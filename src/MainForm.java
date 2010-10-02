@@ -21,11 +21,9 @@ public class MainForm {
     private JButton outputBrowseButton;
     private JTextField packField;
     private JButton packBrowseButton;
-    private JCheckBox fixWaterCheckBox;
-    private JCheckBox fixLavaCheckBox;
-    private JCheckBox fixFireCheckBox;
-    private JCheckBox fixCompassCheckBox;
-    private JButton advancedButton;
+    private JCheckBox animatedWaterCheckBox;
+    private JCheckBox animatedLavaCheckBox;
+    private JCheckBox animatedFireCheckBox;
 	private JCheckBox backupCheckBox;
     private JCheckBox packCheckBox;
     private JPanel optionsPanel;
@@ -39,6 +37,7 @@ public class MainForm {
 	private JFrame frame;
 
 	private Minecraft minecraft;
+	private TexturePack texturePack;
 
     public MainForm(final JFrame frame) {
         this.frame = frame;
@@ -90,7 +89,19 @@ public class MainForm {
                 FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.LOAD);
                 fd.setFile("*.zip;*.rar;*.jar");
                 fd.setVisible(true);
-                form.packField.setText( fd.getFile() );
+	            if(fd.getFile() == null) {
+		            form.packField.setText( "" );
+		            texturePack = null;
+	            } else {
+		            String path = fd.getDirectory() + fd.getFile();
+		            try {
+			            setTexturePack(path);
+		            } catch(Exception e1) {
+			            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+			            System.exit(1);
+		            }
+	            }
+
             }
         });
 
@@ -113,6 +124,14 @@ public class MainForm {
 
     }
 
+	public void setTexturePack(String path) throws IOException {
+		texturePack = TexturePack.open(path);
+		StringBuilder sb = new StringBuilder();
+		sb.append("<html><table>");
+		sb.append("<tr><td>terrain.png</td><td>").append(texturePack.getTerrainTileSize()).append("</td></tr>");
+		textureInfoLabel.setText(sb.toString());
+	}
+
 	public boolean setMinecraftPath(String path, boolean showErrors) throws Exception {
 		String errors = "";
 		try {
@@ -128,14 +147,17 @@ public class MainForm {
 				JOptionPane.showMessageDialog(null, errors, "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			origField.setText( "" );
+			patchButton.setEnabled(false);
 			return false;
 		} else {
 			origField.setText( path );
 			StringBuilder sb = new StringBuilder();
-			sb.append("<html><table><font size=\"80%\">");
+			sb.append("<html><table>");
 			for(Map.Entry<String,String> cfe : minecraft.getClassMap().entrySet()) {
 				sb.append("<tr><td>").append(cfe.getKey()).append("</td><td>").append(cfe.getValue()).append("</td></tr>");
 			}
+			classInfoLabel.setText(sb.toString());
+
 			if(backupCheckBox.isSelected() && backupField.getText().isEmpty()) {
 				backupField.setText( path.replace(".jar", ".original.jar"));
 			}
@@ -147,7 +169,11 @@ public class MainForm {
 					outputField.setText( path );
 				}
 			}
-			classInfoLabel.setText(sb.toString());
+
+			if(packField.getText().isEmpty()) {
+				setTexturePack(path);
+			}
+			patchButton.setEnabled(true);
 			frame.pack();
 			return true;
 		}

@@ -9,6 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="javassist" level="project" />
     <orderEntry type="library" exported="" name="jgoodies" level="project" />
+    <orderEntry type="library" name="unrar" level="project" />
   </component>
 </module>
 
