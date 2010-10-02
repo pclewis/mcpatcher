@@ -2,6 +2,7 @@ abstract class BytecodeTilePatch extends BytecodePatch {
     int multiplier = 1;
     int addX = 0;
     int addY = 0;
+	int add = 0;
     boolean square = false;
     boolean zero = true;
 
@@ -23,6 +24,7 @@ abstract class BytecodeTilePatch extends BytecodePatch {
         int result = orig;
 	    if(square) result = (result+addX)*(result+addY);
 	    result = result * multiplier;
+	    result = result + this.add;
 	    return result;
     }
 
@@ -31,7 +33,7 @@ abstract class BytecodeTilePatch extends BytecodePatch {
     }
 
     public byte[] getToBytes() throws Exception {
-        return getBytes(zero ? 0 : calc(getParamInt("tileSize")));
+        return getBytes(zero ? 0 : calc(params.getInt("tileSize")));
     }
 
     public BytecodeTilePatch multiplier(int multiplier) {
@@ -58,4 +60,10 @@ abstract class BytecodeTilePatch extends BytecodePatch {
         this.zero = zero;
         return this;
     }
+
+	public BytecodeTilePatch add(int add) {
+	    this.add = add;
+	    return this;
+	}
+
 }

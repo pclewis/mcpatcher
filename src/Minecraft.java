@@ -8,6 +8,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class Minecraft implements Opcode {
+	public JarFile getJar() {
+		return jar;
+	}
+
 	private JarFile jar;
 
 	public HashMap<String, String> getClassMap() {

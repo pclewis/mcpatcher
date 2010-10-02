@@ -16,12 +16,10 @@ import javax.swing.*;
 public class MCPatcher {
 	public static PrintStream out;
 	public static PrintStream err;
-	public static ByteArrayOutputStream baos;
+	private static ByteArrayOutputStream baos;
 
-    public static String getDefaultParam(String key) {
-        return "";
-    }
-     
+	public static Params globalParams;
+
 	private static final Replacement NEW_ARRAY_16x16 = new Replacement(
 		"Change new array[16*16] to new array[32*32]",
 		new int[]{
@@ -317,7 +315,7 @@ public class MCPatcher {
 			new ConstChanger[]{
 				new ConstChanger() {
 					public int index() { return 2; }
-					public String description() { return "flame falloff 1.04 -> 0.52"; }
+					public String description() { return "flame falloff 1.04 -> 1.03"; }
 					public int add(ConstPool cp) { return cp.addFloatInfo(1.03F); }
 				}
 			}
@@ -389,35 +387,16 @@ public class MCPatcher {
         form.show();
     }
 
-    public static void runPatch(String orig, String backup, String output) {
+    public static void applyPatch(Minecraft minecraft, TexturePack texturePack, File outputFile) {
 
-		if(GraphicsEnvironment.isHeadless()) {
-			out = System.out;
-			err = System.err;
-		} else {
-			baos = new ByteArrayOutputStream();
-			out = new PrintStream(baos);
-			err = out;
-		}
+		baos = new ByteArrayOutputStream();
+		out = new PrintStream(baos);
+		err = out;
 
-		JarFile mcjar = null;
-		JarOutputStream newjar = null;
-
-        File mc = new File(orig);
-        File oc = new File(output);
-
-        if(backup != null && !backup.isEmpty()) {
-            File bc = new File(backup);
-            if(!mc.renameTo(bc)) {
-                MCPatcher.err.println("Can't move minecraft.jar to minecraft.original.jar");
-                exit(1);
-            }
-            mc = bc;
-        }
+	    JarOutputStream newjar = null;
 
 		try {
-			mcjar = new JarFile(mc, false);
-			newjar = new JarOutputStream(new FileOutputStream(oc));
+			newjar = new JarOutputStream(new FileOutputStream(outputFile));
 		} catch(IOException e) {
 			MCPatcher.err.println(e.getMessage());
 			exit(1);
@@ -430,7 +409,7 @@ public class MCPatcher {
 		javassist.bytecode.MethodInfo.doPreverify = true;
 
 		try {
-			for(JarEntry entry : Collections.list(mcjar.entries())) {
+			for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
 				if(entry.getName().startsWith("META-INF"))
 					continue; // leave out manifest
 
@@ -444,7 +423,7 @@ public class MCPatcher {
 				for(PatchDefinition patch : patches) {
 					if(entry.getName().equals(patch.fileName)) {
 						MCPatcher.out.println("Patching file: " + entry.getName());
-						patch.apply(mcjar.getInputStream(entry), newjar);
+						patch.apply(minecraft.getJar().getInputStream(entry), newjar);
 						newjar.closeEntry();
 						patched = true;
 						break;
@@ -453,7 +432,7 @@ public class MCPatcher {
 				
 				if(entry.getName().equals("gui/items.png")) {
 					MCPatcher.out.println("Resizing " + entry.getName());
-					BufferedImage image = ImageIO.read(mcjar.getInputStream(entry));
+					BufferedImage image = ImageIO.read(minecraft.getJar().getInputStream(entry));
 					BufferedImage newImage = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB);
 					Graphics2D graphics2D = newImage.createGraphics();
 					/*
@@ -469,7 +448,7 @@ public class MCPatcher {
 				}
 
 				if(!patched) {
-					InputStream in = new BufferedInputStream(mcjar.getInputStream(entry));
+					InputStream in = new BufferedInputStream(minecraft.getJar().getInputStream(entry));
 
 					byte[] buffer = new byte[1024];
 					while(true) {
@@ -483,7 +462,6 @@ public class MCPatcher {
 				newjar.closeEntry();
 			}
 
-			mcjar.close();
 			newjar.close();
 		} catch(IOException e) {
 			MCPatcher.err.println(e.getMessage());

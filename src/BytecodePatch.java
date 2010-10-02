@@ -7,12 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 public abstract class BytecodePatch extends Patch implements javassist.bytecode.Opcode {
-    HashMap params;
-    int appliedCount;
-
-    public HashMap getParameters() {
-        return this.params;
-    }
+	int appliedCount;
 
     abstract byte[] getFromBytes() throws Exception;
     abstract byte[] getToBytes() throws Exception;

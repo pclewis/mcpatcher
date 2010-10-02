@@ -8,7 +8,16 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class Patch {
-    HashMap<String,String> params = new HashMap<String,String>();
+    public Params params = new Params(new Params.MissHandler() {
+	    public String get(String key) {
+		    for (ParamSpec p : getParamSpecs()) {
+		        if(p.name.equals(key)) {
+		            return MCPatcher.globalParams.get(p.defaultSource);
+		        }
+		    }
+		    return null;
+	    }
+    });
 
     abstract public ParamSpec[] getParamSpecs();
     abstract public String getDescription();
@@ -23,26 +32,5 @@ public abstract class Patch {
 
     protected byte b(int value, int index) {
         return (byte)((value >> (index*8)) & 0xFF);
-    }
-
-    protected String getParam(String key) throws InvalidArgumentException {
-        if(params.containsKey(key)) {
-            return params.get(key);
-        } else {
-            for (ParamSpec p : getParamSpecs()) {
-                if(p.name.equals(key)) {
-                    return MCPatcher.getDefaultParam(p.defaultSource);
-                }
-            }
-        }
-        throw new InvalidArgumentException(new String[]{"Invalid parameter: " + key});
-    }
-
-    protected int getParamInt(String key) throws InvalidArgumentException {
-        return Integer.parseInt(getParam(key), 10);
-    }
-
-    protected byte getParamByte(String key, int index) throws InvalidArgumentException {
-        return b(getParamInt(key), index);
     }
 }

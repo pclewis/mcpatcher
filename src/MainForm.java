@@ -38,6 +38,7 @@ public class MainForm {
 
 	private Minecraft minecraft;
 	private TexturePack texturePack;
+	private TexturePack mcTexturePack;
 
     public MainForm(final JFrame frame) {
         this.frame = frame;
@@ -72,6 +73,7 @@ public class MainForm {
                 fd.setFile("minecraft.original.jar");
                 fd.setVisible(true);
                 form.backupField.setText( fd.getFile() );
+	            tryEnablePatch();
             }
         });
 
@@ -81,6 +83,7 @@ public class MainForm {
                 fd.setFile("minecraft.jar");
                 fd.setVisible(true);
                 form.outputField.setText( fd.getFile() );
+	            tryEnablePatch();
             }
         });
 
@@ -111,6 +114,7 @@ public class MainForm {
                 boolean enabled = form.backupCheckBox.isSelected();
                 form.backupField.setEnabled( enabled );
                 form.backupBrowseButton.setEnabled( enabled );
+	            tryEnablePatch();
             }
         });
 
@@ -119,17 +123,50 @@ public class MainForm {
                 boolean enabled = form.packCheckBox.isSelected();
                 form.packField.setEnabled( enabled );
                 form.packBrowseButton.setEnabled( enabled );
+	            tryEnablePatch();
             }
         });
 
+	    patchButton.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			    MCPatcher.globalParams.put("tileSize", ""+texturePack.getTerrainTileSize());
+			    MCPatcher.globalParams.put("animateFire", ""+animatedFireCheckBox.isSelected());
+				MCPatcher.globalParams.put("animateWater", ""+animatedWaterCheckBox.isSelected());
+			    MCPatcher.globalParams.put("animateLava", ""+animatedWaterCheckBox.isSelected());
+
+			    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
+		    }
+	    });
     }
 
 	public void setTexturePack(String path) throws IOException {
-		texturePack = TexturePack.open(path);
+		texturePack = TexturePack.open(path, mcTexturePack);
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html><table>");
-		sb.append("<tr><td>terrain.png</td><td>").append(texturePack.getTerrainTileSize()).append("</td></tr>");
+		sb.append("<tr><td>terrain.png</td><td>");
+		int tts = texturePack.getTerrainTileSize();
+		if(tts < 0)
+			sb.append("Not found");
+		else
+			sb.append(tts).append("x").append(tts);
+		sb.append("<td></td>");
+		sb.append(new File(texturePack.getTerrainSource()).getName());
+		sb.append("</td></tr>");
+
+		sb.append("<tr><td>items.png</td><td>");
+		tts = texturePack.getItemsTileSize();
+		if(tts < 0)
+			sb.append("not found");
+		else
+			sb.append(tts).append("x").append(tts);
+		sb.append("<td></td>");
+		sb.append(new File(texturePack.getItemsSource()).getName());
+		sb.append("</td></tr>");
 		textureInfoLabel.setText(sb.toString());
+		packField.setText(path);
+		frame.pack();
+		tryEnablePatch();
 	}
 
 	public boolean setMinecraftPath(String path, boolean showErrors) throws Exception {
@@ -171,9 +208,12 @@ public class MainForm {
 			}
 
 			if(packField.getText().isEmpty()) {
+				mcTexturePack = TexturePack.open(path, null);
 				setTexturePack(path);
+			} else if (texturePack != null) {
+				texturePack.setParent(mcTexturePack);
 			}
-			patchButton.setEnabled(true);
+			tryEnablePatch();
 			frame.pack();
 			return true;
 		}
@@ -186,11 +226,11 @@ public class MainForm {
         frame.setContentPane(form.getMainPanel());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-	    frame.setLocationRelativeTo( null );	    
         return form;
     }
 
     public void show() {
+	    frame.setLocationRelativeTo( null );
         frame.setVisible(true);
     }
 
@@ -204,5 +244,37 @@ public class MainForm {
 
 	public void noBackup() {
 		backupCheckBox.setSelected(false);
+	}
+
+	public void tryEnablePatch() {
+		patchButton.setEnabled(false);
+		if(minecraft == null)
+			return;
+
+		if(texturePack == null)
+			return;
+
+		if(texturePack.getTerrainTileSize() < 16 || texturePack.getItemsTileSize() < 16) {
+			textureInfoLabel.setForeground(Color.RED);
+			return;
+		} else {
+			textureInfoLabel.setForeground(Color.getColor("Label.foreground"));
+		}
+
+		if(backupCheckBox.isSelected() && backupField.getText().isEmpty()) {
+			backupLabel.setForeground(Color.RED);
+			return;
+		} else {
+			backupLabel.setForeground(Color.getColor("Label.foreground"));
+		}
+
+		if(outputField.getText().isEmpty()) {
+			outputLabel.setForeground(Color.RED);
+			return;
+		} else {
+			outputLabel.setForeground(Color.getColor("Label.foreground"));
+		}
+
+		patchButton.setEnabled(true);
 	}
 }

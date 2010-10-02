@@ -1,4 +1,7 @@
-class Patches {
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.Opcode;
+
+class Patches implements Opcode {
 	public static ParamSpec[] PSPEC_EMPTY = new ParamSpec[]{};
 	public static ParamSpec[] PSPEC_TILESIZE = new ParamSpec[]{
 		new ParamSpec("tileSize", "tileSize", "Tile size")
@@ -71,6 +74,24 @@ class Patches {
 		}
 	}
 
+	class ModPatch extends BytecodeTilePatch {
+		public String getDescription() { return "Fix modulus operations"; }
+
+		public byte[] getBytes(int cnt) {
+			cnt = cnt - 1;
+			if(cnt < 0xFF) {
+				return new byte[]{
+					BIPUSH, b(cnt, 0),
+					(byte) IREM
+				};
+			} else {
+				return new byte[]{
+					SIPUSH, b(cnt, 1), b(cnt, 0),
+					(byte) IREM
+				};
+			}
+		}
+	}
 
 	class ModMulPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix %16*16+_3*16 -> %16*x+_3*x"; }
@@ -118,6 +139,44 @@ class Patches {
 		}
 	}
 
+	class VarCmpPatch extends BytecodeTilePatch {
+		public String getDescription() { return "Fix var comparisons"; }
+		int vnum, comparison;
+		public VarCmpPatch(int vnum, int comparison) {
+			this.vnum = vnum;
+			this.comparison = comparison;
+		}
+		public byte[] getBytes(int size) {
+			if(vnum < 4) {
+				return new byte[]{
+					(byte)(ILOAD_0 + vnum),
+					BIPUSH, (byte)size,
+					(byte)this.comparison
+				};
+			} else {
+				return new byte[]{
+					ILOAD, (byte)vnum,
+					BIPUSH, (byte)size,
+					(byte)this.comparison
+				};
+			}
+		}
+
+	}
+
+	class FireUnpatch extends BytecodeTilePatch {
+		public String getDescription() { return "(unpatch) <init> *32 to *16"; }
+		public byte[] getFromBytes() throws Exception { return super.getToBytes(); }
+		public byte[] getToBytes() throws Exception { return super.getFromBytes(); }
+		public byte[] getBytes(int size) {
+			return new byte[]{
+				ILOAD_1,
+				BIPUSH, (byte)size,
+				IMUL
+			};
+		}
+	}
+
 
 	final PatchSet waterPatches = new PatchSet(
 		"Water",
@@ -137,6 +196,28 @@ class Patches {
 			new PatchSpec(new ModMulPatch()),
 			new PatchSpec(new DivMulPatch()),
 			new PatchSpec(new SubImagePatch())
+		}
+	);
+
+	final PatchSet animTexture = new PatchSet(
+		"AnimTexture",
+		new PatchSpec[]{
+			new PatchSpec(new ArraySizePatch().square(true).multiplier(4))
+		}
+	);
+
+	final PatchSet fireTexture = new PatchSet(
+		"Fire",
+		new PatchSpec[]{
+			new PatchSpec(new ArraySizePatch().square(true).addY(4)),
+			new PatchSpec(new WhilePatch()),
+			new PatchSpec(new WhilePatch().square(true)),
+			new PatchSpec(new WhilePatch().add(4)),
+			new PatchSpec(new MultiplyPatch()),
+			new PatchSpec(new ModPatch().add(4)),
+			new PatchSpec(new VarCmpPatch(2, IF_ICMPLT).add(3)),
+			new PatchSpec(new FireUnpatch()),
+			new PatchSpec(new ConstPatch<Float>(ConstPool.CONST_Float, 1.04F, 1.03F))
 		}
 	);
 }
