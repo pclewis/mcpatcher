@@ -367,12 +367,26 @@ public class MCPatcher {
 		)
 	};
 
-	public static void main(String[] argv) {
-
+	public static void main(String[] argv) throws Exception {
         MainForm form = MainForm.create();
-        form.show();
-        if(true) return;
+		String[] paths = new String[] {
+			"minecraft.original.jar",
+			System.getProperty("user.home") + "/AppData/Roaming/.minecraft/bin/minecraft.original.jar",
+			"minecraft.jar",
+			System.getProperty("user.home") + "/AppData/Roaming/.minecraft/bin/minecraft.jar",
+		};
 
+		for(String path : paths) {
+			File f = new File(path);
+			if(f.exists()) {
+				if(path.endsWith(".original.jar"))
+					form.noBackup();
+				if(form.setMinecraftPath(f.getPath(), false)) // .getPath() to normalize /s
+					break;
+			}
+		}
+
+        form.show();
     }
 
     public static void runPatch(String orig, String backup, String output) {

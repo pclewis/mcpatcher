@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Map;
 
 public class MainForm {
     private JPanel mainPanel;
@@ -24,8 +26,7 @@ public class MainForm {
     private JCheckBox fixFireCheckBox;
     private JCheckBox fixCompassCheckBox;
     private JButton advancedButton;
-    private JLabel textureSizeLabel;
-    private JCheckBox backupCheckBox;
+	private JCheckBox backupCheckBox;
     private JCheckBox packCheckBox;
     private JPanel optionsPanel;
     private JPanel filesPanel;
@@ -33,7 +34,11 @@ public class MainForm {
     private JLabel backupLabel;
     private JLabel outputLabel;
     private JLabel packLabel;
-    private JFrame frame;
+	private JLabel textureInfoLabel;
+	private JLabel classInfoLabel;
+	private JFrame frame;
+
+	private Minecraft minecraft;
 
     public MainForm(final JFrame frame) {
         this.frame = frame;
@@ -46,7 +51,19 @@ public class MainForm {
                 FileDialog fd = new FileDialog(form.frame, form.origLabel.getText(), FileDialog.LOAD);
                 fd.setFile("minecraft.jar");
                 fd.setVisible(true);
-                form.origField.setText( fd.getFile() );
+
+	            if(fd.getFile() == null) {
+		            form.origField.setText( "" );
+		            minecraft = null;
+	            } else {
+		            String path = fd.getDirectory() + fd.getFile();
+		            try {
+			            setMinecraftPath(path, true);
+		            } catch(Exception e1) {
+			            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+			            System.exit(1);
+		            }
+	            }
             }
         });
 
@@ -96,13 +113,54 @@ public class MainForm {
 
     }
 
-    public static MainForm create() {
+	public boolean setMinecraftPath(String path, boolean showErrors) throws Exception {
+		String errors = "";
+		try {
+			minecraft = new Minecraft(new File(path));
+		} catch(IOException ex) {
+			errors = ex.getMessage();
+			minecraft = null;
+		}
+
+		if(minecraft == null || !minecraft.isValid()) {
+			if(showErrors) {
+				if(minecraft != null) errors = Util.joinString(minecraft.getErrors(), "\n");
+				JOptionPane.showMessageDialog(null, errors, "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			origField.setText( "" );
+			return false;
+		} else {
+			origField.setText( path );
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html><table><font size=\"80%\">");
+			for(Map.Entry<String,String> cfe : minecraft.getClassMap().entrySet()) {
+				sb.append("<tr><td>").append(cfe.getKey()).append("</td><td>").append(cfe.getValue()).append("</td></tr>");
+			}
+			if(backupCheckBox.isSelected() && backupField.getText().isEmpty()) {
+				backupField.setText( path.replace(".jar", ".original.jar"));
+			}
+
+			if(outputField.getText().isEmpty()) {
+				if(path.endsWith(".original.jar")) {
+					outputField.setText( path.replace(".original.jar", ".jar") );
+				} else if(backupCheckBox.isSelected()) {
+					outputField.setText( path );
+				}
+			}
+			classInfoLabel.setText(sb.toString());
+			frame.pack();
+			return true;
+		}
+	}
+
+	public static MainForm create() {
         JFrame frame = new JFrame("Minecraft Patcher");
         frame.setResizable(false);
         MainForm form = new MainForm(frame);
         frame.setContentPane(form.getMainPanel());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+	    frame.setLocationRelativeTo( null );	    
         return form;
     }
 
@@ -117,4 +175,8 @@ public class MainForm {
     private void createUIComponents() {
         // place custom component creation code here
     }
+
+	public void noBackup() {
+		backupCheckBox.setSelected(false);
+	}
 }
