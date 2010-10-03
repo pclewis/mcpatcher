@@ -72,7 +72,7 @@ public class MainForm {
                 FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.SAVE);
                 fd.setFile("minecraft.original.jar");
                 fd.setVisible(true);
-                form.backupField.setText( fd.getFile() );
+                form.backupField.setText( fd.getDirectory() + fd.getFile() );
 	            tryEnablePatch();
             }
         });
@@ -82,7 +82,7 @@ public class MainForm {
                 FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.SAVE);
                 fd.setFile("minecraft.jar");
                 fd.setVisible(true);
-                form.outputField.setText( fd.getFile() );
+                form.outputField.setText( fd.getDirectory() + fd.getFile() );
 	            tryEnablePatch();
             }
         });
@@ -300,7 +300,23 @@ public class MainForm {
 			backupLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
+		if(backupCheckBox.isSelected() && (
+				new File(backupField.getText()).equals(new File(outputField.getText())) ||
+				new File(backupField.getText()).equals(new File(origField.getText())))) {
+			backupLabel.setForeground(Color.RED);
+			return;
+		} else {
+			backupLabel.setForeground(Color.getColor("Label.foreground"));
+		}
+
 		if(outputField.getText().isEmpty()) {
+			outputLabel.setForeground(Color.RED);
+			return;
+		} else {
+			outputLabel.setForeground(Color.getColor("Label.foreground"));
+		}
+
+		if( !backupCheckBox.isSelected() && new File(outputField.getText()).equals(new File(origField.getText())) ) {
 			outputLabel.setForeground(Color.RED);
 			return;
 		} else {
