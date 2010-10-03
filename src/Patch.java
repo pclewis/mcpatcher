@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class Patch {
+public abstract class Patch implements Cloneable {
     public Params params = new Params(new Params.MissHandler() {
 	    public String get(String key) {
 		    for (ParamSpec p : getParamSpecs()) {
@@ -33,4 +33,10 @@ public abstract class Patch {
     protected byte b(int value, int index) {
         return (byte)((value >> (index*8)) & 0xFF);
     }
+
+	public Patch clone() throws CloneNotSupportedException {
+		Patch newPatch = (Patch)super.clone();
+		newPatch.params = new Params(this.params);
+		return newPatch;
+	}
 }

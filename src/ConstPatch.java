@@ -1,3 +1,4 @@
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
@@ -5,18 +6,18 @@ import javassist.bytecode.MethodInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ConstPatch<T> extends Patch {
+public class ConstPatch extends Patch {
     int appliedCount;
 	ArrayList<Patch> subpatches = new ArrayList<Patch>();
 	int tag;
-	T from;
-	T to;
+	Object from;
+	Object to;
 
 	public String getDescription() { return "Change constant value"; }
     public ParamSpec[] getParamSpecs() { return Patches.PSPEC_TILESIZE; }
 
 	private class UsePatch extends BytecodePatch {
-		public String getDescription() { return ""; }
+		public String getDescription() { return "Update const reference " + fi + " -> " + ti; }
 		public ParamSpec[] getParamSpecs() { return Patches.PSPEC_EMPTY; }
 		private int op, fi, ti;
 
@@ -37,29 +38,36 @@ public class ConstPatch<T> extends Patch {
 		byte[] getToBytes() throws Exception { return getBytes(ti); }
 	}
 
-	public ConstPatch(int tag, T from, T to) {
-		this.tag = tag;
+	public ConstPatch(Object from, Object to)  {
+		assert(from.getClass().equals(to.getClass()));
+		this.tag = getTag(from);
 		this.from = from;
 		this.to = to;
 	}
 
-	private int addToPool(ConstPool cp, Float to) { return cp.addFloatInfo(to); }
-
-	private int addToPool(ConstPool cp, Object o) {
-		throw new UnsupportedOperationException();
+	private int getTag(Object o) {
+		if(o instanceof Float)  { return ConstPool.CONST_Float;  }
+		if(o instanceof Double) { return ConstPool.CONST_Double; }
+		throw new AssertionError("Unreachable");
 	}
 
-	private boolean checkEqual(ConstPool cp, int index, Float from) { return cp.getFloatInfo(index) == from; }
+	private int addToPool(ConstPool cp, Object o) {
+		if(o instanceof Float)  { return cp.addFloatInfo((Float)o);   }
+		if(o instanceof Double) { return cp.addDoubleInfo((Double)o); }
+		throw new AssertionError("Unreachable");
+	}
 
 	private boolean checkEqual(ConstPool cp, int index, Object o) {
-		throw new UnsupportedOperationException();
+		if(o instanceof Float)  { return cp.getFloatInfo(index)  == (Float)o;  }
+		if(o instanceof Double) { return cp.getDoubleInfo(index) == (Double)o; }
+		throw new AssertionError("Unreachable");
 	}
 
 	public void visitConstPool(ConstPool cp) {
 		int oldIndex = -1;
 		for(int i = 1; i < cp.getSize(); ++i) {
 			if( cp.getTag(i) == this.tag ) {
-				if(checkEqual(cp, i, this.from)) {
+				if(checkEqual(cp, i, this.from.getClass().cast(this.from))) {
 					oldIndex = i;
 					break;
 				}
@@ -76,6 +84,7 @@ public class ConstPatch<T> extends Patch {
 		subpatches.add(new UsePatch(UsePatch.LDC2_W, oldIndex, newIndex));
 
 		appliedCount += 1;
+		MCPatcher.out.println("  " + this.getDescription());
     }
 
     public void visitMethod(MethodInfo mi) throws Exception {

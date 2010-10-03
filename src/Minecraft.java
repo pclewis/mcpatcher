@@ -14,10 +14,6 @@ public class Minecraft implements Opcode {
 
 	private JarFile jar;
 
-	public HashMap<String, String> getClassMap() {
-		return classMap;
-	}
-
 	private HashMap<String,String> classMap = new HashMap<String,String>();
 	private HashMap<String,ClassFinder> classFinders = new HashMap<String, ClassFinder>() {{
 		put("AnimManager",new MethodCallSignature("glTexSubImage2D"));
@@ -160,5 +156,9 @@ public class Minecraft implements Opcode {
 
 	public boolean isValid() {
 		return (errors.size()==0);
+	}
+	
+	public HashMap<String, String> getClassMap() {
+		return classMap;
 	}
 }

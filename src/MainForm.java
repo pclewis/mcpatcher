@@ -130,9 +130,9 @@ public class MainForm {
 	    patchButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 			    MCPatcher.globalParams.put("tileSize", ""+texturePack.getTerrainTileSize());
-			    MCPatcher.globalParams.put("animateFire", ""+animatedFireCheckBox.isSelected());
-				MCPatcher.globalParams.put("animateWater", ""+animatedWaterCheckBox.isSelected());
-			    MCPatcher.globalParams.put("animateLava", ""+animatedWaterCheckBox.isSelected());
+			    MCPatcher.globalParams.put("useAnimatedFire", ""+animatedFireCheckBox.isSelected());
+				MCPatcher.globalParams.put("useAnimatedWater", ""+animatedWaterCheckBox.isSelected());
+			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedWaterCheckBox.isSelected());
 
 			    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
 		    }

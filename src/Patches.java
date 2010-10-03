@@ -7,18 +7,18 @@ class Patches implements Opcode {
 		new ParamSpec("tileSize", "tileSize", "Tile size")
 	};
 
-	class ArraySizePatch extends BytecodeTilePatch {
+	public static class ArraySizePatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix array allocations"; }
 
 		public byte[] getBytes(int size) {
 			return new byte[]{
-				SIPUSH, b(size, 0), b(size, 1),
+				SIPUSH, b(size, 1), b(size, 0),
 				(byte) NEWARRAY
 			};
 		}
 	}
 
-	class WhilePatch extends BytecodeTilePatch {
+	public static class WhilePatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix while loops"; }
 
 		public byte[] getBytes(int size) {
@@ -36,11 +36,11 @@ class Patches implements Opcode {
 		}
 	}
 
-	class BitMaskPatch extends BytecodeTilePatch {
+	public static class BitMaskPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix bit masking operations"; }
 
 		public byte[] getBytes(int cnt) {
-			cnt = cnt - 1;
+			if(cnt>0) cnt = cnt - 1;
 			if(cnt < 0xFF) {
 				return new byte[]{
 					BIPUSH, b(cnt, 0),
@@ -55,11 +55,10 @@ class Patches implements Opcode {
 		}
 	}
 
-	class MultiplyPatch extends BytecodeTilePatch {
+	public static class MultiplyPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix multiplication operations"; }
 
 		public byte[] getBytes(int cnt) {
-			cnt = cnt - 1;
 			if(cnt < 0xFF) {
 				return new byte[]{
 					BIPUSH, b(cnt, 0),
@@ -74,11 +73,10 @@ class Patches implements Opcode {
 		}
 	}
 
-	class ModPatch extends BytecodeTilePatch {
+	public static class ModPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix modulus operations"; }
 
 		public byte[] getBytes(int cnt) {
-			cnt = cnt - 1;
 			if(cnt < 0xFF) {
 				return new byte[]{
 					BIPUSH, b(cnt, 0),
@@ -93,7 +91,7 @@ class Patches implements Opcode {
 		}
 	}
 
-	class ModMulPatch extends BytecodeTilePatch {
+	public static class ModMulPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix %16*16+_3*16 -> %16*x+_3*x"; }
 
 		public byte[] getBytes(int size) {
@@ -109,7 +107,7 @@ class Patches implements Opcode {
 		}
 	}
 
-	class DivMulPatch extends BytecodeTilePatch {
+	public static class DivMulPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix %16*16+_4*16 -> %16*x+_4*x"; }
 
 		public byte[] getBytes(int size) {
@@ -125,7 +123,7 @@ class Patches implements Opcode {
 		}
 	}
 
-	class SubImagePatch extends BytecodeTilePatch {
+	public static class SubImagePatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix calls to glTexSubImage2D(...,16,16)"; }
 
 		public byte[] getBytes(int size) {
@@ -139,7 +137,7 @@ class Patches implements Opcode {
 		}
 	}
 
-	class VarCmpPatch extends BytecodeTilePatch {
+	public static class VarCmpPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix var comparisons"; }
 		int vnum, comparison;
 		public VarCmpPatch(int vnum, int comparison) {
@@ -164,7 +162,7 @@ class Patches implements Opcode {
 
 	}
 
-	class FireUnpatch extends BytecodeTilePatch {
+	public static class FireUnpatch extends BytecodeTilePatch {
 		public String getDescription() { return "(unpatch) <init> *32 to *16"; }
 		public byte[] getFromBytes() throws Exception { return super.getToBytes(); }
 		public byte[] getToBytes() throws Exception { return super.getFromBytes(); }
@@ -177,8 +175,21 @@ class Patches implements Opcode {
 		}
 	}
 
+	public static class CompassGetRGBPatch extends BytecodeTilePatch {
+		public String getDescription() { return "Change .getRGB(...16,16,...16) to .getRGB(...32,32,...32)"; }
+		public byte[] getBytes(int size) {
+			return new byte[]{
+				BIPUSH, (byte)size,
+				BIPUSH, (byte)size,
+				ALOAD_0,
+				(byte)GETFIELD, 0x00, 0x2B,
+				ICONST_0,
+				BIPUSH, (byte)size,
+			};
+		}
+	}
 
-	final PatchSet waterPatches = new PatchSet(
+	public static final PatchSet water = new PatchSet(
 		"Water",
 		new PatchSpec[]{
 			new PatchSpec(new ArraySizePatch().square(true)),
@@ -190,7 +201,7 @@ class Patches implements Opcode {
 		}
 	);
 
-	final PatchSet animManager = new PatchSet(
+	public static final PatchSet animManager = new PatchSet(
 		"AnimManager",
 		new PatchSpec[]{
 			new PatchSpec(new ModMulPatch()),
@@ -199,14 +210,14 @@ class Patches implements Opcode {
 		}
 	);
 
-	final PatchSet animTexture = new PatchSet(
+	public static final PatchSet animTexture = new PatchSet(
 		"AnimTexture",
 		new PatchSpec[]{
 			new PatchSpec(new ArraySizePatch().square(true).multiplier(4))
 		}
 	);
 
-	final PatchSet fireTexture = new PatchSet(
+	public static final PatchSet fire = new PatchSet(
 		"Fire",
 		new PatchSpec[]{
 			new PatchSpec(new ArraySizePatch().square(true).addY(4)),
@@ -217,7 +228,20 @@ class Patches implements Opcode {
 			new PatchSpec(new ModPatch().add(4)),
 			new PatchSpec(new VarCmpPatch(2, IF_ICMPLT).add(3)),
 			new PatchSpec(new FireUnpatch()),
-			new PatchSpec(new ConstPatch<Float>(ConstPool.CONST_Float, 1.04F, 1.03F))
+			new PatchSpec(new ConstPatch(1.06F, 1.03F))
+		}
+	);
+
+	public static final PatchSet compass = new PatchSet(
+		"Compass",
+		new PatchSpec[]{
+			new PatchSpec(new ArraySizePatch().square(true)),
+			new PatchSpec(new ArraySizePatch().square(true).addY(4)),
+			new PatchSpec(new WhilePatch().square(true)),
+			new PatchSpec(new MultiplyPatch()),
+			new PatchSpec(new CompassGetRGBPatch()),
+			new PatchSpec(new ConstPatch(8.5D, 16.5D)),
+			new PatchSpec(new ConstPatch(7.5D, 15.5D)),
 		}
 	);
 }

@@ -1,13 +1,11 @@
-import javassist.bytecode.Bytecode;
-import javassist.bytecode.ConstPool;
+import javassist.bytecode.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import javax.imageio.ImageIO;
@@ -18,352 +16,7 @@ public class MCPatcher {
 	public static PrintStream err;
 	private static ByteArrayOutputStream baos;
 
-	public static Params globalParams;
-
-	private static final Replacement NEW_ARRAY_16x16 = new Replacement(
-		"Change new array[16*16] to new array[32*32]",
-		new int[]{
-			Bytecode.SIPUSH, 16*16,
-			Bytecode.NEWARRAY
-		}, new int[]{
-			Bytecode.SIPUSH, 32*32,
-			Bytecode.NEWARRAY
-		}
-	);
-	private static final Replacement WHILE_16 = new Replacement(
-		"Change all while(...<16) to while(...<32)",
-		new int[]{
-			Bytecode.BIPUSH, 16,
-			Bytecode.IF_ICMPGE,
-		}, new int[]{
-			Bytecode.BIPUSH, 32,
-			Bytecode.IF_ICMPGE
-		}
-	);
-	private static final Replacement WHILE_256 = new Replacement(
-		"Change all while(...<16*16) to while(...<32*32)",
-		new int[]{
-			Bytecode.SIPUSH, 16*16,
-			Bytecode.IF_ICMPGE
-		}, new int[]{
-			Bytecode.SIPUSH, 32*32,
-			Bytecode.IF_ICMPGE
-		}
-	);
-	private static final Replacement AND_0xF = new Replacement(
-		"Change all &15 to &31",
-		new int[]{
-			Bytecode.BIPUSH, 15,
-			Bytecode.IAND,
-		}, new int[]{
-			Bytecode.BIPUSH, 31,
-			Bytecode.IAND
-		}
-	);
-	private static final Replacement AND_0xFF = new Replacement(
-		"Change all &0xFF to &0x1FF",
-		new int[]{
-			Bytecode.SIPUSH, 0x00, 0xFF,
-			Bytecode.IAND
-		}, new int[]{
-			Bytecode.SIPUSH, 0x01, 0xFF,
-			Bytecode.IAND
-		}
-	);
-	private static final Replacement TIMES_16 = new Replacement(
-		"Change all *16 to *32",
-		new int[]{
-			Bytecode.BIPUSH, 16,
-			Bytecode.IMUL
-		}, new int[]{
-			Bytecode.BIPUSH, 32,
-			Bytecode.IMUL
-		}
-	);
-	private static final Replacement[] WATER_PATCHES = new Replacement[]{
-		NEW_ARRAY_16x16,
-		WHILE_16,
-		WHILE_256,
-		AND_0xF,
-		TIMES_16,
-		AND_0xFF,
-	};
-
-
-	private static final Replacement[] NEW_ARRAY_16x16x4 = new Replacement[]{
-		new Replacement(
-			"Change new array[16*16*4] to new array[32*32*4]",
-			new int[]{
-				Bytecode.SIPUSH, 16 * 16 * 4,
-				Bytecode.NEWARRAY
-			}, new int[]{
-				Bytecode.SIPUSH, 32 * 32 * 4,
-				Bytecode.NEWARRAY
-			}
-		),
-	};
-
-	private static final Replacement NEW_ARRAY_16x20 = new Replacement(
-		"change new array[16*20] to new array[32*40]",
-		new int[] {
-			Bytecode.SIPUSH, 16*20,
-			Bytecode.NEWARRAY
-		}, new int[]{
-			Bytecode.SIPUSH, 32*40,
-			Bytecode.NEWARRAY
-		}
-	);
-	private static final Replacement MOD16MUL16 = new Replacement(
-		"change % 16 * 16 to % 16 * 32",
-		new byte[]{
-			Bytecode.BIPUSH, 16,
-			Bytecode.IREM,
-			Bytecode.BIPUSH, 16,
-			Bytecode.IMUL
-		}, new byte[]{
-			Bytecode.BIPUSH, 16,
-			Bytecode.IREM,
-			Bytecode.BIPUSH, 32,
-			Bytecode.IMUL
-		}
-	);
-	private static final Replacement DIV16MUL16 = new Replacement(
-		"change / 16 * 16 to / 16 * 32",
-		new byte[]{
-			Bytecode.BIPUSH, 16,
-			Bytecode.IDIV,
-			Bytecode.BIPUSH, 16,
-			Bytecode.IMUL
-		}, new byte[]{
-			Bytecode.BIPUSH, 16,
-			Bytecode.IDIV,
-			Bytecode.BIPUSH, 32,
-			Bytecode.IMUL
-		}
-	);
-	public static PatchDefinition[] patches = {
-		new PatchDefinition(
-			"ey.class",
-			new Replacement[]{
-				/*
-				MOD16MUL16,
-				DIV16MUL16,*/
-				new Replacement(
-					"change %16*16+n*16 to %16*32+n*32",
-				    new int[] {
-					    Bytecode.BIPUSH, 16,
-					    Bytecode.IREM,
-					    Bytecode.BIPUSH, 16,
-					    Bytecode.IMUL,
-					    Bytecode.ILOAD_3,
-					    Bytecode.BIPUSH, 16,
-					    Bytecode.IMUL
-				    }, new int[] {
-						Bytecode.BIPUSH, 16,
-						Bytecode.IREM,
-						Bytecode.BIPUSH, 32,
-						Bytecode.IMUL,
-						Bytecode.ILOAD_3,
-						Bytecode.BIPUSH, 32,
-						Bytecode.IMUL
-					}
-				),
-
-				new Replacement(
-					"change /16*16+n*16 to /16*32+n*32",
-				    new int[] {
-					    Bytecode.BIPUSH, 16,
-					    Bytecode.IDIV,
-					    Bytecode.BIPUSH, 16,
-					    Bytecode.IMUL,
-					    Bytecode.ILOAD, 4,
-					    Bytecode.BIPUSH, 16,
-					    Bytecode.IMUL
-				    }, new int[] {
-						Bytecode.BIPUSH, 16,
-						Bytecode.IDIV,
-						Bytecode.BIPUSH, 32,
-						Bytecode.IMUL,
-						Bytecode.ILOAD, 4,
-						Bytecode.BIPUSH, 32,
-						Bytecode.IMUL
-					}
-				),
-
-				new Replacement(
-					"change glsub(...,16,16) to glsub(...,32,32)",
-					new int[]{
-						Bytecode.BIPUSH, 16,
-						Bytecode.BIPUSH, 16,
-						Bytecode.SIPUSH, 6408,
-						Bytecode.SIPUSH, 5121,
-					}, new int[]{
-						Bytecode.BIPUSH, 32,
-						Bytecode.BIPUSH, 32,
-						Bytecode.SIPUSH, 6408,
-						Bytecode.SIPUSH, 5121,
-					}
-				),
-			}
-		),
-
-		new PatchDefinition(
-			"z.class",
-			NEW_ARRAY_16x16x4
-		),
-
-		new PatchDefinition(
-			"ht.class",
-			WATER_PATCHES
-		),
-
-		new PatchDefinition(
-			"ml.class",
-			WATER_PATCHES
-		),
-		new PatchDefinition(
-			"at.class",
-			WATER_PATCHES
-		),
-		new PatchDefinition(
-			"eg.class",
-			WATER_PATCHES
-		),
-
-		new PatchDefinition(
-			"jz.class",
-			new Replacement[]{
-				NEW_ARRAY_16x20,
-				WHILE_16,
-				WHILE_256,
-				new Replacement(
-					"Change all while(...<20) to while(...<40)",
-					new int[]{
-						Bytecode.BIPUSH, 20,
-						Bytecode.IF_ICMPGE,
-					}, new int[]{
-						Bytecode.BIPUSH, 40,
-						Bytecode.IF_ICMPGE
-					}
-				),
-
-				TIMES_16,
-
-				new Replacement(
-					"(unpatch) <init> *32 to *16",
-					new int[]{
-						Bytecode.ILOAD_1,
-						Bytecode.BIPUSH, 32,
-						Bytecode.IMUL
-					}, new int[]{
-						Bytecode.ILOAD_1,
-						Bytecode.BIPUSH, 16,
-						Bytecode.IMUL
-					}
-				),
-
-				new Replacement(
-					"Change all %20 to %40",
-					new int[]{
-						Bytecode.BIPUSH, 20,
-						Bytecode.IREM
-					}, new int[]{
-						Bytecode.BIPUSH, 40,
-						Bytecode.IREM
-					}
-				),
-
-				new Replacement(
-					"Change y<19 to y<38",
-				    new int[]{
-					    Bytecode.ILOAD_2,
-					    Bytecode.BIPUSH, 19,
-					    Bytecode.IF_ICMPLT
-				    }, new int[]{
-						Bytecode.ILOAD_2,
-						Bytecode.BIPUSH, 38,
-						Bytecode.IF_ICMPLT
-					}
-				),
-
-				/*
-				new Replacement(
-					"Change h=18 to h=64",
-				    new int[]{
-					    Bytecode.BIPUSH, 18,
-					    Bytecode.ISTORE_3
-				    }, new int[]{
-						Bytecode.BIPUSH, 64,
-						Bytecode.ISTORE_3
-					}
-				), */
-
-				/*
-				new Replacement(
-					"Remove flame falloff increase",
-				    new int[] {
-					    Bytecode.IINC, 3, 1,
-					    Bytecode.IINC, 6, 1,
-					    Bytecode.GOTO, 0xFF, 0xC0,
-				    }, new int[] {
-						Bytecode.NOP,Bytecode.NOP,Bytecode.NOP, 
-						Bytecode.IINC, 6, 1,
-						Bytecode.GOTO, 0xFF, 0xC0,
-					}
-				)*/
-			},
-			new ConstChanger[]{
-				new ConstChanger() {
-					public int index() { return 2; }
-					public String description() { return "flame falloff 1.04 -> 1.03"; }
-					public int add(ConstPool cp) { return cp.addFloatInfo(1.03F); }
-				}
-			}
-		),
-		new PatchDefinition(
-			"aa.class",
-		    new Replacement[]{
-				NEW_ARRAY_16x16,
-				NEW_ARRAY_16x20,
-			    WHILE_256,
-			    TIMES_16,
-			    new Replacement(
-				    "Change .getRGB(...16,16,...16) to .getRGB(...32,32,...32)",
-			        new int[] {
-				        Bytecode.BIPUSH, 16,
-				        Bytecode.BIPUSH, 16,
-				        Bytecode.ALOAD_0,
-				        Bytecode.GETFIELD, 0x00, 0x2B,
-				        Bytecode.ICONST_0,
-				        Bytecode.BIPUSH, 16,
-			        }, new int[] {
-					    Bytecode.BIPUSH, 32,
-					    Bytecode.BIPUSH, 32,
-					    Bytecode.ALOAD_0,
-					    Bytecode.GETFIELD, 0x00, 0x2B,
-					    Bytecode.ICONST_0,
-					    Bytecode.BIPUSH, 32
-				    }
-			    )
-		    },
-		    new ConstChanger[]{
-		        new ConstChanger() {
-			        public String description() { return "8.5D -> 16.5D"; }
-			        public int index() { return 0x20; }
-			        public int add(ConstPool cp) {
-				        return cp.addDoubleInfo(16.5D);
-			        }
-		        },
-		        new ConstChanger() {
-					public String description() { return "7.5D -> 15.5D"; }
-			        public int index() { return 0x1E; }
-			        public int add(ConstPool cp) {
-				        return cp.addDoubleInfo(15.5D);
-			        }
-		        },
-		    }
-		)
-	};
+	public static Params globalParams = new Params();
 
 	public static void main(String[] argv) throws Exception {
         MainForm form = MainForm.create();
@@ -395,6 +48,33 @@ public class MCPatcher {
 
 	    JarOutputStream newjar = null;
 
+	    ArrayList<PatchSet> patches = new ArrayList<PatchSet>();
+
+	    patches.add(new PatchSet(Patches.animManager));
+	    patches.add(new PatchSet(Patches.animTexture));
+
+	    PatchSet waterPatches = new PatchSet(Patches.water);
+	    if(!globalParams.getBoolean("useAnimatedWater")) {
+		    waterPatches.setParam("tileSize", "0");
+	    }
+	    patches.add(new PatchSet("FlowWater", Patches.water));
+	    patches.add(new PatchSet("StillWater", Patches.water));
+
+	    PatchSet lavaPatches = new PatchSet(Patches.water);
+	    if(!globalParams.getBoolean("useAnimatedLava")) {
+		    lavaPatches.setParam("tileSize", "0");
+	    }
+	    patches.add(new PatchSet("FlowLava", Patches.water));
+	    patches.add(new PatchSet("StillLava", Patches.water));
+
+	    PatchSet firePatches = new PatchSet(Patches.fire);
+	    if(!globalParams.getBoolean("useAnimatedFire")) {
+		    firePatches.setParam("tileSize", "0");
+	    }
+	    patches.add(new PatchSet("Fire", Patches.fire));
+
+	    patches.add(new PatchSet(Patches.compass));
+
 		try {
 			newjar = new JarOutputStream(new FileOutputStream(outputFile));
 		} catch(IOException e) {
@@ -420,10 +100,19 @@ public class MCPatcher {
 				}
 
 				boolean patched = false;
-				for(PatchDefinition patch : patches) {
-					if(entry.getName().equals(patch.fileName)) {
-						MCPatcher.out.println("Patching file: " + entry.getName());
-						patch.apply(minecraft.getJar().getInputStream(entry), newjar);
+				for(PatchSet patch : patches) {
+					if(entry.getName().equals(minecraft.getClassMap().get(patch.getClassName()))) {
+						MCPatcher.out.println("Patching class: " + patch.getClassName() + " (" + entry.getName() + ")");
+						InputStream input = minecraft.getJar().getInputStream(entry);
+						ClassFile cf = new ClassFile(new DataInputStream(input));
+						ConstPool cp = cf.getConstPool();
+						patch.visitConstPool(cp);
+						for(Object mo : cf.getMethods()) {
+							patch.visitMethod((MethodInfo)mo);
+						}
+
+						cf.compact();
+						cf.write(new DataOutputStream(newjar));
 						newjar.closeEntry();
 						patched = true;
 						break;
@@ -463,7 +152,7 @@ public class MCPatcher {
 			}
 
 			newjar.close();
-		} catch(IOException e) {
+		} catch(Exception e) {
 			MCPatcher.err.println(e.getMessage());
 		}
 
@@ -472,7 +161,7 @@ public class MCPatcher {
 		exit(0);
 	}
 
-    public static void exit(int code) {
+	public static void exit(int code) {
 		if(!GraphicsEnvironment.isHeadless()) {
 			final JTextArea area = new JTextArea(baos.toString());
 			area.setRows(10);

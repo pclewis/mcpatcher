@@ -8,7 +8,12 @@ public class Params {
 	}
 
 	public Params() {
-		this(null);
+		this((MissHandler)null);
+	}
+
+	public Params(Params src) {
+		this.missHandler = src.missHandler;
+		this.map.putAll(src.map);
 	}
 
 	public Params(MissHandler missHandler) {
@@ -33,5 +38,9 @@ public class Params {
 
 	public byte getByte(String key) {
 		return (byte)(getInt(key) & 0xFF);
+	}
+
+	public boolean getBoolean(String key) {
+		return Boolean.parseBoolean(get(key));
 	}
 }
