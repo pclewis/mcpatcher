@@ -132,7 +132,7 @@ public class MainForm {
 			    MCPatcher.globalParams.put("tileSize", ""+texturePack.getTerrainTileSize());
 			    MCPatcher.globalParams.put("useAnimatedFire", ""+animatedFireCheckBox.isSelected());
 				MCPatcher.globalParams.put("useAnimatedWater", ""+animatedWaterCheckBox.isSelected());
-			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedWaterCheckBox.isSelected());
+			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedLavaCheckBox.isSelected());
 
 			    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
 		    }
@@ -163,6 +163,13 @@ public class MainForm {
 		sb.append("<td></td>");
 		sb.append(new File(texturePack.getItemsSource()).getName());
 		sb.append("</td></tr>");
+
+		sb.append("<tr><td>mojang.png</td><td>");
+		sb.append("-");
+		sb.append("<td></td>");
+		sb.append(new File(texturePack.getFileSource("title/mojang.png")).getName());
+		sb.append("</td></tr>");
+
 		textureInfoLabel.setText(sb.toString());
 		packField.setText(path);
 		frame.pack();

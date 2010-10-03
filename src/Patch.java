@@ -8,16 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class Patch implements Cloneable {
-    public Params params = new Params(new Params.MissHandler() {
-	    public String get(String key) {
-		    for (ParamSpec p : getParamSpecs()) {
-		        if(p.name.equals(key)) {
-		            return MCPatcher.globalParams.get(p.defaultSource);
-		        }
-		    }
-		    return null;
-	    }
-    });
+    public Params params;
 
     abstract public ParamSpec[] getParamSpecs();
     abstract public String getDescription();
@@ -25,6 +16,18 @@ public abstract class Patch implements Cloneable {
     abstract public void visitConstPool(ConstPool cp) throws Exception;
     abstract public void visitMethod(MethodInfo mi) throws Exception;
 
+	public Patch() {
+		this.params = new Params(new Params.MissHandler() {
+			public String get(String key) {
+				for (ParamSpec p : getParamSpecs()) {
+					if(p.name.equals(key)) {
+						return MCPatcher.globalParams.get(p.defaultSource);
+					}
+				}
+				return null;
+			}
+	    });
+	}
 
     public void setParam(String key, String value) {
         params.put(key, value);

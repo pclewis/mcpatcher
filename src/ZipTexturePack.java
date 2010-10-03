@@ -16,7 +16,7 @@ public class ZipTexturePack extends TexturePack {
 		this.jar = jar;
 	}
 
-	public DataInputStream openFile(String name) throws IOException {
+	protected DataInputStream openFile(String name) throws IOException {
 		ZipEntry e = jar.getEntry(name);
 		if(e == null) {
 			for(ZipEntry e2 : Collections.list(jar.entries())) {

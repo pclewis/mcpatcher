@@ -14,9 +14,10 @@ public class RarTexturePack extends TexturePack {
 		headers = rar.getFileHeaders();
 	}
 
-	public DataInputStream openFile(String name) throws IOException {
+	protected DataInputStream openFile(String name) throws IOException {
 		for(FileHeader h : headers) {
-			if(h.getFileNameString().equals(name)) {
+			String fileName = h.getFileNameString().replace("\\", "/");
+			if(fileName.equals(name)) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream(h.getDataSize());
 				try {
 					rar.extractFile(h, baos);

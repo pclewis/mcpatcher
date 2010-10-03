@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public abstract class TexturePack {
 
-	abstract public DataInputStream openFile(String name) throws IOException;
+	abstract protected DataInputStream openFile(String name) throws IOException;
 
 	private TexturePack parent;
 	private String path;
@@ -36,6 +36,19 @@ public abstract class TexturePack {
 		return result;
 	}
 
+	public DataInputStream getInputStream(String file) {
+		DataInputStream input = null;
+
+		try {
+			input = openFile(file);
+			if(input==null)
+				input = parent.openFile(file);
+		} catch(IOException e) {
+			throw new RuntimeException("IO error", e);
+		}
+		return input;
+	}
+
 	private int getTileSize(String file) {
 		BufferedImage image = null;
 		DataInputStream input = null;
@@ -52,10 +65,12 @@ public abstract class TexturePack {
 			return -1;
 		} finally {
 			if(input!=null) {
+				/*
 				try {
 					input.close();
 				} catch(IOException e) {
 				}
+				*/
 			}
 		}
 		return image.getWidth() / 16;

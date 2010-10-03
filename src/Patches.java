@@ -1,4 +1,5 @@
 import javassist.bytecode.ConstPool;
+import javassist.bytecode.Mnemonic;
 import javassist.bytecode.Opcode;
 
 class Patches implements Opcode {
@@ -8,7 +9,7 @@ class Patches implements Opcode {
 	};
 
 	public static class ArraySizePatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix array allocations"; }
+		public String getDescription() { return "Fix new array[" + this.getFromSize() + "] -> " + this.getToSize(); }
 
 		public byte[] getBytes(int size) {
 			return new byte[]{
@@ -19,7 +20,7 @@ class Patches implements Opcode {
 	}
 
 	public static class WhilePatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix while loops"; }
+		public String getDescription() { return String.format("Fix while(i<%d) -> while(i<%d)", this.getFromSize(), this.getToSize()); }
 
 		public byte[] getBytes(int size) {
 			if(size < 0xFF) {
@@ -37,7 +38,7 @@ class Patches implements Opcode {
 	}
 
 	public static class BitMaskPatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix bit masking operations"; }
+		public String getDescription() { return String.format("Fix &%x -> %x", this.getFromSize(), this.getToSize()); }
 
 		public byte[] getBytes(int cnt) {
 			if(cnt>0) cnt = cnt - 1;
@@ -56,7 +57,7 @@ class Patches implements Opcode {
 	}
 
 	public static class MultiplyPatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix multiplication operations"; }
+		public String getDescription() { return "Fix * " + this.getFromSize() + " -> " + this.getToSize(); }
 
 		public byte[] getBytes(int cnt) {
 			if(cnt < 0xFF) {
@@ -74,7 +75,7 @@ class Patches implements Opcode {
 	}
 
 	public static class ModPatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix modulus operations"; }
+		public String getDescription() { return "Fix mod " + this.getFromSize() + " -> " + this.getToSize(); }
 
 		public byte[] getBytes(int cnt) {
 			if(cnt < 0xFF) {
@@ -92,7 +93,7 @@ class Patches implements Opcode {
 	}
 
 	public static class ModMulPatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix %16*16+_3*16 -> %16*x+_3*x"; }
+		public String getDescription() { return "Fix %16*"+getFromSize()+"+_3*"+getFromSize()+" -> %16*"+getToSize()+"+_3*"+getToSize(); }
 
 		public byte[] getBytes(int size) {
 			return new byte[]{
@@ -108,7 +109,7 @@ class Patches implements Opcode {
 	}
 
 	public static class DivMulPatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix %16*16+_4*16 -> %16*x+_4*x"; }
+		public String getDescription() { return "Fix /16*"+getFromSize()+"+_4*"+getFromSize()+" -> /16*"+getToSize()+"+_4*"+getToSize(); }
 
 		public byte[] getBytes(int size) {
 			return new byte[]{
@@ -124,7 +125,10 @@ class Patches implements Opcode {
 	}
 
 	public static class SubImagePatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix calls to glTexSubImage2D(...,16,16)"; }
+		public String getDescription() {
+			return String.format("glTexSubImage2D(...,%1$d,%1$d) -> glTexSubImage2D(...,%2$d,%2$d)",
+				this.getFromSize(), this.getToSize());
+		}
 
 		public byte[] getBytes(int size) {
 			return new byte[]{
@@ -138,7 +142,10 @@ class Patches implements Opcode {
 	}
 
 	public static class VarCmpPatch extends BytecodeTilePatch {
-		public String getDescription() { return "Fix var comparisons"; }
+		public String getDescription() {
+			return String.format("Fix ILOAD_%1$d; %2$s %3$d -> %2$s %4$d",
+				vnum, Mnemonic.OPCODE[comparison], this.getFromSize(), this.getToSize());
+		}
 		int vnum, comparison;
 		public VarCmpPatch(int vnum, int comparison) {
 			this.vnum = vnum;
@@ -163,7 +170,7 @@ class Patches implements Opcode {
 	}
 
 	public static class FireUnpatch extends BytecodeTilePatch {
-		public String getDescription() { return "(unpatch) <init> *32 to *16"; }
+		public String getDescription() { return "(unpatch) <init> *"+this.getToSize()+" to *"+this.getFromSize(); }
 		public byte[] getFromBytes() throws Exception { return super.getToBytes(); }
 		public byte[] getToBytes() throws Exception { return super.getFromBytes(); }
 		public byte[] getBytes(int size) {
@@ -176,7 +183,10 @@ class Patches implements Opcode {
 	}
 
 	public static class CompassGetRGBPatch extends BytecodeTilePatch {
-		public String getDescription() { return "Change .getRGB(...16,16,...16) to .getRGB(...32,32,...32)"; }
+		public String getDescription() {
+			return String.format(".getRGB(...%1$d,%1$d,...%1$d) to .getRGB(...%2$d,%2$d,...%2$d)",
+				this.getFromSize(), this.getToSize());
+		}
 		public byte[] getBytes(int size) {
 			return new byte[]{
 				BIPUSH, (byte)size,
@@ -187,6 +197,40 @@ class Patches implements Opcode {
 				BIPUSH, (byte)size,
 			};
 		}
+	}
+
+	public static class OverrideTilenumPatch extends BytecodePatch {
+		public String getDescription() {return "Change tile number";}
+		public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+
+		int from, to;
+		public OverrideTilenumPatch(int from, int to) {
+			this.from = from;
+			this.to = to;
+		}
+
+		byte[] getFromBytes() {
+			return new byte[]{
+				(byte)ALOAD_0,
+				(byte)ILOAD_1,
+				(byte)PUTFIELD, 0x00, 0x08
+			};
+		}
+
+		byte[] getToBytes() {
+			return new byte[]{
+				(byte)ALOAD_0,
+				(byte)ILOAD_1,
+				(byte)PUTFIELD, 0x00, 0x08, // keep so extra patches work
+				(byte)ILOAD_1,
+				(byte)SIPUSH, 0x00, (byte)this.from,
+				(byte)IF_ICMPNE, 0, 10, // bytes to jump forward
+				(byte)ALOAD_0,
+				(byte)SIPUSH, 0x00, (byte)160,
+				(byte)PUTFIELD, 0x00, 0x08,
+			};
+		}
+
 	}
 
 	public static final PatchSet water = new PatchSet(
@@ -244,4 +288,29 @@ class Patches implements Opcode {
 			new PatchSpec(new ConstPatch(7.5D, 15.5D)),
 		}
 	);
+
+	public static final PatchSet hideWater = new PatchSet(
+		"AnimTexture",
+		new PatchSpec[]{
+			new PatchSpec(new OverrideTilenumPatch(12*16+13+0, 160)),
+			new PatchSpec(new OverrideTilenumPatch(12*16+13+1, 160)),
+		}
+	);
+
+	public static final PatchSet hideLava = new PatchSet(
+		"AnimTexture",
+		new PatchSpec[]{
+			new PatchSpec(new OverrideTilenumPatch(14*16+13+0, 160)),
+			new PatchSpec(new OverrideTilenumPatch(14*16+13+1, 160)),
+		}
+	);
+
+	public static final PatchSet hideFire = new PatchSet(
+		"AnimTexture",
+		new PatchSpec[]{
+			new PatchSpec(new OverrideTilenumPatch(31+(0*16), 160)),
+			new PatchSpec(new OverrideTilenumPatch(31+(1*16), 160)),
+		}
+	);
+
 }

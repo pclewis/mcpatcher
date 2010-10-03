@@ -20,11 +20,17 @@ public class MCPatcher {
 
 	public static void main(String[] argv) throws Exception {
         MainForm form = MainForm.create();
+		String appdata = System.getenv("APPDATA");
+		String home = System.getProperty("user.home");
 		String[] paths = new String[] {
 			"minecraft.original.jar",
-			System.getProperty("user.home") + "/AppData/Roaming/.minecraft/bin/minecraft.original.jar",
+			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.original.jar",
+			home + "Library/Application Support/.minecraft/bin/minecraft.original.jar",
+			home + ".minecraft/bin/minecraft.original.jar",
 			"minecraft.jar",
-			System.getProperty("user.home") + "/AppData/Roaming/.minecraft/bin/minecraft.jar",
+			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.jar",
+			home + "Library/Application Support/.minecraft/bin/minecraft.jar",
+			home + ".minecraft/bin/minecraft.jar",
 		};
 
 		for(String path : paths) {
@@ -56,29 +62,36 @@ public class MCPatcher {
 	    PatchSet waterPatches = new PatchSet(Patches.water);
 	    if(!globalParams.getBoolean("useAnimatedWater")) {
 		    waterPatches.setParam("tileSize", "0");
+		    patches.add( new PatchSet(Patches.hideWater) );
 	    }
-	    patches.add(new PatchSet("FlowWater", Patches.water));
-	    patches.add(new PatchSet("StillWater", Patches.water));
+	    patches.add(new PatchSet("FlowWater", waterPatches));
+	    patches.add(new PatchSet("StillWater", waterPatches));
 
 	    PatchSet lavaPatches = new PatchSet(Patches.water);
 	    if(!globalParams.getBoolean("useAnimatedLava")) {
 		    lavaPatches.setParam("tileSize", "0");
+		    patches.add( new PatchSet(Patches.hideLava) );
 	    }
-	    patches.add(new PatchSet("FlowLava", Patches.water));
-	    patches.add(new PatchSet("StillLava", Patches.water));
+	    patches.add(new PatchSet("FlowLava", lavaPatches));
+	    patches.add(new PatchSet("StillLava", lavaPatches));
 
 	    PatchSet firePatches = new PatchSet(Patches.fire);
 	    if(!globalParams.getBoolean("useAnimatedFire")) {
 		    firePatches.setParam("tileSize", "0");
+		    patches.add( new PatchSet(Patches.hideFire) );
 	    }
-	    patches.add(new PatchSet("Fire", Patches.fire));
+	    if(texturePack.getTerrainTileSize() > 16) {
+	        patches.add(new PatchSet("Fire",firePatches));
+	    }
 
-	    patches.add(new PatchSet(Patches.compass));
+	    if(texturePack.getTerrainTileSize() > 16) {
+	        patches.add(new PatchSet(Patches.compass));
+	    }
 
 		try {
 			newjar = new JarOutputStream(new FileOutputStream(outputFile));
 		} catch(IOException e) {
-			MCPatcher.err.println(e.getMessage());
+			e.printStackTrace(MCPatcher.err);
 			exit(1);
 		}
 
@@ -99,29 +112,41 @@ public class MCPatcher {
 					continue;
 				}
 
+				InputStream input = null;
+
+				if(entry.getName().endsWith(".png"))
+					input = texturePack.getInputStream(entry.getName());
+				else
+					input = minecraft.getJar().getInputStream(entry);
+
 				boolean patched = false;
+				ClassFile cf = null;
+				ConstPool cp = null;
 				for(PatchSet patch : patches) {
 					if(entry.getName().equals(minecraft.getClassMap().get(patch.getClassName()))) {
-						MCPatcher.out.println("Patching class: " + patch.getClassName() + " (" + entry.getName() + ")");
-						InputStream input = minecraft.getJar().getInputStream(entry);
-						ClassFile cf = new ClassFile(new DataInputStream(input));
-						ConstPool cp = cf.getConstPool();
+						if(cf == null) {
+							MCPatcher.out.println("Patching class: " + patch.getClassName() + " (" + entry.getName() + ")");
+							cf = new ClassFile(new DataInputStream(input));
+							cp = cf.getConstPool();
+						}
 						patch.visitConstPool(cp);
 						for(Object mo : cf.getMethods()) {
 							patch.visitMethod((MethodInfo)mo);
 						}
-
-						cf.compact();
-						cf.write(new DataOutputStream(newjar));
-						newjar.closeEntry();
-						patched = true;
-						break;
 					}
+
 				}
-				
+				if(cf != null) {
+					cf.compact();
+					cf.write(new DataOutputStream(newjar));
+					newjar.closeEntry();
+					patched = true;
+				}
+
+
 				if(entry.getName().equals("gui/items.png")) {
 					MCPatcher.out.println("Resizing " + entry.getName());
-					BufferedImage image = ImageIO.read(minecraft.getJar().getInputStream(entry));
+					BufferedImage image = ImageIO.read(input);
 					BufferedImage newImage = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB);
 					Graphics2D graphics2D = newImage.createGraphics();
 					/*
@@ -137,11 +162,9 @@ public class MCPatcher {
 				}
 
 				if(!patched) {
-					InputStream in = new BufferedInputStream(minecraft.getJar().getInputStream(entry));
-
 					byte[] buffer = new byte[1024];
 					while(true) {
-						int count = in.read(buffer);
+						int count = input.read(buffer);
 						if(count == -1)
 							break;
 						newjar.write(buffer, 0, count);
@@ -153,7 +176,8 @@ public class MCPatcher {
 
 			newjar.close();
 		} catch(Exception e) {
-			MCPatcher.err.println(e.getMessage());
+			e.printStackTrace(MCPatcher.err);
+			exit(1);
 		}
 
 		MCPatcher.out.println("Success!...ostensibly");

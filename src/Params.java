@@ -1,7 +1,7 @@
 import java.util.HashMap;
 
 public class Params {
-	HashMap<String, String> map = new HashMap<String,String>();
+	HashMap<String, String> map;
 	MissHandler missHandler;
 	static public abstract class MissHandler {
 		public abstract String get(String key);
@@ -13,10 +13,12 @@ public class Params {
 
 	public Params(Params src) {
 		this.missHandler = src.missHandler;
+		this.map = new HashMap<String,String>();
 		this.map.putAll(src.map);
 	}
 
 	public Params(MissHandler missHandler) {
+		this.map = new HashMap<String,String>();
 		this.missHandler = missHandler;
 	}
 

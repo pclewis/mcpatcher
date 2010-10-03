@@ -4,7 +4,7 @@ abstract class BytecodeTilePatch extends BytecodePatch {
     int addY = 0;
 	int add = 0;
     boolean square = false;
-    boolean zero = true;
+    boolean zero = false;
 
     public ParamSpec[] getParamSpecs() {
         return zero ? Patches.PSPEC_EMPTY : Patches.PSPEC_TILESIZE;
@@ -28,12 +28,20 @@ abstract class BytecodeTilePatch extends BytecodePatch {
 	    return result;
     }
 
+	public int getFromSize() {
+		return calc(16);
+	}
+
+	public int getToSize() {
+		return zero ? 0 : calc(params.getInt("tileSize"));
+	}
+
     public byte[] getFromBytes() throws Exception {
-        return getBytes(calc(16));
+        return getBytes(getFromSize());
     }
 
     public byte[] getToBytes() throws Exception {
-        return getBytes(zero ? 0 : calc(params.getInt("tileSize")));
+        return getBytes(getToSize());
     }
 
     public BytecodeTilePatch multiplier(int multiplier) {

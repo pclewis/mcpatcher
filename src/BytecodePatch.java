@@ -1,8 +1,6 @@
 import javassist.bytecode.*;
 
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
+import java.util.Arrays;
 
 public abstract class BytecodePatch extends Patch implements javassist.bytecode.Opcode {
 	int appliedCount;
@@ -32,15 +30,19 @@ public abstract class BytecodePatch extends Patch implements javassist.bytecode.
 	    CodeIterator ci = ca.iterator();
 	    byte[] from = this.getFromBytes();
 	    byte[] to = this.getToBytes();
+	    if(Arrays.equals(from,to)) return;
+
 	    try {
+		    int lastPatchEnd = 0;
 			while(ci.hasNext()) {
 				int i = ci.next();
+				if(i<lastPatchEnd)
+					continue;
 				if(matchAt(ci, i, from)) {
 					int skip = 0;
 					if(to.length <= from.length) {
 						skip = from.length - to.length;
 						pad(ci, i, skip);
-
 					} else {
 						int gapNeeded = to.length - from.length;
 						int gapSize = ci.insertGap(i, gapNeeded);
@@ -48,6 +50,7 @@ public abstract class BytecodePatch extends Patch implements javassist.bytecode.
 					}
 					ci.write(to, i + skip);
 					ci.move(i + skip);
+					lastPatchEnd = i + skip + to.length;
 					appliedCount += 1;
 					MCPatcher.out.println("  " + this.getDescription() + " - " + mi.getName() + "@" + i);
 				}
