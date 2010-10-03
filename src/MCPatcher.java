@@ -19,18 +19,22 @@ public class MCPatcher {
 	public static Params globalParams = new Params();
 
 	public static void main(String[] argv) throws Exception {
+		baos = new ByteArrayOutputStream();
+		out = new PrintStream(baos);
+		err = out;
+		
         MainForm form = MainForm.create();
 		String appdata = System.getenv("APPDATA");
 		String home = System.getProperty("user.home");
 		String[] paths = new String[] {
 			"minecraft.original.jar",
 			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.original.jar",
-			home + "Library/Application Support/.minecraft/bin/minecraft.original.jar",
-			home + ".minecraft/bin/minecraft.original.jar",
+			home + "Library/Application Support/minecraft/bin/minecraft.original.jar",
+			home + "minecraft/bin/minecraft.original.jar",
 			"minecraft.jar",
 			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.jar",
-			home + "Library/Application Support/.minecraft/bin/minecraft.jar",
-			home + ".minecraft/bin/minecraft.jar",
+			home + "Library/Application Support/minecraft/bin/minecraft.jar",
+			home + "minecraft/bin/minecraft.jar",
 		};
 
 		for(String path : paths) {
@@ -47,10 +51,6 @@ public class MCPatcher {
     }
 
     public static void applyPatch(Minecraft minecraft, TexturePack texturePack, File outputFile) {
-
-		baos = new ByteArrayOutputStream();
-		out = new PrintStream(baos);
-		err = out;
 
 	    JarOutputStream newjar = null;
 
@@ -145,20 +145,19 @@ public class MCPatcher {
 
 
 				if(entry.getName().equals("gui/items.png")) {
-					MCPatcher.out.println("Resizing " + entry.getName());
-					BufferedImage image = ImageIO.read(input);
-					BufferedImage newImage = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB);
-					Graphics2D graphics2D = newImage.createGraphics();
-					/*
-					graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-					                            RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-					                            */
-					graphics2D.drawImage(image, 0, 0, 512, 512, null);
+					if(texturePack.getTerrainTileSize() != texturePack.getItemsTileSize()) {
+						int size = texturePack.getTerrainTileSize() * 16;
+						MCPatcher.out.println("Resizing " + entry.getName() + " to " + size + "x" + size);
+						BufferedImage image = ImageIO.read(input);
+						BufferedImage newImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+						Graphics2D graphics2D = newImage.createGraphics();
+						graphics2D.drawImage(image, 0, 0, size, size, null);
 
-					// Write the scaled image to the outputstream
-					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					ImageIO.write(newImage, "PNG", newjar);
-					patched = true;
+						// Write the scaled image to the outputstream
+						ByteArrayOutputStream out = new ByteArrayOutputStream();
+						ImageIO.write(newImage, "PNG", newjar);
+						patched = true;
+					}
 				}
 
 				if(!patched) {

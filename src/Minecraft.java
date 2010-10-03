@@ -2,6 +2,7 @@ import javassist.bytecode.*;
 
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -13,6 +14,7 @@ public class Minecraft implements Opcode {
 	}
 
 	private JarFile jar;
+	File file;
 
 	private HashMap<String,String> classMap = new HashMap<String,String>();
 	private HashMap<String,ClassFinder> classFinders = new HashMap<String, ClassFinder>() {{
@@ -131,6 +133,7 @@ public class Minecraft implements Opcode {
 
 	public Minecraft(File jarFile) throws Exception {
 		jar = new JarFile(jarFile, false);
+		this.file = jarFile;
 		for(JarEntry file : Collections.list(jar.entries())) {
 			if(file.getName().endsWith(".class")) {
 				ClassFile cf = new ClassFile(new DataInputStream(jar.getInputStream(file)));
@@ -160,5 +163,15 @@ public class Minecraft implements Opcode {
 	
 	public HashMap<String, String> getClassMap() {
 		return classMap;
+	}
+
+	public boolean createBackup(File newFile) throws IOException {
+		jar.close();
+		if(file.renameTo(newFile)) {
+			jar = new JarFile(newFile, false);
+		} else {
+			return false;
+		}
+		return true;
 	}
 }

@@ -134,6 +134,31 @@ public class MainForm {
 				MCPatcher.globalParams.put("useAnimatedWater", ""+animatedWaterCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedLavaCheckBox.isSelected());
 
+			    if(backupCheckBox.isSelected()) {
+				    try {
+					    String newPath = backupField.getText();
+					    String texturePackPath = texturePack.getPath();
+					    mcTexturePack.close();
+
+					    if(texturePack.getPath().equals(mcTexturePack.getPath())) {
+					        texturePack.close();
+						    texturePackPath = newPath;
+					    }
+
+					    if (!minecraft.createBackup(new File(newPath)))
+					    {
+						    MCPatcher.err.println("Couldn't create backup");
+						    MCPatcher.exit(1);
+					    }
+					    mcTexturePack = TexturePack.open(newPath, null);
+					    texturePack = TexturePack.open(texturePackPath, mcTexturePack);
+
+				    } catch(IOException e1) {
+					    e1.printStackTrace(MCPatcher.err);
+					    MCPatcher.exit(1);
+				    }
+			    }
+
 			    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
 		    }
 	    });

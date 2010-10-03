@@ -38,7 +38,7 @@ class Patches implements Opcode {
 	}
 
 	public static class BitMaskPatch extends BytecodeTilePatch {
-		public String getDescription() { return String.format("Fix &%x -> %x", this.getFromSize(), this.getToSize()); }
+		public String getDescription() { return String.format("Fix &0x%x -> 0x%x", this.getFromSize(), this.getToSize()); }
 
 		public byte[] getBytes(int cnt) {
 			if(cnt>0) cnt = cnt - 1;
@@ -241,7 +241,7 @@ class Patches implements Opcode {
 			new PatchSpec(new WhilePatch().square(true)),
 			new PatchSpec(new BitMaskPatch()),
 			new PatchSpec(new BitMaskPatch().square(true)),
-			new PatchSpec(new MultiplyPatch())
+			new PatchSpec(new MultiplyPatch()),
 		}
 	);
 
@@ -250,7 +250,8 @@ class Patches implements Opcode {
 		new PatchSpec[]{
 			new PatchSpec(new ModMulPatch()),
 			new PatchSpec(new DivMulPatch()),
-			new PatchSpec(new SubImagePatch())
+			new PatchSpec(new SubImagePatch()),
+			new PatchSpec(new ConstPatch(1048576, (128*16)*(128*16)*4))
 		}
 	);
 

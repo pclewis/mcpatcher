@@ -30,4 +30,8 @@ public class ZipTexturePack extends TexturePack {
 		}
 		return new DataInputStream(jar.getInputStream(e));
 	}
+
+	public void close() throws IOException {
+		jar.close();
+	}
 }

@@ -8,9 +8,17 @@ import java.io.IOException;
 public abstract class TexturePack {
 
 	abstract protected DataInputStream openFile(String name) throws IOException;
+	abstract public void close() throws IOException;
 
 	private TexturePack parent;
+
+	public String getPath() {
+		return path;
+	}
+
 	private String path;
+	private int terrainTileSize = -1;
+	private int itemsTileSize = -1;
 
 	public void setParent(TexturePack parent) {
 		this.parent = parent;
@@ -63,35 +71,28 @@ public abstract class TexturePack {
 			image = ImageIO.read(input);
 		} catch(IOException e) {
 			return -1;
-		} finally {
-			if(input!=null) {
-				/*
-				try {
-					input.close();
-				} catch(IOException e) {
-				}
-				*/
-			}
 		}
 		return image.getWidth() / 16;
 	}
 
 	public int getTerrainTileSize() {
-		return getTileSize("terrain.png");
+		if(terrainTileSize<=0)
+			terrainTileSize = getTileSize("terrain.png");
+		return terrainTileSize;
 	}
 
 	public int getItemsTileSize() {
-		return getTileSize("gui/items.png");
+		if(itemsTileSize<=0)
+			itemsTileSize = getTileSize("gui/items.png");
+		return itemsTileSize;
 	}
 
 	public String getFileSource(String file) {
 		DataInputStream input = null;
 		try {
 			input = openFile(file);
-			if(input != null) {
-				input.close();
+			if(input != null)
 				return this.path;
-			}
 		} catch(IOException e) {
 		}
 		return parent!=null ? parent.getFileSource(file) : null;

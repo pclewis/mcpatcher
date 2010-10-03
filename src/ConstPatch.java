@@ -28,10 +28,13 @@ public class ConstPatch extends Patch {
 		}
 
 		byte[] getBytes(int i) {
-			if(op==LDC)
-				return new byte[]{ (byte)op, b(i, 0) };
+			int mop = op;
+			if(i>=0xFF && mop==LDC)
+				mop = LDC_W;
+			if(mop==LDC)
+				return new byte[]{ (byte)mop, b(i, 0) };
 			else
-				return new byte[]{ (byte)op, b(i, 1), b(i, 0) };
+				return new byte[]{ (byte)mop, b(i, 1), b(i, 0) };
 		}
 
 		byte[] getFromBytes() throws Exception { return getBytes(fi); }
@@ -46,20 +49,23 @@ public class ConstPatch extends Patch {
 	}
 
 	private int getTag(Object o) {
-		if(o instanceof Float)  { return ConstPool.CONST_Float;  }
-		if(o instanceof Double) { return ConstPool.CONST_Double; }
+		if(o instanceof Float)   { return ConstPool.CONST_Float;   }
+		if(o instanceof Double)  { return ConstPool.CONST_Double;  }
+		if(o instanceof Integer) { return ConstPool.CONST_Integer; }
 		throw new AssertionError("Unreachable");
 	}
 
 	private int addToPool(ConstPool cp, Object o) {
-		if(o instanceof Float)  { return cp.addFloatInfo((Float)o);   }
-		if(o instanceof Double) { return cp.addDoubleInfo((Double)o); }
+		if(o instanceof Float)   { return cp.addFloatInfo((Float)o);     }
+		if(o instanceof Double)  { return cp.addDoubleInfo((Double)o);   }
+		if(o instanceof Integer) { return cp.addIntegerInfo((Integer)o); }
 		throw new AssertionError("Unreachable");
 	}
 
 	private boolean checkEqual(ConstPool cp, int index, Object o) {
-		if(o instanceof Float)  { return cp.getFloatInfo(index)  == (Float)o;  }
-		if(o instanceof Double) { return cp.getDoubleInfo(index) == (Double)o; }
+		if(o instanceof Float)   { return cp.getFloatInfo(index)  == (Float)o;  }
+		if(o instanceof Double)  { return cp.getDoubleInfo(index) == (Double)o; }
+		if(o instanceof Integer) { return cp.getIntegerInfo(index) == (Integer)o; }
 		throw new AssertionError("Unreachable");
 	}
 
