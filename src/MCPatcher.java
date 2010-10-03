@@ -29,12 +29,14 @@ public class MCPatcher {
 		String[] paths = new String[] {
 			"minecraft.original.jar",
 			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.original.jar",
-			home + "Library/Application Support/minecraft/bin/minecraft.original.jar",
-			home + "minecraft/bin/minecraft.original.jar",
+			home + "/Library/Application Support/minecraft/bin/minecraft.original.jar",
+			home + "/.minecraft/bin/minecraft.original.jar",
+			home + "/minecraft/bin/minecraft.original.jar",
 			"minecraft.jar",
 			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.jar",
-			home + "Library/Application Support/minecraft/bin/minecraft.jar",
-			home + "minecraft/bin/minecraft.jar",
+			home + "/Library/Application Support/minecraft/bin/minecraft.jar",
+			home + "/.minecraft/bin/minecraft.jar",
+			home + "/minecraft/bin/minecraft.jar",
 		};
 
 		for(String path : paths) {
