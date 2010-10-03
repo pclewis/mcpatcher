@@ -45,10 +45,14 @@ public class MainForm {
 
 	private SwingWorker worker;
 
+	private final boolean canOpenFolder = Util.isWindows() || Util.isMac();
+
     public MainForm(final JFrame frame) {
         this.frame = frame;
 
         final MainForm form = this;
+
+		minecraftFolderButton.setEnabled(canOpenFolder);
 
 
         origBrowseButton.addActionListener(new ActionListener() {
@@ -65,10 +69,11 @@ public class MainForm {
 		            try {
 			            setMinecraftPath(path, true);
 		            } catch(Exception e1) {
-			            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-			            System.exit(1);
+			            e1.printStackTrace(MCPatcher.err);
+			            MCPatcher.logWindow.setVisible(true);
 		            }
 	            }
+	            updateControls();
             }
         });
 
@@ -82,7 +87,7 @@ public class MainForm {
 	            } else {
 	                form.backupField.setText( fd.getDirectory() + fd.getFile() );
 	            }
-	            tryEnablePatch();
+	            updateControls();
             }
         });
 
@@ -96,7 +101,7 @@ public class MainForm {
 	            } else {
                     form.outputField.setText( fd.getDirectory() + fd.getFile() );
 	            }
-	            tryEnablePatch();
+	            updateControls();
             }
         });
 
@@ -113,11 +118,11 @@ public class MainForm {
 		            try {
 			            setTexturePack(path);
 		            } catch(Exception e1) {
-			            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-			            System.exit(1);
+			            e1.printStackTrace(MCPatcher.err);
+			            MCPatcher.logWindow.setVisible(true);
 		            }
 	            }
-
+	            updateControls();
             }
         });
 
@@ -127,7 +132,7 @@ public class MainForm {
                 boolean enabled = form.backupCheckBox.isSelected();
                 form.backupField.setEnabled( enabled );
                 form.backupBrowseButton.setEnabled( enabled );
-	            tryEnablePatch();
+	            updateControls();
             }
         });
 
@@ -136,7 +141,7 @@ public class MainForm {
                 boolean enabled = form.packCheckBox.isSelected();
                 form.packField.setEnabled( enabled );
                 form.packBrowseButton.setEnabled( enabled );
-	            tryEnablePatch();
+	            updateControls();
             }
         });
 
@@ -161,13 +166,21 @@ public class MainForm {
 					    if (!minecraft.createBackup(new File(newPath)))
 					    {
 						    MCPatcher.err.println("Couldn't create backup");
+						    MCPatcher.logWindow.setVisible(true);
+						    mcTexturePack = TexturePack.open(mcTexturePack.getPath(), null);
+						    texturePack = TexturePack.open(texturePack.getPath(), mcTexturePack);
 						    return;
 					    }
 					    mcTexturePack = TexturePack.open(newPath, null);
 					    texturePack = TexturePack.open(texturePackPath, mcTexturePack);
+					    backupCheckBox.setSelected(false);
+					    backupField.setText("");
+					    origField.setText(newPath);
+					    packField.setText(texturePackPath);
 
 				    } catch(IOException e1) {
 					    e1.printStackTrace(MCPatcher.err);
+					    MCPatcher.logWindow.setVisible(true);
 					    return;
 				    }
 			    }
@@ -188,7 +201,7 @@ public class MainForm {
 						String path = new File(origField.getText()).getParent();
 						String cp = path + "/" + Util.joinString(Arrays.asList(
 							"minecraft.jar", "lwjgl.jar", "lwjgl_util.jar", "jinput.jar"
-						), ";" + path + "/");
+						), File.pathSeparatorChar + path + "/");
 						ProcessBuilder pb = new ProcessBuilder(
 							"java",
 								"-cp", cp,
@@ -221,7 +234,7 @@ public class MainForm {
 	    minecraftFolderButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 			    String path = new File(origField.getText()).getParent();
-			    ProcessBuilder pb = new ProcessBuilder("explorer", path);
+			    ProcessBuilder pb = new ProcessBuilder(Util.isWindows() ? "explorer" : "open", path);
 			    try {
 				    Process p = pb.start();
 			    } catch(Exception e1) {
@@ -265,7 +278,7 @@ public class MainForm {
 		textureInfoLabel.setText(sb.toString());
 		packField.setText(path);
 		frame.pack();
-		tryEnablePatch();
+		updateControls();
 	}
 
 	public boolean setMinecraftPath(String path, boolean showErrors) throws Exception {
@@ -312,7 +325,7 @@ public class MainForm {
 			} else if (texturePack != null) {
 				texturePack.setParent(mcTexturePack);
 			}
-			tryEnablePatch();
+			updateControls();
 			frame.pack();
 			return true;
 		}
@@ -345,10 +358,16 @@ public class MainForm {
 		backupCheckBox.setSelected(false);
 	}
 
-	public void tryEnablePatch() {
+	public void updateControls() {
 		patchButton.setEnabled(false);
 		runMinecraftButton.setEnabled(false);
 		minecraftFolderButton.setEnabled(false);
+		if(minecraft == null) {
+			classInfoLabel.setText("");
+		}
+		if(texturePack == null) {
+			textureInfoLabel.setText("");
+		}
 
 		if(worker != null) {
 			if(!worker.isDone())
@@ -359,7 +378,7 @@ public class MainForm {
 			return;
 
 		runMinecraftButton.setEnabled(true);
-		minecraftFolderButton.setEnabled(true);
+		minecraftFolderButton.setEnabled(canOpenFolder);
 
 		if(texturePack == null)
 			return;
@@ -414,11 +433,11 @@ public class MainForm {
 		worker.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName().equals("state") && evt.getNewValue().equals(SwingWorker.StateValue.DONE)) {
-					tryEnablePatch();
+					updateControls();
 				}
 			}
 		});
 		worker.execute();
-		tryEnablePatch();
+		updateControls();
 	}
 }

@@ -169,9 +169,10 @@ public class Minecraft implements Opcode {
 		jar.close();
 		if(file.renameTo(newFile)) {
 			jar = new JarFile(newFile, false);
+			return true;
 		} else {
+			jar = new JarFile(file, false);
 			return false;
 		}
-		return true;
 	}
 }
