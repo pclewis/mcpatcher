@@ -4,9 +4,10 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.*;
+import java.util.Arrays;
 import java.util.Map;
 
 public class MainForm {
@@ -34,11 +35,15 @@ public class MainForm {
     private JLabel packLabel;
 	private JLabel textureInfoLabel;
 	private JLabel classInfoLabel;
+	private JButton runMinecraftButton;
+	private JButton minecraftFolderButton;
 	private JFrame frame;
 
 	private Minecraft minecraft;
 	private TexturePack texturePack;
 	private TexturePack mcTexturePack;
+
+	private SwingWorker worker;
 
     public MainForm(final JFrame frame) {
         this.frame = frame;
@@ -72,7 +77,11 @@ public class MainForm {
                 FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.SAVE);
                 fd.setFile("minecraft.original.jar");
                 fd.setVisible(true);
-                form.backupField.setText( fd.getDirectory() + fd.getFile() );
+	            if(fd.getFile() == null) {
+		            form.backupField.setText( "" );
+	            } else {
+	                form.backupField.setText( fd.getDirectory() + fd.getFile() );
+	            }
 	            tryEnablePatch();
             }
         });
@@ -82,7 +91,11 @@ public class MainForm {
                 FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.SAVE);
                 fd.setFile("minecraft.jar");
                 fd.setVisible(true);
-                form.outputField.setText( fd.getDirectory() + fd.getFile() );
+	            if(fd.getFile() == null) {
+		            form.outputField.setText( "" );
+	            } else {
+                    form.outputField.setText( fd.getDirectory() + fd.getFile() );
+	            }
 	            tryEnablePatch();
             }
         });
@@ -148,18 +161,72 @@ public class MainForm {
 					    if (!minecraft.createBackup(new File(newPath)))
 					    {
 						    MCPatcher.err.println("Couldn't create backup");
-						    MCPatcher.exit(1);
+						    return;
 					    }
 					    mcTexturePack = TexturePack.open(newPath, null);
 					    texturePack = TexturePack.open(texturePackPath, mcTexturePack);
 
 				    } catch(IOException e1) {
 					    e1.printStackTrace(MCPatcher.err);
-					    MCPatcher.exit(1);
+					    return;
 				    }
 			    }
+				runWorker(new SwingWorker() {
+				    protected Object doInBackground() throws Exception {
+					    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
+					    return null;
+				    }
+			    });
+			    worker.execute();
+			    MCPatcher.logWindow.setVisible(true);
+		    }
+	    });
+	    runMinecraftButton.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			    runWorker( new SwingWorker() {
+				    protected Object doInBackground() throws Exception {
+						String path = new File(origField.getText()).getParent();
+						String cp = path + "/" + Util.joinString(Arrays.asList(
+							"minecraft.jar", "lwjgl.jar", "lwjgl_util.jar", "jinput.jar"
+						), ";" + path + "/");
+						ProcessBuilder pb = new ProcessBuilder(
+							"java",
+								"-cp", cp,
+								"-Djava.library.path=" + path + "/natives",
+								"-Xmx1024M", "-Xms512M",
+								"net.minecraft.client.Minecraft");
+						MCPatcher.out.println( pb.command() );
+						pb.redirectErrorStream(true);
 
-			    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
+						try {
+							Process p = pb.start();
+							if(p != null) {
+								BufferedReader input = new BufferedReader( new InputStreamReader(p.getInputStream()) );
+								String line = null;
+								while((line=input.readLine())!= null) {
+									MCPatcher.out.println(line);
+
+								}
+								p.waitFor();
+							}
+						} catch(Exception e1) {
+							e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+			            }
+					    return null;
+				    }
+			    });
+			    MCPatcher.logWindow.setVisible(true);
+		    }
+	    });
+	    minecraftFolderButton.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+			    String path = new File(origField.getText()).getParent();
+			    ProcessBuilder pb = new ProcessBuilder("explorer", path);
+			    try {
+				    Process p = pb.start();
+			    } catch(Exception e1) {
+				    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+			    }
 		    }
 	    });
     }
@@ -280,8 +347,19 @@ public class MainForm {
 
 	public void tryEnablePatch() {
 		patchButton.setEnabled(false);
+		runMinecraftButton.setEnabled(false);
+		minecraftFolderButton.setEnabled(false);
+
+		if(worker != null) {
+			if(!worker.isDone())
+				return;
+		}
+
 		if(minecraft == null)
 			return;
+
+		runMinecraftButton.setEnabled(true);
+		minecraftFolderButton.setEnabled(true);
 
 		if(texturePack == null)
 			return;
@@ -324,5 +402,23 @@ public class MainForm {
 		}
 
 		patchButton.setEnabled(true);
+	}
+
+	public void updateProgress(int at, int total) {
+		progressBar1.setMaximum(total);
+		progressBar1.setValue(at);
+	}
+
+	private void runWorker(SwingWorker worker) {
+		this.worker = worker;
+		worker.addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getPropertyName().equals("state") && evt.getNewValue().equals(SwingWorker.StateValue.DONE)) {
+					tryEnablePatch();
+				}
+			}
+		});
+		worker.execute();
+		tryEnablePatch();
 	}
 }

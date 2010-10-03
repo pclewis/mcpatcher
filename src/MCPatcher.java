@@ -1,6 +1,9 @@
 import javassist.bytecode.*;
 
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -10,20 +13,38 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 
 public class MCPatcher {
 	public static PrintStream out;
 	public static PrintStream err;
-	private static ByteArrayOutputStream baos;
 
 	public static Params globalParams = new Params();
+	public static JFrame logWindow;
+	private static MainForm mainForm;
 
 	public static void main(String[] argv) throws Exception {
-		baos = new ByteArrayOutputStream();
-		out = new PrintStream(baos);
+		logWindow = new JFrame("Log");
+		final JTextArea ta = new JTextArea(20,50);
+		((DefaultCaret)ta.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		//JPanel panel = new JPanel(new GridLayout());
+		logWindow.add(new JScrollPane(ta), BorderLayout.CENTER);
+		JButton button = new JButton("Copy to Clipboard");
+		button.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
+					new StringSelection(ta.getText()), null
+				);
+			}
+		});
+		//panel.add(button);
+		logWindow.add(button, BorderLayout.SOUTH);
+		logWindow.pack();
+
+		out = new JTextAreaPrintStream(ta);
 		err = out;
-		
-        MainForm form = MainForm.create();
+
+		mainForm = MainForm.create();
 		String appdata = System.getenv("APPDATA");
 		String home = System.getProperty("user.home");
 		String[] paths = new String[] {
@@ -43,13 +64,13 @@ public class MCPatcher {
 			File f = new File(path);
 			if(f.exists()) {
 				if(path.endsWith(".original.jar"))
-					form.noBackup();
-				if(form.setMinecraftPath(f.getPath(), false)) // .getPath() to normalize /s
+					mainForm.noBackup();
+				if(mainForm.setMinecraftPath(f.getPath(), false)) // .getPath() to normalize /s
 					break;
 			}
 		}
 
-        form.show();
+        mainForm.show();
     }
 
     public static void applyPatch(Minecraft minecraft, TexturePack texturePack, File outputFile) {
@@ -94,17 +115,21 @@ public class MCPatcher {
 			newjar = new JarOutputStream(new FileOutputStream(outputFile));
 		} catch(IOException e) {
 			e.printStackTrace(MCPatcher.err);
-			exit(1);
+			return;
 		}
 
         if (newjar==null) {
-            exit(1); return;
+            return;
         }
 
 		javassist.bytecode.MethodInfo.doPreverify = true;
 
 		try {
+			int totalFiles = minecraft.getJar().size();
+			int procFiles = 0;
 			for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
+				procFiles += 1;
+				mainForm.updateProgress(procFiles, totalFiles);
 				if(entry.getName().startsWith("META-INF"))
 					continue; // leave out manifest
 
@@ -156,7 +181,6 @@ public class MCPatcher {
 						graphics2D.drawImage(image, 0, 0, size, size, null);
 
 						// Write the scaled image to the outputstream
-						ByteArrayOutputStream out = new ByteArrayOutputStream();
 						ImageIO.write(newImage, "PNG", newjar);
 						patched = true;
 					}
@@ -178,32 +202,9 @@ public class MCPatcher {
 			newjar.close();
 		} catch(Exception e) {
 			e.printStackTrace(MCPatcher.err);
-			exit(1);
+			return;
 		}
 
-		MCPatcher.out.println("Success!...ostensibly");
-
-		exit(0);
-	}
-
-	public static void exit(int code) {
-		if(!GraphicsEnvironment.isHeadless()) {
-			final JTextArea area = new JTextArea(baos.toString());
-			area.setRows(10);
-			area.setColumns(50);
-			area.setLineWrap(true);
-			final JScrollPane pane = new JScrollPane(area);
-
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					pane.getVerticalScrollBar().setValue(
-					pane.getVerticalScrollBar().getMaximum());
-					area.setCaretPosition(area.getDocument().getLength());
-				}
-			});
-			JOptionPane.showMessageDialog(null, pane, "MCHDPatcher",
-			                              (code==0) ? JOptionPane.PLAIN_MESSAGE : JOptionPane.ERROR_MESSAGE);
-		}
-		System.exit(code);
+		MCPatcher.out.println("\n\n#### Success! ...probably ####");
 	}
 }
