@@ -111,6 +111,10 @@ public class MCPatcher {
 	        patches.add(new PatchSet(Patches.compass));
 	    }
 
+	    if(texturePack.getTerrainTileSize() > 16) {
+		    //patches.add(new PatchSet(Patches.tool3d));
+	    }
+
 		try {
 			newjar = new JarOutputStream(new FileOutputStream(outputFile));
 		} catch(IOException e) {

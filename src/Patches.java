@@ -331,4 +331,17 @@ class Patches implements Opcode {
 		}
 	);
 
+	public static final PatchSet tool3d = new PatchSet(
+		"Tool3D",
+		new PatchSpec[]{
+			new PatchSpec(new ConstPatch(16.0F, 32.0F)),
+			new PatchSpec(new ConstPatch(15.99F, 31.99F)),
+			new PatchSpec(new ConstPatch(256.0F, 512.0F)),
+			new PatchSpec(new ConstPatch(0.0625F, 0.0625F/2.0F)),
+			new PatchSpec(new ConstPatch(0.001953125F, 0.001953125F/3.0F)),
+			new PatchSpec(new ModMulPatch()),
+			new PatchSpec(new DivMulPatch()),
+			new PatchSpec(new WhilePatch()),
+		}
+	);
 }
