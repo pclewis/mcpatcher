@@ -1,12 +1,5 @@
 import javassist.bytecode.ConstPool;
 
-/**
- * Created by IntelliJ IDEA.
- * User: nex
- * Date: Oct 4, 2010
- * Time: 9:40:07 PM
- * To change this template use File | Settings | File Templates.
- */
 public class ConstPoolUtils {
 	static int getTag(Object o) {
 		if(o instanceof Float)   { return ConstPool.CONST_Float;   }
@@ -27,5 +20,26 @@ public class ConstPoolUtils {
 		if(o instanceof Double)  { return cp.getDoubleInfo(index) == (Double)o; }
 		if(o instanceof Integer) { return cp.getIntegerInfo(index) == (Integer)o; }
 		throw new AssertionError("Unreachable");
+	}
+
+	static int find(ConstPool cp, Object value) {
+		int index = -1;
+		int tag = getTag(value);
+		for(int i = 1; i < cp.getSize(); ++i) {
+			if( cp.getTag(i) == tag ) {
+				if(checkEqual(cp, i, value)) {
+					index = i;
+					break;
+				}
+			}
+		}
+		return index;
+	}
+
+	static int findOrAdd(ConstPool cp, Object value) {
+		int index = ConstPoolUtils.find(cp, value);
+		if(index == -1)
+			index = ConstPoolUtils.addToPool(cp, value);
+		return index;
 	}
 }

@@ -5,8 +5,8 @@ import java.util.Arrays;
 public abstract class BytecodePatch extends Patch implements javassist.bytecode.Opcode {
 	int appliedCount;
 
-    abstract byte[] getFromBytes() throws Exception;
-    abstract byte[] getToBytes() throws Exception;
+    abstract byte[] getFromBytes(MethodInfo mi) throws Exception;
+    abstract byte[] getToBytes(MethodInfo mi) throws Exception;
 
     public void visitConstPool(ConstPool cp) {}
 
@@ -28,8 +28,8 @@ public abstract class BytecodePatch extends Patch implements javassist.bytecode.
             return;
 
 	    CodeIterator ci = ca.iterator();
-	    byte[] from = this.getFromBytes();
-	    byte[] to = this.getToBytes();
+	    byte[] from = this.getFromBytes(mi);
+	    byte[] to = this.getToBytes(mi);
 	    if(Arrays.equals(from,to)) return;
 
 	    try {

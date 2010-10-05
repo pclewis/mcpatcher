@@ -1,3 +1,9 @@
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.MethodInfo;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 abstract class BytecodeTilePatch extends BytecodePatch {
     int multiplier = 1;
     int addX = 0;
@@ -10,15 +16,21 @@ abstract class BytecodeTilePatch extends BytecodePatch {
         return zero ? Patches.PSPEC_EMPTY : Patches.PSPEC_TILESIZE;
     }
 
-    public BytecodeTilePatch() {
-        this(1);
-    }
+	public void visitConstPool(ConstPool cp) {
+		int toSize = getToSize();
+		if(toSize <= Short.MAX_VALUE)
+			return;
 
-    public BytecodeTilePatch(int multiplier) {
-        this.multiplier = multiplier;
-    }
+		ConstPoolUtils.findOrAdd(cp, toSize);
+	}
 
-    abstract byte[] getBytes(int tileSize);
+	byte[] getBytes(int tileSize) {
+		return new byte[]{};
+	};
+
+	byte[] getBytes(int tileSize, MethodInfo mi) {
+		return getBytes(tileSize);
+	}
 
     private int calc(int orig) {
         int result = orig;
@@ -36,12 +48,12 @@ abstract class BytecodeTilePatch extends BytecodePatch {
 		return zero ? 0 : calc(params.getInt("tileSize"));
 	}
 
-    public byte[] getFromBytes() throws Exception {
-        return getBytes(getFromSize());
+    public byte[] getFromBytes(MethodInfo mi) throws Exception {
+        return getBytes(getFromSize(), mi);
     }
 
-    public byte[] getToBytes() throws Exception {
-        return getBytes(getToSize());
+    public byte[] getToBytes(MethodInfo mi) throws Exception {
+        return getBytes(getToSize(), mi);
     }
 
     public BytecodeTilePatch multiplier(int multiplier) {
@@ -72,6 +84,43 @@ abstract class BytecodeTilePatch extends BytecodePatch {
 	public BytecodeTilePatch add(int add) {
 	    this.add = add;
 	    return this;
+	}
+
+	protected byte[] buildCode(Object... values) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(values.length);
+		for(Object v : values) {
+			if(v instanceof Integer) {
+				baos.write(((Integer) v).byteValue());
+			} else if (v instanceof byte[]) {
+				try {
+					baos.write((byte[])v);
+				} catch(IOException e) {
+					throw new RuntimeException("impossible", e);
+				}
+			} else {
+				throw new RuntimeException("Unknown type");
+			}
+		}
+		return baos.toByteArray();
+	}
+
+	protected byte[] push(MethodInfo mi, int value) {
+		if(value <= Byte.MAX_VALUE) {
+			return new byte[] { BIPUSH, (byte)value };
+		} else if (value <= Short.MAX_VALUE) {
+			return new byte[] { SIPUSH, b(value, 1), b(value, 0) };
+		} else {
+			int index = ConstPoolUtils.findOrAdd(mi.getConstPool(), value);
+			return ldc(index);
+		}
+	}
+
+	protected byte[] ldc(int i) {
+		if(i<=Short.MAX_VALUE) {
+			return new byte[]{ (byte)LDC,  b(i, 0) };
+		} else {
+			return new byte[]{ (byte)LDC_W, b(i, 1), b(i, 0) };
+		}
 	}
 
 }

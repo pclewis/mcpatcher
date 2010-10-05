@@ -5,12 +5,13 @@ import java.util.ArrayList;
 
 public class ConstPatch extends Patch {
     int appliedCount;
-	ArrayList<Patch> subpatches = new ArrayList<Patch>();
-	int tag;
-	Object from;
-	Object to;
+	ArrayList<Patch> subpatches;
+	private int tag;
 
-	public String getDescription() { return "Change constant value"; }
+	private Object from;
+	private Object to;
+
+	public String getDescription() { return "Change constant value " + getFrom().toString() + " -> " + getTo().toString(); }
     public ParamSpec[] getParamSpecs() { return Patches.PSPEC_TILESIZE; }
 
 	private class UsePatch extends BytecodePatch {
@@ -34,8 +35,12 @@ public class ConstPatch extends Patch {
 				return new byte[]{ (byte)mop, b(i, 1), b(i, 0) };
 		}
 
-		byte[] getFromBytes() throws Exception { return getBytes(fi); }
-		byte[] getToBytes() throws Exception { return getBytes(ti); }
+		byte[] getFromBytes(MethodInfo mi) throws Exception { return getBytes(fi); }
+		byte[] getToBytes(MethodInfo mi) throws Exception { return getBytes(ti); }
+	}
+
+	protected ConstPatch() {
+		this.subpatches = new ArrayList<Patch>();
 	}
 
 	public ConstPatch(Object from, Object to)  {
@@ -43,23 +48,49 @@ public class ConstPatch extends Patch {
 		this.tag = ConstPoolUtils.getTag(from);
 		this.from = from;
 		this.to = to;
+		this.subpatches = new ArrayList<Patch>();
+	}
+
+	public ConstPatch clone() {
+		ConstPatch newPatch = null;
+		try {
+			newPatch = (ConstPatch)super.clone();
+		} catch(CloneNotSupportedException e) {
+			throw new RuntimeException("Can't clone", e);
+		}
+		newPatch.subpatches =  new ArrayList<Patch>();
+		return newPatch;
+	}
+
+	protected int getTag() {
+		return tag;
+	}
+
+	protected Object getFrom() {
+		return from;
+	}
+
+	protected Object getTo() {
+		return to;
 	}
 
 	public void visitConstPool(ConstPool cp) {
 		int oldIndex = -1;
 		for(int i = 1; i < cp.getSize(); ++i) {
-			if( cp.getTag(i) == this.tag ) {
-				if(ConstPoolUtils.checkEqual(cp, i, this.from.getClass().cast(this.from))) {
+			if( cp.getTag(i) == this.getTag()) {
+				if(ConstPoolUtils.checkEqual(cp, i, this.getFrom().getClass().cast(this.getFrom()))) {
 					oldIndex = i;
 					break;
 				}
 			}
 		}
 
-		if(oldIndex <= 0)
+		if(oldIndex <= 0) {
+			//throw new RuntimeException("Can't find constant: " + from.toString() );
 			return;
+		}
 
-		int newIndex = ConstPoolUtils.addToPool(cp, this.to);
+		int newIndex = ConstPoolUtils.addToPool(cp, this.getTo());
 
 		subpatches.clear();
 		subpatches.add(new UsePatch(UsePatch.LDC, oldIndex, newIndex));
