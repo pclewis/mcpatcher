@@ -79,7 +79,7 @@ public class Minecraft implements Opcode {
 			(byte)IAND,
 			(byte)FALOAD
 		}));
-
+		put("Tool3D", new ConstSignature(-0.9375F));
 	}};
 	private List<String> errors = new LinkedList<String>();
 
@@ -105,6 +105,25 @@ public class Minecraft implements Opcode {
 		}
 	}
 
+	private class ConstSignature implements ClassFinder {
+		Object constToFind;
+		int tag;
+		public ConstSignature(Object constToFind) {
+			this.constToFind = constToFind;
+			this.tag = ConstPoolUtils.getTag(constToFind);
+		}
+		public boolean match(JarEntry entry, ClassFile cf) {
+			ConstPool cp = cf.getConstPool();
+			for(int i = 1; i < cp.getSize(); ++i) {
+				if( cp.getTag(i) == this.tag ) {
+					if(ConstPoolUtils.checkEqual(cp, i, constToFind))
+						return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	private class BytecodeSignature implements ClassFinder {
 		private String codeToMatch;
 		public BytecodeSignature(byte[] codeToMatch) throws UnsupportedEncodingException {
@@ -123,9 +142,6 @@ public class Minecraft implements Opcode {
 			return false;
 		}
 	}
-
-
-	/* "AnimManager" methodCallSignature( "glTexSubImage2D" ) */
 
 	public List<String> getErrors() {
 		return errors;

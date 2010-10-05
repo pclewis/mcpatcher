@@ -1,10 +1,7 @@
-import com.sun.javaws.exceptions.InvalidArgumentException;
-import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ConstPatch extends Patch {
     int appliedCount;
@@ -43,37 +40,16 @@ public class ConstPatch extends Patch {
 
 	public ConstPatch(Object from, Object to)  {
 		assert(from.getClass().equals(to.getClass()));
-		this.tag = getTag(from);
+		this.tag = ConstPoolUtils.getTag(from);
 		this.from = from;
 		this.to = to;
-	}
-
-	private int getTag(Object o) {
-		if(o instanceof Float)   { return ConstPool.CONST_Float;   }
-		if(o instanceof Double)  { return ConstPool.CONST_Double;  }
-		if(o instanceof Integer) { return ConstPool.CONST_Integer; }
-		throw new AssertionError("Unreachable");
-	}
-
-	private int addToPool(ConstPool cp, Object o) {
-		if(o instanceof Float)   { return cp.addFloatInfo((Float)o);     }
-		if(o instanceof Double)  { return cp.addDoubleInfo((Double)o);   }
-		if(o instanceof Integer) { return cp.addIntegerInfo((Integer)o); }
-		throw new AssertionError("Unreachable");
-	}
-
-	private boolean checkEqual(ConstPool cp, int index, Object o) {
-		if(o instanceof Float)   { return cp.getFloatInfo(index)  == (Float)o;  }
-		if(o instanceof Double)  { return cp.getDoubleInfo(index) == (Double)o; }
-		if(o instanceof Integer) { return cp.getIntegerInfo(index) == (Integer)o; }
-		throw new AssertionError("Unreachable");
 	}
 
 	public void visitConstPool(ConstPool cp) {
 		int oldIndex = -1;
 		for(int i = 1; i < cp.getSize(); ++i) {
 			if( cp.getTag(i) == this.tag ) {
-				if(checkEqual(cp, i, this.from.getClass().cast(this.from))) {
+				if(ConstPoolUtils.checkEqual(cp, i, this.from.getClass().cast(this.from))) {
 					oldIndex = i;
 					break;
 				}
@@ -83,7 +59,7 @@ public class ConstPatch extends Patch {
 		if(oldIndex <= 0)
 			return;
 
-		int newIndex = this.addToPool(cp, this.to);
+		int newIndex = ConstPoolUtils.addToPool(cp, this.to);
 
 		subpatches.clear();
 		subpatches.add(new UsePatch(UsePatch.LDC, oldIndex, newIndex));
