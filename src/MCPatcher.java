@@ -175,11 +175,15 @@ public class MCPatcher {
 				}
 
 
-				if(entry.getName().equals("gui/items.png")) {
-					if(texturePack.getTerrainTileSize() != texturePack.getItemsTileSize()) {
-						int size = texturePack.getTerrainTileSize() * 16;
-						MCPatcher.out.println("Resizing " + entry.getName() + " to " + size + "x" + size);
-						BufferedImage image = ImageIO.read(input);
+				if(entry.getName().equals("gui/items.png") || entry.getName().equals("terrain.png")) {
+					int size = globalParams.getInt("tileSize") * 16;
+					MCPatcher.out.println("Reading " + entry.getName() + "...");
+					BufferedImage image = ImageIO.read(input);
+
+					if(image.getWidth() != size || image.getHeight() != size) {
+						MCPatcher.out.println("Resizing " + entry.getName() + " from " + image.getWidth() + "x" +
+							image.getHeight() + " to " + size + "x" + size);
+
 						BufferedImage newImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 						Graphics2D graphics2D = newImage.createGraphics();
 						graphics2D.drawImage(image, 0, 0, size, size, null);
@@ -187,6 +191,9 @@ public class MCPatcher {
 						// Write the scaled image to the outputstream
 						ImageIO.write(newImage, "PNG", newjar);
 						patched = true;
+					} else {
+						// can't rewind, so reopen
+						input = texturePack.getInputStream(entry.getName());
 					}
 				}
 

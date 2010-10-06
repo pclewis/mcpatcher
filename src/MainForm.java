@@ -37,6 +37,7 @@ public class MainForm {
 	private JLabel classInfoLabel;
 	private JButton runMinecraftButton;
 	private JButton minecraftFolderButton;
+	private JComboBox tileSizeCombo;
 	private JFrame frame;
 
 	private Minecraft minecraft;
@@ -86,6 +87,7 @@ public class MainForm {
 		            form.backupField.setText( "" );
 	            } else {
 	                form.backupField.setText( fd.getDirectory() + fd.getFile() );
+					form.backupCheckBox.setSelected(true);
 	            }
 	            updateControls();
             }
@@ -111,8 +113,19 @@ public class MainForm {
                 fd.setFile("*.zip;*.rar;*.jar");
                 fd.setVisible(true);
 	            if(fd.getFile() == null) {
-		            form.packField.setText( "" );
-		            texturePack = null;
+		            Boolean set = false;
+		            if(minecraft != null) {
+			            try {
+			                setTexturePack(minecraft.getPath());
+				            set = true;
+			            } catch (IOException e1) {
+				            set = false;
+			            }
+		            }
+		            if(!set) {
+						form.packField.setText( "" );
+						texturePack = null;
+		            }
 	            } else {
 		            String path = fd.getDirectory() + fd.getFile();
 		            try {
@@ -131,7 +144,6 @@ public class MainForm {
             public void stateChanged(ChangeEvent e) {
                 boolean enabled = form.backupCheckBox.isSelected();
                 form.backupField.setEnabled( enabled );
-                form.backupBrowseButton.setEnabled( enabled );
 	            updateControls();
             }
         });
@@ -140,14 +152,14 @@ public class MainForm {
             public void stateChanged(ChangeEvent e) {
                 boolean enabled = form.packCheckBox.isSelected();
                 form.packField.setEnabled( enabled );
-                form.packBrowseButton.setEnabled( enabled );
 	            updateControls();
             }
         });
 
 	    patchButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-			    MCPatcher.globalParams.put("tileSize", ""+texturePack.getTerrainTileSize());
+			    int tileSize = Integer.parseInt(tileSizeCombo.getSelectedItem().toString().split("x")[0], 10);
+			    MCPatcher.globalParams.put("tileSize", ""+tileSize);
 			    MCPatcher.globalParams.put("useAnimatedFire", ""+animatedFireCheckBox.isSelected());
 				MCPatcher.globalParams.put("useAnimatedWater", ""+animatedWaterCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedLavaCheckBox.isSelected());
@@ -247,6 +259,10 @@ public class MainForm {
 	public void setTexturePack(String path) throws IOException {
 		texturePack = TexturePack.open(path, mcTexturePack);
 
+		if(mcTexturePack == null || !path.equals(mcTexturePack.getPath())) {
+			packCheckBox.setSelected(true);
+		}
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html><table>");
 		sb.append("<tr><td>terrain.png</td><td>");
@@ -277,6 +293,8 @@ public class MainForm {
 
 		textureInfoLabel.setText(sb.toString());
 		packField.setText(path);
+
+		tileSizeCombo.setSelectedItem( texturePack.getTerrainTileSize() + "x" + texturePack.getTerrainTileSize() );
 		frame.pack();
 		updateControls();
 	}

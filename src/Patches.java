@@ -235,6 +235,8 @@ class Patches implements Opcode {
 			if(tileSize==16) fireSize = 1.06F;
 			else if(tileSize==32) fireSize = 1.03F;
 			else if(tileSize==64) fireSize = 1.02F;
+			else if(tileSize==128) fireSize = 1.01F;
+			else if(tileSize==256) fireSize = 1.005F;
 			return (Float) fireSize;
 		}
 	}

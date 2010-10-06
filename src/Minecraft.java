@@ -83,6 +83,10 @@ public class Minecraft implements Opcode {
 	}};
 	private List<String> errors = new LinkedList<String>();
 
+	public String getPath() {
+		return file.getPath();
+	}
+
 	private interface ClassFinder {
 		public boolean match(JarEntry entry, ClassFile cf) throws Exception;
 	}

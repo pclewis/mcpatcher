@@ -20,6 +20,8 @@
         <rowspec value="center:max(d;4px):noGrow"/>
         <rowspec value="top:4dlu:noGrow"/>
         <rowspec value="center:max(d;4px):noGrow"/>
+        <rowspec value="top:4dlu:noGrow"/>
+        <rowspec value="center:max(d;4px):noGrow"/>
         <colspec value="fill:d:noGrow"/>
         <colspec value="left:4dlu:noGrow"/>
         <colspec value="fill:max(d;4px):noGrow"/>
@@ -149,7 +151,7 @@
               <forms/>
             </constraints>
             <properties>
-              <enabled value="false"/>
+              <enabled value="true"/>
               <text value="Browse"/>
             </properties>
           </component>
@@ -175,7 +177,7 @@
           <grid id="a7723" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="5" bottom="0" right="5"/>
             <constraints>
-              <grid row="8" column="0" row-span="1" col-span="7" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="10" column="0" row-span="1" col-span="7" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
               <forms defaultalign-vert="false"/>
             </constraints>
             <properties/>
@@ -183,9 +185,7 @@
             <children>
               <component id="d39f5" class="javax.swing.JLabel" binding="textureInfoLabel">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="4" anchor="9" fill="0" indent="0" use-parent-layout="false">
-                    <preferred-size width="194" height="0"/>
-                  </grid>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="4" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font size="9"/>
@@ -207,6 +207,30 @@
               </component>
             </children>
           </grid>
+          <component id="4eb11" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <text value="Tile Size"/>
+            </properties>
+          </component>
+          <component id="1800c" class="javax.swing.JComboBox" binding="tileSizeCombo">
+            <constraints>
+              <grid row="8" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <model>
+                <item value="16x16"/>
+                <item value="32x32"/>
+                <item value="64x64"/>
+                <item value="128x128"/>
+                <item value="256x256"/>
+              </model>
+            </properties>
+          </component>
         </children>
       </grid>
       <grid id="270dd" binding="optionsPanel" layout-manager="FormLayout">
