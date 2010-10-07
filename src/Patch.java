@@ -33,10 +33,6 @@ public abstract class Patch implements Cloneable {
         params.put(key, value);
     }
 
-    protected byte b(int value, int index) {
-        return (byte)((value >> (index*8)) & 0xFF);
-    }
-
 	public Patch clone() throws CloneNotSupportedException {
 		Patch newPatch = (Patch)super.clone();
 		newPatch.params = new Params(this.params);

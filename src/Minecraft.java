@@ -80,6 +80,7 @@ public class Minecraft implements Opcode {
 			(byte)FALOAD
 		}));
 		put("Tool3D", new ConstSignature(-0.9375F));
+		put("Tessellator", new ConstSignature("Not tesselating!"));
 	}};
 	private List<String> errors = new LinkedList<String>();
 

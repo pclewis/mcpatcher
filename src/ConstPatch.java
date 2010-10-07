@@ -19,7 +19,7 @@ public class ConstPatch extends Patch {
 		public ParamSpec[] getParamSpecs() { return Patches.PSPEC_EMPTY; }
 		private int op, fi, ti;
 
-		private UsePatch(int op, int fi, int ti) {
+		public UsePatch(int op, int fi, int ti) {
 			this.op = op;
 			this.fi = fi;
 			this.ti = ti;
@@ -30,13 +30,22 @@ public class ConstPatch extends Patch {
 			if(i>=0xFF && mop==LDC)
 				mop = LDC_W;
 			if(mop==LDC)
-				return new byte[]{ (byte)mop, b(i, 0) };
+				return new byte[]{ (byte)mop, Util.b(i, 0) };
 			else
-				return new byte[]{ (byte)mop, b(i, 1), b(i, 0) };
+				return new byte[]{ (byte)mop, Util.b(i, 1), Util.b(i, 0) };
 		}
 
 		byte[] getFromBytes(MethodInfo mi) throws Exception { return getBytes(fi); }
 		byte[] getToBytes(MethodInfo mi) throws Exception { return getBytes(ti); }
+	}
+
+	private class UseImmPatch extends UsePatch {
+		int loadop;
+		public UseImmPatch(int loadop, int op, int ti) {
+			super(op, -1, ti);
+			this.loadop = loadop;
+		}
+		byte[] getFromBytes(MethodInfo mi) throws Exception { return new byte[] { (byte) loadop }; }
 	}
 
 	protected ConstPatch() {
@@ -76,25 +85,51 @@ public class ConstPatch extends Patch {
 
 	public void visitConstPool(ConstPool cp) {
 		int oldIndex = -1;
-		for(int i = 1; i < cp.getSize(); ++i) {
-			if( cp.getTag(i) == this.getTag()) {
-				if(ConstPoolUtils.checkEqual(cp, i, this.getFrom().getClass().cast(this.getFrom()))) {
-					oldIndex = i;
-					break;
-				}
+		int newIndex = ConstPoolUtils.addToPool(cp, this.getTo());
+		boolean handled = false;
+
+		subpatches.clear();
+
+		if(this.getFrom() instanceof Float) {
+			float f = (Float)this.getFrom();
+			handled = true;
+			if(f == 0.0F) {
+				subpatches.add(new UseImmPatch(UsePatch.FCONST_0, UsePatch.LDC, newIndex));
+			} else if (f == 1.0F) {
+				subpatches.add(new UseImmPatch(UsePatch.FCONST_1, UsePatch.LDC, newIndex));
+			} else {
+				handled = false;
+			}
+		} else if(this.getFrom() instanceof Double) {
+			double d = (Double)this.getFrom();
+			handled = true;
+			if(d == 0.0D) {
+				subpatches.add(new UseImmPatch(UsePatch.DCONST_0, UsePatch.LDC2_W, newIndex));
+			} else if (d == 1.0D) {
+				subpatches.add(new UseImmPatch(UsePatch.DCONST_1, UsePatch.LDC2_W, newIndex));
+			} else {
+				handled = false;
 			}
 		}
 
-		if(oldIndex <= 0) {
-			//throw new RuntimeException("Can't find constant: " + from.toString() );
-			return;
+		if(!handled) {
+			for(int i = 1; i < cp.getSize(); ++i) {
+				if( cp.getTag(i) == this.getTag()) {
+					if(ConstPoolUtils.checkEqual(cp, i, this.getFrom().getClass().cast(this.getFrom()))) {
+						oldIndex = i;
+						break;
+					}
+				}
+			}
+
+			if(oldIndex <= 0) {
+				//throw new RuntimeException("Can't find constant: " + from.toString() );
+				return;
+			}
+
+			subpatches.add(new UsePatch(UsePatch.LDC, oldIndex, newIndex));
+			subpatches.add(new UsePatch(UsePatch.LDC2_W, oldIndex, newIndex));
 		}
-
-		int newIndex = ConstPoolUtils.addToPool(cp, this.getTo());
-
-		subpatches.clear();
-		subpatches.add(new UsePatch(UsePatch.LDC, oldIndex, newIndex));
-		subpatches.add(new UsePatch(UsePatch.LDC2_W, oldIndex, newIndex));
 
 		appliedCount += 1;
 		MCPatcher.out.println("  " + this.getDescription());

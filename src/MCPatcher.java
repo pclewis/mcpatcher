@@ -112,7 +112,7 @@ public class MCPatcher {
 	    }
 
 	    if(texturePack.getTerrainTileSize() > 16) {
-		    //patches.add(new PatchSet(Patches.tool3d));
+		    patches.add(new PatchSet(Patches.tool3d));
 	    }
 
 		try {

@@ -250,6 +250,51 @@ class Patches implements Opcode {
 		}
 	}
 
+	public static class ToolTopPatch extends BytecodePatch {
+		public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+		public String getDescription() {
+			return String.format("tool pixel top");
+		}
+		public byte[] getFromBytes(MethodInfo mi) {
+			return new byte[] {
+				(byte)LDC, (byte)0x0D,
+				(byte)FADD,
+				(byte)FSTORE, 0x0F,
+				(byte)ALOAD_2,
+				(byte)DCONST_0
+			};
+		}
+		public byte[] getToBytes(MethodInfo mi) {
+			return new byte[] {
+				(byte)NOP, (byte)NOP,
+				(byte)NOP,
+				(byte)FSTORE, 0x0F,
+				(byte)ALOAD_2,
+				(byte)DCONST_0
+			};
+		}
+	}
+
+	public static class ToolTexPatch extends BytecodeTilePatch {
+		public String getDescription() { return "Fix tool tex nonsense"; }
+		int op;
+		boolean add;
+		public ToolTexPatch(int op, boolean add) { this.op = op; this.add=add; }
+
+		public byte[] getBytes(int size, MethodInfo mi) {
+			return buildCode(
+				BIPUSH, 16,
+				op,
+				push(mi, size),
+				IMUL,
+				push(mi, add ? size : 0),
+				IADD,
+				I2F,
+				ConstPoolUtils.getLoad(mi.getConstPool(), (float)(16*size))
+			);
+		}
+	}
+
 	public static final PatchSet water = new PatchSet(
 		"Water",
 		new PatchSpec[]{
@@ -336,14 +381,24 @@ class Patches implements Opcode {
 	public static final PatchSet tool3d = new PatchSet(
 		"Tool3D",
 		new PatchSpec[]{
+			new PatchSpec(new ToolTopPatch()),
 			new PatchSpec(new ConstPatch(16.0F, 32.0F)),
-			new PatchSpec(new ConstPatch(15.99F, 31.99F)),
-			new PatchSpec(new ConstPatch(256.0F, 512.0F)),
-			new PatchSpec(new ConstPatch(0.0625F, 0.0625F/2.0F)),
-			new PatchSpec(new ConstPatch(0.001953125F, 0.001953125F/3.0F)),
-			new PatchSpec(new ModMulPatch()),
-			new PatchSpec(new DivMulPatch()),
+			new PatchSpec(new ToolTexPatch(IREM, false)),
+			new PatchSpec(new ToolTexPatch(IDIV, false)),
+			new PatchSpec(new ToolTexPatch(IREM, true)),
+			new PatchSpec(new ToolTexPatch(IDIV, true)),
+			//new PatchSpec(new ToolSizePatch()),
+			//new PatchSpec(new ConstPatch(1.0F, 0.5F)),
+			//new PatchSpec(new ConstPatch(1.0D, 0.5D)),
 			new PatchSpec(new WhilePatch()),
+			new PatchSpec(new ConstPatch(0.001953125F, 1F/1024F)),
+
+			//new PatchSpec(new ConstPatch(15.99F, 31.99F)),
+			//new PatchSpec(new ConstPatch(256.0F, 512.0F)),
+			//new PatchSpec(new ConstPatch(0.0625F, 0.0625F/2.0F)),
+			//new PatchSpec(new ModMulPatch()),
+			//new PatchSpec(new DivMulPatch()),
+
 		}
 	);
 }

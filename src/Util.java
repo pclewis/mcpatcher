@@ -24,4 +24,8 @@ public class Util {
 		while(oIter.hasNext()) oBuilder.append(separator).append(oIter.next());
 		return oBuilder.toString();
 	}
+
+	protected static byte b(int value, int index) {
+	    return (byte)((value >> (index*8)) & 0xFF);
+	}
 }
