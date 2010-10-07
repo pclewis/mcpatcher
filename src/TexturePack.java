@@ -34,7 +34,7 @@ public abstract class TexturePack {
 			try {
 				result = new RarTexturePack(path);
 			} catch(RarException e) {
-				throw new IOException("Rar Exception", e);
+				throw new IOException("Rar Exception:" + e.getMessage());
 			}
 		}
 		if(result != null) {

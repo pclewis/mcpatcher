@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
 
-public class MainForm {
+public class MainForm implements Runnable {
     private JPanel mainPanel;
     private JButton patchButton;
     private JProgressBar progressBar1;
@@ -44,7 +44,8 @@ public class MainForm {
 	private TexturePack texturePack;
 	private TexturePack mcTexturePack;
 
-	private SwingWorker worker;
+	private Runnable worker;
+	private Thread workThread;
 
 	private final boolean canOpenFolder = Util.isWindows() || Util.isMac();
 
@@ -196,20 +197,18 @@ public class MainForm {
 					    return;
 				    }
 			    }
-				runWorker(new SwingWorker() {
-				    protected Object doInBackground() throws Exception {
+				runWorker(new Runnable() {
+				    public void run() {
 					    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
-					    return null;
 				    }
 			    });
-			    worker.execute();
 			    MCPatcher.logWindow.setVisible(true);
 		    }
 	    });
 	    runMinecraftButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-			    runWorker( new SwingWorker() {
-				    protected Object doInBackground() throws Exception {
+			    runWorker( new Runnable() {
+				    public void run() {
 						String path = new File(origField.getText()).getParent();
 						String cp = path + "/" + Util.joinString(Arrays.asList(
 							"minecraft.jar", "lwjgl.jar", "lwjgl_util.jar", "jinput.jar"
@@ -237,7 +236,6 @@ public class MainForm {
 						} catch(Exception e1) {
 							e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 			            }
-					    return null;
 				    }
 			    });
 			    MCPatcher.logWindow.setVisible(true);
@@ -325,11 +323,11 @@ public class MainForm {
 			}
 			classInfoLabel.setText(sb.toString());
 
-			if(backupCheckBox.isSelected() && backupField.getText().isEmpty()) {
+			if(backupCheckBox.isSelected() && backupField.getText().length() == 0) {
 				backupField.setText( path.replace(".jar", ".original.jar"));
 			}
 
-			if(outputField.getText().isEmpty()) {
+			if(outputField.getText().length() == 0) {
 				if(path.endsWith(".original.jar")) {
 					outputField.setText( path.replace(".original.jar", ".jar") );
 				} else if(backupCheckBox.isSelected()) {
@@ -337,7 +335,7 @@ public class MainForm {
 				}
 			}
 
-			if(packField.getText().isEmpty()) {
+			if(packField.getText().length() == 0) {
 				mcTexturePack = TexturePack.open(path, null);
 				setTexturePack(path);
 			} else if (texturePack != null) {
@@ -388,8 +386,7 @@ public class MainForm {
 		}
 
 		if(worker != null) {
-			if(!worker.isDone())
-				return;
+			return;
 		}
 
 		if(minecraft == null)
@@ -408,7 +405,7 @@ public class MainForm {
 			textureInfoLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
-		if(backupCheckBox.isSelected() && backupField.getText().isEmpty()) {
+		if(backupCheckBox.isSelected() && backupField.getText().length() == 0) {
 			backupLabel.setForeground(Color.RED);
 			return;
 		} else {
@@ -424,7 +421,7 @@ public class MainForm {
 			backupLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
-		if(outputField.getText().isEmpty()) {
+		if(outputField.getText().length() == 0) {
 			outputLabel.setForeground(Color.RED);
 			return;
 		} else {
@@ -446,16 +443,16 @@ public class MainForm {
 		progressBar1.setValue(at);
 	}
 
-	private void runWorker(SwingWorker worker) {
+	private void runWorker(Runnable worker) {
 		this.worker = worker;
-		worker.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				if (evt.getPropertyName().equals("state") && evt.getNewValue().equals(SwingWorker.StateValue.DONE)) {
-					updateControls();
-				}
-			}
-		});
-		worker.execute();
+		this.workThread = new Thread(this);
+		this.workThread.start();
+		updateControls();
+	}
+
+	public void run() {
+		this.worker.run();
+		this.worker = null;
 		updateControls();
 	}
 }
