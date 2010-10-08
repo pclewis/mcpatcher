@@ -86,47 +86,4 @@ abstract class BytecodeTilePatch extends BytecodePatch {
 	    return this;
 	}
 
-	protected byte[] buildCode(Object... values) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(values.length);
-		for(Object v : values) {
-			if(v instanceof Integer) {
-				baos.write(((Integer) v).byteValue());
-			} else if(v instanceof Byte) {
-				baos.write((Byte)v);
-			} else if (v instanceof byte[]) {
-				try {
-					baos.write((byte[])v);
-				} catch(IOException e) {
-					throw new RuntimeException("impossible", e);
-				}
-			} else {
-				throw new RuntimeException("Unknown type");
-			}
-		}
-		return baos.toByteArray();
-	}
-
-	protected byte[] push(MethodInfo mi, int value) {
-		if(value == 0 ) {
-			return new byte[] { ICONST_0 };
-		} else if (value == 1) {
-			return new byte[] { ICONST_1 };
-		} if(value <= Byte.MAX_VALUE) {
-			return new byte[] { BIPUSH, (byte)value };
-		} else if (value <= Short.MAX_VALUE) {
-			return new byte[] { SIPUSH, Util.b(value, 1), Util.b(value, 0) };
-		} else {
-			int index = ConstPoolUtils.findOrAdd(mi.getConstPool(), value);
-			return ldc(index);
-		}
-	}
-
-	protected byte[] ldc(int i) {
-		if(i<=Short.MAX_VALUE) {
-			return new byte[]{ (byte)LDC,  Util.b(i, 0) };
-		} else {
-			return new byte[]{ (byte)LDC_W, Util.b(i, 1), Util.b(i, 0) };
-		}
-	}
-
 }

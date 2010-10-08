@@ -81,6 +81,7 @@ public class Minecraft implements Opcode {
 		}));
 		put("Tool3D", new ConstSignature(-0.9375F));
 		put("Tessellator", new ConstSignature("Not tesselating!"));
+		put("Minecraft", new FilenameSignature("net/minecraft/client/Minecraft.class"));
 	}};
 	private List<String> errors = new LinkedList<String>();
 
@@ -145,6 +146,16 @@ public class Minecraft implements Opcode {
 					return true;
 			}
 			return false;
+		}
+	}
+
+	private class FilenameSignature implements ClassFinder {
+		String name;
+		public FilenameSignature(String name) {
+			this.name = name;
+		}
+		public boolean match(JarEntry entry, ClassFile cf) {
+			return entry.getName().equals(this.name);
 		}
 	}
 

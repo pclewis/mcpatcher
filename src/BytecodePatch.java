@@ -1,11 +1,52 @@
 import javassist.bytecode.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 public abstract class BytecodePatch extends Patch implements javassist.bytecode.Opcode {
 	int appliedCount;
 
-    abstract byte[] getFromBytes(MethodInfo mi) throws Exception;
+	protected static byte[] ldc(int i) {
+		return ConstPoolUtils.getLoad(LDC, i);
+	}
+
+	protected static byte[] push(MethodInfo mi, int value) {
+		if(value == 0 ) {
+			return new byte[] { ICONST_0 };
+		} else if (value == 1) {
+			return new byte[] { ICONST_1 };
+		} if(value <= Byte.MAX_VALUE) {
+			return new byte[] { BIPUSH, (byte)value };
+		} else if (value <= Short.MAX_VALUE) {
+			return new byte[] { SIPUSH, Util.b(value, 1), Util.b(value, 0) };
+		} else {
+			int index = ConstPoolUtils.findOrAdd(mi.getConstPool(), value);
+			return ldc(index);
+		}
+	}
+
+	protected static byte[] buildCode(Object... values) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(values.length);
+		for(Object v : values) {
+			if(v instanceof Integer) {
+				baos.write(((Integer) v).byteValue());
+			} else if(v instanceof Byte) {
+				baos.write((Byte)v);
+			} else if (v instanceof byte[]) {
+				try {
+					baos.write((byte[])v);
+				} catch(IOException e) {
+					throw new RuntimeException("impossible", e);
+				}
+			} else {
+				throw new RuntimeException("Unknown type");
+			}
+		}
+		return baos.toByteArray();
+	}
+
+	abstract byte[] getFromBytes(MethodInfo mi) throws Exception;
     abstract byte[] getToBytes(MethodInfo mi) throws Exception;
 
     public void visitConstPool(ConstPool cp) {}

@@ -403,4 +403,33 @@ class Patches implements Opcode {
 			new PatchSpec(new TexNudgePatch()),
 		}
 	);
+
+	public static final PatchSet minecraft = new PatchSet(
+		"Minecraft",
+		new PatchSpec[] {
+			new PatchSpec(new ConstPatch(
+				new MethodRef("ht", "<init>", "()V"),
+				new MethodRef("ht", "<init>", "(Lnet/minecraft/client/Minecraft;)V"))
+			),
+			new PatchSpec(new BytecodePatch() {
+				byte[] getFromBytes(MethodInfo mi) throws Exception {
+					int methi = ConstPoolUtils.find(mi.getConstPool(), new MethodRef("ht", "<init>", "()V"));
+					return buildCode(
+						(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
+					);
+				}
+
+				byte[] getToBytes(MethodInfo mi) throws Exception {
+					int methi = ConstPoolUtils.findOrAdd(mi.getConstPool(), new MethodRef("ht", "<init>", "(Lnet/minecraft/client/Minecraft;)V"));
+					return buildCode(
+						(byte)ALOAD_0,
+						(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
+					);
+				}
+
+				public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+				public String getDescription() { return "pass Minecraft to FlowWater initializer"; }
+			})
+		}
+	);
 }

@@ -3,10 +3,12 @@ import javassist.bytecode.ConstPool;
 
 public class ConstPoolUtils {
 	static int getTag(Object o) {
-		if(o instanceof Float)   { return ConstPool.CONST_Float;   }
-		if(o instanceof Double)  { return ConstPool.CONST_Double;  }
-		if(o instanceof Integer) { return ConstPool.CONST_Integer; }
-		if(o instanceof String)  { return ConstPool.CONST_String;  }
+		if(o instanceof Float)     { return ConstPool.CONST_Float;   }
+		if(o instanceof Double)    { return ConstPool.CONST_Double;  }
+		if(o instanceof Integer)   { return ConstPool.CONST_Integer; }
+		if(o instanceof String)    { return ConstPool.CONST_String;  }
+		if(o instanceof MethodRef) { return ConstPool.CONST_Methodref; }
+		if(o instanceof ClassRef)  { return ConstPool.CONST_Class; }
 		throw new AssertionError("Unreachable");
 	}
 
@@ -15,6 +17,12 @@ public class ConstPoolUtils {
 		if(o instanceof Double)  { return cp.addDoubleInfo((Double)o);   }
 		if(o instanceof Integer) { return cp.addIntegerInfo((Integer)o); }
 		if(o instanceof String)  { return cp.addStringInfo((String)o);   }
+		if(o instanceof MethodRef) {
+			MethodRef mr = (MethodRef)o;
+			int ci = findOrAdd(cp, new ClassRef(mr.getClassName()));
+			return cp.addMethodrefInfo(ci, mr.getName(), mr.getType());
+		}
+		if(o instanceof ClassRef) { return cp.addClassInfo(((ClassRef) o).getClassName()); }
 		throw new AssertionError("Unreachable");
 	}
 
@@ -23,6 +31,13 @@ public class ConstPoolUtils {
 		if(o instanceof Double)  { return cp.getDoubleInfo(index) == (Double)o; }
 		if(o instanceof Integer) { return cp.getIntegerInfo(index) == (Integer)o; }
 		if(o instanceof String)  { return ((String)o).equals(cp.getStringInfo(index)); }
+		if(o instanceof MethodRef) {
+			MethodRef mr = (MethodRef)o;
+			return cp.getMethodrefClassName(index).equals(mr.getClassName())
+				&& cp.getMethodrefName(index).equals(mr.getName())
+				&& cp.getMethodrefType(index).equals(mr.getType());
+		}
+		if(o instanceof ClassRef) { return cp.getClassInfo(index).equals(((ClassRef) o).getClassName()); }
 		throw new AssertionError("Unreachable");
 	}
 

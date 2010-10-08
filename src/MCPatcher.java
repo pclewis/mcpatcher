@@ -87,7 +87,8 @@ public class MCPatcher {
 		    waterPatches.setParam("tileSize", "0");
 		    patches.add( new PatchSet(Patches.hideWater) );
 	    }
-	    patches.add(new PatchSet("FlowWater", waterPatches));
+	    //patches.add(new PatchSet("FlowWater", waterPatches));
+	    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.minecraft)));
 	    patches.add(new PatchSet("StillWater", waterPatches));
 
 	    PatchSet lavaPatches = new PatchSet(Patches.water);
