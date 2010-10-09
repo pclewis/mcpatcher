@@ -78,43 +78,9 @@ public class MCPatcher {
 	    JarOutputStream newjar = null;
 
 	    ArrayList<PatchSet> patches = new ArrayList<PatchSet>();
+	    ArrayList<String> replaceFiles = new ArrayList<String>();
 
-	    patches.add(new PatchSet(Patches.animManager));
-	    patches.add(new PatchSet(Patches.animTexture));
-
-	    PatchSet waterPatches = new PatchSet(Patches.water);
-	    if(!globalParams.getBoolean("useAnimatedWater")) {
-		    waterPatches.setParam("tileSize", "0");
-		    patches.add( new PatchSet(Patches.hideWater) );
-	    }
-	    //patches.add(new PatchSet("FlowWater", waterPatches));
-	    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.minecraft)));
-	    patches.add(new PatchSet("StillWater", waterPatches));
-
-	    PatchSet lavaPatches = new PatchSet(Patches.water);
-	    if(!globalParams.getBoolean("useAnimatedLava")) {
-		    lavaPatches.setParam("tileSize", "0");
-		    patches.add( new PatchSet(Patches.hideLava) );
-	    }
-	    patches.add(new PatchSet("FlowLava", lavaPatches));
-	    patches.add(new PatchSet("StillLava", lavaPatches));
-
-	    PatchSet firePatches = new PatchSet(Patches.fire);
-	    if(!globalParams.getBoolean("useAnimatedFire")) {
-		    firePatches.setParam("tileSize", "0");
-		    patches.add( new PatchSet(Patches.hideFire) );
-	    }
-	    if(texturePack.getTerrainTileSize() > 16) {
-	        patches.add(new PatchSet("Fire",firePatches));
-	    }
-
-	    if(texturePack.getTerrainTileSize() > 16) {
-	        patches.add(new PatchSet(Patches.compass));
-	    }
-
-	    if(texturePack.getTerrainTileSize() > 16) {
-		    patches.add(new PatchSet(Patches.tool3d));
-	    }
+	    getPatches(patches, replaceFiles);
 
 		try {
 			newjar = new JarOutputStream(new FileOutputStream(outputFile));
@@ -133,6 +99,8 @@ public class MCPatcher {
 			int totalFiles = minecraft.getJar().size();
 			int procFiles = 0;
 			for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
+				String name = entry.getName();
+
 				procFiles += 1;
 				mainForm.updateProgress(procFiles, totalFiles);
 				if(entry.getName().startsWith("META-INF"))
@@ -152,60 +120,21 @@ public class MCPatcher {
 					input = minecraft.getJar().getInputStream(entry);
 
 				boolean patched = false;
-				ClassFile cf = null;
-				ConstPool cp = null;
-				for(PatchSet patch : patches) {
-					if(entry.getName().equals(minecraft.getClassMap().get(patch.getClassName()))) {
-						if(cf == null) {
-							MCPatcher.out.println("Patching class: " + patch.getClassName() + " (" + entry.getName() + ")");
-							cf = new ClassFile(new DataInputStream(input));
-							cp = cf.getConstPool();
-						}
-						patch.visitConstPool(cp);
-						for(Object mo : cf.getMethods()) {
-							patch.visitMethod((MethodInfo)mo);
-						}
-					}
 
-				}
-				if(cf != null) {
-					cf.compact();
-					cf.write(new DataOutputStream(newjar));
-					newjar.closeEntry();
+				if(replaceFiles.contains(name)) {
+					replaceFile(name, input, newjar);
 					patched = true;
-				}
-
-
-				if(entry.getName().equals("gui/items.png") || entry.getName().equals("terrain.png")) {
-					int size = globalParams.getInt("tileSize") * 16;
-					MCPatcher.out.println("Reading " + entry.getName() + "...");
-					BufferedImage image = ImageIO.read(input);
-
-					if(image.getWidth() != size || image.getHeight() != size) {
-						MCPatcher.out.println("Resizing " + entry.getName() + " from " + image.getWidth() + "x" +
-							image.getHeight() + " to " + size + "x" + size);
-
-						BufferedImage newImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-						Graphics2D graphics2D = newImage.createGraphics();
-						graphics2D.drawImage(image, 0, 0, size, size, null);
-
-						// Write the scaled image to the outputstream
-						ImageIO.write(newImage, "PNG", newjar);
-						patched = true;
-					} else {
-						// can't rewind, so reopen
+				} else if (name.endsWith(".class")) {
+					patched = applyPatches(name, input, minecraft, patches, newjar);
+				} else if(name.equals("gui/items.png") || name.equals("terrain.png")) {
+					patched = resizeImage(name, input, newjar);
+					if(!patched) { // can't rewind, so reopen
 						input = texturePack.getInputStream(entry.getName());
 					}
 				}
 
 				if(!patched) {
-					byte[] buffer = new byte[1024];
-					while(true) {
-						int count = input.read(buffer);
-						if(count == -1)
-							break;
-						newjar.write(buffer, 0, count);
-					}
+					copyStream(input, newjar);
 				}
 
 				newjar.closeEntry();
@@ -218,5 +147,121 @@ public class MCPatcher {
 		}
 
 		MCPatcher.out.println("\n\n#### Success! ...probably ####");
+	}
+
+	private static void replaceFile(String name, InputStream input, JarOutputStream newjar) throws IOException {
+		MCPatcher.out.println("Replacing " + name);
+		InputStream is = MCPatcher.class.getResourceAsStream("/newcode/" + name);
+		if(is==null) {
+			is = MCPatcher.class.getResourceAsStream(name);
+			if(is == null)
+				throw new FileNotFoundException("newcode/" + name);
+		}
+		copyStream(is, newjar);
+	}
+
+	private static void getPatches(ArrayList<PatchSet> patches, ArrayList<String> replaceFiles) {
+		patches.add(new PatchSet(Patches.animManager));
+		patches.add(new PatchSet(Patches.animTexture));
+
+		PatchSet waterPatches = new PatchSet(Patches.water);
+		if (globalParams.getBoolean("useCustomWater")) {
+		    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customWaterMC)));
+			replaceFiles.add("ht.class");
+			waterPatches.setParam("tileSize", "0");
+			patches.add(new PatchSet("StillWater", waterPatches));
+			patches.add( new PatchSet(Patches.hideStillWater) );
+		} else {
+			if(!globalParams.getBoolean("useAnimatedWater")) {
+				waterPatches.setParam("tileSize", "0");
+				patches.add( new PatchSet(Patches.hideWater) );
+			}
+			patches.add(new PatchSet("FlowWater", waterPatches));
+			patches.add(new PatchSet("StillWater", waterPatches));
+		}
+
+		PatchSet lavaPatches = new PatchSet(Patches.water);
+		if(globalParams.getBoolean("useCustomLava")) {
+			patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customLavaMC)));
+			replaceFiles.add("eg.class");
+			lavaPatches.setParam("tileSize", "0");
+			patches.add(new PatchSet("StillLava", lavaPatches));
+			patches.add( new PatchSet(Patches.hideStillLava) );			
+		} else {
+			if(!globalParams.getBoolean("useAnimatedLava")) {
+				lavaPatches.setParam("tileSize", "0");
+				patches.add( new PatchSet(Patches.hideLava) );
+			}
+			patches.add(new PatchSet("FlowLava", lavaPatches));
+			patches.add(new PatchSet("StillLava", lavaPatches));
+		}
+
+		PatchSet firePatches = new PatchSet(Patches.fire);
+		if(!globalParams.getBoolean("useAnimatedFire")) {
+			firePatches.setParam("tileSize", "0");
+			patches.add( new PatchSet(Patches.hideFire) );
+		}
+
+		if(globalParams.getInt("tileSize") > 16) {
+		    patches.add(new PatchSet("Fire",firePatches));
+		    patches.add(new PatchSet(Patches.compass));
+			patches.add(new PatchSet(Patches.tool3d));
+		}
+	}
+
+	private static boolean resizeImage(String name, InputStream input, JarOutputStream newjar) throws IOException {
+		boolean patched = false;
+		int size = globalParams.getInt("tileSize") * 16;
+		MCPatcher.out.println("Reading " + name + "...");
+		BufferedImage image = ImageIO.read(input);
+
+		if(image.getWidth() != size || image.getHeight() != size) {
+			MCPatcher.out.println("Resizing " + name + " from " + image.getWidth() + "x" +
+				image.getHeight() + " to " + size + "x" + size);
+
+			BufferedImage newImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D graphics2D = newImage.createGraphics();
+			graphics2D.drawImage(image, 0, 0, size, size, null);
+
+			// Write the scaled image to the outputstream
+			ImageIO.write(newImage, "PNG", newjar);
+			patched = true;
+		}
+		return patched;
+	}
+
+	private static void copyStream(InputStream input, OutputStream output) throws IOException {
+		byte[] buffer = new byte[1024];
+		while(true) {
+			int count = input.read(buffer);
+			if(count == -1)
+				break;
+			output.write(buffer, 0, count);
+		}
+	}
+
+	private static boolean applyPatches(String name, InputStream input, Minecraft minecraft, ArrayList<PatchSet> patches, JarOutputStream newjar) throws Exception {
+		Boolean patched = false;
+		ClassFile cf = null;
+		ConstPool cp = null;
+		for(PatchSet patch : patches) {
+			if(name.equals(minecraft.getClassMap().get(patch.getClassName()))) {
+				if(cf == null) {
+					MCPatcher.out.println("Patching class: " + patch.getClassName() + " (" + name + ")");
+					cf = new ClassFile(new DataInputStream(input));
+					cp = cf.getConstPool();
+				}
+				patch.visitConstPool(cp);
+				for(Object mo : cf.getMethods()) {
+					patch.visitMethod((MethodInfo)mo);
+				}
+			}
+		}
+		if(cf != null) {
+			cf.compact();
+			cf.write(new DataOutputStream(newjar));
+			patched = true;
+		}
+		return patched;
 	}
 }

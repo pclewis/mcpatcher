@@ -4,15 +4,15 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class ht extends z {
+public class eg extends z {
 	Minecraft game;
 	int tileNumber;
 	int tileWidth;
 	int tileHeight;
 	byte temp[];
 
-	public ht(Minecraft game) {
-		super(ly.B.bb + 1);
+	public eg(Minecraft game) {
+		super(ly.D.bb + 1);
 		this.e = 2;
 		this.game = game;
 		this.tileNumber = this.b;

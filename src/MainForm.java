@@ -38,6 +38,8 @@ public class MainForm implements Runnable {
 	private JButton runMinecraftButton;
 	private JButton minecraftFolderButton;
 	private JComboBox tileSizeCombo;
+	private JCheckBox customWaterCheckBox;
+	private JCheckBox customLavaCheckBox;
 	private JFrame frame;
 
 	private Minecraft minecraft;
@@ -164,6 +166,8 @@ public class MainForm implements Runnable {
 			    MCPatcher.globalParams.put("useAnimatedFire", ""+animatedFireCheckBox.isSelected());
 				MCPatcher.globalParams.put("useAnimatedWater", ""+animatedWaterCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedLavaCheckBox.isSelected());
+			    MCPatcher.globalParams.put("useCustomWater", ""+customWaterCheckBox.isSelected());
+		        MCPatcher.globalParams.put("useCustomLava", ""+customLavaCheckBox.isSelected());
 
 			    if(backupCheckBox.isSelected()) {
 				    try {

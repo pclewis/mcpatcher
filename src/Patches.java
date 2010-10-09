@@ -307,6 +307,35 @@ class Patches implements Opcode {
 		}
 	}
 
+	public static class PassThisPatch extends BytecodePatch {
+		public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+		public String getDescription() { return "pass Minecraft to "+className+"."+methodName; }
+
+		String className, methodName, fromType, toType;
+
+		public PassThisPatch(String className, String methodName, String fromType, String toType) {
+			this.className = className;
+			this.methodName = methodName;
+			this.fromType = fromType;
+			this.toType = toType;
+		}
+
+		byte[] getFromBytes(MethodInfo mi) throws Exception {
+			int methi = ConstPoolUtils.find(mi.getConstPool(), new MethodRef(className, methodName, fromType));
+			return buildCode(
+				(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
+			);
+		}
+
+		byte[] getToBytes(MethodInfo mi) throws Exception {
+			int methi = ConstPoolUtils.findOrAdd(mi.getConstPool(), new MethodRef(className, methodName, toType));
+			return buildCode(
+				(byte)ALOAD_0,
+				(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
+			);
+		}
+	}
+
 	public static final PatchSet water = new PatchSet(
 		"Water",
 		new PatchSpec[]{
@@ -373,12 +402,25 @@ class Patches implements Opcode {
 			new PatchSpec(new OverrideTilenumPatch(12*16+13+1, 160)),
 		}
 	);
+	public static final PatchSet hideStillWater = new PatchSet(
+		"AnimTexture",
+		new PatchSpec[]{
+			new PatchSpec(new OverrideTilenumPatch(12*16+13+0, 160)),
+		}
+	);
 
 	public static final PatchSet hideLava = new PatchSet(
 		"AnimTexture",
 		new PatchSpec[]{
 			new PatchSpec(new OverrideTilenumPatch(14*16+13+0, 160)),
 			new PatchSpec(new OverrideTilenumPatch(14*16+13+1, 160)),
+		}
+	);
+
+	public static final PatchSet hideStillLava = new PatchSet(
+		"AnimTexture",
+		new PatchSpec[]{
+			new PatchSpec(new OverrideTilenumPatch(14*16+13+0, 160)),
 		}
 	);
 
@@ -404,32 +446,17 @@ class Patches implements Opcode {
 		}
 	);
 
-	public static final PatchSet minecraft = new PatchSet(
+	public static final PatchSet customWaterMC = new PatchSet(
 		"Minecraft",
 		new PatchSpec[] {
-			new PatchSpec(new ConstPatch(
-				new MethodRef("ht", "<init>", "()V"),
-				new MethodRef("ht", "<init>", "(Lnet/minecraft/client/Minecraft;)V"))
-			),
-			new PatchSpec(new BytecodePatch() {
-				byte[] getFromBytes(MethodInfo mi) throws Exception {
-					int methi = ConstPoolUtils.find(mi.getConstPool(), new MethodRef("ht", "<init>", "()V"));
-					return buildCode(
-						(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
-					);
-				}
+			new PatchSpec(new PassThisPatch("ht", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+		}
+	);
 
-				byte[] getToBytes(MethodInfo mi) throws Exception {
-					int methi = ConstPoolUtils.findOrAdd(mi.getConstPool(), new MethodRef("ht", "<init>", "(Lnet/minecraft/client/Minecraft;)V"));
-					return buildCode(
-						(byte)ALOAD_0,
-						(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
-					);
-				}
-
-				public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
-				public String getDescription() { return "pass Minecraft to FlowWater initializer"; }
-			})
+	public static final PatchSet customLavaMC = new PatchSet(
+		"Minecraft",
+		new PatchSpec[] {
+			new PatchSpec(new PassThisPatch("eg", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 }
