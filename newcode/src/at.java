@@ -3,22 +3,20 @@ import net.minecraft.client.Minecraft;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Random;
 
 public class at extends z {
 	Minecraft game;
 	int tileNumber;
 	int tileWidth;
 	int tileHeight;
-	int[] palette;
-	int[] data;
+	byte temp[];
+	int timer = 0;
+	private final static int MAX_TIMER=3;
+	Random rand = new Random();
 
 	public at(Minecraft game) {
 		super(ly.D.bb);
-
 		this.game = game;
 		this.tileNumber = this.b;
 		try {
@@ -28,46 +26,53 @@ public class at extends z {
 			int tileX = tileNumber % 16 * tileWidth;
 			int tileY = tileNumber / 16 * tileHeight;
 			int imageBuf[] = new int[tileWidth * tileHeight];
-			data = new int[tileWidth * tileHeight];
 			tiles.getRGB(tileX, tileY, tileWidth, tileHeight, imageBuf, 0, tileWidth);
-			HashMap<Integer,Integer> palBuilder = new HashMap<Integer,Integer>();
-
-			for(int i = 0; i < imageBuf.length; ++i) {
+			for( int i = 0; i < imageBuf.length; ++i ) {
 				int v = imageBuf[i];
-				int c = ((v>>24)&0xFF) | ((v &0x00FFFFFF)<<8);
-				if(!palBuilder.containsKey(c)) {
-					palBuilder.put(c, 0);
-				}
-			}
-			Integer[] colors = new Integer[palBuilder.size()];
-			palBuilder.keySet().toArray(colors);
-			Arrays.sort(colors);
-			palette = new int[colors.length];
-			int p = 0;
-			for(int c : colors) {
-				palette[p] = c;
-				palBuilder.put(c, p++);
-			}
-			for(int i = 0; i < imageBuf.length; ++i) {
-				int v = imageBuf[i];
-				int c = ((v>>24)&0xFF) | ((v &0x00FFFFFF)<<8);
-				data[i] = palBuilder.get(c);
+				//ARGB -> RGBA
+				//System.out.println(String.format("%08x -> %02x", v, (byte)((v>>24)&0xFF)));
+				this.a[(i*4)+3] = (byte)((v>>24)&0xFF);
+				this.a[(i*4)+0] = (byte)((v>>16)&0xFF);
+				this.a[(i*4)+1] = (byte)((v>> 8)&0xFF);
+				this.a[(i*4)+2] = (byte)((v>> 0)&0xFF);
 			}
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
+
+		temp = new byte[tileWidth*4];
 	}
 
 	public void a() {
-		int temp = palette[palette.length-1];
-		System.arraycopy(palette, 0, palette, 1, palette.length-1);
-		palette[0] = temp;
-		for(int i = 0; i < data.length; ++i) {
-			int v = palette[this.data[i]];
-			this.a[(i*4)+0] = (byte)((v>>24)&0xFF);
-			this.a[(i*4)+1] = (byte)((v>>16)&0xFF);
-			this.a[(i*4)+2] = (byte)((v>> 8)&0xFF);
-			this.a[(i*4)+3] = (byte)((v>> 0)&0xFF);
+		if(++timer >= MAX_TIMER) {
+			timer = 0;
+			if(rand.nextBoolean()) {
+				if(rand.nextBoolean()) {
+					System.arraycopy(this.a, (tileHeight-1)*tileWidth*4, this.temp, 0, tileWidth*4);
+					System.arraycopy(this.a, 0, this.a, tileWidth*4, tileWidth*(tileHeight-1)*4);
+					System.arraycopy(this.temp, 0, this.a, 0, tileWidth*4);
+				} else {
+					System.arraycopy(this.a, 0, this.temp, 0, tileWidth*4);
+					System.arraycopy(this.a, tileWidth*4, this.a, 0, tileWidth*(tileHeight-1)*4);
+					System.arraycopy(this.temp, 0, this.a, (tileHeight-1)*tileWidth*4, tileWidth*4);
+				}
+			} else {
+				if(rand.nextBoolean()) { // left
+					for(int y = 0; y < tileHeight; ++y) {
+						int i = (y*tileWidth)*4;
+						byte temp = this.a[i];
+						System.arraycopy(this.a, i+4, this.a, i, (tileWidth-1)*4);
+						this.a[i+(tileWidth-1)*4] = temp;
+					}
+				} else { // right
+					for(int y = 0; y < tileHeight; ++y) {
+						int i = (y*tileWidth)*4;
+						byte temp = this.a[i+ (tileWidth-1)*4];
+						System.arraycopy(this.a, i, this.a, i+4, (tileWidth-1)*4);
+						this.a[i] = temp;
+					}
+				}
+			}
 		}
 	}
 }
