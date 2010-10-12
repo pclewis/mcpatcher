@@ -10,6 +10,8 @@ public class eg extends z {
 	int tileWidth;
 	int tileHeight;
 	byte temp[];
+	int timer = 0;
+	private final static int MAX_TIMER=3;
 
 	public eg(Minecraft game) {
 		super(ly.D.bb + 1);
@@ -41,8 +43,11 @@ public class eg extends z {
 	}
 
 	public void a() {
-		System.arraycopy(this.a, (tileHeight-1)*tileWidth*4, this.temp, 0, tileWidth*4);
-		System.arraycopy(this.a, 0, this.a, tileWidth*4, tileWidth*(tileHeight-1)*4);
-		System.arraycopy(this.temp, 0, this.a, 0, tileWidth*4);
+		if(++timer >= MAX_TIMER) {
+			timer = 0;
+			System.arraycopy(this.a, (tileHeight-1)*tileWidth*4, this.temp, 0, tileWidth*4);
+			System.arraycopy(this.a, 0, this.a, tileWidth*4, tileWidth*(tileHeight-1)*4);
+			System.arraycopy(this.temp, 0, this.a, 0, tileWidth*4);
+		}
 	}
 }
