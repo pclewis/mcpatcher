@@ -457,6 +457,7 @@ class Patches implements Opcode {
 		"Minecraft",
 		new PatchSpec[] {
 			new PatchSpec(new PassThisPatch("eg", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("at", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 }

@@ -149,15 +149,33 @@ public class MCPatcher {
 		MCPatcher.out.println("\n\n#### Success! ...probably ####");
 	}
 
-	private static void replaceFile(String name, InputStream input, JarOutputStream newjar) throws IOException {
-		MCPatcher.out.println("Replacing " + name);
+	private static InputStream openResource(String name) throws FileNotFoundException {
 		InputStream is = MCPatcher.class.getResourceAsStream("/newcode/" + name);
 		if(is==null) {
 			is = MCPatcher.class.getResourceAsStream(name);
-			if(is == null)
-				throw new FileNotFoundException("newcode/" + name);
 		}
+		return is;
+	}
+
+	private static void replaceFile(String name, InputStream input, JarOutputStream newjar) throws IOException {
+		MCPatcher.out.println("Replacing " + name);
+		InputStream is = openResource(name);
+		if(is == null)
+			throw new FileNotFoundException("newcode/" + name);
+
 		copyStream(is, newjar);
+
+		for(int i = 1; true; ++i) {
+			String nn = (name.replace(".class", "$"+i+".class"));
+			is = openResource(nn);
+			if(is==null)
+				break;
+			MCPatcher.out.println("Adding " + nn);
+			newjar.closeEntry();
+			newjar.putNextEntry(new ZipEntry(nn));
+			copyStream(is,newjar);
+		}
+
 	}
 
 	private static void getPatches(ArrayList<PatchSet> patches, ArrayList<String> replaceFiles) {
@@ -184,9 +202,10 @@ public class MCPatcher {
 		if(globalParams.getBoolean("useCustomLava")) {
 			patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customLavaMC)));
 			replaceFiles.add("eg.class");
-			lavaPatches.setParam("tileSize", "0");
-			patches.add(new PatchSet("StillLava", lavaPatches));
-			patches.add( new PatchSet(Patches.hideStillLava) );			
+			replaceFiles.add("at.class");
+			//lavaPatches.setParam("tileSize", "0");
+			//patches.add(new PatchSet("StillLava", lavaPatches));
+			//patches.add( new PatchSet(Patches.hideStillLava) );
 		} else {
 			if(!globalParams.getBoolean("useAnimatedLava")) {
 				lavaPatches.setParam("tileSize", "0");
