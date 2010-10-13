@@ -40,6 +40,7 @@ public class MainForm implements Runnable {
 	private JComboBox tileSizeCombo;
 	private JCheckBox customWaterCheckBox;
 	private JCheckBox customLavaCheckBox;
+	private JCheckBox betterGrassCheckBox;
 	private JFrame frame;
 
 	private Minecraft minecraft;
@@ -168,6 +169,7 @@ public class MainForm implements Runnable {
 			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedLavaCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useCustomWater", ""+customWaterCheckBox.isSelected());
 		        MCPatcher.globalParams.put("useCustomLava", ""+customLavaCheckBox.isSelected());
+			    MCPatcher.globalParams.put("useBetterGrass", ""+betterGrassCheckBox.isSelected());
 
 			    if(backupCheckBox.isSelected()) {
 				    try {

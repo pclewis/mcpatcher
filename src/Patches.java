@@ -450,6 +450,7 @@ class Patches implements Opcode {
 		"Minecraft",
 		new PatchSpec[] {
 			new PatchSpec(new PassThisPatch("ht", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("ml", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 
@@ -458,6 +459,15 @@ class Patches implements Opcode {
 		new PatchSpec[] {
 			new PatchSpec(new PassThisPatch("eg", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 			new PatchSpec(new PassThisPatch("at", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+		}
+	);
+
+	public static final PatchSet betterGrass = new PatchSet(
+		"Block",
+		new PatchSpec[] {
+			new PatchSpec(new ConstPatch(new ClassRef("my"), new ClassRef("BetterGrass"))),
+			new PatchSpec(new ConstPatch(new MethodRef("my", "<init>", "(I)V"),
+										 new MethodRef("BetterGrass","<init>", "(I)V")))
 		}
 	);
 }

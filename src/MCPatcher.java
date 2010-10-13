@@ -122,7 +122,8 @@ public class MCPatcher {
 				boolean patched = false;
 
 				if(replaceFiles.contains(name)) {
-					replaceFile(name, input, newjar);
+					replaceFiles.remove(name);
+					replaceFile(name, newjar);
 					patched = true;
 				} else if (name.endsWith(".class")) {
 					patched = applyPatches(name, input, minecraft, patches, newjar);
@@ -137,6 +138,13 @@ public class MCPatcher {
 					copyStream(input, newjar);
 				}
 
+				newjar.closeEntry();
+			}
+
+			// Add files in replaceFiles list that weren't encountered in src
+			for(String f : replaceFiles) {
+				newjar.putNextEntry(new ZipEntry(f));
+				replaceFile(f, newjar);
 				newjar.closeEntry();
 			}
 
@@ -157,7 +165,7 @@ public class MCPatcher {
 		return is;
 	}
 
-	private static void replaceFile(String name, InputStream input, JarOutputStream newjar) throws IOException {
+	private static void replaceFile(String name, JarOutputStream newjar) throws IOException {
 		MCPatcher.out.println("Replacing " + name);
 		InputStream is = openResource(name);
 		if(is == null)
@@ -186,9 +194,7 @@ public class MCPatcher {
 		if (globalParams.getBoolean("useCustomWater")) {
 		    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customWaterMC)));
 			replaceFiles.add("ht.class");
-			waterPatches.setParam("tileSize", "0");
-			patches.add(new PatchSet("StillWater", waterPatches));
-			patches.add( new PatchSet(Patches.hideStillWater) );
+			replaceFiles.add("ml.class");
 		} else {
 			if(!globalParams.getBoolean("useAnimatedWater")) {
 				waterPatches.setParam("tileSize", "0");
@@ -215,6 +221,11 @@ public class MCPatcher {
 			patches.add(new PatchSet("StillLava", lavaPatches));
 		}
 
+		if (globalParams.getBoolean("useCustomWater")||
+			globalParams.getBoolean("useCustomLava")) {
+			replaceFiles.add("WaterAnimation.class");
+		}
+
 		PatchSet firePatches = new PatchSet(Patches.fire);
 		if(!globalParams.getBoolean("useAnimatedFire")) {
 			firePatches.setParam("tileSize", "0");
@@ -225,6 +236,11 @@ public class MCPatcher {
 		    patches.add(new PatchSet("Fire",firePatches));
 		    patches.add(new PatchSet(Patches.compass));
 			patches.add(new PatchSet(Patches.tool3d));
+		}
+
+		if(globalParams.getBoolean("useBetterGrass")) {
+			patches.add(new PatchSet(Patches.betterGrass));
+			replaceFiles.add("BetterGrass.class");
 		}
 	}
 

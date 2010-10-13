@@ -127,8 +127,15 @@ public class ConstPatch extends Patch {
 				return;
 			}
 
-			subpatches.add(new UsePatch(UsePatch.LDC, oldIndex, newIndex));
-			subpatches.add(new UsePatch(UsePatch.LDC2_W, oldIndex, newIndex));
+			if(this.from instanceof ClassRef) {
+				subpatches.add(new UsePatch(UsePatch.NEW, oldIndex, newIndex));
+			} else if (this.from instanceof MethodRef) {
+				subpatches.add(new UsePatch(UsePatch.INVOKESPECIAL, oldIndex, newIndex));
+				subpatches.add(new UsePatch(UsePatch.INVOKEVIRTUAL, oldIndex, newIndex));
+			} else {
+				subpatches.add(new UsePatch(UsePatch.LDC, oldIndex, newIndex));
+				subpatches.add(new UsePatch(UsePatch.LDC2_W, oldIndex, newIndex));
+			}
 		}
 
 		appliedCount += 1;
