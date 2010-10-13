@@ -4,11 +4,10 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.zip.ZipException;
 
 public class MainForm implements Runnable {
     private JPanel mainPanel;
@@ -16,21 +15,17 @@ public class MainForm implements Runnable {
     private JProgressBar progressBar1;
     private JTextField origField;
     private JButton origBrowseButton;
-    private JTextField backupField;
     private JTextField outputField;
-    private JButton backupBrowseButton;
     private JButton outputBrowseButton;
     private JTextField packField;
     private JButton packBrowseButton;
     private JCheckBox animatedWaterCheckBox;
     private JCheckBox animatedLavaCheckBox;
     private JCheckBox animatedFireCheckBox;
-	private JCheckBox backupCheckBox;
     private JCheckBox packCheckBox;
     private JPanel optionsPanel;
     private JPanel filesPanel;
     private JLabel origLabel;
-    private JLabel backupLabel;
     private JLabel outputLabel;
     private JLabel packLabel;
 	private JLabel textureInfoLabel;
@@ -57,6 +52,9 @@ public class MainForm implements Runnable {
 
         final MainForm form = this;
 
+	    textureInfoLabel.setVisible(false);
+	    classInfoLabel.setVisible(false);
+
 		minecraftFolderButton.setEnabled(canOpenFolder);
 
 
@@ -72,7 +70,7 @@ public class MainForm implements Runnable {
 	            } else {
 		            String path = fd.getDirectory() + fd.getFile();
 		            try {
-			            setMinecraftPath(path, true);
+			            setMinecraftPath(path);
 		            } catch(Exception e1) {
 			            e1.printStackTrace(MCPatcher.err);
 			            MCPatcher.logWindow.setVisible(true);
@@ -82,24 +80,9 @@ public class MainForm implements Runnable {
             }
         });
 
-        backupBrowseButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.SAVE);
-                fd.setFile("minecraft.original.jar");
-                fd.setVisible(true);
-	            if(fd.getFile() == null) {
-		            form.backupField.setText( "" );
-	            } else {
-	                form.backupField.setText( fd.getDirectory() + fd.getFile() );
-					form.backupCheckBox.setSelected(true);
-	            }
-	            updateControls();
-            }
-        });
-
         outputBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.SAVE);
+                FileDialog fd = new FileDialog(form.frame, form.outputLabel.getText(), FileDialog.SAVE);
                 fd.setFile("minecraft.jar");
                 fd.setVisible(true);
 	            if(fd.getFile() == null) {
@@ -113,7 +96,7 @@ public class MainForm implements Runnable {
 
         packBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                FileDialog fd = new FileDialog(form.frame, form.backupLabel.getText(), FileDialog.LOAD);
+                FileDialog fd = new FileDialog(form.frame, form.packLabel.getText(), FileDialog.LOAD);
                 fd.setFile("*.zip;*.rar;*.jar");
                 fd.setVisible(true);
 	            if(fd.getFile() == null) {
@@ -144,14 +127,6 @@ public class MainForm implements Runnable {
         });
 
 
-        backupCheckBox.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                boolean enabled = form.backupCheckBox.isSelected();
-                form.backupField.setEnabled( enabled );
-	            updateControls();
-            }
-        });
-
         packCheckBox.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 boolean enabled = form.packCheckBox.isSelected();
@@ -171,38 +146,6 @@ public class MainForm implements Runnable {
 		        MCPatcher.globalParams.put("useCustomLava", ""+customLavaCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useBetterGrass", ""+betterGrassCheckBox.isSelected());
 
-			    if(backupCheckBox.isSelected()) {
-				    try {
-					    String newPath = backupField.getText();
-					    String texturePackPath = texturePack.getPath();
-					    mcTexturePack.close();
-
-					    if(texturePack.getPath().equals(mcTexturePack.getPath())) {
-					        texturePack.close();
-						    texturePackPath = newPath;
-					    }
-
-					    if (!minecraft.createBackup(new File(newPath)))
-					    {
-						    MCPatcher.err.println("Couldn't create backup");
-						    MCPatcher.logWindow.setVisible(true);
-						    mcTexturePack = TexturePack.open(mcTexturePack.getPath(), null);
-						    texturePack = TexturePack.open(texturePack.getPath(), mcTexturePack);
-						    return;
-					    }
-					    mcTexturePack = TexturePack.open(newPath, null);
-					    texturePack = TexturePack.open(texturePackPath, mcTexturePack);
-					    backupCheckBox.setSelected(false);
-					    backupField.setText("");
-					    origField.setText(newPath);
-					    packField.setText(texturePackPath);
-
-				    } catch(IOException e1) {
-					    e1.printStackTrace(MCPatcher.err);
-					    MCPatcher.logWindow.setVisible(true);
-					    return;
-				    }
-			    }
 				runWorker(new Runnable() {
 				    public void run() {
 					    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
@@ -261,7 +204,21 @@ public class MainForm implements Runnable {
     }
 
 	public void setTexturePack(String path) throws IOException {
-		texturePack = TexturePack.open(path, mcTexturePack);
+		try {
+			texturePack = TexturePack.open(path, mcTexturePack);
+		} catch (ZipException ex) {
+			JOptionPane.showMessageDialog(null,
+				"The compression used in this zip file is not supported. Please install the\n" +
+				"texture pack manually, or re-package it as a .jar or .rar file.",
+				"Error Opening Texture Pack",
+				JOptionPane.ERROR_MESSAGE);
+			if(mcTexturePack!=null)
+				packField.setText(mcTexturePack.getPath());
+			else
+				packField.setText("");
+			updateControls();
+			return;
+		}
 
 		if(mcTexturePack == null || !path.equals(mcTexturePack.getPath())) {
 			packCheckBox.setSelected(true);
@@ -303,7 +260,7 @@ public class MainForm implements Runnable {
 		updateControls();
 	}
 
-	public boolean setMinecraftPath(String path, boolean showErrors) throws Exception {
+	public boolean setMinecraftPath(String path) throws Exception {
 		String errors = "";
 		try {
 			minecraft = new Minecraft(new File(path));
@@ -313,14 +270,47 @@ public class MainForm implements Runnable {
 		}
 
 		if(minecraft == null || !minecraft.isValid()) {
-			if(showErrors) {
-				if(minecraft != null) errors = Util.joinString(minecraft.getErrors(), "\n");
-				JOptionPane.showMessageDialog(null, errors, "Error", JOptionPane.ERROR_MESSAGE);
-			}
+			if(minecraft != null) errors = Util.joinString(minecraft.getErrors(), "\n");
+			MCPatcher.err.println(errors);
+			MCPatcher.logWindow.setVisible(true);
+			JOptionPane.showMessageDialog(null,
+				"There was an error opening minecraft.jar. This may be because:\n"+
+				" - The file has already been patched.\n" +
+				" - There was an update that this patcher cannot handle.\n" +
+				" - There is another, conflicting mod applied.\n" +
+				" - The jar file is invalid or corrupt.\n" +
+				"\n" +
+				"You can re-download the original minecraft.jar by deleting your minecraft/bin folder and "+
+				"running the game normally.\n" +
+				"\n" +
+				"Please see log window for more details.",
+				"Error", JOptionPane.ERROR_MESSAGE);
 			origField.setText( "" );
+			minecraft = null;
 			patchButton.setEnabled(false);
 			return false;
 		} else {
+			if(!minecraft.isBackup()) {
+				boolean success = false;
+				try {
+					success = minecraft.createBackup();
+					if(!success)
+						JOptionPane.showMessageDialog(null, "Must create backup.", "Error", JOptionPane.ERROR_MESSAGE);
+				} catch (IOException ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage(), "Error Creating Backup", JOptionPane.ERROR_MESSAGE);
+				}
+
+				if(!success) {
+					origField.setText( "" );
+					minecraft = null;
+					patchButton.setEnabled(false);
+					updateControls();
+					return false;
+				}
+
+				path = minecraft.getPath();
+			}
+
 			origField.setText( path );
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html><table>");
@@ -329,15 +319,9 @@ public class MainForm implements Runnable {
 			}
 			classInfoLabel.setText(sb.toString());
 
-			if(backupCheckBox.isSelected() && backupField.getText().length() == 0) {
-				backupField.setText( path.replace(".jar", ".original.jar"));
-			}
-
 			if(outputField.getText().length() == 0) {
 				if(path.endsWith(".original.jar")) {
 					outputField.setText( path.replace(".original.jar", ".jar") );
-				} else if(backupCheckBox.isSelected()) {
-					outputField.setText( path );
 				}
 			}
 
@@ -376,10 +360,6 @@ public class MainForm implements Runnable {
         // place custom component creation code here
     }
 
-	public void noBackup() {
-		backupCheckBox.setSelected(false);
-	}
-
 	public void updateControls() {
 		patchButton.setEnabled(false);
 		runMinecraftButton.setEnabled(false);
@@ -411,22 +391,6 @@ public class MainForm implements Runnable {
 			textureInfoLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
-		if(backupCheckBox.isSelected() && backupField.getText().length() == 0) {
-			backupLabel.setForeground(Color.RED);
-			return;
-		} else {
-			backupLabel.setForeground(Color.getColor("Label.foreground"));
-		}
-
-		if(backupCheckBox.isSelected() && (
-				new File(backupField.getText()).equals(new File(outputField.getText())) ||
-				new File(backupField.getText()).equals(new File(origField.getText())))) {
-			backupLabel.setForeground(Color.RED);
-			return;
-		} else {
-			backupLabel.setForeground(Color.getColor("Label.foreground"));
-		}
-
 		if(outputField.getText().length() == 0) {
 			outputLabel.setForeground(Color.RED);
 			return;
@@ -434,7 +398,7 @@ public class MainForm implements Runnable {
 			outputLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
-		if( !backupCheckBox.isSelected() && new File(outputField.getText()).equals(new File(origField.getText())) ) {
+		if( new File(outputField.getText()).equals(new File(origField.getText())) ) {
 			outputLabel.setForeground(Color.RED);
 			return;
 		} else {

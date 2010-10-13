@@ -24,6 +24,40 @@ public class MCPatcher {
 	private static MainForm mainForm;
 
 	public static void main(String[] argv) throws Exception {
+		initLogWindow();
+
+		mainForm = MainForm.create();
+		findMinecraft();
+
+        mainForm.show();
+    }
+
+	private static void findMinecraft() throws Exception {
+		String appdata = System.getenv("APPDATA");
+		String home = System.getProperty("user.home");
+		String[] paths = new String[] {
+			"minecraft.original.jar",
+			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.original.jar",
+			home + "/Library/Application Support/minecraft/bin/minecraft.original.jar",
+			home + "/.minecraft/bin/minecraft.original.jar",
+			home + "/minecraft/bin/minecraft.original.jar",
+			"minecraft.jar",
+			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.jar",
+			home + "/Library/Application Support/minecraft/bin/minecraft.jar",
+			home + "/.minecraft/bin/minecraft.jar",
+			home + "/minecraft/bin/minecraft.jar",
+		};
+
+		for(String path : paths) {
+			File f = new File(path);
+			if(f.exists()) {
+				if(mainForm.setMinecraftPath(f.getPath())) // .getPath() to normalize /s
+					break;
+			}
+		}
+	}
+
+	private static void initLogWindow() {
 		logWindow = new JFrame("Log");
 		final JTextArea ta = new JTextArea(20,50);
 		((DefaultCaret)ta.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -43,37 +77,9 @@ public class MCPatcher {
 
 		out = new JTextAreaPrintStream(ta);
 		err = out;
+	}
 
-		mainForm = MainForm.create();
-		String appdata = System.getenv("APPDATA");
-		String home = System.getProperty("user.home");
-		String[] paths = new String[] {
-			"minecraft.original.jar",
-			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.original.jar",
-			home + "/Library/Application Support/minecraft/bin/minecraft.original.jar",
-			home + "/.minecraft/bin/minecraft.original.jar",
-			home + "/minecraft/bin/minecraft.original.jar",
-			"minecraft.jar",
-			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.jar",
-			home + "/Library/Application Support/minecraft/bin/minecraft.jar",
-			home + "/.minecraft/bin/minecraft.jar",
-			home + "/minecraft/bin/minecraft.jar",
-		};
-
-		for(String path : paths) {
-			File f = new File(path);
-			if(f.exists()) {
-				if(path.endsWith(".original.jar"))
-					mainForm.noBackup();
-				if(mainForm.setMinecraftPath(f.getPath(), false)) // .getPath() to normalize /s
-					break;
-			}
-		}
-
-        mainForm.show();
-    }
-
-    public static void applyPatch(Minecraft minecraft, TexturePack texturePack, File outputFile) {
+	public static void applyPatch(Minecraft minecraft, TexturePack texturePack, File outputFile) {
 
 	    JarOutputStream newjar = null;
 
@@ -135,7 +141,7 @@ public class MCPatcher {
 				}
 
 				if(!patched) {
-					copyStream(input, newjar);
+					Util.copyStream(input, newjar);
 				}
 
 				newjar.closeEntry();
@@ -171,7 +177,7 @@ public class MCPatcher {
 		if(is == null)
 			throw new FileNotFoundException("newcode/" + name);
 
-		copyStream(is, newjar);
+		Util.copyStream(is, newjar);
 
 		for(int i = 1; true; ++i) {
 			String nn = (name.replace(".class", "$"+i+".class"));
@@ -181,7 +187,7 @@ public class MCPatcher {
 			MCPatcher.out.println("Adding " + nn);
 			newjar.closeEntry();
 			newjar.putNextEntry(new ZipEntry(nn));
-			copyStream(is,newjar);
+			Util.copyStream(is,newjar);
 		}
 
 	}
@@ -263,16 +269,6 @@ public class MCPatcher {
 			patched = true;
 		}
 		return patched;
-	}
-
-	private static void copyStream(InputStream input, OutputStream output) throws IOException {
-		byte[] buffer = new byte[1024];
-		while(true) {
-			int count = input.read(buffer);
-			if(count == -1)
-				break;
-			output.write(buffer, 0, count);
-		}
 	}
 
 	private static boolean applyPatches(String name, InputStream input, Minecraft minecraft, ArrayList<PatchSet> patches, JarOutputStream newjar) throws Exception {

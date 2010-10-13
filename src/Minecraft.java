@@ -1,9 +1,7 @@
 import javassist.bytecode.*;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import javax.swing.*;
+import java.io.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -198,14 +196,31 @@ public class Minecraft implements Opcode {
 		return classMap;
 	}
 
-	public boolean createBackup(File newFile) throws IOException {
-		jar.close();
-		if(file.renameTo(newFile)) {
-			jar = new JarFile(newFile, false);
-			return true;
-		} else {
-			jar = new JarFile(file, false);
-			return false;
+	public boolean isBackup() {
+		return file.getPath().endsWith(".original.jar");
+	}
+
+	public boolean createBackup() throws IOException {
+		if(isBackup()) return false;
+
+		File newFile = new File(file.getPath().replaceFirst(".jar$", ".original.jar"));
+		assert(!newFile.getPath().equals(file.getPath()));
+
+		if(newFile.exists()) {
+			int confirm = JOptionPane.showConfirmDialog(null,
+				newFile.getPath() + " exists. Overwrite?",
+				"Create Backup", JOptionPane.YES_NO_OPTION);
+
+			if(confirm != JOptionPane.YES_OPTION) {
+				return false;
+			}
 		}
+
+		Util.copyStream(new FileInputStream(file), new FileOutputStream(newFile));
+
+		file = newFile;
+		jar = new JarFile(file, false);
+
+		return true;
 	}
 }

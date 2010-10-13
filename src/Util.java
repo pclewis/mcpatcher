@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 
 public class Util {
@@ -27,5 +30,15 @@ public class Util {
 
 	protected static byte b(int value, int index) {
 	    return (byte)((value >> (index*8)) & 0xFF);
+	}
+
+	static void copyStream(InputStream input, OutputStream output) throws IOException {
+		byte[] buffer = new byte[1024];
+		while(true) {
+			int count = input.read(buffer);
+			if(count == -1)
+				break;
+			output.write(buffer, 0, count);
+		}
 	}
 }
