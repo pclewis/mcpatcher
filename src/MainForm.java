@@ -288,6 +288,7 @@ public class MainForm implements Runnable {
 			origField.setText( "" );
 			minecraft = null;
 			patchButton.setEnabled(false);
+			updateControls();
 			return false;
 		} else {
 			if(!minecraft.isBackup()) {
