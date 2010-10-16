@@ -1,6 +1,4 @@
-import javassist.bytecode.MethodInfo;
-import javassist.bytecode.Mnemonic;
-import javassist.bytecode.Opcode;
+import javassist.bytecode.*;
 
 class Patches implements Opcode {
 	public static ParamSpec[] PSPEC_EMPTY = new ParamSpec[]{};
@@ -468,6 +466,62 @@ class Patches implements Opcode {
 			new PatchSpec(new ConstPatch(new ClassRef("my"), new ClassRef("BetterGrass"))),
 			new PatchSpec(new ConstPatch(new MethodRef("my", "<init>", "(I)V"),
 										 new MethodRef("BetterGrass","<init>", "(I)V")))
+		}
+	);
+
+	public static final PatchSet electricCart = new PatchSet(
+		"jo",
+		new PatchSpec[] {
+			new PatchSpec(new ConstPatch(new ClassRef("oc"), new ClassRef("ElectricCart"))),
+			new PatchSpec(new ConstPatch(new MethodRef("oc", "<init>", "(Lcn;DDDI)V"),
+										 new MethodRef("ElectricCart","<init>", "(Lcn;DDDI)V")))
+		}
+	);
+
+	public static final PatchSet cart = new PatchSet(
+		"oc",
+		new PatchSpec[] {
+			new PatchSpec(new ConstPatch(0.4D, 1.0D))
+		}
+	);
+
+	public static final PatchSet electricWire = new PatchSet(
+		"ly",
+		new PatchSpec[] {
+			new PatchSpec(new ConstPatch(new ClassRef("kf"), new ClassRef("ElectricWire"))),
+			new PatchSpec(new ConstPatch(new MethodRef("kf", "<init>", "(II)V"),
+										 new MethodRef("ElectricWire", "<init>", "(II)V"))),
+		}
+	);
+
+	public static final PatchSet wire = new PatchSet(
+		"Wire",
+		new PatchSpec[] {
+			new PatchSpec(new Patch() {
+				public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+				public String getDescription() { return "make .h protected"; }
+				public void visitConstPool(ConstPool cp) throws Exception { }
+				public void visitMethod(MethodInfo mi) throws Exception {
+					if(mi.getName().equals("h") || mi.getName().equals("i")) {
+						MCPatcher.out.println("make " + mi.getName() + " protected");
+						mi.setAccessFlags( mi.getAccessFlags() & ~AccessFlag.PRIVATE | AccessFlag.PROTECTED );
+					}
+				}
+			}),
+			new PatchSpec(new BytecodePatch() {
+				public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+				public String getDescription() { return "invoke .h virtual"; }
+
+				byte[] getFromBytes(MethodInfo mi) throws Exception {
+					int i = ConstPoolUtils.find(mi.getConstPool(), new MethodRef("kf", "h", "(Lcn;III)V"));
+					return buildCode(INVOKESPECIAL, Util.b(i, 1), Util.b(i, 0));
+				}
+
+				byte[] getToBytes(MethodInfo mi) throws Exception {
+					int i = ConstPoolUtils.find(mi.getConstPool(), new MethodRef("kf", "h", "(Lcn;III)V"));
+					return buildCode(INVOKEVIRTUAL, Util.b(i, 1), Util.b(i, 0));
+				}
+			})
 		}
 	);
 }

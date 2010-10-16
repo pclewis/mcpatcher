@@ -1,5 +1,10 @@
-import javassist.bytecode.*;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.MethodInfo;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -11,9 +16,6 @@ import java.util.Collections;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 
 public class MCPatcher {
 	public static PrintStream out;
@@ -248,6 +250,16 @@ public class MCPatcher {
 			patches.add(new PatchSet(Patches.betterGrass));
 			replaceFiles.add("BetterGrass.class");
 		}
+
+		patches.add(new PatchSet("gy", Patches.electricCart));
+		patches.add(new PatchSet("jo", Patches.electricCart));
+		replaceFiles.add("ElectricCart.class");
+
+		patches.add(new PatchSet(Patches.cart));
+		patches.add(new PatchSet("Block", Patches.electricWire));
+		patches.add(new PatchSet(Patches.wire));
+		replaceFiles.add("ElectricWire.class");
+		replaceFiles.add("ElectricCart$Point.class");
 	}
 
 	private static boolean resizeImage(String name, InputStream input, JarOutputStream newjar) throws IOException {
@@ -289,7 +301,7 @@ public class MCPatcher {
 			}
 		}
 		if(cf != null) {
-			cf.compact();
+			//cf.compact();
 			cf.write(new DataOutputStream(newjar));
 			patched = true;
 		}
