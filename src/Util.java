@@ -28,8 +28,17 @@ public class Util {
 		return oBuilder.toString();
 	}
 
-	protected static byte b(int value, int index) {
+	public static byte b(int value, int index) {
 	    return (byte)((value >> (index*8)) & 0xFF);
+	}
+
+	public static byte[] bytes(int value, int n) {
+		switch(n) {
+			case 1: return new byte[]{b(value, 0)};
+			case 2: return new byte[]{b(value, 1), b(value, 0)};
+			case 4: return new byte[]{b(value, 3), b(value, 2), b(value, 1), b(value, 0)};
+		}
+		throw new IllegalArgumentException("n must be 1,2, or 4");
 	}
 
 	static void copyStream(InputStream input, OutputStream output) throws IOException {

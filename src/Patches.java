@@ -524,4 +524,36 @@ class Patches implements Opcode {
 			})
 		}
 	);
+
+	public static final PatchSet entityLoader = new PatchSet(
+		"EntityLoader",
+		new PatchSpec[] {
+			new PatchSpec(new BytecodePatch() {
+				public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+				public String getDescription() { return "add ElectricCart entity loader"; }
+
+				byte[] getFromBytes(MethodInfo mi) throws Exception {
+					return buildCode(
+						load(mi, new ClassRef("oc")),
+						load(mi, "Minecart"),
+						BIPUSH, 40,
+						INVOKESTATIC, fc(mi, new MethodRef("ew", "a", "(Ljava/lang/Class;Ljava/lang/String;I)V"))
+					);
+				}
+
+				byte[] getToBytes(MethodInfo mi) throws Exception {
+					return buildCode(
+						load(mi, new ClassRef("oc")),
+						load(mi, "Minecart"),
+						BIPUSH, 40,
+						INVOKESTATIC, fc(mi, new MethodRef("ew", "a", "(Ljava/lang/Class;Ljava/lang/String;I)V")),
+						load(mi, new ClassRef("ElectricCart")),
+						load(mi, "ElectricCart"),
+						BIPUSH, 127,
+						INVOKESTATIC, fc(mi, new MethodRef("ew", "a", "(Ljava/lang/Class;Ljava/lang/String;I)V"))
+					);
+				}
+			})
+		}
+	);
 }

@@ -1,11 +1,5 @@
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class Patch implements Cloneable {
     public Params params;
@@ -38,4 +32,17 @@ public abstract class Patch implements Cloneable {
 		newPatch.params = new Params(this.params);
 		return newPatch;
 	}
+
+	// convenience
+	protected byte[] fc(MethodInfo mi, Object c       ) { return fc(mi.getConstPool(), c);    }
+	protected byte[] fc(MethodInfo mi, Object c, int n) { return fc(mi.getConstPool(), c, n); }
+	protected byte[] fc(ConstPool  cp, Object c       ) { return fc(cp, c, 2               ); }
+	protected byte[] fc(ConstPool cp, Object c, int n) {
+		int i = ConstPoolUtils.findOrAdd(cp, c);
+		assert(i > 0);
+		return Util.bytes(i,n);
+	}
+
+	protected byte[] load(MethodInfo mi, Object c) { return load(mi.getConstPool(), c);    }
+	protected byte[] load(ConstPool cp, Object c)  { return ConstPoolUtils.getLoad(cp, c); }
 }

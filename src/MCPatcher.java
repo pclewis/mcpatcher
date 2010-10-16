@@ -260,6 +260,8 @@ public class MCPatcher {
 		patches.add(new PatchSet(Patches.wire));
 		replaceFiles.add("ElectricWire.class");
 		replaceFiles.add("ElectricCart$Point.class");
+
+		patches.add(new PatchSet(Patches.entityLoader));
 	}
 
 	private static boolean resizeImage(String name, InputStream input, JarOutputStream newjar) throws IOException {
