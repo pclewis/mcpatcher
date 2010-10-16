@@ -7,7 +7,18 @@ public class ElectricCart extends oc {
 	static HashMap<Point, Integer> allPoweredPoints = new HashMap<Point,Integer>();
 	int powerLevel = 0;
 
+	private static double[] SPEEDS = {
+		Double.NaN,
+		0.0, 0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, 0.0,
+		0.1, 0.2, 0.4, 0.6, 1.0
+	};
+
 	private class Point {
+		public String toString() {
+			return "{" + x + ", " + y + ", " + z + '}';
+		}
+
 		public int x, y, z;
 
 		private Point(int x, int y, int z) {
@@ -41,8 +52,7 @@ public class ElectricCart extends oc {
 		}
 	}
 
-	List<Point> myPoweredPoints = new LinkedList<Point>();
-	int lastX,lastY,lastZ;
+	List<Point> myPoweredPoints = new LinkedList<Point>();;
 	public ElectricCart(cn paramcn) {
 		super(paramcn);
 	}
@@ -52,13 +62,14 @@ public class ElectricCart extends oc {
 
 	private boolean addPower(Point p) {
 		if(powerLevel > 0 && !myPoweredPoints.contains(p)) {
-			System.out.println("Adding power: " + p.x + "," + p.y + "," + p.z);
+			System.out.println("Adding power: " + p);
 			myPoweredPoints.add(p);
 			Integer i = allPoweredPoints.get(p);
 			if(i==null) i = 0;
 			allPoweredPoints.put(p, i+1);
+			System.out.println("Refcount: " + (i+1));
 			setPower(p, powerLevel);
-			powerLevel -= 1;
+			//powerLevel -= 1;
 			return true;
 		}
 		return false;
@@ -66,18 +77,19 @@ public class ElectricCart extends oc {
 
 	private void removePower(Point p, Iterator iter) {
 		if(myPoweredPoints.contains(p)) {
-			System.out.println("Removing power: " + p.x + "," + p.y + "," + p.z);
+			System.out.println("Removing power: " + p);
 			if(iter != null)
 				iter.remove();
 			else
 				myPoweredPoints.remove(p);
 			Integer i = allPoweredPoints.get(p);
 			assert(i != null);
+			System.out.println("Refcount: " + i);
 			if(i.equals(1)) {
 				allPoweredPoints.remove(p);
+				setPower(p, 0);
 			} else {
 				allPoweredPoints.put(p, i-1);
-				setPower(p, 0);
 			}
 		}
 	}
@@ -87,47 +99,50 @@ public class ElectricCart extends oc {
 	}
 
 	private void setPower(Point p, int level) {
+		System.out.println("Set power at " + p + " to " + level);
 		ag.b(p.x, p.y, p.z, level); // set level
 		ly wire = ly.n[ag.a(p.x,p.y,p.z)]; // find instance
         if (wire != null) wire.a(ag, p.x, p.y, p.z, ly.aH.bc); // trigger update
 	}
 
 	private void setPowerLevel(Point m, Point p, int s) {
+		double speed = SPEEDS[s];
 		if(Math.abs(this.an) < 0.001 && Math.abs(this.ap) < 0.001) {
 			int trackType = ag.e(m.x,m.y,m.z);
 			if(trackType == 0 && p.x==(m.x+1)) {
-				this.ap = -0.5;
+				this.ap = -speed;
 			} else if (trackType==0 && p.x==(m.x-1)) {
-				this.ap = 0.5;
+				this.ap = speed;
 			} else if (trackType == 1 && p.z==(m.z+1)) {
-				this.an = 0.5;
+				this.an = speed;
 			} else if (trackType == 1 && p.z==(m.z-1)) {
-				this.an = -0.5;
+				this.an = -speed;
 			} else if (trackType == 2) {
-				this.ap = -0.5;
+				this.ap = -speed;
 			} else if (trackType == 3) {
-				this.ap = 0.5;
+				this.ap = speed;
 			} else if (trackType == 4) {
-				this.an = 0.5;
+				this.an = speed;
 			} else if (trackType == 5) {
-				this.an = -0.5;
+				this.an = -speed;
 			} else {
 				if(p.x==m.x) {
-					this.ap = (m.z-p.z) * 0.5;
+					this.ap = (m.z-p.z) * speed;
 				} else {
-					this.an = (m.x-p.x) * 0.5;
+					this.an = (m.x-p.x) * speed;
 				}
 			}
 		}
 
 		powerLevel = s;
+		System.out.println("" + s + " power from " + p);
 	}
 
 	private void cullPoweredPoints(int mx, int my, int mz, double speed) {Iterator<Point> i = myPoweredPoints.iterator();
 		while(i.hasNext()) {
 			Point p = i.next();
 			int dist = p.distance(mx,my,mz);
-			if(dist>2 || speed<0.001) {
+			if(dist>2 || powerLevel<=0) {
 				removePower(p,i);
 			}
 		}
@@ -135,15 +150,24 @@ public class ElectricCart extends oc {
 
 	private static final double SPEED_STEP = 0.05;
 	private static double step(double from, double to) {
+		double result = 0;
 		if(from<0 && to>0)
 			to=-to;
 		if(from > to)
-			return Math.max(to, from - SPEED_STEP);
+			result = Math.max(to, from - SPEED_STEP);
 		else
-			return Math.min(to, from + SPEED_STEP);
+			result = Math.min(to, from + SPEED_STEP);
+		System.out.println("step("+from + ","+to+") -> " + result);
+		return result;
 	}
 
 	private void setSpeed(double speed) {
+		if(speed <= 0.001) { // brakes
+			this.an = step(this.an, speed);
+			this.ap = step(this.ap, speed);
+			return;
+		}
+
 		if(Math.abs(this.an) > 0.0001) {
 			this.an = step(this.an, speed);
 		}
@@ -157,7 +181,8 @@ public class ElectricCart extends oc {
 		int mx = (int)Math.floor(this.ak), my = (int)Math.floor(this.al), mz = (int)Math.floor(this.am);
 		double speed = (Math.abs(this.an) + Math.abs(this.ap));
 
-		if(speed <= 0.001)
+		// if stopped but not braking, kill motor
+		if(speed <= 0.001 && SPEEDS[powerLevel] > 0.001)
 			powerLevel = 0;
 
 		cullPoweredPoints(mx, my, mz, speed);
@@ -189,7 +214,7 @@ public class ElectricCart extends oc {
 		if(powerLevel > 0 && ag.a(mx,my,mz) == ly.aH.bc) {
 			int trackType = ag.e(mx,my,mz);
 			if(trackType == 0 || trackType == 1) {
-				setSpeed(1.0 / (16-powerLevel));
+				setSpeed(SPEEDS[powerLevel]);
 			}
 		}
 
