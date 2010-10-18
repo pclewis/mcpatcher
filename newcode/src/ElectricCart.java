@@ -4,14 +4,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ElectricCart extends oc {
-	static HashMap<Point, Integer> allPoweredPoints = new HashMap<Point,Integer>();
-	int powerLevel = 0;
+	private static HashMap<Point, Integer> allPoweredPoints = new HashMap<Point,Integer>();
+	private List<Point> myPoweredPoints = new LinkedList<Point>();
+	private int powerLevel = 0;
+	private boolean isBraked = false;
+	private double dirX, dirZ;
+	private int cooldown = 0;
+
+	private static final int COOLDOWN_TIME =4;
 
 	private static double[] SPEEDS = {
 		Double.NaN,
-		0.0, 0.0, 0.0, 0.0, 0.0,
-		0.0, 0.0, 0.0, 0.0, 0.0,
-		0.1, 0.2, 0.4, 0.6, 1.0
+		0.0, 0.2, 0.2, 0.2, 0.2,
+		0.2, 0.2, 0.2, 0.2, 0.2,
+		0.4, 0.4, 1.0, 1.0, 0.0
 	};
 
 	private class Point {
@@ -19,40 +25,31 @@ public class ElectricCart extends oc {
 			return "{" + x + ", " + y + ", " + z + '}';
 		}
 
-		public int x, y, z;
+		public final int x, y, z, hashCode;
 
 		private Point(int x, int y, int z) {
 			this.x = x;
 			this.y = y;
 			this.z = z;
+			this.hashCode = x|(y<<10)|(z<<20);
 		}
 
 		public int distance(int x, int y, int z) {
-			return Math.abs(this.x - x) + Math.abs(this.y - y) + Math.abs(this.z - z);
+			int dx = x - this.x;
+			int dy = y - this.y;
+			int dz = z - this.z;
+			return (int)Math.sqrt((dx*dx)+(dy*dy)+(dz*dz));
 		}
 
 		public boolean equals(Object o) {
-			if(this == o) return true;
-			if(o == null || getClass() != o.getClass()) return false;
-
-			Point point = (Point) o;
-
-			if(x != point.x) return false;
-			if(y != point.y) return false;
-			if(z != point.z) return false;
-
-			return true;
+			return ((Point)o).hashCode == this.hashCode;
 		}
 
 		public int hashCode() {
-			int result = x;
-			result = 31 * result + y;
-			result = 31 * result + z;
-			return result;
+			return hashCode;
 		}
 	}
 
-	List<Point> myPoweredPoints = new LinkedList<Point>();;
 	public ElectricCart(cn paramcn) {
 		super(paramcn);
 	}
@@ -62,12 +59,12 @@ public class ElectricCart extends oc {
 
 	private boolean addPower(Point p) {
 		if(powerLevel > 0 && !myPoweredPoints.contains(p)) {
-			System.out.println("Adding power: " + p);
+			//System.out.println("Adding power: " + p);
 			myPoweredPoints.add(p);
 			Integer i = allPoweredPoints.get(p);
 			if(i==null) i = 0;
 			allPoweredPoints.put(p, i+1);
-			System.out.println("Refcount: " + (i+1));
+			//System.out.println("Refcount: " + (i+1));
 			setPower(p, powerLevel);
 			//powerLevel -= 1;
 			return true;
@@ -77,14 +74,14 @@ public class ElectricCart extends oc {
 
 	private void removePower(Point p, Iterator iter) {
 		if(myPoweredPoints.contains(p)) {
-			System.out.println("Removing power: " + p);
+			//System.out.println("Removing power: " + p);
 			if(iter != null)
 				iter.remove();
 			else
 				myPoweredPoints.remove(p);
 			Integer i = allPoweredPoints.get(p);
 			assert(i != null);
-			System.out.println("Refcount: " + i);
+			//System.out.println("Refcount: " + i);
 			if(i.equals(1)) {
 				allPoweredPoints.remove(p);
 				setPower(p, 0);
@@ -99,15 +96,17 @@ public class ElectricCart extends oc {
 	}
 
 	private void setPower(Point p, int level) {
-		System.out.println("Set power at " + p + " to " + level);
-		ag.b(p.x, p.y, p.z, level); // set level
-		ly wire = ly.n[ag.a(p.x,p.y,p.z)]; // find instance
-        if (wire != null) wire.a(ag, p.x, p.y, p.z, ly.aH.bc); // trigger update
+		if(ag.e(p.x,p.y,p.z) != level) {
+			//System.out.println("Set power at " + p + " to " + level);
+			ag.b(p.x, p.y, p.z, level); // set level
+			ly wire = ly.n[ag.a(p.x,p.y,p.z)]; // find instance
+			if (wire != null) wire.a(ag, p.x, p.y, p.z, ly.aH.bc); // trigger update
+		}
 	}
 
 	private void setPowerLevel(Point m, Point p, int s) {
 		double speed = SPEEDS[s];
-		if(Math.abs(this.an) < 0.001 && Math.abs(this.ap) < 0.001) {
+		if(speed>0.0 && Math.abs(this.an) < 0.001 && Math.abs(this.ap) < 0.001) {
 			int trackType = ag.e(m.x,m.y,m.z);
 			if(trackType == 0 && p.x==(m.x+1)) {
 				this.ap = -speed;
@@ -134,21 +133,24 @@ public class ElectricCart extends oc {
 			}
 		}
 
+		dirX = this.ap;
+		dirZ = this.an;
 		powerLevel = s;
-		System.out.println("" + s + " power from " + p);
+		//System.out.println("" + s + " power from " + p);
 	}
 
-	private void cullPoweredPoints(int mx, int my, int mz, double speed) {Iterator<Point> i = myPoweredPoints.iterator();
+	private void cullPoweredPoints(int mx, int my, int mz) {
+		Iterator<Point> i = myPoweredPoints.iterator();
 		while(i.hasNext()) {
 			Point p = i.next();
-			int dist = p.distance(mx,my,mz);
-			if(dist>2 || powerLevel<=0) {
+			int dist = p.distance(mx,p.y,mz);
+			if(dist>1 || powerLevel<=0) {
 				removePower(p,i);
 			}
 		}
 	}
 
-	private static final double SPEED_STEP = 0.05;
+	private static final double SPEED_STEP = 0.025;
 	private static double step(double from, double to) {
 		double result = 0;
 		if(from<0 && to>0)
@@ -157,7 +159,7 @@ public class ElectricCart extends oc {
 			result = Math.max(to, from - SPEED_STEP);
 		else
 			result = Math.min(to, from + SPEED_STEP);
-		System.out.println("step("+from + ","+to+") -> " + result);
+		//System.out.println("step("+from + ","+to+") -> " + result);
 		return result;
 	}
 
@@ -175,49 +177,151 @@ public class ElectricCart extends oc {
 		if(Math.abs(this.ap) > 0.0001) {
 			this.ap = step(this.ap, speed);
 		}
+
+		//System.out.println("SET SPEED: " + this.an + "," + this.ap + " (" + this.ao + ")");
 	}
 
 	public void e_() {
 		int mx = (int)Math.floor(this.ak), my = (int)Math.floor(this.al), mz = (int)Math.floor(this.am);
-		double speed = (Math.abs(this.an) + Math.abs(this.ap));
+		boolean isOnTrack = ag.a(mx, my, mz) == ly.aH.bc;
+		if(!isOnTrack && ag.a(mx,my-1,mz) == ly.aH.bc) {
+			isOnTrack = true;
+			my -= 1;
+		}
+		int trackType = isOnTrack ? ag.e(mx,my,mz) : -1;
+		boolean isOnStraightTrack = (trackType == 0 || trackType == 1);
+		boolean isOnRamp = (trackType >= 2 && trackType <= 5);
 
-		// if stopped but not braking, kill motor
-		if(speed <= 0.001 && SPEEDS[powerLevel] > 0.001)
-			powerLevel = 0;
+		//System.out.println("("+mx+","+my+","+mz+") onTrack:"+ isOnTrack+"  ramp: " + isOnRamp);
 
-		cullPoweredPoints(mx, my, mz, speed);
+		if(powerLevel>0) {
+			// if stopped but not braking, kill motor
+			double speed = (Math.abs(this.an) + Math.abs(this.ap));
+			if(speed <= 0.001) {
+				if (SPEEDS[powerLevel] > 0.001)
+					powerLevel = 0;
+				else
+					isBraked = true;
+			}
+		}
 
-		for(int px = -1; px <= 1; ++px) {
-			for(int pz = -1; pz <= 1; ++pz) {
-				int x = mx + px;
-				int y = my;
-				int z = mz + pz;
-				int dist = Math.abs(px) + Math.abs(pz);
-				if(dist!=1)
-					continue;
-				Point p = new Point(x,y,z);
-				if(ag.a(x,y,z) == ly.aw.bc) {
-					int s = ag.e(x, y, z);
-					if(s>0) {
-						if(isMinecartPowered(p)) {
-							addPower(p);
-						} else {
-							setPowerLevel(new Point(mx,my,mz), p, s);
+		cullPoweredPoints(mx, my, mz);
+
+		if(isOnStraightTrack) {
+			for(int px = -1; px <= 1; ++px) {
+				for(int py = -1; py <= 0; ++py) {
+					for(int pz = -1; pz <= 1; ++pz) {
+						int x = mx + px;
+						int y = my + py;
+						int z = mz + pz;
+						int dist = Math.abs(px) + Math.abs(pz);
+						if(dist!=1)
+							continue;
+						if(ag.a(x,y,z) == ly.aw.bc) {
+							int s = ag.e(x, y, z);
+							if(s>0) {
+								if(isBraked) {
+									isBraked = SPEEDS[s] <= 0.001;
+								}
+								setPowerLevel(new Point(mx,my,mz), new Point(x,y,z), s);
+							}
 						}
-					} else {
-						addPower(p);
 					}
 				}
 			}
 		}
 
-		if(powerLevel > 0 && ag.a(mx,my,mz) == ly.aH.bc) {
-			int trackType = ag.e(mx,my,mz);
-			if(trackType == 0 || trackType == 1) {
+		if(powerLevel>0) {
+			for(int py = -2; py > -5; --py) {
+				int bt = ag.a(mx,my+py,mz);
+				if(bt != ly.aw.bc) {
+					continue;
+				}
+				addPower(new Point(mx, my+py, mz));
+			}
+		}
+
+		if(isBraked)
+			return;
+
+		if(powerLevel>0) {
+			if(cooldown>0) {
+				if(--cooldown == 0) {
+					an = dirX;
+					ap = dirZ;
+				}
+			} else {
+				dirX = an;
+				dirZ = ap;				
+			}
+			if(cooldown==0 && (isOnStraightTrack||isOnRamp)) {
 				setSpeed(SPEEDS[powerLevel]);
 			}
 		}
 
 		super.e_();
+	}
+
+	/* save */
+	protected void a(hm db) {
+		super.a(db);
+		db.a("PowerLevel", powerLevel);
+	}
+
+	/* load */
+	protected void b(hm db) {
+		super.b(db);
+		powerLevel = db.e("PowerLevel");
+	}
+
+	/* destroyed */
+	public void F() {
+		Iterator<Point> i = myPoweredPoints.iterator();
+		while(i.hasNext())
+			removePower(i.next(), i);
+		super.F();
+	}
+
+	private static double distance(double fx, double fy, double fz, double tx, double ty, double tz) {
+		double x=(fx-tx), y=(fy-ty), z=(fz-tz);
+		return Math.sqrt(x*x+y*y+z*z);
+	}
+	private boolean movingToward(kh e) {
+		// see if past distance is further than current distance
+		// seeing if future dist is farther would not work if our speed is enough to pass entirely through
+		return distance(ak-an, ak-ao, ak-ap, e.ak, e.al, e.am)
+		     > distance(ak, al, am, e.ak, e.al, e.am);
+	}
+
+	/* collision */
+	public void f(kh other) {
+		if(other == this.ae) return; // ignore rider
+
+		if(powerLevel>0 && cooldown==0 && movingToward(other)) {
+			cooldown = COOLDOWN_TIME;
+		}
+		
+		if(other instanceof ElectricCart) {
+			ElectricCart ec = (ElectricCart)other;
+			//System.out.println("Collision with cart  otherBraked = " + ec.isBraked + " me = " + this.isBraked );
+
+			if(ec.isBraked) {
+				this.powerLevel = ec.powerLevel;
+				double x=ec.an,z=ec.ap;
+				super.f(other);
+				other.an=x; other.ap=z;
+				return;
+			} else if (this.isBraked) {
+				ec.powerLevel = this.powerLevel;
+			}
+		}
+
+		if(this.isBraked) {
+			double x=an,z=ap;
+			super.f(other);
+			an=x; ap=z;
+		} else {
+			super.f(other);
+		}
 	}
 }

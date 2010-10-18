@@ -262,6 +262,8 @@ public class MCPatcher {
 		replaceFiles.add("ElectricCart$Point.class");
 
 		patches.add(new PatchSet(Patches.entityLoader));
+
+		patches.add(new PatchSet(Patches.moreTracks));
 	}
 
 	private static boolean resizeImage(String name, InputStream input, JarOutputStream newjar) throws IOException {

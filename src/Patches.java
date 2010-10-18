@@ -556,4 +556,29 @@ class Patches implements Opcode {
 			})
 		}
 	);
+
+	public static final PatchSet moreTracks = new PatchSet(
+		"Recipes",
+	    new PatchSpec[] {
+		    new PatchSpec(new BytecodePatch() {
+			    public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
+			    public String getDescription() { return "increase crafted tracks from 16 to 64"; }
+
+			    byte[] getFromBytes(MethodInfo mi) throws Exception {
+				    return buildCode(
+					    GETSTATIC, fc(mi,new FieldRef("ly", "aH", "Lly;")),
+					    BIPUSH, 16
+				    );
+			    }
+
+			    byte[] getToBytes(MethodInfo mi) throws Exception {
+				    return buildCode(
+					    GETSTATIC, fc(mi,new FieldRef("ly", "aH", "Lly;")),
+					    BIPUSH, 64
+				    );
+			    }
+
+		    })
+	    }
+	);
 }

@@ -8,6 +8,7 @@ public class ConstPoolUtils {
 		if(o instanceof Integer)   { return ConstPool.CONST_Integer; }
 		if(o instanceof String)    { return ConstPool.CONST_String;  }
 		if(o instanceof MethodRef) { return ConstPool.CONST_Methodref; }
+		if(o instanceof FieldRef)  { return ConstPool.CONST_Fieldref; }
 		if(o instanceof ClassRef)  { return ConstPool.CONST_Class; }
 		throw new AssertionError("Unreachable");
 	}
@@ -21,6 +22,11 @@ public class ConstPoolUtils {
 			MethodRef mr = (MethodRef)o;
 			int ci = findOrAdd(cp, new ClassRef(mr.getClassName()));
 			return cp.addMethodrefInfo(ci, mr.getName(), mr.getType());
+		}
+		if(o instanceof FieldRef) {
+			FieldRef mr = (FieldRef)o;
+			int ci = findOrAdd(cp, new ClassRef(mr.getClassName()));
+			return cp.addFieldrefInfo(ci, mr.getName(), mr.getType());
 		}
 		if(o instanceof ClassRef) { return cp.addClassInfo(((ClassRef) o).getClassName()); }
 		throw new AssertionError("Unreachable");
@@ -36,6 +42,12 @@ public class ConstPoolUtils {
 			return cp.getMethodrefClassName(index).equals(mr.getClassName())
 				&& cp.getMethodrefName(index).equals(mr.getName())
 				&& cp.getMethodrefType(index).equals(mr.getType());
+		}
+		if(o instanceof FieldRef) {
+			FieldRef mr = (FieldRef)o;
+			return cp.getFieldrefClassName(index).equals(mr.getClassName())
+				&& cp.getFieldrefName(index).equals(mr.getName())
+				&& cp.getFieldrefType(index).equals(mr.getType());
 		}
 		if(o instanceof ClassRef) { return cp.getClassInfo(index).equals(((ClassRef) o).getClassName()); }
 		throw new AssertionError("Unreachable");

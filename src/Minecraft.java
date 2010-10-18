@@ -86,6 +86,7 @@ public class Minecraft implements Opcode {
 		put("gy", new FilenameSignature("gy.class"));
 		put("Wire", new FilenameSignature("kf.class"));
 		put("EntityLoader", new ConstSignature("Skipping Entity with id "));
+		put("Recipes", new ConstSignature(" recipes"));
 	}};
 	private List<String> errors = new LinkedList<String>();
 
