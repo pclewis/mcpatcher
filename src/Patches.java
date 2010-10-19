@@ -481,7 +481,9 @@ class Patches implements Opcode {
 	public static final PatchSet cart = new PatchSet(
 		"oc",
 		new PatchSpec[] {
-			new PatchSpec(new ConstPatch(0.4D, 1.0D))
+			new PatchSpec(new ConstPatch(0.4D, 1.0D)), // increase max speed
+			new PatchSpec(new ConstPatch(0.75D, 1.0D)), // remove slowdown when occupied
+			new PatchSpec(new ConstPatch(0.996999979019165D, 1.0D)), // same
 		}
 	);
 

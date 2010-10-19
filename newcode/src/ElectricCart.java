@@ -6,12 +6,17 @@ import java.util.List;
 public class ElectricCart extends oc {
 	private static HashMap<Point, Integer> allPoweredPoints = new HashMap<Point,Integer>();
 	private List<Point> myPoweredPoints = new LinkedList<Point>();
+	private boolean blockedDirections[][] = new boolean[3][3];
 	private int powerLevel = 0;
 	private boolean isBraked = false;
-	private double dirX, dirZ;
+	private boolean isInUpdate = false;
+	private boolean hitEntity = false;
+	private int dirX, dirZ;
 	private int cooldown = 0;
+	private int stopCountdown = 0;
 
-	private static final int COOLDOWN_TIME =4;
+	private static final int COOLDOWN_TIME = 4;
+	private static final int STOPPED_TIME = 3;
 
 	private static double[] SPEEDS = {
 		Double.NaN,
@@ -109,32 +114,33 @@ public class ElectricCart extends oc {
 		if(speed>0.0 && Math.abs(this.an) < 0.001 && Math.abs(this.ap) < 0.001) {
 			int trackType = ag.e(m.x,m.y,m.z);
 			if(trackType == 0 && p.x==(m.x+1)) {
-				this.ap = -speed;
+				dirZ = -1;
 			} else if (trackType==0 && p.x==(m.x-1)) {
-				this.ap = speed;
+				dirZ = 1;
 			} else if (trackType == 1 && p.z==(m.z+1)) {
-				this.an = speed;
+				dirX = 1;
 			} else if (trackType == 1 && p.z==(m.z-1)) {
-				this.an = -speed;
+				dirX = -1;
 			} else if (trackType == 2) {
-				this.ap = -speed;
+				dirZ = -1;
 			} else if (trackType == 3) {
-				this.ap = speed;
+				dirZ = 1;
 			} else if (trackType == 4) {
-				this.an = speed;
+				dirX = 1;
 			} else if (trackType == 5) {
-				this.an = -speed;
+				dirX = -1;
 			} else {
 				if(p.x==m.x) {
-					this.ap = (m.z-p.z) * speed;
+					dirZ = m.z>p.z ? 1 : -1;
 				} else {
-					this.an = (m.x-p.x) * speed;
+					dirX = m.x>p.x ? 1 : -1;
 				}
 			}
+		} else if (speed>0.0) {
+			dirX = dirZ = 0;
+			updateDirection();
 		}
 
-		dirX = this.ap;
-		dirZ = this.an;
 		powerLevel = s;
 		//System.out.println("" + s + " power from " + p);
 	}
@@ -153,8 +159,6 @@ public class ElectricCart extends oc {
 	private static final double SPEED_STEP = 0.025;
 	private static double step(double from, double to) {
 		double result = 0;
-		if(from<0 && to>0)
-			to=-to;
 		if(from > to)
 			result = Math.max(to, from - SPEED_STEP);
 		else
@@ -165,18 +169,13 @@ public class ElectricCart extends oc {
 
 	private void setSpeed(double speed) {
 		if(speed <= 0.001) { // brakes
-			this.an = step(this.an, speed);
-			this.ap = step(this.ap, speed);
+			this.an = step(this.an, 0);
+			this.ap = step(this.ap, 0);
 			return;
 		}
 
-		if(Math.abs(this.an) > 0.0001) {
-			this.an = step(this.an, speed);
-		}
-
-		if(Math.abs(this.ap) > 0.0001) {
-			this.ap = step(this.ap, speed);
-		}
+		this.an = step(this.an, speed * dirX);
+		this.ap = step(this.ap, speed * dirZ);
 
 		//System.out.println("SET SPEED: " + this.an + "," + this.ap + " (" + this.ao + ")");
 	}
@@ -197,11 +196,20 @@ public class ElectricCart extends oc {
 		if(powerLevel>0) {
 			// if stopped but not braking, kill motor
 			double speed = (Math.abs(this.an) + Math.abs(this.ap));
-			if(speed <= 0.001) {
-				if (SPEEDS[powerLevel] > 0.001)
-					powerLevel = 0;
-				else
+			if(speed < (SPEED_STEP/4)) {
+				if (SPEEDS[powerLevel] > 0) {
+					/*
+					if(++stopCountdown >= STOPPED_TIME) {
+						stopCountdown = 0;
+						powerLevel = 0;
+					}
+					*/
+				} else {
 					isBraked = true;
+				}
+			} else if(cooldown<=0){
+				updateDirection();
+				stopCountdown = 0;
 			}
 		}
 
@@ -246,20 +254,48 @@ public class ElectricCart extends oc {
 
 		if(powerLevel>0) {
 			if(cooldown>0) {
-				if(--cooldown == 0) {
-					an = dirX;
-					ap = dirZ;
-				}
-			} else {
-				dirX = an;
-				dirZ = ap;				
+				if(--cooldown==0)
+					this.an = this.ap = 0;
 			}
-			if(cooldown==0 && (isOnStraightTrack||isOnRamp)) {
+			if(cooldown==0 && (isOnTrack)) {
 				setSpeed(SPEEDS[powerLevel]);
 			}
 		}
 
+		isInUpdate = (this.an!=0.0D) || (this.ap!=0.0D);
+		int tryX = (int)Math.signum(this.an), tryZ = (int)Math.signum(this.ap);
+		hitEntity = false;
+
 		super.e_();
+
+		if(isInUpdate) {
+			/* tried to move and didn't, probably ran into a wall */
+			if(!hitEntity && this.an==0.0D && this.ap==0.0D) {
+				System.out.println("Stopped by something");
+				if(SPEEDS[powerLevel]==0)
+					isBraked = true;
+				else {
+					powerLevel = 0;
+					blockedDirections[tryX+1][tryZ+1] = true;
+					System.out.println("Block: " + tryX + "," + tryZ);
+				}
+			} else if(this.an!=0.0D || this.ap!=0.0D) {
+				blockedDirections[tryX+1][tryZ+1] = false;
+				//System.out.println("Unblock: " + tryX + "," + tryZ);
+			}
+		}
+
+		isInUpdate = false;
+	}
+
+	private void updateDirection() {
+		int newDirX = (int)Math.signum(this.an);
+		int newDirZ = (int)Math.signum(this.ap);
+		if((dirX != 0 && newDirX == -dirX) || (dirZ != 0 && newDirZ == -dirZ)) // no 180s allowed
+			return;
+		dirX = newDirX;
+		dirZ = newDirZ;
+		//System.out.println("updated direction: (" + dirX + "," + dirZ + ")");
 	}
 
 	/* save */
@@ -289,13 +325,23 @@ public class ElectricCart extends oc {
 	private boolean movingToward(kh e) {
 		// see if past distance is further than current distance
 		// seeing if future dist is farther would not work if our speed is enough to pass entirely through
-		return distance(ak-an, ak-ao, ak-ap, e.ak, e.al, e.am)
+		return distance(ak-an, al-ao, ak-ap, e.ak, e.al, e.am)
 		     > distance(ak, al, am, e.ak, e.al, e.am);
 	}
 
 	/* collision */
 	public void f(kh other) {
 		if(other == this.ae) return; // ignore rider
+
+		if(isInUpdate)
+			hitEntity = true;
+
+		// if another cart hit us but we're not moving, let them deal with it
+		if(other instanceof ElectricCart && !isInUpdate) {
+			if(((ElectricCart)other).isInUpdate)
+				other.f(this);
+			return;
+		}
 
 		if(powerLevel>0 && cooldown==0 && movingToward(other)) {
 			cooldown = COOLDOWN_TIME;
@@ -309,19 +355,21 @@ public class ElectricCart extends oc {
 				this.powerLevel = ec.powerLevel;
 				double x=ec.an,z=ec.ap;
 				super.f(other);
-				other.an=x; other.ap=z;
+				ec.an=x; ec.ap=z;
 				return;
-			} else if (this.isBraked) {
-				ec.powerLevel = this.powerLevel;
+			} else if (ec.blockedDirections[dirX+1][dirZ+1]) {
+				this.powerLevel = 0;
+				this.blockedDirections[dirX+1][dirZ+1] = true;
+				System.out.println("Chain block: " + dirX + "," + dirZ);
+			} else {
+				// do normal resolve, but first transfer a bunch of energy to them
+				ec.an += an*0.50;
+				ec.ap += ap*0.50;
+				this.an *= 0.75;
+				this.ap *= 0.75;
 			}
 		}
 
-		if(this.isBraked) {
-			double x=an,z=ap;
-			super.f(other);
-			an=x; ap=z;
-		} else {
-			super.f(other);
-		}
+		super.f(other);
 	}
 }
