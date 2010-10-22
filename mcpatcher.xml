@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="mcpatcher" default="all">
 
+    <property file="mcpatcher.properties" />
+
  <taskdef resource="proguard/ant/task.properties"
-         classpath="\Users\nex\Desktop\proguard4.5.1\lib\proguard.jar" />
-<property name="launch4j.dir" location="\Users\nex\Desktop\launch4j" />
+         classpath="${proguard.dir}\lib\proguard.jar" />
  <taskdef name="launch4j"
   classname="net.sf.launch4j.ant.Launch4jTask"
   classpath="${launch4j.dir}/launch4j.jar
         :${launch4j.dir}/lib/xstream.jar" />
-  <property file="mcpatcher.properties"/>
   <!-- Uncomment the following property if no tests compilation is needed -->
-  <!-- 
   <property name="skip.tests" value="true"/>
-   -->
-  
+
   <!-- Compiler options -->
   
   <property name="compiler.debug" value="on"/>
@@ -87,18 +85,20 @@
   
   <!-- Project Libraries -->
   
-  <path id="library.javassist.classpath">
-    <pathelement location="D:/javassist-3.13.GA/javassist.jar"/>
-  </path>
-  
+    <path id="library.javassist.classpath">
+      <pathelement location="${javassist.dir}/javassist.jar"/>
+    </path>
+
+    <path id="library.unrar.classpath">
+      <pathelement location="${junrar.dir}/junrar.jar"/>
+    </path>
+
+
   <path id="library.jgoodies.classpath">
     <pathelement location="${basedir}/lib/junit-3.8.2.jar"/>
     <pathelement location="${basedir}/lib/forms-1.2.1.jar"/>
   </path>
   
-  <path id="library.unrar.classpath">
-    <pathelement location="D:/Java/lib/unrar/out/artifacts/Unrar_jar/Unrar.jar"/>
-  </path>
   <!-- Register Custom Compiler Taskdefs -->
   <property name="javac2.home" value="${idea.home}/lib"/>
   <path id="javac2.classpath">
@@ -230,9 +230,9 @@
          manifest="${basedir}/src/META-INF/MANIFEST.MF"
          filesetmanifest="skip">
       <zipfileset dir="${mcpatcher.output.dir}"/>
-      <zipfileset src="D:/javassist-3.13.GA/javassist.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/maven/"/>
+      <zipfileset src="${javassist.dir}/javassist.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/maven/"/>
       <zipfileset src="${basedir}/lib/forms-1.2.1.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/maven/"/>
-      <zipfileset src="D:/Java/lib/unrar/out/artifacts/Unrar_jar/Unrar.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/.idea/,**/maven/" />
+      <zipfileset src="${junrar.dir}/junrar.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/.idea/,**/maven/" />
     </jar>
     <!--<copy file="${temp.jar.path.mcpatcher.jar}" tofile="${artifact.temp.output.mcpatcher:jar}/mcpatcher.jar"/> -->
     <proguard configuration="mcpatcher.pro">
