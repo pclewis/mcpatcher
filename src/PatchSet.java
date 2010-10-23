@@ -1,3 +1,4 @@
+import javassist.CtClass;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
@@ -41,10 +42,23 @@ public class PatchSet {
 	    for(PatchSpec ps :  patchSpecs) {
 		    ps.getPatch().visitConstPool(cp);
 	    }
-    };
+    }
+
     public void visitMethod(MethodInfo mi) throws Exception{
 	    for(PatchSpec ps :  patchSpecs) {
 		    ps.getPatch().visitMethod(mi);
 	    }
-    };
+    }
+
+    public void visitClassPre(CtClass ct) throws Exception {
+        for(PatchSpec ps : patchSpecs) {
+            ps.getPatch().visitClassPre(ct);
+        }
+    }
+
+    public void visitClassPost(CtClass ct) throws Exception {
+        for(PatchSpec ps : patchSpecs) {
+            ps.getPatch().visitClassPost(ct);
+        }
+    }
 }

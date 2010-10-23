@@ -1,3 +1,4 @@
+import javassist.CtClass;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
@@ -7,8 +8,10 @@ public abstract class Patch implements Cloneable {
     abstract public ParamSpec[] getParamSpecs();
     abstract public String getDescription();
 
-    abstract public void visitConstPool(ConstPool cp) throws Exception;
-    abstract public void visitMethod(MethodInfo mi) throws Exception;
+    public void visitClassPre(CtClass ct) throws Exception {}
+    public void visitClassPost(CtClass ct) throws Exception {}
+    public void visitConstPool(ConstPool cp) throws Exception {}
+    public void visitMethod(MethodInfo mi) throws Exception {}
 
 	public Patch() {
 		this.params = new Params(new Params.MissHandler() {

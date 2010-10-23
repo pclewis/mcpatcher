@@ -1,3 +1,5 @@
+import javassist.ClassPool;
+import javassist.CtClass;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
@@ -103,6 +105,18 @@ public class MCPatcher {
 
 		javassist.bytecode.MethodInfo.doPreverify = true;
 
+        ClassPool cp = ClassPool.getDefault();
+        for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
+            if(entry.getName().endsWith(".class")) {
+                try {
+                    cp.makeClass(minecraft.getJar().getInputStream(entry));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException();
+                }
+            }
+        }
+
 		try {
 			int totalFiles = minecraft.getJar().size();
 			int procFiles = 0;
@@ -134,7 +148,7 @@ public class MCPatcher {
 					replaceFile(name, newjar);
 					patched = true;
 				} else if (name.endsWith(".class")) {
-					patched = applyPatches(name, input, minecraft, patches, newjar);
+					patched = applyPatches(name, input, minecraft, patches, newjar, cp);
 				} else if(name.equals("gui/items.png") || name.equals("terrain.png")) {
 					patched = resizeImage(name, input, newjar);
 					if(!patched) { // can't rewind, so reopen
@@ -288,21 +302,26 @@ public class MCPatcher {
 		return patched;
 	}
 
-	private static boolean applyPatches(String name, InputStream input, Minecraft minecraft, ArrayList<PatchSet> patches, JarOutputStream newjar) throws Exception {
+	private static boolean applyPatches(String name, InputStream input, Minecraft minecraft,
+                                        ArrayList<PatchSet> patches, JarOutputStream newjar, ClassPool classPool) throws Exception {
 		Boolean patched = false;
 		ClassFile cf = null;
 		ConstPool cp = null;
+        CtClass ct = null;
 		for(PatchSet patch : patches) {
 			if(name.equals(minecraft.getClassMap().get(patch.getClassName()))) {
 				if(cf == null) {
 					MCPatcher.out.println("Patching class: " + patch.getClassName() + " (" + name + ")");
-					cf = new ClassFile(new DataInputStream(input));
+                    ct = classPool.makeClass(input);
+					cf = ct.getClassFile(); //new ClassFile(new DataInputStream(input));
 					cp = cf.getConstPool();
 				}
+                patch.visitClassPre(ct);
 				patch.visitConstPool(cp);
 				for(Object mo : cf.getMethods()) {
 					patch.visitMethod((MethodInfo)mo);
 				}
+                patch.visitClassPost(ct);
 			}
 		}
 		if(cf != null) {
