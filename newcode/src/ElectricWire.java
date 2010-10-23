@@ -7,7 +7,8 @@ public class ElectricWire extends kf {
 
 	protected void h(cn state, int x, int y, int z) {
 		//System.out.println(String.format("h(%d,%d,%d)", x, y, z));
-		if(x==skipX&&y==skipY&&z==skipZ) {
+		if(ElectricCart.isMinecartPowered(x,y,z)) {
+			//System.out.println("Minecart powered: " +x+","+y+","+z);
 			//System.out.println("Skip");
 			//super.i(state, x, y, z);
 		} else {
@@ -16,23 +17,18 @@ public class ElectricWire extends kf {
 	}
 
 	public void a(cn state, int x, int y, int z, int src) {
-		//System.out.println(String.format("a(%d,%d,%d,%d)", x, y, z, src));
-		if(x==skipX&&y==skipY&&z==skipZ) {
-			//System.out.println("SkipA");
-		} else if(src == ly.aH.bc && state.e(x,y,z)>0) { // track piece
-			//System.out.println("Updated by track piece");
-			skipX=x;skipY=y;skipZ=z;
-			state.g(x,y,z,this.bc);
+		if(src == ly.aH.bc) { // track piece
+			//System.out.println("Updated by track piece: " +x+","+y+","+z);
 			state.b(x,y,z,x,y,z);
+			state.g(x,y,z,this.bc);
 			state.g(x-1,y,z,this.bc);
 			state.g(x+1,y,z,this.bc);
-			state.g(x,y-1,z,this.bc);
-			state.g(x,y+1,z,this.bc);
 			state.g(x,y,z-1,this.bc);
 			state.g(x,y,z+1,this.bc);
-			skipY=9999;
+			state.g(x,y-1,z,this.bc);
+			state.g(x,y+1,z,this.bc);
 		} else {
-			//System.out.println("Updated by other.");
+			//System.out.println("Updated by other: " + x+","+y+","+z);
 			super.a(state, x, y, z, src);
 		}
 	}

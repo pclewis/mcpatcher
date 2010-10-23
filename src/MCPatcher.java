@@ -260,6 +260,7 @@ public class MCPatcher {
 		patches.add(new PatchSet(Patches.wire));
 		replaceFiles.add("ElectricWire.class");
 		replaceFiles.add("ElectricCart$Point.class");
+		replaceFiles.add("ElectricCart$PoweredPoint.class");
 
 		patches.add(new PatchSet(Patches.entityLoader));
 

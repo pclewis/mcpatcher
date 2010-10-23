@@ -483,7 +483,7 @@ class Patches implements Opcode {
 		new PatchSpec[] {
 			new PatchSpec(new ConstPatch(0.4D, 1.0D)), // increase max speed
 			new PatchSpec(new ConstPatch(0.75D, 1.0D)), // remove slowdown when occupied
-			new PatchSpec(new ConstPatch(0.996999979019165D, 1.0D)), // same
+			new PatchSpec(new ConstPatch(0.996999979019165D, 0.9599999785423279D)), // same falloff as non-occupied
 		}
 	);
 
