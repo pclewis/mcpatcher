@@ -5,8 +5,11 @@ import java.util.List;
 
 public class ElectricCart extends oc {
 	private static final double SIN45 = Math.sin(Math.PI/4);
+    private static final int OBSIDIAN_BLOCK = 0x31;
+    private static final int WIRE_BLOCK     = 0x37;
+	private static final int TRACK_BLOCK    = 0x42;
 
-	private class PoweredPoint {
+    private class PoweredPoint {
 		public static final int TIMEOUT = 2;
 		int refcount;
 		int timeout;
@@ -36,8 +39,6 @@ public class ElectricCart extends oc {
 		0.2, 0.2, 0.2, 0.2, 0.2,
 		0.4, 0.4, 1.0, 1.0, 0.0
 	};
-	private static final int WIRE_BLOCK = ly.aw.bc;
-	private static final int TRACK_BLOCK = ly.aH.bc;
 
 	private static class Point {
 		public String toString() {
@@ -256,12 +257,12 @@ public class ElectricCart extends oc {
 		}
 
 		if(powerLevel>0) {
-			for(int py = -2; py > -5; --py) {
+			for(int py = -1; py > -5; --py) {
 				int bt = getBlockType(mx, my+py, mz);
-				if(bt != WIRE_BLOCK) {
-					continue;
-				}
-				addPower(new Point(mx, my+py, mz));
+                if(bt == OBSIDIAN_BLOCK)
+                    break;
+				if(bt == WIRE_BLOCK)
+				    addPower(new Point(mx, my+py, mz));
 			}
 		}
 
