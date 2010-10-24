@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 import de.innosystec.unrar.Archive;
 import de.innosystec.unrar.exception.RarException;
 import de.innosystec.unrar.rarfile.FileHeader;

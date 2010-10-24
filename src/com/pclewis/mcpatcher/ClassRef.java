@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 public class ClassRef {
 	public String getClassName() {
 		return className;

@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 public abstract class ConstTilePatch extends ConstPatch {
 	private int tag = -1;
 

@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 public class ParamSpec {
     String name;
     String defaultSource;

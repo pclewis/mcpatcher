@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 import javassist.CtClass;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;

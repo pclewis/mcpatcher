@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 import de.innosystec.unrar.exception.RarException;
 
 import javax.imageio.ImageIO;

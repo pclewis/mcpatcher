@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 import javax.swing.*;
 import java.io.OutputStream;
 import java.io.PrintStream;

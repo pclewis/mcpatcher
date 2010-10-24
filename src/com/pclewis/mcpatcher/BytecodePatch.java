@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 import javassist.bytecode.*;
 
 import java.io.ByteArrayOutputStream;

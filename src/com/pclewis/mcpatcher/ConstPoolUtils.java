@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 import javassist.bytecode.Bytecode;
 import javassist.bytecode.ConstPool;
 
@@ -82,6 +84,7 @@ public class ConstPoolUtils {
 		}
 		return getLoad(op, index);
 	}
+
 	static byte[] getLoad(int op, int i) {
 		int mop = op;
 		if(i>=Byte.MAX_VALUE && mop==Bytecode.LDC)
@@ -91,4 +94,15 @@ public class ConstPoolUtils {
 		else
 			return new byte[]{ (byte)mop, Util.b(i, 1), Util.b(i, 0) };
 	}
+
+    public static boolean contains(ConstPool cp, Object o) {
+        int tag = getTag(o);
+        for(int i = 1; i < cp.getSize(); ++i) {
+            if( cp.getTag(i) == tag ) {
+                if(checkEqual(cp, i, o))
+                    return true;
+            }
+        }
+        return false;
+    }
 }

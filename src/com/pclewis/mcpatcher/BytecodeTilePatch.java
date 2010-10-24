@@ -1,8 +1,7 @@
+package com.pclewis.mcpatcher;
+
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 abstract class BytecodeTilePatch extends BytecodePatch {
     int multiplier = 1;

@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 public class FieldRef {
 	String className;
 	String name;

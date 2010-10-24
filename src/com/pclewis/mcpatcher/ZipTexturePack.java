@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Collections;

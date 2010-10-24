@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher;
+
 public class PatchSpec {
 	public Patch patch;
     public boolean required;
