@@ -1,10 +1,10 @@
 import net.minecraft.client.Minecraft;
 
-public class ht extends z {
+public class iq extends ab {
 	WaterAnimation w;
 
-	public ht(Minecraft game) {
-		super(ly.B.bb + 1);
+	public iq(Minecraft game) {
+		super(ne.B.bh + 1);
 		this.e = 2;
 		w = new WaterAnimation(game, "water_flowing", this.b, this.a, 0, 0);
 	}

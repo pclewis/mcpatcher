@@ -174,7 +174,7 @@ class Patches implements Opcode {
 				push(mi, size),
 				push(mi, size),
 				ALOAD_0,
-				GETFIELD, 0x00, 0x2B,
+				GETFIELD, 0x00, 0x2E,
 				ICONST_0,
 				push(mi, size)
 			);
@@ -449,16 +449,16 @@ class Patches implements Opcode {
 	public static final PatchSet customWaterMC = new PatchSet(
 		"Minecraft",
 		new PatchSpec[] {
-			new PatchSpec(new PassThisPatch("ht", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
-			new PatchSpec(new PassThisPatch("ml", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("iq", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("nr", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 
 	public static final PatchSet customLavaMC = new PatchSet(
 		"Minecraft",
 		new PatchSpec[] {
-			new PatchSpec(new PassThisPatch("eg", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
-			new PatchSpec(new PassThisPatch("at", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("et", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("ay", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 

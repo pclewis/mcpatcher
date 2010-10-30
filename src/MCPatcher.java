@@ -1,5 +1,10 @@
-import javassist.bytecode.*;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.MethodInfo;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -11,9 +16,6 @@ import java.util.Collections;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 
 public class MCPatcher {
 	public static PrintStream out;
@@ -199,8 +201,8 @@ public class MCPatcher {
 		PatchSet waterPatches = new PatchSet(Patches.water);
 		if (globalParams.getBoolean("useCustomWater")) {
 		    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customWaterMC)));
-			replaceFiles.add("ht.class");
-			replaceFiles.add("ml.class");
+			replaceFiles.add("iq.class");
+			replaceFiles.add("nr.class");
 		} else {
 			if(!globalParams.getBoolean("useAnimatedWater")) {
 				waterPatches.setParam("tileSize", "0");
@@ -213,8 +215,8 @@ public class MCPatcher {
 		PatchSet lavaPatches = new PatchSet(Patches.water);
 		if(globalParams.getBoolean("useCustomLava")) {
 			patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customLavaMC)));
-			replaceFiles.add("eg.class");
-			replaceFiles.add("at.class");
+			replaceFiles.add("et.class");
+			replaceFiles.add("ay.class");
 			//lavaPatches.setParam("tileSize", "0");
 			//patches.add(new PatchSet("StillLava", lavaPatches));
 			//patches.add( new PatchSet(Patches.hideStillLava) );

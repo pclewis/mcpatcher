@@ -22,18 +22,11 @@ public class Minecraft implements Opcode {
 			(byte)NEWARRAY, T_BYTE
 		}));
 		put("Compass", new BytecodeSignature(new byte[]{
-			(byte)SIPUSH, 0x01, 0x40, // 320
-			(byte)NEWARRAY, T_FLOAT,
-			(byte)PUTFIELD, 0x00, 0x28, // these will probably change..
-			(byte)ALOAD_0,
-			(byte)SIPUSH, 0x01, 0x40, // 320
-			(byte)NEWARRAY, T_FLOAT,
-			(byte)PUTFIELD, 0x00, 0x29,
 			(byte)ALOAD_0,
 			(byte)SIPUSH, 0x01, 0x00, // 256
 			(byte)NEWARRAY, T_INT,
-			(byte)PUTFIELD, 0x00, 0x2B,
-			(byte)ALOAD_0,	
+			(byte)PUTFIELD, 0x00, 0x2E,
+			(byte)ALOAD_0,
 		}));
 		put("Fire", new BytecodeSignature(new byte[]{
 			(byte)SIPUSH, 0x01, 0x40, // 320
@@ -46,7 +39,7 @@ public class Minecraft implements Opcode {
 			(byte)RETURN
 		}));
 		put("StillLava", new BytecodeSignature(new byte[]{
-			(byte)INVOKESTATIC, 0x00, 0x1E, // Math.random
+			(byte)INVOKESTATIC, 0x00, 0x1F, // Math.random
 			(byte)LDC2_W, 0x00, 0x13, // 0.005
 			(byte)DCMPG,
 			(byte)IFGE, 0x00, 0x10
@@ -63,7 +56,7 @@ public class Minecraft implements Opcode {
 			(byte)FALOAD
 		}));
 		put("StillWater", new BytecodeSignature(new byte[]{
-			(byte)INVOKESTATIC, 0x00, 0x19, // Math.random
+			(byte)INVOKESTATIC, 0x00, 0x1A, // Math.random
 			(byte)LDC2_W, 0x00, 0x0E, // 0.005
 			(byte)DCMPG,
 			(byte)IFGE, 0x00, 0x10
@@ -175,6 +168,7 @@ public class Minecraft implements Opcode {
 								classMap.get(cfe.getKey()) + ", " + file.getName() );
 						} else {
 							classMap.put(cfe.getKey(), file.getName());
+                            MCPatcher.out.println("Found " + cfe.getKey() + ": " + file.getName() );
 						}
 					}
 				}
