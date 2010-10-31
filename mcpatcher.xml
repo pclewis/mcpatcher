@@ -98,6 +98,10 @@
     <pathelement location="${basedir}/lib/junit-3.8.2.jar"/>
     <pathelement location="${basedir}/lib/forms-1.2.1.jar"/>
   </path>
+
+  <path id="library.intellij.forms.classpath">
+    <pathelement location="${javac2.home}/forms_rt.jar"/>
+  </path>
   
   <!-- Register Custom Compiler Taskdefs -->
   <property name="javac2.home" value="${idea.home}/lib"/>
@@ -139,6 +143,7 @@
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
     <path refid="library.unrar.classpath"/>
+    <path refid="library.intellij.forms.classpath"/>
   </path>
   
   <path id="mcpatcher.runtime.production.module.classpath">
@@ -146,6 +151,7 @@
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
     <path refid="library.unrar.classpath"/>
+    <path refid="library.intellij.forms.classpath"/>
   </path>
   
   <path id="mcpatcher.module.classpath">
@@ -154,6 +160,7 @@
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
     <path refid="library.unrar.classpath"/>
+    <path refid="library.intellij.forms.classpath"/>
   </path>
   
   <path id="mcpatcher.runtime.module.classpath">
@@ -162,6 +169,7 @@
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
     <path refid="library.unrar.classpath"/>
+    <path refid="library.intellij.forms.classpath"/>
   </path>
   
   
@@ -233,6 +241,7 @@
       <zipfileset src="${javassist.dir}/javassist.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/maven/"/>
       <zipfileset src="${basedir}/lib/forms-1.2.1.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/maven/"/>
       <zipfileset src="${junrar.dir}/junrar.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/.idea/,**/maven/" />
+      <zipfileset src="${idea.home}/lib/forms_rt.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/.idea/,**/maven/" />
     </jar>
     <!--<copy file="${temp.jar.path.mcpatcher.jar}" tofile="${artifact.temp.output.mcpatcher:jar}/mcpatcher.jar"/> -->
     <proguard configuration="mcpatcher.pro">
