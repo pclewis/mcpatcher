@@ -465,8 +465,8 @@ class Patches implements Opcode {
 	public static final PatchSet betterGrass = new PatchSet(
 		"Block",
 		new PatchSpec[] {
-			new PatchSpec(new ConstPatch(new ClassRef("my"), new ClassRef("BetterGrass"))),
-			new PatchSpec(new ConstPatch(new MethodRef("my", "<init>", "(I)V"),
+			new PatchSpec(new ConstPatch(new ClassRef("of"), new ClassRef("BetterGrass"))),
+			new PatchSpec(new ConstPatch(new MethodRef("of", "<init>", "(I)V"),
 										 new MethodRef("BetterGrass","<init>", "(I)V")))
 		}
 	);
