@@ -1,12 +1,13 @@
 package com.pclewis.mcpatcher;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 
 public class Util {
-
 	public static final boolean mac;
 	public static final boolean windows;
 	public static final boolean linux;
@@ -52,4 +53,37 @@ public class Util {
 			output.write(buffer, 0, count);
 		}
 	}
+
+    public static String getMinecraftPath() {
+        String home = System.getProperty("user.home", ".");
+        if(isWindows()) {
+            String appdata = System.getenv("APPDATA");
+            return ((appdata != null) ? appdata : home) + "/.minecraft/";
+        } else if (isMac()) {
+            return home + "/Library/Application Support/minecraft/";
+        } else if (isLinux()) {
+            return home + "/.minecraft/";
+        } else {
+            return home + "/minecraft/";
+        }
+    }
+
+    public static String fileDigest(File file, String algorithm) throws IOException, NoSuchAlgorithmException {
+        MessageDigest md;
+        md = MessageDigest.getInstance(algorithm);
+
+        DigestInputStream dis = new DigestInputStream(new FileInputStream(file), md);
+
+        byte[] buffer = new byte[8192];
+        while (true) {
+            if (dis.read(buffer) == -1)
+                break;
+        }
+
+        String result = new BigInteger(1, md.digest()).toString(16);
+        while (result.length() < md.getDigestLength()*2) {
+            result = "0" + result;
+        }
+        return result;
+    }
 }

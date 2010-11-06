@@ -3,9 +3,12 @@ package com.pclewis.mcpatcher;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A comparable version number, using some subset of the format "variant maj.min.build_rev"
+ */
 public class Version implements Comparable {
     public static final Pattern PATTERN = Pattern.compile(
-            "(?:(\\S+) )?(\\d+)(?:\\.(\\d+)(?:\\.(\\d+)(?:_(\\d+))?)?)?"
+            "(?:(\\S+) )?(?:v ?|version ?)?(\\d+)(?:\\.(\\d+)(?:\\.(\\d+)(?:_(\\d+))?)?)?"
     );
 
     public String variant  = null;
@@ -18,6 +21,7 @@ public class Version implements Comparable {
         Matcher m = PATTERN.matcher(str);
         if(m.find()) {
             variant  = m.group(1);
+            if(variant!=null) variant = variant.toLowerCase();
             major    = parseInt(m.group(2));
             minor    = parseInt(m.group(3));
             build    = parseInt(m.group(4));
@@ -27,6 +31,11 @@ public class Version implements Comparable {
         }
     }
 
+    /**
+     * Convert a version to a string. Note that the variant is always lowercase,
+     * and components never have leading zeroes.
+     * @return String representation of version.
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -40,7 +40,7 @@ public class MainForm implements Runnable {
 	private JCheckBox betterGrassCheckBox;
 	private JFrame frame;
 
-	private Minecraft minecraft;
+	private OldMinecraft minecraft;
 	private TexturePack texturePack;
 	private TexturePack mcTexturePack;
 
@@ -265,7 +265,7 @@ public class MainForm implements Runnable {
 	public boolean setMinecraftPath(String path) throws Exception {
 		String errors = "";
 		try {
-			minecraft = new Minecraft(new File(path));
+			minecraft = new OldMinecraft(new File(path));
 		} catch(IOException ex) {
 			errors = ex.getMessage();
 			minecraft = null;

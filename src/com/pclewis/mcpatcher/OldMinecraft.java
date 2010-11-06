@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class Minecraft implements Opcode {
+public class OldMinecraft implements Opcode {
 	public JarFile getJar() {
 		return jar;
 	}
@@ -170,7 +170,7 @@ public class Minecraft implements Opcode {
 		return errors;
 	}
 
-	public Minecraft(File jarFile) throws Exception {
+	public OldMinecraft(File jarFile) throws Exception {
 		jar = new JarFile(jarFile, false);
 		this.file = jarFile;
 		for(JarEntry file : Collections.list(jar.entries())) {
