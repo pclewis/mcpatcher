@@ -21,7 +21,7 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="b8cdf" class="com.jidesoft.swing.CheckBoxList">
+          <component id="b8cdf" class="com.jidesoft.swing.CheckBoxList" binding="modList">
             <constraints/>
             <properties>
               <model>
@@ -35,6 +35,7 @@
                 <item value="Texture Pack: Painterly Pack"/>
                 <item value="Texture Pack: Hello Kitty"/>
               </model>
+              <selectionMode value="0"/>
             </properties>
           </component>
         </children>

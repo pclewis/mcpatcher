@@ -1,15 +1,19 @@
 package com.pclewis.mcpatcher;
 
+import com.jidesoft.swing.CheckBoxList;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.MultilineLabel;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.LinkedList;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -29,7 +33,10 @@ public class NewGui implements ActionListener {
     private JPanel infoPanel;
     private JProgressBar progressBar1;
     private JTextArea logArea;
+    private CheckBoxList modList;
     private JFrame frame;
+    ModListModel modListModel;
+    LinkedList<Mod> mods;
 
     public NewGui() {
         this( new JFrame("Minecraft Patcher") );
@@ -38,7 +45,8 @@ public class NewGui implements ActionListener {
         frame.pack();
         minecraftFolderButton.addActionListener(this);
         ((DefaultCaret)logArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        Logger.getLogger("com.pclewis").addHandler(new Handler() {
+
+        Logger.getLogger("com.pclewis.mcpatcher").addHandler(new Handler() {
             @Override
             public void publish(LogRecord record) {
                 logArea.append(String.format("%tT %s %s: %s\n", record.getMillis(), record.getLevel(),
@@ -49,9 +57,25 @@ public class NewGui implements ActionListener {
 
             @Override public void close() throws SecurityException { }
         });
+
+        modListModel = new ModListModel();
+        modList.setModel(modListModel);
+
+        modList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if(!e.getValueIsAdjusting()) {
+                    ModInfo info = modListModel.getMod(modList.getSelectedIndex()).getModInfo();
+                    logger.info(info.toString());
+                    clearInfo();
+                    setDescription(info.description(), info.author(), info.version());
+
+                    // repack and redisplay
+                    infoPanel.setPreferredSize(infoPanel.getPreferredSize());
+                    infoPanel.validate();
+                }
+            }
+        });
     }
-
-
 
     public NewGui(JFrame frame) {
         this.frame = frame;
@@ -61,6 +85,10 @@ public class NewGui implements ActionListener {
     public void show() {
         frame.setLocationRelativeTo( null );
         frame.setVisible(true);
+    }
+
+    public void addMod(Mod mod) {
+        modListModel.addElement( mod );
     }
 
     public void setDescription(String description, String author, String version) {
@@ -80,6 +108,11 @@ public class NewGui implements ActionListener {
         ml.setBorder(BorderFactory.createEmptyBorder(0, 15, 15, 0));
         ml.setFont(f.deriveFont(f.getStyle() & ~Font.BOLD));
         infoPanel.add(ml, JideBoxLayout.FLEXIBLE);
+        infoPanel.add(new JLabel(""), JideBoxLayout.VARY);
+    }
+
+    public void clearInfo() {
+        infoPanel.removeAll();
         infoPanel.add(new JLabel(""), JideBoxLayout.VARY);
     }
 

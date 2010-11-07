@@ -105,4 +105,11 @@ public abstract class Mod {
             throw new RuntimeException();
         }
     }
+
+    /**
+     * @return ModInfo annotation for this mod.
+     */
+    public ModInfo getModInfo() {
+        return getClass().getAnnotation(ModInfo.class);
+    }
 }
