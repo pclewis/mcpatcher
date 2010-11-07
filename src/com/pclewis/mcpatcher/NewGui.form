@@ -56,6 +56,7 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <actionCommand value="mod_configure"/>
               <enabled value="false"/>
               <text value="Configure"/>
             </properties>
@@ -65,6 +66,7 @@
               <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <actionCommand value="mod_uninstall"/>
               <text value="Uninstall"/>
             </properties>
           </component>
@@ -101,6 +103,7 @@
               <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <actionCommand value="mod_install"/>
               <text value="Install New"/>
             </properties>
           </component>
@@ -109,6 +112,7 @@
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <actionCommand value="mod_update"/>
               <enabled value="false"/>
               <text value="Check For Update"/>
             </properties>
@@ -128,6 +132,7 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <actionCommand value="mc_folder"/>
               <text value="Minecraft Folder"/>
             </properties>
           </component>
@@ -136,6 +141,7 @@
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <actionCommand value="mc_run"/>
               <text value="Run Minecraft"/>
             </properties>
           </component>
@@ -144,6 +150,7 @@
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <actionCommand value="patch"/>
               <text value="Patch"/>
             </properties>
           </component>
