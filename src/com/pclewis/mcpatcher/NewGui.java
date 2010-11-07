@@ -4,6 +4,7 @@ import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.MultilineLabel;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public class NewGui implements ActionListener {
@@ -25,8 +27,9 @@ public class NewGui implements ActionListener {
     private JButton installNewButton;
     private JButton checkForUpdateButton;
     private JPanel infoPanel;
+    private JProgressBar progressBar1;
+    private JTextArea logArea;
     private JFrame frame;
-    private ButtonGroup logLevelButtonGroup;
 
     public NewGui() {
         this( new JFrame("Minecraft Patcher") );
@@ -34,7 +37,21 @@ public class NewGui implements ActionListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         minecraftFolderButton.addActionListener(this);
+        ((DefaultCaret)logArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        Logger.getLogger("com.pclewis").addHandler(new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                logArea.append(String.format("%tT %s %s: %s\n", record.getMillis(), record.getLevel(),
+                        record.getSourceClassName(), record.getMessage()));
+            }
+
+            @Override public void flush() { }
+
+            @Override public void close() throws SecurityException { }
+        });
     }
+
+
 
     public NewGui(JFrame frame) {
         this.frame = frame;
@@ -114,14 +131,14 @@ public class NewGui implements ActionListener {
 
         addMenuItem(menu, "Create Moddable Jar", null, KeyEvent.VK_C );
         JMenu subMenu = new JMenu("Log Level");
-        logLevelButtonGroup = new ButtonGroup();
-        addLogLevel(subMenu, logLevelButtonGroup, Level.SEVERE, KeyEvent.VK_S);
-        addLogLevel(subMenu, logLevelButtonGroup, Level.WARNING, KeyEvent.VK_W);
-        addLogLevel(subMenu, logLevelButtonGroup, Level.INFO, KeyEvent.VK_I);
-        addLogLevel(subMenu, logLevelButtonGroup, Level.CONFIG, KeyEvent.VK_C);
-        addLogLevel(subMenu, logLevelButtonGroup, Level.FINE, KeyEvent.VK_F);
-        addLogLevel(subMenu, logLevelButtonGroup, Level.FINER, KeyEvent.VK_R);
-        addLogLevel(subMenu, logLevelButtonGroup, Level.FINEST, KeyEvent.VK_T);
+        ButtonGroup bg = new ButtonGroup();
+        addLogLevel(subMenu, bg, Level.SEVERE,  KeyEvent.VK_S);
+        addLogLevel(subMenu, bg, Level.WARNING, KeyEvent.VK_W);
+        addLogLevel(subMenu, bg, Level.INFO,    KeyEvent.VK_I);
+        addLogLevel(subMenu, bg, Level.CONFIG,  KeyEvent.VK_C);
+        addLogLevel(subMenu, bg, Level.FINE,    KeyEvent.VK_F);
+        addLogLevel(subMenu, bg, Level.FINER,   KeyEvent.VK_R);
+        addLogLevel(subMenu, bg, Level.FINEST,  KeyEvent.VK_T);
         menu.add(subMenu);
         menuBar.add(menu);
 
