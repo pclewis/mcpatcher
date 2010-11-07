@@ -1,5 +1,9 @@
 package com.pclewis.mcpatcher;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(value= RetentionPolicy.RUNTIME)
 public @interface ModInfo {
     String name();
     String description();

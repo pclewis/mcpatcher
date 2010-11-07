@@ -33,7 +33,7 @@ public abstract class Mod {
      * @param ctClass   The class to be identified.
      * @return          A name to map to, or null.
      */
-    public static String identifyClass(Deobfuscator de, CtClass ctClass) {
+    public String identifyClass(Deobfuscator de, CtClass ctClass) {
         return null;
     }
 
@@ -43,7 +43,7 @@ public abstract class Mod {
      * @param method    The method to be identified.
      * @return          A name to map to, or null.
      */
-    public static String identifyMethod(Deobfuscator de, CtMethod method) {
+    public String identifyMethod(Deobfuscator de, CtMethod method) {
         return null;
     }
 
@@ -51,7 +51,7 @@ public abstract class Mod {
      * Allow user to configure mod in whatever manner is appropriate. Must set configurable=true in ModInfo annotation.
      * The default implementation does nothing.
      */
-    public static void configure() {
+    public void configure() {
     }
 
     /**
@@ -60,7 +60,7 @@ public abstract class Mod {
      *
      * @param target The output jar file
      */
-    public static void addFiles(JarFile target) {
+    public void addFiles(JarFile target) {
     }
 
     /**
@@ -72,7 +72,7 @@ public abstract class Mod {
      * @param output Output stream for new file.
      * @return       true if file was replaced, otherwise false.
      */
-    public static boolean replaceFile(String name, InputStream input, OutputStream output) {
+    public boolean replaceFile(String name, InputStream input, OutputStream output) {
         return false;
     }
 
@@ -83,7 +83,7 @@ public abstract class Mod {
      * @param de      Deobfuscator instance.
      * @param ctClass The class to patch.
      */
-    public static void patchFile(Deobfuscator de, CtClass ctClass) {
+    public void patchFile(Deobfuscator de, CtClass ctClass) {
         if(patches == null || patches.isEmpty())
             return;
 
