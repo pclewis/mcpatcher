@@ -23,16 +23,40 @@ public class BytecodeBuilderTest {
         builder.push(256);
         builder.push(90210);
         byte[] code = builder.getCode();
-        byte[] expected = new byte[] {
+        byte[] expected = [
                 (byte)Opcode.BIPUSH, 123,
                 (byte)Opcode.SIPUSH, 0x01, 0x00,
                 (byte)Opcode.LDC, (byte)ConstPoolUtils.find(constPool, 90210)
-        };
+        ];
         Assert.assertArrayEquals(expected, code);
     }
 
     @Test(expected = MissingPropertyException.class)
     public void testInvalidOpcode() {
         builder.methodMissing("asdfas", null);
+    }
+
+    @Test
+    public void testInvokeStatic() {
+        int ci = ConstPoolUtils.addToPool(constPool, new MethodRef("com.example.Test", "function", "(III)V"));
+        builder.invokestatic("com.example.Test.function");
+        byte[] code = builder.getCode();
+        byte[] expected = [
+                (byte)Opcode.INVOKESTATIC, Util.b(ci, 1), Util.b(ci, 0)
+        ];
+        Assert.assertArrayEquals(expected, code);
+    }
+
+    @Test
+    public void testBuildWithProperty() {
+        byte[] code = BytecodeBuilder.build(constPool) {
+            push 40
+            dcmpg
+        };
+        byte[] expected = [
+                (byte)Opcode.BIPUSH, 40,
+                (byte)Opcode.DCMPG
+        ];
+        Assert.assertArrayEquals(expected, code);
     }
 }

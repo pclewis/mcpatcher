@@ -89,8 +89,8 @@ public class Deobfuscator {
     public void addClassName(String name, String newName) {
         ObfuscatedClass oc = getClass(name);
         if(classes.containsKey(newName) && classes.get(newName) != oc) {
-            throw new IllegalArgumentException("There is already a class named '" + name +
-                    "' associated with '" + classes.get(newName).getObfuscatedName());
+            throw new IllegalArgumentException("There is already a class named '" + newName +
+                    "' associated with '" + classes.get(newName).getObfuscatedName() + "'");
         }
         classes.put(newName, oc);
         oc.addName(newName);

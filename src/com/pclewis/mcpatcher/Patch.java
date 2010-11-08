@@ -1,13 +1,16 @@
 package com.pclewis.mcpatcher;
 
 import javassist.CtClass;
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
 public abstract class Patch implements Cloneable {
     public Params params;
 
-    abstract public ParamSpec[] getParamSpecs();
+    public ParamSpec[] getParamSpecs() {
+        return Patches.PSPEC_EMPTY;
+    }
     abstract public String getDescription();
 
     public void visitClassPre(CtClass ct) throws Exception {}
@@ -37,6 +40,19 @@ public abstract class Patch implements Cloneable {
 		newPatch.params = new Params(this.params);
 		return newPatch;
 	}
+
+    public void apply(CtClass ctClass) throws Exception {
+        visitClassPre(ctClass);
+        ClassFile cf = ctClass.getClassFile(); //new ClassFile(new DataInputStream(input));
+        ConstPool cp = cf.getConstPool();
+
+        visitConstPool(cp);
+        for(Object mo : cf.getMethods()) {
+            visitMethod((MethodInfo)mo);
+        }
+
+        visitClassPost(ctClass);
+    }
 
 	// convenience
 	protected byte[] fc(MethodInfo mi, Object c       ) { return fc(mi.getConstPool(), c);    }

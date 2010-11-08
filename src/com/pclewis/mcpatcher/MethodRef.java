@@ -2,13 +2,12 @@ package com.pclewis.mcpatcher;
 
 public class MethodRef {
 	String className;
-
-	public String getClassName() {
-		return className;
-	}
-
 	String name;
 	String type;
+
+    public String getClassName() {
+        return className;
+    }
 
 	public String getName() {
 		return name;
@@ -23,6 +22,10 @@ public class MethodRef {
 		this.name = name;
 		this.type = type;
 	}
+
+    public MethodRef(String className, String name) {
+        this(className, name, null);
+    }
 
 	public String toString() {
 		return "MethodRef{" +

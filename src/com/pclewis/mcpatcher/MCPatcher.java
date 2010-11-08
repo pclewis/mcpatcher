@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher;
 
+import com.pclewis.mcpatcher.archive.PathArchive;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.bytecode.ClassFile;
@@ -15,13 +16,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
 public class MCPatcher {
+    private static final Logger logger = Logger.getLogger("com.pclewis.mcpatcher.MCPatcher");
 	public static PrintStream out;
 	public static PrintStream err;
 
@@ -30,12 +36,69 @@ public class MCPatcher {
 	private static MainForm mainForm;
 
 	public static void main(String[] argv) throws Exception {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		initLogWindow();
 
+        /*
 		mainForm = MainForm.create();
 		findMinecraft();
 
         mainForm.show();
+        */
+
+        MinecraftLibrary mcl = new MinecraftLibrary(new File(Util.getMinecraftPath(), "/archive"));
+        mcl.importFile( new File(Util.getMinecraftPath(), "/bin/minecraft_server.jar"));
+
+        for(Minecraft mc : mcl.getEntries()) {
+            Logger.getLogger("com.pclewis").fine(mc.getFile().getName() + ": " + mc.guessVersion().toString());
+        }
+
+        URI myJar = MCPatcher.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        List<Mod> mods = ModFinder.findMods(new PathArchive(new File(myJar)));
+
+        Minecraft mc = new Minecraft(new File(Util.getMinecraftPath(), "bin/minecraft.jar"));
+        Logger.getLogger("com.pclewis").severe(mc.getVersion().toString());
+
+        NewGui newgui = new NewGui();
+
+        for (Mod mod : mods) {
+            newgui.addMod(mod);
+        }
+
+        Deobfuscator de = deobfuscate(mc, mods);
+        newgui.show();
+
+    }
+
+    private static Deobfuscator deobfuscate(Minecraft mc, List<Mod> mods) throws IOException {
+        Deobfuscator de = new Deobfuscator(mc.getVersion());        
+        JarFile jf = new JarFile(mc.getFile());
+        try {
+            ClassPool cp = ClassPool.getDefault();
+            for(JarEntry entry : Collections.list(jf.entries())) {
+                if(entry.getName().endsWith(".class")) {
+                    CtClass ctClass;
+                    try {
+                        ctClass = cp.makeClass(jf.getInputStream(entry));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException();
+                    }
+                    de.addClass( ctClass.getName() );
+                    for(Mod mod : mods) {
+                        String identity = mod.identifyClass(de, ctClass);
+                        if(identity!=null) {
+                            logger.info("Identified class: " + ctClass.getName() + " -> " + identity);
+                            de.addClassName(ctClass.getName(), identity);
+                        }
+                    }
+                }
+            }
+        } finally {
+            jf.close();
+        }
+
+        return de;
     }
 
 	private static void findMinecraft() throws Exception {
@@ -85,7 +148,7 @@ public class MCPatcher {
 		err = out;
 	}
 
-	public static void applyPatch(Minecraft minecraft, TexturePack texturePack, File outputFile) {
+	public static void applyPatch(OldMinecraft minecraft, TexturePack texturePack, File outputFile) {
 
 	    JarOutputStream newjar = null;
 
@@ -185,6 +248,13 @@ public class MCPatcher {
 		InputStream is = MCPatcher.class.getResourceAsStream("/newcode/" + name);
 		if(is==null) {
 			is = MCPatcher.class.getResourceAsStream(name);
+            if(is==null) {
+                try {
+                    is = new FileInputStream(new File("C:/Users/nex/Desktop/projects/mcpatcher/out/production/newcode/" + name));
+                } catch (FileNotFoundException e) {
+                    is = null;
+                }
+            }
 		}
 		return is;
 	}
@@ -304,7 +374,7 @@ public class MCPatcher {
 		return patched;
 	}
 
-	private static boolean applyPatches(String name, InputStream input, Minecraft minecraft,
+	private static boolean applyPatches(String name, InputStream input, OldMinecraft minecraft,
                                         ArrayList<PatchSet> patches, JarOutputStream newjar, ClassPool classPool) throws Exception {
 		Boolean patched = false;
 		ClassFile cf = null;

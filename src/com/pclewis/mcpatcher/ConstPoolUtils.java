@@ -43,7 +43,7 @@ public class ConstPoolUtils {
 			MethodRef mr = (MethodRef)o;
 			return cp.getMethodrefClassName(index).equals(mr.getClassName())
 				&& cp.getMethodrefName(index).equals(mr.getName())
-				&& cp.getMethodrefType(index).equals(mr.getType());
+				&& (mr.getType() == null || cp.getMethodrefType(index).equals(mr.getType()));
 		}
 		if(o instanceof FieldRef) {
 			FieldRef mr = (FieldRef)o;
