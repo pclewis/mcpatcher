@@ -33,10 +33,10 @@ public class HDFix extends Mod {
                 containsCode {
                     iconst_3
                     idiv
-                    bipush byte, 16
+                    push 16
                     imul
                     isub
-                    sipush 255
+                    push 255
                 }
             },
 
