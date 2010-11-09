@@ -119,6 +119,10 @@ public class Deobfuscator {
         getClass(className).addMemberName(memberName,memberType,newName);
     }
 
+    public boolean hasClass(String name) {
+        return classes.containsKey(name);
+    }
+
     public String getClassName(String name) {
         return getClass(name).getObfuscatedName();
     }

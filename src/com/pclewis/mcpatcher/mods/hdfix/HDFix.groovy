@@ -18,7 +18,7 @@ public class HDFix extends Mod {
     @Override
     public String identifyClass(Deobfuscator de, CtClass ctClass) {
         ConstPool cp = ctClass.getClassFile().getConstPool();
-        return identify(ctClass, [
+        return identify(de, ctClass, [
             "animation.Manager": new MethodRef("org.lwjgl.opengl.GL11","glTexSubImage2D"),
             "render.Tessellator": "Not tesselating!",
             "render.Tool3D": -0.9375F,
@@ -28,65 +28,82 @@ public class HDFix extends Mod {
                 newarray ((byte)T_BYTE)
             },
 
-            "animation.FlowLava": BytecodeBuilder.build(cp) {
-                iconst_3
-                idiv
-                bipush byte, 16
-                imul
-                isub
-                sipush 255
+            "animation.FlowLava": {
+                superclass("animation.Texture") &&
+                containsCode {
+                    iconst_3
+                    idiv
+                    bipush byte, 16
+                    imul
+                    isub
+                    sipush 255
+                }
             },
 
-            "animation.StillLava": BytecodeBuilder.build(cp) {
-                i2f
-                push float, Math.PI
-                fmul
-                fconst_2
-                fmul
-                push 16F
+            "animation.StillLava": {
+                superclass("animation.Texture") &&
+                containsCode {
+                    i2f
+                    push float, Math.PI
+                    fmul
+                    fconst_2
+                    fmul
+                    push 16F
+                }
             },
 
-            "animation.StillWater": BytecodeBuilder.build(cp) {
-                invokestatic "java.lang.Math.random"
-                push 0.05D
-                dcmpg
-                ifge 16
+            "animation.StillWater": {
+                superclass("animation.Texture") &&
+                containsCode {
+                    invokestatic "java.lang.Math.random"
+                    push 0.05D
+                    dcmpg
+                    ifge 16
+                }
             },
 
-            "animation.FlowWater": BytecodeBuilder.build(cp) {
-                invokestatic "java.lang.Math.random"
-                push 0.2D
-                dcmpg
-                ifge 16
+            "animation.FlowWater": {
+                superclass("animation.Texture") &&
+                containsCode {
+                    invokestatic "java.lang.Math.random"
+                    push 0.2D
+                    dcmpg
+                    ifge 16
+                }
             },
 
-            "animation.Fire": BytecodeBuilder.build(cp) {
-                invokestatic "java.lang.Math.random"
-                invokestatic "java.lang.Math.random"
-                dmul
-                invokestatic "java.lang.Math.random"
-                dmul
-                push 4.0D
-                dmul
-                invokestatic "java.lang.Math.random"
+            "animation.Fire": {
+                superclass("animation.Texture") &&
+                containsCode {
+                    invokestatic "java.lang.Math.random"
+                    invokestatic "java.lang.Math.random"
+                    dmul
+                    invokestatic "java.lang.Math.random"
+                    dmul
+                    push 4.0D
+                    dmul
+                    invokestatic "java.lang.Math.random"
+                }
             },
 
-            "animation.Compass": BytecodeBuilder.build(cp) {
-                push 90.0F
-                fsub
-                f2d
-                push 3.141592653589793D // *NOT* PI (??)
-                dmul
-                push 180.0D
-                ddiv
+            "animation.Compass": {
+                superclass("animation.Texture") &&
+                containsCode {
+                    push 90.0F
+                    fsub
+                    f2d
+                    push 3.141592653589793D // *NOT* PI (??)
+                    dmul
+                    push 180.0D
+                    ddiv
+                }
             }
         ]);
     }
 
-    private String identify(CtClass ctClass, Map args) {
+    private String identify(Deobfuscator de, CtClass ctClass, Map args) {
         ClassFile cf = ctClass.getClassFile();
         ConstPool cp = cf.getConstPool();
-
         def result = args.find { name, match ->
             if(match instanceof byte[]) {
                 String codeToMatch = new String(match, "ISO-8859-1");
@@ -99,11 +116,46 @@ public class HDFix extends Mod {
                     if(methodCode.contains(codeToMatch))
                         return true;
                 }
+            } else if (match instanceof Closure) {
+                match.setDelegate(new IdentifierContext(de, cp, cf));
+                return match();
             } else {
                 return ConstPoolUtils.contains(cp, match);
             }
         }
 
         return result ? result.key : null;
+    }
+
+    private static class IdentifierContext {
+        Deobfuscator de;
+        ConstPool constPool;
+        ClassFile classFile;
+
+        public IdentifierContext(Deobfuscator de, ConstPool cp, ClassFile cf) {
+            this.de = de;
+            this.constPool = cp;
+            this.classFile = cf;
+        }
+
+        public boolean containsCode(Closure c) {
+            byte[] match = BytecodeBuilder.build(constPool, c);
+            String codeToMatch = new String(match, "ISO-8859-1");
+            for(Object mo : classFile.getMethods()) {
+                MethodInfo mi = (MethodInfo) mo;
+                CodeAttribute ca = mi.getCodeAttribute();
+                if(ca == null)
+                    continue;
+                String methodCode = new String(ca.getCode(), "ISO-8859-1");
+                if(methodCode.contains(codeToMatch))
+                    return true;
+            }
+            return false;
+        }
+
+        public boolean superclass(String className) {
+            String superName = classFile.getSuperclass();
+            return (superName==className || (de.hasClass(className) && superName==de.getClassName(className)) );
+        }
     }
 }
