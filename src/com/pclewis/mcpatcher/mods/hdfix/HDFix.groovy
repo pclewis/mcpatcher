@@ -48,7 +48,14 @@ public class HDFix extends Mod {
 
             "animation.StillWater": BytecodeBuilder.build(cp) {
                 invokestatic "java.lang.Math.random"
-                push 0.005
+                push 0.05D
+                dcmpg
+                ifge 16
+            },
+
+            "animation.FlowWater": BytecodeBuilder.build(cp) {
+                invokestatic "java.lang.Math.random"
+                push 0.2D
                 dcmpg
                 ifge 16
             },
