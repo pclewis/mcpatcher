@@ -31,7 +31,7 @@ public class HDFix extends Mod {
             "animation.FlowLava": {
                 superclass("animation.Texture") &&
                 containsCode {
-                    iconst_3
+                    push 3
                     idiv
                     push 16
                     imul
@@ -46,7 +46,7 @@ public class HDFix extends Mod {
                     i2f
                     push float, Math.PI
                     fmul
-                    fconst_2
+                    push 2F
                     fmul
                     push 16F
                 }
@@ -97,7 +97,21 @@ public class HDFix extends Mod {
                     push 180.0D
                     ddiv
                 }
-            }
+            },
+
+            "animation.Portal": {
+                superclass("animation.Texture") &&
+                containsCode {
+                    push 32F
+                    fdiv
+                    push float, Math.PI
+                    fmul
+                    push 2F
+                    fmul
+                }
+            },
+
+            "animation.Watch": "/misc/dial.png"
         ]);
     }
 

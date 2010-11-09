@@ -21,33 +21,50 @@ class BytecodeBuilder implements javassist.bytecode.Opcode {
     }
 
     public void push(int value) {
-        if(value == 0) {
-			iconst_0;
-		} else if (value == 1) {
-			iconst_1;
-		} else if(value <= Byte.MAX_VALUE) {
-			bipush( (byte)value );
-		} else if (value <= Short.MAX_VALUE) {
-			sipush( (int)value );
-		} else {
-			int index = ConstPoolUtils.findOrAdd(constPool, value);
-			cpush index;
-		}
+        switch(value) {
+            case -1: iconst_m1; break;
+            case 0: iconst_0; break;
+            case 1: iconst_1; break;
+            case 2: iconst_2; break;
+            case 3: iconst_3; break;
+            case 4: iconst_4; break;
+            case 5: iconst_5; break;
+            default:
+                if(value <= Byte.MAX_VALUE) {
+                    bipush( (byte)value );
+                } else if (value <= Short.MAX_VALUE) {
+                    sipush( (int)value );
+        		} else {
+        			int index = ConstPoolUtils.findOrAdd(constPool, value);
+        			cpush index;
+        		}
+        }
     }
 
+    public void push(float f) {
+        switch(f) {
+            case 0.0F: fconst_0; break;
+            case 1.0F: fconst_1; break;
+            case 2.0F: fconst_2; break;
+            default:
+                cpush ConstPoolUtils.findOrAdd(constPool, f);
+        }
+    }
+
+    public void push(double d) {
+        switch(d) {
+            case 0.0D: dconst_0; break;
+            case 1.0D: dconst_1; break;
+            default:
+                ldc2_w ConstPoolUtils.findOrAdd(constPool, d);
+        }
+    }
+    
     public void cpush(int i) {
         if(i>=Byte.MAX_VALUE)
 			ldc_w i;
         else
             ldc( (byte)i );
-    }
-
-    public void push(float f) {
-        cpush ConstPoolUtils.findOrAdd(constPool, f);
-    }
-
-    public void push(double d) {
-        ldc2_w ConstPoolUtils.findOrAdd(constPool, d);
     }
 
     public void invokestatic(String method) {
