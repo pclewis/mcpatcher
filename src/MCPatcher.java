@@ -201,8 +201,8 @@ public class MCPatcher {
 		PatchSet waterPatches = new PatchSet(Patches.water);
 		if (globalParams.getBoolean("useCustomWater")) {
 		    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customWaterMC)));
-			replaceFiles.add("iq.class");
-			replaceFiles.add("nr.class");
+			replaceFiles.add("iw.class");
+			replaceFiles.add("nz.class");
 		} else {
 			if(!globalParams.getBoolean("useAnimatedWater")) {
 				waterPatches.setParam("tileSize", "0");
@@ -215,8 +215,8 @@ public class MCPatcher {
 		PatchSet lavaPatches = new PatchSet(Patches.water);
 		if(globalParams.getBoolean("useCustomLava")) {
 			patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customLavaMC)));
-			replaceFiles.add("et.class");
-			replaceFiles.add("ay.class");
+			replaceFiles.add("ba.class");
+			replaceFiles.add("ex.class");
 			//lavaPatches.setParam("tileSize", "0");
 			//patches.add(new PatchSet("StillLava", lavaPatches));
 			//patches.add( new PatchSet(Patches.hideStillLava) );
