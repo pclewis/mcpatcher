@@ -42,6 +42,62 @@ class Patches implements Opcode {
 		}
 	}
 
+    // PER
+    public static class CompassPatch1 extends BytecodeTilePatch {
+        private int factor = 1;
+        public CompassPatch1(int factor) {
+            this.factor = factor;
+        }
+        public String getDescription() {
+            return "Compass1 Fix * " + (this.getFromSize() / factor) + " -> " + (this.getToSize() / factor);
+        }
+
+        public byte[] getBytes(int cnt, MethodInfo mi) {
+            return buildCode( push(mi, (byte)(cnt / factor)) );
+        }
+    }
+
+    public static class CompassPatch2 extends BytecodeTilePatch {
+        public String getDescription() {
+            return "Compass2 Fix * ICONST_" + (this.getFromSize() / 4) + " -> " + (this.getToSize() / 4);
+        }
+
+        public byte[] getBytes(int cnt, MethodInfo mi) {
+            if (cnt == 16)
+                return buildCode( ILOAD, (byte)9, ICONST_4 );
+            else
+                return buildCode( ILOAD, (byte)9, push(mi, (byte)(cnt / 4)));
+        }
+    }
+
+    public static class CompassPatch3 extends BytecodeTilePatch {
+        public String getDescription() {
+            return "Compass3 Fix * " + this.getFromSize() + " -> " + this.getToSize();
+        }
+
+        public byte[] getBytes(int cnt, MethodInfo mi) {
+            return buildCode( ILOAD, (byte)9, push(mi, cnt), IF_ICMPGT );
+        }
+    }
+
+    public static class WatchPatch1 extends BytecodeTilePatch {
+        public String getDescription() {
+            return "Watch1 Fix * " + this.getFromSize() + " -> " + this.getToSize();
+        }
+
+        public byte[] getBytes(int cnt, MethodInfo mi) {
+            return buildCode( push(mi, cnt * cnt) );
+        }
+    }
+
+    public static class WatchPatch2 extends BytecodeTilePatch {
+        public String getDescription() { return "Watch2 Fix % " + this.getFromSize() + " -> " + this.getToSize(); }
+
+        public byte[] getBytes(int cnt, MethodInfo mi) {
+            return buildCode( ILOAD, (byte)9, push(mi, cnt), IREM );
+        }
+    }
+
 	public static class MultiplyPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix * " + this.getFromSize() + " -> " + this.getToSize(); }
 
@@ -57,6 +113,14 @@ class Patches implements Opcode {
 			return buildCode( push(mi, cnt), IREM );
 		}
 	}
+
+    public static class DivPatch extends BytecodeTilePatch {
+        public String getDescription() { return "Fix / " + this.getFromSize() + " -> " + this.getToSize(); }
+
+        public byte[] getBytes(int cnt, MethodInfo mi) {
+            return buildCode( push(mi, cnt), IDIV, I2D );
+        }
+    }
 
 	public static class ModMulPatch extends BytecodeTilePatch {
 		public String getDescription() { return "Fix %16*"+getFromSize()+" -> %16*"+getToSize(); }
@@ -165,16 +229,19 @@ class Patches implements Opcode {
 	}
 
 	public static class CompassGetRGBPatch extends BytecodeTilePatch {
+        private byte fld = 0x2E;
+        public CompassGetRGBPatch() { }
+        public CompassGetRGBPatch(byte fld) { this.fld = fld; }
 		public String getDescription() {
-			return String.format(".getRGB(...%1$d,%1$d,...%1$d) to .getRGB(...%2$d,%2$d,...%2$d)",
-				this.getFromSize(), this.getToSize());
+			return String.format(".getRGB(...%1$d,%1$d,...%1$d) to .getRGB(...%2$d,%2$d,...%2$d) fld=%3$d",
+				this.getFromSize(), this.getToSize(), (int)fld);
 		}
 		public byte[] getBytes(int size, MethodInfo mi) {
 			return buildCode(
 				push(mi, size),
 				push(mi, size),
 				ALOAD_0,
-				GETFIELD, 0x00, 0x2E,
+				GETFIELD, 0x00, fld,
 				ICONST_0,
 				push(mi, size)
 			);
@@ -296,10 +363,22 @@ class Patches implements Opcode {
 	}
 
 	public static class ConstTileSizePatch extends ConstTilePatch {
+        private float add = 0;
+        public ConstTileSizePatch(float add) { this.add = add; }
+        public ConstTileSizePatch() { }
 		public Object getValue(int tileSize) {
-			return (float)tileSize;
+			return (float)tileSize+add;
 		}
 	}
+
+    public static class ConstTileSizeDoublePatch extends ConstTilePatch {
+        private double add = 0;
+        public ConstTileSizeDoublePatch(double add) { this.add = add; }
+        public ConstTileSizeDoublePatch() { }
+        public Object getValue(int tileSize) {
+            return (double)tileSize+add;
+        }
+    }
 
 	public static class TexNudgePatch extends ConstTilePatch {
 		public Object getValue(int tileSize) {
@@ -385,6 +464,7 @@ class Patches implements Opcode {
 	public static final PatchSet compass = new PatchSet(
 		"Compass",
 		new PatchSpec[]{
+            new PatchSpec(new CompassPatch3()),
 			new PatchSpec(new ArraySizePatch().square(true)),
 			new PatchSpec(new ArraySizePatch().square(true).addY(4)),
 			new PatchSpec(new WhilePatch().square(true)),
@@ -392,6 +472,9 @@ class Patches implements Opcode {
 			new PatchSpec(new CompassGetRGBPatch()),
 			new PatchSpec(new ConstCompassPatch(1)),
 			new PatchSpec(new ConstCompassPatch(-1)),
+            new PatchSpec(new CompassPatch1(-2)),
+            new PatchSpec(new CompassPatch1(-4)),
+            new PatchSpec(new CompassPatch2()),
 		}
 	);
 
@@ -470,4 +553,46 @@ class Patches implements Opcode {
 										 new MethodRef("BetterGrass","<init>", "(I)V")))
 		}
 	);
+
+    public static final PatchSet watch = new PatchSet(
+        "Watch",
+        new PatchSpec[] {
+            new PatchSpec(new CompassGetRGBPatch((byte)44)),
+            new PatchSpec(new CompassGetRGBPatch((byte)45)),
+            new PatchSpec(new WatchPatch1()),
+            new PatchSpec(new ConstTileSizeDoublePatch()),
+            new PatchSpec(new ConstTileSizeDoublePatch(-1)),
+            new PatchSpec(new MultiplyPatch()),
+            new PatchSpec(new BitMaskPatch()),
+            new PatchSpec(new WatchPatch2()),
+            new PatchSpec(new DivPatch()),
+         }
+    );
+
+    public static class PortalPatch1 extends BytecodeTilePatch {
+        private int multiplier = 1;
+
+        public PortalPatch1(int multiplier) { this.multiplier = multiplier; }
+
+        public String getDescription() {
+            return "Portal1 Fix " + (this.getFromSize() * this.getFromSize() * multiplier ) + " -> " + (this.getToSize() * this.getToSize() * multiplier);
+        }
+
+        public byte[] getBytes(int cnt, MethodInfo mi) {
+            return buildCode( push(mi, cnt*cnt*multiplier) );
+        }
+    }
+
+    public static final PatchSet portal = new PatchSet(
+        "Portal",
+        new PatchSpec[] {
+            new PatchSpec(new ConstTileSizePatch()),
+            new PatchSpec(new WhilePatch()),
+            new PatchSpec(new PortalPatch1(4)),
+            new PatchSpec(new PortalPatch1(1)),
+            new PatchSpec(new MultiplyPatch().square(true)),
+            new PatchSpec(new MultiplyPatch()),
+            new PatchSpec(new MultiplyPatch().divider(2)),
+        }
+    );
 }

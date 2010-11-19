@@ -136,11 +136,16 @@ public class MCPatcher {
 				} else if (name.endsWith(".class")) {
 					patched = applyPatches(name, input, minecraft, patches, newjar);
 				} else if(name.equals("gui/items.png") || name.equals("terrain.png")) {
-					patched = resizeImage(name, input, newjar);
+					patched = resizeImage(name, 16, input, newjar);
 					if(!patched) { // can't rewind, so reopen
 						input = texturePack.getInputStream(entry.getName());
 					}
-				}
+                } else if(name.equals("misc/dial.png")) {
+                    patched = resizeImage(name, 1, input, newjar);
+                    if(!patched) { // can't rewind, so reopen
+                        input = texturePack.getInputStream(entry.getName());
+                    }
+                }
 
 				if(!patched) {
 					Util.copyStream(input, newjar);
@@ -244,6 +249,8 @@ public class MCPatcher {
 		    patches.add(new PatchSet("Fire",firePatches));
 		    patches.add(new PatchSet(Patches.compass));
 			patches.add(new PatchSet(Patches.tool3d));
+            patches.add(new PatchSet(Patches.watch));
+            patches.add(new PatchSet(Patches.portal));
 		}
 
 		if(globalParams.getBoolean("useBetterGrass")) {
@@ -252,9 +259,9 @@ public class MCPatcher {
 		}
 	}
 
-	private static boolean resizeImage(String name, InputStream input, JarOutputStream newjar) throws IOException {
+	private static boolean resizeImage(String name, int numTiles, InputStream input, JarOutputStream newjar) throws IOException {
 		boolean patched = false;
-		int size = globalParams.getInt("tileSize") * 16;
+		int size = globalParams.getInt("tileSize") * numTiles;
 		MCPatcher.out.println("Reading " + name + "...");
 		BufferedImage image = ImageIO.read(input);
 

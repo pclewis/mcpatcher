@@ -74,6 +74,13 @@ public class Minecraft implements Opcode {
 		put("Tessellator", new ConstSignature("Not tesselating!"));
 		put("Minecraft", new FilenameSignature("net/minecraft/client/Minecraft.class"));
 		put("Block", new ConstSignature(" is already occupied by "));
+        put("Watch", new ConstSignature("/misc/dial.png"));
+        put("Portal", new BytecodeSignature(new byte[]{
+            (byte)FLOAD, 10,
+            (byte)F2D,
+            (byte)FLOAD, 9,
+            (byte)F2D
+        }));
 	}};
 	private List<String> errors = new LinkedList<String>();
 

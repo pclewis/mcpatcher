@@ -1,11 +1,9 @@
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 abstract class BytecodeTilePatch extends BytecodePatch {
     int multiplier = 1;
+    int divider = 1;
     int addX = 0;
     int addY = 0;
 	int add = 0;
@@ -36,6 +34,7 @@ abstract class BytecodeTilePatch extends BytecodePatch {
         int result = orig;
 	    if(square) result = (result+addX)*(result+addY);
 	    result = result * multiplier;
+        result = result / divider;
 	    result = result + this.add;
 	    return result;
     }
@@ -58,6 +57,11 @@ abstract class BytecodeTilePatch extends BytecodePatch {
 
     public BytecodeTilePatch multiplier(int multiplier) {
         this.multiplier = multiplier;
+        return this;
+    }
+
+    public BytecodeTilePatch divider(int divider) {
+        this.divider = divider;
         return this;
     }
 
