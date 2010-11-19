@@ -225,9 +225,6 @@ public class MCPatcher {
 	}
 
 	private static void getPatches(ArrayList<PatchSet> patches, ArrayList<String> replaceFiles) {
-		patches.add(new PatchSet(Patches.animManager));
-		patches.add(new PatchSet(Patches.animTexture));
-
 		PatchSet waterPatches = new PatchSet(Patches.water);
 		if (globalParams.getBoolean("useCustomWater")) {
 		    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customWaterMC)));
@@ -271,6 +268,8 @@ public class MCPatcher {
 		}
 
 		if(globalParams.getInt("tileSize") > 16) {
+            patches.add(new PatchSet(Patches.animManager));
+            patches.add(new PatchSet(Patches.animTexture));            
 		    patches.add(new PatchSet("Fire",firePatches));
 		    patches.add(new PatchSet(Patches.compass));
 			patches.add(new PatchSet(Patches.tool3d));
