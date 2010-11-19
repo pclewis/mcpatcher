@@ -12,7 +12,9 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -104,6 +106,8 @@ public class MCPatcher {
 		javassist.bytecode.MethodInfo.doPreverify = true;
 
 		try {
+            List<String> customAnimations = Arrays.asList("custom_water_still.png", "custom_water_flowing.png",
+                    "custom_lava_still.png", "custom_lava_flowing.png");
 			int totalFiles = minecraft.getJar().size();
 			int procFiles = 0;
 			for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
@@ -111,7 +115,7 @@ public class MCPatcher {
 
 				procFiles += 1;
 				mainForm.updateProgress(procFiles, totalFiles);
-				if(entry.getName().startsWith("META-INF"))
+				if(name.startsWith("META-INF"))
 					continue; // leave out manifest
 
 				newjar.putNextEntry(new ZipEntry(entry.getName()));
@@ -122,10 +126,14 @@ public class MCPatcher {
 
 				InputStream input = null;
 
-				if(entry.getName().endsWith(".png"))
-					input = texturePack.getInputStream(entry.getName());
-				else
+				if(name.endsWith(".png")) {
+					input = texturePack.getInputStream(name);
+                    if(customAnimations.contains(name)) {
+                        customAnimations.remove(name);
+                    }
+                } else {
 					input = minecraft.getJar().getInputStream(entry);
+                }
 
 				boolean patched = false;
 
@@ -153,6 +161,23 @@ public class MCPatcher {
 
 				newjar.closeEntry();
 			}
+
+            // Add custom animations if present
+            for(String f : customAnimations) {
+                InputStream is;
+                try {
+                    is = texturePack.getInputStream(f);
+                } catch (Exception ex) {
+                    continue;
+                }
+
+                if(is!=null) {
+                    MCPatcher.out.println("Adding file: " + f);
+                    newjar.putNextEntry(new ZipEntry(f));
+                    Util.copyStream(is, newjar);
+                    newjar.closeEntry();
+                }
+            }
 
 			// Add files in replaceFiles list that weren't encountered in src
 			for(String f : replaceFiles) {
