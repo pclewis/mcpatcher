@@ -158,7 +158,7 @@ public class MainForm implements Runnable {
 		    public void actionPerformed(ActionEvent e) {
 			    runWorker( new Runnable() {
 				    public void run() {
-						String path = new File(origField.getText()).getParent();
+						String path = new File(origField.getText()).getAbsoluteFile().getParent();
 						String cp = path + "/" + Util.joinString(Arrays.asList(
 							"minecraft.jar", "lwjgl.jar", "lwjgl_util.jar", "jinput.jar"
 						), File.pathSeparatorChar + path + "/");
