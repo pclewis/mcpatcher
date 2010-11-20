@@ -106,8 +106,8 @@ public class MCPatcher {
 		javassist.bytecode.MethodInfo.doPreverify = true;
 
 		try {
-            List<String> customAnimations = Arrays.asList("custom_water_still.png", "custom_water_flowing.png",
-                    "custom_lava_still.png", "custom_lava_flowing.png");
+            List<String> customAnimations = new ArrayList<String>(Arrays.asList("custom_water_still.png",
+                    "custom_water_flowing.png", "custom_lava_still.png", "custom_lava_flowing.png"));
 			int totalFiles = minecraft.getJar().size();
 			int procFiles = 0;
 			for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
