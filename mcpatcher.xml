@@ -3,6 +3,9 @@
 
     <property file="mcpatcher.properties" />
 
+    <taskdef name="jarbundler"
+         classname="net.sourceforge.jarbundler.JarBundler"
+            classpath="${jarbundler.dir}\jarbundler-2.1.0.jar"/>
  <taskdef resource="proguard/ant/task.properties"
          classpath="${proguard.dir}\lib\proguard.jar" />
  <taskdef name="launch4j"
@@ -256,7 +259,13 @@
       <launch4j configFile="mcpatcher-l4j.xml"
                 jar="${artifact.temp.output.mcpatcher:jar}/mcpatcher.jar"
                 outfile="${artifact.temp.output.mcpatcher:jar}/mcpatcher.exe" />
-
+        <jarbundler dir="${artifact.temp.output.mcpatcher:jar}"
+                    name="MCPatcher"
+                    mainclass="MCPatcher"
+                    jar="${artifact.temp.output.mcpatcher:jar}/mcpatcher.jar"
+                    jvmversion="1.5+"
+                    vmoptions="-Xmx512m"
+                    stubfile="${osxstubfile}"/>
   </target>
   
   <target name="build.all.artifacts" depends="artifact.mcpatcher:jar" description="Build all artifacts">
