@@ -4,7 +4,7 @@ public class ba extends ad {
 	WaterAnimation w;
 
 	public ba(Minecraft game) {
-		super(nl.C.bg);
+		super(nq.C.bg);
 		w = new WaterAnimation(game, "lava_still", this.b, this.a);
 	}
 

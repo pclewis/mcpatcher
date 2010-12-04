@@ -532,15 +532,15 @@ class Patches implements Opcode {
 	public static final PatchSet customWaterMC = new PatchSet(
 		"Minecraft",
 		new PatchSpec[] {
-			new PatchSpec(new PassThisPatch("iw", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
-			new PatchSpec(new PassThisPatch("nz", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("iz", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("oe", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 
 	public static final PatchSet customLavaMC = new PatchSet(
 		"Minecraft",
 		new PatchSpec[] {
-			new PatchSpec(new PassThisPatch("ex", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("ez", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 			new PatchSpec(new PassThisPatch("ba", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
