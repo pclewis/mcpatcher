@@ -5,6 +5,9 @@ import java.io.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
 
 public class Minecraft implements Opcode {
 	public JarFile getJar() {
@@ -12,7 +15,10 @@ public class Minecraft implements Opcode {
 	}
 
 	private JarFile jar;
+	private String version = null;
 	File file;
+
+	private static final String minecraftVerRegex = "[0-9][-_.0-9a-zA-Z]+";
 
 	private HashMap<String,String> classMap = new HashMap<String,String>();
 	private HashMap<String,ClassFinder> classFinders = new HashMap<String, ClassFinder>() {{
@@ -163,8 +169,10 @@ public class Minecraft implements Opcode {
 	}
 
 	public Minecraft(File jarFile) throws Exception {
-		jar = new JarFile(jarFile, false);
 		this.file = jarFile;
+        version = extractVersion(this.file);
+        jar = new JarFile(this.file.getPath(), false);
+
 		for(JarEntry file : Collections.list(jar.entries())) {
 			if(file.getName().endsWith(".class")) {
 				ClassFile cf = new ClassFile(new DataInputStream(jar.getInputStream(file)));
@@ -197,17 +205,71 @@ public class Minecraft implements Opcode {
 		return classMap;
 	}
 
-	public boolean isBackup() {
-		return file.getPath().endsWith(".original.jar");
+	public static String extractVersion(File file) {
+		if(!file.exists()) return null;
+
+		String version = null;
+		JarFile jar = null;
+		InputStream is = null;
+
+		try {
+			jar = new JarFile(file, false);
+			ZipEntry mc = jar.getEntry("net/minecraft/client/Minecraft.class");
+			is = jar.getInputStream(mc);
+			byte buffer[] = new byte[(int)mc.getSize()];
+			is.read(buffer, 0, (int)mc.getSize());
+			String s = new String(buffer);
+			Pattern p = Pattern.compile("Minecraft (Alpha |Beta )?v(" + minecraftVerRegex + ")");
+			Matcher m = p.matcher(s);
+			if(m.find()) {
+				version = m.group(2);
+			}
+		} catch (Exception e) {
+			MCPatcher.out.println("Could not determine version of " + file.getPath());
+			e.printStackTrace(MCPatcher.out);
+		} finally {
+			try { if(is != null) is.close(); } catch (Exception e) { }
+			try { if(jar != null) jar.close(); } catch (Exception e) { }
+		}
+
+		return version;
 	}
 
-	public boolean createBackup() throws IOException {
+	public String getVersion() {
+		return version;
+	}
+
+	public static String getBaseName(String name) {
+		return name
+				.replaceFirst("\\.jar$", "")
+				.replaceFirst("\\.original$", "")
+				.replaceFirst("-" + minecraftVerRegex + "$", "");
+	}
+
+	public String getBaseName() {
+		return getBaseName(file.getPath());
+	}
+
+	public static boolean isBackup(String name) {
+		return !name.equals(getBaseName(name) + ".jar");
+	}
+
+	public boolean isBackup() {
+		return isBackup(file.getPath());
+	}
+
+	public boolean createBackup(boolean allowOverwrite) throws IOException {
 		if(isBackup()) return false;
 
-		File newFile = new File(file.getPath().replaceFirst(".jar$", ".original.jar"));
+		File newFile;
+		if(version == null) {
+			newFile = new File(getBaseName() + ".original.jar");
+		} else {
+			newFile = new File(getBaseName() + "-" + version + ".jar");
+		}
 		assert(!newFile.getPath().equals(file.getPath()));
 
-		if(newFile.exists()) {
+		if(newFile.exists() && allowOverwrite) {
 			int confirm = JOptionPane.showConfirmDialog(null,
 				newFile.getPath() + " exists. Overwrite?",
 				"Create Backup", JOptionPane.YES_NO_OPTION);
@@ -217,7 +279,9 @@ public class Minecraft implements Opcode {
 			}
 		}
 
-		Util.copyStream(new FileInputStream(file), new FileOutputStream(newFile));
+		if(!newFile.exists() || allowOverwrite) {
+			Util.copyStream(new FileInputStream(file), new FileOutputStream(newFile));
+		}
 
 		file = newFile;
 		jar = new JarFile(file, false);

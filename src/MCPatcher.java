@@ -39,24 +39,48 @@ public class MCPatcher {
 	private static void findMinecraft() throws Exception {
 		String appdata = System.getenv("APPDATA");
 		String home = System.getProperty("user.home");
-		String[] paths = new String[] {
-			"minecraft.original.jar",
-			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.original.jar",
-			home + "/Library/Application Support/minecraft/bin/minecraft.original.jar",
-			home + "/.minecraft/bin/minecraft.original.jar",
-			home + "/minecraft/bin/minecraft.original.jar",
-			"minecraft.jar",
-			(appdata==null?home:appdata) + "/.minecraft/bin/minecraft.jar",
-			home + "/Library/Application Support/minecraft/bin/minecraft.jar",
-			home + "/.minecraft/bin/minecraft.jar",
-			home + "/minecraft/bin/minecraft.jar",
+		String[] dirs = new String[] {
+			".",
+			(appdata==null?home:appdata) + "/.minecraft/bin",
+			home + "/Library/Application Support/minecraft/bin",
+			home + "/.minecraft/bin",
+			home + "/minecraft/bin",
 		};
 
-		for(String path : paths) {
-			File f = new File(path);
+		// Convert existing minecraft.original.jar to minecraft-<version>.jar
+		for(String dir : dirs) {
+			File f = new File(dir + "/minecraft.original.jar");
 			if(f.exists()) {
-				if(mainForm.setMinecraftPath(f.getPath())) // .getPath() to normalize /s
+				String version = Minecraft.extractVersion(f);
+				if(version != null) {
+					File newFile = new File(dir + "/minecraft-" + version + ".jar");
+					if (f.renameTo(newFile)) {
+						MCPatcher.out.println("renamed " + f.getPath() + " to " + newFile.getPath());
+					}
+				}
+			}
+		}
+
+		// Find minecraft.jar
+		// Extract its version and look for minecraft-<version>.jar
+		// If found, use that as the input file instead
+		// Else assume minecraft.jar is an unpatched original
+		for(String dir : dirs) {
+			File f = new File(dir + "/minecraft.jar");
+			if(f.exists()) {
+				MCPatcher.out.println("found " + f.getPath());
+				String version = Minecraft.extractVersion(f);
+				if(version != null) {
+					File newFile = new File(dir + "/minecraft-" + version + ".jar");
+					if (newFile.exists()) {
+						if (mainForm.setMinecraftPath(newFile.getPath(), false)) {
+							break;
+						}
+					}
+				}
+				if (mainForm.setMinecraftPath(f.getPath(), false)) {
 					break;
+				}
 			}
 		}
 	}
@@ -201,6 +225,21 @@ public class MCPatcher {
 			is = MCPatcher.class.getResourceAsStream(name);
 		}
 		return is;
+	}
+
+	public static boolean hasNewcode(String name) {
+		InputStream is = null;
+		boolean found = false;
+		try {
+			is = MCPatcher.class.getResourceAsStream("/newcode/" + name);
+			if(is != null) {
+				found = true;
+			}
+		} catch(Exception e) {
+		} finally {
+			try { is.close(); } catch(Exception e) { }
+		}
+		return found;
 	}
 
 	private static void replaceFile(String name, JarOutputStream newjar) throws IOException {

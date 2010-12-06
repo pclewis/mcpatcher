@@ -70,7 +70,7 @@ public class MainForm implements Runnable {
 	            } else {
 		            String path = fd.getDirectory() + fd.getFile();
 		            try {
-			            setMinecraftPath(path);
+			            setMinecraftPath(path, true);
 		            } catch(Exception e1) {
 			            e1.printStackTrace(MCPatcher.err);
 			            MCPatcher.logWindow.setVisible(true);
@@ -260,7 +260,7 @@ public class MainForm implements Runnable {
 		updateControls();
 	}
 
-	public boolean setMinecraftPath(String path) throws Exception {
+	public boolean setMinecraftPath(String path, boolean fromUser) throws Exception {
 		String errors = "";
 		try {
 			minecraft = new Minecraft(new File(path));
@@ -294,7 +294,7 @@ public class MainForm implements Runnable {
 			if(!minecraft.isBackup()) {
 				boolean success = false;
 				try {
-					success = minecraft.createBackup();
+					success = minecraft.createBackup(fromUser);
 					if(!success)
 						JOptionPane.showMessageDialog(null, "Must create backup.", "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (IOException ex) {
@@ -321,9 +321,7 @@ public class MainForm implements Runnable {
 			classInfoLabel.setText(sb.toString());
 
 			if(outputField.getText().length() == 0) {
-				if(path.endsWith(".original.jar")) {
-					outputField.setText( path.replace(".original.jar", ".jar") );
-				}
+				outputField.setText(minecraft.getBaseName() + ".jar");
 			}
 
 			if(packField.getText().length() == 0) {
@@ -336,6 +334,18 @@ public class MainForm implements Runnable {
 			frame.pack();
 			return true;
 		}
+	}
+
+	private boolean customLiquidOk(String name) {
+		String obfName = minecraft.getClassMap().get(name);
+		return obfName != null && MCPatcher.hasNewcode(obfName);
+	}
+
+	private boolean customLiquidOk() {
+		return customLiquidOk("StillLava") &&
+				customLiquidOk("FlowLava") &&
+				customLiquidOk("StillWater") &&
+				customLiquidOk("FlowWater");
 	}
 
 	public static MainForm create() {
@@ -404,6 +414,27 @@ public class MainForm implements Runnable {
 			return;
 		} else {
 			outputLabel.setForeground(Color.getColor("Label.foreground"));
+		}
+
+		if(customLiquidOk()) {
+			customWaterCheckBox.setEnabled(true);
+			customWaterCheckBox.setToolTipText(null);
+
+			customLavaCheckBox.setEnabled(true);
+			customLavaCheckBox.setToolTipText(null);
+		} else {
+			final String msg =
+					"Custom water and lava are not available with Minecraft " +
+					minecraft.getVersion() +
+					" until a new version of mcpatcher is released.";
+
+			customWaterCheckBox.setEnabled(false);
+			customWaterCheckBox.setSelected(false);
+			customWaterCheckBox.setToolTipText(msg);
+
+			customLavaCheckBox.setEnabled(false);
+			customLavaCheckBox.setSelected(false);
+			customLavaCheckBox.setToolTipText(msg);
 		}
 
 		patchButton.setEnabled(true);
