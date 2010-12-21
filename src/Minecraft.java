@@ -219,7 +219,7 @@ public class Minecraft implements Opcode {
 			byte buffer[] = new byte[(int)mc.getSize()];
 			is.read(buffer, 0, (int)mc.getSize());
 			String s = new String(buffer);
-			Pattern p = Pattern.compile("Minecraft (Alpha |Beta )?v(" + minecraftVerRegex + ")");
+			Pattern p = Pattern.compile("Minecraft (Alpha |Beta )?v?(" + minecraftVerRegex + ")");
 			Matcher m = p.matcher(s);
 			if(m.find()) {
 				version = m.group(2);

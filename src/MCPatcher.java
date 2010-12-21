@@ -231,7 +231,7 @@ public class MCPatcher {
 		InputStream is = null;
 		boolean found = false;
 		try {
-			is = MCPatcher.class.getResourceAsStream("/newcode/" + name);
+            is = openResource(name);
 			if(is != null) {
 				found = true;
 			}

@@ -304,7 +304,7 @@
             </constraints>
             <properties>
               <enabled value="false"/>
-              <text value="Run Minecraft"/>
+              <text value="Test Minecraft"/>
             </properties>
           </component>
           <component id="c5843" class="javax.swing.JButton" binding="minecraftFolderButton" default-binding="true">
