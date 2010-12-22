@@ -1,10 +1,10 @@
 import net.minecraft.client.Minecraft;
 
-public class jm extends ae {
+public class jn extends ae {
 	WaterAnimation w;
 
-	public jm(Minecraft game) {
-		super(of.A.bg + 1);
+	public jn(Minecraft game) {
+		super(og.A.bg + 1);
 		this.e = 2;
 		w = new WaterAnimation(game, "water_flowing", this.b, this.a, 0, 0);
 	}
