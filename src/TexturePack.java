@@ -57,6 +57,18 @@ public abstract class TexturePack {
 		return input;
 	}
 
+	public boolean hasFile(String file) {
+		DataInputStream input = getInputStream(file);
+		if(input == null) {
+			return false;
+		}
+		try {
+			input.close();
+		} catch (IOException e) {
+		}
+		return true;
+	}
+
 	private int getTileSize(String file) {
 		BufferedImage image = null;
 		DataInputStream input = null;

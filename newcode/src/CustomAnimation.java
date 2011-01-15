@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
 
-public class WaterAnimation {
+public class CustomAnimation {
 	Minecraft game;
 	int tileNumber;
 	int tileWidth;
@@ -24,11 +24,11 @@ public class WaterAnimation {
 	boolean isCustom;
 	static private Random rand = new Random();
 
-	public WaterAnimation(Minecraft game, String name, int tileNumber, byte[] outBuf) {
+	public CustomAnimation(Minecraft game, String name, int tileNumber, byte[] outBuf) {
 		this(game, name, tileNumber, outBuf, -1, -1);
 	}
 
-	public WaterAnimation(Minecraft game, String name, int tileNumber, byte[] outBuf, int minScrollDelay, int maxScrollDelay) {
+	public CustomAnimation(Minecraft game, String name, int tileNumber, byte[] outBuf, int minScrollDelay, int maxScrollDelay) {
 		this.game           = game;
 		this.tileNumber     = tileNumber;
 		this.outBuf         = outBuf;
@@ -91,7 +91,7 @@ public class WaterAnimation {
 		}
 	}
 
-	public void a() {
+	public void render() {
 		if(this.src != null) {
 			if(++this.frame >= numFrames)
 				this.frame = 0;

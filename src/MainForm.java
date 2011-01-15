@@ -38,7 +38,7 @@ public class MainForm implements Runnable {
 	private JCheckBox betterGrassCheckBox;
 	private JFrame frame;
 
-	private Minecraft minecraft;
+	public Minecraft minecraft;
 	private TexturePack texturePack;
 	private TexturePack mcTexturePack;
 
@@ -356,16 +356,21 @@ public class MainForm implements Runnable {
 		}
 	}
 
-	private boolean customLiquidOk(String name) {
-		String obfName = minecraft.getClassMap().get(name);
-		return obfName != null && MCPatcher.hasNewcode(obfName);
+	private boolean customAnimationOk(String className, String pngName) {
+		return minecraft.getClassMap().get("AnimTexture") != null &&
+				minecraft.getClassMap().get(className) != null &&
+				texturePack != null &&
+				texturePack.hasFile("custom_" + pngName + ".png");
 	}
 
-	private boolean customLiquidOk() {
-		return customLiquidOk("StillLava") &&
-				customLiquidOk("FlowLava") &&
-				customLiquidOk("StillWater") &&
-				customLiquidOk("FlowWater");
+	private boolean customWaterOk() {
+		return customAnimationOk("StillWater", "water_still") &&
+				customAnimationOk("FlowWater", "water_flowing");
+	}
+
+	private boolean customLavaOk() {
+		return customAnimationOk("StillLava", "lava_still") &&
+				customAnimationOk("FlowLava", "lava_flowing");
 	}
 
 	public static MainForm create() {
@@ -436,28 +441,24 @@ public class MainForm implements Runnable {
 			outputLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
-		if(customLiquidOk()) {
-			customWaterCheckBox.setEnabled(true);
-			customWaterCheckBox.setToolTipText(null);
-
-			customLavaCheckBox.setEnabled(true);
-			customLavaCheckBox.setToolTipText(null);
-		} else {
-			final String msg =
-					"Custom water and lava are not available with Minecraft " +
-					minecraft.getVersion() +
-					" until a new version of mcpatcher is released.";
-
-			customWaterCheckBox.setEnabled(false);
-			customWaterCheckBox.setSelected(false);
-			customWaterCheckBox.setToolTipText(msg);
-
-			customLavaCheckBox.setEnabled(false);
-			customLavaCheckBox.setSelected(false);
-			customLavaCheckBox.setToolTipText(msg);
-		}
+		updateCustomCheckBox(customWaterCheckBox, customWaterOk(), "water");
+		updateCustomCheckBox(customLavaCheckBox, customLavaOk(), "lava");
 
 		patchButton.setEnabled(true);
+	}
+
+	private void updateCustomCheckBox(JCheckBox checkBox, boolean enabled, String name) {
+		if(enabled) {
+			if(!checkBox.isEnabled()) {
+				checkBox.setSelected(true);
+			}
+			checkBox.setEnabled(true);
+			checkBox.setToolTipText(null);
+		} else {
+			checkBox.setSelected(false);
+			checkBox.setEnabled(false);
+			checkBox.setToolTipText("Currently selected texture pack does not support custom " + name + ".");
+		}
 	}
 
 	public void updateProgress(int at, int total) {

@@ -136,11 +136,24 @@ public class MCPatcher {
 			int procFiles = 0;
 			for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
 				String name = entry.getName();
+				String deobfName = name;
+				for(String s : replaceFiles) {
+					String t = mainForm.minecraft.getClassMap().get(s.replaceFirst("\\.class$", ""));
+					if(name.equals(t)) {
+						deobfName = s;
+						break;
+					}
+				}
 
 				procFiles += 1;
 				mainForm.updateProgress(procFiles, totalFiles);
 				if(name.startsWith("META-INF"))
 					continue; // leave out manifest
+				if(replaceFiles.contains(deobfName)) {
+					replaceFiles.remove(deobfName);
+					replaceFile(name, deobfName, newjar);
+					continue;
+				}
 
 				newjar.putNextEntry(new ZipEntry(entry.getName()));
 				if(entry.isDirectory()) {
@@ -161,11 +174,7 @@ public class MCPatcher {
 
 				boolean patched = false;
 
-				if(replaceFiles.contains(name)) {
-					replaceFiles.remove(name);
-					replaceFile(name, newjar);
-					patched = true;
-				} else if (name.endsWith(".class")) {
+				if (name.endsWith(".class")) {
 					patched = applyPatches(name, input, minecraft, patches, newjar);
 				} else if(name.equals("gui/items.png") || name.equals("terrain.png")) {
 					patched = resizeImage(name, 16, input, newjar);
@@ -205,9 +214,7 @@ public class MCPatcher {
 
 			// Add files in replaceFiles list that weren't encountered in src
 			for(String f : replaceFiles) {
-				newjar.putNextEntry(new ZipEntry(f));
-				replaceFile(f, newjar);
-				newjar.closeEntry();
+				replaceFile(f, f, newjar);
 			}
 
 			newjar.close();
@@ -227,48 +234,137 @@ public class MCPatcher {
 		return is;
 	}
 
-	public static boolean hasNewcode(String name) {
-		InputStream is = null;
-		boolean found = false;
-		try {
-            is = openResource(name);
-			if(is != null) {
-				found = true;
-			}
-		} catch(Exception e) {
-		} finally {
-			try { is.close(); } catch(Exception e) { }
+	private static void replaceFile(String name, String srcName, JarOutputStream newjar) throws IOException {
+		if(name.equals(srcName)) {
+			MCPatcher.out.println("Replacing " + name);
+		} else {
+			MCPatcher.out.println("Replacing " + name + " (" + srcName + ")");
 		}
-		return found;
-	}
-
-	private static void replaceFile(String name, JarOutputStream newjar) throws IOException {
-		MCPatcher.out.println("Replacing " + name);
-		InputStream is = openResource(name);
+		newjar.putNextEntry(new ZipEntry(name));
+		InputStream is = openResource(srcName);
 		if(is == null)
 			throw new FileNotFoundException("newcode/" + name);
 
-		Util.copyStream(is, newjar);
+		// Previously, we simply copied replacement class files verbatim from the newcode directory into
+		// the new minecraft.jar.  This generally required a new mcpatcher release with each update of
+		// Minecraft.
+		//
+		// Instead, we use the classes in newcode as templates and edit them with the proper Minecraft
+		// references on the fly.  The newcode classes always use the long class field names.  In newcode,
+		// there are also AnimTexture and net.minecraft.client.Minecraft classes, which are not actually
+		// injected into the patched minecraft.jar but are simply stubs to get everything to build properly.
+		//
+		// Here we map long names to the short names in the currently selected Minecraft.jar.
+		if(name.endsWith(".class")) {
+			String className = name.replace(".class", "");
+			String srcClassName = srcName.replace(".class", "");
+			String animName = mainForm.minecraft.getClassMap().get("AnimTexture");
+			if(animName == null) {
+				animName = "AnimTexture";
+			} else {
+				animName = animName.replace(".class", "");
+			}
 
-		for(int i = 1; true; ++i) {
-			String nn = (name.replace(".class", "$"+i+".class"));
-			is = openResource(nn);
-			if(is==null)
-				break;
-			MCPatcher.out.println("Adding " + nn);
-			newjar.closeEntry();
-			newjar.putNextEntry(new ZipEntry(nn));
-			Util.copyStream(is,newjar);
+			byte[] buffer = new byte[is.available()];
+			is.read(buffer, 0, is.available());
+
+			if(!className.equals(srcClassName)) {
+				buffer = replaceClassString(buffer, srcClassName, className);
+				buffer = replaceClassString(buffer, srcClassName + ";", className + ";");
+				buffer = replaceClassString(buffer, srcClassName + ".java", className + ".java");
+			}
+			if(animName != null) {
+				buffer = replaceClassString(buffer, "AnimTexture", animName);
+			}
+
+			// NOTE: These field mappings in the AnimTexture class are still hard-coded, which means
+			// a new mcpatcher release may still be required occasionally.
+			//
+			// However, it is not a problem if the whole class is simply renamed (e.g., ae -> af), only
+			// if the class internal structure changes significantly.
+			buffer = replaceClassString(buffer, "render", "a");
+			buffer = replaceClassString(buffer, "outBuf", "a");
+			buffer = replaceClassString(buffer, "tile", "b");
+			buffer = replaceClassString(buffer, "flow", "e");
+
+			newjar.write(buffer, 0, buffer.length);
+		} else {
+			Util.copyStream(is, newjar);
 		}
 
+		newjar.closeEntry();
+
+		for(int i = 1; true; ++i) {
+			String src = (srcName.replace(".class", "$"+i+".class"));
+			String dest = (name.replace(".class", "$"+i+".class"));
+			is = openResource(src);
+			if(is==null)
+				break;
+			MCPatcher.out.println("Adding " + dest);
+			newjar.putNextEntry(new ZipEntry(dest));
+			Util.copyStream(is, newjar);
+			newjar.closeEntry();
+		}
+
+	}
+
+	private static byte[] replaceClassString(byte[] code, String from, String to) throws IOException {
+		byte[] a = getClassStringBytes(from);
+		byte[] b = getClassStringBytes(to);
+		int n = a.length;
+		int m = b.length;
+		byte t[] = new byte[n];
+
+		if(n == 0 || m == 0) {
+			return code.clone();
+		}
+		
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		for(int offset = 0; offset < code.length; ) {
+			boolean match = false;
+			if(offset + n < code.length) {
+				match = true;
+				for(int i = 0; match && i < n; i++) {
+					match = (code[offset+i] == a[i]);
+				}
+			}
+			if(match) {
+				MCPatcher.out.println(String.format("  Replace string \"%s\" -> \"%s\" @%d", from, to, offset));
+				os.write(b);
+				offset += n;
+			} else {
+				os.write(code[offset]);
+				offset++;
+			}
+		}
+
+		return os.toByteArray();
+	}
+
+	private static byte[] getClassStringBytes(String code) throws IOException {
+		byte a[] = code.getBytes();
+		int len = a.length;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+		os.write((byte)(len / 256));
+		os.write((byte)(len % 256));
+		os.write(a);
+
+		return os.toByteArray();
 	}
 
 	private static void getPatches(ArrayList<PatchSet> patches, ArrayList<String> replaceFiles) {
 		PatchSet waterPatches = new PatchSet(Patches.water);
 		if (globalParams.getBoolean("useCustomWater")) {
+			for(PatchSpec ps : Patches.customWaterMC.getPatchSpecs()) {
+				Patch p = ps.getPatch();
+				if(p instanceof Patches.PassThisPatch) {
+					((Patches.PassThisPatch)p).setClassMap(mainForm.minecraft.getClassMap());
+				}
+			}
 		    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customWaterMC)));
-			replaceFiles.add("jn.class");
-			replaceFiles.add("ou.class");
+			replaceFiles.add("StillWater.class");
+			replaceFiles.add("FlowWater.class");
 		} else {
 			if(!globalParams.getBoolean("useAnimatedWater")) {
 				waterPatches.setParam("tileSize", "0");
@@ -280,9 +376,15 @@ public class MCPatcher {
 
 		PatchSet lavaPatches = new PatchSet(Patches.water);
 		if(globalParams.getBoolean("useCustomLava")) {
+			for(PatchSpec ps : Patches.customLavaMC.getPatchSpecs()) {
+				Patch p = ps.getPatch();
+				if(p instanceof Patches.PassThisPatch) {
+					((Patches.PassThisPatch)p).setClassMap(mainForm.minecraft.getClassMap());
+				}
+			}
 			patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customLavaMC)));
-			replaceFiles.add("bc.class");
-			replaceFiles.add("fj.class");
+			replaceFiles.add("StillLava.class");
+			replaceFiles.add("FlowLava.class");
 			//lavaPatches.setParam("tileSize", "0");
 			//patches.add(new PatchSet("StillLava", lavaPatches));
 			//patches.add( new PatchSet(Patches.hideStillLava) );
@@ -297,7 +399,7 @@ public class MCPatcher {
 
 		if (globalParams.getBoolean("useCustomWater")||
 			globalParams.getBoolean("useCustomLava")) {
-			replaceFiles.add("WaterAnimation.class");
+			replaceFiles.add("CustomAnimation.class");
 		}
 
 		PatchSet firePatches = new PatchSet(Patches.fire);

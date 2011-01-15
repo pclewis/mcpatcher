@@ -2,6 +2,8 @@ import javassist.bytecode.MethodInfo;
 import javassist.bytecode.Mnemonic;
 import javassist.bytecode.Opcode;
 
+import java.util.HashMap;
+
 class Patches implements Opcode {
 	public static ParamSpec[] PSPEC_EMPTY = new ParamSpec[]{};
 	public static ParamSpec[] PSPEC_TILESIZE = new ParamSpec[]{
@@ -369,23 +371,38 @@ class Patches implements Opcode {
 		public String getDescription() { return "pass Minecraft to "+className+"."+methodName; }
 
 		String className, methodName, fromType, toType;
+		private HashMap<String,String> classMap;
 
 		public PassThisPatch(String className, String methodName, String fromType, String toType) {
 			this.className = className;
 			this.methodName = methodName;
 			this.fromType = fromType;
 			this.toType = toType;
+			this.classMap = new HashMap<String,String>();
+		}
+
+		public void setClassMap(HashMap<String,String> classMap) {
+			this.classMap = classMap;
+		}
+
+		private String mapClassName() {
+			String obfName = classMap.get(className);
+			if(obfName == null) {
+				obfName = className;
+			}
+			obfName = obfName.replace(".class", "");
+			return obfName;
 		}
 
 		byte[] getFromBytes(MethodInfo mi) throws Exception {
-			int methi = ConstPoolUtils.find(mi.getConstPool(), new MethodRef(className, methodName, fromType));
+			int methi = ConstPoolUtils.find(mi.getConstPool(), new MethodRef(mapClassName(), methodName, fromType));
 			return buildCode(
 				(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
 			);
 		}
 
 		byte[] getToBytes(MethodInfo mi) throws Exception {
-			int methi = ConstPoolUtils.findOrAdd(mi.getConstPool(), new MethodRef(className, methodName, toType));
+			int methi = ConstPoolUtils.findOrAdd(mi.getConstPool(), new MethodRef(mapClassName(), methodName, toType));
 			return buildCode(
 				(byte)ALOAD_0,
 				(byte)INVOKESPECIAL, Util.b(methi, 1), Util.b(methi, 0)
@@ -493,16 +510,16 @@ class Patches implements Opcode {
 	public static final PatchSet customWaterMC = new PatchSet(
 		"Minecraft",
 		new PatchSpec[] {
-			new PatchSpec(new PassThisPatch("jn", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
-			new PatchSpec(new PassThisPatch("ou", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("FlowWater", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("StillWater", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 
 	public static final PatchSet customLavaMC = new PatchSet(
 		"Minecraft",
 		new PatchSpec[] {
-			new PatchSpec(new PassThisPatch("fj", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
-			new PatchSpec(new PassThisPatch("bc", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("FlowLava", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+			new PatchSpec(new PassThisPatch("StillLava", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
 		}
 	);
 
