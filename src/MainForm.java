@@ -162,11 +162,31 @@ public class MainForm implements Runnable {
 						String cp = path + "/" + Util.joinString(Arrays.asList(
 							"minecraft.jar", "lwjgl.jar", "lwjgl_util.jar", "jinput.jar"
 						), File.pathSeparatorChar + path + "/");
+
+						// 256x256+ texture packs will give out of memory errors when launching minecraft.
+						// ########## GL ERROR ##########
+						// @ Pre render
+						// 1285: Out of memory
+						// To fix this, we must REDUCE, not EXPAND, the jvm heap size so that more address
+						// space will be left for the native gl library.
+						// This should not be an issue on 64-bit systems.
+						int heapSize = 1024;
+						if(!Util.is64Bit()) {
+							try {
+								int tileSize = Integer.parseInt(tileSizeCombo.getSelectedItem().toString().split("x")[0], 10);
+								if(tileSize > 128) {
+									heapSize = 768;
+									MCPatcher.out.println("Reducing java heap size to " + heapSize + "M for 32-bit OS + large texture pack");
+								}
+							} catch(Exception e) {
+							}
+						}
+
 						ProcessBuilder pb = new ProcessBuilder(
 							"java",
 								"-cp", cp,
 								"-Djava.library.path=" + path + "/natives",
-								"-Xmx1024M", "-Xms512M",
+								"-Xmx"+heapSize+"M", "-Xms512M",
 								"net.minecraft.client.Minecraft");
 						MCPatcher.out.println( pb.command() );
 						pb.redirectErrorStream(true);

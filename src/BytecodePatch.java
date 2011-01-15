@@ -16,6 +16,14 @@ public abstract class BytecodePatch extends Patch implements javassist.bytecode.
 			return new byte[] { ICONST_0 };
 		} else if (value == 1) {
 			return new byte[] { ICONST_1 };
+		} else if (value == 2) {
+			return new byte[] { ICONST_2 };
+		} else if (value == 3) {
+			return new byte[] { ICONST_3 };
+		} else if (value == 4) {
+			return new byte[] { ICONST_4 };
+		} else if (value == 5) {
+			return new byte[] { ICONST_5 };
 		} if(value <= Byte.MAX_VALUE) {
 			return new byte[] { BIPUSH, (byte)value };
 		} else if (value <= Short.MAX_VALUE) {
@@ -48,6 +56,8 @@ public abstract class BytecodePatch extends Patch implements javassist.bytecode.
 
 	abstract byte[] getFromBytes(MethodInfo mi) throws Exception;
     abstract byte[] getToBytes(MethodInfo mi) throws Exception;
+	protected byte[] preBytes = new byte[0];
+	protected byte[] postBytes = new byte[0];
 
     public void visitConstPool(ConstPool cp) {}
 
@@ -59,18 +69,36 @@ public abstract class BytecodePatch extends Patch implements javassist.bytecode.
 		return true;
 	}
 
+	private static byte[] joinArrays(byte[] a1, byte[] a2, byte[] a3) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		os.write(a1);
+		os.write(a2);
+		os.write(a3);
+		return os.toByteArray();
+	}
+
 	private void pad(CodeIterator ci, int start, int length) {
 		for(int i = 0; i < length; ++i)
 			ci.writeByte(NOP, start+i);
 	}
+
+	public BytecodePatch preBytes(byte[] preBytes) {
+		this.preBytes = preBytes.clone();
+		return this;
+	}
+	public BytecodePatch postBytes(byte[] postBytes) {
+		this.postBytes = postBytes.clone();
+		return this;
+	}
+
     public void visitMethod(MethodInfo mi) throws Exception {
         CodeAttribute ca = mi.getCodeAttribute();
         if(ca == null || ca.getCodeLength() <= 0)
             return;
 
 	    CodeIterator ci = ca.iterator();
-	    byte[] from = this.getFromBytes(mi);
-	    byte[] to = this.getToBytes(mi);
+	    byte[] from = joinArrays(preBytes, this.getFromBytes(mi), postBytes);
+		byte[] to = joinArrays(preBytes, this.getToBytes(mi), postBytes);
 	    if(Arrays.equals(from,to)) return;
 
 	    try {
