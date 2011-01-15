@@ -196,6 +196,8 @@
         <rowspec value="center:d:noGrow"/>
         <rowspec value="top:4dlu:noGrow"/>
         <rowspec value="center:max(d;4px):noGrow"/>
+        <rowspec value="top:4dlu:noGrow"/>
+        <rowspec value="center:max(d;4px):noGrow"/>
         <colspec value="fill:d:noGrow"/>
         <colspec value="left:4dlu:grow"/>
         <colspec value="fill:d:noGrow"/>
@@ -262,13 +264,23 @@
           </component>
           <component id="1012b" class="javax.swing.JCheckBox" binding="betterGrassCheckBox" default-binding="true">
             <constraints>
-              <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
               <forms/>
             </constraints>
             <properties>
               <selected value="false"/>
               <text value="Better Grass"/>
               <visible value="false"/>
+            </properties>
+          </component>
+          <component id="67424" class="javax.swing.JCheckBox" binding="customPortalCheckBox">
+            <constraints>
+              <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <selected value="true"/>
+              <text value="Custom Portal"/>
             </properties>
           </component>
         </children>

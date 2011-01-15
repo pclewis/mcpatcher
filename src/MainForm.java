@@ -35,6 +35,7 @@ public class MainForm implements Runnable {
 	private JComboBox tileSizeCombo;
 	private JCheckBox customWaterCheckBox;
 	private JCheckBox customLavaCheckBox;
+	private JCheckBox customPortalCheckBox;
 	private JCheckBox betterGrassCheckBox;
 	private JFrame frame;
 
@@ -144,6 +145,7 @@ public class MainForm implements Runnable {
 			    MCPatcher.globalParams.put("useAnimatedLava", ""+animatedLavaCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useCustomWater", ""+customWaterCheckBox.isSelected());
 		        MCPatcher.globalParams.put("useCustomLava", ""+customLavaCheckBox.isSelected());
+				MCPatcher.globalParams.put("useCustomPortal", ""+customPortalCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useBetterGrass", ""+betterGrassCheckBox.isSelected());
 
 				runWorker(new Runnable() {
@@ -373,6 +375,10 @@ public class MainForm implements Runnable {
 				customAnimationOk("FlowLava", "lava_flowing");
 	}
 
+	private boolean customPortalOk() {
+		return customAnimationOk("Portal", "portal");
+	}
+
 	public static MainForm create() {
         JFrame frame = new JFrame("Minecraft Patcher");
         frame.setResizable(false);
@@ -443,6 +449,7 @@ public class MainForm implements Runnable {
 
 		//updateCustomCheckBox(customWaterCheckBox, customWaterOk(), "water");
 		//updateCustomCheckBox(customLavaCheckBox, customLavaOk(), "lava");
+		updateCustomCheckBox(customPortalCheckBox, customPortalOk(), "portals");
 
 		patchButton.setEnabled(true);
 	}

@@ -523,6 +523,13 @@ class Patches implements Opcode {
 		}
 	);
 
+	public static final PatchSet customPortalMC = new PatchSet(
+		"Minecraft",
+		new PatchSpec[] {
+			new PatchSpec(new PassThisPatch("Portal", "<init>", "()V", "(Lnet/minecraft/client/Minecraft;)V")),
+		}
+	);
+
 	public static final PatchSet betterGrass = new PatchSet(
 		"Block",
 		new PatchSpec[] {

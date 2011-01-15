@@ -131,7 +131,8 @@ public class MCPatcher {
 
 		try {
             List<String> customAnimations = new ArrayList<String>(Arrays.asList("custom_water_still.png",
-                    "custom_water_flowing.png", "custom_lava_still.png", "custom_lava_flowing.png"));
+                    "custom_water_flowing.png", "custom_lava_still.png", "custom_lava_flowing.png",
+					"custom_portal.png"));
 			int totalFiles = minecraft.getJar().size();
 			int procFiles = 0;
 			for(JarEntry entry : Collections.list(minecraft.getJar().entries())) {
@@ -355,6 +356,7 @@ public class MCPatcher {
 
 	private static void getPatches(ArrayList<PatchSet> patches, ArrayList<String> replaceFiles) {
 		PatchSet waterPatches = new PatchSet(Patches.water);
+		boolean useCustomAnimation = false;
 		if (globalParams.getBoolean("useCustomWater")) {
 			for(PatchSpec ps : Patches.customWaterMC.getPatchSpecs()) {
 				Patch p = ps.getPatch();
@@ -365,6 +367,7 @@ public class MCPatcher {
 		    patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customWaterMC)));
 			replaceFiles.add("StillWater.class");
 			replaceFiles.add("FlowWater.class");
+			useCustomAnimation = true;
 		} else {
 			if(!globalParams.getBoolean("useAnimatedWater")) {
 				waterPatches.setParam("tileSize", "0");
@@ -385,6 +388,7 @@ public class MCPatcher {
 			patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customLavaMC)));
 			replaceFiles.add("StillLava.class");
 			replaceFiles.add("FlowLava.class");
+			useCustomAnimation = true;
 			//lavaPatches.setParam("tileSize", "0");
 			//patches.add(new PatchSet("StillLava", lavaPatches));
 			//patches.add( new PatchSet(Patches.hideStillLava) );
@@ -397,8 +401,19 @@ public class MCPatcher {
 			patches.add(new PatchSet("StillLava", lavaPatches));
 		}
 
-		if (globalParams.getBoolean("useCustomWater")||
-			globalParams.getBoolean("useCustomLava")) {
+		if(globalParams.getBoolean("useCustomPortal")) {
+			for(PatchSpec ps : Patches.customPortalMC.getPatchSpecs()) {
+				Patch p = ps.getPatch();
+				if(p instanceof Patches.PassThisPatch) {
+					((Patches.PassThisPatch)p).setClassMap(mainForm.minecraft.getClassMap());
+				}
+			}
+			patches.add(new PatchSet("Minecraft", new PatchSet(Patches.customPortalMC)));
+			replaceFiles.add("Portal.class");
+			useCustomAnimation = true;
+		}
+
+		if (useCustomAnimation) {
 			replaceFiles.add("CustomAnimation.class");
 		}
 
@@ -415,7 +430,9 @@ public class MCPatcher {
 		    patches.add(new PatchSet(Patches.compass));
 			patches.add(new PatchSet(Patches.tool3d));
             patches.add(new PatchSet(Patches.watch));
-            patches.add(new PatchSet(Patches.portal));
+			if(!globalParams.getBoolean("useCustomPortal")) {
+				patches.add(new PatchSet(Patches.portal));
+			}
 		}
 
 		if(globalParams.getBoolean("useBetterGrass")) {
