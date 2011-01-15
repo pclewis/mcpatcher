@@ -441,8 +441,8 @@ public class MainForm implements Runnable {
 			outputLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
-		updateCustomCheckBox(customWaterCheckBox, customWaterOk(), "water");
-		updateCustomCheckBox(customLavaCheckBox, customLavaOk(), "lava");
+		//updateCustomCheckBox(customWaterCheckBox, customWaterOk(), "water");
+		//updateCustomCheckBox(customLavaCheckBox, customLavaOk(), "lava");
 
 		patchButton.setEnabled(true);
 	}
