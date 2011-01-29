@@ -4,9 +4,13 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 public class MainForm implements Runnable {
@@ -149,7 +153,7 @@ public class MainForm implements Runnable {
 
 	    patchButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-			    int tileSize = Integer.parseInt(tileSizeCombo.getSelectedItem().toString().split("x")[0], 10);
+			    int tileSize = getTileSize();
 			    MCPatcher.globalParams.put("tileSize", ""+tileSize);
 			    MCPatcher.globalParams.put("useAnimatedFire", ""+animatedFireCheckBox.isSelected());
 				MCPatcher.globalParams.put("useAnimatedWater", ""+animatedWaterCheckBox.isSelected());
@@ -185,13 +189,9 @@ public class MainForm implements Runnable {
 						// This should not be an issue on 64-bit systems.
 						int heapSize = 1024;
 						if(!Util.is64Bit()) {
-							try {
-								int tileSize = Integer.parseInt(tileSizeCombo.getSelectedItem().toString().split("x")[0], 10);
-								if(tileSize > 128) {
-									heapSize = 768;
-									MCPatcher.out.println("Reducing java heap size to " + heapSize + "M for 32-bit OS + large texture pack");
-								}
-							} catch(Exception e) {
+							if(getTileSize() > 128) {
+								heapSize = 768;
+								MCPatcher.out.println("Reducing java heap size to " + heapSize + "M for 32-bit OS + large texture pack");
 							}
 						}
 
@@ -234,7 +234,36 @@ public class MainForm implements Runnable {
 			    }
 		    }
 	    });
+
+	    tileSizeCombo.addActionListener(new ActionListener() {
+		    private final Pattern re = Pattern.compile("^(\\d+)x\\1$");
+		    private int shownMessageFor = -1;
+		    public void actionPerformed(ActionEvent e) {
+				String val = tileSizeCombo.getSelectedItem().toString();
+			    if(!re.matcher(val).find() || getTileSize() < 16) {
+				    tileSizeCombo.setSelectedIndex(0);
+			    } else {
+				    if(tileSizeCombo.getSelectedIndex() == -1 && shownMessageFor != getTileSize()) {
+					    shownMessageFor = getTileSize();
+					    JOptionPane.showMessageDialog(null,
+							    "The tile size you have selected is TOTALLY UNSUPPORTED.\n" +
+							    "DO NOT ask for help if something goes wrong.",
+							    "Proceed With Caution",
+							    JOptionPane.WARNING_MESSAGE
+					    );
+				    }
+			    }
+		    }
+	    });
     }
+
+	private int getTileSize() {
+		try {
+			return Integer.parseInt(tileSizeCombo.getSelectedItem().toString().split("x")[0], 10);
+		} catch (NumberFormatException ex) {
+			return 0;
+		}
+	}
 
 	public void setTexturePack(String path) throws IOException {
 		try {

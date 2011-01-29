@@ -181,6 +181,7 @@
               <forms/>
             </constraints>
             <properties>
+              <editable value="true"/>
               <model>
                 <item value="16x16"/>
                 <item value="32x32"/>
