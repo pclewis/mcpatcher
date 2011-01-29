@@ -22,7 +22,10 @@ public class Minecraft implements Opcode {
 
 	private HashMap<String,String> classMap = new HashMap<String,String>();
 	private HashMap<String,ClassFinder> classFinders = new HashMap<String, ClassFinder>() {{
-		put("AnimManager",new MethodCallSignature("glTexSubImage2D"));
+		put("AnimManager",new ComboSignature(
+				new MethodCallSignature("glTexSubImage2D"),
+				new ConstSignature("%clamp%")
+		));
 		put("AnimTexture",new BytecodeSignature(new byte[]{
 			(byte)SIPUSH, 0x04, 0x00, // 1024
 			(byte)NEWARRAY, T_BYTE
@@ -161,6 +164,22 @@ public class Minecraft implements Opcode {
 		}
 		public boolean match(JarEntry entry, ClassFile cf) {
 			return entry.getName().equals(this.name);
+		}
+	}
+
+	private class ComboSignature implements ClassFinder {
+		ClassFinder finders[];
+
+		public ComboSignature(ClassFinder... finders) {
+			this.finders = finders;
+		}
+
+		public boolean match(JarEntry entry, ClassFile cf) throws Exception {
+			for(ClassFinder finder : finders) {
+				if(!finder.match(entry, cf))
+					return false;
+			}
+			return true;
 		}
 	}
 
