@@ -20,6 +20,8 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 public class MCPatcher {
+	public static final String VERSION = "1.1.12";
+
 	public static PrintStream out;
 	public static PrintStream err;
 
@@ -29,6 +31,7 @@ public class MCPatcher {
 
 	public static void main(String[] argv) throws Exception {
 		initLogWindow();
+		out.println("Starting MCPatcher v" + VERSION);
 
 		mainForm = MainForm.create();
 		findMinecraft();
@@ -113,6 +116,9 @@ public class MCPatcher {
 
 	    ArrayList<PatchSet> patches = new ArrayList<PatchSet>();
 	    ArrayList<String> replaceFiles = new ArrayList<String>();
+
+		out.println("Texture pack: " + texturePack.getPath());
+		out.println("Minecraft version: " + minecraft.getVersion());
 
 	    getPatches(patches, replaceFiles);
 
