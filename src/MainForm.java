@@ -48,7 +48,18 @@ public class MainForm implements Runnable {
 
 	private final boolean canOpenFolder = Util.isWindows() || Util.isMac();
 
+	private class EventQueueErrorProxy extends EventQueue {
+		protected void dispatchEvent(AWTEvent e) {
+			try {
+				super.dispatchEvent(e);
+			} catch (Throwable ex) {
+				MCPatcher.panic(ex);
+			}
+		}
+	}
+
     public MainForm(final JFrame frame) {
+	    Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueueErrorProxy());
         this.frame = frame;
 
         final MainForm form = this;
@@ -481,7 +492,11 @@ public class MainForm implements Runnable {
 	}
 
 	public void run() {
-		this.worker.run();
+		try {
+			this.worker.run();
+		} catch (Throwable ex) {
+			MCPatcher.panic(ex);
+		}
 		this.worker = null;
 		updateControls();
 	}

@@ -30,14 +30,33 @@ public class MCPatcher {
 	private static MainForm mainForm;
 
 	public static void main(String[] argv) throws Exception {
-		initLogWindow();
-		out.println("Starting MCPatcher v" + VERSION);
+		try {
+			initLogWindow();
+			out.println("Starting MCPatcher v" + VERSION);
 
-		mainForm = MainForm.create();
-		findMinecraft();
+			mainForm = MainForm.create();
+			findMinecraft();
 
-        mainForm.show();
+			mainForm.show();
+		} catch (Throwable ex) {
+			panic(ex);
+		}
     }
+
+	public static void panic(Throwable ex) {
+		ex.printStackTrace(MCPatcher.err);
+		MCPatcher.logWindow.setVisible(true);
+		JOptionPane.showMessageDialog(null,
+			"MCPatcher has encountered an error and cannot continue.\n"+
+			"Please copy the messages from the log window if you need to report this problem.\n" +
+			"You must restart MCPatcher before using it again.\n" +
+			"\n" +
+			"If your minecraft.jar has been corrupted, you can re-download the original minecraft.jar \n" +
+			"by deleting your minecraft/bin folder and running the game normally.\n" +
+			"\n" +
+			"Please see log window for more details.",
+			"Error", JOptionPane.ERROR_MESSAGE);
+	}
 
 	private static void findMinecraft() throws Exception {
 		String appdata = System.getenv("APPDATA");
