@@ -41,6 +41,7 @@ public class MainForm implements Runnable {
 	private JCheckBox customLavaCheckBox;
 	private JCheckBox customPortalCheckBox;
 	private JCheckBox betterGrassCheckBox;
+	private JCheckBox hiResFontCheckBox;
 	private JFrame frame;
 
 	public Minecraft minecraft;
@@ -161,6 +162,7 @@ public class MainForm implements Runnable {
 			    MCPatcher.globalParams.put("useCustomWater", ""+customWaterCheckBox.isSelected());
 		        MCPatcher.globalParams.put("useCustomLava", ""+customLavaCheckBox.isSelected());
 				MCPatcher.globalParams.put("useCustomPortal", ""+customPortalCheckBox.isSelected());
+				MCPatcher.globalParams.put("useHiResFont", ""+hiResFontCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useBetterGrass", ""+betterGrassCheckBox.isSelected());
 
 				runWorker(new Runnable() {
@@ -451,6 +453,16 @@ public class MainForm implements Runnable {
 		}
 		if(texturePack == null) {
 			textureInfoLabel.setText("");
+		}
+
+		if(minecraft.getClassMap().containsKey("FontRenderer")) {
+			if(!hiResFontCheckBox.isEnabled()) {
+				hiResFontCheckBox.setSelected(true);
+			}
+			hiResFontCheckBox.setEnabled(true);
+		} else {
+			hiResFontCheckBox.setSelected(false);
+			hiResFontCheckBox.setEnabled(false);
 		}
 
 		if(worker != null) {

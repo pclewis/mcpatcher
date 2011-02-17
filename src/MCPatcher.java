@@ -464,6 +464,10 @@ public class MCPatcher {
 			patches.add(new PatchSet(Patches.betterGrass));
 			replaceFiles.add("BetterGrass.class");
 		}
+
+		if(globalParams.getBoolean("useHiResFont")) {
+			patches.add(new PatchSet(Patches.font));
+		}
 	}
 
 	private static boolean resizeImage(String name, int numTiles, InputStream input, JarOutputStream newjar) throws IOException {

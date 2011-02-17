@@ -90,6 +90,25 @@ public class Minecraft implements Opcode {
             (byte)FLOAD, 9,
             (byte)F2D
         }));
+		put("FontRenderer", new ComboSignature(
+			new BytecodeSignature(new byte[]{
+				(byte)DCONST_0,
+				(byte)DCONST_0,
+				(byte)DCONST_0,
+				(byte)ILOAD
+			}),
+			new BytecodeSignature(new byte[]{
+				(byte)ALOAD, 4,
+    			(byte)ICONST_0,
+    			(byte)ICONST_0,
+    			(byte)ILOAD, BytecodeFontPatch.IMAGE_WIDTH_REGISTER,
+    			(byte)ILOAD, BytecodeFontPatch.IMAGE_HEIGHT_REGISTER,
+    			(byte)ALOAD, 7,
+    			(byte)ICONST_0,
+    			(byte)ILOAD, BytecodeFontPatch.IMAGE_WIDTH_REGISTER,
+    			(byte)INVOKEVIRTUAL
+			})
+		).required(false));
 	}};
 	private List<String> errors = new LinkedList<String>();
 
@@ -97,11 +116,13 @@ public class Minecraft implements Opcode {
 		return file.getPath();
 	}
 
-	private interface ClassFinder {
-		public boolean match(JarEntry entry, ClassFile cf) throws Exception;
+	private abstract class ClassFinder {
+		protected boolean required = true;
+		abstract public boolean match(JarEntry entry, ClassFile cf) throws Exception;
+		public ClassFinder required(boolean required) { this.required = required; return this; }
 	}
 
-	private class MethodCallSignature implements ClassFinder {
+	private class MethodCallSignature extends ClassFinder {
 		private String methodToFind;
 		public MethodCallSignature(String methodToFind) {
 			this.methodToFind = methodToFind;
@@ -119,7 +140,7 @@ public class Minecraft implements Opcode {
 		}
 	}
 
-	private class ConstSignature implements ClassFinder {
+	private class ConstSignature extends ClassFinder {
 		Object constToFind;
 		int tag;
 		public ConstSignature(Object constToFind) {
@@ -138,7 +159,7 @@ public class Minecraft implements Opcode {
 		}
 	}
 
-	private class BytecodeSignature implements ClassFinder {
+	private class BytecodeSignature extends ClassFinder {
 		private String codeToMatch;
 		public BytecodeSignature(byte[] codeToMatch) throws UnsupportedEncodingException {
 			this.codeToMatch =  new String(codeToMatch, "ISO-8859-1");
@@ -157,7 +178,7 @@ public class Minecraft implements Opcode {
 		}
 	}
 
-	private class FilenameSignature implements ClassFinder {
+	private class FilenameSignature extends ClassFinder {
 		String name;
 		public FilenameSignature(String name) {
 			this.name = name;
@@ -167,7 +188,7 @@ public class Minecraft implements Opcode {
 		}
 	}
 
-	private class ComboSignature implements ClassFinder {
+	private class ComboSignature extends ClassFinder {
 		ClassFinder finders[];
 
 		public ComboSignature(ClassFinder... finders) {
@@ -209,7 +230,7 @@ public class Minecraft implements Opcode {
 			}
 		}
 		for(Map.Entry<String,ClassFinder> cfe : classFinders.entrySet()) {
-			if(!classMap.containsKey(cfe.getKey())) {
+			if(cfe.getValue().required && !classMap.containsKey(cfe.getKey())) {
 				errors.add("No classes match for " + cfe.getKey());
 
 			}

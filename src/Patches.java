@@ -410,6 +410,116 @@ class Patches implements Opcode {
 		}
 	}
 
+	public static class FontSizeMinus1Patch extends BytecodeFontPatch {
+		public String getDescription() { return "Fix font 7 -> i / 16 - 1"; }
+		public byte[] getFromBytes(MethodInfo mi) {
+			return buildCode(push(mi, 7), (byte)ISTORE);
+		}
+		public byte[] getToBytes(MethodInfo mi) {
+			return buildCode(
+				(byte)ILOAD, getRegister(),
+				push(mi, 16),
+				(byte)IDIV,
+				(byte)ICONST_1,
+				(byte)ISUB,
+				(byte)ISTORE
+			);
+		}
+	}
+
+	public static class FontSizePatch extends BytecodeFontPatch {
+		public String getDescription() { return "Fix font 8 -> i / 16"; }
+
+		public byte operator = IMUL;
+		public FontSizePatch operator(int operator) {
+			this.operator = (byte)operator;
+			return this;
+		}
+
+		public byte[] getFromBytes(MethodInfo mi) {
+			return buildCode(push(mi, 8), operator);
+		}
+		public byte[] getToBytes(MethodInfo mi) {
+			return buildCode(
+				(byte)ILOAD, getRegister(),
+				push(mi, 16),
+				(byte)IDIV,
+				operator
+			);
+		}
+	}
+
+	public static class FontWhitespacePatch extends BytecodeFontPatch {
+		public String getDescription() { return "Fix font whitespace width 2 -> i / 64"; }
+
+		public byte[] getFromBytes(MethodInfo mi) {
+			return buildCode(
+				(byte)ICONST_2,
+				(byte)ISTORE
+			);
+		}
+		public byte[] getToBytes(MethodInfo mi) {
+			return buildCode(
+				(byte)ILOAD, getRegister(),
+				push(mi, 64),
+				(byte)IDIV,
+				(byte)ISTORE
+			);
+		}
+	}
+
+	public static class FontUnpatch extends BytecodeFontPatch {
+		public String getDescription() { return "(unpatch) font i / 16 -> 8"; }
+
+		public byte operator = IREM;
+		public FontUnpatch operator(int operator) {
+			this.operator = (byte)operator;
+			return this;
+		}
+
+		public byte[] getFromBytes(MethodInfo mi) {
+			return buildCode(
+				operator,
+				(byte)ILOAD, getRegister(),
+				push(mi, 16),
+				(byte)IDIV,
+				(byte)IMUL
+			);
+		}
+		public byte[] getToBytes(MethodInfo mi) {
+			return buildCode(
+				operator,
+				push(mi, 8),
+				(byte)IMUL
+			);
+		}
+	}
+
+	public static class FontCharWidthPatch extends BytecodeFontPatch {
+		public String getDescription() { return "Fix font charWidth computation: j + 2 -> (128 * j + 256) / i"; }
+
+		public byte[] getFromBytes(MethodInfo mi) {
+			return buildCode(
+				(byte)ILOAD, 11,
+				(byte)ICONST_2,
+				(byte)IADD,
+				(byte)IASTORE
+			);
+		}
+		public byte[] getToBytes(MethodInfo mi) {
+			return buildCode(
+				push(mi, 128),
+				(byte)ILOAD, 11,
+				(byte)IMUL,
+				push(mi, 256),
+				(byte)IADD,
+				(byte)ILOAD, getRegister(),
+				(byte)IDIV,
+				(byte)IASTORE
+			);
+		}
+	}
+
 	public static final PatchSet water = new PatchSet(
 		"Water",
 		new PatchSpec[]{
@@ -584,4 +694,17 @@ class Patches implements Opcode {
             new PatchSpec(new MultiplyPatch().divider(2)),
         }
     );
+
+	public static final PatchSet font = new PatchSet(
+		"FontRenderer",
+		new PatchSpec[] {
+			new PatchSpec(new FontSizeMinus1Patch()),
+			new PatchSpec(new FontCharWidthPatch()),
+			new PatchSpec(new FontSizePatch().operator(IMUL)),
+			new PatchSpec(new FontSizePatch().operator(IF_ICMPGE)),
+			new PatchSpec(new FontUnpatch().operator(IREM)),
+			new PatchSpec(new FontUnpatch().operator(IDIV)),
+			new PatchSpec(new FontWhitespacePatch()),
+		}
+	);
 }
