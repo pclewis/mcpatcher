@@ -74,6 +74,7 @@ public class MainForm implements Runnable {
 
 		minecraftFolderButton.setEnabled(canOpenFolder);
 
+		form.frame.setTitle(form.frame.getTitle() + " " + MCPatcher.VERSION);
 
         origBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
