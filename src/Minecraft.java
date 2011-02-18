@@ -20,6 +20,17 @@ public class Minecraft implements Opcode {
 
 	private static final String minecraftVerRegex = "[0-9][-_.0-9a-zA-Z]+";
 
+	private static final List<String> allowedDirs = Arrays.asList(
+		"",
+		"com/jcraft/jogg",
+		"com/jcraft/jorbis",
+		"net/minecraft/client",
+		"net/minecraft/isom",
+		"paulscode/sound",
+		"paulscode/sound/codecs",
+		"paulscode/sound/libraries"
+	);
+
 	private HashMap<String,String> classMap = new HashMap<String,String>();
 	private HashMap<String,ClassFinder> classFinders = new HashMap<String, ClassFinder>() {{
 		put("AnimManager",new ComboSignature(
@@ -212,9 +223,18 @@ public class Minecraft implements Opcode {
 		this.file = jarFile;
         version = extractVersion(this.file);
         jar = new JarFile(this.file.getPath(), false);
+		String lastDir = "";
 
 		for(JarEntry file : Collections.list(jar.entries())) {
 			if(file.getName().endsWith(".class")) {
+				String dir = file.getName().replaceFirst("[^/]+$", "").replaceFirst("/$", "");
+				if(!allowedDirs.contains(dir)) {
+					if(!dir.equals(lastDir)) {
+						MCPatcher.out.println("Skipping " + dir + "/*.class from another mod");
+						lastDir = dir;
+					}
+					continue;
+				}
 				ClassFile cf = new ClassFile(new DataInputStream(jar.getInputStream(file)));
 				for(Map.Entry<String,ClassFinder> cfe : classFinders.entrySet()) {
 					if(cfe.getValue().match(file, cf)) {
