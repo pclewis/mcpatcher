@@ -245,7 +245,15 @@ public class MCPatcher {
 
 			newjar.close();
 		} catch(Exception e) {
-			e.printStackTrace(MCPatcher.err);
+			panic(e);
+			try { if(newjar != null) newjar.close(); } catch(IOException e1) { e1.printStackTrace(MCPatcher.err); }
+			try {
+				Util.copyFile(new File(minecraft.getPath()), outputFile);
+				MCPatcher.out.println("Restored " + outputFile.getPath() + " due to previous error");
+			} catch(IOException e1) {
+				MCPatcher.out.println("Unable to restore " + outputFile.getPath());
+				e1.printStackTrace(MCPatcher.err);
+			}
 			return;
 		}
 

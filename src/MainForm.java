@@ -42,6 +42,7 @@ public class MainForm implements Runnable {
 	private JCheckBox customPortalCheckBox;
 	private JCheckBox betterGrassCheckBox;
 	private JCheckBox hiResFontCheckBox;
+	private JButton undoButton;
 	private JFrame frame;
 
 	public Minecraft minecraft;
@@ -174,6 +175,7 @@ public class MainForm implements Runnable {
 			    MCPatcher.logWindow.setVisible(true);
 		    }
 	    });
+
 	    runMinecraftButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 			    runWorker( new Runnable() {
@@ -219,13 +221,14 @@ public class MainForm implements Runnable {
 								p.waitFor();
 							}
 						} catch(Exception e1) {
-							e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+							e1.printStackTrace(MCPatcher.err);
 			            }
 				    }
 			    });
 			    MCPatcher.logWindow.setVisible(true);
 		    }
 	    });
+
 	    minecraftFolderButton.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 			    String path = new File(origField.getText()).getParent();
@@ -233,10 +236,21 @@ public class MainForm implements Runnable {
 			    try {
 				    Process p = pb.start();
 			    } catch(Exception e1) {
-				    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+					e1.printStackTrace(MCPatcher.err);
 			    }
 		    }
 	    });
+
+		undoButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Util.copyFile(new File(origField.getText()), new File(outputField.getText()));
+					MCPatcher.out.println("Restored " + outputField.getText());
+				} catch(IOException e1) {
+					e1.printStackTrace(MCPatcher.err);
+				}
+			}
+		});
 
 	    tileSizeCombo.addActionListener(new ActionListener() {
 		    private final Pattern re = Pattern.compile("^(\\d+)x\\1$");
@@ -449,6 +463,7 @@ public class MainForm implements Runnable {
 		patchButton.setEnabled(false);
 		runMinecraftButton.setEnabled(false);
 		minecraftFolderButton.setEnabled(false);
+		undoButton.setEnabled(false);
 		if(minecraft == null) {
 			classInfoLabel.setText("");
 		}
@@ -493,11 +508,16 @@ public class MainForm implements Runnable {
 			outputLabel.setForeground(Color.getColor("Label.foreground"));
 		}
 
-		if( new File(outputField.getText()).equals(new File(origField.getText())) ) {
+		File output = new File(outputField.getText());
+		File orig = new File(origField.getText());
+		if(output.equals(orig)) {
 			outputLabel.setForeground(Color.RED);
 			return;
 		} else {
 			outputLabel.setForeground(Color.getColor("Label.foreground"));
+			if(orig.exists()) {
+				undoButton.setEnabled(true);
+			}
 		}
 
 		//updateCustomCheckBox(customWaterCheckBox, customWaterOk(), "water");

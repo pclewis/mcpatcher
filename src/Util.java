@@ -1,6 +1,4 @@
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Iterator;
 
 public class Util {
@@ -51,6 +49,21 @@ public class Util {
 			if(count == -1)
 				break;
 			output.write(buffer, 0, count);
+		}
+	}
+
+	static void copyFile(File input, File output) throws IOException {
+		FileInputStream in = null;
+		FileOutputStream out = null;
+		try {
+			in = new FileInputStream(input);
+			out = new FileOutputStream(output);
+			Util.copyStream(in, out);
+		} catch(IOException e) {
+			throw e;
+		} finally {
+			try { if (in != null) in.close(); } catch(IOException e) { }
+			try { if (out != null) out.close(); } catch(IOException e) { }
 		}
 	}
 }
