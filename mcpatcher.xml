@@ -92,10 +92,6 @@
       <pathelement location="${javassist.dir}/javassist.jar"/>
     </path>
 
-    <path id="library.unrar.classpath">
-      <pathelement location="${junrar.dir}/junrar.jar"/>
-    </path>
-
 
   <path id="library.jgoodies.classpath">
     <pathelement location="${basedir}/lib/junit-3.8.2.jar"/>
@@ -145,7 +141,6 @@
     <path refid="${module.jdk.classpath.mcpatcher}"/>
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
-    <path refid="library.unrar.classpath"/>
     <path refid="library.intellij.forms.classpath"/>
   </path>
   
@@ -153,7 +148,6 @@
     <pathelement location="${mcpatcher.output.dir}"/>
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
-    <path refid="library.unrar.classpath"/>
     <path refid="library.intellij.forms.classpath"/>
   </path>
   
@@ -162,7 +156,6 @@
     <pathelement location="${mcpatcher.output.dir}"/>
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
-    <path refid="library.unrar.classpath"/>
     <path refid="library.intellij.forms.classpath"/>
   </path>
   
@@ -171,7 +164,6 @@
     <pathelement location="${mcpatcher.output.dir}"/>
     <path refid="library.javassist.classpath"/>
     <path refid="library.jgoodies.classpath"/>
-    <path refid="library.unrar.classpath"/>
     <path refid="library.intellij.forms.classpath"/>
   </path>
   
@@ -243,7 +235,6 @@
       <zipfileset dir="${mcpatcher.output.dir}"/>
       <zipfileset src="${javassist.dir}/javassist.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/maven/"/>
       <zipfileset src="${basedir}/lib/forms-1.2.1.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/maven/"/>
-      <zipfileset src="${junrar.dir}/junrar.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/.idea/,**/maven/" />
       <zipfileset src="${idea.home}/lib/forms_rt.jar" excludes="**/*.txt,**/*.html,**/README,**/LICENSE,**/.idea/,**/maven/" />
     </jar>
     <!--<copy file="${temp.jar.path.mcpatcher.jar}" tofile="${artifact.temp.output.mcpatcher:jar}/mcpatcher.jar"/> -->

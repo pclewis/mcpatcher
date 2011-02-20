@@ -116,7 +116,7 @@ public class MainForm implements Runnable {
         packBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 FileDialog fd = new FileDialog(form.frame, form.packLabel.getText(), FileDialog.LOAD);
-                fd.setFile("*.zip;*.rar;*.jar");
+                fd.setFile("*.zip;*.jar");
                 fd.setVisible(true);
 	            if(fd.getFile() == null) {
 		            Boolean set = false;

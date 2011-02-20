@@ -1,5 +1,3 @@
-import de.innosystec.unrar.exception.RarException;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
@@ -30,12 +28,6 @@ public abstract class TexturePack {
 			result = new JarTexturePack(path);
 		} else if (path.endsWith(".zip")) {
 			result = new ZipTexturePack(path);
-		} else if (path.endsWith(".rar")) {
-			try {
-				result = new RarTexturePack(path);
-			} catch(RarException e) {
-				throw new IOException("Rar Exception:" + e.getMessage());
-			}
 		}
 		if(result != null) {
 			result.parent = parent;
