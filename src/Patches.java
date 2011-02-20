@@ -226,7 +226,7 @@ class Patches implements Opcode {
 	}
 
 	public static class OverrideTilenumPatch extends BytecodePatch {
-		public String getDescription() {return "Change tile number";}
+		public String getDescription() {return "Change tile number "+this.from+" -> " + this.to;}
 		public ParamSpec[] getParamSpecs() { return PSPEC_EMPTY; }
 
 		int from, to;
@@ -252,7 +252,7 @@ class Patches implements Opcode {
 				(byte)SIPUSH, 0x00, (byte)this.from,
 				(byte)IF_ICMPNE, 0, 10, // bytes to jump forward
 				(byte)ALOAD_0,
-				(byte)SIPUSH, 0x00, (byte)160,
+				(byte)SIPUSH, 0x00, (byte)this.to,
 				(byte)PUTFIELD, 0x00, 0x08,
 			};
 		}
@@ -569,37 +569,37 @@ class Patches implements Opcode {
 	public static final PatchSet hideWater = new PatchSet(
 		"AnimTexture",
 		new PatchSpec[]{
-			new PatchSpec(new OverrideTilenumPatch(12*16+13+0, 160)),
-			new PatchSpec(new OverrideTilenumPatch(12*16+13+1, 160)),
+			new PatchSpec(new OverrideTilenumPatch(12*16+13+0, 13*16+12)),
+			new PatchSpec(new OverrideTilenumPatch(12*16+13+1, 13*16+12)),
 		}
 	);
 	public static final PatchSet hideStillWater = new PatchSet(
 		"AnimTexture",
 		new PatchSpec[]{
-			new PatchSpec(new OverrideTilenumPatch(12*16+13+0, 160)),
+			new PatchSpec(new OverrideTilenumPatch(12*16+13+0, 13*16+12)),
 		}
 	);
 
 	public static final PatchSet hideLava = new PatchSet(
 		"AnimTexture",
 		new PatchSpec[]{
-			new PatchSpec(new OverrideTilenumPatch(14*16+13+0, 160)),
-			new PatchSpec(new OverrideTilenumPatch(14*16+13+1, 160)),
+			new PatchSpec(new OverrideTilenumPatch(14*16+13+0, 13*16+12)),
+			new PatchSpec(new OverrideTilenumPatch(14*16+13+1, 13*16+12)),
 		}
 	);
 
 	public static final PatchSet hideStillLava = new PatchSet(
 		"AnimTexture",
 		new PatchSpec[]{
-			new PatchSpec(new OverrideTilenumPatch(14*16+13+0, 160)),
+			new PatchSpec(new OverrideTilenumPatch(14*16+13+0, 13*16+12)),
 		}
 	);
 
 	public static final PatchSet hideFire = new PatchSet(
 		"AnimTexture",
 		new PatchSpec[]{
-			new PatchSpec(new OverrideTilenumPatch(31+(0*16), 160)),
-			new PatchSpec(new OverrideTilenumPatch(31+(1*16), 160)),
+			new PatchSpec(new OverrideTilenumPatch(31+(0*16), 13*16+12)),
+			new PatchSpec(new OverrideTilenumPatch(31+(1*16), 13*16+12)),
 		}
 	);
 
