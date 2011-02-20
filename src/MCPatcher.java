@@ -62,7 +62,6 @@ public class MCPatcher {
 		String appdata = System.getenv("APPDATA");
 		String home = System.getProperty("user.home");
 		String[] dirs = new String[] {
-			".",
 			(appdata==null?home:appdata) + "/.minecraft/bin",
 			home + "/Library/Application Support/minecraft/bin",
 			home + "/.minecraft/bin",
