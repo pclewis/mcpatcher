@@ -167,6 +167,22 @@ public class MainForm implements Runnable {
 				MCPatcher.globalParams.put("useHiResFont", ""+hiResFontCheckBox.isSelected());
 			    MCPatcher.globalParams.put("useBetterGrass", ""+betterGrassCheckBox.isSelected());
 
+			    boolean isUsingAnimations = animatedFireCheckBox.isSelected() ||
+					    animatedWaterCheckBox.isSelected() ||
+					    animatedLavaCheckBox.isSelected() ||
+					    customWaterCheckBox.isSelected() ||
+					    customLavaCheckBox.isSelected();
+
+			    if(tileSize>32 && isUsingAnimations) {
+					JOptionPane.showMessageDialog(null,
+						"Animations are drawn pixel-by-pixel and may cause performance problems with high tile sizes.\n" +
+						"If you experience poor performance, please try disabling animations.\n" +
+						"(This message will not appear when all animations are disabled.)",
+						"Proceed With Caution",
+						JOptionPane.WARNING_MESSAGE
+					);
+			    }
+
 				runWorker(new Runnable() {
 				    public void run() {
 					    MCPatcher.applyPatch(minecraft, texturePack, new File(outputField.getText()));
@@ -264,7 +280,7 @@ public class MainForm implements Runnable {
 					    shownMessageFor = getTileSize();
 					    JOptionPane.showMessageDialog(null,
 							    "The tile size you have selected is TOTALLY UNSUPPORTED.\n" +
-							    "DO NOT ask for help if something goes wrong.",
+							    "You are on your own if anything goes wrong.",
 							    "Proceed With Caution",
 							    JOptionPane.WARNING_MESSAGE
 					    );
