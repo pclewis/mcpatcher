@@ -657,7 +657,7 @@ class Patches implements Opcode {
 			new PatchSpec(new ArraySizePatch().square(true).addY(4)),
 			new PatchSpec(new WhilePatch().square(true)),
 			new PatchSpec(new MultiplyPatch()),
-			new PatchSpec(new GetRGBPatch()),
+			new PatchSpec(new GetRGBPatch().field((byte)0x2F)),
 			new PatchSpec(new ConstCompassPatch().direction(1)),
 			new PatchSpec(new ConstCompassPatch().direction(-1)),
             new PatchSpec(new PushPatch().divider(-2)),
