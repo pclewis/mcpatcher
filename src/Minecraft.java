@@ -45,7 +45,7 @@ public class Minecraft implements Opcode {
 			(byte)ALOAD_0,
 			(byte)SIPUSH, 0x01, 0x00, // 256
 			(byte)NEWARRAY, T_INT,
-			(byte)PUTFIELD, 0x00, 0x2E,
+			(byte)PUTFIELD, 0x00, 0x2F,
 			(byte)ALOAD_0,
 		}));
 		put("Fire", new BytecodeSignature(new byte[]{
