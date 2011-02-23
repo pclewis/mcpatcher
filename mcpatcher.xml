@@ -250,11 +250,11 @@
 		<!--<copy file="${temp.jar.path.mcpatcher.jar}" tofile="${artifact.temp.output.mcpatcher:jar}/mcpatcher.jar"/> -->
 		<proguard configuration="mcpatcher.pro">
 			<injar path="${temp.jar.path.mcpatcher.jar}"/>
-			<outjar path="${artifact.temp.output.mcpatcher:jar}/mcpatcher-pg.jar"/>
+			<outjar path="${artifacts.temp.dir}/mcpatcher-pg.jar"/>
 		</proguard>
 		<jar destfile="${artifact.temp.output.mcpatcher:jar}/mcpatcher.jar"
 		     filesetmanifest="merge">
-			<zipfileset src="${artifact.temp.output.mcpatcher:jar}/mcpatcher-pg.jar"/>
+			<zipfileset src="${artifacts.temp.dir}/mcpatcher-pg.jar"/>
 			<zipfileset dir="${mcpatcher.output.dir}/../newcode" prefix="newcode/"/>
 		</jar>
 		<launch4j>
