@@ -1,0 +1,82 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="images/style.css" />
+<title>MCPatcher</title>
+</head>
+
+<body>
+
+<h3>Overview</h3>
+
+<p>MCPatcher is a program that patches Minecraft so it can support higher
+resolution texture packs than the game's default 16x16.  It also adds support
+for custom lava, water, and portal animations.  Version 1.x of MCPatcher could
+only patch the game to support a single resolution at a time, and had limited
+support for switching between texture packs within the game.  Version 2 allows
+you to switch between any size texture pack on the fly.</p>
+
+<h3>Quick Start</h3>
+
+<p>Start MCPatcher by double-clicking the jar file.  The main window should
+appear:</p>
+
+<div class="screenshot">
+<img alt="" src="images/screen001.png" width="520" height="537" />
+</div>
+
+<p>If you've used MCPatcher before, the first thing you'll notice is that
+there's place to select your texture pack.  That's because you no longer need
+to.  Place all your texture packs no matter the resolution into the
+<code>&lt;minecraft dir&gt;/texturepacks</code> folder and choose between them
+in-game.</p>
+
+<p>In the simplest case, all you need to do is press <b>Patch</b> and wait for
+it to finish.  Then, pressing <b>Test Minecraft</b> will launch the game in
+single-player mode.  For multiplayer, run Minecraft via the launcher as
+usual.</p>
+
+<h3>Other features</h3>
+
+<p>The <b>Browse</b> buttons let you select a different input or output jar.
+MCPatcher automatically finds your Minecraft installation, so you should rarely
+need to use these.</p>
+
+<p><b>Unpatch</b> will restore Minecraft to the state it was in before the
+first time you ran MCPatcher.  If you had other mods loaded before MCPatcher,
+they will still be there.  If you loaded them after running MCPatcher, you
+will need to reinstall them.  Unpatch also resets Minecraft to the default
+texture pack.  This is because an unpatched Minecraft will crash on
+texture packs larger than 16x16.</p>
+
+<p>The <b>Mods</b> window lets you enable or disable individual mods.  If a mod
+is greyed out, that means it is not compatible with your version of Minecraft.
+This could mean an update came out that broke MCPatcher, or you have a mod
+conflict that MCPatcher cannot resolve.</p>
+
+<p>The <b>Log</b> window gives detailed information about what MCPatcher is
+doing and lists any errors that occur.</p>
+
+<p>The <b>Class Map</b> and <b>Patch Summary</b> windows give detailed
+information about Minecraft and the patching process.  This is mostly useful
+for troubleshooting and to mod developers.</p>
+
+<h3>Using MCPatcher with other mods</h3>
+
+<h4>Other mods + MCPatcher</h4>
+
+<p>If you are using other mods, it is best to install them <em>before</em>
+running MCPatcher.  MCPatcher does its best to work with other mods you may
+have installed.  It is designed to change only certain parts of the code and
+leave everything else alone.  If you have other mods installed, MCPatcher will
+warn you that there may be problems, but it will attempt to continue.</p>
+
+<h4>MCPatcher + Other mods</h4>
+
+<p>It is possible to install other mods after running MCPatcher, but only if
+they do not replace any classes modified by MCPatcher (see the Patch Summary
+window for a list).  If another mod overwrites a class that MCPatcher has
+patched, Minecraft will almost certainly either fail to launch entirely or
+crash shortly after startup.</p>
+
+</body>
+</html>

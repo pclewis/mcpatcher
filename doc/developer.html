@@ -1,0 +1,178 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="images/style.css" />
+<title>MCPatcher</title>
+</head>
+
+<body>
+
+<h3 id="overview">Overview</h3>
+
+<p>MCPatcher works by modifying Minecraft at the Java bytecode level.  Other
+mod frameworks for Minecraft allow you to add whole new classes to the game,
+but limit your ability to modify the behavior of existing classes to a few
+pre-defined "hooks".  MCPatcher can potientially modify any part of the game as
+long as you can write a regular expression for the code you are looking
+for.  To put it another way, MCPatcher isn't particularly well-suited to load
+Mod Loader <em>mods</em> into Minecraft, but it could potentially insert
+the Mod Loader framework <em>itself</em> in a version-independent way.</p>
+
+<p>To build mods for MCPatcher, in addition to knowing the Java language, you
+will need to learn about Java bytecode and the structure of .class files.  None
+of it is terribly hard.  I knew almost nothing about this stuff when I started
+contributing to MCPatcher.  Java bytecode is a stack-based assembly-like
+language where many of the opcodes take 16-bit indexes into a shared "constant
+pool".  The constant pool contains values for basic Java types (strings,
+floats, doubles, etc.) and references to class, field, and method names used
+in the source code.</p>
+
+<h3 id="building">Building</h3>
+
+<p>I used <a href="http://www.jetbrains.com/idea/download/index.html">IntelliJ
+IDEA Community Edition 10</a> for development, but any Java development
+environment should work.  I'd also recommend getting the latest
+<a href="http://mcp.ocean-labs.de/index.php/MCP_Releases">MCP</a> and having a
+decompiled Minecraft tree handy.  Also helpful is an IDE plugin that lets you
+view Java bytecode.  Keep in mind that MCP's deobfuscated source does not
+always compile back into the same bytecode that is in the original
+minecraft.jar.  If there is any doubt, unpack an unmodified minecraft.jar and
+use <code>javap -c &lt;classname&gt;</code> to disassemble it.</p>
+
+<p>Once you have everything set up, make sure mcpatcher.jar is in your build
+path and write some code starting with
+
+<pre>
+import com.pclewis.mcpatcher.*;
+import static javassist.bytecode.Opcode.*;
+
+public class MyMod extends Mod {
+}
+</pre>
+
+<p>When you've build a jar file, put it in <code>&lt;minecraft
+dir&gt;/mcpatcher-mods/</code> and start MCPatcher to try it out.</p>
+
+<p>Take a look at the <a href="#refs">references</a> below when you get
+stuck.</p>
+
+<h3>Mod structure</h3>
+
+<pre>
+Mod
+|-- name, author, etc.
+|-- ClassMod
+|   |-- ClassSignature
+|   |-- FieldMapper
+|   |-- MethodMapper
+|   |-- ClassPatch
+|-- ClassMap
+
+FieldRef
+MethodRef
+InterfaceMethodRef
+ClassRef
+
+BinaryRegex
+</pre>
+
+<p>The top-level class for a mod is called Mod.  MCPatcher automatically loads
+all public classes that extend the Mod class.  The basic structure of a mod is
+some general information and a set of ClassMods.  A ClassMod is a part of the
+mod that applies to a single class and contains ClassSignatures and
+ClassPatches.</p>
+
+<p>ClassSignatures determine what target class the ClassMod should be applied
+to.  Unless you specify otherwise, each ClassMod must match exactly one class
+in the input minecraft.jar.  0 or 2+ means your Mod will be greyed out in
+MCPatcher's UI.  Once MCPatcher has located the ClassMod's target, it
+automatically sets up a mapping from your ClassMod's name to the obfuscated
+class name in minecraft.jar.</p>
+
+<p>FieldMappers and MethodMappers are evaluated in a second pass once all of
+the classes have been successfully mapped.  These allow you to locate
+individual members within a class and assign meaningful names to them to refer
+to later.  The default behavior is to map by type, but you can override this
+behavior to match on other criteria.</p>
+
+<p>ClassPatches do the actual work of making changes to the target class
+file.  Subclasses do various things. BytecodePatch must implement methods to
+return a match expression and generate replacement bytecode.
+MakeMemberPublicPatch and AddMethodPatch do what they say on the tin.  If none
+of these meet your needs, ClassMod offers prePatch and postPatch hooks to do
+other processing.</p>
+
+<p>ClassMap contains the mapping from meaningful names like
+RenderEngine.registerTextureFX to obfuscated names like hf.a.  You probably
+don't need to add anything to it directly, but you will need to be aware of its
+existence.</p>
+
+<p>BinaryRegex provides methods for creating match expressions for
+BytecodeSignatures and BytecodePatches.  To refer to classes, methods, or
+fields, use the reference() method with one of the JavaRef subclasses.  To
+refer to string, floating point, or integer constants, use the push()
+method.</p>
+
+<h3>Adding or replacing Minecraft classes</h3>
+
+<p>You may want to add a new class or replace an existing class.  To do this,
+add the filename to the filesToAdd or filesToReplace list in your Mod's
+constructor.  Place these files in a folder called newcode on the root of your
+mod's jar file.  MCPatcher will ask for the file's InputStream at the
+appropriate time.</p>
+
+<p>In the source for your new class file, you may use the descriptive names for
+any Minecraft classes.  MCPatcher automatically maps any classes, fields, and
+methods in the ClassMap to their obfuscated names when it injects your new
+class into the output jar.</p>
+
+<p>You will need to create stubs for the Minecraft classes you refer to in
+order to build the new class file itself, but the stubs do not need to be
+included in your jar file.</p>
+
+<h3 id="tips">Tips for writing mods</h3>
+
+<ul>
+
+<li><b>Make your patches general</b> &mdash; Don't assume that field 0x13
+will always be the RenderEngine object.  The next version of Minecraft may
+introduce a new field and renumber everything.  Use a ClassSignature to map the
+RenderEngine class, then use a FieldMapper to locate the class member of that
+type.  Use capture groups to save bits of code between the stuff you care about
+and echo them unmodified back in the output.</li>
+
+<li><b>...but not too general</b> &mdash; <code>BIPUSH 16 IF_ICMPLT</code> by
+itself is not a good way to uniquely identify a class.  It could match almost
+anywhere.  The best matches are unique numerical constants or strings.  Next
+best is a series of arithmetic operations that is integral to what the class
+does.  A class doesn't match unless <em>all</em> of its ClassSignatures match,
+so a set of several non-specific signatures can be more effective than a single
+super-specific one.</li>
+
+<li><b>Turn up the logging</b> &mdash; Start MCPatcher from the command line
+with the <code>-loglevel 5</code> option to see a side-by-side view of the
+bytecode before and after each replacement.  Add
+<code>-ignorebuiltinmods</code> to hide the built-in font and texture
+mods.</li>
+
+<li><b>Don't write complex replacement bytecode</b> &mdash; Don't write 100
+lines of new bytecode only to get a StackUnderflowError because you left off
+an ALOAD_0 somewhere.  If you need to do anything complex, gather up any
+private members you need (or make them public) and pass them off to a static
+method you write in Java source to do the hard stuff.</li>
+
+<li><b>Look at the examples</b> &mdash; HDFontMod.java is fairly simple.  It
+modifies a single class and makes fairly straightforward bytecode changes that
+are independent of each other.  HDTextureMod.java is a beast, but it has
+examples of nearly all of MCPatcher's capabilities.</li>
+
+</ul>
+
+<h3 id="refs">References</h3>
+<ul>
+<li><a href="javadoc/index.html">Javadoc for MCPatcher</a></li>
+<li><a href="http://www.csg.is.titech.ac.jp/~chiba/javassist/html" target="_blank">Javassist bytecode library documentation</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Java_bytecode_instruction_listings" target="_blank">Java bytecode instruction listings (Wikipedia)</a></li>
+</ul>
+
+</body>
+</html>
