@@ -14,6 +14,7 @@ public class MCPatcherUtils {
     private static File minecraftDir;
     private static File propFile = null;
     private static Properties properties = new Properties();
+    private static boolean needSaveProps = false;
 
     private MCPatcherUtils() {
     }
@@ -79,7 +80,8 @@ public class MCPatcherUtils {
      * @return String value
      */
     public static String getString(String mod, String name) {
-        return properties.getProperty(getPropertyKey(mod, name));
+        String value = properties.getProperty(getPropertyKey(mod, name));
+        return value == null ? "" : value;
     }
 
     /**
@@ -148,14 +150,22 @@ public class MCPatcherUtils {
      */
     public static void set(String mod, String name, Object value) {
         properties.setProperty(getPropertyKey(mod, name), value.toString());
+        needSaveProps = true;
+    }
+
+    static void set(String name, Object value) {
+        set(null, name, value);
     }
 
     /**
      * Save all properties to mcpatcher.properties.
-
+     *
      * @return true if successful
      */
     public static boolean saveProperties() {
+        if (! needSaveProps) {
+            return true;
+        }
         boolean saved = false;
         FileOutputStream os = null;
         if (properties != null && propFile != null) {
@@ -175,6 +185,7 @@ public class MCPatcherUtils {
                 }
             }
         }
+        needSaveProps = false;
         return saved;
     }
 }

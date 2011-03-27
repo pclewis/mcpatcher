@@ -84,12 +84,18 @@ final public class MCPatcher {
         if (guiEnabled) {
             mainForm = new MainForm();
             mainForm.show();
-            if (BETA_VERSION > 0) {
-                mainForm.showBetaDialog();
-            }
         }
 
         Logger.log(Logger.LOG_MAIN, "MCPatcher version is %s", VERSION_STRING);
+        if (!MCPatcherUtils.getString("lastVersion").equals(VERSION_STRING)) {
+            MCPatcherUtils.set("lastVersion", VERSION_STRING);
+            MCPatcherUtils.set("betaWarningShown", false);
+        }
+        if (guiEnabled && BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown")) {
+            mainForm.showBetaDialog();
+            MCPatcherUtils.set("betaWarningShown", true);
+        }
+        MCPatcherUtils.saveProperties();
         getAllMods();
 
         if (setMinecraft(MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar"), true)) {
