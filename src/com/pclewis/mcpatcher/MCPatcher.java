@@ -101,20 +101,29 @@ final public class MCPatcher {
         MCPatcherUtils.saveProperties();
         getAllMods();
 
-        if (setMinecraft(MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar"), true)) {
-            if (mainForm == null) {
+        File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
+        if (!defaultMinecraft.exists()) {
+        } else if (setMinecraft(defaultMinecraft, true)) {
+            if (guiEnabled) {
+                mainForm.updateModList();
+            } else {
+                int exitStatus = 1;
                 try {
                     getApplicableMods();
-                    patch();
+                    if (patch()) {
+                        MCPatcherUtils.saveProperties();
+                        exitStatus = 0;
+                    }
                 } catch (Exception e) {
                     Logger.log(e);
                 }
-            } else {
-                mainForm.updateModList();
+                System.exit(exitStatus);
             }
+        } else if (guiEnabled) {
+            mainForm.showCorruptJarError();
         }
 
-        if (mainForm != null) {
+        if (guiEnabled) {
             mainForm.updateControls();
         }
     }
