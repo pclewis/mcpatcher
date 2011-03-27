@@ -17,6 +17,7 @@ import java.util.jar.JarFile;
 
 class ModList {
     private static final String IGNORE_CLASS = "newcode";
+    private static final int MAX_DEPENDENCY_DEPTH = 20;
 
     private Vector<Mod> modsByIndex = new Vector<Mod>();
     private HashMap<String, Mod> modsByName = new HashMap<String, Mod>();
@@ -102,10 +103,9 @@ class ModList {
     }
 
     public void enableValidMods() {
-        for (Mod mod : modsByIndex) {
-            if (mod.okToApply()) {
-                mod.setEnabled(true);
-            }
+        for (int i = modsByIndex.size() - 1; i >= 0; i--) {
+            Mod mod = modsByIndex.get(i);
+            selectMod(mod, mod.okToApply());
         }
     }
 
@@ -129,5 +129,70 @@ class ModList {
         mod.setRefs();
         modsByName.put(name, mod);
         modsByIndex.add(mod);
+    }
+
+    public void selectMod(Mod mod, boolean enabled) {
+        HashMap<Mod, Boolean> old = new HashMap<Mod, Boolean>();
+        for (Mod m : modsByIndex) {
+            old.put(m, m.isEnabled());
+        }
+        try {
+            if (enabled) {
+                enableMod(mod, 0);
+            } else {
+                disableMod(mod, 0);
+            }
+        } catch (RuntimeException e) {
+            Logger.log(e);
+            for (Mod m : modsByIndex) {
+                m.setEnabled(old.get(m));
+            }
+        }
+    }
+
+    private boolean enableMod(Mod mod, int depth) {
+        if (depth > MAX_DEPENDENCY_DEPTH) {
+            throw new RuntimeException("mod dependency depth exceeded");
+        }
+        if (mod == null) {
+            return false;
+        }
+        Logger.log(Logger.LOG_MOD, "enabling %s (%s)", mod.getName(), (depth > 0 ? "auto" : "manual"));
+        if (!mod.okToApply()) {
+            return false;
+        }
+        for (Mod.Dependency dep : mod.dependencies) {
+            Mod dmod = modsByName.get(dep.name);
+            if (dep.enabled) {
+                if (!enableMod(dmod, depth + 1)) {
+                    return false;
+                }
+            } else {
+                disableMod(dmod, depth + 1);
+            }
+        }
+        mod.setEnabled(true);
+        return true;
+    }
+
+    private void disableMod(Mod mod, int depth) {
+        if (depth > MAX_DEPENDENCY_DEPTH) {
+            throw new RuntimeException("mod dependency depth exceeded");
+        }
+        if (mod == null) {
+            return;
+        }
+        Logger.log(Logger.LOG_MOD, "disabling %s (%s)", mod.getName(), (depth > 0 ? "auto" : "manual"));
+        mod.setEnabled(false);
+        for (Mod dmod : modsByIndex) {
+            if (dmod != mod) {
+                for (Mod.Dependency dep : dmod.dependencies) {
+                    if (dep.name.equals(mod.getName()) && dep.enabled) {
+                        disableMod(dmod, depth + 1);
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

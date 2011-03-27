@@ -154,10 +154,9 @@ class MainForm {
                     int row = modTable.getSelectedRow();
                     int col = modTable.getSelectedColumn();
                     Mod mod = (Mod) modTable.getModel().getValueAt(row, col);
-                    if (col == 0 && mod.okToApply()) {
-                        mod.setEnabled(!mod.isEnabled());
-                        Rectangle rect = modTable.getCellRect(row, col, true);
-                        modTable.repaint(rect);
+                    if (col == 0 && mod != null && mod.okToApply()) {
+                        MCPatcher.modList.selectMod(mod, !mod.isEnabled());
+                        modTable.repaint();
                     }
                 }
                 super.mouseClicked(e);

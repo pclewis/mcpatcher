@@ -32,10 +32,6 @@ public abstract class Mod {
      */
     protected String description = "";
     /**
-     * Names of other mods required by this one
-     */
-    protected ArrayList<String> dependencies = new ArrayList<String>();
-    /**
      * List of ClassMod objects for the mod
      */
     protected ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
@@ -71,6 +67,7 @@ public abstract class Mod {
     private HashMap<String, String> params = new HashMap<String, String>();
     private ArrayList<String> errors = new ArrayList<String>();
     private boolean enabled = false;
+    ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
 
     /**
      * Initialize mod.
@@ -190,10 +187,46 @@ public abstract class Mod {
      *
      * @param name name of file to open
      * @return a valid input stream, or null
-     * @throws IOException
+     * @throws IOException I/O error
+     * @see #filesToAdd
+     * @see #filesToReplace
      */
     public InputStream openFile(String name) throws IOException {
         return null;
+    }
+
+    /**
+     * Indicates that this mod <i>requires</i> another mod to function.  Whenever the specified
+     * mod is unchecked in the GUI, this mod will be unchecked too.  Whenever this mod is checked
+     * in the GUI, the specified mod will be checked also.  If the specified mod is not available
+     * at all, then this mod will be unchecked and greyed out in the GUI.
+     * <p/>
+     * If Mod A calls <code>addDependency(B)</code>:<br>
+     * check A -> check B<br>
+     * uncheck B -> uncheck A<br>
+     * B unavailable -> A greyed out<br>
+     *
+     * @param name name of required mod
+     */
+    final protected void addDependency(String name) {
+        dependencies.add(new Dependency(name, true));
+    }
+
+    /**
+     * Indicates that this mod <i>conflicts</i> with another mod.  Whenever the specified mod is
+     * checked in the GUI, this mod will be unchecked.  Whenever this mod is checked in the GUI,
+     * the specified mod will be unchecked.  If the specified mod is not available at all, then
+     * there is no effect.
+     * <p/>
+     * If Mod A calls <code>addConflict(B)</code>:<br>
+     * check A -> uncheck B<br>
+     * check B -> uncheck A<br>
+     * B unavailable -> no effect<br>
+
+     * @param name name of conflicting mod
+     */
+    final protected void addConflict(String name) {
+        dependencies.add(new Dependency(name, false));
     }
 
     /**
@@ -242,6 +275,16 @@ public abstract class Mod {
             return Boolean.parseBoolean(params.get(name));
         } catch (Throwable e) {
             return false;
+        }
+    }
+
+    class Dependency {
+        String name;
+        boolean enabled;
+
+        Dependency(String name, boolean enabled) {
+            this.name = name;
+            this.enabled = enabled;
         }
     }
 }

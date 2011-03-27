@@ -42,8 +42,8 @@ final public class MCPatcher {
     public static final String UTILS_CLASS = "MCPatcherUtils";
 
     static MinecraftJar minecraft = null;
+    static ModList modList;
 
-    private static ModList modList;
     private static boolean ignoreBuiltInMods = false;
     private static boolean ignoreCustomMods = false;
 
@@ -182,7 +182,7 @@ final public class MCPatcher {
 
         mapModClasses(origJar);
         mapModClassMembers(origJar);
-        resolveModDependencies(origJar);
+        resolveModDependencies();
         printModList();
 
         modList.enableValidMods();
@@ -273,24 +273,22 @@ final public class MCPatcher {
         }
     }
 
-    private static void resolveModDependencies(JarFile origJar) throws IOException, InterruptedException {
-        boolean didSomething = false;
-        while (true) {
+    private static void resolveModDependencies() throws IOException, InterruptedException {
+        boolean didSomething = true;
+        while (didSomething) {
+            didSomething = false;
             for (Mod mod : modList.getAll()) {
                 if (mod.okToApply()) {
-                    for (String s : mod.dependencies) {
-                        Mod dmod = modList.get(s);
+                    for (Mod.Dependency dep : mod.dependencies) {
+                        Mod dmod = modList.get(dep.name);
                         checkInterrupt();
                         if (dmod == null || !dmod.okToApply()) {
-                            mod.addError(String.format("requires %s, which cannot be applied", s));
+                            mod.addError(String.format("requires %s, which cannot be applied", dep.name));
                             didSomething = true;
                             break;
                         }
                     }
                 }
-            }
-            if (!didSomething) {
-                break;
             }
         }
     }
