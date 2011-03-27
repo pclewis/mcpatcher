@@ -258,7 +258,7 @@ class MainForm {
         );
     }
 
-    private void showCorruptJarError() {
+    public void showCorruptJarError() {
         tabbedPane.setSelectedIndex(1);
         JOptionPane.showMessageDialog(frame,
             "There was an error opening minecraft.jar. This may be because:\n" +
@@ -268,8 +268,8 @@ class MainForm {
                 " - There is another, conflicting mod applied.\n" +
                 " - The jar file is invalid or corrupt.\n" +
                 "\n" +
-                "You can re-download the original minecraft.jar by deleting your minecraft/bin folder and " +
-                "running the game normally.\n",
+                "You can re-download the original minecraft.jar by using the Force Update\n" +
+                "button in the Minecraft Launcher.\n",
             "Invalid or Corrupt jar", JOptionPane.ERROR_MESSAGE
         );
     }
