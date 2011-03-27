@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * Base class of all class patches
+ * Base class of all class patches.
  */
 abstract public class ClassPatch implements PatchComponent {
     ClassMod classMod;

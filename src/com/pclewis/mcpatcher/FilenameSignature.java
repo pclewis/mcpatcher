@@ -1,5 +1,8 @@
 package com.pclewis.mcpatcher;
 
+/**
+ * ClassSignature that matches by filename.
+ */
 public class FilenameSignature extends ClassSignature {
     private String filename;
 

@@ -2,6 +2,9 @@ package com.pclewis.mcpatcher;
 
 import javassist.bytecode.ConstPool;
 
+/**
+ * Reference to a class method.
+ */
 public class MethodRef extends JavaRef {
     public MethodRef(String className, String name, String type) {
         super(className, name, type);

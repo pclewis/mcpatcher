@@ -12,6 +12,9 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+/**
+ * Main program entry point.
+ */
 final public class MCPatcher {
     /**
      * Major MCPatcher version number
