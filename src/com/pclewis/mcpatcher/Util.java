@@ -6,44 +6,6 @@ import java.security.MessageDigest;
 import java.util.jar.JarFile;
 
 class Util {
-    public static final boolean mac;
-    public static final boolean windows;
-    public static final boolean linux;
-    public static final boolean is64bit;
-
-    public static boolean isMac() {
-        return mac;
-    }
-
-    public static boolean isWindows() {
-        return windows;
-    }
-
-    public static boolean isLinux() {
-        return linux;
-    }
-
-    public static boolean is64Bit() {
-        return is64bit;
-    }
-
-    static {
-        String os = System.getProperty("os.name").toLowerCase();
-        mac = os != null && os.contains("mac os x");
-        windows = os != null && os.contains("windows");
-        linux = os != null && os.contains("linux");
-
-        String datamodel = System.getProperty("sun.arch.data.model");  // sun-specific, but gets the arch of the jvm
-        String arch = System.getProperty("os.arch");  // generic, but gets the arch of the os, not the jvm (may be a 32-bit jvm on a 64-bit os)
-        if (datamodel != null) {
-            is64bit = (Integer.parseInt(datamodel) >= 64);
-        } else if (arch != null) {
-            is64bit = arch.contains("64");
-        } else {
-            is64bit = false;
-        }
-    }
-
     protected static byte b(int value, int index) {
         return (byte) ((value >> (index * 8)) & 0xFF);
     }
