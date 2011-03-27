@@ -92,7 +92,7 @@ final public class MCPatcher {
         Logger.log(Logger.LOG_MAIN, "MCPatcher version is %s", VERSION_STRING);
         getAllMods();
 
-        if (setMinecraft(MinecraftJar.getMinecraftPath("bin", "minecraft.jar"), true)) {
+        if (setMinecraft(MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar"), true)) {
             if (mainForm == null) {
                 try {
                     getApplicableMods();
@@ -169,7 +169,7 @@ final public class MCPatcher {
             modList.loadBuiltInMods();
         }
         if (!ignoreCustomMods) {
-            modList.loadCustomMods(MinecraftJar.getMinecraftPath("mcpatcher-mods"));
+            modList.loadCustomMods(MCPatcherUtils.getMinecraftPath("mcpatcher-mods"));
         }
 
         if (mainForm != null) {

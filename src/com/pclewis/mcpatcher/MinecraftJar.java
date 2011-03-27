@@ -23,26 +23,10 @@ class MinecraftJar {
     private JarOutputStream outputJar;
     private int heapSize = 1024;
 
-    private static File mcDir;
     private static String origMD5;
 
     static {
-        String baseDir = null;
-        String subDir;
-        if (Util.isWindows()) {
-            baseDir = System.getenv("APPDATA");
-            subDir = ".minecraft";
-        } else if (Util.isMac()) {
-            subDir = "Library/Application Support/minecraft";
-        } else {
-            subDir = ".minecraft";
-        }
-        if (baseDir == null) {
-            baseDir = System.getProperty("user.home");
-        }
-        mcDir = new File(baseDir, subDir);
-
-        File md5File = getMinecraftPath("bin", "md5s");
+        File md5File = MCPatcherUtils.getMinecraftPath("bin", "md5s");
         if (md5File.exists()) {
             FileInputStream is = null;
             try {
@@ -96,14 +80,6 @@ class MinecraftJar {
         return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5);
     }
 
-    public static File getMinecraftPath(String... subdirs) {
-        File f = mcDir;
-        for (String s : subdirs) {
-            f = new File(f, s);
-        }
-        return f;
-    }
-
     private static String extractVersion(File file) {
         if (!file.exists()) {
             return null;
@@ -146,11 +122,11 @@ class MinecraftJar {
     }
 
     static void setDefaultTexturePack() {
-        File input = MinecraftJar.getMinecraftPath("options.txt");
+        File input = MCPatcherUtils.getMinecraftPath("options.txt");
         if (!input.exists()) {
             return;
         }
-        File output = MinecraftJar.getMinecraftPath("options.txt.tmp");
+        File output = MCPatcherUtils.getMinecraftPath("options.txt.tmp");
         BufferedReader br = null;
         PrintWriter pw = null;
         try {
@@ -261,7 +237,7 @@ class MinecraftJar {
             "-Xmx" + MCPatcher.minecraft.getHeapSize() + "M", "-Xms512M",
             "net.minecraft.client.Minecraft");
         pb.redirectErrorStream(true);
-        pb.directory(MinecraftJar.getMinecraftPath());
+        pb.directory(MCPatcherUtils.getMinecraftPath());
 
         Logger.log(Logger.LOG_MAIN);
         Logger.log(Logger.LOG_MAIN, "Launching %s", file.getPath());

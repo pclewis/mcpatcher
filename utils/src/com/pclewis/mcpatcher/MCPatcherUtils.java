@@ -11,6 +11,7 @@ import java.util.Properties;
  * the output minecraft jar.
  */
 public class MCPatcherUtils {
+    private static File minecraftDir;
     private static File propFile = null;
     private static Properties properties = new Properties();
 
@@ -19,29 +20,24 @@ public class MCPatcherUtils {
 
     static {
         String os = System.getProperty("os.name").toLowerCase();
-        String dir1 = null;
-        String dir2 = ".minecraft";
+        String baseDir = null;
+        String subDir = ".minecraft";
         if (os.contains("win")) {
-            dir1 = System.getenv("APPDATA");
+            baseDir = System.getenv("APPDATA");
         } else if (os.contains("mac")) {
-            dir1 = System.getProperty("user.home");
-            if (dir1 != null) {
-                dir1 = new File(dir1, "Library/Application Support").getPath();
-            }
-            dir2 = "minecraft";
+            subDir = "Library/Application Support/minecraft";
         }
-        if (dir1 == null) {
-            dir1 = System.getProperty("user.home");
+        if (baseDir == null) {
+            baseDir = System.getProperty("user.home");
         }
 
-        File mcDir = new File(dir1, dir2);
-        if (mcDir.exists()) {
-            propFile = new File(mcDir, "mcpatcher.properties");
+        minecraftDir = new File(baseDir, subDir);
+        if (minecraftDir.exists()) {
+            propFile = new File(minecraftDir, "mcpatcher.properties");
 
             try {
                 if (propFile.exists()) {
                     properties.load(new FileInputStream(propFile));
-                    System.out.printf("read %s\n", propFile.getPath());
                 } else {
                     set("HDTexture", "enableAnimations", true);
                     set("HDTexture", "useCustomAnimations", true);
@@ -51,6 +47,20 @@ public class MCPatcherUtils {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Get the path to a file/directory within the minecraft folder.
+     *
+     * @param subdirs zero or more path components
+     * @return combined path
+     */
+    public static File getMinecraftPath(String... subdirs) {
+        File f = minecraftDir;
+        for (String s : subdirs) {
+            f = new File(f, s);
+        }
+        return f;
     }
 
     private static String getPropertyKey(String mod, String name) {

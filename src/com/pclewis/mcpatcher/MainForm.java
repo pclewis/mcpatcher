@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Vector;
 
 class MainForm {
     private static final Color MOD_BUSY_COLOR = new Color(192, 192, 192);
@@ -107,7 +106,7 @@ class MainForm {
             public void actionPerformed(ActionEvent e) {
                 setStatusText("");
                 FileDialog fd = new FileDialog(frame, origLabel.getText(), FileDialog.LOAD);
-                fd.setDirectory(MinecraftJar.getMinecraftPath("bin").getPath());
+                fd.setDirectory(MCPatcherUtils.getMinecraftPath("bin").getPath());
                 fd.setFile("minecraft.jar");
                 fd.setVisible(true);
 
@@ -129,7 +128,7 @@ class MainForm {
             public void actionPerformed(ActionEvent e) {
                 setStatusText("");
                 FileDialog fd = new FileDialog(frame, outputLabel.getText(), FileDialog.SAVE);
-                fd.setDirectory(MinecraftJar.getMinecraftPath("bin").getPath());
+                fd.setDirectory(MCPatcherUtils.getMinecraftPath("bin").getPath());
                 fd.setFile("minecraft.jar");
                 fd.setVisible(true);
 
