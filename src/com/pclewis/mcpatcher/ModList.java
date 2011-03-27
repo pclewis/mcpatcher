@@ -8,16 +8,12 @@ import java.io.FileFilter;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 class ModList {
     private static final String IGNORE_CLASS = "newcode";
-    private static final int MAX_DEPENDENCY_DEPTH = 20;
 
     private Vector<Mod> modsByIndex = new Vector<Mod>();
     private HashMap<String, Mod> modsByName = new HashMap<String, Mod>();
@@ -131,64 +127,76 @@ class ModList {
         modsByIndex.add(mod);
     }
 
-    public void selectMod(Mod mod, boolean enabled) {
-        HashMap<Mod, Boolean> old = new HashMap<Mod, Boolean>();
-        for (Mod m : modsByIndex) {
-            old.put(m, m.isEnabled());
-        }
-        try {
-            if (enabled) {
-                enableMod(mod, 0);
-            } else {
-                disableMod(mod, 0);
-            }
-        } catch (RuntimeException e) {
-            Logger.log(e);
-            for (Mod m : modsByIndex) {
-                m.setEnabled(old.get(m));
-            }
+    private class ModDependencyException extends Exception {
+        ModDependencyException(String s) {
+            super(s);
         }
     }
 
-    private boolean enableMod(Mod mod, int depth) {
-        if (depth > MAX_DEPENDENCY_DEPTH) {
-            throw new RuntimeException("mod dependency depth exceeded");
+    public void selectMod(Mod mod, boolean enabled) {
+        HashMap<Mod, Boolean> inst = new HashMap<Mod, Boolean>();
+        try {
+            if (enabled) {
+                enableMod(inst, mod, false);
+            } else {
+                disableMod(inst, mod, false);
+            }
+        } catch (ModDependencyException e) {
+            Logger.log(e);
         }
+        for (Map.Entry<Mod, Boolean> entry : inst.entrySet()) {
+            entry.getKey().setEnabled(entry.getValue());
+        }
+    }
+
+    private void enableMod(HashMap<Mod, Boolean> inst, Mod mod, boolean recursive) throws ModDependencyException {
         if (mod == null) {
-            return false;
+            return;
         }
-        Logger.log(Logger.LOG_MOD, "enabling %s (%s)", mod.getName(), (depth > 0 ? "auto" : "manual"));
+        //Logger.log(Logger.LOG_MOD, "%senabling %s", (recursive ? " " : ""), mod.getName());
         if (!mod.okToApply()) {
-            return false;
+            throw new ModDependencyException(mod.getName() + " cannot be applied");
+        }
+        if (inst.containsKey(mod)) {
+            if (!inst.get(mod)) {
+                throw new ModDependencyException(mod.getName() + " is both conflicting and required");
+            }
+            return;
+        } else {
+            inst.put(mod, true);
         }
         for (Mod.Dependency dep : mod.dependencies) {
             Mod dmod = modsByName.get(dep.name);
             if (dep.enabled) {
-                if (!enableMod(dmod, depth + 1)) {
-                    return false;
+                if (dmod == null) {
+                    throw new ModDependencyException("dependent mod " + dep.name + " not available");
+                } else {
+                    enableMod(inst, dmod, true);
                 }
             } else {
-                disableMod(dmod, depth + 1);
+                disableMod(inst, dmod, true);
             }
         }
-        mod.setEnabled(true);
-        return true;
     }
 
-    private void disableMod(Mod mod, int depth) {
-        if (depth > MAX_DEPENDENCY_DEPTH) {
-            throw new RuntimeException("mod dependency depth exceeded");
-        }
+    private void disableMod(HashMap<Mod, Boolean> inst, Mod mod, boolean recursive) throws ModDependencyException {
         if (mod == null) {
             return;
         }
-        Logger.log(Logger.LOG_MOD, "disabling %s (%s)", mod.getName(), (depth > 0 ? "auto" : "manual"));
-        mod.setEnabled(false);
+        //Logger.log(Logger.LOG_MOD, "%sdisabling %s", (recursive ? " " : ""), mod.getName());
+        if (inst.containsKey(mod)) {
+            if (inst.get(mod)) {
+                throw new ModDependencyException(mod.getName() + " is both conflicting and required");
+            }
+            return;
+        } else {
+            inst.put(mod, false);
+        }
         for (Mod dmod : modsByIndex) {
             if (dmod != mod) {
                 for (Mod.Dependency dep : dmod.dependencies) {
                     if (dep.name.equals(mod.getName()) && dep.enabled) {
-                        disableMod(dmod, depth + 1);
+                        disableMod(inst, dmod, true);
                         break;
                     }
                 }
