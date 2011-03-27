@@ -39,7 +39,7 @@ final public class MCPatcher {
     /**
      * Name of utility class always injected into output minecraft.jar
      */
-    public static final String UTILS_CLASS = "MCPatcherUtils";
+    public static final String UTILS_CLASS = "com/pclewis/mcpatcher/MCPatcherUtils";
 
     static MinecraftJar minecraft = null;
     static ModList modList;

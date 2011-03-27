@@ -1,4 +1,4 @@
-MCPatcher version is 2.0.0
+MCPatcher version is 2.0.0-beta1
 Minecraft version is 1.3_01 (md5 4203826f35e1036f089919032c3d19d1)
 
 Analyzing /home/prupe/.minecraft/bin/minecraft-1.3_01.jar (683 files)
@@ -1060,7 +1060,7 @@ Patching...
                                NOP
                                NOP
                                NOP
-  adding MCPatcherUtils.class
+  adding com/pclewis/mcpatcher/MCPatcherUtils.class
   adding TileSize.class for HD Textures
   adding TextureUtils.class for HD Textures
    method signature ()LTexturePackBase; -> ()Le;
