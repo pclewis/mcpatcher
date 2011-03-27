@@ -26,9 +26,15 @@ final public class MCPatcher {
      */
     public static final int PATCH_VERSION = 0;
     /**
+     * MCPatcher beta version if > 0
+     */
+    public static final int BETA_VERSION = 1;
+    /**
      * MCPatcher version as a string
      */
-    public static final String VERSION_STRING = String.format("%d.%d.%d", MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
+    public static final String VERSION_STRING =
+        String.format("%d.%d.%d", MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION) +
+        (BETA_VERSION > 0 ? "-beta" + BETA_VERSION : "");
 
     /**
      * Name of utility class always injected into output minecraft.jar
@@ -78,6 +84,9 @@ final public class MCPatcher {
         if (guiEnabled) {
             mainForm = new MainForm();
             mainForm.show();
+            if (BETA_VERSION > 0) {
+                mainForm.showBetaDialog();
+            }
         }
 
         Logger.log(Logger.LOG_MAIN, "MCPatcher version is %s", VERSION_STRING);

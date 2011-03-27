@@ -232,39 +232,27 @@ class MainForm {
 
         ((DefaultCaret) logText.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         Logger.setOutput(new JTextAreaPrintStream(logText));
+        copyLogButton.addActionListener(new CopyToClipboardListener(logText));
 
         ((DefaultCaret) classMap.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        copyClassMapButton.addActionListener(new CopyToClipboardListener(classMap));
 
         ((DefaultCaret) patchResults.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-
-        copyLogButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-                    new StringSelection(logText.getText()), null
-                );
-            }
-        });
-
-        copyClassMapButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-                    new StringSelection(classMap.getText()), null
-                );
-            }
-        });
-
-        copyPatchResultsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-                    new StringSelection(patchResults.getText()), null
-                );
-            }
-        });
+        copyPatchResultsButton.addActionListener(new CopyToClipboardListener(patchResults));
     }
 
     public void show() {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void showBetaDialog() {
+        JOptionPane.showMessageDialog(frame,
+            "This is a pre-release version of MCPatcher that is not intended for general use.\n\n" +
+                "Please make backups of your mods and texture packs and report any problems\n" +
+                "in the MCPatcher beta thread.",
+            "For testing purposes only", JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
     private void showCorruptJarError() {
@@ -555,6 +543,20 @@ class MainForm {
 
             setOpaque(true);
             return this;
+        }
+    }
+
+    private class CopyToClipboardListener implements ActionListener {
+        JTextArea textArea;
+
+        public CopyToClipboardListener(JTextArea textArea) {
+            this.textArea = textArea;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
+                new StringSelection("[code]\n" + textArea.getText() + "\n[code]"), null
+            );
         }
     }
 }
