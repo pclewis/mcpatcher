@@ -51,6 +51,7 @@ class MainForm {
     private JTextArea patchResults;
     private JButton copyClassMapButton;
     private JButton copyPatchResultsButton;
+    private JScrollPane modTableScrollPane;
 
     private boolean busy = true;
     private Thread workerThread = null;
@@ -147,6 +148,7 @@ class MainForm {
         modTable.setColumnSelectionAllowed(false);
         modTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         setModList(null);
+        modTableScrollPane.getViewport().setBackground(modTable.getBackground());
         modTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 setStatusText("");
@@ -329,7 +331,7 @@ class MainForm {
             origField.setText(MCPatcher.minecraft.getInputFile().getPath());
             outputField.setText(MCPatcher.minecraft.getOutputFile().getPath());
         }
-        boolean outputSet = !outputField.getText().isEmpty();
+        boolean outputSet = !outputField.getText().equals("");
         File orig = new File(origField.getText());
         File output = new File(outputField.getText());
         boolean origOk = orig.exists();
