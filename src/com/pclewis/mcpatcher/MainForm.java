@@ -249,10 +249,12 @@ class MainForm {
 
     public void showBetaDialog() {
         JOptionPane.showMessageDialog(frame,
-            "This is a pre-release version of MCPatcher that is not intended for general use.\n\n" +
-                "Please make backups of your mods and texture packs and report any problems\n" +
-                "in the MCPatcher beta thread.",
-            "For testing purposes only", JOptionPane.INFORMATION_MESSAGE
+            "This is a pre-release version of MCPatcher and is not intended\n" +
+                "for general use.\n\n" +
+                "Please make backups of your mods, save files, and texture packs\n" +
+                "before using.  Report any problems in the thread for MCPatcher beta at\n" +
+                "http://www.minecraftforum.net/viewforum.php?f=1021",
+            "For testing only", JOptionPane.INFORMATION_MESSAGE
         );
     }
 
