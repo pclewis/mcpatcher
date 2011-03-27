@@ -146,6 +146,7 @@ class MainForm {
         modTable.setRowSelectionAllowed(true);
         modTable.setColumnSelectionAllowed(false);
         modTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        setModList(null);
         modTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 setStatusText("");
@@ -371,10 +372,10 @@ class MainForm {
         out.close();
     }
 
-    public void setModList(final Vector<Mod> mods) {
+    public void setModList(final ModList modList) {
         modTable.setModel(new TableModel() {
             public int getRowCount() {
-                return mods.size();
+                return modList == null ? 0 : modList.size();
             }
 
             public int getColumnCount() {
@@ -394,7 +395,7 @@ class MainForm {
             }
 
             public Object getValueAt(int rowIndex, int columnIndex) {
-                return (rowIndex >= 0 && rowIndex < mods.size()) ? mods.get(rowIndex) : null;
+                return (modList != null && rowIndex >= 0 && rowIndex < modList.size()) ? modList.get(rowIndex) : null;
             }
 
             public void setValueAt(Object aValue, int rowIndex, int columnIndex) {

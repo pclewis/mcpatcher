@@ -173,7 +173,7 @@ final public class MCPatcher {
         }
 
         if (mainForm != null) {
-            mainForm.setModList(modList.getAll());
+            mainForm.setModList(modList);
         }
     }
 

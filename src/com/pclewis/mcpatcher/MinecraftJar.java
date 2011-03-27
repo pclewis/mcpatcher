@@ -44,7 +44,6 @@ class MinecraftJar {
 
         File md5File = getMinecraftPath("bin", "md5s");
         if (md5File.exists()) {
-
             FileInputStream is = null;
             try {
                 Properties properties = new Properties();

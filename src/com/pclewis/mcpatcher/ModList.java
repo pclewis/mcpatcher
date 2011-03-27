@@ -93,6 +93,14 @@ class ModList {
         return modsByName.get(name);
     }
 
+    public Mod get(int index) {
+        return modsByIndex.get(index);
+    }
+
+    public int size() {
+        return modsByIndex.size();
+    }
+
     public void enableValidMods() {
         for (Mod mod : modsByIndex) {
             if (mod.okToApply()) {
