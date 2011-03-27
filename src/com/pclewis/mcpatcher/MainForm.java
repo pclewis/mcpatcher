@@ -555,7 +555,7 @@ class MainForm {
 
         public void actionPerformed(ActionEvent e) {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-                new StringSelection("[code]\n" + textArea.getText() + "\n[code]"), null
+                new StringSelection("[code]\n" + textArea.getText() + "[/code]\n"), null
             );
         }
     }
