@@ -45,6 +45,7 @@
               <forms defaultalign-horz="false"/>
             </constraints>
             <properties>
+              <columns value="25"/>
               <editable value="false"/>
               <minimumSize width="300" height="21"/>
             </properties>
@@ -75,6 +76,7 @@
               <forms defaultalign-horz="false"/>
             </constraints>
             <properties>
+              <columns value="25"/>
               <editable value="false"/>
               <minimumSize width="300" height="21"/>
             </properties>
