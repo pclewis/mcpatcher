@@ -541,6 +541,9 @@ public class HDTextureMod extends Mod {
 
     private static class GLAllocationMod extends ClassMod {
         public GLAllocationMod() {
+            classSignatures.add(new ConstSignature(
+                new MethodRef("org.lwjgl.opengl.ARBShaderObjects", "glCreateProgramObjectARB", "()I")
+            ).negate(true)); // don't match GLSL Shader Mod
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
