@@ -471,18 +471,16 @@ final public class MCPatcher {
         Logger.log(Logger.LOG_CLASS, "%s %s for %s", action, filename, mod.getName());
 
         try {
+            outputJar.putNextEntry(new ZipEntry(filename));
             if (filename.endsWith(".class")) {
-                String dir = filename.replaceAll("[^/]*$", "");
                 ClassFile classFile = new ClassFile(new DataInputStream(inputStream));
                 mod.classMap.apply(classFile);
                 classFile.compact();
-                outputJar.putNextEntry(new ZipEntry(dir + classFile.getName() + ".class"));
                 mod.classMap.stringReplace(classFile, outputJar);
             } else {
-                outputJar.putNextEntry(new ZipEntry(filename));
                 Util.copyStream(inputStream, outputJar);
-                outputJar.closeEntry();
             }
+            outputJar.closeEntry();
         } finally {
             Util.close(inputStream);
         }
