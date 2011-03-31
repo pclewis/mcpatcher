@@ -3,8 +3,7 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.HashMap;
 
 public class TextureUtils {
@@ -37,10 +36,36 @@ public class TextureUtils {
 
     public static boolean setTileSize() {
         int size = getTileSize();
+        File options = MCPatcherUtils.getMinecraftPath("options.txt");
+        BufferedReader br = null;
+        if (options.exists()) {
+            try {
+                br = new BufferedReader(new FileReader(options));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.matches("^skin:.*")) {
+                        line = line.substring(5);
+                        System.out.printf("\nchanging skin to %s\n", line);
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
         if (size == TileSize.int_size) {
+            System.out.printf("tile size %d unchanged\n", size);
             return false;
         } else {
-            System.out.printf("\nsetting tile size to %d\n", size);
+            System.out.printf("setting tile size to %d (was %d)\n", size, TileSize.int_size);
             TileSize.setTileSize(size);
             return true;
         }
