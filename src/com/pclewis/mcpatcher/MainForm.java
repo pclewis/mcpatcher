@@ -255,7 +255,7 @@ class MainForm {
                 "for general use.\n\n" +
                 "Please make backups of your mods, save files, and texture packs\n" +
                 "before using.  Report any problems in the thread for MCPatcher beta at\n" +
-                "http://www.minecraftforum.net/viewforum.php?f=1021",
+                "http://www.minecraftforum.net/viewtopic.php?f=1021&t=252531",
             "For testing only", JOptionPane.INFORMATION_MESSAGE
         );
     }

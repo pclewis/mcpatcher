@@ -31,7 +31,7 @@ final public class MCPatcher {
     /**
      * MCPatcher beta version if > 0
      */
-    public static final int BETA_VERSION = 1;
+    public static final int BETA_VERSION = 2;
     /**
      * MCPatcher version as a string
      */
