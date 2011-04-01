@@ -90,6 +90,24 @@ final public class MCPatcher {
         }
 
         Logger.log(Logger.LOG_MAIN, "MCPatcher version is %s", VERSION_STRING);
+        Logger.log(Logger.LOG_MAIN, "OS: %s %s %s",
+            System.getProperty("os.name"),
+            System.getProperty("os.version"),
+            System.getProperty("os.arch")
+        );
+        String bits;
+        try {
+            int b = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+            bits = String.format(" (%d bit)", b);
+        } catch (Throwable e) {
+            bits = "";
+        }
+        Logger.log(Logger.LOG_MAIN, "JVM: %s %s%s",
+            System.getProperty("java.vendor"),
+            System.getProperty("java.version"),
+            bits
+        );
+
         if (!MCPatcherUtils.getString("lastVersion").equals(VERSION_STRING)) {
             MCPatcherUtils.set("lastVersion", VERSION_STRING);
             MCPatcherUtils.set("betaWarningShown", false);

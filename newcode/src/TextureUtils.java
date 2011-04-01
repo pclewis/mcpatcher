@@ -67,6 +67,7 @@ public class TextureUtils {
         } else {
             System.out.printf("setting tile size to %d (was %d)\n", size, TileSize.int_size);
             TileSize.setTileSize(size);
+            System.out.printf("GL buffer size is %d\n", TileSize.int_glBufferSize);
             return true;
         }
     }
