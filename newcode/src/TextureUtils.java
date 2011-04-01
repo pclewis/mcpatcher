@@ -171,23 +171,25 @@ public class TextureUtils {
             }
         }
 
-        if (image != null) {
-            if (!cached && texturePack != lastTexturePack) {
-                System.out.printf("clearing texture cache (%d items)\n", cache.size());
-                cache.clear();
+        if (image == null) {
+            throw new IOException(resource + " image is null");
+        }
+
+        if (!cached && texturePack != lastTexturePack) {
+            System.out.printf("clearing texture cache (%d items)\n", cache.size());
+            cache.clear();
+        }
+        System.out.printf("opened %s %dx%d from %s\n",
+            resource, image.getWidth(), image.getHeight(),
+            (cached ? "cache" : fromCustom ? "custom texture pack" : "default texture pack")
+        );
+        if (!cached) {
+            Integer i = expectedColumns.get(resource);
+            if (i != null && image.getWidth() != i * TileSize.int_size) {
+                image = resizeImage(image, i * TileSize.int_size);
             }
-            System.out.printf("opened %s %dx%d from %s\n",
-                resource, image.getWidth(), image.getHeight(),
-                (cached ? "cache" : fromCustom ? "custom texture pack" : "default texture pack")
-            );
-            if (!cached) {
-                Integer i = expectedColumns.get(resource);
-                if (i != null && image.getWidth() != i * TileSize.int_size) {
-                    image = resizeImage(image, i * TileSize.int_size);
-                }
-                lastTexturePack = texturePack;
-                cache.put(resource, image);
-            }
+            lastTexturePack = texturePack;
+            cache.put(resource, image);
         }
 
         return image;
