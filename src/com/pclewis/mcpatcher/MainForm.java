@@ -249,6 +249,16 @@ class MainForm {
         frame.setVisible(true);
     }
 
+    public void showNoMinecraftDialog(File minecraftDir) {
+        JOptionPane.showMessageDialog(frame,
+            "Minecraft directory not found at\n" +
+                minecraftDir.getPath() + "\n" +
+                "Please make sure the game is properly installed.\n\n" +
+                "Unable to continue.  MCPatcher will now exit.",
+            "Minecraft not found", JOptionPane.ERROR_MESSAGE
+        );
+    }
+
     public void showBetaDialog() {
         JOptionPane.showMessageDialog(frame,
             "This is a pre-release version of MCPatcher and is not intended\n" +

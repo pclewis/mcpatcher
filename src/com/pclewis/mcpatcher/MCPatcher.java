@@ -101,8 +101,20 @@ final public class MCPatcher {
         MCPatcherUtils.saveProperties();
         getAllMods();
 
+        File minecraftDir = MCPatcherUtils.getMinecraftPath();
+        if (!minecraftDir.isDirectory()) {
+            Logger.log(Logger.LOG_MAIN, "ERROR: could not find minecraft directory %s", minecraftDir.getPath());
+            if (guiEnabled) {
+                mainForm.showNoMinecraftDialog(minecraftDir);
+            }
+            System.exit(1);
+        }
+
         File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
         if (!defaultMinecraft.exists()) {
+            if (guiEnabled) {
+                mainForm.setBusy(false);
+            }
         } else if (setMinecraft(defaultMinecraft, true)) {
             if (guiEnabled) {
                 mainForm.updateModList();
@@ -119,8 +131,12 @@ final public class MCPatcher {
                 }
                 System.exit(exitStatus);
             }
-        } else if (guiEnabled) {
-            mainForm.showCorruptJarError();
+        } else {
+            Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
+            if (guiEnabled) {
+                mainForm.showCorruptJarError();
+                mainForm.setBusy(false);
+            }
         }
 
         if (guiEnabled) {
