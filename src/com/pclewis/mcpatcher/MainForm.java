@@ -199,6 +199,7 @@ class MainForm {
                     Logger.log(e1);
                     JOptionPane.showMessageDialog(frame, "Failed to restore minecraft jar from backup:\n\n" + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+                updateControls();
             }
         });
 
