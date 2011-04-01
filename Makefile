@@ -35,7 +35,7 @@ profile: $(MCPATCHER) $(PROFILER4J)
 	java -Xmx512M -javaagent:$(PROFILER4J)=waitconn=true,verbosity=1 -jar $(MCPATCHER)
 
 clean:
-	rm -rf $(TEST_LOG) $(MCPATCHER) $(DOC_OUT)
+	rm -rf $(TEST_LOG) $(MCPATCHER) $(DOC_OUT) out
 
 modjar: $(MCPATCHER)
 	rm -rf $(TMPDIR)
