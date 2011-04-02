@@ -147,6 +147,12 @@ public class TextureUtils {
         if (is == null) {
             is = TextureUtils.class.getResourceAsStream(resource);
         }
+        if (is == null && !resource.startsWith("/custom_")) {
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+            MCPatcherUtils.warn("falling back on thread class loader for %s: %s",
+                resource, (is == null ? "failed" : "success")
+            );
+        }
         return is;
     }
 
