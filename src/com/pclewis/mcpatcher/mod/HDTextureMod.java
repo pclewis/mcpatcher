@@ -72,6 +72,7 @@ public class HDTextureMod extends Mod {
                 }
             });
             methodMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
+            methodMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -155,6 +156,46 @@ public class HDTextureMod extends Mod {
                         POP,
                         SWAP,
                         POP,
+                        reference(methodInfo, INVOKESTATIC, map(new MethodRef("TextureUtils", "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;")))
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "getInputStream(...), readTextureImage -> getResourceAsBufferedImage(...)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_2,
+                        ALOAD_1,
+                        reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;"))),
+                        ASTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        ALOAD, BinaryRegex.backReference(1),
+                        IFNONNULL, BinaryRegex.any(2),
+                        ALOAD_0,
+                        ALOAD_0,
+                        GETFIELD, BinaryRegex.any(2),
+                        BinaryRegex.capture(BinaryRegex.any()),
+                        reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("RenderEngine", "setupTexture",  "(Ljava/awt/image/BufferedImage;I)V"))),
+                        GOTO, BinaryRegex.any(2),
+                        ALOAD_0,
+                        ALOAD_0,
+                        ALOAD, BinaryRegex.backReference(1),
+                        reference(methodInfo, INVOKESPECIAL, map(new MethodRef("RenderEngine", "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;")))/*,
+                        ILOAD_3,
+                        reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("RenderEngine", "setupTexture",  "(Ljava/awt/image/BufferedImage;I)V")))*/
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        ALOAD_1,
                         reference(methodInfo, INVOKESTATIC, map(new MethodRef("TextureUtils", "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;")))
                     );
                 }
