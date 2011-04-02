@@ -49,31 +49,7 @@ public class TextureUtils {
 
     public static boolean setTileSize() {
         int size = getTileSize();
-        File options = MCPatcherUtils.getMinecraftPath("options.txt");
-        BufferedReader br = null;
-        if (options.exists()) {
-            try {
-                br = new BufferedReader(new FileReader(options));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    if (line.matches("^skin:.*")) {
-                        line = line.substring(5);
-                        MCPatcherUtils.log("\nchanging skin to %s", line);
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
+        MCPatcherUtils.log("\nchanging skin to %s", getTexturePackName(getSelectedTexturePack()));
         if (size == TileSize.int_size) {
             MCPatcherUtils.log("tile size %d unchanged", size);
             return false;
@@ -140,6 +116,10 @@ public class TextureUtils {
         return minecraft == null ? null :
             minecraft.texturePackList == null ? null :
                 minecraft.texturePackList.selectedTexturePack;
+    }
+
+    public static String getTexturePackName(TexturePackBase texturePack) {
+        return texturePack == null ? "Default" : texturePack.texturePackFileName;
     }
 
     public static ByteBuffer getByteBuffer(ByteBuffer buffer, byte[] data) {
@@ -213,8 +193,7 @@ public class TextureUtils {
             cache.clear();
         }
         MCPatcherUtils.log("opened %s %dx%d from %s",
-            resource, image.getWidth(), image.getHeight(),
-            (cached ? "cache" : fromCustom ? "custom texture pack" : "default texture pack")
+            resource, image.getWidth(), image.getHeight(), (cached ? "cache" : getTexturePackName(texturePack))
         );
         if (!cached) {
             Integer i = expectedColumns.get(resource);

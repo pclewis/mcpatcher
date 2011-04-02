@@ -681,6 +681,19 @@ public class HDTextureMod extends Mod {
                     );
                 }
             }.setMethodName("getInputStream"));
+
+            fieldMappers.add(new FieldMapper("texturePackFileName", "Ljava/lang/String;") {
+                boolean matched = false;
+
+                @Override
+                public boolean match(FieldInfo fieldInfo) {
+                    if (!super.match(fieldInfo) || matched) {
+                        return false;
+                    }
+                    matched = true;
+                    return true;
+                }
+            });
         }
     }
 
