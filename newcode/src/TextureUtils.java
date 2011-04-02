@@ -80,7 +80,6 @@ public class TextureUtils {
         } else {
             System.out.printf("setting tile size to %d (was %d)\n", size, TileSize.int_size);
             TileSize.setTileSize(size);
-            System.out.printf("GL buffer size is %d\n", TileSize.int_glBufferSize);
             return true;
         }
     }
@@ -141,13 +140,15 @@ public class TextureUtils {
 
     public static ByteBuffer getByteBuffer(ByteBuffer buffer, byte[] data) {
         buffer.clear();
-        if (buffer.capacity() < data.length) {
-            System.out.printf("resizing gl buffer to 0x%x\n", data.length);
-            buffer = GLAllocation.createDirectByteBuffer(data.length);
+        final int have = buffer.capacity();
+        final int needed = data.length;
+        if (needed > have || have >= 4 * needed) {
+            System.out.printf("resizing gl buffer from 0x%x to 0x%x\n", have, needed);
+            buffer = GLAllocation.createDirectByteBuffer(needed);
         }
-        TileSize.int_glBufferSize = buffer.capacity();
         buffer.put(data);
-        buffer.position(0).limit(data.length);
+        buffer.position(0).limit(needed);
+        TileSize.int_glBufferSize = needed;
         return buffer;
     }
 

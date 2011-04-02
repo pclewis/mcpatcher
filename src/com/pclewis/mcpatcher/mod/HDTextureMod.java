@@ -161,6 +161,8 @@ public class HDTextureMod extends Mod {
             });
 
             patches.add(new BytecodePatch() {
+                private FieldRef imageData;
+
                 @Override
                 public String getDescription() {
                     return "imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()";
@@ -168,23 +170,24 @@ public class HDTextureMod extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
+                    imageData = (FieldRef) map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"));
                     return buildExpression(
                         // imageData.clear();
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        reference(methodInfo, GETFIELD, imageData),
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "clear", "()Ljava/nio/Buffer;")),
                         POP,
 
                         // imageData.put($1);
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        reference(methodInfo, GETFIELD, imageData),
                         BinaryRegex.capture(BinaryRegex.repeat(BinaryRegex.any(), 2, 5)),
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "put", "([B)Ljava/nio/ByteBuffer;")),
                         POP,
 
                         // imageData.position(0).limit($1.length);
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        reference(methodInfo, GETFIELD, imageData),
                         ICONST_0,
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "position", "(I)Ljava/nio/Buffer;")),
                         BinaryRegex.backReference(1),
@@ -200,10 +203,10 @@ public class HDTextureMod extends Mod {
                         // imageData = TextureUtils.getByteBuffer(imageData, $1);
                         ALOAD_0,
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        reference(methodInfo, GETFIELD, imageData),
                         getCaptureGroup(1),
                         reference(methodInfo, INVOKESTATIC, new MethodRef("TextureUtils", "getByteBuffer", "(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;")),
-                        reference(methodInfo, PUTFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;")))
+                        reference(methodInfo, PUTFIELD, imageData)
                     );
                 }
             });
