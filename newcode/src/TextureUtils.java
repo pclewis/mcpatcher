@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 public class TextureUtils {
@@ -136,6 +137,18 @@ public class TextureUtils {
         return minecraft == null ? null :
             minecraft.texturePackList == null ? null :
                 minecraft.texturePackList.selectedTexturePack;
+    }
+
+    public static ByteBuffer getByteBuffer(ByteBuffer buffer, byte[] data) {
+        buffer.clear();
+        if (buffer.capacity() < data.length) {
+            System.out.printf("resizing gl buffer to 0x%x\n", data.length);
+            buffer = GLAllocation.createDirectByteBuffer(data.length);
+        }
+        TileSize.int_glBufferSize = buffer.capacity();
+        buffer.put(data);
+        buffer.position(0).limit(data.length);
+        return buffer;
     }
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {

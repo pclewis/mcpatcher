@@ -160,6 +160,54 @@ public class HDTextureMod extends Mod {
                 }
             });
 
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // imageData.clear();
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "clear", "()Ljava/nio/Buffer;")),
+                        POP,
+
+                        // imageData.put($1);
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        BinaryRegex.capture(BinaryRegex.repeat(BinaryRegex.any(), 2, 5)),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "put", "([B)Ljava/nio/ByteBuffer;")),
+                        POP,
+
+                        // imageData.position(0).limit($1.length);
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        ICONST_0,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "position", "(I)Ljava/nio/Buffer;")),
+                        BinaryRegex.backReference(1),
+                        ARRAYLENGTH,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/Buffer", "limit", "(I)Ljava/nio/Buffer;")),
+                        POP
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // imageData = TextureUtils.getByteBuffer(imageData, $1);
+                        ALOAD_0,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;"))),
+                        getCaptureGroup(1),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("TextureUtils", "getByteBuffer", "(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;")),
+                        reference(methodInfo, PUTFIELD, map(new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;")))
+                    );
+                }
+            });
+
             patches.add(new BytecodeTilePatch(1048576, "int_glBufferSize"));
 
             patches.add(new AddMethodPatch("setTileSize", "(Lnet/minecraft/client/Minecraft;)V") {
