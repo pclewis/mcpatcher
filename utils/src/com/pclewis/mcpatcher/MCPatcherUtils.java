@@ -81,6 +81,26 @@ public class MCPatcherUtils {
         }
     }
 
+    /**
+     * Write a warning message to minecraft standard output.
+     *
+     * @param format printf-style format string
+     * @param params printf-style parameters
+     */
+    public static void warn(String format, Object... params) {
+        System.out.printf("WARNING: " + format + "\n", params);
+    }
+
+    /**
+     * Write an error message to minecraft standard output.
+     *
+     * @param format printf-style format string
+     * @param params printf-style parameters
+     */
+    public static void error(String format, Object... params) {
+        System.out.printf("ERROR: " + format + "\n", params);
+    }
+
     private static String getPropertyKey(String mod, String name) {
         if (mod == null || mod.equals("")) {
             return name;
