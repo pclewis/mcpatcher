@@ -27,16 +27,13 @@ public class CustomAnimation extends TextureFX {
         System.out.printf("new CustomAnimation %s, buffer size=%d, tileNumber=%d\n", name, imageData.length, this.tileNumber);
 
         BufferedImage custom = null;
-        String src = "terrain.png";
+        String customSrc = "custom_" + name + ".png";
         try {
-            custom = TextureUtils.getResourceAsBufferedImage(src);
-            if (custom != null) {
-                src = "/custom_" + name + ".png";
-            }
+            custom = TextureUtils.getResourceAsBufferedImage("/" + customSrc);
         } catch (IOException ex) {
         }
-        System.out.printf("new CustomAnimation %s, src=%s, buffer size=%d, tileNumber=%d\n",
-            name, src, imageData.length, this.tileNumber
+        System.out.printf("new CustomAnimation %s, src=%s, buffer size=0x%x, tile=%d\n",
+            name, (custom == null ? "terrain.png" : customSrc), imageData.length, this.tileNumber
         );
 
         if (custom == null) {
