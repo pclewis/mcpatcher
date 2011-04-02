@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 class MainForm {
+    private static final int LOG_TAB = 2;
     private static final Color MOD_BUSY_COLOR = new Color(192, 192, 192);
     private static final String MOD_DESC_FORMAT = "<html>" +
         "<table border=\"0\" width=\"%1$d\"><tr style=\"font-weight: bold; font-size: larger;\">" +
@@ -52,6 +53,10 @@ class MainForm {
     private JButton copyClassMapButton;
     private JButton copyPatchResultsButton;
     private JScrollPane modTableScrollPane;
+    private JComboBox waterCombo;
+    private JComboBox lavaCombo;
+    private JComboBox fireCombo;
+    private JComboBox portalCombo;
 
     private boolean busy = true;
     private Thread workerThread = null;
@@ -169,7 +174,7 @@ class MainForm {
             class PatchThread implements Runnable {
                 public void run() {
                     if (!MCPatcher.patch()) {
-                        tabbedPane.setSelectedIndex(1);
+                        tabbedPane.setSelectedIndex(LOG_TAB);
                         JOptionPane.showMessageDialog(frame,
                             "There was an error during patching.  " +
                                 "See log for more information.  " +
@@ -220,7 +225,7 @@ class MainForm {
             }
 
             public void actionPerformed(ActionEvent e) {
-                tabbedPane.setSelectedIndex(1);
+                tabbedPane.setSelectedIndex(LOG_TAB);
                 setBusy(true);
                 setStatusText("Launching %s...", MCPatcher.minecraft.getOutputFile().getName());
                 MCPatcherUtils.saveProperties();
@@ -243,6 +248,94 @@ class MainForm {
 
         ((DefaultCaret) patchResults.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         copyPatchResultsButton.addActionListener(new CopyToClipboardListener(patchResults));
+
+        waterCombo.addItem("Default");
+        waterCombo.addItem("Not Animated");
+        waterCombo.addItem("Custom Animated");
+        waterCombo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    switch (waterCombo.getSelectedIndex()) {
+                        default:
+                            MCPatcherUtils.set("HDTexture", "customWater", false);
+                            MCPatcherUtils.set("HDTexture", "animatedWater", true);
+                            break;
+
+                        case 1:
+                            MCPatcherUtils.set("HDTexture", "customWater", false);
+                            MCPatcherUtils.set("HDTexture", "animatedWater", false);
+                            break;
+
+                        case 2:
+                            MCPatcherUtils.set("HDTexture", "customWater", true);
+                            MCPatcherUtils.set("HDTexture", "animatedWater", true);
+                            break;
+                    }
+                }
+            }
+        });
+
+        lavaCombo.addItem("Default");
+        lavaCombo.addItem("Not Animated");
+        lavaCombo.addItem("Custom Animated");
+        lavaCombo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    switch (lavaCombo.getSelectedIndex()) {
+                        default:
+                            MCPatcherUtils.set("HDTexture", "customLava", false);
+                            MCPatcherUtils.set("HDTexture", "animatedLava", true);
+                            break;
+
+                        case 1:
+                            MCPatcherUtils.set("HDTexture", "customLava", false);
+                            MCPatcherUtils.set("HDTexture", "animatedLava", false);
+                            break;
+
+                        case 2:
+                            MCPatcherUtils.set("HDTexture", "customLava", true);
+                            MCPatcherUtils.set("HDTexture", "animatedLava", true);
+                            break;
+                    }
+                }
+            }
+        });
+
+        fireCombo.addItem("Default");
+        fireCombo.addItem("Not Animated");
+        fireCombo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    switch (fireCombo.getSelectedIndex()) {
+                        default:
+                            MCPatcherUtils.set("HDTexture", "animatedFire", true);
+                            break;
+
+                        case 1:
+                            MCPatcherUtils.set("HDTexture", "animatedFire", false);
+                            break;
+                    }
+                }
+            }
+        });
+
+        portalCombo.addItem("Default");
+        portalCombo.addItem("Custom Animated");
+        portalCombo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    switch (portalCombo.getSelectedIndex()) {
+                        default:
+                            MCPatcherUtils.set("HDTexture", "customPortal", false);
+                            break;
+
+                        case 1:
+                            MCPatcherUtils.set("HDTexture", "customPortal", true);
+                            break;
+                    }
+                }
+            }
+        });
     }
 
     public void show() {
@@ -272,7 +365,7 @@ class MainForm {
     }
 
     public void showCorruptJarError() {
-        tabbedPane.setSelectedIndex(1);
+        tabbedPane.setSelectedIndex(LOG_TAB);
         JOptionPane.showMessageDialog(frame,
             "There was an error opening minecraft.jar. This may be because:\n" +
                 " - You selected the launcher jar and not the main minecraft.jar in the bin folder.\n" +
@@ -355,16 +448,47 @@ class MainForm {
         patchButton.setEnabled(!busy && origOk && !output.equals(orig));
         undoButton.setEnabled(!busy && origOk && !output.equals(orig));
         tabbedPane.setEnabled(!busy);
+
         updateActiveTab();
     }
 
     void updateActiveTab() {
         switch (tabbedPane.getSelectedIndex()) {
-            case 2:
-                showClassMaps();
+            case 1:
+                if (MCPatcherUtils.getBoolean("HDTexture", "customWater", true)) {
+                    waterCombo.setSelectedIndex(2);
+                } else if (MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true)) {
+                    waterCombo.setSelectedIndex(0);
+                } else {
+                    waterCombo.setSelectedIndex(1);
+                }
+
+                if (MCPatcherUtils.getBoolean("HDTexture", "customLava", true)) {
+                    lavaCombo.setSelectedIndex(2);
+                } else if (MCPatcherUtils.getBoolean("HDTexture", "animatedLava", true)) {
+                    lavaCombo.setSelectedIndex(0);
+                } else {
+                    lavaCombo.setSelectedIndex(1);
+                }
+
+                if (MCPatcherUtils.getBoolean("HDTexture", "animatedFire", true)) {
+                    fireCombo.setSelectedIndex(0);
+                } else {
+                    fireCombo.setSelectedIndex(1);
+                }
+
+                if (MCPatcherUtils.getBoolean("HDTexture", "customPortal", true)) {
+                    portalCombo.setSelectedIndex(1);
+                } else {
+                    portalCombo.setSelectedIndex(0);
+                }
                 break;
 
             case 3:
+                showClassMaps();
+                break;
+
+            case 4:
                 showPatchResults();
                 break;
 
