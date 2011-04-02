@@ -1242,21 +1242,21 @@ Patching...
      INVOKESPECIAL 0x00 0x1b   INVOKESPECIAL 0x02 0x1b
     method ref Watch.<init> (LMinecraft;)V -> ir.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@76
      INVOKESPECIAL 0x00 0x1d   INVOKESPECIAL 0x02 0x1e
-    method ref StillLava.<init> ()V -> bo.<init> ()V refreshTextureFX@176
+    method ref StillLava.<init> ()V -> bo.<init> ()V refreshTextureFX@177
      INVOKESPECIAL 0x00 0x26   INVOKESPECIAL 0x02 0x22
-    method ref FlowLava.<init> ()V -> gr.<init> ()V refreshTextureFX@190
+    method ref FlowLava.<init> ()V -> gr.<init> ()V refreshTextureFX@191
      INVOKESPECIAL 0x00 0x28   INVOKESPECIAL 0x02 0x25
-    method ref StillWater.<init> ()V -> ru.<init> ()V refreshTextureFX@269
+    method ref StillWater.<init> ()V -> ru.<init> ()V refreshTextureFX@270
      INVOKESPECIAL 0x00 0x2e   INVOKESPECIAL 0x02 0x28
-    method ref FlowWater.<init> ()V -> lr.<init> ()V refreshTextureFX@283
+    method ref FlowWater.<init> ()V -> lr.<init> ()V refreshTextureFX@284
      INVOKESPECIAL 0x00 0x30   INVOKESPECIAL 0x02 0x2b
-    method ref Portal.<init> ()V -> gh.<init> ()V refreshTextureFX@340
+    method ref Portal.<init> ()V -> gh.<init> ()V refreshTextureFX@341
      INVOKESPECIAL 0x00 0x36   INVOKESPECIAL 0x02 0x2e
-    method ref TextureFX.onTick ()V -> ai.a ()V refreshTextureFX@378
+    method ref TextureFX.onTick ()V -> ai.a ()V refreshTextureFX@379
      INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x02 0x33
-    field ref ColorizerFoliage.colorBuffer [I -> hn.a [I refreshTextureFX@384
+    field ref ColorizerFoliage.colorBuffer [I -> hn.a [I refreshTextureFX@385
      GETSTATIC 0x00 0x3c       GETSTATIC 0x02 0x37
-    field ref ColorizerGrass.colorBuffer [I -> gm.a [I refreshTextureFX@392
+    field ref ColorizerGrass.colorBuffer [I -> gm.a [I refreshTextureFX@393
      GETSTATIC 0x00 0x3f       GETSTATIC 0x02 0x3a
     field ref Minecraft.texturePackList LTexturePackList; -> net.minecraft.client.Minecraft.C Lgw; getSelectedTexturePack@13
      GETFIELD 0x00 0x42        GETFIELD 0x02 0x3e
