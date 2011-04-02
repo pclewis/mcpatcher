@@ -40,7 +40,7 @@ public class CustomAnimation extends TextureFX {
         if (custom == null) {
             BufferedImage tiles;
             try {
-                tiles = ImageIO.read(Minecraft.class.getResource("/terrain.png"));
+                tiles = TextureUtils.getResourceAsBufferedImage("/terrain.png");
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
