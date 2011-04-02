@@ -108,11 +108,11 @@ final public class MCPatcher {
             bits
         );
 
-        if (!MCPatcherUtils.getString("lastVersion").equals(VERSION_STRING)) {
+        if (!MCPatcherUtils.getString("lastVersion", "").equals(VERSION_STRING)) {
             MCPatcherUtils.set("lastVersion", VERSION_STRING);
             MCPatcherUtils.set("betaWarningShown", false);
         }
-        if (guiEnabled && BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown")) {
+        if (guiEnabled && BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown", false)) {
             mainForm.showBetaDialog();
             MCPatcherUtils.set("betaWarningShown", true);
         }

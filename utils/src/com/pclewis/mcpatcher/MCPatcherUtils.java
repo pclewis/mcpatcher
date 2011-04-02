@@ -39,11 +39,12 @@ public class MCPatcherUtils {
             try {
                 if (propFile.exists()) {
                     properties.load(new FileInputStream(propFile));
+                    remove("HDTexture.enableAnimations");
+                    remove("HDTexture.useCustomAnimations");
                 } else {
-                    set("HDTexture", "enableAnimations", true);
-                    set("HDTexture", "useCustomAnimations", true);
-                    saveProperties();
+                    needSaveProps = true;
                 }
+                saveProperties();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -77,10 +78,19 @@ public class MCPatcherUtils {
      *
      * @param mod name of mod
      * @param name property name
+     * @param defaultValue default value if not found in .properties file
      * @return String value
      */
-    public static String getString(String mod, String name) {
-        String value = properties.getProperty(getPropertyKey(mod, name));
+    public static String getString(String mod, String name, Object defaultValue) {
+        String key = getPropertyKey(mod, name);
+        String value = properties.getProperty(key);
+        if (value == null && defaultValue != null) {
+            value = defaultValue.toString();
+            if (!value.equals("")) {
+                properties.setProperty(key, value);
+                needSaveProps = true;
+            }
+        }
         return value == null ? "" : value;
     }
 
@@ -88,10 +98,11 @@ public class MCPatcherUtils {
      * Gets a value from mcpatcher.properties.
      *
      * @param name property name
+     * @param defaultValue default value if not found in .properties file
      * @return String value
      */
-    public static String getString(String name) {
-        return getString(null, name);
+    public static String getString(String name, Object defaultValue) {
+        return getString(null, name, defaultValue);
     }
 
     /**
@@ -99,13 +110,15 @@ public class MCPatcherUtils {
      *
      * @param mod name of mod
      * @param name property name
+     * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
-    public static int getInt(String mod, String name) {
-        int value = 0;
+    public static int getInt(String mod, String name, int defaultValue) {
+        int value;
         try {
-            value = Integer.parseInt(getString(mod, name));
+            value = Integer.parseInt(getString(mod, name, Integer.valueOf(defaultValue).toString()));
         } catch (NumberFormatException e) {
+            value = defaultValue;
         }
         return value;
     }
@@ -114,10 +127,11 @@ public class MCPatcherUtils {
      * Gets a value from mcpatcher.properties.
      *
      * @param name property name
+     * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
-    public static int getInt(String name) {
-        return getInt(null, name);
+    public static int getInt(String name, int defaultValue) {
+        return getInt(null, name, defaultValue);
     }
 
     /**
@@ -125,20 +139,29 @@ public class MCPatcherUtils {
      *
      * @param mod name of mod
      * @param name property name
+     * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
-    public static boolean getBoolean(String mod, String name) {
-        return Boolean.parseBoolean(getString(mod, name));
+    public static boolean getBoolean(String mod, String name, boolean defaultValue) {
+        String value = getString(mod, name, Boolean.valueOf(defaultValue).toString()).toLowerCase();
+        if (value.equals("false")) {
+            return false;
+        } else if (value.equals("true")) {
+            return true;
+        } else {
+            return defaultValue;
+        }
     }
 
     /**
      * Gets a value from mcpatcher.properties.
      *
      * @param name property name
+     * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
-    public static boolean getBoolean(String name) {
-        return getBoolean(null, name);
+    public static boolean getBoolean(String name, boolean defaultValue) {
+        return getBoolean(null, name, defaultValue);
     }
 
     /**
@@ -155,6 +178,24 @@ public class MCPatcherUtils {
 
     static void set(String name, Object value) {
         set(null, name, value);
+    }
+
+    /**
+     * Remove a value from mcpatcher.properties.
+     *
+     * @param mod name of mod
+     * @param name property name
+     */
+    public static void remove(String mod, String name) {
+        String key = getPropertyKey(mod, name);
+        if (properties.containsKey(key)) {
+            properties.remove(key);
+            needSaveProps = true;
+        }
+    }
+
+    static void remove(String name) {
+        remove(null, name);
     }
 
     /**
