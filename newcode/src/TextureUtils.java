@@ -93,6 +93,7 @@ public class TextureUtils {
         System.out.println("refreshTextureFX()");
 
         textureList.clear();
+
         if (animatedFire) {
             textureList.add(new Fire(0));
             textureList.add(new Fire(1));
@@ -100,7 +101,10 @@ public class TextureUtils {
         textureList.add(new Compass(minecraft));
         textureList.add(new Watch(minecraft));
 
-        if (customLava) {
+        TexturePackBase selectedTexturePack = getSelectedTexturePack();
+        boolean isDefault = (selectedTexturePack == null || selectedTexturePack instanceof TexturePackDefault);
+
+        if (!isDefault && customLava) {
             textureList.add(new CustomAnimation(LAVA_STILL_TEXTURE_INDEX, 0, 1, "lava_still", -1, -1));
             textureList.add(new CustomAnimation(LAVA_FLOWING_TEXTURE_INDEX, 0, 2, "lava_flowing", -1, -1));
         } else if (animatedLava) {
@@ -108,7 +112,7 @@ public class TextureUtils {
             textureList.add(new FlowLava());
         }
 
-        if (customWater) {
+        if (!isDefault && customWater) {
             textureList.add(new CustomAnimation(WATER_STILL_TEXTURE_INDEX, 0, 1, "water_still", -1, -1));
             textureList.add(new CustomAnimation(WATER_FLOWING_TEXTURE_INDEX, 0, 2, "water_flowing", 0, 0));
         } else if (animatedWater) {
@@ -116,7 +120,7 @@ public class TextureUtils {
             textureList.add(new FlowWater());
         }
 
-        if (customPortal && hasResource("/custom_portal.png")) {
+        if (!isDefault && customPortal && hasResource("/custom_portal.png")) {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
         } else {
             textureList.add(new Portal());
