@@ -82,12 +82,43 @@ public class BinaryRegex {
     }
 
     /**
+     * Match an optional expression: (...)?
+     *
+     * @param regex subexpression
+     * @return String regex
+     */
+    public static String optional(String regex) {
+        return String.format("(?:%s)?", regex);
+    }
+
+    /**
      * Matches any single byte: .
      *
      * @return String regex
      */
     public static String any() {
         return BYTE_REGEX;
+    }
+
+    /**
+     * Matches any string of count bytes: (.){m}
+     *
+     * @param count number of repetitions
+     * @return String regex
+     */
+    public static String any(int count) {
+        return repeat(any(), count);
+    }
+
+    /**
+     * Matches any string of min...max bytes: (.){m,n}
+     *
+     * @param min minimum number of repetitions
+     * @param max maximum number of repetitions
+     * @return String regex
+     */
+    public static String any(int min, int max) {
+        return repeat(any(), min, max);
     }
 
     /**
@@ -105,8 +136,8 @@ public class BinaryRegex {
      * Repeats a subexpression between min and max times: (...){m,n}
      *
      * @param regex subexpression
-     * @param min   minimum number of repetitions
-     * @param max   maximum number of repetitions
+     * @param min minimum number of repetitions
+     * @param max maximum number of repetitions
      * @return String regex
      */
     public static String repeat(String regex, int min, int max) {
