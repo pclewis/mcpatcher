@@ -9,8 +9,12 @@ import java.util.HashMap;
 public class TextureUtils {
     public static Minecraft minecraft;
 
-    private static boolean enableAnimations = MCPatcherUtils.getBoolean("HDTexture", "enableAnimations");
-    private static boolean useCustomAnimations = MCPatcherUtils.getBoolean("HDTexture", "useCustomAnimations");
+    private static boolean animatedFire;
+    private static boolean animatedLava;
+    private static boolean animatedWater;
+    private static boolean customLava;
+    private static boolean customWater;
+    private static boolean customPortal;
 
     public static final int LAVA_STILL_TEXTURE_INDEX = 14 * 16 + 13;  // Block.lavaStill.blockIndexInTexture
     public static final int LAVA_FLOWING_TEXTURE_INDEX = LAVA_STILL_TEXTURE_INDEX + 1; // Block.lavaMoving.blockIndexInTexture
@@ -25,6 +29,14 @@ public class TextureUtils {
     private static boolean fromCustom = false;
 
     static {
+        animatedFire = MCPatcherUtils.getBoolean("HDTexture", "animatedFire", true);
+        animatedLava = MCPatcherUtils.getBoolean("HDTexture", "animatedLava", true);
+        animatedWater = MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true);
+        customLava = MCPatcherUtils.getBoolean("HDTexture", "customLava", true);
+        customWater = MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
+        customPortal = MCPatcherUtils.getBoolean("HDTexture", "customPortal", true);
+        MCPatcherUtils.saveProperties();
+
         TextureUtils.expectedColumns.put("/gui/items.png", 16);
         TextureUtils.expectedColumns.put("/misc/dial.png", 1);
         TextureUtils.expectedColumns.put("/custom_lava_still.png", 1);
@@ -81,34 +93,37 @@ public class TextureUtils {
         System.out.println("refreshTextureFX()");
 
         textureList.clear();
-        if (enableAnimations) {
-            if (useCustomAnimations && hasResource("/custom_lava_still.png") && hasResource("/custom_lava_flowing.png")) {
-                textureList.add(new CustomAnimation(LAVA_STILL_TEXTURE_INDEX, 0, 1, "lava_still", -1, -1));
-                textureList.add(new CustomAnimation(LAVA_FLOWING_TEXTURE_INDEX, 0, 2, "lava_flowing", -1, -1));
-            } else {
-                textureList.add(new StillLava());
-                textureList.add(new FlowLava());
-            }
-            if (useCustomAnimations && hasResource("/custom_water_still.png") && hasResource("/custom_water_flowing.png")) {
-                textureList.add(new CustomAnimation(WATER_STILL_TEXTURE_INDEX, 0, 1, "water_still", -1, -1));
-                textureList.add(new CustomAnimation(WATER_FLOWING_TEXTURE_INDEX, 0, 2, "water_flowing", 0, 0));
-            } else {
-                textureList.add(new StillWater());
-                textureList.add(new FlowWater());
-            }
-            if (useCustomAnimations && hasResource("/custom_portal.png")) {
-                textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
-            } else {
-                textureList.add(new Portal());
-            }
-            textureList.add(new Compass(minecraft));
-            textureList.add(new Watch(minecraft));
+        if (animatedFire) {
             textureList.add(new Fire(0));
             textureList.add(new Fire(1));
+        }
+        textureList.add(new Compass(minecraft));
+        textureList.add(new Watch(minecraft));
 
-            for (TextureFX t : textureList) {
-                t.onTick();
-            }
+        if (customLava) {
+            textureList.add(new CustomAnimation(LAVA_STILL_TEXTURE_INDEX, 0, 1, "lava_still", -1, -1));
+            textureList.add(new CustomAnimation(LAVA_FLOWING_TEXTURE_INDEX, 0, 2, "lava_flowing", -1, -1));
+        } else if (animatedLava) {
+            textureList.add(new StillLava());
+            textureList.add(new FlowLava());
+        }
+
+        if (customWater) {
+            textureList.add(new CustomAnimation(WATER_STILL_TEXTURE_INDEX, 0, 1, "water_still", -1, -1));
+            textureList.add(new CustomAnimation(WATER_FLOWING_TEXTURE_INDEX, 0, 2, "water_flowing", 0, 0));
+        } else if (animatedWater) {
+            textureList.add(new StillWater());
+            textureList.add(new FlowWater());
+        }
+
+        if (customPortal && hasResource("/custom_portal.png")) {
+            textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
+        } else {
+            textureList.add(new Portal());
+        }
+
+        for (TextureFX t : textureList) {
+            t.onTick();
         }
 
         refreshColorizer(ColorizerFoliage.colorBuffer, "/misc/foliagecolor.png");
