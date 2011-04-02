@@ -82,7 +82,7 @@ public class TextureUtils {
 
         if (!isDefault && customLava) {
             textureList.add(new CustomAnimation(LAVA_STILL_TEXTURE_INDEX, 0, 1, "lava_still", -1, -1));
-            textureList.add(new CustomAnimation(LAVA_FLOWING_TEXTURE_INDEX, 0, 2, "lava_flowing", -1, -1));
+            textureList.add(new CustomAnimation(LAVA_FLOWING_TEXTURE_INDEX, 0, 2, "lava_flowing", 3, 6));
         } else if (animatedLava) {
             textureList.add(new StillLava());
             textureList.add(new FlowLava());
