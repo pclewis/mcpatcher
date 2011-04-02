@@ -27,7 +27,6 @@ public class TextureUtils {
 
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
-    private static boolean fromCustom = false;
 
     static {
         animatedFire = MCPatcherUtils.getBoolean("HDTexture", "animatedFire", true);
@@ -147,9 +146,6 @@ public class TextureUtils {
         }
         if (is == null) {
             is = TextureUtils.class.getResourceAsStream(resource);
-            fromCustom = false;
-        } else {
-            fromCustom = !(texturePack instanceof TexturePackDefault);
         }
         return is;
     }
