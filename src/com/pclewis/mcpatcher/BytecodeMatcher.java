@@ -1,11 +1,56 @@
 package com.pclewis.mcpatcher;
 
 import javassist.bytecode.*;
+import static javassist.bytecode.Opcode.*;
 
 /**
  * BinaryMatcher used with Java bytecode.
  */
 public class BytecodeMatcher extends BinaryMatcher {
+    /**
+     * Fixed regex that matches any ALOAD ... instruction.
+     */
+    public static final String anyALOAD = BinaryRegex.or(
+        BinaryRegex.build(ALOAD_0),
+        BinaryRegex.build(ALOAD_1),
+        BinaryRegex.build(ALOAD_2),
+        BinaryRegex.build(ALOAD_3),
+        BinaryRegex.build(ALOAD, BinaryRegex.any(2))
+    );
+
+    /**
+     * Fixed regex that matches any ASTORE ... instruction.
+     */
+    public static final String anyASTORE = BinaryRegex.or(
+        BinaryRegex.build(ASTORE_0),
+        BinaryRegex.build(ASTORE_1),
+        BinaryRegex.build(ASTORE_2),
+        BinaryRegex.build(ASTORE_3),
+        BinaryRegex.build(ASTORE, BinaryRegex.any(2))
+    );
+
+    /**
+     * Fixed regex that matches any ILOAD ... instruction.
+     */
+    public static final String anyILOAD = BinaryRegex.or(
+        BinaryRegex.build(ILOAD_0),
+        BinaryRegex.build(ILOAD_1),
+        BinaryRegex.build(ILOAD_2),
+        BinaryRegex.build(ILOAD_3),
+        BinaryRegex.build(ILOAD, BinaryRegex.any(2))
+    );
+
+    /**
+     * Fixed regex that matches any ISTORE ... instruction.
+     */
+    public static final String anyISTORE = BinaryRegex.or(
+        BinaryRegex.build(ISTORE_0),
+        BinaryRegex.build(ISTORE_1),
+        BinaryRegex.build(ISTORE_2),
+        BinaryRegex.build(ISTORE_3),
+        BinaryRegex.build(ISTORE, BinaryRegex.any(2))
+    );
+
     /**
      * Construct a new matcher for the given regular expression.
      *
