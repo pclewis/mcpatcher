@@ -15,7 +15,8 @@ public class BytecodeMatcher extends BinaryMatcher {
         BinaryRegex.build(ALOAD_1),
         BinaryRegex.build(ALOAD_2),
         BinaryRegex.build(ALOAD_3),
-        BinaryRegex.build(ALOAD, BinaryRegex.any(2))
+        BinaryRegex.build(ALOAD, BinaryRegex.any()),
+        BinaryRegex.build(WIDE, ALOAD, BinaryRegex.any(2))
     );
 
     /**
@@ -26,7 +27,8 @@ public class BytecodeMatcher extends BinaryMatcher {
         BinaryRegex.build(ASTORE_1),
         BinaryRegex.build(ASTORE_2),
         BinaryRegex.build(ASTORE_3),
-        BinaryRegex.build(ASTORE, BinaryRegex.any(2))
+        BinaryRegex.build(ASTORE, BinaryRegex.any()),
+        BinaryRegex.build(WIDE, ASTORE, BinaryRegex.any(2))
     );
 
     /**
@@ -37,7 +39,8 @@ public class BytecodeMatcher extends BinaryMatcher {
         BinaryRegex.build(ILOAD_1),
         BinaryRegex.build(ILOAD_2),
         BinaryRegex.build(ILOAD_3),
-        BinaryRegex.build(ILOAD, BinaryRegex.any(2))
+        BinaryRegex.build(ILOAD, BinaryRegex.any()),
+        BinaryRegex.build(WIDE, ILOAD, BinaryRegex.any(2))
     );
 
     /**
@@ -48,7 +51,8 @@ public class BytecodeMatcher extends BinaryMatcher {
         BinaryRegex.build(ISTORE_1),
         BinaryRegex.build(ISTORE_2),
         BinaryRegex.build(ISTORE_3),
-        BinaryRegex.build(ISTORE, BinaryRegex.any(2))
+        BinaryRegex.build(ISTORE, BinaryRegex.any()),
+        BinaryRegex.build(WIDE, ISTORE, BinaryRegex.any(2))
     );
 
     /**
