@@ -27,10 +27,17 @@ public class CustomAnimation extends TextureFX {
         System.out.printf("new CustomAnimation %s, buffer size=%d, tileNumber=%d\n", name, imageData.length, this.tileNumber);
 
         BufferedImage custom = null;
+        String src = "terrain.png";
         try {
-            custom = TextureUtils.getResourceAsBufferedImage("/custom_" + name + ".png");
+            custom = TextureUtils.getResourceAsBufferedImage(src);
+            if (custom != null) {
+                src = "/custom_" + name + ".png";
+            }
         } catch (IOException ex) {
         }
+        System.out.printf("new CustomAnimation %s, src=%s, buffer size=%d, tileNumber=%d\n",
+            name, src, imageData.length, this.tileNumber
+        );
 
         if (custom == null) {
             BufferedImage tiles;
@@ -53,8 +60,8 @@ public class CustomAnimation extends TextureFX {
             numFrames = custom.getHeight() / custom.getWidth();
             int imageBuf[] = new int[custom.getWidth() * custom.getHeight()];
             custom.getRGB(0, 0, custom.getWidth(), custom.getHeight(), imageBuf, 0, TileSize.int_size);
-            src = new byte[imageBuf.length * 4];
-            ARGBtoRGBA(imageBuf, src);
+            this.src = new byte[imageBuf.length * 4];
+            ARGBtoRGBA(imageBuf, this.src);
         }
     }
 
