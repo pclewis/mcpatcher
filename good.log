@@ -1,4 +1,4 @@
-MCPatcher version is 2.0.0-beta2
+MCPatcher version is 2.0.0-beta3
 OS: Linux 2.6.35.11-83.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_23 (64 bit)
 Minecraft version is 1.4 (md5 71e64b61175b371ed148b385f2d14ebf)
@@ -37,6 +37,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
    method a matches registerTextureFX
    method b matches refreshTextures
    method a matches readTextureImage
+   method a matches setupTexture
   TextureFX (ai.class)
    field a matches imageData
    field b matches tileNumber
@@ -63,6 +64,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
    field c matches defaultTexturePack
    field e matches minecraft
   TexturePackBase (f.class)
+   field a matches texturePackFileName
   TexturePackDefault (me.class)
   FontRenderer (ox.class)
   GameSettings (is.class)
@@ -103,10 +105,12 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
    method registerTextureFX -> a
    method readTextureImage -> a
    method refreshTextures -> b
+   method setupTexture -> a
    field imageData -> e
    field textureList -> f
   class TexturePackBase -> f
    method getInputStream -> a
+   field texturePackFileName -> a
   class FlowWater -> lr
   class Watch -> ir
   class GameSettings -> is
@@ -502,8 +506,125 @@ Patching...
                                SWAP
                                POP
                                INVOKESTATIC 0x01 0x70
+    getInputStream(...), readTextureImage -> getResourceAsBufferedImage(...) a@172
+     ALOAD_2                   NOP
+     ALOAD_1                   NOP
+     INVOKEVIRTUAL 0x00 0x44   NOP
+     ASTORE 0x04               NOP
+     ALOAD 0x04                NOP
+     IFNONNULL 0x00 0x0f       NOP
+     ALOAD_0                   NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x3a        NOP
+     ILOAD_3                   NOP
+     INVOKEVIRTUAL 0x00 0x48   NOP
+     GOTO 0x00 0x0e            NOP
+     ALOAD_0                   NOP
+     ALOAD_0                   NOP
+     ALOAD 0x04                NOP
+     INVOKESPECIAL 0x00 0x49   NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               ALOAD_0
+                               ALOAD_1
+                               INVOKESTATIC 0x01 0x70
+    imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer() a@397
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     INVOKEVIRTUAL 0x00 0x60   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     ALOAD 0x06                NOP
+     INVOKEVIRTUAL 0x00 0x63   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     ICONST_0                  NOP
+     INVOKEVIRTUAL 0x00 0x62   NOP
+     ALOAD 0x06                NOP
+     ARRAYLENGTH               NOP
+     INVOKEVIRTUAL 0x00 0x5f   NOP
+     POP                       NOP
+                               NOP
+                               NOP
+                               NOP
+                               ALOAD_0
+                               ALOAD_0
+                               GETFIELD 0x00 0x33
+                               ALOAD 0x06
+                               INVOKESTATIC 0x01 0x74
+                               PUTFIELD 0x00 0x33
+    imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer() a@44
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     INVOKEVIRTUAL 0x00 0x60   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x25        NOP
+     INVOKEVIRTUAL 0x00 0x63   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     ICONST_0                  NOP
+     INVOKEVIRTUAL 0x00 0x62   NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x25        NOP
+     ARRAYLENGTH               NOP
+     INVOKEVIRTUAL 0x00 0x5f   NOP
+     POP                       NOP
+                               NOP
+                               NOP
+                               NOP
+                               ALOAD_0
+                               ALOAD_0
+                               GETFIELD 0x00 0x33
+                               ALOAD_2
+                               GETFIELD 0x00 0x25
+                               INVOKESTATIC 0x01 0x74
+                               PUTFIELD 0x00 0x33
+    imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer() a@481
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     INVOKEVIRTUAL 0x00 0x60   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x25        NOP
+     INVOKEVIRTUAL 0x00 0x63   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x33        NOP
+     ICONST_0                  NOP
+     INVOKEVIRTUAL 0x00 0x62   NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x25        NOP
+     ARRAYLENGTH               NOP
+     INVOKEVIRTUAL 0x00 0x5f   NOP
+     POP                       NOP
+                               NOP
+                               NOP
+                               NOP
+                               ALOAD_0
+                               ALOAD_0
+                               GETFIELD 0x00 0x33
+                               ALOAD_2
+                               GETFIELD 0x00 0x25
+                               INVOKESTATIC 0x01 0x74
+                               PUTFIELD 0x00 0x33
     1048576 -> int_glBufferSize <init>@35
-     LDC 0x02                  GETSTATIC 0x01 0x73
+     LDC 0x02                  GETSTATIC 0x01 0x77
     insert method setTileSize (Lnet/minecraft/client/Minecraft;)V stack size 10, local vars 5
  applying Watch patch to ir.class for mod HD Textures
     16.0D -> double_size a@332
@@ -1060,6 +1181,7 @@ Patching...
   adding TileSize.class for HD Textures
   adding TextureUtils.class for HD Textures
    method signature ()LTexturePackBase; -> ()Lf;
+   method signature (LTexturePackBase;)Ljava/lang/String; -> (Lf;)Ljava/lang/String;
    method signature (LTexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> (Lf;Ljava/lang/String;)Ljava/io/InputStream;
    method signature (LTexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> (Lf;Ljava/lang/String;)Ljava/awt/image/BufferedImage;
    method signature (LTexturePackBase;)I -> (Lf;)I
@@ -1068,133 +1190,144 @@ Patching...
    method signature ()LMinecraft; -> ()Lnet/minecraft/client/Minecraft;
    field signature LMinecraft; -> Lnet/minecraft/client/Minecraft;
    field signature LTexturePackBase; -> Lf;
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setFontRenderer@8
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setFontRenderer@14
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setFontRenderer@22
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; refreshTextureFX@276
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; refreshTextureFX@293
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getSelectedTexturePack@0
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getSelectedTexturePack@10
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getSelectedTexturePack@23
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setMinecraft@1
-     PUTSTATIC 0x00 0x1f       PUTSTATIC 0x01 0xd8
-    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getMinecraft@0
-     GETSTATIC 0x00 0x1f       GETSTATIC 0x01 0xd8
-    field ref Minecraft.fontRenderer LFontRenderer; -> net.minecraft.client.Minecraft.p Lox; setFontRenderer@11
-     GETFIELD 0x00 0x20        GETFIELD 0x01 0xde
-    field ref Minecraft.gameSettings LGameSettings; -> net.minecraft.client.Minecraft.y Lis; setFontRenderer@17
-     GETFIELD 0x00 0x21        GETFIELD 0x01 0xe2
-    field ref Minecraft.renderEngine LRenderEngine; -> net.minecraft.client.Minecraft.o Lho; setFontRenderer@25
-     GETFIELD 0x00 0x23        GETFIELD 0x01 0xe6
-    method ref FontRenderer.initialize (LGameSettings;Ljava/lang/String;LRenderEngine;)V -> ox.initialize (Lis;Ljava/lang/String;Lho;)V setFontRenderer@28
-     INVOKEVIRTUAL 0x00 0x24   INVOKEVIRTUAL 0x01 0xeb
-    method ref StillLava.<init> ()V -> bo.<init> ()V refreshTextureFX@96
-     INVOKESPECIAL 0x00 0x32   INVOKESPECIAL 0x01 0xef
-    method ref FlowLava.<init> ()V -> gr.<init> ()V refreshTextureFX@110
-     INVOKESPECIAL 0x00 0x34   INVOKESPECIAL 0x01 0xf2
-    method ref StillWater.<init> ()V -> ru.<init> ()V refreshTextureFX@195
-     INVOKESPECIAL 0x00 0x3a   INVOKESPECIAL 0x01 0xf5
-    method ref FlowWater.<init> ()V -> lr.<init> ()V refreshTextureFX@209
-     INVOKESPECIAL 0x00 0x3c   INVOKESPECIAL 0x01 0xf8
-    method ref Portal.<init> ()V -> gh.<init> ()V refreshTextureFX@262
-     INVOKESPECIAL 0x00 0x40   INVOKESPECIAL 0x01 0xfb
-    method ref Compass.<init> (LMinecraft;)V -> aj.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@279
-     INVOKESPECIAL 0x00 0x42   INVOKESPECIAL 0x01 0xff
-    method ref Watch.<init> (LMinecraft;)V -> ir.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@296
-     INVOKESPECIAL 0x00 0x44   INVOKESPECIAL 0x02 0x02
-    method ref Fire.<init> (I)V -> os.<init> (I)V refreshTextureFX@311
-     INVOKESPECIAL 0x00 0x46   INVOKESPECIAL 0x02 0x06
-    method ref Fire.<init> (I)V -> os.<init> (I)V refreshTextureFX@326
-     INVOKESPECIAL 0x00 0x46   INVOKESPECIAL 0x02 0x06
-    method ref TextureFX.onTick ()V -> ai.a ()V refreshTextureFX@362
-     INVOKEVIRTUAL 0x00 0x4b   INVOKEVIRTUAL 0x02 0x0b
-    field ref ColorizerFoliage.colorBuffer [I -> hn.a [I refreshTextureFX@368
-     GETSTATIC 0x00 0x4c       GETSTATIC 0x02 0x0f
-    field ref ColorizerGrass.colorBuffer [I -> gm.a [I refreshTextureFX@376
-     GETSTATIC 0x00 0x4f       GETSTATIC 0x02 0x12
-    field ref Minecraft.texturePackList LTexturePackList; -> net.minecraft.client.Minecraft.C Lgw; getSelectedTexturePack@13
-     GETFIELD 0x00 0x52        GETFIELD 0x02 0x16
-    field ref Minecraft.texturePackList LTexturePackList; -> net.minecraft.client.Minecraft.C Lgw; getSelectedTexturePack@26
-     GETFIELD 0x00 0x52        GETFIELD 0x02 0x16
-    field ref TexturePackList.selectedTexturePack LTexturePackBase; -> gw.a Lf; getSelectedTexturePack@29
-     GETFIELD 0x00 0x53        GETFIELD 0x02 0x1a
-    method ref TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> f.a (Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream@8
-     INVOKEVIRTUAL 0x00 0x54   INVOKEVIRTUAL 0x02 0x1e
+    method ref TextureUtils.getSelectedTexturePack ()LTexturePackBase; -> TextureUtils.getSelectedTexturePack ()Lf; setTileSize@12
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xfc
+    method ref TextureUtils.getSelectedTexturePack ()LTexturePackBase; -> TextureUtils.getSelectedTexturePack ()Lf; refreshTextureFX@85
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xfc
     method ref TextureUtils.getSelectedTexturePack ()LTexturePackBase; -> TextureUtils.getSelectedTexturePack ()Lf; getResourceAsStream@0
-     INVOKESTATIC 0x00 0x5b    INVOKESTATIC 0x02 0x20
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xfc
     method ref TextureUtils.getSelectedTexturePack ()LTexturePackBase; -> TextureUtils.getSelectedTexturePack ()Lf; getResourceAsBufferedImage@0
-     INVOKESTATIC 0x00 0x5b    INVOKESTATIC 0x02 0x20
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xfc
     method ref TextureUtils.getSelectedTexturePack ()LTexturePackBase; -> TextureUtils.getSelectedTexturePack ()Lf; getTileSize@0
-     INVOKESTATIC 0x00 0x5b    INVOKESTATIC 0x02 0x20
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xfc
     method ref TextureUtils.getSelectedTexturePack ()LTexturePackBase; -> TextureUtils.getSelectedTexturePack ()Lf; hasResource@0
-     INVOKESTATIC 0x00 0x5b    INVOKESTATIC 0x02 0x20
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xfc
+    method ref TextureUtils.getTexturePackName (LTexturePackBase;)Ljava/lang/String; -> TextureUtils.getTexturePackName (Lf;)Ljava/lang/String; setTileSize@15
+     INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0xfe
+    method ref TextureUtils.getTexturePackName (LTexturePackBase;)Ljava/lang/String; -> TextureUtils.getTexturePackName (Lf;)Ljava/lang/String; getResourceAsBufferedImage@199
+     INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0xfe
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setFontRenderer@9
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setFontRenderer@15
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setFontRenderer@23
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; refreshTextureFX@56
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; refreshTextureFX@73
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getSelectedTexturePack@0
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getSelectedTexturePack@10
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getSelectedTexturePack@23
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; setMinecraft@1
+     PUTSTATIC 0x00 0x0e       PUTSTATIC 0x02 0x00
+    field ref TextureUtils.minecraft LMinecraft; -> TextureUtils.minecraft Lnet/minecraft/client/Minecraft; getMinecraft@0
+     GETSTATIC 0x00 0x0e       GETSTATIC 0x02 0x00
+    field ref Minecraft.fontRenderer LFontRenderer; -> net.minecraft.client.Minecraft.p Lox; setFontRenderer@12
+     GETFIELD 0x00 0x0f        GETFIELD 0x02 0x06
+    field ref Minecraft.gameSettings LGameSettings; -> net.minecraft.client.Minecraft.y Lis; setFontRenderer@18
+     GETFIELD 0x00 0x10        GETFIELD 0x02 0x0a
+    field ref Minecraft.renderEngine LRenderEngine; -> net.minecraft.client.Minecraft.o Lho; setFontRenderer@26
+     GETFIELD 0x00 0x12        GETFIELD 0x02 0x0e
+    method ref FontRenderer.initialize (LGameSettings;Ljava/lang/String;LRenderEngine;)V -> ox.initialize (Lis;Ljava/lang/String;Lho;)V setFontRenderer@29
+     INVOKEVIRTUAL 0x00 0x13   INVOKEVIRTUAL 0x02 0x13
+    method ref Fire.<init> (I)V -> os.<init> (I)V refreshTextureFX@27
+     INVOKESPECIAL 0x00 0x18   INVOKESPECIAL 0x02 0x17
+    method ref Fire.<init> (I)V -> os.<init> (I)V refreshTextureFX@42
+     INVOKESPECIAL 0x00 0x18   INVOKESPECIAL 0x02 0x17
+    method ref Compass.<init> (LMinecraft;)V -> aj.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@59
+     INVOKESPECIAL 0x00 0x1b   INVOKESPECIAL 0x02 0x1b
+    method ref Watch.<init> (LMinecraft;)V -> ir.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@76
+     INVOKESPECIAL 0x00 0x1d   INVOKESPECIAL 0x02 0x1e
+    method ref StillLava.<init> ()V -> bo.<init> ()V refreshTextureFX@176
+     INVOKESPECIAL 0x00 0x26   INVOKESPECIAL 0x02 0x22
+    method ref FlowLava.<init> ()V -> gr.<init> ()V refreshTextureFX@190
+     INVOKESPECIAL 0x00 0x28   INVOKESPECIAL 0x02 0x25
+    method ref StillWater.<init> ()V -> ru.<init> ()V refreshTextureFX@269
+     INVOKESPECIAL 0x00 0x2e   INVOKESPECIAL 0x02 0x28
+    method ref FlowWater.<init> ()V -> lr.<init> ()V refreshTextureFX@283
+     INVOKESPECIAL 0x00 0x30   INVOKESPECIAL 0x02 0x2b
+    method ref Portal.<init> ()V -> gh.<init> ()V refreshTextureFX@340
+     INVOKESPECIAL 0x00 0x36   INVOKESPECIAL 0x02 0x2e
+    method ref TextureFX.onTick ()V -> ai.a ()V refreshTextureFX@378
+     INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x02 0x33
+    field ref ColorizerFoliage.colorBuffer [I -> hn.a [I refreshTextureFX@384
+     GETSTATIC 0x00 0x3c       GETSTATIC 0x02 0x37
+    field ref ColorizerGrass.colorBuffer [I -> gm.a [I refreshTextureFX@392
+     GETSTATIC 0x00 0x3f       GETSTATIC 0x02 0x3a
+    field ref Minecraft.texturePackList LTexturePackList; -> net.minecraft.client.Minecraft.C Lgw; getSelectedTexturePack@13
+     GETFIELD 0x00 0x42        GETFIELD 0x02 0x3e
+    field ref Minecraft.texturePackList LTexturePackList; -> net.minecraft.client.Minecraft.C Lgw; getSelectedTexturePack@26
+     GETFIELD 0x00 0x42        GETFIELD 0x02 0x3e
+    field ref TexturePackList.selectedTexturePack LTexturePackBase; -> gw.a Lf; getSelectedTexturePack@29
+     GETFIELD 0x00 0x43        GETFIELD 0x02 0x42
+    field ref TexturePackBase.texturePackFileName Ljava/lang/String; -> f.a Ljava/lang/String; getTexturePackName@10
+     GETFIELD 0x00 0x45        GETFIELD 0x02 0x46
+    method ref GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> ez.b (I)Ljava/nio/ByteBuffer; getByteBuffer@49
+     INVOKESTATIC 0x00 0x49    INVOKESTATIC 0x02 0x4b
+    method ref TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> f.a (Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream@8
+     INVOKEVIRTUAL 0x00 0x4e   INVOKEVIRTUAL 0x02 0x4d
     method ref TextureUtils.getResourceAsStream (LTexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> TextureUtils.getResourceAsStream (Lf;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream@4
-     INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x22
+     INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x4f
     method ref TextureUtils.getResourceAsStream (LTexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> TextureUtils.getResourceAsStream (Lf;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsBufferedImage@34
-     INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x22
+     INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x4f
     method ref TextureUtils.getResourceAsStream (LTexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> TextureUtils.getResourceAsStream (Lf;Ljava/lang/String;)Ljava/io/InputStream; hasResource@2
-     INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x22
+     INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x4f
     field ref TextureUtils.lastTexturePack LTexturePackBase; -> TextureUtils.lastTexturePack Lf; getResourceAsBufferedImage@5
-     GETSTATIC 0x00 0x5d       GETSTATIC 0x02 0x24
+     GETSTATIC 0x00 0x5d       GETSTATIC 0x02 0x51
     field ref TextureUtils.lastTexturePack LTexturePackBase; -> TextureUtils.lastTexturePack Lf; getResourceAsBufferedImage@124
-     GETSTATIC 0x00 0x5d       GETSTATIC 0x02 0x24
-    field ref TextureUtils.lastTexturePack LTexturePackBase; -> TextureUtils.lastTexturePack Lf; getResourceAsBufferedImage@275
-     PUTSTATIC 0x00 0x5d       PUTSTATIC 0x02 0x24
-    field ref TextureUtils.lastTexturePack LTexturePackBase; -> TextureUtils.lastTexturePack Lf; <clinit>@31
-     PUTSTATIC 0x00 0x5d       PUTSTATIC 0x02 0x24
+     GETSTATIC 0x00 0x5d       GETSTATIC 0x02 0x51
+    field ref TextureUtils.lastTexturePack LTexturePackBase; -> TextureUtils.lastTexturePack Lf; getResourceAsBufferedImage@258
+     PUTSTATIC 0x00 0x5d       PUTSTATIC 0x02 0x51
+    field ref TextureUtils.lastTexturePack LTexturePackBase; -> TextureUtils.lastTexturePack Lf; <clinit>@11
+     PUTSTATIC 0x00 0x5d       PUTSTATIC 0x02 0x51
     method ref TextureUtils.getResourceAsBufferedImage (LTexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> TextureUtils.getResourceAsBufferedImage (Lf;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getResourceAsBufferedImage@4
-     INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x02 0x26
+     INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x02 0x53
     method ref TextureUtils.getResourceAsBufferedImage (LTexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> TextureUtils.getResourceAsBufferedImage (Lf;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getTileSize@6
-     INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x02 0x26
+     INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x02 0x53
     method ref TextureUtils.getTileSize (LTexturePackBase;)I -> TextureUtils.getTileSize (Lf;)I getTileSize@3
-     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0x28
+     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0x55
     method ref TextureUtils.hasResource (LTexturePackBase;Ljava/lang/String;)Z -> TextureUtils.hasResource (Lf;Ljava/lang/String;)Z hasResource@4
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0x2a
-   string replace StillLava -> bo @2205
-   string replace StillWater -> ru @2384
-   string replace Portal -> gh @2484
-   string replace TextureFX -> ai @2766
-   string replace FlowWater -> lr @2405
-   string replace Watch -> ir @2577
-   string replace Fire -> os @2598
-   string replace Compass -> aj @2503
-   string replace FlowLava -> gr @2231
-   string replace TexturePackDefault -> me @3375
+     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0x57
+   string replace StillLava -> bo @1580
+   string replace StillWater -> ru @1719
+   string replace Portal -> gh @1877
+   string replace TextureFX -> ai @2028
+   string replace FlowWater -> lr @1740
+   string replace Watch -> ir @1380
+   string replace Fire -> os @1243
+   string replace Compass -> aj @1309
+   string replace FlowLava -> gr @1591
+   string replace TexturePackDefault -> me @1404
   adding CustomAnimation.class for HD Textures
    method onTick -> a
     method ref TextureFX.<init> (I)V -> ai.<init> (I)V <init>@2
-     INVOKESPECIAL 0x00 0x01   INVOKESPECIAL 0x00 0xb7
+     INVOKESPECIAL 0x00 0x01   INVOKESPECIAL 0x00 0xaa
     field ref CustomAnimation.tileNumber I -> CustomAnimation.b I <init>@22
-     PUTFIELD 0x00 0x05        PUTFIELD 0x00 0xba
-    field ref CustomAnimation.tileNumber I -> CustomAnimation.b I <init>@89
-     GETFIELD 0x00 0x05        GETFIELD 0x00 0xba
+     PUTFIELD 0x00 0x05        PUTFIELD 0x00 0xad
+    field ref CustomAnimation.tileNumber I -> CustomAnimation.b I <init>@161
+     GETFIELD 0x00 0x05        GETFIELD 0x00 0xad
     field ref CustomAnimation.tileImage I -> CustomAnimation.f I <init>@27
-     PUTFIELD 0x00 0x06        PUTFIELD 0x00 0xbd
+     PUTFIELD 0x00 0x06        PUTFIELD 0x00 0xb0
     field ref CustomAnimation.tileSize I -> CustomAnimation.e I <init>@32
-     PUTFIELD 0x00 0x07        PUTFIELD 0x00 0xbf
-    field ref CustomAnimation.imageData [B -> CustomAnimation.a [B <init>@78
-     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc1
-    field ref CustomAnimation.imageData [B -> CustomAnimation.a [B <init>@219
-     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc1
+     PUTFIELD 0x00 0x07        PUTFIELD 0x00 0xb2
+    field ref CustomAnimation.imageData [B -> CustomAnimation.a [B <init>@150
+     GETFIELD 0x00 0x15        GETFIELD 0x00 0xb4
+    field ref CustomAnimation.imageData [B -> CustomAnimation.a [B <init>@246
+     GETFIELD 0x00 0x15        GETFIELD 0x00 0xb4
     field ref CustomAnimation.imageData [B -> CustomAnimation.a [B a@49
-     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc1
+     GETFIELD 0x00 0x15        GETFIELD 0x00 0xb4
     field ref CustomAnimation.imageData [B -> CustomAnimation.a [B a@130
-     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc1
+     GETFIELD 0x00 0x15        GETFIELD 0x00 0xb4
     field ref CustomAnimation.imageData [B -> CustomAnimation.a [B a@158
-     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc1
+     GETFIELD 0x00 0x15        GETFIELD 0x00 0xb4
     field ref CustomAnimation.imageData [B -> CustomAnimation.a [B a@163
-     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc1
+     GETFIELD 0x00 0x15        GETFIELD 0x00 0xb4
     field ref CustomAnimation.imageData [B -> CustomAnimation.a [B a@191
-     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc1
-   string replace Minecraft -> net.minecraft.client.Minecraft @1177
+     GETFIELD 0x00 0x15        GETFIELD 0x00 0xb4
    string replace TextureFX -> ai @32
 
 Done!
