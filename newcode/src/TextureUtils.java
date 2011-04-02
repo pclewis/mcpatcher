@@ -58,7 +58,7 @@ public class TextureUtils {
                 while ((line = br.readLine()) != null) {
                     if (line.matches("^skin:.*")) {
                         line = line.substring(5);
-                        System.out.printf("\nchanging skin to %s\n", line);
+                        MCPatcherUtils.log("\nchanging skin to %s", line);
                         break;
                     }
                 }
@@ -75,22 +75,22 @@ public class TextureUtils {
             }
         }
         if (size == TileSize.int_size) {
-            System.out.printf("tile size %d unchanged\n", size);
+            MCPatcherUtils.log("tile size %d unchanged", size);
             return false;
         } else {
-            System.out.printf("setting tile size to %d (was %d)\n", size, TileSize.int_size);
+            MCPatcherUtils.log("setting tile size to %d (was %d)", size, TileSize.int_size);
             TileSize.setTileSize(size);
             return true;
         }
     }
 
     public static void setFontRenderer() {
-        System.out.println("setFontRenderer()");
+        MCPatcherUtils.log("setFontRenderer()");
         minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
     }
 
     public static void refreshTextureFX(java.util.List<TextureFX> textureList) {
-        System.out.println("refreshTextureFX()");
+        MCPatcherUtils.log("refreshTextureFX()");
 
         textureList.clear();
 
@@ -147,7 +147,7 @@ public class TextureUtils {
         final int have = buffer.capacity();
         final int needed = data.length;
         if (needed > have || have >= 4 * needed) {
-            System.out.printf("resizing gl buffer from 0x%x to 0x%x\n", have, needed);
+            MCPatcherUtils.log("resizing gl buffer from 0x%x to 0x%x", have, needed);
             buffer = GLAllocation.createDirectByteBuffer(needed);
         }
         buffer.put(data);
@@ -209,10 +209,10 @@ public class TextureUtils {
         }
 
         if (!cached && texturePack != lastTexturePack) {
-            System.out.printf("clearing texture cache (%d items)\n", cache.size());
+            MCPatcherUtils.log("clearing texture cache (%d items)", cache.size());
             cache.clear();
         }
-        System.out.printf("opened %s %dx%d from %s\n",
+        MCPatcherUtils.log("opened %s %dx%d from %s",
             resource, image.getWidth(), image.getHeight(),
             (cached ? "cache" : fromCustom ? "custom texture pack" : "default texture pack")
         );
@@ -264,7 +264,7 @@ public class TextureUtils {
 
     private static BufferedImage resizeImage(BufferedImage image, int width) {
         int height = image.getHeight() * width / image.getWidth();
-        System.out.printf("  resizing to %dx%d\n", width, height);
+        MCPatcherUtils.log("  resizing to %dx%d", width, height);
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = newImage.createGraphics();
         graphics2D.drawImage(image, 0, 0, width, height, null);

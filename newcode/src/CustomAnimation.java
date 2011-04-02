@@ -1,3 +1,5 @@
+import com.pclewis.mcpatcher.MCPatcherUtils;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -24,7 +26,6 @@ public class CustomAnimation extends TextureFX {
         this.minScrollDelay = minScrollDelay;
         this.maxScrollDelay = maxScrollDelay;
         this.isScrolling = (minScrollDelay >= 0);
-        System.out.printf("new CustomAnimation %s, buffer size=%d, tileNumber=%d\n", name, imageData.length, this.tileNumber);
 
         BufferedImage custom = null;
         String customSrc = "custom_" + name + ".png";
@@ -32,7 +33,7 @@ public class CustomAnimation extends TextureFX {
             custom = TextureUtils.getResourceAsBufferedImage("/" + customSrc);
         } catch (IOException ex) {
         }
-        System.out.printf("new CustomAnimation %s, src=%s, buffer size=0x%x, tile=%d\n",
+        MCPatcherUtils.log("new CustomAnimation %s, src=%s, buffer size=0x%x, tile=%d",
             name, (custom == null ? "terrain.png" : customSrc), imageData.length, this.tileNumber
         );
 

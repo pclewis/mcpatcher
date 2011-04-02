@@ -15,6 +15,7 @@ public class MCPatcherUtils {
     private static File propFile = null;
     private static Properties properties = new Properties();
     private static boolean needSaveProps = false;
+    private static boolean debug;
 
     private MCPatcherUtils() {
     }
@@ -42,9 +43,11 @@ public class MCPatcherUtils {
                     remove("HDTexture.enableAnimations");
                     remove("HDTexture.useCustomAnimations");
                     remove("HDTexture.glBufferSize");
+                    // remove("debug"); TODO: uncomment when out of beta
                 } else {
                     needSaveProps = true;
                 }
+                debug = getBoolean("debug", true); // TODO: change to false when out of beta
                 saveProperties();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -64,6 +67,18 @@ public class MCPatcherUtils {
             f = new File(f, s);
         }
         return f;
+    }
+
+    /**
+     * Write a debug message to minecraft standard output.
+     *
+     * @param format printf-style format string
+     * @param params printf-style parameters
+     */
+    public static void log(String format, Object... params) {
+        if (debug) {
+            System.out.printf(format + "\n", params);
+        }
     }
 
     private static String getPropertyKey(String mod, String name) {

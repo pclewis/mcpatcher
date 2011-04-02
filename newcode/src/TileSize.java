@@ -71,9 +71,9 @@ final public class TileSize {
         for (Field f : TileSize.class.getDeclaredFields()) {
             if (f.getName().contains("_")) {
                 try {
-                    System.out.printf("%s = %s\n", f.getName(), f.get(null));
+                    MCPatcherUtils.log("%s = %s", f.getName(), f.get(null));
                 } catch (Exception e) {
-                    System.out.printf("%s: %s\n", f.getName(), e.toString());
+                    MCPatcherUtils.log("%s: %s", f.getName(), e.toString());
                 }
             }
         }
