@@ -31,16 +31,6 @@ final public class TileSize {
     public static double double_compassCenterMax;
 
     static {
-        String s = MCPatcherUtils.getString("HDTexture", "glBufferSize", "");
-        try {
-            if (s.equals("")) {
-            } else if (s.startsWith("0x")) {
-                int_glBufferSize = Integer.parseInt(s.substring(2), 16);
-            } else {
-                int_glBufferSize = Integer.parseInt(s);
-            }
-        } catch (NumberFormatException e) {
-        }
         setTileSize(16);
     }
 

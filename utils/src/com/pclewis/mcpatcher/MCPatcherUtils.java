@@ -41,6 +41,7 @@ public class MCPatcherUtils {
                     properties.load(new FileInputStream(propFile));
                     remove("HDTexture.enableAnimations");
                     remove("HDTexture.useCustomAnimations");
+                    remove("HDTexture.glBufferSize");
                 } else {
                     needSaveProps = true;
                 }
