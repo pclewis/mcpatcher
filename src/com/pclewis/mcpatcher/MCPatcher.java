@@ -37,7 +37,7 @@ final public class MCPatcher {
      */
     public static final String VERSION_STRING =
         String.format("%d.%d.%d", MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION) +
-        (BETA_VERSION > 0 ? "-beta" + BETA_VERSION : "");
+            (BETA_VERSION > 0 ? "-beta" + BETA_VERSION : "");
 
     /**
      * Name of utility class always injected into output minecraft.jar

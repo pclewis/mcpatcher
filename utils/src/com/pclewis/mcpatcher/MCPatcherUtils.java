@@ -112,8 +112,8 @@ public class MCPatcherUtils {
     /**
      * Gets a value from mcpatcher.properties.
      *
-     * @param mod name of mod
-     * @param name property name
+     * @param mod          name of mod
+     * @param name         property name
      * @param defaultValue default value if not found in .properties file
      * @return String value
      */
@@ -133,7 +133,7 @@ public class MCPatcherUtils {
     /**
      * Gets a value from mcpatcher.properties.
      *
-     * @param name property name
+     * @param name         property name
      * @param defaultValue default value if not found in .properties file
      * @return String value
      */
@@ -144,8 +144,8 @@ public class MCPatcherUtils {
     /**
      * Gets a value from mcpatcher.properties.
      *
-     * @param mod name of mod
-     * @param name property name
+     * @param mod          name of mod
+     * @param name         property name
      * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
@@ -162,7 +162,7 @@ public class MCPatcherUtils {
     /**
      * Gets a value from mcpatcher.properties.
      *
-     * @param name property name
+     * @param name         property name
      * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
@@ -173,8 +173,8 @@ public class MCPatcherUtils {
     /**
      * Gets a value from mcpatcher.properties.
      *
-     * @param mod name of mod
-     * @param name property name
+     * @param mod          name of mod
+     * @param name         property name
      * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
@@ -192,7 +192,7 @@ public class MCPatcherUtils {
     /**
      * Gets a value from mcpatcher.properties.
      *
-     * @param name property name
+     * @param name         property name
      * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
@@ -203,8 +203,8 @@ public class MCPatcherUtils {
     /**
      * Sets a value in mcpatcher.properties.
      *
-     * @param mod name of mod
-     * @param name property name
+     * @param mod   name of mod
+     * @param name  property name
      * @param value property value (must support toString())
      */
     public static void set(String mod, String name, Object value) {
@@ -219,7 +219,7 @@ public class MCPatcherUtils {
     /**
      * Remove a value from mcpatcher.properties.
      *
-     * @param mod name of mod
+     * @param mod  name of mod
      * @param name property name
      */
     public static void remove(String mod, String name) {
@@ -240,7 +240,7 @@ public class MCPatcherUtils {
      * @return true if successful
      */
     public static boolean saveProperties() {
-        if (! needSaveProps) {
+        if (!needSaveProps) {
             return true;
         }
         boolean saved = false;

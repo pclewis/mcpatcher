@@ -222,7 +222,7 @@ public abstract class Mod {
      * check A -> uncheck B<br>
      * check B -> uncheck A<br>
      * B unavailable -> no effect<br>
-
+     *
      * @param name name of conflicting mod
      */
     final protected void addConflict(String name) {

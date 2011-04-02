@@ -180,7 +180,7 @@ public class HDTextureMod extends Mod {
                         ALOAD_0,
                         GETFIELD, BinaryRegex.any(2),
                         BytecodeMatcher.anyILOAD,
-                        reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("RenderEngine", "setupTexture",  "(Ljava/awt/image/BufferedImage;I)V"))),
+                        reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("RenderEngine", "setupTexture", "(Ljava/awt/image/BufferedImage;I)V"))),
                         GOTO, BinaryRegex.any(2),
                         ALOAD_0,
                         ALOAD_0,

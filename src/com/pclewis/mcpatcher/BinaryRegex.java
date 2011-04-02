@@ -136,8 +136,8 @@ public class BinaryRegex {
      * Repeats a subexpression between min and max times: (...){m,n}
      *
      * @param regex subexpression
-     * @param min minimum number of repetitions
-     * @param max maximum number of repetitions
+     * @param min   minimum number of repetitions
+     * @param max   maximum number of repetitions
      * @return String regex
      */
     public static String repeat(String regex, int min, int max) {

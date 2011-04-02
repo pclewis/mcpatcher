@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher;
 
 import javassist.bytecode.*;
+
 import static javassist.bytecode.Opcode.*;
 
 /**
