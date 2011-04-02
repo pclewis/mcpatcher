@@ -173,21 +173,19 @@ public class HDTextureMod extends Mod {
                         ALOAD_2,
                         ALOAD_1,
                         reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;"))),
-                        ASTORE, BinaryRegex.capture(BinaryRegex.any()),
-                        ALOAD, BinaryRegex.backReference(1),
+                        BytecodeMatcher.anyASTORE,
+                        BytecodeMatcher.anyALOAD,
                         IFNONNULL, BinaryRegex.any(2),
                         ALOAD_0,
                         ALOAD_0,
                         GETFIELD, BinaryRegex.any(2),
-                        BinaryRegex.capture(BinaryRegex.any()),
+                        BytecodeMatcher.anyILOAD,
                         reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("RenderEngine", "setupTexture",  "(Ljava/awt/image/BufferedImage;I)V"))),
                         GOTO, BinaryRegex.any(2),
                         ALOAD_0,
                         ALOAD_0,
-                        ALOAD, BinaryRegex.backReference(1),
-                        reference(methodInfo, INVOKESPECIAL, map(new MethodRef("RenderEngine", "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;")))/*,
-                        ILOAD_3,
-                        reference(methodInfo, INVOKEVIRTUAL, map(new MethodRef("RenderEngine", "setupTexture",  "(Ljava/awt/image/BufferedImage;I)V")))*/
+                        BytecodeMatcher.anyALOAD,
+                        reference(methodInfo, INVOKESPECIAL, map(new MethodRef("RenderEngine", "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;")))
                     );
                 }
 
