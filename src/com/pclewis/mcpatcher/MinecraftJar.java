@@ -21,7 +21,7 @@ class MinecraftJar {
     private String md5;
     private JarFile origJar;
     private JarOutputStream outputJar;
-    private int heapSize = 1024;
+    private int heapSize = MCPatcherUtils.getInt("heapSize", 1024);
 
     private static String origMD5;
 
