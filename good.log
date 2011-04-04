@@ -276,9 +276,27 @@ Patching...
     * 16 -> int_size a@350
      BIPUSH 0x10               GETSTATIC 0x00 0x4d
      IMUL                      IMUL
+ applying LDC_W patch to de.class for mod __Base
+    LDC_W 0x00 -> LDC valueOf@0
+     LDC_W 0x00 0x04           NOP
+                               LDC 0x04
+ applying LDC_W patch to em.class for mod __Base
+    LDC_W 0x00 -> LDC a@11
+     LDC_W 0x00 0x05           NOP
+                               LDC 0x05
+ applying LDC_W patch to ev.class for mod __Base
+    LDC_W 0x00 -> LDC <init>@5
+     LDC_W 0x00 0x02           NOP
+                               LDC 0x02
  applying GetResource patch to ev.class for mod HD Textures
- applying GLAllocation patch to ez.class for mod HD Textures
- applying TexturePackBase patch to f.class for mod HD Textures
+    ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@6
+     LDC 0x02                  NOP
+     LDC 0x01                  NOP
+     INVOKEVIRTUAL 0x00 0x14   NOP
+     INVOKESTATIC 0x00 0x15    NOP
+                               NOP
+                               LDC 0x01
+                               INVOKESTATIC 0x00 0x4b
  applying Portal patch to gh.class for mod HD Textures
     16.0F -> float_size <init>@98
      LDC 0x06                  GETSTATIC 0x00 0x50
@@ -426,6 +444,14 @@ Patching...
                                INVOKEVIRTUAL 0x00 0xce
                                INVOKESTATIC 0x00 0xd1
                                ICONST_1
+ applying LDC_W patch to hj.class for mod __Base
+    LDC_W 0x00 -> LDC <clinit>@120
+     LDC_W 0x00 0x35           NOP
+                               LDC 0x35
+ applying LDC_W patch to hm.class for mod __Base
+    LDC_W 0x00 -> LDC valueOf@0
+     LDC_W 0x00 0x04           NOP
+                               LDC 0x04
  applying GetResource patch to hn.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <clinit>@7
      LDC 0x05                  NOP
@@ -697,7 +723,6 @@ Patching...
                                NOP
                                LDC 0x03
                                INVOKESTATIC 0x00 0xa9
- applying GameSettings patch to is.class for mod HD Textures
  applying FlowWater patch to lr.class for mod HD Textures
     array size 256 -> int_numPixels <init>@13
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x47
@@ -765,7 +790,6 @@ Patching...
     * 16 -> int_size a@290
      BIPUSH 0x10               GETSTATIC 0x00 0x4a
      IMUL                      IMUL
- applying TexturePackDefault patch to me.class for mod HD Textures
  applying GetResource patch to me.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@22
      LDC 0x0a                  NOP
@@ -1177,7 +1201,7 @@ Patching...
                                NOP
                                NOP
                                NOP
-  adding com/pclewis/mcpatcher/MCPatcherUtils.class
+  adding com/pclewis/mcpatcher/MCPatcherUtils.class for __Base
   adding TileSize.class for HD Textures
   adding TextureUtils.class for HD Textures
    method signature ()LTexturePackBase; -> ()Lf;

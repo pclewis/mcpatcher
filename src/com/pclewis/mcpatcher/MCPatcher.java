@@ -347,8 +347,8 @@ final public class MCPatcher {
 
     private static void printModList() {
         Logger.log(Logger.LOG_MAIN);
-        Logger.log(Logger.LOG_MAIN, "%d available mods:", modList.getAll().size());
-        for (Mod mod : modList.getAll()) {
+        Logger.log(Logger.LOG_MAIN, "%d available mods:", modList.getVisible().size());
+        for (Mod mod : modList.getVisible()) {
             Logger.log(Logger.LOG_MAIN, "[%3s] %s %s - %s", (mod.okToApply() ? "YES" : "NO"), mod.getName(), mod.getVersion(), mod.getDescription());
             for (ClassMod cm : mod.classMods) {
                 if (cm.okToApply()) {
@@ -374,7 +374,7 @@ final public class MCPatcher {
             out.println("No minecraft jar selected.");
             out.println("Click Browse to choose the input file.");
         } else {
-            for (Mod mod : modList.getAll()) {
+            for (Mod mod : modList.getVisible()) {
                 out.printf("%s\n", mod.getName());
                 mod.getClassMap().print(out, "    ");
                 out.println();
@@ -462,11 +462,12 @@ final public class MCPatcher {
                     }
                 }
 
-                patched = applyPatches(name, outputJar, classFile, classMods);
+                patched = applyPatches(name, classFile, classMods);
                 if (patched) {
                     outputJar.putNextEntry(new ZipEntry(name));
                     classFile.compact();
                     classFile.write(new DataOutputStream(outputJar));
+                    outputJar.closeEntry();
                 }
             }
 
@@ -480,15 +481,6 @@ final public class MCPatcher {
 
             Util.close(inputStream);
         }
-
-        Logger.log(Logger.LOG_CLASS, "adding %s.class", UTILS_CLASS);
-        InputStream inputStream = MCPatcher.class.getResourceAsStream("/" + UTILS_CLASS + ".class");
-        if (inputStream == null) {
-            throw new IOException("could not open /" + UTILS_CLASS + ".class");
-        }
-        outputJar.putNextEntry(new ZipEntry(UTILS_CLASS + ".class"));
-        Util.copyStream(inputStream, outputJar);
-        Util.close(inputStream);
 
         for (Mod mod : modList.getSelected()) {
             for (String name : mod.filesToAdd) {
@@ -522,14 +514,16 @@ final public class MCPatcher {
         return true;
     }
 
-    private static boolean applyPatches(String filename, JarOutputStream outputJar, ClassFile classFile, ArrayList<ClassMod> classMods) throws Exception {
+    private static boolean applyPatches(String filename, ClassFile classFile, ArrayList<ClassMod> classMods) throws Exception {
         boolean patched = false;
         for (ClassMod cm : classMods) {
             checkInterrupt();
             if (cm.targetClasses.contains(classFile.getName())) {
                 cm.addToConstPool = true;
                 cm.prePatch(filename, classFile);
-                Logger.log(Logger.LOG_MOD, "applying %s patch to %s for mod %s", cm.getDeobfClass(), filename, cm.mod.getName());
+                if (cm.patches.size() > 0) {
+                    Logger.log(Logger.LOG_MOD, "applying %s patch to %s for mod %s", cm.getDeobfClass(), filename, cm.mod.getName());
+                }
                 for (ClassPatch cp : cm.patches) {
                     if (cp.apply(classFile)) {
                         patched = true;

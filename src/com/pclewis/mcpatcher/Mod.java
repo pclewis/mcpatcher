@@ -67,6 +67,7 @@ public abstract class Mod {
     private HashMap<String, String> params = new HashMap<String, String>();
     private ArrayList<String> errors = new ArrayList<String>();
     private boolean enabled = false;
+    boolean internal = false;
     ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
 
     /**

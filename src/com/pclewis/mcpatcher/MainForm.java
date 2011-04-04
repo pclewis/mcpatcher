@@ -514,7 +514,7 @@ class MainForm {
     public void setModList(final ModList modList) {
         modTable.setModel(new TableModel() {
             public int getRowCount() {
-                return modList == null ? 0 : modList.size();
+                return modList == null ? 0 : modList.getVisible().size();
             }
 
             public int getColumnCount() {
@@ -534,7 +534,7 @@ class MainForm {
             }
 
             public Object getValueAt(int rowIndex, int columnIndex) {
-                return (modList != null && rowIndex >= 0 && rowIndex < modList.size()) ? modList.get(rowIndex) : null;
+                return (modList != null && rowIndex >= 0 && rowIndex < modList.getVisible().size()) ? modList.getVisible().get(rowIndex) : null;
             }
 
             public void setValueAt(Object aValue, int rowIndex, int columnIndex) {

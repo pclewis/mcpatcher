@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher;
 
+import com.pclewis.mcpatcher.mod.BaseMod;
 import com.pclewis.mcpatcher.mod.HDFontMod;
 import com.pclewis.mcpatcher.mod.HDTextureMod;
 
@@ -16,10 +17,16 @@ class ModList {
     private static final String IGNORE_CLASS = "newcode";
 
     private Vector<Mod> modsByIndex = new Vector<Mod>();
+    private Vector<Mod> visibleMods = new Vector<Mod>();
     private HashMap<String, Mod> modsByName = new HashMap<String, Mod>();
     private boolean applied = false;
 
+    Mod baseMod;
+
     public void loadBuiltInMods() {
+        baseMod = new BaseMod();
+        baseMod.internal = true;
+        add(baseMod);
         add(new HDTextureMod());
         add(new HDFontMod());
     }
@@ -76,6 +83,10 @@ class ModList {
         return modsByIndex;
     }
 
+    public Vector<Mod> getVisible() {
+        return visibleMods;
+    }
+
     public ArrayList<Mod> getSelected() {
         ArrayList<Mod> list = new ArrayList<Mod>();
         for (Mod mod : modsByIndex) {
@@ -125,6 +136,9 @@ class ModList {
         mod.setRefs();
         modsByName.put(name, mod);
         modsByIndex.add(mod);
+        if (!mod.internal) {
+            visibleMods.add(mod);
+        }
     }
 
     private class ModDependencyException extends Exception {
