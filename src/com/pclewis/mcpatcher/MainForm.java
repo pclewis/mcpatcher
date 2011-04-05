@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,6 +116,11 @@ class MainForm {
                 FileDialog fd = new FileDialog(frame, origLabel.getText(), FileDialog.LOAD);
                 fd.setDirectory(MCPatcherUtils.getMinecraftPath("bin").getPath());
                 fd.setFile("minecraft.jar");
+                fd.setFilenameFilter(new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return name.toLowerCase().endsWith(".jar");
+                    }
+                });
                 fd.setVisible(true);
 
                 if (fd.getFile() == null) {
@@ -137,6 +143,11 @@ class MainForm {
                 FileDialog fd = new FileDialog(frame, outputLabel.getText(), FileDialog.SAVE);
                 fd.setDirectory(MCPatcherUtils.getMinecraftPath("bin").getPath());
                 fd.setFile("minecraft.jar");
+                fd.setFilenameFilter(new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return name.toLowerCase().endsWith(".jar");
+                    }
+                });
                 fd.setVisible(true);
 
                 if (MCPatcher.minecraft == null) {
@@ -369,6 +380,7 @@ class MainForm {
         JOptionPane.showMessageDialog(frame,
             "There was an error opening minecraft.jar. This may be because:\n" +
                 " - You selected the launcher jar and not the main minecraft.jar in the bin folder.\n" +
+                " - You selected a texture pack and not minecraft.jar.\n" +
                 " - The file has already been patched.\n" +
                 " - There was an update that this patcher cannot handle.\n" +
                 " - There is another, conflicting mod applied.\n" +
