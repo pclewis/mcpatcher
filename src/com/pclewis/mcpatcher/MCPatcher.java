@@ -188,33 +188,6 @@ final public class MCPatcher {
         return true;
     }
 
-    static boolean patch() {
-        modList.setApplied(true);
-        boolean patchOk = false;
-        try {
-            Logger.log(Logger.LOG_MAIN);
-            Logger.log(Logger.LOG_MAIN, "Patching...");
-
-            applyMods();
-            minecraft.checkOutput();
-            minecraft.closeStreams();
-
-            Logger.log(Logger.LOG_MAIN);
-            Logger.log(Logger.LOG_MAIN, "Done!");
-            patchOk = true;
-        } catch (Exception e) {
-            Logger.log(e);
-            Logger.log(Logger.LOG_MAIN);
-            Logger.log(Logger.LOG_MAIN, "Restoring original minecraft.jar due to previous error");
-            try {
-                minecraft.restoreBackup();
-            } catch (IOException e1) {
-                Logger.log(e1);
-            }
-        }
-        return patchOk;
-    }
-
     static void getAllMods() {
         modList = new ModList();
         if (!ignoreBuiltInMods) {
@@ -413,6 +386,37 @@ final public class MCPatcher {
                 out.println();
             }
         }
+    }
+
+    static boolean patch() {
+        modList.setApplied(true);
+        boolean patchOk = false;
+        try {
+            Logger.log(Logger.LOG_MAIN);
+            Logger.log(Logger.LOG_MAIN, "Patching...");
+
+            for (Mod mod : modList.getAll()) {
+                mod.resetCounts();
+            }
+
+            applyMods();
+            minecraft.checkOutput();
+            minecraft.closeStreams();
+
+            Logger.log(Logger.LOG_MAIN);
+            Logger.log(Logger.LOG_MAIN, "Done!");
+            patchOk = true;
+        } catch (Exception e) {
+            Logger.log(e);
+            Logger.log(Logger.LOG_MAIN);
+            Logger.log(Logger.LOG_MAIN, "Restoring original minecraft.jar due to previous error");
+            try {
+                minecraft.restoreBackup();
+            } catch (IOException e1) {
+                Logger.log(e1);
+            }
+        }
+        return patchOk;
     }
 
     private static void applyMods() throws Exception {

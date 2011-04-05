@@ -151,6 +151,14 @@ public abstract class Mod {
         }
     }
 
+    void resetCounts() {
+        for (ClassMod classMod : getClassMods()) {
+            for (ClassPatch classPatch : classMod.patches) {
+                classPatch.numMatches.clear();
+            }
+        }
+    }
+
     ArrayList<ClassMod> getClassMods() {
         return classMods;
     }
