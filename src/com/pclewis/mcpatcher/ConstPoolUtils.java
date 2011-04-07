@@ -202,6 +202,8 @@ class ConstPoolUtils {
 
             case GETFIELD:
             case GETSTATIC:
+            case PUTFIELD:
+            case PUTSTATIC:
                 if (!(value instanceof FieldRef)) {
                     throw new AssertionError(Mnemonic.OPCODE[opcode] + " requires a FieldRef object");
                 }
