@@ -22,10 +22,13 @@ class ModList {
 
     Mod baseMod;
 
-    public void loadBuiltInMods() {
+    public ModList() {
         baseMod = new BaseMod();
         baseMod.internal = true;
         add(baseMod);
+    }
+
+    public void loadBuiltInMods() {
         add(new HDTextureMod());
         add(new HDFontMod());
     }
