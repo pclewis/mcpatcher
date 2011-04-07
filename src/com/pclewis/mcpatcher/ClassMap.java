@@ -18,6 +18,14 @@ import static javassist.bytecode.Opcode.*;
  * names in minecraft.jar.  Each Mod has its own ClassMap that is maintained by MCPatcher.
  */
 public class ClassMap {
+    /**
+     * Alias for default package.  Allows mods to refer to Minecraft classes without being
+     * in the default package themselves.  Either <tt>RenderEngine</tt> or
+     * <tt>net.minecraft.src.RenderEngine</tt> will map to the same obfuscated name at
+     * runtime.
+     */
+    public static final String DEFAULT_MINECRAFT_PACKAGE = "net.minecraft.src";
+
     private HashMap<String, ClassMapEntry> classMap = new HashMap<String, ClassMapEntry>();
 
     ClassMap() {
@@ -59,6 +67,9 @@ public class ClassMap {
         if (e == null) {
             e = new ClassMapEntry(obfName);
             classMap.put(descName, e);
+            if (!descName.contains(".")) {
+                classMap.put(DEFAULT_MINECRAFT_PACKAGE + "." + descName, e);
+            }
         }
     }
 
@@ -159,6 +170,9 @@ public class ClassMap {
 
     void print() {
         for (Entry<String, ClassMapEntry> e : classMap.entrySet()) {
+            if (e.getKey().startsWith(DEFAULT_MINECRAFT_PACKAGE)) {
+                continue;
+            }
             Logger.log(Logger.LOG_CLASS, "class %s -> %s", e.getKey(), e.getValue().obfName);
             for (Entry<String, String> e1 : e.getValue().methodMap.entrySet()) {
                 Logger.log(Logger.LOG_METHOD, "method %s -> %s", e1.getKey(), e1.getValue());
@@ -171,6 +185,9 @@ public class ClassMap {
 
     void print(PrintStream out, String indent) {
         for (Entry<String, ClassMapEntry> e : classMap.entrySet()) {
+            if (e.getKey().startsWith(DEFAULT_MINECRAFT_PACKAGE)) {
+                continue;
+            }
             out.printf("%1$sclass %2$s -> %3$s\n", indent, e.getKey(), e.getValue().obfName);
             for (Entry<String, String> e1 : e.getValue().methodMap.entrySet()) {
                 out.printf("%1$s%1$smethod %2$s -> %3$s\n", indent, e1.getKey(), e1.getValue());
