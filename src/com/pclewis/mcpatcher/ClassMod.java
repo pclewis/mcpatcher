@@ -63,10 +63,6 @@ abstract public class ClassMod implements PatchComponent {
         this.mod = mod;
     }
 
-    final public ClassMap getClassMap() {
-        return mod.getClassMap();
-    }
-
     boolean matchClassFile(String filename, ClassFile classFile) {
         addToConstPool = false;
         if (!considerFile(filename)) {
@@ -126,7 +122,10 @@ abstract public class ClassMod implements PatchComponent {
     }
 
     /**
-     * @return deobfuscated name of target class, determined from the name of the ClassMod itself
+     * Get deobfuscated name of target class.  The default implementation simply strips "Mod" from the end
+     * of the ClassMod subclass name itself.
+     *
+     * @return deobfuscated class name
      */
     public String getDeobfClass() {
         return getClass().getSimpleName().replaceFirst("Mod$", "");
@@ -233,9 +232,6 @@ abstract public class ClassMod implements PatchComponent {
 
     // PatchComponent methods
 
-    /**
-     * @see BinaryRegex#build(Object...)
-     */
     final public String buildExpression(Object... objects) {
         return BinaryRegex.build(objects);
     }
@@ -260,13 +256,6 @@ abstract public class ClassMod implements PatchComponent {
         return baos.toByteArray();
     }
 
-    /**
-     * @see ClassMap#map(JavaRef)
-     */
-    final public JavaRef map(JavaRef ref) {
-        return mod.getClassMap().map(ref);
-    }
-
     final public Object push(MethodInfo methodInfo, Object value) {
         return ConstPoolUtils.push(methodInfo.getConstPool(), value, addToConstPool);
     }
@@ -275,30 +264,26 @@ abstract public class ClassMod implements PatchComponent {
         return ConstPoolUtils.reference(methodInfo.getConstPool(), opcode, map(ref), addToConstPool);
     }
 
-    /**
-     * @see Mod#setModParam(String, Object)
-     */
+    final public ClassMap getClassMap() {
+        return mod.getClassMap();
+    }
+
+    final public JavaRef map(JavaRef ref) {
+        return mod.getClassMap().map(ref);
+    }
+
     final public void setModParam(String name, Object value) {
         mod.setModParam(name, value);
     }
 
-    /**
-     * @see Mod#getModParam(String)
-     */
     final public String getModParam(String name) {
         return mod.getModParam(name);
     }
 
-    /**
-     * @see Mod#getModParamInt(String)
-     */
     final public int getModParamInt(String name) {
         return mod.getModParamInt(name);
     }
 
-    /**
-     * @see Mod#getModParamBool(String)
-     */
     final public boolean getModParamBool(String name) {
         return mod.getModParamBool(name);
     }
