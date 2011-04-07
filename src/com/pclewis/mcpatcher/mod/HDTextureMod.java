@@ -48,7 +48,7 @@ public class HDTextureMod extends Mod {
 
     @Override
     public InputStream openFile(String name) throws IOException {
-        return MCPatcher.class.getResourceAsStream("/newcode/" + name);
+        return getClass().getResourceAsStream("/newcode/" + name);
     }
 
     private static class RenderEngineMod extends ClassMod {
@@ -88,7 +88,7 @@ public class HDTextureMod extends Mod {
                         BinaryRegex.capture(BinaryRegex.subset(new byte[]{IREM, IDIV}, true)),
                         push(methodInfo, 16),
                         IMUL,
-                        BinaryRegex.capture(BinaryRegex.repeat(BinaryRegex.any(), 1, 3)),
+                        BinaryRegex.capture(BinaryRegex.any(1, 3)),
                         push(methodInfo, 16),
                         IMUL
                     );
@@ -209,7 +209,7 @@ public class HDTextureMod extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    imageData = (FieldRef) new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;");
+                    imageData = new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;");
                     return buildExpression(
                         // imageData.clear();
                         ALOAD_0,
@@ -220,7 +220,7 @@ public class HDTextureMod extends Mod {
                         // imageData.put($1);
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, imageData),
-                        BinaryRegex.capture(BinaryRegex.repeat(BinaryRegex.any(), 2, 5)),
+                        BinaryRegex.capture(BinaryRegex.any(2, 5)),
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "put", "([B)Ljava/nio/ByteBuffer;")),
                         POP,
 
@@ -342,7 +342,7 @@ public class HDTextureMod extends Mod {
                 ALOAD_0,
                 SIPUSH, 0x01, 0x00, // 256
                 NEWARRAY, T_INT,
-                PUTFIELD, BinaryRegex.repeat(BinaryRegex.any(), 2),
+                PUTFIELD, BinaryRegex.any(2),
                 ALOAD_0
             ));
 
@@ -366,11 +366,11 @@ public class HDTextureMod extends Mod {
             classSignatures.add(new FixedBytecodeSignature(
                 SIPUSH, 0x01, 0x40, // 320
                 NEWARRAY, T_FLOAT,
-                PUTFIELD, BinaryRegex.repeat(BinaryRegex.any(), 2),
+                PUTFIELD, BinaryRegex.any(2),
                 ALOAD_0,
                 SIPUSH, 0x01, 0x40, // 320
                 NEWARRAY, T_FLOAT,
-                PUTFIELD, BinaryRegex.repeat(BinaryRegex.any(), 2),
+                PUTFIELD, BinaryRegex.any(2),
                 RETURN
             ));
 
@@ -400,8 +400,8 @@ public class HDTextureMod extends Mod {
 
             classSignatures.add(new FixedBytecodeSignature(
                 ALOAD_0,
-                GETSTATIC, BinaryRegex.repeat(BinaryRegex.any(), 2),
-                GETFIELD, BinaryRegex.repeat(BinaryRegex.any(), 2),
+                GETSTATIC, BinaryRegex.any(2),
+                GETFIELD, BinaryRegex.any(2),
                 (flow ? new byte[]{ICONST_1, IADD} : new byte[0]),
                 INVOKESPECIAL
             ));
@@ -554,7 +554,7 @@ public class HDTextureMod extends Mod {
                     return BinaryRegex.capture(buildExpression(
                         ALOAD_0,
                         reference(methodInfo, NEW, new ClassRef("TexturePackList")),
-                        BinaryRegex.repeat(BinaryRegex.any(), 0, 18),
+                        BinaryRegex.any(0, 18),
                         PUTFIELD, BinaryRegex.any(), BinaryRegex.any()
                     ));
                 }
@@ -580,8 +580,8 @@ public class HDTextureMod extends Mod {
                     return BinaryRegex.capture(buildExpression(
                         ALOAD_0,
                         reference(methodInfo, NEW, new ClassRef("RenderEngine")),
-                        BinaryRegex.repeat(BinaryRegex.any(), 0, 18),
-                        PUTFIELD, BinaryRegex.capture(BinaryRegex.repeat(BinaryRegex.any(), 2))
+                        BinaryRegex.any(0, 18),
+                        PUTFIELD, BinaryRegex.capture(BinaryRegex.any(2))
                     ));
                 }
 
@@ -600,7 +600,7 @@ public class HDTextureMod extends Mod {
             });
 
             patches.add(new BytecodePatch() {
-                private JavaRef registerTextureFX = null;
+                private JavaRef registerTextureFX = new MethodRef("RenderEngine", "registerTextureFX", "(LTextureFX;)V");
 
                 @Override
                 public String getDescription() {
@@ -609,14 +609,10 @@ public class HDTextureMod extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (registerTextureFX == null) {
-                        registerTextureFX = new MethodRef("RenderEngine", "registerTextureFX", "(LTextureFX;)V");
-                    }
-
                     return buildExpression(
                         ALOAD_0,
                         GETFIELD, // RenderEngine
-                        BinaryRegex.repeat(BinaryRegex.any(), 0, 12),
+                        BinaryRegex.any(0, 12),
                         reference(methodInfo, INVOKEVIRTUAL, registerTextureFX)
                     );
                 }
@@ -676,7 +672,7 @@ public class HDTextureMod extends Mod {
                         BinaryRegex.capture(buildExpression(
                             ALOAD_0,
                             reference(methodInfo, GETFIELD, new FieldRef("TexturePackList", "selectedTexturePack", "LTexturePackBase;")),
-                            INVOKEVIRTUAL, BinaryRegex.repeat(BinaryRegex.any(), 2)
+                            INVOKEVIRTUAL, BinaryRegex.any(2)
                         )),
                         BinaryRegex.capture(buildExpression(
                             ICONST_1,
