@@ -22,7 +22,9 @@ public class BinaryRegex {
     public static String build(Object... objects) {
         StringBuilder sb = new StringBuilder();
         for (Object o : objects) {
-            if (o instanceof Byte) {
+            if (o == null) {
+                return null;
+            } else if (o instanceof Byte) {
                 sb.append(literal((Byte) o));
             } else if (o instanceof byte[]) {
                 sb.append(literal((byte[]) o));
@@ -44,7 +46,7 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String literal(byte[] b) {
-        return binToStr(b);
+        return b == null ? null : binToStr(b);
     }
 
     /**
@@ -88,7 +90,7 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String optional(String regex) {
-        return String.format("(?:%s)?", regex);
+        return regex == null ? "" : String.format("(?:%s)?", regex);
     }
 
     /**
@@ -107,7 +109,7 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String any(int count) {
-        return repeat(any(), count);
+        return repeat(BYTE_REGEX, count);
     }
 
     /**
@@ -118,7 +120,7 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String any(int min, int max) {
-        return repeat(any(), min, max);
+        return repeat(BYTE_REGEX, min, max);
     }
 
     /**
@@ -129,7 +131,13 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String repeat(String regex, int count) {
-        return String.format("(?:%s){%d}", regex, count);
+        if (regex != null) {
+            return String.format("(?:%s){%d}", regex, count);
+        } else if (count > 0) {
+            return null;
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -141,7 +149,13 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String repeat(String regex, int min, int max) {
-        return String.format("(?:%s){%d,%d}", regex, min, max);
+        if (regex != null) {
+            return String.format("(?:%s){%d,%d}", regex, min, max);
+        } else if (min > 0) {
+            return null;
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -157,8 +171,10 @@ public class BinaryRegex {
         for (i = 0; i < allowed.length; i++) {
             allowed[i] = !positive;
         }
-        for (i = 0; i < byteList.length; i++) {
-            allowed[(int) byteList[i] & 0xff] = positive;
+        if (byteList != null) {
+            for (i = 0; i < byteList.length; i++) {
+                allowed[(int) byteList[i] & 0xff] = positive;
+            }
         }
 
         StringBuilder sb = new StringBuilder();
@@ -190,7 +206,9 @@ public class BinaryRegex {
         sb.append("(?:");
         boolean first = true;
         for (String regex : regexes) {
-            if (first) {
+            if (regex == null) {
+                continue;
+            } else if (first) {
                 first = false;
             } else {
                 sb.append("|");
@@ -198,7 +216,7 @@ public class BinaryRegex {
             sb.append(regex);
         }
         sb.append(")");
-        return sb.toString();
+        return first ? null : sb.toString();
     }
 
     /**
@@ -208,7 +226,7 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String capture(String regex) {
-        return "(" + regex + ")";
+        return regex == null ? null : "(" + regex + ")";
     }
 
     /**
@@ -229,7 +247,13 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String lookAhead(String regex, boolean positive) {
-        return String.format("(?%s%s)", (positive ? "=" : "!"), regex);
+        if (regex != null) {
+            return String.format("(?%s%s)", (positive ? "=" : "!"), regex);
+        } else if (positive) {
+            return null;
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -240,7 +264,13 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String lookBehind(String regex, boolean positive) {
-        return String.format("(?<%s%s)", (positive ? "=" : "!"), regex);
+        if (regex != null) {
+            return String.format("(?<%s%s)", (positive ? "=" : "!"), regex);
+        } else if (positive) {
+            return null;
+        } else {
+            return "";
+        }
     }
 
     static String binToStr(final byte[] b) {
