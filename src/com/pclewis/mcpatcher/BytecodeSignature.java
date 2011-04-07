@@ -41,7 +41,7 @@ abstract public class BytecodeSignature extends ClassSignature {
      * Gets descriptive name assigned to the signature.
      *
      * @return String name
-     * @see #setMethodName
+     * @see #setMethodName(String)
      */
     public String getMethodName() {
         return methodName;
