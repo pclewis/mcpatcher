@@ -65,7 +65,7 @@ abstract public class ClassMod implements PatchComponent {
 
     boolean matchClassFile(String filename, ClassFile classFile) {
         addToConstPool = false;
-        if (!considerFile(filename)) {
+        if (!filterFile(filename)) {
             return false;
         }
 
@@ -144,12 +144,13 @@ abstract public class ClassMod implements PatchComponent {
     }
 
     /**
-     * Used to quickly rule out candidate class files based on filename alone.
+     * Used to quickly rule out candidate class files based on filename alone.  The default implementation
+     * allows only files in the allowedDirs list.
      *
      * @param filename full path of .class file within the .jar
      * @return true if a class file should be considered for patching
      */
-    protected boolean considerFile(String filename) {
+    protected boolean filterFile(String filename) {
         String dir = filename.replaceFirst("[^/]+$", "").replaceFirst("/$", "");
         return mod.allowedDirs.contains(dir);
     }
@@ -294,11 +295,11 @@ abstract public class ClassMod implements PatchComponent {
      */
     public class FieldMapper {
         /**
-         * deobfuscated field name
+         * Deobfuscated field name.
          */
         protected String name;
         /**
-         * Java type descriptor, e.g., "[B" represents an array of bytes
+         * Java type descriptor, e.g., "[B" represents an array of bytes.
          */
         protected String descriptor;
 
@@ -312,7 +313,7 @@ abstract public class ClassMod implements PatchComponent {
         }
 
         /**
-         * @param fieldInfo
+         * @param fieldInfo candidate field
          * @return true if fieldInfo matches the desired field
          */
         public boolean match(FieldInfo fieldInfo) {
@@ -326,12 +327,12 @@ abstract public class ClassMod implements PatchComponent {
      */
     public class MethodMapper {
         /**
-         * deobfuscated field name
+         * Deobfuscated field name.
          */
         protected String name;
         /**
          * Java type descriptor, e.g., "(I)Lnet/minecraft/client/Minecraft;" represents a method taking an
-         * int and returning a Minecraft object
+         * int and returning a Minecraft object.
          */
         protected String descriptor;
 
@@ -345,7 +346,7 @@ abstract public class ClassMod implements PatchComponent {
         }
 
         /**
-         * @param methodInfo
+         * @param methodInfo candidate method
          * @return true if methodInfo matches the desired method
          */
         public boolean match(MethodInfo methodInfo) {
