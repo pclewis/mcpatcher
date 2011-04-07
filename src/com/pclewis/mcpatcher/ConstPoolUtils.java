@@ -151,13 +151,20 @@ class ConstPoolUtils {
             } else if (i <= Short.MAX_VALUE) {
                 return new byte[]{SIPUSH, Util.b(i, 1), Util.b(i, 0)};
             }
+        } else if (value instanceof Long) {
+            long l = (Long) value;
+            if (l == 0L) {
+                return new byte[]{LCONST_0};
+            } else if (l == 1L) {
+                return new byte[]{LCONST_1};
+            }
         } else if (value instanceof Float) {
             float f = (Float) value;
-            if (f == 0.0f) {
+            if (f == 0.0F) {
                 return new byte[]{FCONST_0};
-            } else if (f == 1.0f) {
+            } else if (f == 1.0F) {
                 return new byte[]{FCONST_1};
-            } else if (f == 2.0f) {
+            } else if (f == 2.0F) {
                 return new byte[]{FCONST_2};
             }
         } else if (value instanceof Double) {
