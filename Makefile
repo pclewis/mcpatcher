@@ -19,7 +19,7 @@ run: $(MCPATCHER)
 	java -jar $(MCPATCHER)
 
 test: $(MCPATCHER)
-	java -jar $(MCPATCHER) -ignorecustommods -auto -loglevel 5 > $(TEST_LOG) 2>&1
+	time java -jar $(MCPATCHER) -ignorecustommods -auto -loglevel 5 > $(TEST_LOG) 2>&1
 	diff -c $(GOOD_LOG) $(TEST_LOG)
 	rm -f $(TEST_LOG)
 
