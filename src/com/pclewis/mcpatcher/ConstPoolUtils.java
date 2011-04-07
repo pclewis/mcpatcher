@@ -1,13 +1,12 @@
 package com.pclewis.mcpatcher;
 
-import javassist.bytecode.Bytecode;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.Mnemonic;
 
 import static javassist.bytecode.Opcode.*;
 
 class ConstPoolUtils {
-    private static final byte[] DUMMY_BYTES = "zzzz nothing zzzz".getBytes();
+    private static final byte[] NOT_FOUND = null;
 
     public static int getTag(Object o) {
         if (o instanceof Float) {
@@ -93,34 +92,42 @@ class ConstPoolUtils {
     }
 
     private static int findOrAdd(ConstPool cp, Object value) {
-        int index = ConstPoolUtils.find(cp, value);
+        int index = find(cp, value);
         if (index == -1) {
-            index = ConstPoolUtils.addToPool(cp, value);
+            index = addToPool(cp, value);
         }
         return index;
     }
 
-    private static byte[] getLoad(ConstPool cp, Object value) {
-        int index = findOrAdd(cp, value);
-        int op = Bytecode.LDC;
-        if (value instanceof Double) {
-            op = Bytecode.LDC2_W;
-        }
-        return getLoad(op, index);
-    }
-
     private static byte[] getLoad(int op, int i) {
         int mop = op;
-        if (i >= Byte.MAX_VALUE && mop == Bytecode.LDC)
-            mop = Bytecode.LDC_W;
-        if (mop == Bytecode.LDC) {
+        if (i > Byte.MAX_VALUE && mop == LDC) {
+            mop = LDC_W;
+        }
+        if (mop == LDC) {
             return new byte[]{(byte) mop, Util.b(i, 0)};
         } else {
             return new byte[]{(byte) mop, Util.b(i, 1), Util.b(i, 0)};
         }
     }
 
-    public static byte[] push(ConstPool cp, Object value, boolean add) {
+    private static Object getLoadExpr(int op, int i) {
+        int mop = op;
+        if (i > Byte.MAX_VALUE && mop == LDC) {
+            mop = LDC_W;
+        }
+        if (mop == LDC) {
+            // obfuscator occasionally uses LDC_W even when LDC would do, so we're forced to generate a regex here
+            return BinaryRegex.or(
+                BinaryRegex.build(new byte[]{LDC, Util.b(i, 0)}),
+                BinaryRegex.build(new byte[]{LDC_W, Util.b(i, 1), Util.b(i, 0)})
+            );
+        } else {
+            return new byte[]{(byte) mop, Util.b(i, 1), Util.b(i, 0)};
+        }
+    }
+
+    public static Object push(ConstPool cp, Object value, boolean add) {
         if (value instanceof Integer) {
             int i = (Integer) value;
             switch (i) {
@@ -163,16 +170,21 @@ class ConstPoolUtils {
         }
         int index = add ? findOrAdd(cp, value) : find(cp, value);
         if (index >= 0) {
-            return getLoad((value instanceof Double || value instanceof Long ? LDC2_W : LDC), index);
+            int op = (value instanceof Double || value instanceof Long ? LDC2_W : LDC);
+            if (add) {
+                return getLoad(op, index);
+            } else {
+                return getLoadExpr(op, index);
+            }
         } else {
-            return DUMMY_BYTES;
+            return NOT_FOUND;
         }
     }
 
     public static byte[] reference(ConstPool cp, Object value, boolean add) {
         int index = add ? findOrAdd(cp, value) : find(cp, value);
         if (index < 0) {
-            return DUMMY_BYTES;
+            return NOT_FOUND;
         }
         return Util.marshal16(index);
     }
@@ -180,10 +192,11 @@ class ConstPoolUtils {
     public static byte[] reference(ConstPool cp, int opcode, Object value, boolean add) {
         int index = add ? findOrAdd(cp, value) : find(cp, value);
         if (index < 0) {
-            return DUMMY_BYTES;
+            return NOT_FOUND;
         }
         switch (opcode) {
             case LDC:
+            case LDC_W:
             case LDC2_W:
                 return getLoad(opcode, index);
 

@@ -267,7 +267,7 @@ abstract public class ClassMod implements PatchComponent {
         return mod.getClassMap().map(ref);
     }
 
-    final public byte[] push(MethodInfo methodInfo, Object value) {
+    final public Object push(MethodInfo methodInfo, Object value) {
         return ConstPoolUtils.push(methodInfo.getConstPool(), value, addToConstPool);
     }
 

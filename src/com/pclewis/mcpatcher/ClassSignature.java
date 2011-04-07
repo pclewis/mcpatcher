@@ -71,7 +71,7 @@ abstract public class ClassSignature implements PatchComponent {
     /**
      * @see ClassMod#push(javassist.bytecode.MethodInfo, Object)
      */
-    final public byte[] push(MethodInfo methodInfo, Object value) {
+    final public Object push(MethodInfo methodInfo, Object value) {
         return classMod.push(methodInfo, value);
     }
 
