@@ -1,9 +1,9 @@
 MCPatcher version is 2.0.0-beta3
 OS: Linux 2.6.35.11-83.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_23 (64 bit)
-Minecraft version is 1.4 (md5 71e64b61175b371ed148b385f2d14ebf)
+Minecraft version is 1.4_01 (md5 9379e54b581ba4ef3acc3e326e87db91)
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (715 files)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.4_01.jar (714 files)
   ai.class matches TextureFX.class
    a matches onTick
   aj.class matches Compass.class
@@ -27,10 +27,10 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (715 files)
   ox.class matches FontRenderer.class
   ox.class matches FontRenderer.class
    font registers = 5, 6
-  ru.class matches StillWater.class
+  rv.class matches StillWater.class
   net/minecraft/client/Minecraft.class matches Minecraft.class
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.4_01.jar (second pass)
   RenderEngine (ho.class)
    field e matches imageData
    field f matches textureList
@@ -48,7 +48,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
   Fire (os.class)
   StillLava (bo.class)
   FlowLava (gr.class)
-  StillWater (ru.class)
+  StillWater (rv.class)
   FlowWater (lr.class)
   ItemRenderer (nt.class)
   Watch (ir.class)
@@ -76,6 +76,33 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
 
 2 available mods:
 [YES] HD Textures 1.0 - Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.
+  class StillWater -> rv
+  class Portal -> gh
+  class ItemRenderer -> nt
+  class TextureFX -> ai
+   method onTick -> a
+   field imageData -> a
+   field tileSize -> e
+   field tileImage -> f
+   field tileNumber -> b
+   field field_1130_d -> d
+  class TexturePackBase -> f
+   method getInputStream -> a
+   field texturePackFileName -> a
+  class FlowWater -> lr
+  class Watch -> ir
+  class Fire -> os
+  class GLAllocation -> ez
+   method createDirectByteBuffer -> b
+  class FontRenderer -> ox
+  class TexturePackList -> gw
+   field minecraft -> e
+   field defaultTexturePack -> c
+   field selectedTexturePack -> a
+  class FlowLava -> gr
+  class TexturePackDefault -> me
+  class ColorizerFoliage -> hn
+   field colorBuffer -> a
   class Minecraft -> net.minecraft.client.Minecraft
    field gameSettings -> y
    field fontRenderer -> p
@@ -84,17 +111,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
   class ColorizerGrass -> gm
    field colorBuffer -> a
   class StillLava -> bo
-  class StillWater -> ru
-  class Portal -> gh
-  class ItemRenderer -> nt
   class CustomAnimation -> CustomAnimation
-   method onTick -> a
-   field imageData -> a
-   field tileSize -> e
-   field tileImage -> f
-   field tileNumber -> b
-   field field_1130_d -> d
-  class TextureFX -> ai
    method onTick -> a
    field imageData -> a
    field tileSize -> e
@@ -108,25 +125,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.jar (second pass)
    method setupTexture -> a
    field imageData -> e
    field textureList -> f
-  class TexturePackBase -> f
-   method getInputStream -> a
-   field texturePackFileName -> a
-  class FlowWater -> lr
-  class Watch -> ir
   class GameSettings -> is
-  class Fire -> os
-  class GLAllocation -> ez
-   method createDirectByteBuffer -> b
   class Compass -> aj
-  class FontRenderer -> ox
-  class TexturePackList -> gw
-   field minecraft -> e
-   field defaultTexturePack -> c
-   field selectedTexturePack -> a
-  class FlowLava -> gr
-  class TexturePackDefault -> me
-  class ColorizerFoliage -> hn
-   field colorBuffer -> a
 [YES] HD Font 1.0 - Provides support for higher resolution fonts.
   class FontRenderer -> ox
 
@@ -276,24 +276,13 @@ Patching...
     * 16 -> int_size a@350
      BIPUSH 0x10               GETSTATIC 0x00 0x4d
      IMUL                      IMUL
- applying LDC_W patch to de.class for mod __Base
-    LDC_W 0x00 -> LDC valueOf@0
-     LDC_W 0x00 0x04           NOP
-                               LDC 0x04
- applying LDC_W patch to em.class for mod __Base
-    LDC_W 0x00 -> LDC a@11
-     LDC_W 0x00 0x05           NOP
-                               LDC 0x05
- applying LDC_W patch to ev.class for mod __Base
-    LDC_W 0x00 -> LDC <init>@5
-     LDC_W 0x00 0x02           NOP
-                               LDC 0x02
  applying GetResource patch to ev.class for mod HD Textures
-    ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@6
-     LDC 0x02                  NOP
+    ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@5
+     LDC_W 0x00 0x02           NOP
      LDC 0x01                  NOP
      INVOKEVIRTUAL 0x00 0x14   NOP
      INVOKESTATIC 0x00 0x15    NOP
+                               NOP
                                NOP
                                LDC 0x01
                                INVOKESTATIC 0x00 0x4b
@@ -444,14 +433,6 @@ Patching...
                                INVOKEVIRTUAL 0x00 0xce
                                INVOKESTATIC 0x00 0xd1
                                ICONST_1
- applying LDC_W patch to hj.class for mod __Base
-    LDC_W 0x00 -> LDC <clinit>@120
-     LDC_W 0x00 0x35           NOP
-                               LDC 0x35
- applying LDC_W patch to hm.class for mod __Base
-    LDC_W 0x00 -> LDC valueOf@0
-     LDC_W 0x00 0x04           NOP
-                               LDC 0x04
  applying GetResource patch to hn.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <clinit>@7
      LDC 0x05                  NOP
@@ -881,21 +862,21 @@ Patching...
     insert method initialize ()V stack size 11, local vars 18
  applying GetResource patch to ox.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@28
-     LDC 0x0a                  NOP
+     LDC 0x09                  NOP
      ALOAD_2                   NOP
-     INVOKEVIRTUAL 0x00 0x25   NOP
-     INVOKESTATIC 0x00 0x34    NOP
+     INVOKEVIRTUAL 0x00 0x23   NOP
+     INVOKESTATIC 0x00 0x2e    NOP
                                NOP
                                ALOAD_2
-                               INVOKESTATIC 0x00 0xce
+                               INVOKESTATIC 0x00 0xbb
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) initialize@28
-     LDC 0x0a                  NOP
+     LDC 0x09                  NOP
      ALOAD_2                   NOP
-     INVOKEVIRTUAL 0x00 0x25   NOP
-     INVOKESTATIC 0x00 0x34    NOP
+     INVOKEVIRTUAL 0x00 0x23   NOP
+     INVOKESTATIC 0x00 0x2e    NOP
                                NOP
                                ALOAD_2
-                               INVOKESTATIC 0x00 0xce
+                               INVOKESTATIC 0x00 0xbb
  applying FontRenderer patch to ox.class for mod HD Font
     font width 7 -> i / 16 - 1 <init>@119
      BIPUSH 0x07               ILOAD 0x05
@@ -913,34 +894,28 @@ Patching...
                                ISTORE 0x0b
     font width 8 -> i / 16 <init>@135
      BIPUSH 0x08               ILOAD 0x05
-     IMUL                      BIPUSH 0x10
+                               BIPUSH 0x10
                                IDIV
-                               IMUL
     font width 8 -> i / 16 <init>@154
      BIPUSH 0x08               ILOAD 0x05
-     IF_ICMPGE 0x00 0x31       BIPUSH 0x10
+                               BIPUSH 0x10
                                IDIV
-                               IF_ICMPGE 0x00 0x31
     font width 8 -> i / 16 <init>@169
      BIPUSH 0x08               ILOAD 0x05
-     IMUL                      BIPUSH 0x10
+                               BIPUSH 0x10
                                IDIV
-                               IMUL
     font width 8 -> i / 16 initialize@135
      BIPUSH 0x08               ILOAD 0x05
-     IMUL                      BIPUSH 0x10
+                               BIPUSH 0x10
                                IDIV
-                               IMUL
     font width 8 -> i / 16 initialize@154
      BIPUSH 0x08               ILOAD 0x05
-     IF_ICMPGE 0x00 0x31       BIPUSH 0x10
+                               BIPUSH 0x10
                                IDIV
-                               IF_ICMPGE 0x00 0x31
     font width 8 -> i / 16 initialize@169
      BIPUSH 0x08               ILOAD 0x05
-     IMUL                      BIPUSH 0x10
+                               BIPUSH 0x10
                                IDIV
-                               IMUL
     font whitespace width 2 -> i / 64 <init>@232
      ICONST_2                  ILOAD 0x05
      ISTORE 0x0b               BIPUSH 0x40
@@ -978,8 +953,8 @@ Patching...
                                NOP
                                LDC 0x0b
                                INVOKESTATIC 0x00 0x99
- applying GetResource patch to rr.class for mod HD Textures
- applying StillWater patch to ru.class for mod HD Textures
+ applying GetResource patch to rs.class for mod HD Textures
+ applying StillWater patch to rv.class for mod HD Textures
     array size 256 -> int_numPixels <init>@11
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x44
      NEWARRAY 0x06             NEWARRAY 0x06
@@ -1270,7 +1245,7 @@ Patching...
      INVOKESPECIAL 0x00 0x26   INVOKESPECIAL 0x02 0x22
     method ref FlowLava.<init> ()V -> gr.<init> ()V refreshTextureFX@191
      INVOKESPECIAL 0x00 0x28   INVOKESPECIAL 0x02 0x25
-    method ref StillWater.<init> ()V -> ru.<init> ()V refreshTextureFX@270
+    method ref StillWater.<init> ()V -> rv.<init> ()V refreshTextureFX@270
      INVOKESPECIAL 0x00 0x2e   INVOKESPECIAL 0x02 0x28
     method ref FlowWater.<init> ()V -> lr.<init> ()V refreshTextureFX@284
      INVOKESPECIAL 0x00 0x30   INVOKESPECIAL 0x02 0x2b
@@ -1316,16 +1291,16 @@ Patching...
      INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0x55
     method ref TextureUtils.hasResource (LTexturePackBase;Ljava/lang/String;)Z -> TextureUtils.hasResource (Lf;Ljava/lang/String;)Z hasResource@4
      INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0x57
-   string replace StillLava -> bo @1580
-   string replace StillWater -> ru @1719
-   string replace Portal -> gh @1877
-   string replace TextureFX -> ai @2028
-   string replace FlowWater -> lr @1740
+   string replace StillWater -> rv @1726
+   string replace Portal -> gh @1884
+   string replace TextureFX -> ai @2035
+   string replace FlowWater -> lr @1747
    string replace Watch -> ir @1380
    string replace Fire -> os @1243
+   string replace FlowLava -> gr @1603
+   string replace TexturePackDefault -> me @1409
+   string replace StillLava -> bo @1559
    string replace Compass -> aj @1309
-   string replace FlowLava -> gr @1591
-   string replace TexturePackDefault -> me @1404
   adding CustomAnimation.class for HD Textures
    method onTick -> a
     method ref TextureFX.<init> (I)V -> ai.<init> (I)V <init>@2
