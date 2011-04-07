@@ -88,7 +88,7 @@ public class HDFontMod extends Mod {
                     return buildExpression(
                         BinaryRegex.lookBehind(BinaryRegex.subset(new byte[]{(byte) IREM, (byte) IDIV}, true), false),
                         push(mi, 8),
-                        BinaryRegex.capture(BinaryRegex.subset(new byte[]{(byte) IMUL, (byte) IF_ICMPGE}, true))
+                        BinaryRegex.lookAhead(BinaryRegex.subset(new byte[]{(byte) IMUL, (byte) IF_ICMPGE}, true), true)
                     );
                 }
 
@@ -97,8 +97,7 @@ public class HDFontMod extends Mod {
                     return buildCode(
                         ILOAD, getModParamInt("imageWidthRegister"),
                         push(mi, 16),
-                        IDIV,
-                        getCaptureGroup(1)
+                        IDIV
                     );
                 }
             });
