@@ -119,15 +119,12 @@ public class MCPatcherUtils {
      */
     public static String getString(String mod, String name, Object defaultValue) {
         String key = getPropertyKey(mod, name);
-        String value = properties.getProperty(key);
-        if (value == null && defaultValue != null) {
-            value = defaultValue.toString();
-            if (!value.equals("")) {
-                properties.setProperty(key, value);
-                needSaveProps = true;
-            }
+        String value = defaultValue.toString();
+        if (!properties.containsKey(key)) {
+            properties.setProperty(key, value);
+            needSaveProps = true;
         }
-        return value == null ? "" : value;
+        return properties.getProperty(key, value);
     }
 
     /**
@@ -152,7 +149,7 @@ public class MCPatcherUtils {
     public static int getInt(String mod, String name, int defaultValue) {
         int value;
         try {
-            value = Integer.parseInt(getString(mod, name, Integer.valueOf(defaultValue).toString()));
+            value = Integer.parseInt(getString(mod, name, defaultValue));
         } catch (NumberFormatException e) {
             value = defaultValue;
         }
@@ -179,7 +176,7 @@ public class MCPatcherUtils {
      * @return boolean value
      */
     public static boolean getBoolean(String mod, String name, boolean defaultValue) {
-        String value = getString(mod, name, Boolean.valueOf(defaultValue).toString()).toLowerCase();
+        String value = getString(mod, name, defaultValue).toLowerCase();
         if (value.equals("false")) {
             return false;
         } else if (value.equals("true")) {
@@ -208,8 +205,11 @@ public class MCPatcherUtils {
      * @param value property value (must support toString())
      */
     public static void set(String mod, String name, Object value) {
-        properties.setProperty(getPropertyKey(mod, name), value.toString());
-        needSaveProps = true;
+        String key = getPropertyKey(mod, name);
+        String oldValue = properties.getProperty(key);
+        String newValue = value.toString();
+        properties.setProperty(key, newValue);
+        needSaveProps = !newValue.equals(oldValue);
     }
 
     static void set(String name, Object value) {
