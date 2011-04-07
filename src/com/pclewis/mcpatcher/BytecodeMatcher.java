@@ -57,6 +57,14 @@ public class BytecodeMatcher extends BinaryMatcher {
     );
 
     /**
+     * Fixed regex that matches any LDC/LDC_W ... instruction.
+     */
+    public static final String anyLDC = BinaryRegex.or(
+        BinaryRegex.build(LDC, BinaryRegex.any()),
+        BinaryRegex.build(LDC_W, BinaryRegex.any(2))
+    );
+
+    /**
      * Construct a new matcher for the given regular expression.
      *
      * @param objects BinaryRegex elements that make up the expression to match

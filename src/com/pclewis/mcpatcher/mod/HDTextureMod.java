@@ -800,11 +800,10 @@ public class HDTextureMod extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        LDC, BinaryRegex.any(),
+                        BytecodeMatcher.anyLDC,
                         BinaryRegex.capture(BinaryRegex.or(
-                            buildExpression(LDC, BinaryRegex.any()),
-                            buildExpression(ALOAD, BinaryRegex.any()),
-                            buildExpression(BinaryRegex.subset(new byte[]{ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3}, true))
+                            BytecodeMatcher.anyLDC,
+                            BytecodeMatcher.anyALOAD
                         )),
                         BinaryRegex.or(
                             buildExpression(
