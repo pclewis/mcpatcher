@@ -249,32 +249,40 @@ public class ClassMap {
 
         int origSize = cp.getSize();
         for (int i = 1; i < origSize; i++) {
+            final int tag = cp.getTag(i);
             String oldName;
             String oldType;
 
-            switch (cp.getTag(i)) {
+            switch (tag) {
                 case ConstPool.CONST_Fieldref:
                     oldClass = cp.getFieldrefClassName(i);
                     oldName = cp.getFieldrefName(i);
                     oldType = cp.getFieldrefType(i);
                     break;
+
                 case ConstPool.CONST_Methodref:
                     oldClass = cp.getMethodrefClassName(i);
                     oldName = cp.getMethodrefName(i);
                     oldType = cp.getMethodrefType(i);
                     break;
+
+                case ConstPool.CONST_InterfaceMethodref:
+                    oldClass = cp.getInterfaceMethodrefClassName(i);
+                    oldName = cp.getInterfaceMethodrefName(i);
+                    oldType = cp.getInterfaceMethodrefType(i);
+                    break;
+
                 default:
                     continue;
             }
 
-            final boolean field = (cp.getTag(i) == ConstPool.CONST_Fieldref);
             String newClass = oldClass;
             String newName = oldName;
             String newType;
             if (classMap.containsKey(oldClass)) {
                 ClassMapEntry entry = classMap.get(oldClass);
                 newClass = entry.obfName;
-                HashMap<String, String> map = (field ? entry.fieldMap : entry.methodMap);
+                HashMap<String, String> map = (tag == ConstPool.CONST_Fieldref ? entry.fieldMap : entry.methodMap);
                 if (map.containsKey(oldName)) {
                     newName = map.get(oldName);
                 }
@@ -298,32 +306,50 @@ public class ClassMap {
                 }
             };
             BytecodePatch patch = new BytecodePatch() {
-                private String typeStr;
-                private byte[] opcodes;
-                private Object oldRef;
-                private Object newRef;
+                final private String typeStr;
+                final private byte[] opcodes;
+                final private JavaRef oldRef;
+                final private JavaRef newRef;
 
                 {
-                    if (field) {
-                        typeStr = "field";
-                        opcodes = new byte[]{(byte) GETFIELD, (byte) GETSTATIC, (byte) PUTFIELD, (byte) PUTSTATIC};
-                        oldRef = new FieldRef(oldClass2, oldName2, oldType2);
-                        newRef = new FieldRef(newClass2, newName2, newType2);
-                    } else {
-                        typeStr = "method";
-                        opcodes = new byte[]{(byte) INVOKEVIRTUAL, (byte) INVOKESTATIC, (byte) INVOKESPECIAL};
-                        oldRef = new MethodRef(oldClass2, oldName2, oldType2);
-                        newRef = new MethodRef(newClass2, newName2, newType2);
+                    switch (tag)
+                    {
+                        case ConstPool.CONST_Fieldref:
+                            typeStr = "field";
+                            opcodes = new byte[]{(byte) GETFIELD, (byte) GETSTATIC, (byte) PUTFIELD, (byte) PUTSTATIC};
+                            oldRef = new FieldRef(oldClass2, oldName2, oldType2);
+                            newRef = new FieldRef(newClass2, newName2, newType2);
+                            break;
+
+                        case ConstPool.CONST_Methodref:
+                            typeStr = "method";
+                            opcodes = new byte[]{(byte) INVOKEVIRTUAL, (byte) INVOKESTATIC, (byte) INVOKESPECIAL};
+                            oldRef = new MethodRef(oldClass2, oldName2, oldType2);
+                            newRef = new MethodRef(newClass2, newName2, newType2);
+                            break;
+
+                        case ConstPool.CONST_InterfaceMethodref:
+                            typeStr = "interface method";
+                            opcodes = new byte[]{(byte) INVOKEINTERFACE};
+                            oldRef = new InterfaceMethodRef(oldClass2, oldName2, oldType2);
+                            newRef = new InterfaceMethodRef(newClass2, newName2, newType2);
+                            break;
+
+                        default:
+                            throw new AssertionError("Unreachable");
                     }
                 }
 
+                @Override
                 public String getDescription() {
                     return String.format("%s ref %s.%s %s -> %s.%s %s",
                         typeStr,
                         oldClass2, oldName2, oldType2,
-                        newClass2, newName2, newType2);
+                        newClass2, newName2, newType2
+                    );
                 }
 
+                @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return BinaryRegex.build(
                         BinaryRegex.capture(BinaryRegex.subset(opcodes, true)),
@@ -331,6 +357,7 @@ public class ClassMap {
                     );
                 }
 
+                @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
