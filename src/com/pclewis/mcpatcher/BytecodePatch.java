@@ -67,9 +67,13 @@ abstract public class BytecodePatch extends ClassPatch {
                 repl = getReplacementBytes(mi);
             } catch (IOException e) {
                 Logger.log(e);
-                continue;
+                repl = null;
             } finally {
                 classMod.addToConstPool = false;
+            }
+            if (repl == null) {
+                offset = ci.next();
+                continue;
             }
 
             if (Logger.isLogLevel(Logger.LOG_BYTECODE)) {
@@ -98,7 +102,7 @@ abstract public class BytecodePatch extends ClassPatch {
 
         int newStackSize = ca.computeMaxStack();
         if (oldStackSize < newStackSize) {
-            Logger.log(Logger.LOG_DETAIL, "increasing stack size from %d to %d", oldStackSize, newStackSize);
+            Logger.log(Logger.LOG_METHOD, "increasing stack size from %d to %d", oldStackSize, newStackSize);
             ca.setMaxStack(newStackSize);
         }
 

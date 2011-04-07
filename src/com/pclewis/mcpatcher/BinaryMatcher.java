@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  */
 public class BinaryMatcher {
     private String regex;
-    private Pattern pattern;
+    private Pattern pattern = null;
     private Matcher matcher = null;
     private String inputStr = null;
 
@@ -22,7 +22,9 @@ public class BinaryMatcher {
      */
     public BinaryMatcher(Object... objects) {
         regex = BinaryRegex.build(objects);
-        pattern = Pattern.compile(this.regex);
+        if (regex != null) {
+            pattern = Pattern.compile(this.regex);
+        }
     }
 
     /**
@@ -33,6 +35,9 @@ public class BinaryMatcher {
      * @return true if match was found
      */
     public boolean match(byte[] input, int offset) {
+        if (pattern == null) {
+            return false;
+        }
         inputStr = BinaryRegex.binToStr(input);
 
         if (Logger.isLogLevel(Logger.LOG_REGEX)) {
