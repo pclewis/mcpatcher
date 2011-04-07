@@ -5,12 +5,16 @@ import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
 import java.io.*;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 
 class MinecraftJar {
     private static final String VERSION_REGEX = "[0-9][-_.0-9a-zA-Z]+";
@@ -47,10 +51,12 @@ class MinecraftJar {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getPath() + " does not exist");
         }
+
         version = extractVersion(file);
         if (version == null) {
             throw new IOException("Could not determine version of " + file.getPath());
         }
+
         if (file.getName().equals("minecraft.jar")) {
             origFile = new File(file.getParent(), "minecraft-" + version + ".jar");
             outputFile = file;
@@ -61,7 +67,19 @@ class MinecraftJar {
             origFile = file;
             outputFile = new File(file.getParent(), "minecraft.jar");
         }
+
         md5 = Util.computeMD5(origFile);
+
+        HashSet<String> entries = new HashSet<String>();
+        getInputJar();
+        for (JarEntry entry : Collections.list(origJar.entries())) {
+            String name = entry.getName();
+            if (entries.contains(name)) {
+                closeStreams();
+                throw new ZipException("duplicate zip entry " + name);
+            }
+            entries.add(name);
+        }
     }
 
     public String getVersion() {
