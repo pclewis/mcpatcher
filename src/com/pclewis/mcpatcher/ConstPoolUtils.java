@@ -28,7 +28,7 @@ class ConstPoolUtils {
         } else if (o instanceof ClassRef) {
             return ConstPool.CONST_Class;
         }
-        throw new AssertionError("Unreachable");
+        throw new AssertionError("Unhandled type: " + o.getClass().getName());
     }
 
     private static int addToPool(ConstPool cp, Object o) {
@@ -57,7 +57,7 @@ class ConstPoolUtils {
         } else if (o instanceof ClassRef) {
             return cp.addClassInfo(((ClassRef) o).getClassName());
         }
-        throw new AssertionError("Unreachable");
+        throw new AssertionError("Unhandled type: " + o.getClass().getName());
     }
 
     public static boolean checkEqual(ConstPool cp, int index, Object o) {
@@ -74,7 +74,7 @@ class ConstPoolUtils {
         } else if (o instanceof JavaRef) {
             return ((JavaRef) o).checkEqual(cp, index);
         }
-        throw new AssertionError("Unreachable");
+        throw new AssertionError("Unhandled type: " + o.getClass().getName());
     }
 
     private static int find(ConstPool cp, Object value) {
