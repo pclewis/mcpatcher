@@ -1,3 +1,5 @@
+package net.minecraft.client;
+
 public class Minecraft {
     public TexturePackList texturePackList;
     public RenderEngine renderEngine;

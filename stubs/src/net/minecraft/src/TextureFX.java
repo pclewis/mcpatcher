@@ -1,3 +1,5 @@
+package net.minecraft.src;
+
 public class TextureFX {
     public byte[] imageData;
     public int tileNumber;

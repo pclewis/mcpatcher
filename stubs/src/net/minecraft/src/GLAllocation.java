@@ -1,3 +1,5 @@
+package net.minecraft.src;
+
 import java.nio.ByteBuffer;
 
 public class GLAllocation {

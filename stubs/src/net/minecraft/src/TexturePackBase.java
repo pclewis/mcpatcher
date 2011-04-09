@@ -1,3 +1,5 @@
+package net.minecraft.src;
+
 import java.io.InputStream;
 
 abstract public class TexturePackBase {

@@ -1,4 +1,7 @@
+package com.pclewis.mcpatcher.mod;
+
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import net.minecraft.src.TextureFX;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;

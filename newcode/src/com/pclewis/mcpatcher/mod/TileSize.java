@@ -1,3 +1,5 @@
+package com.pclewis.mcpatcher.mod;
+
 import com.pclewis.mcpatcher.MCPatcherUtils;
 
 import java.lang.reflect.Field;

@@ -1,4 +1,8 @@
+package com.pclewis.mcpatcher.mod;
+
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.src.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
