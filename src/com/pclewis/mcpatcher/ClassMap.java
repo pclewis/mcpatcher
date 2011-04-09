@@ -180,10 +180,11 @@ public class ClassMap {
                 }
             });
             for (Entry<String, ClassMapEntry> e : sortedClasses) {
-                if (e.getKey().startsWith(DEFAULT_MINECRAFT_PACKAGE)) {
-                    continue;
+                if (e.getKey().equals(e.getValue().obfName)) {
+                    logClass("class %s", e.getKey());
+                } else {
+                    logClass("class %s -> %s", e.getKey(), e.getValue().obfName);
                 }
-                logClass("class %s -> %s", e.getKey(), e.getValue().obfName);
 
                 ArrayList<Entry<String, String>> sortedMembers;
 
@@ -537,13 +538,13 @@ public class ClassMap {
             char c = old.charAt(i);
             if (c == 'L') {
                 int end = old.indexOf(';', i);
-                String oldType = old.substring(i + 1, end).replaceAll("/", ".");
+                String oldType = old.substring(i + 1, end).replace('/', '.');
                 String newType = oldType;
                 if (classMap.containsKey(oldType)) {
                     newType = classMap.get(oldType).obfName;
                 }
                 sb.append('L');
-                sb.append(newType.replaceAll("\\.", "/"));
+                sb.append(newType.replace('.', '/'));
                 sb.append(';');
                 i = end;
             } else {
@@ -563,7 +564,7 @@ public class ClassMap {
                 continue;
             }
             byte[] oldName = Util.marshalString(e.getKey());
-            byte[] newName = Util.marshalString(e.getValue().obfName.replaceAll("\\.", "/"));
+            byte[] newName = Util.marshalString(e.getValue().obfName.replace('.', '/'));
             BinaryMatcher bm = new BinaryMatcher(BinaryRegex.build(oldName));
             int offset = 0;
             while (bm.match(data, offset)) {
