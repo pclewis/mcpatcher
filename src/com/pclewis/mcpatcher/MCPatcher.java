@@ -127,6 +127,11 @@ final public class MCPatcher {
                         MCPatcherUtils.saveProperties();
                         exitStatus = 0;
                     }
+                    System.out.println();
+                    System.out.println("#### Class map:");
+                    showClassMaps(System.out);
+                    System.out.println("#### Patch summary:");
+                    showPatchResults(System.out);
                 } catch (Exception e) {
                     Logger.log(e);
                 }
