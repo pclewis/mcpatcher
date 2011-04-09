@@ -93,4 +93,25 @@ class Util {
         }
         return md5;
     }
+
+    public static void logOSInfo() {
+        Logger.log(Logger.LOG_MAIN, "MCPatcher version is %s", MCPatcher.VERSION_STRING);
+        Logger.log(Logger.LOG_MAIN, "OS: %s %s %s",
+            System.getProperty("os.name"),
+            System.getProperty("os.version"),
+            System.getProperty("os.arch")
+        );
+        String bits;
+        try {
+            int b = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+            bits = String.format(" (%d bit)", b);
+        } catch (Throwable e) {
+            bits = "";
+        }
+        Logger.log(Logger.LOG_MAIN, "JVM: %s %s%s",
+            System.getProperty("java.vendor"),
+            System.getProperty("java.version"),
+            bits
+        );
+    }
 }

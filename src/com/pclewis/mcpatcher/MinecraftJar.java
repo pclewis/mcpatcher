@@ -98,6 +98,13 @@ class MinecraftJar {
         return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5);
     }
 
+    public void logVersion() {
+        Logger.log(Logger.LOG_MAIN, "Minecraft version is %s (md5 %s)", getVersion(), getMD5());
+        if (isModded()) {
+            Logger.log(Logger.LOG_MAIN, "WARNING: possibly modded minecraft.jar (orig md5 %s)", getOrigMD5());
+        }
+    }
+
     private static String extractVersion(File file) {
         if (!file.exists()) {
             return null;

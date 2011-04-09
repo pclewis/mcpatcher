@@ -89,24 +89,7 @@ final public class MCPatcher {
             mainForm.show();
         }
 
-        Logger.log(Logger.LOG_MAIN, "MCPatcher version is %s", VERSION_STRING);
-        Logger.log(Logger.LOG_MAIN, "OS: %s %s %s",
-            System.getProperty("os.name"),
-            System.getProperty("os.version"),
-            System.getProperty("os.arch")
-        );
-        String bits;
-        try {
-            int b = Integer.parseInt(System.getProperty("sun.arch.data.model"));
-            bits = String.format(" (%d bit)", b);
-        } catch (Throwable e) {
-            bits = "";
-        }
-        Logger.log(Logger.LOG_MAIN, "JVM: %s %s%s",
-            System.getProperty("java.vendor"),
-            System.getProperty("java.version"),
-            bits
-        );
+        Util.logOSInfo();
 
         if (!MCPatcherUtils.getString("lastVersion", "").equals(VERSION_STRING)) {
             MCPatcherUtils.set("lastVersion", VERSION_STRING);
@@ -176,10 +159,7 @@ final public class MCPatcher {
             if (createBackup) {
                 minecraft.createBackup();
             }
-            Logger.log(Logger.LOG_MAIN, "Minecraft version is %s (md5 %s)", minecraft.getVersion(), minecraft.getMD5());
-            if (minecraft.isModded()) {
-                Logger.log(Logger.LOG_MAIN, "WARNING: possibly modded minecraft.jar (orig md5 %s)", MinecraftJar.getOrigMD5());
-            }
+            minecraft.logVersion();
         } catch (IOException e) {
             minecraft = null;
             Logger.log(e);
