@@ -6,8 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.jar.JarOutputStream;
 
@@ -168,34 +167,87 @@ public class ClassMap {
         return e.fieldMap;
     }
 
-    void print() {
-        for (Entry<String, ClassMapEntry> e : classMap.entrySet()) {
-            if (e.getKey().startsWith(DEFAULT_MINECRAFT_PACKAGE)) {
-                continue;
-            }
-            Logger.log(Logger.LOG_CLASS, "class %s -> %s", e.getKey(), e.getValue().obfName);
-            for (Entry<String, String> e1 : e.getValue().methodMap.entrySet()) {
-                Logger.log(Logger.LOG_METHOD, "method %s -> %s", e1.getKey(), e1.getValue());
-            }
-            for (Entry<String, String> e1 : e.getValue().fieldMap.entrySet()) {
-                Logger.log(Logger.LOG_FIELD, "field %s -> %s", e1.getKey(), e1.getValue());
+    abstract private class Printer {
+        abstract public void logClass(String format, Object... params);
+        abstract public void logMethod(String format, Object... params);
+        abstract public void logField(String format, Object... params);
+
+        public void print() {
+            ArrayList<Entry<String, ClassMapEntry>> sortedClasses = new ArrayList<Entry<String, ClassMapEntry>>(classMap.entrySet());
+            Collections.sort(sortedClasses, new Comparator<Entry<String, ClassMapEntry>>() {
+                public int compare(Entry<String, ClassMapEntry> o1, Entry<String, ClassMapEntry> o2) {
+                    return o1.getKey().compareTo(o2.getKey());
+                }
+            });
+            for (Entry<String, ClassMapEntry> e : sortedClasses) {
+                if (e.getKey().startsWith(DEFAULT_MINECRAFT_PACKAGE)) {
+                    continue;
+                }
+                logClass("class %s -> %s", e.getKey(), e.getValue().obfName);
+
+                ArrayList<Entry<String, String>> sortedMembers;
+
+                sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().methodMap.entrySet());
+                Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
+                    public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+                        return o1.getKey().compareTo(o2.getKey());
+                    }
+                });
+                for (Entry<String, String> e1 : sortedMembers) {
+                    logMethod("method %s -> %s", e1.getKey(), e1.getValue());
+                }
+
+                sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().fieldMap.entrySet());
+                Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
+                    public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+                        return o1.getKey().compareTo(o2.getKey());
+                    }
+                });
+                for (Entry<String, String> e1 : sortedMembers) {
+                    logField("field %s -> %s", e1.getKey(), e1.getValue());
+                }
             }
         }
     }
 
-    void print(PrintStream out, String indent) {
-        for (Entry<String, ClassMapEntry> e : classMap.entrySet()) {
-            if (e.getKey().startsWith(DEFAULT_MINECRAFT_PACKAGE)) {
-                continue;
+    void print() {
+        new Printer() {
+            @Override
+            public void logClass(String format, Object... params) {
+                Logger.log(Logger.LOG_CLASS, format, params);
             }
-            out.printf("%1$sclass %2$s -> %3$s\n", indent, e.getKey(), e.getValue().obfName);
-            for (Entry<String, String> e1 : e.getValue().methodMap.entrySet()) {
-                out.printf("%1$s%1$smethod %2$s -> %3$s\n", indent, e1.getKey(), e1.getValue());
+
+            @Override
+            public void logMethod(String format, Object... params) {
+                Logger.log(Logger.LOG_METHOD, format, params);
             }
-            for (Entry<String, String> e1 : e.getValue().fieldMap.entrySet()) {
-                out.printf("%1$s%1$sfield %2$s -> %3$s\n", indent, e1.getKey(), e1.getValue());
+
+            @Override
+            public void logField(String format, Object... params) {
+                Logger.log(Logger.LOG_FIELD, format, params);
             }
-        }
+        }.print();
+    }
+
+    void print(final PrintStream out, final String indent) {
+        new Printer() {
+            private String indent2 = indent + indent;
+
+            @Override
+            public void logClass(String format, Object... params) {
+                out.printf(indent + format + "\n", params);
+            }
+
+            @Override
+            public void logMethod(String format, Object... params) {
+                out.printf(indent2 + format + "\n", params);
+            }
+
+            @Override
+            public void logField(String format, Object... params) {
+                out.printf(indent2 + format + "\n", params);
+            }
+        }.print();
     }
 
     void apply(ClassFile cf) throws BadBytecode {

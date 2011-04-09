@@ -4,9 +4,7 @@ import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -361,11 +359,18 @@ final public class MCPatcher {
                         }
                         out.print(")");
                     }
-                    out.println();
+                    ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<Map.Entry<String, Integer>>();
                     for (ClassPatch classPatch : classMod.patches) {
-                        for (Map.Entry<String, Integer> e : classPatch.numMatches.entrySet()) {
-                            out.printf("        [%d] %s\n", e.getValue(), e.getKey());
+                        sortedList.addAll(classPatch.numMatches.entrySet());
+                    }
+                    Collections.sort(sortedList, new Comparator<Map.Entry<String, Integer>>() {
+                        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                            return o1.getKey().compareTo(o2.getKey());
                         }
+                    });
+                    out.println();
+                    for (Map.Entry<String, Integer> e : sortedList) {
+                        out.printf("        [%d] %s\n", e.getValue(), e.getKey());
                     }
                 }
                 out.println();
