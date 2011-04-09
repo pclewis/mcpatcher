@@ -9,9 +9,7 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/javassist.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jgoodies-common-1.1.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jgoodies-forms-1.4.0.jar" path-in-jar="/" />
-      <element id="directory" name="newcode">
-        <element id="module-output" name="newcode" />
-      </element>
+      <element id="module-output" name="newcode" />
       <element id="module-output" name="utils" />
     </root>
   </artifact>

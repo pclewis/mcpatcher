@@ -41,14 +41,14 @@ public class HDTextureMod extends Mod {
         classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
         classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
 
-        filesToAdd.add("TileSize.class");
-        filesToAdd.add("TextureUtils.class");
-        filesToAdd.add("CustomAnimation.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
     }
 
     @Override
     public InputStream openFile(String name) throws IOException {
-        return getClass().getResourceAsStream("/newcode/" + name);
+        return getClass().getResourceAsStream("/" + name);
     }
 
     private static class RenderEngineMod extends ClassMod {
