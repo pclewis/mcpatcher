@@ -192,7 +192,8 @@ public abstract class Mod {
     }
 
     /**
-     * Called by MCPatcher for each file in filesToAdd and filesToReplace.
+     * Called by MCPatcher for each file in filesToAdd and filesToReplace.  Default implementation
+     * simply calls getResourceAsStream.
      *
      * @param name name of file to open
      * @return a valid input stream, or null
@@ -201,7 +202,7 @@ public abstract class Mod {
      * @see #filesToReplace
      */
     public InputStream openFile(String name) throws IOException {
-        return null;
+        return getClass().getResourceAsStream("/" + name);
     }
 
     /**

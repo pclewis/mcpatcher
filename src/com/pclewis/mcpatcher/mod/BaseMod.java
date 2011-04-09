@@ -17,9 +17,4 @@ public class BaseMod extends Mod {
 
         filesToAdd.add(MCPatcher.UTILS_CLASS + ".class");
     }
-
-    @Override
-    public InputStream openFile(String name) throws IOException {
-        return BaseMod.class.getResourceAsStream("/" + name);
-    }
 }

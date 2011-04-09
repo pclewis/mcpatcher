@@ -50,11 +50,6 @@ public class HDTextureMod extends Mod {
         filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
     }
 
-    @Override
-    public InputStream openFile(String name) throws IOException {
-        return getClass().getResourceAsStream("/" + name);
-    }
-
     private static class RenderEngineMod extends ClassMod {
         public RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
