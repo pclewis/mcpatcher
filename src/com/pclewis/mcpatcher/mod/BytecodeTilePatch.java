@@ -55,7 +55,7 @@ class BytecodeTilePatch extends BytecodePatch {
     public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
         return buildCode(
             getCaptureGroup(1),
-            reference(methodInfo, GETSTATIC, new FieldRef("TileSize", field, type)),
+            reference(methodInfo, GETSTATIC, new FieldRef(HDTextureMod.class_TileSize, field, type)),
             getCaptureGroup(2)
         );
     }
@@ -198,7 +198,7 @@ class BytecodeTilePatch extends BytecodePatch {
 
         @Override
         public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-            byte[] getField = reference(methodInfo, GETSTATIC, new FieldRef("TileSize", "int_size", "I"));
+            byte[] getField = reference(methodInfo, GETSTATIC, new FieldRef(HDTextureMod.class_TileSize, "int_size", "I"));
             return buildCode(
                 getField,
                 getField,
