@@ -6,7 +6,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.jar.JarOutputStream;
 
@@ -201,7 +204,9 @@ public class ClassMap {
 
     abstract private class Printer {
         abstract public void logClass(String format, Object... params);
+
         abstract public void logMethod(String format, Object... params);
+
         abstract public void logField(String format, Object... params);
 
         public void print() {
@@ -402,8 +407,7 @@ public class ClassMap {
                 final private JavaRef newRef;
 
                 {
-                    switch (tag)
-                    {
+                    switch (tag) {
                         case ConstPool.CONST_Fieldref:
                             typeStr = "field";
                             opcodes = new byte[]{(byte) GETFIELD, (byte) GETSTATIC, (byte) PUTFIELD, (byte) PUTSTATIC};

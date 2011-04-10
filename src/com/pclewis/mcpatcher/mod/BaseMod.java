@@ -1,12 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
-import com.pclewis.mcpatcher.*;
-import javassist.bytecode.MethodInfo;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import static javassist.bytecode.Opcode.*;
+import com.pclewis.mcpatcher.MCPatcher;
+import com.pclewis.mcpatcher.Mod;
 
 public class BaseMod extends Mod {
     public BaseMod() {
