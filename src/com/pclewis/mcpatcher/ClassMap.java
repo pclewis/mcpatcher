@@ -71,7 +71,7 @@ public class ClassMap {
         if (entry == null) {
             entry = new ClassMapEntry(descName, obfName);
             classMap.put(descName, entry);
-            if (descName.equals("Minecraft")) {
+            if (descName.equals("Minecraft") || descName.equals("MinecraftApplet")) {
                 putEntry(new ClassMapEntry("net.minecraft.client." + descName, entry));
             } else if (!descName.contains(".")) {
                 putEntry(new ClassMapEntry("net.minecraft.src." + descName, entry));
@@ -626,27 +626,27 @@ public class ClassMap {
 
     void merge(ClassMap from) {
         for (Entry<String, ClassMapEntry> e : from.classMap.entrySet()) {
-            merge(from, e.getValue());
+            merge(e.getValue());
         }
     }
 
-    private ClassMapEntry merge(ClassMap from, ClassMapEntry entry) {
+    private ClassMapEntry merge(ClassMapEntry entry) {
         ClassMapEntry newEntry = classMap.get(entry.descName);
         if (newEntry != null) {
             return newEntry;
         }
         if (entry.aliasFor != null) {
-            newEntry = new ClassMapEntry(entry.descName, merge(from, entry.aliasFor));
+            newEntry = new ClassMapEntry(entry.descName, merge(entry.aliasFor));
         } else if (entry.parent != null) {
-            newEntry = new ClassMapEntry(entry.descName, entry.obfName, merge(from, entry.parent));
+            newEntry = new ClassMapEntry(entry.descName, entry.obfName, merge(entry.parent));
         } else {
             newEntry = new ClassMapEntry(entry.descName, entry.obfName);
         }
         for (ClassMapEntry iface : entry.interfaces) {
-            newEntry.addInterface(merge(from, iface));
+            newEntry.addInterface(merge(iface));
         }
-        newEntry.methodMap.putAll(entry.getMethodMap());
-        newEntry.fieldMap.putAll(entry.getFieldMap());
+        newEntry.methodMap.putAll(entry.methodMap);
+        newEntry.fieldMap.putAll(entry.fieldMap);
         putEntry(newEntry);
         return newEntry;
     }
