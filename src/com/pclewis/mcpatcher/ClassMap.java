@@ -38,7 +38,7 @@ public class ClassMap {
      * @return class name
      */
     public static String filenameToClassName(String filename) {
-        return filename.replaceAll("\\.class$", "").replaceAll("/", ".");
+        return filename.replaceAll("\\.class$", "").replaceAll("^/", "").replace('/', '.');
     }
 
     /**
@@ -49,7 +49,7 @@ public class ClassMap {
      * @return filename
      */
     public static String classNameToFilename(String className) {
-        return className.replaceAll("\\.", "/") + ".class";
+        return className.replace('.', '/') + ".class";
     }
 
     private ClassMapEntry getEntry(String descName) {
