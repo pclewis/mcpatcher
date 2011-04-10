@@ -25,7 +25,6 @@ class MinecraftJar {
     private String md5;
     private JarFile origJar;
     private JarOutputStream outputJar;
-    private int heapSize = MCPatcherUtils.getInt("heapSize", 1024);
 
     private static String origMD5;
 
@@ -113,7 +112,6 @@ class MinecraftJar {
         String version = null;
         JarFile jar = null;
         InputStream is = null;
-
         try {
             jar = new JarFile(file, false);
             ZipEntry mc = jar.getEntry("net/minecraft/client/Minecraft.class");
@@ -122,7 +120,7 @@ class MinecraftJar {
             }
             is = jar.getInputStream(mc);
             ClassFile cf = new ClassFile(new DataInputStream(is));
-            Pattern p = Pattern.compile("Minecraft (Alpha |Beta )?v?(" + VERSION_REGEX + ")");
+            Pattern p = Pattern.compile("Minecraft (?:Alpha |Beta )?v?(" + VERSION_REGEX + ")");
             for (Object o : cf.getMethods()) {
                 MethodInfo mi = (MethodInfo) o;
                 ConstPool cp = mi.getConstPool();
@@ -131,7 +129,7 @@ class MinecraftJar {
                         String value = cp.getStringInfo(i);
                         Matcher m = p.matcher(value);
                         if (m.find()) {
-                            version = m.group(2);
+                            version = m.group(1);
                             break;
                         }
                     }
@@ -159,7 +157,7 @@ class MinecraftJar {
             pw = new PrintWriter(new FileWriter(output));
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.matches("^skin:.*")) {
+                if (line.startsWith("skin:")) {
                     line = "skin:Default";
                 }
                 pw.println(line);
@@ -176,14 +174,6 @@ class MinecraftJar {
         } catch (IOException e) {
             Logger.log(e);
         }
-    }
-
-    public int getHeapSize() {
-        return heapSize;
-    }
-
-    public void setHeapSize(int heapSize) {
-        this.heapSize = heapSize;
     }
 
     public void createBackup() throws IOException {
@@ -246,21 +236,24 @@ class MinecraftJar {
 
     public void run() {
         File file = getOutputFile();
-        String path = file.getParent();
+        File directory = file.getParentFile();
         StringBuilder cp = new StringBuilder();
         for (String p : new String[]{file.getName(), "lwjgl.jar", "lwjgl_util.jar", "jinput.jar"}) {
-            cp.append(path);
+            cp.append(directory.getPath());
             cp.append("/");
             cp.append(p);
             cp.append(File.pathSeparatorChar);
         }
 
+        int heapSize = MCPatcherUtils.getInt("heapSize", 1024);
         ProcessBuilder pb = new ProcessBuilder(
             "java",
             "-cp", cp.toString(),
-            "-Djava.library.path=" + path + "/natives",
-            "-Xmx" + MCPatcher.minecraft.getHeapSize() + "M", "-Xms512M",
-            "net.minecraft.client.Minecraft");
+            "-Djava.library.path=" + new File(directory, "natives").getPath(),
+            "-Xmx" + heapSize + "M",
+            "-Xms" + Math.min(heapSize, 512) + "M",
+            "net.minecraft.client.Minecraft"
+        );
         pb.redirectErrorStream(true);
         pb.directory(MCPatcherUtils.getMinecraftPath());
 
@@ -295,9 +288,9 @@ class MinecraftJar {
                     Logger.log(Logger.LOG_MAIN, "Minecraft exited with status %d", p.exitValue());
                 }
             }
-        } catch (InterruptedException e1) {
-        } catch (IOException e1) {
-            Logger.log(e1);
+        } catch (InterruptedException e) {
+        } catch (IOException e) {
+            Logger.log(e);
         }
     }
 }
