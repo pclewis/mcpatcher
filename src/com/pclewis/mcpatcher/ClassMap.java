@@ -171,7 +171,7 @@ public class ClassMap {
      */
     public HashMap<String, String> getMethodMap(String classDescName) {
         ClassMapEntry entry = getEntry(classDescName);
-        return entry.getMethodMap();
+        return entry == null ? new HashMap<String, String>() : entry.getMethodMap();
     }
 
     /**
@@ -182,7 +182,7 @@ public class ClassMap {
      */
     public HashMap<String, String> getFieldMap(String classDescName) {
         ClassMapEntry entry = getEntry(classDescName);
-        return entry.getFieldMap();
+        return entry == null ? new HashMap<String, String>() : entry.getFieldMap();
     }
 
     abstract private class Printer {
@@ -194,7 +194,13 @@ public class ClassMap {
             ArrayList<Entry<String, ClassMapEntry>> sortedClasses = new ArrayList<Entry<String, ClassMapEntry>>(classMap.entrySet());
             Collections.sort(sortedClasses, new Comparator<Entry<String, ClassMapEntry>>() {
                 public int compare(Entry<String, ClassMapEntry> o1, Entry<String, ClassMapEntry> o2) {
-                    return o1.getKey().compareTo(o2.getKey());
+                    if (o1.getValue().aliasFor == null && o2.getValue().aliasFor != null) {
+                        return -1;
+                    } else if (o1.getValue().aliasFor != null && o2.getValue().aliasFor == null) {
+                        return 1;
+                    } else {
+                        return o1.getKey().compareTo(o2.getKey());
+                    }
                 }
             });
             for (Entry<String, ClassMapEntry> e : sortedClasses) {
@@ -349,8 +355,8 @@ public class ClassMap {
             String newClass = oldClass;
             String newName = oldName;
             String newType;
-            if (classMap.containsKey(oldClass)) {
-                ClassMapEntry entry = getEntry(oldClass);
+            ClassMapEntry entry = getEntry(oldClass);
+            if (entry != null) {
                 newClass = entry.getObfName();
                 HashMap<String, String> map = (tag == ConstPool.CONST_Fieldref ? entry.getFieldMap() : entry.getMethodMap());
                 if (map.containsKey(oldName)) {
