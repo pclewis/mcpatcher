@@ -4,7 +4,7 @@ MCJARV = ../bin/minecraft-$(MCVER).jar
 MODJAR = ../mcpatcher-mods/mcpatcher-builtin.jar
 MCPATCHER = out/artifacts/mcpatcher/mcpatcher.jar
 PROFILER4J = $(HOME)/profiler4j-1.0-beta2/agent.jar
-CLASSPATH = lib/javassist.jar:jgoodies-common-1.1.1.jar:jgoodies-forms-1.4.0.jar
+CLASSPATH = lib/javassist.jar
 PACKAGE = com.pclewis.mcpatcher
 DOC_OUT = doc/javadoc
 DOC_SRC = $(PACKAGE)
@@ -51,7 +51,7 @@ modjar: $(MCPATCHER)
 	rm -rf $(TMPDIR)
 	mkdir -p $(TMPDIR)
 	cd $(TMPDIR) && jar -xf ../$(MCPATCHER)
-	cd $(TMPDIR) && rm -rf javassist META-INF *.class com/intellij com/jgoodies com/pclewis/mcpatcher/*.class
+	cd $(TMPDIR) && rm -rf javassist META-INF *.class com/intellij com/pclewis/mcpatcher/*.class
 	cd $(TMPDIR) && jar -cf ../$(MODJAR) *
 	rm -rf $(TMPDIR)
 

@@ -93,11 +93,6 @@
 	</path>
 
 
-	<path id="library.jgoodies.classpath">
-		<pathelement location="${basedir}/lib/junit-3.8.2.jar"/>
-		<pathelement location="${basedir}/lib/forms-1.2.1.jar"/>
-	</path>
-
 	<path id="library.intellij.forms.classpath">
 		<pathelement location="${javac2.home}/forms_rt.jar"/>
 	</path>
@@ -141,14 +136,12 @@
 	<path id="mcpatcher.module.production.classpath">
 		<path refid="${module.jdk.classpath.mcpatcher}"/>
 		<path refid="library.javassist.classpath"/>
-		<path refid="library.jgoodies.classpath"/>
 		<path refid="library.intellij.forms.classpath"/>
 	</path>
 
 	<path id="mcpatcher.runtime.production.module.classpath">
 		<pathelement location="${mcpatcher.output.dir}"/>
 		<path refid="library.javassist.classpath"/>
-		<path refid="library.jgoodies.classpath"/>
 		<path refid="library.intellij.forms.classpath"/>
 	</path>
 
@@ -156,7 +149,6 @@
 		<path refid="${module.jdk.classpath.mcpatcher}"/>
 		<pathelement location="${mcpatcher.output.dir}"/>
 		<path refid="library.javassist.classpath"/>
-		<path refid="library.jgoodies.classpath"/>
 		<path refid="library.intellij.forms.classpath"/>
 	</path>
 
@@ -164,7 +156,6 @@
 		<pathelement location="${mcpatcher.testoutput.dir}"/>
 		<pathelement location="${mcpatcher.output.dir}"/>
 		<path refid="library.javassist.classpath"/>
-		<path refid="library.jgoodies.classpath"/>
 		<path refid="library.intellij.forms.classpath"/>
 	</path>
 
