@@ -202,7 +202,7 @@ public abstract class Mod {
      * @see #filesToReplace
      */
     public InputStream openFile(String name) throws IOException {
-        return getClass().getResourceAsStream("/" + name);
+        return getClass().getResourceAsStream(name.replaceFirst("^/*", "/"));
     }
 
     /**
