@@ -9,26 +9,29 @@ PACKAGE = com.pclewis.mcpatcher
 DOC_OUT = doc/javadoc
 DOC_SRC = $(PACKAGE)
 DOC_SRCPATH = utils/src:stubs/src:newcode/src:src:
+TEST_OPTS = -ignorecustommods -auto -loglevel 5
 TEST_LOG = test.log
 GOOD_LOG = good.log
 TMPDIR = t.1
 FILTER = perl -p -e 's/@[[:digit:]]+/@.../g; s/(INVOKE|GET|PUT)(VIRTUAL|STATIC|INTERFACE|FIELD)( 0x[[:xdigit:]]{2}){2}/$$1$$2 0x.. 0x../g;'
 
-.PHONY: default run test testfilter javadoc control profile clean modjar restore
+.PHONY: default build run test testfilter javadoc control profile clean modjar restore
 
-default: build.xml
+default:
+
+build: $(MCPATCHER)
 	ant
 
 run: $(MCPATCHER)
 	java -jar $(MCPATCHER)
 
 test: $(MCPATCHER)
-	time java -jar $(MCPATCHER) -ignorecustommods -auto -loglevel 5 > $(TEST_LOG) 2>&1
+	time java -jar $(MCPATCHER) $(TEST_OPTS) > $(TEST_LOG) 2>&1
 	diff -c $(GOOD_LOG) $(TEST_LOG)
 	rm -f $(TEST_LOG)
 
 testfilter: $(MCPATCHER)
-	time java -jar $(MCPATCHER) -ignorecustommods -auto -loglevel 5 > $(TEST_LOG) 2>&1
+	time java -jar $(MCPATCHER) $(TEST_OPTS) > $(TEST_LOG) 2>&1
 	@$(FILTER) $(TEST_LOG) > $(TEST_LOG).1
 	@$(FILTER) $(GOOD_LOG) > $(GOOD_LOG).1
 	diff -c $(GOOD_LOG).1 $(TEST_LOG).1
@@ -46,7 +49,7 @@ profile: $(MCPATCHER) $(PROFILER4J)
 	java -Xmx512M -javaagent:$(PROFILER4J)=waitconn=true,verbosity=1 -jar $(MCPATCHER)
 
 clean:
-	rm -rf $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1 $(MCPATCHER) $(DOC_OUT) out
+	rm -rf $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1 $(MCPATCHER) $(DOC_OUT) $(MODJAR) out
 
 modjar: $(MCPATCHER)
 	rm -rf $(TMPDIR)
