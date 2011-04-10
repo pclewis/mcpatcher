@@ -78,6 +78,85 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4_01.jar (second pass)
 [YES] HD Textures 1.0 - Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.
 [YES] HD Font 1.0 - Provides support for higher resolution fonts.
 
+#### Class map:
+HD Textures
+    class ColorizerFoliage (hn.class)
+        field colorBuffer -> a
+    class ColorizerGrass (gm.class)
+        field colorBuffer -> a
+    class Compass (aj.class)
+    class Fire (os.class)
+    class FlowLava (gr.class)
+    class FlowWater (lr.class)
+    class FontRenderer (ox.class)
+    class GLAllocation (ez.class)
+        method createDirectByteBuffer -> b
+    class GameSettings (is.class)
+    class ItemRenderer (nt.class)
+    class Minecraft (net/minecraft/client/Minecraft.class)
+        field fontRenderer -> p
+        field gameSettings -> y
+        field renderEngine -> o
+        field texturePackList -> C
+    class Portal (gh.class)
+    class RenderEngine (ho.class)
+        method readTextureImage -> a
+        method refreshTextures -> b
+        method registerTextureFX -> a
+        method setupTexture -> a
+        field imageData -> e
+        field textureList -> f
+    class StillLava (bo.class)
+    class StillWater (rv.class)
+    class TextureFX (ai.class)
+        method onTick -> a
+        field field_1130_d -> d
+        field imageData -> a
+        field tileImage -> f
+        field tileNumber -> b
+        field tileSize -> e
+    class TexturePackBase (f.class)
+        method getInputStream -> a
+        field texturePackFileName -> a
+    class TexturePackDefault (me.class)
+    class TexturePackList (gw.class)
+        field defaultTexturePack -> c
+        field minecraft -> e
+        field selectedTexturePack -> a
+    class Watch (ir.class)
+    class com.pclewis.mcpatcher.mod.CustomAnimation extends TextureFX
+        method onTick -> a
+        field field_1130_d -> d
+        field imageData -> a
+        field tileImage -> f
+        field tileNumber -> b
+        field tileSize -> e
+    class net.minecraft.client.Minecraft alias for Minecraft
+    class net.minecraft.src.ColorizerFoliage alias for ColorizerFoliage
+    class net.minecraft.src.ColorizerGrass alias for ColorizerGrass
+    class net.minecraft.src.Compass alias for Compass
+    class net.minecraft.src.Fire alias for Fire
+    class net.minecraft.src.FlowLava alias for FlowLava
+    class net.minecraft.src.FlowWater alias for FlowWater
+    class net.minecraft.src.FontRenderer alias for FontRenderer
+    class net.minecraft.src.GLAllocation alias for GLAllocation
+    class net.minecraft.src.GameSettings alias for GameSettings
+    class net.minecraft.src.ItemRenderer alias for ItemRenderer
+    class net.minecraft.src.Portal alias for Portal
+    class net.minecraft.src.RenderEngine alias for RenderEngine
+    class net.minecraft.src.StillLava alias for StillLava
+    class net.minecraft.src.StillWater alias for StillWater
+    class net.minecraft.src.TextureFX alias for TextureFX
+    class net.minecraft.src.TexturePackBase alias for TexturePackBase
+    class net.minecraft.src.TexturePackDefault alias for TexturePackDefault
+    class net.minecraft.src.TexturePackList alias for TexturePackList
+    class net.minecraft.src.Watch alias for Watch
+
+HD Font
+    class FontRenderer (ox.class)
+    class net.minecraft.src.FontRenderer alias for FontRenderer
+
+
 Patching...
  applying TextureFX patch to ai.class for mod HD Textures
     array size 1024 -> int_numBytes <init>@5
@@ -1331,84 +1410,6 @@ Patching...
    string replace net/minecraft/src/TextureFX -> ai @58
 
 Done!
-
-#### Class map:
-HD Textures
-    class ColorizerFoliage (hn.class)
-        field colorBuffer -> a
-    class ColorizerGrass (gm.class)
-        field colorBuffer -> a
-    class Compass (aj.class)
-    class Fire (os.class)
-    class FlowLava (gr.class)
-    class FlowWater (lr.class)
-    class FontRenderer (ox.class)
-    class GLAllocation (ez.class)
-        method createDirectByteBuffer -> b
-    class GameSettings (is.class)
-    class ItemRenderer (nt.class)
-    class Minecraft (net/minecraft/client/Minecraft.class)
-        field fontRenderer -> p
-        field gameSettings -> y
-        field renderEngine -> o
-        field texturePackList -> C
-    class Portal (gh.class)
-    class RenderEngine (ho.class)
-        method readTextureImage -> a
-        method refreshTextures -> b
-        method registerTextureFX -> a
-        method setupTexture -> a
-        field imageData -> e
-        field textureList -> f
-    class StillLava (bo.class)
-    class StillWater (rv.class)
-    class TextureFX (ai.class)
-        method onTick -> a
-        field field_1130_d -> d
-        field imageData -> a
-        field tileImage -> f
-        field tileNumber -> b
-        field tileSize -> e
-    class TexturePackBase (f.class)
-        method getInputStream -> a
-        field texturePackFileName -> a
-    class TexturePackDefault (me.class)
-    class TexturePackList (gw.class)
-        field defaultTexturePack -> c
-        field minecraft -> e
-        field selectedTexturePack -> a
-    class Watch (ir.class)
-    class com.pclewis.mcpatcher.mod.CustomAnimation extends TextureFX
-        method onTick -> a
-        field field_1130_d -> d
-        field imageData -> a
-        field tileImage -> f
-        field tileNumber -> b
-        field tileSize -> e
-    class net.minecraft.client.Minecraft alias for Minecraft
-    class net.minecraft.src.ColorizerFoliage alias for ColorizerFoliage
-    class net.minecraft.src.ColorizerGrass alias for ColorizerGrass
-    class net.minecraft.src.Compass alias for Compass
-    class net.minecraft.src.Fire alias for Fire
-    class net.minecraft.src.FlowLava alias for FlowLava
-    class net.minecraft.src.FlowWater alias for FlowWater
-    class net.minecraft.src.FontRenderer alias for FontRenderer
-    class net.minecraft.src.GLAllocation alias for GLAllocation
-    class net.minecraft.src.GameSettings alias for GameSettings
-    class net.minecraft.src.ItemRenderer alias for ItemRenderer
-    class net.minecraft.src.Portal alias for Portal
-    class net.minecraft.src.RenderEngine alias for RenderEngine
-    class net.minecraft.src.StillLava alias for StillLava
-    class net.minecraft.src.StillWater alias for StillWater
-    class net.minecraft.src.TextureFX alias for TextureFX
-    class net.minecraft.src.TexturePackBase alias for TexturePackBase
-    class net.minecraft.src.TexturePackDefault alias for TexturePackDefault
-    class net.minecraft.src.TexturePackList alias for TexturePackList
-    class net.minecraft.src.Watch alias for Watch
-
-HD Font
-    class FontRenderer (ox.class)
-    class net.minecraft.src.FontRenderer alias for FontRenderer
 
 #### Patch summary:
 HD Textures

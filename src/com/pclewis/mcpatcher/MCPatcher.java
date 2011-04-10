@@ -127,15 +127,16 @@ final public class MCPatcher {
                 int exitStatus = 1;
                 try {
                     getApplicableMods();
-                    if (patch()) {
-                        MCPatcherUtils.saveProperties();
-                        exitStatus = 0;
-                    }
                     System.out.println();
                     System.out.println("#### Class map:");
                     showClassMaps(System.out);
+                    if (patch()) {
+                        exitStatus = 0;
+                    }
+                    System.out.println();
                     System.out.println("#### Patch summary:");
                     showPatchResults(System.out);
+                    MCPatcherUtils.saveProperties();
                 } catch (Exception e) {
                     Logger.log(e);
                 }
