@@ -16,7 +16,8 @@ FILTER = perl -p -e 's/@[0-9]+//g; s/0x\x\x/0x../g;'
 
 .PHONY: default run test testfilter javadoc control profile clean modjar restore
 
-default:
+default: build.xml
+	ant
 
 run: $(MCPATCHER)
 	java -jar $(MCPATCHER)
