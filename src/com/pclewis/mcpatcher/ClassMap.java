@@ -202,95 +202,47 @@ public class ClassMap {
         return entry == null ? new HashMap<String, String>() : entry.getFieldMap();
     }
 
-    abstract private class Printer {
-        abstract public void logClass(String format, Object... params);
+    void print(final PrintStream out, final String indent) {
+        ArrayList<Entry<String, ClassMapEntry>> sortedClasses = new ArrayList<Entry<String, ClassMapEntry>>(classMap.entrySet());
+        Collections.sort(sortedClasses, new Comparator<Entry<String, ClassMapEntry>>() {
+            public int compare(Entry<String, ClassMapEntry> o1, Entry<String, ClassMapEntry> o2) {
+                if (o1.getValue().aliasFor == null && o2.getValue().aliasFor != null) {
+                    return -1;
+                } else if (o1.getValue().aliasFor != null && o2.getValue().aliasFor == null) {
+                    return 1;
+                } else {
+                    return o1.getKey().compareTo(o2.getKey());
+                }
+            }
+        });
+        for (Entry<String, ClassMapEntry> e : sortedClasses) {
+            out.printf("%1$sclass %2$s\n", indent, e.getValue().toString());
+            if (e.getValue().aliasFor != null) {
+                continue;
+            }
 
-        abstract public void logMethod(String format, Object... params);
+            ArrayList<Entry<String, String>> sortedMembers;
 
-        abstract public void logField(String format, Object... params);
-
-        public void print() {
-            ArrayList<Entry<String, ClassMapEntry>> sortedClasses = new ArrayList<Entry<String, ClassMapEntry>>(classMap.entrySet());
-            Collections.sort(sortedClasses, new Comparator<Entry<String, ClassMapEntry>>() {
-                public int compare(Entry<String, ClassMapEntry> o1, Entry<String, ClassMapEntry> o2) {
-                    if (o1.getValue().aliasFor == null && o2.getValue().aliasFor != null) {
-                        return -1;
-                    } else if (o1.getValue().aliasFor != null && o2.getValue().aliasFor == null) {
-                        return 1;
-                    } else {
-                        return o1.getKey().compareTo(o2.getKey());
-                    }
+            sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().getMethodMap().entrySet());
+            Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
+                public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+                    return o1.getKey().compareTo(o2.getKey());
                 }
             });
-            for (Entry<String, ClassMapEntry> e : sortedClasses) {
-                logClass("class %s", e.getValue().toString());
-                if (e.getValue().aliasFor != null) {
-                    continue;
-                }
+            for (Entry<String, String> e1 : sortedMembers) {
+                out.printf("%1$s%1$smethod %2$s -> %3$s\n", indent, e1.getKey(), e1.getValue());
+            }
 
-                ArrayList<Entry<String, String>> sortedMembers;
-
-                sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().getMethodMap().entrySet());
-                Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
-                    public int compare(Entry<String, String> o1, Entry<String, String> o2) {
-                        return o1.getKey().compareTo(o2.getKey());
-                    }
-                });
-                for (Entry<String, String> e1 : sortedMembers) {
-                    logMethod("method %s -> %s", e1.getKey(), e1.getValue());
+            sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().getFieldMap().entrySet());
+            Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
+                public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+                    return o1.getKey().compareTo(o2.getKey());
                 }
-
-                sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().getFieldMap().entrySet());
-                Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
-                    public int compare(Entry<String, String> o1, Entry<String, String> o2) {
-                        return o1.getKey().compareTo(o2.getKey());
-                    }
-                });
-                for (Entry<String, String> e1 : sortedMembers) {
-                    logField("field %s -> %s", e1.getKey(), e1.getValue());
-                }
+            });
+            for (Entry<String, String> e1 : sortedMembers) {
+                out.printf("%1$s%1$sfield %2$s -> %3$s\n", indent, e1.getKey(), e1.getValue());
             }
         }
-    }
-
-    void print() {
-        new Printer() {
-            @Override
-            public void logClass(String format, Object... params) {
-                Logger.log(Logger.LOG_CLASS, format, params);
-            }
-
-            @Override
-            public void logMethod(String format, Object... params) {
-                Logger.log(Logger.LOG_METHOD, format, params);
-            }
-
-            @Override
-            public void logField(String format, Object... params) {
-                Logger.log(Logger.LOG_FIELD, format, params);
-            }
-        }.print();
-    }
-
-    void print(final PrintStream out, final String indent) {
-        new Printer() {
-            private String indent2 = indent + indent;
-
-            @Override
-            public void logClass(String format, Object... params) {
-                out.printf(indent + format + "\n", params);
-            }
-
-            @Override
-            public void logMethod(String format, Object... params) {
-                out.printf(indent2 + format + "\n", params);
-            }
-
-            @Override
-            public void logField(String format, Object... params) {
-                out.printf(indent2 + format + "\n", params);
-            }
-        }.print();
     }
 
     void apply(ClassFile cf) throws BadBytecode {

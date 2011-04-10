@@ -325,9 +325,6 @@ final public class MCPatcher {
                     Logger.log(Logger.LOG_MOD, "multiple classes matched %s:%s", cm.getDeobfClass(), sb.toString());
                 }
             }
-            if (mainForm == null) {
-                mod.getClassMap().print();
-            }
         }
     }
 
