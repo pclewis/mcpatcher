@@ -741,7 +741,7 @@ public class ClassMap {
             sb.append(descName.replace('/', '.'));
             if (obfName != null && !obfName.equals(descName)) {
                 sb.append(" (");
-                sb.append(obfName.replace('/', '.'));
+                sb.append(obfName);
                 sb.append(".class)");
             }
             if (aliasFor != null) {
