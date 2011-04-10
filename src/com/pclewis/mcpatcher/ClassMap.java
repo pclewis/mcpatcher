@@ -626,14 +626,29 @@ public class ClassMap {
 
     void merge(ClassMap from) {
         for (Entry<String, ClassMapEntry> e : from.classMap.entrySet()) {
-            addClassMap(e.getKey(), e.getValue().getObfName());
-            for (Entry<String, String> e1 : e.getValue().getMethodMap().entrySet()) {
-                addMethodMap(e.getKey(), e1.getKey(), e1.getValue());
-            }
-            for (Entry<String, String> e1 : e.getValue().getFieldMap().entrySet()) {
-                addFieldMap(e.getKey(), e1.getKey(), e1.getValue());
-            }
+            merge(from, e.getValue());
         }
+    }
+
+    private ClassMapEntry merge(ClassMap from, ClassMapEntry entry) {
+        ClassMapEntry newEntry = classMap.get(entry.descName);
+        if (newEntry != null) {
+            return newEntry;
+        }
+        if (entry.aliasFor != null) {
+            newEntry = new ClassMapEntry(entry.descName, merge(from, entry.aliasFor));
+        } else if (entry.parent != null) {
+            newEntry = new ClassMapEntry(entry.descName, entry.obfName, merge(from, entry.parent));
+        } else {
+            newEntry = new ClassMapEntry(entry.descName, entry.obfName);
+        }
+        for (ClassMapEntry iface : entry.interfaces) {
+            newEntry.addInterface(merge(from, iface));
+        }
+        newEntry.methodMap.putAll(entry.getMethodMap());
+        newEntry.fieldMap.putAll(entry.getFieldMap());
+        putEntry(newEntry);
+        return newEntry;
     }
 
     private static class ClassMapEntry {
@@ -668,8 +683,8 @@ public class ClassMap {
             this.parent = parent;
         }
 
-        public void addInterface(ClassMapEntry parent) {
-            interfaces.add(parent);
+        public void addInterface(ClassMapEntry iface) {
+            interfaces.add(iface);
         }
 
         public void addMethod(String descName, String obfName) {
