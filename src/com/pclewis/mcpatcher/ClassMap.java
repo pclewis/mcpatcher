@@ -82,6 +82,13 @@ public class ClassMap {
                 putEntry(new ClassMapEntry("net.minecraft.src." + descName, entry));
             }
         }
+        String oldName = entry.getObfName();
+        if (!oldName.equals(obfName.replace('.', '/'))) {
+            throw new RuntimeException(String.format(
+                "cannot add class map %1$s -> %2$s because there is already a class map for %1$s -> %3$s",
+                descName, obfName, oldName
+            ));
+        }
     }
 
     /**
@@ -101,6 +108,13 @@ public class ClassMap {
             throw new RuntimeException(String.format(
                 "cannot add method map %s.%s -> %s because there is no class map for %s",
                 classDescName, descName, obfName, classDescName
+            ));
+        }
+        String oldName = entry.getMethod(descName);
+        if (oldName != null && !oldName.equals(obfName)) {
+            throw new RuntimeException(String.format(
+                "cannot add method map %1$s.%2$s -> %3$s because it is already mapped to %4$s",
+                classDescName, descName, obfName, oldName
             ));
         }
         entry.addMethod(descName, obfName);
@@ -125,6 +139,13 @@ public class ClassMap {
                 classDescName, descName, obfName, classDescName
             ));
         }
+        String oldName = entry.getField(descName);
+        if (oldName != null && !oldName.equals(obfName)) {
+            throw new RuntimeException(String.format(
+                "cannot add field map %1$s.%2$s -> %3$s because it is already mapped to %4$s",
+                classDescName, descName, obfName, oldName
+            ));
+        }
         entry.addField(descName, obfName);
     }
 
@@ -146,8 +167,9 @@ public class ClassMap {
         if (childEntry == null) {
             childEntry = new ClassMapEntry(child, child, parentEntry);
             putEntry(childEntry);
+        } else {
+            childEntry.setParent(parentEntry);
         }
-        childEntry.parent = parentEntry;
     }
 
     /**
@@ -671,23 +693,18 @@ public class ClassMap {
         }
 
         public String getMethod(String descName) {
-            String obfName = findMethod(descName);
-            return obfName == null ? descName : obfName;
-        }
-
-        private String findMethod(String descName) {
             String obfName;
+            if (aliasFor != null && (obfName = aliasFor.getMethod(descName)) != null) {
+                return obfName;
+            }
             if ((obfName = methodMap.get(descName)) != null) {
                 return obfName;
             }
-            if (aliasFor != null && (obfName = aliasFor.findMethod(descName)) != null) {
-                return obfName;
-            }
-            if (parent != null && (obfName = parent.findMethod(descName)) != null) {
+            if (parent != null && (obfName = parent.getMethod(descName)) != null) {
                 return obfName;
             }
             for (ClassMapEntry entry : interfaces) {
-                if ((obfName = entry.findMethod(descName)) != null) {
+                if ((obfName = entry.getMethod(descName)) != null) {
                     return obfName;
                 }
             }
@@ -695,19 +712,14 @@ public class ClassMap {
         }
 
         public String getField(String descName) {
-            String obfName = findField(descName);
-            return obfName == null ? descName : obfName;
-        }
-        
-        private String findField(String descName) {
             String obfName;
+            if (aliasFor != null && (obfName = aliasFor.getField(descName)) != null) {
+                return obfName;
+            }
             if ((obfName = fieldMap.get(descName)) != null) {
                 return obfName;
             }
-            if (aliasFor != null && (obfName = aliasFor.findField(descName)) != null) {
-                return obfName;
-            }
-            if (parent != null && (obfName = parent.findField(descName)) != null) {
+            if (parent != null && (obfName = parent.getField(descName)) != null) {
                 return obfName;
             }
             return null;
