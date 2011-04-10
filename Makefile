@@ -12,7 +12,7 @@ DOC_SRCPATH = utils/src:stubs/src:newcode/src:src:
 TEST_LOG = test.log
 GOOD_LOG = good.log
 TMPDIR = t.1
-FILTER = perl -p -e 's/@[0-9]+//g; s/0x\x\x/0x../g;'
+FILTER = perl -p -e 's/@[[:digit:]]+/@.../g; s/(INVOKE|GET|PUT)(VIRTUAL|STATIC|INTERFACE|FIELD)( 0x[[:xdigit:]]{2}){2}/$$1$$2 0x.. 0x../g;'
 
 .PHONY: default run test testfilter javadoc control profile clean modjar restore
 
@@ -29,8 +29,8 @@ test: $(MCPATCHER)
 
 testfilter: $(MCPATCHER)
 	time java -jar $(MCPATCHER) -ignorecustommods -auto -loglevel 5 > $(TEST_LOG) 2>&1
-	$(FILTER) $(TEST_LOG) > $(TEST_LOG).1
-	$(FILTER) $(GOOD_LOG) > $(GOOD_LOG).1
+	@$(FILTER) $(TEST_LOG) > $(TEST_LOG).1
+	@$(FILTER) $(GOOD_LOG) > $(GOOD_LOG).1
 	diff -c $(GOOD_LOG).1 $(TEST_LOG).1
 	rm -f $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1
 
