@@ -478,7 +478,9 @@ final public class MCPatcher {
 
         for (Mod mod : modList.getSelected()) {
             for (String name : mod.filesToAdd) {
-                addOrReplaceFile("adding", mod, name, outputJar);
+                if (!addOrReplaceFile("adding", mod, name, outputJar)) {
+                    throw new IOException(String.format("could not open %s for %s", name, mod));
+                }
             }
         }
     }
