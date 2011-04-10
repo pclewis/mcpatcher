@@ -350,6 +350,9 @@ final public class MCPatcher {
             out.println("Click Patch on the Mods tab.");
         } else {
             for (Mod mod : modList.getSelected()) {
+                if (mod.getClassMods().size() == 0) {
+                    continue;
+                }
                 out.printf("%s\n", mod.getName());
                 for (ClassMod classMod : mod.getClassMods()) {
                     ArrayList<String> tc = classMod.getTargetClasses();
