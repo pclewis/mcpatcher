@@ -17,6 +17,8 @@ public class MCPatcherUtils {
     private static boolean needSaveProps = false;
     private static boolean debug;
 
+    static boolean isGame = true;
+
     private MCPatcherUtils() {
     }
 
@@ -40,14 +42,13 @@ public class MCPatcherUtils {
             try {
                 if (propFile.exists()) {
                     properties.load(new FileInputStream(propFile));
-                    remove("HDTexture.enableAnimations");
-                    remove("HDTexture.useCustomAnimations");
-                    remove("HDTexture.glBufferSize");
-                    // remove("debug"); TODO: uncomment when out of beta
+                    remove("HDTexture", "enableAnimations");
+                    remove("HDTexture", "useCustomAnimations");
+                    remove("HDTexture", "glBufferSize");
                 } else {
                     needSaveProps = true;
                 }
-                debug = getBoolean("debug", true); // TODO: change to false when out of beta
+                debug = getBoolean("debug", false);
                 saveProperties();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -79,6 +80,16 @@ public class MCPatcherUtils {
         if (debug) {
             System.out.printf(format + "\n", params);
         }
+    }
+
+    /**
+     * Returns true if running inside game, false if running inside MCPatcher.  Useful for
+     * code shared between mods and runtime classes.
+     *
+     * @return true if in game
+     */
+    public static boolean isGame() {
+        return isGame;
     }
 
     /**

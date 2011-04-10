@@ -92,6 +92,8 @@ final public class MCPatcher {
 
         Util.logOSInfo();
 
+        MCPatcherUtils.isGame = false;
+
         if (!MCPatcherUtils.getString("lastVersion", "").equals(VERSION_STRING)) {
             MCPatcherUtils.set("lastVersion", VERSION_STRING);
             MCPatcherUtils.set("betaWarningShown", false);
