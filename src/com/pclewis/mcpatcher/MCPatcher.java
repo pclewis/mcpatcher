@@ -95,6 +95,7 @@ final public class MCPatcher {
         if (!MCPatcherUtils.getString("lastVersion", "").equals(VERSION_STRING)) {
             MCPatcherUtils.set("lastVersion", VERSION_STRING);
             MCPatcherUtils.set("betaWarningShown", false);
+            MCPatcherUtils.set("debug", BETA_VERSION > 0);
         }
         if (guiEnabled && BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown", false)) {
             mainForm.showBetaDialog();
