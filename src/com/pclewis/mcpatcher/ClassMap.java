@@ -17,14 +17,6 @@ import static javassist.bytecode.Opcode.*;
  * names in minecraft.jar.  Each Mod has its own ClassMap that is maintained by MCPatcher.
  */
 public class ClassMap {
-    /**
-     * Alias for default package.  Allows mods to refer to Minecraft classes without being
-     * in the default package themselves.  Either <tt>RenderEngine</tt> or
-     * <tt>net.minecraft.src.RenderEngine</tt> will map to the same obfuscated name at
-     * runtime.
-     */
-    public static final String DEFAULT_MINECRAFT_PACKAGE = "net.minecraft.src";
-
     private HashMap<String, ClassMapEntry> classMap = new HashMap<String, ClassMapEntry>();
 
     ClassMap() {
