@@ -131,6 +131,8 @@ class ConstPoolUtils {
         if (value instanceof Integer) {
             int i = (Integer) value;
             switch (i) {
+                case -1:
+                    return new byte[]{ICONST_M1};
                 case 0:
                     return new byte[]{ICONST_0};
                 case 1:
