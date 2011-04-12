@@ -5,6 +5,8 @@ import javassist.bytecode.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a set of patches to be applied to a class.
@@ -58,6 +60,9 @@ abstract public class ClassMod implements PatchComponent {
     ArrayList<String> targetClasses = new ArrayList<String>();
     ArrayList<String> errors = new ArrayList<String>();
     boolean addToConstPool = false;
+    private ArrayList<Label> labels = new ArrayList<Label>();
+    private HashMap<String, Integer> labelPositions = new HashMap<String, Integer>();
+
 
     void setMod(Mod mod) {
         this.mod = mod;
@@ -231,6 +236,49 @@ abstract public class ClassMod implements PatchComponent {
     public void postPatch(String filename, ClassFile classFile) throws Exception {
     }
 
+    final public static class Label {
+        String name;
+        boolean save;
+        int from;
+
+        Label(String name, boolean save) {
+            this.name = name;
+            this.save = save;
+        }
+    }
+
+    final protected Label label(String key) {
+        return new Label(key, true);
+    }
+
+    final protected Label branch(String key) {
+        return new Label(key, false);
+    }
+
+    void resetLabels() {
+        labels.clear();
+        labelPositions.clear();
+    }
+
+    void resolveLabels(byte[] code, int start) {
+        for (Map.Entry<String, Integer> e : labelPositions.entrySet()) {
+            Logger.log(Logger.LOG_BYTECODE, "label %s -> instruction %d", e.getKey(), start + e.getValue());
+        }
+        for (Label label : labels) {
+            if (!labelPositions.containsKey(label.name)) {
+                throw new RuntimeException("no label " + label.name + " defined");
+            }
+            int to = labelPositions.get(label.name);
+            int diff = to - label.from + 1;
+            int codepos = label.from;
+            Logger.log(Logger.LOG_BYTECODE, "branch offset %s %s -> %+d @%d",
+                Mnemonic.OPCODE[code[codepos - 1] & 0xff].toUpperCase(), label.name, diff, label.from - 1 + start
+            );
+            code[codepos] = Util.b(diff, 1);
+            code[codepos + 1] = Util.b(diff, 0);
+        }
+    }
+
     // PatchComponent methods
 
     final public String buildExpression(Object... objects) {
@@ -249,6 +297,20 @@ abstract public class ClassMod implements PatchComponent {
             } else if (o instanceof int[]) {
                 for (int i : (int[]) o) {
                     baos.write(i);
+                }
+            } else if (o instanceof Label) {
+                Label label = (Label) o;
+                if (label.save) {
+                    int offset = baos.size();
+                    if (labelPositions.containsKey(label.name)) {
+                        throw new RuntimeException("label " + label.name + " already defined");
+                    }
+                    labelPositions.put(label.name, offset);
+                } else {
+                    label.from = baos.size();
+                    labels.add(label);
+                    baos.write(0);
+                    baos.write(0);
                 }
             } else {
                 throw new AssertionError("invalid type");

@@ -62,8 +62,10 @@ abstract public class AddMethodPatch extends ClassPatch {
         exceptionTable = new ExceptionTable(constPool);
         try {
             classMod.addToConstPool = true;
+            classMod.resetLabels();
             byte[] code = generateMethod(classFile, methodInfo);
             if (code != null) {
+                classMod.resolveLabels(code, 0);
                 methodInfo.setCodeAttribute(new CodeAttribute(constPool, maxStackSize, numLocals, code, exceptionTable));
                 recordPatch(String.format("stack size %d, local vars %d", maxStackSize, numLocals));
                 classFile.addMethod(methodInfo);
