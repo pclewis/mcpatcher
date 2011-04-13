@@ -1,10 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.AccessFlag;
-import javassist.bytecode.BadBytecode;
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.MethodInfo;
+import javassist.bytecode.*;
 
 import java.io.IOException;
 
@@ -15,6 +12,7 @@ public class BetterGrass extends Mod {
     private static final String fieldtype_MATRIX = "[[I";
 
     private String colorMultiplierType;
+    private String colorMultiplierTypeStatic;
     private byte[] colorMultiplierCode;
 
     public BetterGrass() {
@@ -27,12 +25,45 @@ public class BetterGrass extends Mod {
         allowedDirs.add("");
 
         classMods.add(new ColorizerGrassMod());
+        classMods.add(new MaterialMod());
         classMods.add(new BlockGrassMod());
+        classMods.add(new BlockDirtMod());
     }
 
     private static class ColorizerGrassMod extends ClassMod {
         public ColorizerGrassMod() {
             classSignatures.add(new ConstSignature("/misc/grasscolor.png"));
+        }
+    }
+
+    private static class MaterialMod extends ClassMod {
+        public MaterialMod() {
+            classSignatures.add(new FixedBytecodeSignature(
+                "^",
+                ALOAD_0,
+                ICONST_1,
+                PUTFIELD, BinaryRegex.any(2),
+                ALOAD_0,
+                ARETURN,
+                "$"
+            ));
+            classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
+
+            fieldMappers.add(new FieldMapper("ground", "LMaterial;") {
+                int count = 0;
+
+                @Override
+                public boolean match(FieldInfo fieldInfo) {
+                    if (!super.match(fieldInfo)) {
+                        return false;
+                    }
+                    if ((fieldInfo.getAccessFlags() & AccessFlag.STATIC) == 0) {
+                        return false;
+                    }
+                    count++;
+                    return count == 2;
+                }
+            });
         }
     }
 
@@ -72,6 +103,7 @@ public class BetterGrass extends Mod {
                 @Override
                 public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
                     colorMultiplierType = methodInfo.getDescriptor();
+                    colorMultiplierTypeStatic = colorMultiplierType.replaceFirst("\\(", "(I");
                     colorMultiplierCode = methodInfo.getCodeAttribute().getCode().clone();
                     Logger.log(Logger.LOG_CONST, "colorMultiplier %s %d bytes",
                         colorMultiplierType, colorMultiplierCode.length
@@ -296,13 +328,54 @@ public class BetterGrass extends Mod {
             patches.add(new AddMethodPatch("colorMultiplierStatic", null) {
                 @Override
                 protected void prePatch(ClassFile classFile) {
-                    type = colorMultiplierType.replaceFirst("\\(", "(I");
+                    type = colorMultiplierTypeStatic;
                 }
 
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
                     methodInfo.setAccessFlags(methodInfo.getAccessFlags() | AccessFlag.STATIC);
                     return colorMultiplierCode;
+                }
+            });
+        }
+    }
+
+    private class BlockDirtMod extends ClassMod {
+        public BlockDirtMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        "^",
+                        ALOAD_0,
+                        ILOAD_1,
+                        ILOAD_2,
+                        reference(methodInfo, GETSTATIC, new FieldRef("jh", "b", "Ljh;")),
+                        INVOKESPECIAL, BinaryRegex.any(2),
+                        RETURN,
+                        "$"
+                    );
+                }
+            });
+
+            patches.add(new AddMethodPatch(null, null) {
+                @Override
+                protected void prePatch(ClassFile classFile) {
+                    type = colorMultiplierType;
+                    name = map(new MethodRef("BlockGrass", "colorMultiplier", type)).getName();
+                }
+
+                @Override
+                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
+                    return buildCode(
+                        ICONST_0,
+                        ALOAD_1,
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("BlockGrass", "colorMultiplierStatic", colorMultiplierTypeStatic)),
+                        IRETURN
+                    );
                 }
             });
         }
