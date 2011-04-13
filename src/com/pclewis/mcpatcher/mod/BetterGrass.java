@@ -60,8 +60,22 @@ public class BetterGrass extends Mod {
                     if ((fieldInfo.getAccessFlags() & AccessFlag.STATIC) == 0) {
                         return false;
                     }
-                    count++;
-                    return count == 2;
+                    switch (++count) {
+                        case 2:
+                            name = "ground";
+                            return true;
+
+                        case 19:
+                            name = "snow";
+                            return true;
+
+                        case 20:
+                            name = "builtSnow";
+                            return true;
+
+                        default:
+                            return false;
+                    }
                 }
             });
         }
@@ -90,6 +104,9 @@ public class BetterGrass extends Mod {
                 public void afterMatch(ClassFile classFile) {
                     getBlockMaterial = matcher.getCaptureGroup(1).clone();
                     int index = (getBlockMaterial[1] << 8) | getBlockMaterial[2];
+                    ConstPool cp = classFile.getConstPool();
+                    classMap.addClassMap("IBlockAccess", cp.getInterfaceMethodrefClassName(index));
+                    classMap.addMethodMap("IBlockAccess", "getBlockMaterial", cp.getInterfaceMethodrefName(index));
                     Logger.log(Logger.LOG_CONST, "getBlockMaterial ref %d", index);
                 }
             });
@@ -350,7 +367,7 @@ public class BetterGrass extends Mod {
                         ALOAD_0,
                         ILOAD_1,
                         ILOAD_2,
-                        reference(methodInfo, GETSTATIC, new FieldRef("jh", "b", "Ljh;")),
+                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "b", "LMaterial;")),
                         INVOKESPECIAL, BinaryRegex.any(2),
                         RETURN,
                         BinaryRegex.end()
@@ -368,12 +385,37 @@ public class BetterGrass extends Mod {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
                     return buildCode(
+                        // Material material = iblockaccess.getBlockMaterial(i, j + 1, k);
+                        ALOAD_1,
+                        ILOAD_2,
+                        ILOAD_3,
+                        ICONST_1,
+                        IADD,
+                        ILOAD, 4,
+                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
+                        ASTORE, 5,
+
+                        // if (material == Material.snow)
+                        ALOAD, 5,
+                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "snow", "LMaterial;")),
+                        IF_ACMPEQ, branch("A"),
+
+                        // if (material == Material.builtSnow)
+                        ALOAD, 5,
+                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;")),
+                        IF_ACMPEQ, branch("A"),
+
+                        // return BlockGrass.colorMultiplierStatic(iblockaccess, i, j, k);
                         ICONST_0,
                         ALOAD_1,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
                         reference(methodInfo, INVOKESTATIC, new MethodRef("BlockGrass", "colorMultiplierStatic", colorMultiplierTypeStatic)),
+                        IRETURN,
+
+                        label("A"),
+                        push(methodInfo, 0xffffff),
                         IRETURN
                     );
                 }
