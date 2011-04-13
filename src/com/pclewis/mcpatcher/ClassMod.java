@@ -96,6 +96,7 @@ abstract public class ClassMod implements PatchComponent {
                                 newMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
                                 newMap.addMethodMap(deobfName, m.getMethodName(), mi.getName());
                             }
+                            m.afterMatch(classFile, mi);
                             found = true;
                             break;
                         }
