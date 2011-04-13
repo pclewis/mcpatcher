@@ -2,6 +2,7 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
@@ -13,6 +14,9 @@ public class BetterGrass extends Mod {
     private static final String field_MATRIX = "grassMatrix";
     private static final String fieldtype_MATRIX = "[[I";
 
+    private String colorMultiplierType;
+    private byte[] colorMultiplierCode;
+
     public BetterGrass() {
         name = "Better Grass";
         author = "MCPatcher";
@@ -22,10 +26,17 @@ public class BetterGrass extends Mod {
         allowedDirs.clear();
         allowedDirs.add("");
 
+        classMods.add(new ColorizerGrassMod());
         classMods.add(new BlockGrassMod());
     }
 
-    private static class BlockGrassMod extends ClassMod {
+    private static class ColorizerGrassMod extends ClassMod {
+        public ColorizerGrassMod() {
+            classSignatures.add(new ConstSignature("/misc/grasscolor.png"));
+        }
+    }
+
+    private class BlockGrassMod extends ClassMod {
         private byte[] getBlockMaterial;
 
         public BlockGrassMod() {
@@ -51,6 +62,22 @@ public class BetterGrass extends Mod {
                     Logger.log(Logger.LOG_CONST, "getBlockMaterial ref %d", index);
                 }
             });
+
+            classSignatures.add(new FixedBytecodeSignature(
+                DALOAD,
+                DSTORE, BinaryRegex.any(1, 12),
+                DALOAD,
+                DSTORE, BinaryRegex.any()
+            ) {
+                @Override
+                public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                    colorMultiplierType = methodInfo.getDescriptor();
+                    colorMultiplierCode = methodInfo.getCodeAttribute().getCode().clone();
+                    Logger.log(Logger.LOG_CONST, "colorMultiplier %s %d bytes",
+                        colorMultiplierType, colorMultiplierCode.length
+                    );
+                }
+            }.setMethodName("colorMultiplier"));
 
             patches.add(new AddFieldPatch(field_MATRIX, fieldtype_MATRIX, AccessFlag.PUBLIC | AccessFlag.STATIC));
 
@@ -263,6 +290,19 @@ public class BetterGrass extends Mod {
                         BIPUSH, 66,
                         IRETURN
                     );
+                }
+            });
+
+            patches.add(new AddMethodPatch("colorMultiplierStatic", null) {
+                @Override
+                protected void prePatch(ClassFile classFile) {
+                    type = colorMultiplierType.replaceFirst("\\(", "(I");
+                }
+
+                @Override
+                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
+                    methodInfo.setAccessFlags(methodInfo.getAccessFlags() | AccessFlag.STATIC);
+                    return colorMultiplierCode;
                 }
             });
         }
