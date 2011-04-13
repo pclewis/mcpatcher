@@ -78,6 +78,7 @@ public class BetterGrass extends Mod {
                     );
                 }
             });
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -210,7 +211,7 @@ public class BetterGrass extends Mod {
                         IALOAD,
                         IADD,
                         getBlockID,
-                        ICONST_3,
+                        ICONST_2,
                         IF_ICMPEQ, branch("B"),
 
                         // return 3;
