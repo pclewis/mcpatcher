@@ -4,6 +4,7 @@ import com.pclewis.mcpatcher.*;
 import javassist.bytecode.*;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import static javassist.bytecode.Opcode.*;
 
@@ -60,22 +61,7 @@ public class BetterGrass extends Mod {
                     if ((fieldInfo.getAccessFlags() & AccessFlag.STATIC) == 0) {
                         return false;
                     }
-                    switch (++count) {
-                        case 2:
-                            name = "ground";
-                            return true;
-
-                        case 19:
-                            name = "snow";
-                            return true;
-
-                        case 20:
-                            name = "builtSnow";
-                            return true;
-
-                        default:
-                            return false;
-                    }
+                    return ++count == 2;
                 }
             });
         }
@@ -83,14 +69,32 @@ public class BetterGrass extends Mod {
 
     private class BlockGrassMod extends ClassMod {
         private byte[] getBlockMaterial;
+        private byte[] material;
 
         public BlockGrassMod() {
             classSignatures.add(new FixedBytecodeSignature(
+                ALOAD, BinaryRegex.capture(BinaryRegex.any()),
+                BinaryRegex.capture(BinaryRegex.build(GETSTATIC, BinaryRegex.any(2))),
+                IF_ACMPEQ, BinaryRegex.any(2),
+                ALOAD, BinaryRegex.backReference(1),
+                BinaryRegex.capture(BinaryRegex.build(GETSTATIC, BinaryRegex.any(2))),
+                IF_ACMPNE, BinaryRegex.any(2),
                 BIPUSH, 68,
                 IRETURN,
                 ICONST_3,
                 IRETURN
-            ).setMethodName("getBlockTexture"));
+            ) {
+                @Override
+                public void afterMatch(ClassFile classFile) {
+                    material = matcher.getCaptureGroup(1).clone();
+                    int snow = ((matcher.getCaptureGroup(2)[1] << 8) | matcher.getCaptureGroup(2)[2]) & 0xffff;
+                    int builtSnow = ((matcher.getCaptureGroup(3)[1] << 8) | matcher.getCaptureGroup(3)[2]) & 0xffff;
+                    ConstPool cp = classFile.getConstPool();
+                    classMap.addClassMap("Material", cp.getFieldrefClassName(snow));
+                    classMap.addFieldMap("Material", "snow", cp.getFieldrefName(snow));
+                    classMap.addFieldMap("Material", "builtSnow", cp.getFieldrefName(builtSnow));
+                }
+            }.setMethodName("getBlockTexture"));
 
             classSignatures.add(new FixedBytecodeSignature(
                 BIPUSH, 9,
@@ -246,11 +250,9 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    String type = methodInfo.getDescriptor().replaceFirst("^\\(L", "").replaceFirst(";.*", "");
-                    byte[] material = getCaptureGroup(1);
-                    byte[] snow = getCaptureGroup(2);
-                    byte[] builtSnow = getCaptureGroup(3);
-                    byte[] getBlockID = reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef(type, "a", "(III)I"));
+                    byte[] snow = reference(methodInfo, GETSTATIC, new FieldRef("Material", "snow", "LMaterial;"));
+                    byte[] builtSnow = reference(methodInfo, GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;"));
+                    byte[] getBlockID = reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "a", "(III)I"));
                     byte[] matrix = reference(methodInfo, GETSTATIC, new FieldRef("BlockGrass", field_MATRIX, fieldtype_MATRIX));
 
                     return buildCode(
@@ -342,6 +344,58 @@ public class BetterGrass extends Mod {
                 }
             });
 
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "disable biome color for snow";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return BinaryRegex.capture(BinaryRegex.build(
+                        BinaryRegex.begin(),
+                        BinaryRegex.any(0, 30),
+                        DALOAD,
+                        DSTORE, BinaryRegex.any(1, 12),
+                        DALOAD,
+                        DSTORE, BinaryRegex.any(1, 30),
+                        BinaryRegex.end()
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Material material = iblockaccess.getBlockMaterial(i, j + 1, k);
+                        ALOAD_1,
+                        ILOAD_2,
+                        ILOAD_3,
+                        ICONST_1,
+                        IADD,
+                        ILOAD, 4,
+                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
+                        DUP,
+
+                        // if (material == Material.snow)
+                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "snow", "LMaterial;")),
+                        IF_ACMPEQ, branch("A"),
+
+                        // if (material == Material.builtSnow)
+                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;")),
+                        IF_ACMPEQ, branch("B"),
+
+                        getCaptureGroup(1),
+
+                        // return 0xffffff;
+                        label("A"),
+                        POP,
+                        label("B"),
+                        push(methodInfo, 0xffffff),
+                        IRETURN
+                    );
+                }
+            });
+
             patches.add(new AddMethodPatch("colorMultiplierStatic", null) {
                 @Override
                 protected void prePatch(ClassFile classFile) {
@@ -385,26 +439,6 @@ public class BetterGrass extends Mod {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
                     return buildCode(
-                        // Material material = iblockaccess.getBlockMaterial(i, j + 1, k);
-                        ALOAD_1,
-                        ILOAD_2,
-                        ILOAD_3,
-                        ICONST_1,
-                        IADD,
-                        ILOAD, 4,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
-                        ASTORE, 5,
-
-                        // if (material == Material.snow)
-                        ALOAD, 5,
-                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "snow", "LMaterial;")),
-                        IF_ACMPEQ, branch("A"),
-
-                        // if (material == Material.builtSnow)
-                        ALOAD, 5,
-                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;")),
-                        IF_ACMPEQ, branch("A"),
-
                         // return BlockGrass.colorMultiplierStatic(iblockaccess, i, j, k);
                         ICONST_0,
                         ALOAD_1,
@@ -412,10 +446,6 @@ public class BetterGrass extends Mod {
                         ILOAD_3,
                         ILOAD, 4,
                         reference(methodInfo, INVOKESTATIC, new MethodRef("BlockGrass", "colorMultiplierStatic", colorMultiplierTypeStatic)),
-                        IRETURN,
-
-                        label("A"),
-                        push(methodInfo, 0xffffff),
                         IRETURN
                     );
                 }
