@@ -39,13 +39,13 @@ public class BetterGrass extends Mod {
     private static class MaterialMod extends ClassMod {
         public MaterialMod() {
             classSignatures.add(new FixedBytecodeSignature(
-                "^",
+                BinaryRegex.begin(),
                 ALOAD_0,
                 ICONST_1,
                 PUTFIELD, BinaryRegex.any(2),
                 ALOAD_0,
                 ARETURN,
-                "$"
+                BinaryRegex.end()
             ));
             classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
 
@@ -346,14 +346,14 @@ public class BetterGrass extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        "^",
+                        BinaryRegex.begin(),
                         ALOAD_0,
                         ILOAD_1,
                         ILOAD_2,
                         reference(methodInfo, GETSTATIC, new FieldRef("jh", "b", "Ljh;")),
                         INVOKESPECIAL, BinaryRegex.any(2),
                         RETURN,
-                        "$"
+                        BinaryRegex.end()
                     );
                 }
             });
