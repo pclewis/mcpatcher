@@ -53,9 +53,13 @@ abstract public class AddMethodPatch extends ClassPatch {
         return String.format("insert method %s %s", name, type);
     }
 
+    protected void prePatch(ClassFile classFile) throws BadBytecode, IOException {
+    }
+
     @Override
     final public boolean apply(ClassFile classFile) throws BadBytecode, DuplicateMemberException, IOException {
         boolean patched = false;
+        prePatch(classFile);
         ConstPool constPool = classFile.getConstPool();
         MethodInfo methodInfo = new MethodInfo(constPool, name, classMod.getClassMap().mapTypeString(type));
         methodInfo.setAccessFlags(AccessFlag.PUBLIC);
