@@ -182,6 +182,10 @@ public class BetterGrass extends Mod {
                     byte[] getArray = reference(methodInfo, GETSTATIC, array);
                     byte[] putArray = reference(methodInfo, PUTSTATIC, array);
                     return buildCode(
+                        getArray,
+                        ACONST_NULL,
+                        IF_ACMPNE, branch("A"),
+
                         // grassMatrix = new int[4][2];
                         ICONST_4,
                         ICONST_2,
@@ -220,6 +224,7 @@ public class BetterGrass extends Mod {
                         ICONST_1,
                         IASTORE,
 
+                        label("A"),
                         RETURN
                     );
                 }
