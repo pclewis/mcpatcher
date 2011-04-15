@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher;
 
 import com.pclewis.mcpatcher.mod.BaseMod;
+import com.pclewis.mcpatcher.mod.BetterGrass;
 import com.pclewis.mcpatcher.mod.HDFontMod;
 import com.pclewis.mcpatcher.mod.HDTextureMod;
 
@@ -31,6 +32,7 @@ class ModList {
     public void loadBuiltInMods() {
         add(new HDTextureMod());
         add(new HDFontMod());
+        add(new BetterGrass());
     }
 
     public void loadCustomMods(File directory) {

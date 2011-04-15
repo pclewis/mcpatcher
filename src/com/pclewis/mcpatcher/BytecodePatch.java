@@ -64,6 +64,7 @@ abstract public class BytecodePatch extends ClassPatch {
             byte repl[];
             try {
                 classMod.addToConstPool = true;
+                classMod.resetLabels();
                 repl = getReplacementBytes(mi);
             } catch (IOException e) {
                 Logger.log(e);
@@ -90,6 +91,7 @@ abstract public class BytecodePatch extends ClassPatch {
             for (int i = 0; i < skip; i++) {
                 ci.writeByte(Opcode.NOP, matcher.getStart() + i);
             }
+            classMod.resolveLabels(repl, matcher.getStart() + skip);
             ci.write(repl, matcher.getStart() + skip);
             offset = matcher.getStart() + repl.length + gap;
             if (Logger.isLogLevel(Logger.LOG_BYTECODE)) {

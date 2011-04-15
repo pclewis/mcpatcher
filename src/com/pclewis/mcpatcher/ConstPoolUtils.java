@@ -3,6 +3,8 @@ package com.pclewis.mcpatcher;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.Mnemonic;
 
+import java.util.ArrayList;
+
 import static javassist.bytecode.Opcode.*;
 
 class ConstPoolUtils {
@@ -131,6 +133,8 @@ class ConstPoolUtils {
         if (value instanceof Integer) {
             int i = (Integer) value;
             switch (i) {
+                case -1:
+                    return new byte[]{ICONST_M1};
                 case 0:
                     return new byte[]{ICONST_0};
                 case 1:
@@ -201,6 +205,7 @@ class ConstPoolUtils {
         if (index < 0) {
             return NOT_FOUND;
         }
+        opcode &= 0xff;
         switch (opcode) {
             case LDC:
             case LDC_W:
@@ -228,7 +233,8 @@ class ConstPoolUtils {
                 if (!(value instanceof InterfaceMethodRef)) {
                     throw new AssertionError(Mnemonic.OPCODE[opcode] + " requires an InterfaceMethodRef object");
                 }
-                break;
+                int numArgs = parseDescriptor(((InterfaceMethodRef) value).getType()).size();
+                return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0), (byte) numArgs, 0};
 
             case INSTANCEOF:
             case CHECKCAST:
@@ -244,5 +250,27 @@ class ConstPoolUtils {
                 break;
         }
         return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0)};
+    }
+
+    public static ArrayList<String> parseDescriptor(String desc) {
+        ArrayList<String> types = new ArrayList<String>();
+        desc = desc.replaceAll("[()]", "");
+        int len = desc.length();
+        int j;
+        for (int i = 0; i < len; i = j + 1) {
+            for (j = i; j < len; j++) {
+                char c = desc.charAt(j);
+                if ("SIFDZV".indexOf(c) >= 0) {
+                    break;
+                } else if (c == 'L') {
+                    while (desc.charAt(j) != ';') {
+                        j++;
+                    }
+                    break;
+                }
+            }
+            types.add(desc.substring(i, j + 1));
+        }
+        return types;
     }
 }

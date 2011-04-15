@@ -285,7 +285,9 @@ public class HDTextureMod extends Mod {
                 NEWARRAY, T_BYTE
             ));
             classSignatures.add(new FixedBytecodeSignature(
-                "^", RETURN, "$"
+                BinaryRegex.begin(),
+                RETURN,
+                BinaryRegex.end()
             ).setMethodName("onTick"));
 
             fieldMappers.add(new FieldMapper("imageData", "[B"));

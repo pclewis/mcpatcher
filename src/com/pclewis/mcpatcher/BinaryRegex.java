@@ -84,6 +84,24 @@ public class BinaryRegex {
     }
 
     /**
+     * Match beginning of input: ^
+     *
+     * @return String regex
+     */
+    public static String begin() {
+        return "^";
+    }
+
+    /**
+     * Match end of input: $
+     *
+     * @return String regex
+     */
+    public static String end() {
+        return "$";
+    }
+
+    /**
      * Match an optional expression: (...)?
      *
      * @param regex subexpression
