@@ -61,6 +61,7 @@ final public class MCPatcher {
      * <p/>
      * Valid parameters:<br>
      * -loglevel n: set log level to n (0-7)<br>
+     * -mcdir path: specify path to minecraft
      * -auto: apply all applicable mods to the default minecraft.jar and exit (no GUI)<br>
      * -ignorebuiltinmods: do not load mods built into mcpatcher<br>
      * -ignorecustommods: do not load mods from the mcpatcher-mods directory
@@ -69,6 +70,7 @@ final public class MCPatcher {
      */
     public static void main(String[] args) {
         boolean guiEnabled = true;
+        String enteredMCDir = null;
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-loglevel") && i + 1 < args.length) {
                 i++;
@@ -76,6 +78,9 @@ final public class MCPatcher {
                     Logger.setLogLevel(Integer.parseInt(args[i]));
                 } catch (NumberFormatException e) {
                 }
+            } else if (args[i].equals("-mcdir") && i + 1 < args.length) {
+                i++;
+                enteredMCDir = args[i];
             } else if (args[i].equals("-auto")) {
                 guiEnabled = false;
             } else if (args[i].equals("-ignorebuiltinmods")) {
@@ -85,14 +90,16 @@ final public class MCPatcher {
             }
         }
 
+        if (! locateMinecraftDir(guiEnabled, enteredMCDir)) {
+            System.exit(1);
+        }
+
         if (guiEnabled) {
             mainForm = new MainForm();
             mainForm.show();
         }
 
         Util.logOSInfo();
-
-        MCPatcherUtils.isGame = false;
 
         if (!MCPatcherUtils.getString("lastVersion", "").equals(VERSION_STRING)) {
             MCPatcherUtils.set("lastVersion", VERSION_STRING);
@@ -105,15 +112,6 @@ final public class MCPatcher {
         }
         MCPatcherUtils.saveProperties();
         getAllMods();
-
-        File minecraftDir = MCPatcherUtils.getMinecraftPath();
-        if (!minecraftDir.isDirectory()) {
-            Logger.log(Logger.LOG_MAIN, "ERROR: could not find minecraft directory %s", minecraftDir.getPath());
-            if (guiEnabled) {
-                mainForm.showNoMinecraftDialog(minecraftDir);
-            }
-            System.exit(1);
-        }
 
         File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
         if (!defaultMinecraft.exists()) {
@@ -157,6 +155,31 @@ final public class MCPatcher {
 
     static void checkInterrupt() throws InterruptedException {
         Thread.sleep(0);
+    }
+
+    private static boolean locateMinecraftDir(boolean guiEnabled, String enteredMCDir) {
+        ArrayList<File> mcDirs = new ArrayList<File>();
+        if (enteredMCDir == null) {
+            mcDirs.add(MCPatcherUtils.getDefaultGameDir());
+            mcDirs.add(new File("."));
+            mcDirs.add(new File(".."));
+        } else {
+            mcDirs.add(new File(enteredMCDir).getAbsoluteFile());
+        }
+
+        for (File dir : mcDirs) {
+            if (MCPatcherUtils.setGameDir(dir)) {
+                return true;
+            }
+        }
+
+        File minecraftDir = mcDirs.get(0);
+        System.out.printf("ERROR: could not find minecraft directory %s\n", minecraftDir.getPath());
+        if (guiEnabled && MainForm.showNoMinecraftDialog(minecraftDir)) {
+            return true;
+        }
+
+        return false;
     }
 
     static boolean setMinecraft(File file, boolean createBackup) {

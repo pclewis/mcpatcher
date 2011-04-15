@@ -354,14 +354,29 @@ class MainForm {
         frame.setVisible(true);
     }
 
-    public void showNoMinecraftDialog(File minecraftDir) {
-        JOptionPane.showMessageDialog(frame,
-            "Minecraft directory not found at\n" +
-                minecraftDir.getPath() + "\n" +
-                "Please make sure the game is properly installed.\n\n" +
-                "Unable to continue.  MCPatcher will now exit.",
-            "Minecraft not found", JOptionPane.ERROR_MESSAGE
-        );
+    public static boolean showNoMinecraftDialog(File minecraftDir) {
+        while (true) {
+            JOptionPane.showMessageDialog(null,
+                "Minecraft not found in\n" +
+                    minecraftDir.getPath() + "\n\n" +
+                    "If the game is installed somewhere else, please select the game\n" +
+                    "folder (the one containing bin, resources, saves, etc., subfolders).",
+                "Minecraft not found", JOptionPane.ERROR_MESSAGE
+            );
+            JFileChooser fd = new JFileChooser();
+            fd.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fd.setDialogTitle("Select Minecraft directory");
+            int result = fd.showDialog(null, null);
+            if (result != JFileChooser.APPROVE_OPTION) {
+                return false;
+            }
+            minecraftDir = fd.getSelectedFile();
+            if (MCPatcherUtils.setGameDir(minecraftDir) ||
+                MCPatcherUtils.setGameDir(minecraftDir.getParentFile())) {
+                break;
+            }
+        }
+        return true;
     }
 
     public void showBetaDialog() {

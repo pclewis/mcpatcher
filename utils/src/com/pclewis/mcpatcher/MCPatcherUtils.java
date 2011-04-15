@@ -11,34 +11,72 @@ import java.util.Properties;
  * the output minecraft jar.
  */
 public class MCPatcherUtils {
-    private static File minecraftDir;
+    private static File minecraftDir = null;
     private static File propFile = null;
-    private static Properties properties = new Properties();
+    private static Properties properties = null;
     private static boolean needSaveProps = false;
-    private static boolean debug;
-
-    static boolean isGame = true;
+    private static boolean debug = false;
+    private static boolean isGame = true;
 
     private MCPatcherUtils() {
     }
 
     static {
+        System.out.println("MCPatcherUtils init");
+        System.out.println("cwd = " + new File(".").getAbsolutePath());
+        try {
+            if (Class.forName("com.pclewis.mcpatcher.MCPatcher") != null) {
+                isGame = false;
+            }
+        } catch (ClassNotFoundException e) {
+        }
+        System.out.println("isGame = " + isGame);
+
+        if (isGame) {
+            setGameDir(new File("."));
+        }
+    }
+
+    static File getDefaultGameDir() {
         String os = System.getProperty("os.name").toLowerCase();
         String baseDir = null;
         String subDir = ".minecraft";
         if (os.contains("win")) {
             baseDir = System.getenv("APPDATA");
-        } else if (os.contains("mac")) {
+        }
+        if (os.contains("mac")) {
             subDir = "Library/Application Support/minecraft";
         }
         if (baseDir == null) {
             baseDir = System.getProperty("user.home");
         }
+        return new File(baseDir, subDir);
+    }
 
-        minecraftDir = new File(baseDir, subDir);
+    static boolean isGameDir(File dir) {
+        return dir != null &&
+            dir.isDirectory() &&
+            new File(dir, "bin/lwjgl.jar").exists() &&
+            new File(dir, "resources").isDirectory()
+        ;
+    }
+
+    static boolean setGameDir(File dir) {
+        if (isGameDir(dir)) {
+            minecraftDir = dir.getAbsoluteFile();
+            loadProperties();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static void loadProperties() {
+        propFile = null;
+        properties = new Properties();
+        needSaveProps = false;
         if (minecraftDir.exists()) {
             propFile = new File(minecraftDir, "mcpatcher.properties");
-
             try {
                 if (propFile.exists()) {
                     properties.load(new FileInputStream(propFile));
