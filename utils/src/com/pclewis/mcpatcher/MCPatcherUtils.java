@@ -29,11 +29,15 @@ public class MCPatcherUtils {
                 isGame = false;
             }
         } catch (ClassNotFoundException e) {
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
 
         if (isGame) {
             if (setGameDir(new File("."))) {
                 System.out.println("MCPatcherUtils initialized. Directory " + minecraftDir.getPath());
+            } else {
+                System.out.println("MCPatcherUtils initialized.");
             }
         }
     }
@@ -44,8 +48,7 @@ public class MCPatcherUtils {
         String subDir = ".minecraft";
         if (os.contains("win")) {
             baseDir = System.getenv("APPDATA");
-        }
-        if (os.contains("mac")) {
+        } else if (os.contains("mac")) {
             subDir = "Library/Application Support/minecraft";
         }
         if (baseDir == null) {
@@ -54,16 +57,11 @@ public class MCPatcherUtils {
         return new File(baseDir, subDir);
     }
 
-    private static boolean isGameDir(File dir) {
-        return dir != null &&
+    static boolean setGameDir(File dir) {
+        if (dir != null &&
             dir.isDirectory() &&
             new File(dir, "bin/lwjgl.jar").exists() &&
-            new File(dir, "resources").isDirectory()
-        ;
-    }
-
-    static boolean setGameDir(File dir) {
-        if (isGameDir(dir)) {
+            new File(dir, "resources").isDirectory()) {
             minecraftDir = dir.getAbsoluteFile();
         } else {
             minecraftDir = null;
