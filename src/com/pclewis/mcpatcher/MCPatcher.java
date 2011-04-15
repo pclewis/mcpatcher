@@ -110,46 +110,17 @@ final public class MCPatcher {
             mainForm.showBetaDialog();
             MCPatcherUtils.set("betaWarningShown", true);
         }
-        MCPatcherUtils.saveProperties();
+
+        int exitStatus = 0;
         getAllMods();
-
-        File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
-        if (!defaultMinecraft.exists()) {
-            if (guiEnabled) {
-                mainForm.setBusy(false);
-            }
-        } else if (setMinecraft(defaultMinecraft, true)) {
-            if (guiEnabled) {
-                mainForm.updateModList();
-            } else {
-                int exitStatus = 1;
-                try {
-                    getApplicableMods();
-                    System.out.println();
-                    System.out.println("#### Class map:");
-                    showClassMaps(System.out);
-                    if (patch()) {
-                        exitStatus = 0;
-                    }
-                    System.out.println();
-                    System.out.println("#### Patch summary:");
-                    showPatchResults(System.out);
-                    MCPatcherUtils.saveProperties();
-                } catch (Exception e) {
-                    Logger.log(e);
-                }
-                System.exit(exitStatus);
-            }
-        } else {
-            Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
-            if (guiEnabled) {
-                mainForm.showCorruptJarError();
-                mainForm.setBusy(false);
-            }
-        }
-
         if (guiEnabled) {
-            mainForm.updateControls();
+            startGUI();
+        } else {
+            exitStatus = autoPatch();
+        }
+        MCPatcherUtils.saveProperties();
+        if (!guiEnabled) {
+            System.exit(exitStatus);
         }
     }
 
@@ -174,12 +145,47 @@ final public class MCPatcher {
         }
 
         File minecraftDir = mcDirs.get(0);
-        System.out.printf("ERROR: could not find minecraft directory %s\n", minecraftDir.getPath());
-        if (guiEnabled && MainForm.showNoMinecraftDialog(minecraftDir)) {
-            return true;
+        return guiEnabled && MainForm.showNoMinecraftDialog(minecraftDir);
+    }
+
+    private static void startGUI() {
+        File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
+        if (!defaultMinecraft.exists()) {
+            mainForm.setBusy(false);
+        } else if (setMinecraft(defaultMinecraft, true)) {
+            mainForm.updateModList();
+        } else {
+            Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
+            mainForm.showCorruptJarError();
+            mainForm.setBusy(false);
         }
 
-        return false;
+        mainForm.updateControls();
+    }
+
+    private static int autoPatch() {
+        int exitStatus = 1;
+        File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
+        if (!defaultMinecraft.exists()) {
+        } else if (setMinecraft(defaultMinecraft, true)) {
+            try {
+                getApplicableMods();
+                System.out.println();
+                System.out.println("#### Class map:");
+                showClassMaps(System.out);
+                if (patch()) {
+                    exitStatus = 0;
+                }
+                System.out.println();
+                System.out.println("#### Patch summary:");
+                showPatchResults(System.out);
+            } catch (Exception e) {
+                Logger.log(e);
+            }
+        } else {
+            Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
+        }
+        return exitStatus;
     }
 
     static boolean setMinecraft(File file, boolean createBackup) {
