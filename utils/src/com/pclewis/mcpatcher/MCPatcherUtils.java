@@ -13,28 +13,27 @@ import java.util.Properties;
 public class MCPatcherUtils {
     private static File minecraftDir = null;
     private static File propFile = null;
-    private static Properties properties = null;
+    private static Properties properties;
     private static boolean needSaveProps = false;
     private static boolean debug = false;
-    private static boolean isGame = true;
+    private static boolean isGame;
 
     private MCPatcherUtils() {
     }
 
     static {
-        System.out.println("MCPatcherUtils init");
-        System.out.println("cwd = " + new File(".").getAbsolutePath());
+        properties = new Properties();
+        isGame = true;
         try {
             if (Class.forName("com.pclewis.mcpatcher.MCPatcher") != null) {
                 isGame = false;
             }
         } catch (ClassNotFoundException e) {
         }
-        System.out.println("isGame = " + isGame);
 
         if (isGame) {
             if (setGameDir(new File("."))) {
-                System.out.println("read " + propFile.getPath());
+                System.out.println("MCPatcherUtils initialized. Directory " + minecraftDir.getPath());
             }
         }
     }
@@ -55,7 +54,7 @@ public class MCPatcherUtils {
         return new File(baseDir, subDir);
     }
 
-    static boolean isGameDir(File dir) {
+    private static boolean isGameDir(File dir) {
         return dir != null &&
             dir.isDirectory() &&
             new File(dir, "bin/lwjgl.jar").exists() &&
@@ -66,34 +65,35 @@ public class MCPatcherUtils {
     static boolean setGameDir(File dir) {
         if (isGameDir(dir)) {
             minecraftDir = dir.getAbsoluteFile();
-            loadProperties();
-            return true;
         } else {
-            return false;
+            minecraftDir = null;
         }
+        return loadProperties();
     }
 
-    static void loadProperties() {
+    private static boolean loadProperties() {
         propFile = null;
         properties = new Properties();
         needSaveProps = false;
-        if (minecraftDir.exists()) {
+        if (minecraftDir != null && minecraftDir.exists()) {
             propFile = new File(minecraftDir, "mcpatcher.properties");
-            try {
-                if (propFile.exists()) {
+            if (propFile.exists()) {
+                try {
                     properties.load(new FileInputStream(propFile));
-                    remove("HDTexture", "enableAnimations");
-                    remove("HDTexture", "useCustomAnimations");
-                    remove("HDTexture", "glBufferSize");
-                } else {
-                    needSaveProps = true;
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                debug = getBoolean("debug", false);
-                saveProperties();
-            } catch (IOException e) {
-                e.printStackTrace();
+                remove("HDTexture", "enableAnimations");
+                remove("HDTexture", "useCustomAnimations");
+                remove("HDTexture", "glBufferSize");
+            } else {
+                needSaveProps = true;
             }
+            debug = getBoolean("debug", false);
+            saveProperties();
+            return true;
         }
+        return false;
     }
 
     /**
