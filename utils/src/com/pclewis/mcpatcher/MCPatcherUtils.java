@@ -33,7 +33,9 @@ public class MCPatcherUtils {
         System.out.println("isGame = " + isGame);
 
         if (isGame) {
-            setGameDir(new File("."));
+            if (setGameDir(new File("."))) {
+                System.out.println("read " + propFile.getPath());
+            }
         }
     }
 
