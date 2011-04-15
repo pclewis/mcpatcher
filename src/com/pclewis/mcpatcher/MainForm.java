@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -12,7 +13,6 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,20 +113,25 @@ class MainForm {
         origBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 setStatusText("");
-                FileDialog fd = new FileDialog(frame, origLabel.getText(), FileDialog.LOAD);
-                fd.setDirectory(MCPatcherUtils.getMinecraftPath("bin").getPath());
-                fd.setFile("minecraft.jar");
-                fd.setFilenameFilter(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                        return name.toLowerCase().endsWith(".jar");
+                JFileChooser fd = new JFileChooser();
+                fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                fd.setFileHidingEnabled(false);
+                fd.setDialogTitle("Select input file");
+                fd.setCurrentDirectory(MCPatcherUtils.getMinecraftPath("bin"));
+                fd.setAcceptAllFileFilterUsed(false);
+                fd.setFileFilter(new FileFilter() {
+                    @Override
+                    public boolean accept(File f) {
+                        return f.isDirectory() || f.getName().toLowerCase().endsWith(".jar");
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "*.jar";
                     }
                 });
-                fd.setVisible(true);
-
-                if (fd.getFile() == null) {
-                    MCPatcher.setMinecraft(null, false);
-                } else {
-                    if (MCPatcher.setMinecraft(new File(fd.getDirectory(), fd.getFile()), false)) {
+                if (fd.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                    if (MCPatcher.setMinecraft(fd.getSelectedFile(), false)) {
                         MCPatcher.getAllMods();
                         updateModList();
                     } else {
@@ -140,21 +145,26 @@ class MainForm {
         outputBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 setStatusText("");
-                FileDialog fd = new FileDialog(frame, outputLabel.getText(), FileDialog.SAVE);
-                fd.setDirectory(MCPatcherUtils.getMinecraftPath("bin").getPath());
-                fd.setFile("minecraft.jar");
-                fd.setFilenameFilter(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                        return name.toLowerCase().endsWith(".jar");
+                JFileChooser fd = new JFileChooser();
+                fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                fd.setFileHidingEnabled(false);
+                fd.setDialogTitle("Select output file");
+                fd.setCurrentDirectory(MCPatcherUtils.getMinecraftPath("bin"));
+                fd.setSelectedFile(MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar"));
+                fd.setAcceptAllFileFilterUsed(false);
+                fd.setFileFilter(new FileFilter() {
+                    @Override
+                    public boolean accept(File f) {
+                        return f.isDirectory() || f.getName().toLowerCase().endsWith(".jar");
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "*.jar";
                     }
                 });
-                fd.setVisible(true);
-
-                if (MCPatcher.minecraft == null) {
-                } else if (fd.getFile() == null) {
-                    MCPatcher.minecraft.setOutputFile(null);
-                } else {
-                    MCPatcher.minecraft.setOutputFile(new File(fd.getDirectory(), fd.getFile()));
+                if (fd.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                    MCPatcher.minecraft.setOutputFile(fd.getSelectedFile());
                 }
                 updateControls();
             }
