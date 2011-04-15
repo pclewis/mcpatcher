@@ -365,6 +365,7 @@ class MainForm {
             );
             JFileChooser fd = new JFileChooser();
             fd.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fd.setFileHidingEnabled(false);
             fd.setDialogTitle("Select Minecraft directory");
             int result = fd.showDialog(null, null);
             if (result != JFileChooser.APPROVE_OPTION) {
