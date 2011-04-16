@@ -9,13 +9,13 @@ import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
 
-class BytecodeTilePatch extends BytecodePatch {
+class TileSizePatch extends BytecodePatch {
     protected Object value;
     protected String field;
     protected String type;
     protected String extra = "";
 
-    public BytecodeTilePatch(Object value, String field) {
+    public TileSizePatch(Object value, String field) {
         this.value = value;
         this.field = field;
         if (field.startsWith("float_")) {
@@ -60,7 +60,7 @@ class BytecodeTilePatch extends BytecodePatch {
         );
     }
 
-    protected static class WhilePatch extends BytecodeTilePatch {
+    protected static class WhilePatch extends TileSizePatch {
         public WhilePatch(Object value, String field) {
             super(value, field);
             this.extra = "while i < ";
@@ -72,7 +72,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class IfGreaterPatch extends BytecodeTilePatch {
+    protected static class IfGreaterPatch extends TileSizePatch {
         public IfGreaterPatch(Object value, String field) {
             super(value, field);
             this.extra = "if i > ";
@@ -84,7 +84,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class IfLessPatch extends BytecodeTilePatch {
+    protected static class IfLessPatch extends TileSizePatch {
         public IfLessPatch(Object value, String field) {
             super(value, field);
             this.extra = "if i < ";
@@ -96,7 +96,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class BitMaskPatch extends BytecodeTilePatch {
+    protected static class BitMaskPatch extends TileSizePatch {
         public BitMaskPatch(Object value, String field) {
             super(value, field);
             this.extra = "& ";
@@ -108,7 +108,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class MultiplyPatch extends BytecodeTilePatch {
+    protected static class MultiplyPatch extends TileSizePatch {
         public MultiplyPatch(Object value, String field) {
             super(value, field);
             this.extra = "* ";
@@ -120,7 +120,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class ModPatch extends BytecodeTilePatch {
+    protected static class ModPatch extends TileSizePatch {
         public ModPatch(Object value, String field) {
             super(value, field);
             this.extra = "% ";
@@ -132,7 +132,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class DivPatch extends BytecodeTilePatch {
+    protected static class DivPatch extends TileSizePatch {
         public DivPatch(Object value, String field) {
             super(value, field);
             this.extra = "/ ";
@@ -144,7 +144,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class ArraySizePatch extends BytecodeTilePatch {
+    protected static class ArraySizePatch extends TileSizePatch {
         public ArraySizePatch(Object value, String field) {
             super(value, field);
             this.extra = "array size ";
@@ -156,7 +156,7 @@ class BytecodeTilePatch extends BytecodePatch {
         }
     }
 
-    protected static class ArraySize2DPatch extends BytecodeTilePatch {
+    protected static class ArraySize2DPatch extends TileSizePatch {
         private int dimension;
 
         public ArraySize2DPatch(Object value, String field, int dimension) {

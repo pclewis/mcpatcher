@@ -248,7 +248,7 @@ public class HDTexture extends Mod {
                 }
             });
 
-            patches.add(new BytecodeTilePatch(1048576, "int_glBufferSize"));
+            patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
 
             patches.add(new AddMethodPatch("setTileSize", "(Lnet/minecraft/client/Minecraft;)V") {
                 @Override
@@ -320,7 +320,7 @@ public class HDTexture extends Mod {
                 }
             });
 
-            patches.add(new BytecodeTilePatch.ArraySizePatch(1024, "int_numBytes"));
+            patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
         }
 
         @Override
@@ -346,17 +346,17 @@ public class HDTexture extends Mod {
                 ALOAD_0
             ));
 
-            patches.add(new BytecodeTilePatch(7.5, "double_compassCenterMin"));
-            patches.add(new BytecodeTilePatch(8.5, "double_compassCenterMax"));
-            patches.add(new BytecodeTilePatch.ArraySizePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch.MultiplyPatch(16, "int_size"));
-            patches.add(new BytecodeTilePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch(-4, "int_compassCrossMin"));
-            patches.add(new BytecodeTilePatch.IfGreaterPatch(4, "int_compassCrossMax"));
-            patches.add(new BytecodeTilePatch(-8, "int_compassNeedleMin"));
-            patches.add(new BytecodeTilePatch.IfGreaterPatch(16, "int_compassNeedleMax"));
+            patches.add(new TileSizePatch(7.5, "double_compassCenterMin"));
+            patches.add(new TileSizePatch(8.5, "double_compassCenterMax"));
+            patches.add(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
+            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch(-4, "int_compassCrossMin"));
+            patches.add(new TileSizePatch.IfGreaterPatch(4, "int_compassCrossMax"));
+            patches.add(new TileSizePatch(-8, "int_compassNeedleMin"));
+            patches.add(new TileSizePatch.IfGreaterPatch(16, "int_compassNeedleMax"));
 
-            patches.add(new BytecodeTilePatch.GetRGBPatch());
+            patches.add(new TileSizePatch.GetRGBPatch());
         }
     }
 
@@ -374,19 +374,19 @@ public class HDTexture extends Mod {
                 RETURN
             ));
 
-            patches.add(new BytecodeTilePatch(1.06F, "float_flameNudge"));
-            patches.add(new BytecodeTilePatch.ArraySizePatch(320, "int_flameArraySize"));
-            patches.add(new BytecodeTilePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch.WhilePatch(20, "int_flameHeight"));
-            patches.add(new BytecodeTilePatch.WhilePatch(16, "int_size"));
-            patches.add(new BytecodeTilePatch.MultiplyPatch(16, "int_size") {
+            patches.add(new TileSizePatch(1.06F, "float_flameNudge"));
+            patches.add(new TileSizePatch.ArraySizePatch(320, "int_flameArraySize"));
+            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch.WhilePatch(20, "int_flameHeight"));
+            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
+            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size") {
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
                     return !methodInfo.getName().equals("<init>");
                 }
             });
-            patches.add(new BytecodeTilePatch.ModPatch(20, "int_flameHeight"));
-            patches.add(new BytecodeTilePatch.IfLessPatch(19, "int_flameHeightMinus1"));
+            patches.add(new TileSizePatch.ModPatch(20, "int_flameHeight"));
+            patches.add(new TileSizePatch.IfLessPatch(19, "int_flameHeightMinus1"));
         }
     }
 
@@ -436,12 +436,12 @@ public class HDTexture extends Mod {
                 });
             }
 
-            patches.add(new BytecodeTilePatch.ArraySizePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch.WhilePatch(16, "int_size"));
-            patches.add(new BytecodeTilePatch.BitMaskPatch(255, "int_numPixelsMinus1"));
-            patches.add(new BytecodeTilePatch.BitMaskPatch(15, "int_sizeMinus1"));
-            patches.add(new BytecodeTilePatch.MultiplyPatch(16, "int_size"));
+            patches.add(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
+            patches.add(new TileSizePatch.BitMaskPatch(255, "int_numPixelsMinus1"));
+            patches.add(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
+            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
         }
 
         @Override
@@ -481,9 +481,9 @@ public class HDTexture extends Mod {
                 }
             });
 
-            patches.add(new BytecodeTilePatch(16.0F, "float_size"));
-            patches.add(new BytecodeTilePatch.WhilePatch(16, "int_size"));
-            patches.add(new BytecodeTilePatch(1.0F / 512.0F, "float_texNudge"));
+            patches.add(new TileSizePatch(16.0F, "float_size"));
+            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
+            patches.add(new TileSizePatch(1.0F / 512.0F, "float_texNudge"));
         }
     }
 
@@ -491,20 +491,20 @@ public class HDTexture extends Mod {
         public WatchMod() {
             classSignatures.add(new ConstSignature("/misc/dial.png"));
 
-            patches.add(new BytecodeTilePatch(16.0D, "double_size"));
-            patches.add(new BytecodeTilePatch(15.0D, "double_sizeMinus1"));
-            patches.add(new BytecodeTilePatch.GetRGBPatch());
-            patches.add(new BytecodeTilePatch.ArraySizePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch.MultiplyPatch(16, "int_size"));
-            patches.add(new BytecodeTilePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch.BitMaskPatch(15, "int_sizeMinus1"));
-            patches.add(new BytecodeTilePatch.ModPatch(16, "int_size") {
+            patches.add(new TileSizePatch(16.0D, "double_size"));
+            patches.add(new TileSizePatch(15.0D, "double_sizeMinus1"));
+            patches.add(new TileSizePatch.GetRGBPatch());
+            patches.add(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
+            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
+            patches.add(new TileSizePatch.ModPatch(16, "int_size") {
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
                     return !methodInfo.getName().equals("<init>");
                 }
             });
-            patches.add(new BytecodeTilePatch.DivPatch(16, "int_size"));
+            patches.add(new TileSizePatch.DivPatch(16, "int_size"));
         }
     }
 
@@ -524,13 +524,13 @@ public class HDTexture extends Mod {
                 }
             });
 
-            patches.add(new BytecodeTilePatch(16.0F, "float_size"));
-            patches.add(new BytecodeTilePatch.WhilePatch(16, "int_size"));
-            patches.add(new BytecodeTilePatch.ArraySize2DPatch(1024, "int_numBytes", 32));
-            patches.add(new BytecodeTilePatch.MultiplyPatch(16, "int_size"));
-            patches.add(new BytecodeTilePatch.MultiplyPatch(8, "int_sizeHalf"));
-            patches.add(new BytecodeTilePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new BytecodeTilePatch.IfLessPatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch(16.0F, "float_size"));
+            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
+            patches.add(new TileSizePatch.ArraySize2DPatch(1024, "int_numBytes", 32));
+            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
+            patches.add(new TileSizePatch.MultiplyPatch(8, "int_sizeHalf"));
+            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            patches.add(new TileSizePatch.IfLessPatch(256, "int_numPixels"));
         }
     }
 
