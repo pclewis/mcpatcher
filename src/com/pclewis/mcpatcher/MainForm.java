@@ -1,9 +1,7 @@
 package com.pclewis.mcpatcher;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelListener;
+import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -18,7 +16,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 class MainForm {
-    private static final int LOG_TAB = 2;
+    private static final int TAB_MODS = 0;
+    private static final int TAB_OPTIONS = 1;
+    private static final int TAB_LOG = 2;
+    private static final int TAB_CLASS_MAP = 3;
+    private static final int TAB_PATCH_SUMMARY = 4;
+
     private static final Color MOD_BUSY_COLOR = new Color(192, 192, 192);
     private static final String MOD_DESC_FORMAT = "<html>" +
         "<table border=\"0\" width=\"%1$d\"><tr style=\"font-weight: bold; font-size: larger;\">" +
@@ -44,8 +47,6 @@ class MainForm {
     private JLabel statusText;
     private JButton refreshButton;
     private JProgressBar progressBar;
-    private JLabel origLabel;
-    private JLabel outputLabel;
     private JTabbedPane tabbedPane;
     private JTextArea logText;
     private JButton copyLogButton;
@@ -58,6 +59,8 @@ class MainForm {
     private JComboBox lavaCombo;
     private JComboBox fireCombo;
     private JComboBox portalCombo;
+    private JTextField heapSizeText;
+    private JCheckBox debugCheckBox;
 
     private boolean busy = true;
     private Thread workerThread = null;
@@ -195,7 +198,7 @@ class MainForm {
             class PatchThread implements Runnable {
                 public void run() {
                     if (!MCPatcher.patch()) {
-                        tabbedPane.setSelectedIndex(LOG_TAB);
+                        tabbedPane.setSelectedIndex(TAB_LOG);
                         JOptionPane.showMessageDialog(frame,
                             "There was an error during patching.  " +
                                 "See log for more information.  " +
@@ -246,7 +249,7 @@ class MainForm {
             }
 
             public void actionPerformed(ActionEvent e) {
-                tabbedPane.setSelectedIndex(LOG_TAB);
+                tabbedPane.setSelectedIndex(TAB_LOG);
                 setBusy(true);
                 setStatusText("Launching %s...", MCPatcher.minecraft.getOutputFile().getName());
                 MCPatcherUtils.saveProperties();
@@ -357,6 +360,12 @@ class MainForm {
                 }
             }
         });
+
+        debugCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                MCPatcherUtils.set("debug", debugCheckBox.isSelected());
+            }
+        });
     }
 
     public void show() {
@@ -395,7 +404,7 @@ class MainForm {
     }
 
     public void showCorruptJarError() {
-        tabbedPane.setSelectedIndex(LOG_TAB);
+        tabbedPane.setSelectedIndex(TAB_LOG);
         JOptionPane.showMessageDialog(frame,
             "There was an error opening minecraft.jar. This may be because:\n" +
                 " - You selected the launcher jar and not the main minecraft.jar in the bin folder.\n" +
@@ -484,8 +493,14 @@ class MainForm {
     }
 
     void updateActiveTab() {
+        if (tabbedPane.getSelectedIndex() != TAB_OPTIONS) {
+            try {
+                MCPatcherUtils.set("heapSize", Integer.parseInt(heapSizeText.getText()));
+            } catch (Exception e1) {
+            }
+        }
         switch (tabbedPane.getSelectedIndex()) {
-            case 1:
+            case TAB_OPTIONS:
                 if (MCPatcherUtils.getBoolean("HDTexture", "customWater", true)) {
                     waterCombo.setSelectedIndex(2);
                 } else if (MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true)) {
@@ -513,13 +528,16 @@ class MainForm {
                 } else {
                     portalCombo.setSelectedIndex(0);
                 }
+
+                heapSizeText.setText("" + MCPatcherUtils.getInt("heapSize", 1024));
+                debugCheckBox.setSelected(MCPatcherUtils.getBoolean("debug", false));
                 break;
 
-            case 3:
+            case TAB_CLASS_MAP:
                 showClassMaps();
                 break;
 
-            case 4:
+            case TAB_PATCH_SUMMARY:
                 showPatchResults();
                 break;
 
