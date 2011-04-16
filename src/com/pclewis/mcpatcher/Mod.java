@@ -200,7 +200,11 @@ public abstract class Mod {
      * @see #filesToReplace
      */
     public InputStream openFile(String name) throws IOException {
-        return getClass().getResourceAsStream(name.replaceFirst("^/*", "/"));
+        InputStream is = getClass().getResourceAsStream(name);
+        if (is == null) {
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+        }
+        return is;
     }
 
     /**
