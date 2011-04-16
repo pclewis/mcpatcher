@@ -328,28 +328,16 @@ abstract public class ClassMod implements PatchComponent {
         return ConstPoolUtils.reference(methodInfo.getConstPool(), opcode, map(ref), addToConstPool);
     }
 
+    final public Mod getMod() {
+        return mod;
+    }
+
     final public ClassMap getClassMap() {
         return mod.getClassMap();
     }
 
     final public JavaRef map(JavaRef ref) {
         return mod.getClassMap().map(ref);
-    }
-
-    final public void setModParam(String name, Object value) {
-        mod.setModParam(name, value);
-    }
-
-    final public String getModParam(String name) {
-        return mod.getModParam(name);
-    }
-
-    final public int getModParamInt(String name) {
-        return mod.getModParamInt(name);
-    }
-
-    final public boolean getModParamBool(String name) {
-        return mod.getModParamBool(name);
     }
 
     /**

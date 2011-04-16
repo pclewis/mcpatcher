@@ -84,27 +84,15 @@ abstract public class ClassPatch implements PatchComponent {
         return classMod.reference(methodInfo, opcode, ref);
     }
 
+    final public Mod getMod() {
+        return classMod.getMod();
+    }
+
     final public ClassMap getClassMap() {
         return classMod.getClassMap();
     }
 
     final public JavaRef map(JavaRef ref) {
         return classMod.map(ref);
-    }
-
-    final public void setModParam(String name, Object value) {
-        classMod.setModParam(name, value);
-    }
-
-    final public String getModParam(String name) {
-        return classMod.getModParam(name);
-    }
-
-    final public int getModParamInt(String name) {
-        return classMod.getModParamInt(name);
-    }
-
-    final public boolean getModParamBool(String name) {
-        return classMod.getModParamBool(name);
     }
 }

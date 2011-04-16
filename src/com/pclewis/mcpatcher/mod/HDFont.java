@@ -9,6 +9,9 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class HDFont extends Mod {
+    private int imageWidthRegister;
+    private int imageHeightRegister;
+
     public HDFont() {
         name = "HD Font";
         author = "MCPatcher";
@@ -42,11 +45,12 @@ public class HDFont extends Mod {
             ) {
                 @Override
                 public void afterMatch(ClassFile classFile) {
-                    int w = matcher.getCaptureGroup(1)[0];
-                    int h = matcher.getCaptureGroup(2)[0];
-                    setModParam("imageWidthRegister", w);
-                    setModParam("imageHeightRegister", h);
-                    Logger.log(Logger.LOG_CONST, "font registers = %d, %d", w, h);
+                    HDFont mod = (HDFont) getMod();
+                    mod.imageWidthRegister = matcher.getCaptureGroup(1)[0];
+                    mod.imageHeightRegister = matcher.getCaptureGroup(2)[0];
+                    Logger.log(Logger.LOG_CONST, "font registers = %d, %d",
+                        mod.imageWidthRegister, mod.imageHeightRegister
+                    );
                 }
             });
 
@@ -67,7 +71,7 @@ public class HDFont extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        ILOAD, getModParamInt("imageWidthRegister"),
+                        ILOAD, ((HDFont) getMod()).imageWidthRegister,
                         push(methodInfo, 16),
                         IDIV,
                         ICONST_1,
@@ -94,8 +98,9 @@ public class HDFont extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo mi) throws IOException {
+                    HDFont mod = (HDFont) getMod();
                     return buildCode(
-                        ILOAD, getModParamInt("imageWidthRegister"),
+                        ILOAD, ((HDFont) getMod()).imageWidthRegister,
                         push(mi, 16),
                         IDIV
                     );
@@ -119,7 +124,7 @@ public class HDFont extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo mi) throws IOException {
                     return buildCode(
-                        ILOAD, getModParamInt("imageWidthRegister"),
+                        ILOAD, ((HDFont) getMod()).imageWidthRegister,
                         push(mi, 64),
                         IDIV,
                         ISTORE
@@ -151,7 +156,7 @@ public class HDFont extends Mod {
                         IMUL,
                         push(mi, 256),
                         IADD,
-                        ILOAD, getModParamInt("imageWidthRegister"),
+                        ILOAD, ((HDFont) getMod()).imageWidthRegister,
                         IDIV,
                         IASTORE
                     );

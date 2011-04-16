@@ -64,7 +64,6 @@ public abstract class Mod {
     };
 
     protected ClassMap classMap = new ClassMap();
-    private HashMap<String, String> params = new HashMap<String, String>();
     private ArrayList<String> errors = new ArrayList<String>();
     private boolean enabled = false;
     boolean internal = false;
@@ -237,55 +236,6 @@ public abstract class Mod {
      */
     final protected void addConflict(String name) {
         dependencies.add(new Dependency(name, false));
-    }
-
-    /**
-     * Set a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name  parameter name
-     * @param value parameter value (must support toString())
-     */
-    final protected void setModParam(String name, Object value) {
-        params.put(name, value.toString());
-    }
-
-    /**
-     * Get a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name parameter name
-     * @return parameter value or ""
-     */
-    final protected String getModParam(String name) {
-        String value = params.get(name);
-        return value == null ? "" : value;
-    }
-
-    /**
-     * Get a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name parameter name
-     * @return parameter value or 0
-     */
-    final protected int getModParamInt(String name) {
-        try {
-            return Integer.parseInt(params.get(name));
-        } catch (Throwable e) {
-            return 0;
-        }
-    }
-
-    /**
-     * Get a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name parameter name
-     * @return parameter value or false
-     */
-    final protected boolean getModParamBool(String name) {
-        try {
-            return Boolean.parseBoolean(params.get(name));
-        } catch (Throwable e) {
-            return false;
-        }
     }
 
     class Dependency {

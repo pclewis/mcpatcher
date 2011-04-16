@@ -44,6 +44,13 @@ interface PatchComponent {
     public byte[] reference(MethodInfo methodInfo, int opcode, JavaRef ref);
 
     /**
+     * Gets a reference to the containing mod.
+     *
+     * @return mod
+     */
+    public Mod getMod();
+
+    /**
      * Gets the mapping from descriptive class/field/method names to obfuscated names.
      *
      * @return mod ClassMap
@@ -57,36 +64,4 @@ interface PatchComponent {
      * @return obfuscated reference
      */
     public JavaRef map(JavaRef ref);
-
-    /**
-     * Set a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name
-     * @param value
-     */
-    public void setModParam(String name, Object value);
-
-    /**
-     * Get a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name
-     * @return parameter value or ""
-     */
-    public String getModParam(String name);
-
-    /**
-     * Get a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name
-     * @return parameter value or 0
-     */
-    public int getModParamInt(String name);
-
-    /**
-     * Get a global parameter for the mod, visible to all ClassMods and ClassPatches.
-     *
-     * @param name
-     * @return parameter value or false
-     */
-    public boolean getModParamBool(String name);
 }
