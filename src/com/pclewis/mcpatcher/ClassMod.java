@@ -63,11 +63,6 @@ abstract public class ClassMod implements PatchComponent {
     private ArrayList<Label> labels = new ArrayList<Label>();
     private HashMap<String, Integer> labelPositions = new HashMap<String, Integer>();
 
-
-    void setMod(Mod mod) {
-        this.mod = mod;
-    }
-
     boolean matchClassFile(String filename, ClassFile classFile) {
         addToConstPool = false;
         if (!filterFile(filename)) {
@@ -135,10 +130,6 @@ abstract public class ClassMod implements PatchComponent {
      */
     public String getDeobfClass() {
         return getClass().getSimpleName().replaceFirst("Mod$", "");
-    }
-
-    ArrayList<String> getTargetClasses() {
-        return targetClasses;
     }
 
     boolean okToApply() {

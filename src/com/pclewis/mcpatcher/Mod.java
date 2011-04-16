@@ -139,7 +139,7 @@ public abstract class Mod {
 
     void setRefs() {
         for (ClassMod classMod : getClassMods()) {
-            classMod.setMod(this);
+            classMod.mod = this;
             for (ClassSignature classSignature : classMod.classSignatures) {
                 classSignature.setClassMod(classMod);
             }

@@ -220,7 +220,7 @@ final public class MCPatcher {
             for (ClassMod classMod : mod.getClassMods()) {
                 if (!classMod.global && classMod.okToApply()) {
                     checkInterrupt();
-                    if (classMod.getTargetClasses().size() > 1) {
+                    if (classMod.targetClasses.size() > 1) {
                         StringBuilder sb = new StringBuilder();
                         for (String s : classMod.targetClasses) {
                             sb.append(" ");
@@ -228,7 +228,7 @@ final public class MCPatcher {
                         }
                         classMod.addError(String.format("multiple classes matched:%s", sb.toString()));
                         Logger.log(Logger.LOG_MOD, "multiple classes matched %s:%s", classMod.getDeobfClass(), sb.toString());
-                    } else if (classMod.getTargetClasses().size() == 0) {
+                    } else if (classMod.targetClasses.size() == 0) {
                         classMod.addError("no classes matched");
                         Logger.log(Logger.LOG_MOD, "no classes matched %s", classMod.getDeobfClass());
                     }
@@ -245,7 +245,7 @@ final public class MCPatcher {
                 checkInterrupt();
                 try {
                     if (!classMod.global && classMod.okToApply()) {
-                        String name = ClassMap.classNameToFilename(classMod.getTargetClasses().get(0));
+                        String name = ClassMap.classNameToFilename(classMod.targetClasses.get(0));
                         Logger.log(Logger.LOG_CLASS, "%s (%s)", classMod.getDeobfClass(), name);
                         ClassFile classFile = new ClassFile(new DataInputStream(origJar.getInputStream(new ZipEntry(name))));
                         classMod.addToConstPool = false;
@@ -326,7 +326,7 @@ final public class MCPatcher {
                 }
                 out.printf("%s\n", mod.getName());
                 for (ClassMod classMod : mod.getClassMods()) {
-                    ArrayList<String> tc = classMod.getTargetClasses();
+                    ArrayList<String> tc = classMod.targetClasses;
                     out.printf("    %s", classMod.getDeobfClass());
                     if (tc.size() == 0) {
                     } else if (tc.size() == 1) {
@@ -428,7 +428,7 @@ final public class MCPatcher {
 
                 for (Mod mod : modList.getSelected()) {
                     for (ClassMod classMod : mod.getClassMods()) {
-                        if (classMod.getTargetClasses().contains(ClassMap.filenameToClassName(name))) {
+                        if (classMod.targetClasses.contains(ClassMap.filenameToClassName(name))) {
                             classMods.add(classMod);
                         }
                     }
