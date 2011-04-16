@@ -258,7 +258,9 @@ public class MCPatcherUtils {
         String oldValue = properties.getProperty(key);
         String newValue = value.toString();
         properties.setProperty(key, newValue);
-        needSaveProps = !newValue.equals(oldValue);
+        if (!newValue.equals(oldValue)) {
+            needSaveProps = true;
+        }
     }
 
     static void set(String name, Object value) {
