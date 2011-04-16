@@ -50,6 +50,7 @@ final public class MCPatcher {
 
     private static boolean ignoreBuiltInMods = false;
     private static boolean ignoreCustomMods = false;
+    static boolean experimentalMods = false;
 
     private static MainForm mainForm = null;
 
@@ -65,6 +66,7 @@ final public class MCPatcher {
      * -auto: apply all applicable mods to the default minecraft.jar and exit (no GUI)<br>
      * -ignorebuiltinmods: do not load mods built into mcpatcher<br>
      * -ignorecustommods: do not load mods from the mcpatcher-mods directory
+     * -experimental: load mods considered "experimental"
      *
      * @param args command-line arguments
      */
@@ -87,6 +89,8 @@ final public class MCPatcher {
                 ignoreBuiltInMods = true;
             } else if (args[i].equals("-ignorecustommods")) {
                 ignoreCustomMods = true;
+            } else if (args[i].equals("-experimental")) {
+                experimentalMods = true;
             }
         }
 

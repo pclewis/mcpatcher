@@ -20,7 +20,7 @@ public class BetterGrass extends Mod {
         name = "Better Grass";
         author = "MCPatcher";
         description = "Improves the look of the sides of grass blocks. Based on MrMessiah's mod.";
-        version = "1.0";
+        version = "0.1";
 
         allowedDirs.clear();
         allowedDirs.add("");
