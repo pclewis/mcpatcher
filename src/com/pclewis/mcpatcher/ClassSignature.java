@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 abstract public class ClassSignature implements PatchComponent {
     boolean negate = false;
-    private ClassMod classMod;
+    protected ClassMod classMod;
 
     /**
      * Negates a signature's meaning.  A class that does not match underlying signature will be
@@ -24,6 +24,8 @@ abstract public class ClassSignature implements PatchComponent {
         this.negate = negate;
         return this;
     }
+
+    abstract boolean match(String filename, ClassFile classFile, ClassMap tempClassMap);
 
     /**
      * Called immediately after a successful match.  Gives an opportunity to extract bytecode

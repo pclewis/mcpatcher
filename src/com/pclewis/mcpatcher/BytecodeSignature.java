@@ -1,15 +1,19 @@
 package com.pclewis.mcpatcher;
 
 import javassist.bytecode.ClassFile;
+import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.MethodInfo;
 
 /**
  * ClassSignature that matches a particular bytecode sequence.
  */
 abstract public class BytecodeSignature extends ClassSignature {
-    String methodName = null;
     /**
-     * Matcher object
+     * Optional method name.
+     */
+    protected String methodName = null;
+    /**
+     * Matcher object.
      *
      * @see BytecodeMatcher
      */
@@ -25,27 +29,26 @@ abstract public class BytecodeSignature extends ClassSignature {
      */
     abstract public String getMatchExpression(MethodInfo methodInfo);
 
-    /**
-     * Match against the given method.  If successful, matcher contains further
-     * match information.
-     *
-     * @param methodInfo current method
-     * @return true if match
-     * @see #matcher
-     */
-    public boolean match(MethodInfo methodInfo) {
+    protected boolean match(MethodInfo methodInfo) {
         matcher = new BytecodeMatcher(getMatchExpression(methodInfo));
         return matcher.match(methodInfo);
     }
 
-    /**
-     * Gets descriptive name assigned to the signature.
-     *
-     * @return String name
-     * @see #setMethodName(String)
-     */
-    public String getMethodName() {
-        return methodName;
+    boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+        for (Object o : classFile.getMethods()) {
+            MethodInfo methodInfo = (MethodInfo) o;
+            CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
+            if (codeAttribute != null && match(methodInfo)) {
+                if (methodName != null) {
+                    String deobfName = classMod.getDeobfClass();
+                    tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
+                    tempClassMap.addMethodMap(deobfName, methodName, methodInfo.getName());
+                }
+                afterMatch(classFile, methodInfo);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher;
 
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 
 /**
@@ -19,7 +20,18 @@ public class ConstSignature extends ClassSignature {
         tag = ConstPoolUtils.getTag(value);
     }
 
-    boolean match(ConstPool cp, int index) {
+    @Override
+    boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+        ConstPool cp = classFile.getConstPool();
+        for (int i = 1; i < cp.getSize(); i++) {
+            if (match(cp, i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean match(ConstPool cp, int index) {
         return cp.getTag(index) == tag && ConstPoolUtils.checkEqual(cp, index, value);
     }
 }

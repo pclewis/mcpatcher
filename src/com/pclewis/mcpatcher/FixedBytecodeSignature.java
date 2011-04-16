@@ -22,10 +22,7 @@ public class FixedBytecodeSignature extends BytecodeSignature {
         throw new AssertionError("Unreachable");
     }
 
-    /**
-     * @see BytecodeSignature#match(javassist.bytecode.MethodInfo)
-     */
-    public boolean match(MethodInfo methodInfo) {
+    protected boolean match(MethodInfo methodInfo) {
         return matcher.match(methodInfo);
     }
 }

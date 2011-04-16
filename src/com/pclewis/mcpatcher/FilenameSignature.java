@@ -1,16 +1,19 @@
 package com.pclewis.mcpatcher;
 
+import javassist.bytecode.ClassFile;
+
 /**
  * ClassSignature that matches by filename.
  */
 public class FilenameSignature extends ClassSignature {
-    private String filename;
+    protected String filename;
 
     public FilenameSignature(String filename) {
         this.filename = filename;
     }
 
-    public String getFilename() {
-        return filename;
+    @Override
+    boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+        return filename.equals(this.filename);
     }
 }

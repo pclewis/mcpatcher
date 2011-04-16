@@ -75,37 +75,8 @@ abstract public class ClassMod implements PatchComponent {
         for (ClassSignature cs : classSignatures) {
             boolean found = false;
 
-            if (cs instanceof FilenameSignature) {
-                FilenameSignature f = (FilenameSignature) cs;
-                if (filename.equals(f.getFilename())) {
-                    found = true;
-                }
-            } else if (cs instanceof BytecodeSignature) {
-                BytecodeSignature m = (BytecodeSignature) cs;
-                for (Object o : classFile.getMethods()) {
-                    MethodInfo mi = (MethodInfo) o;
-                    CodeAttribute ca = mi.getCodeAttribute();
-                    if (ca != null) {
-                        if (m.match(mi)) {
-                            if (m.getMethodName() != null) {
-                                newMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
-                                newMap.addMethodMap(deobfName, m.getMethodName(), mi.getName());
-                            }
-                            m.afterMatch(classFile, mi);
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-            } else if (cs instanceof ConstSignature) {
-                ConstSignature c = (ConstSignature) cs;
-                ConstPool cp = classFile.getConstPool();
-                for (int i = 1; i < cp.getSize(); i++) {
-                    if (c.match(cp, i)) {
-                        found = true;
-                        break;
-                    }
-                }
+            if (cs.match(filename, classFile, newMap)) {
+                found = true;
             }
 
             if (found == cs.negate) {
