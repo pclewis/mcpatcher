@@ -304,6 +304,7 @@ final public class MCPatcher {
         if (minecraft == null) {
             out.println("No minecraft jar selected.");
             out.println("Click Browse to choose the input file.");
+            out.println();
         } else {
             for (Mod mod : modList.getVisible()) {
                 out.printf("%s\n", mod.getName());
@@ -317,6 +318,7 @@ final public class MCPatcher {
         if (modList == null || !modList.isApplied()) {
             out.println("No patches applied yet.");
             out.println("Click Patch on the Mods tab.");
+            out.println();
         } else {
             for (Mod mod : modList.getSelected()) {
                 if (mod.getClassMods().size() == 0) {

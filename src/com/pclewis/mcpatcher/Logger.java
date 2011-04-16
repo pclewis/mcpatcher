@@ -41,6 +41,10 @@ public class Logger {
         Logger.out = out;
     }
 
+    static PrintStream getOutput() {
+        return out;
+    }
+
     /**
      * Write a blank line to the log.
      *
