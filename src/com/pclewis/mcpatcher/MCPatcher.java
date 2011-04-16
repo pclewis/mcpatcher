@@ -3,7 +3,6 @@ package com.pclewis.mcpatcher;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
-import javax.jws.soap.SOAPBinding;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,14 +121,12 @@ final public class MCPatcher {
         }
 
         getAllMods();
-        if (ui.start()) {
+        if (ui.go()) {
             exitStatus = 0;
-        } else if (ui.shouldExit()) {
-            System.exit(exitStatus);
         }
 
-        MCPatcherUtils.saveProperties();
         if (ui.shouldExit()) {
+            MCPatcherUtils.saveProperties();
             System.exit(exitStatus);
         }
     }

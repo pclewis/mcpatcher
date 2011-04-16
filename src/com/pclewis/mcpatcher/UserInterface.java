@@ -42,7 +42,7 @@ abstract class UserInterface {
         }
     }
 
-    boolean start() {
+    boolean go() {
         File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
         if (!defaultMinecraft.exists()) {
             setBusy(false);
@@ -56,9 +56,6 @@ abstract class UserInterface {
             setBusy(false);
             return false;
         }
-    }
-
-    void updateControls() {
     }
 
     void updateProgress(int value, int max) {
@@ -95,11 +92,6 @@ abstract class UserInterface {
         @Override
         File chooseMinecraftDir(File enteredMCDir) {
             return mainForm.chooseMinecraftDir(enteredMCDir);
-        }
-
-        @Override
-        void updateControls() {
-            mainForm.updateControls();
         }
 
         @Override
@@ -140,8 +132,8 @@ abstract class UserInterface {
         }
 
         @Override
-        boolean start() {
-            if (!super.start()) {
+        boolean go() {
+            if (!super.go()) {
                 return false;
             }
             boolean ok = false;
