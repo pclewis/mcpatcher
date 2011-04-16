@@ -3,6 +3,7 @@ package com.pclewis.mcpatcher;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
+import javax.jws.soap.SOAPBinding;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,7 @@ final public class MCPatcher {
     private static boolean ignoreCustomMods = false;
     static boolean experimentalMods = false;
 
-    private static MainForm mainForm = null;
+    private static UserInterface ui;
 
     private MCPatcher() {
     }
@@ -71,8 +72,10 @@ final public class MCPatcher {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
+        int exitStatus = 1;
         boolean guiEnabled = true;
         String enteredMCDir = null;
+
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-loglevel") && i + 1 < args.length) {
                 i++;
@@ -94,14 +97,17 @@ final public class MCPatcher {
             }
         }
 
-        if (! locateMinecraftDir(guiEnabled, enteredMCDir)) {
-            System.exit(1);
+        if (guiEnabled) {
+            ui = new UserInterface.GUI();
+        } else {
+            ui = new UserInterface.CLI();
         }
 
-        if (guiEnabled) {
-            mainForm = new MainForm();
-            mainForm.show();
+        if (!ui.locateMinecraftDir(enteredMCDir)) {
+            System.exit(exitStatus);
         }
+
+        ui.show();
 
         Util.logOSInfo();
 
@@ -110,86 +116,26 @@ final public class MCPatcher {
             MCPatcherUtils.set("betaWarningShown", false);
             MCPatcherUtils.set("debug", BETA_VERSION > 0);
         }
-        if (guiEnabled && BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown", false)) {
-            mainForm.showBetaDialog();
+        if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown", false)) {
+            ui.showBetaWarning();
             MCPatcherUtils.set("betaWarningShown", true);
         }
 
-        int exitStatus = 0;
         getAllMods();
-        if (guiEnabled) {
-            startGUI();
-        } else {
-            exitStatus = autoPatch();
+        if (ui.start()) {
+            exitStatus = 0;
+        } else if (ui.shouldExit()) {
+            System.exit(exitStatus);
         }
+
         MCPatcherUtils.saveProperties();
-        if (!guiEnabled) {
+        if (ui.shouldExit()) {
             System.exit(exitStatus);
         }
     }
 
     static void checkInterrupt() throws InterruptedException {
         Thread.sleep(0);
-    }
-
-    private static boolean locateMinecraftDir(boolean guiEnabled, String enteredMCDir) {
-        ArrayList<File> mcDirs = new ArrayList<File>();
-        if (enteredMCDir == null) {
-            mcDirs.add(MCPatcherUtils.getDefaultGameDir());
-            mcDirs.add(new File("."));
-            mcDirs.add(new File(".."));
-        } else {
-            mcDirs.add(new File(enteredMCDir).getAbsoluteFile());
-        }
-
-        for (File dir : mcDirs) {
-            if (MCPatcherUtils.setGameDir(dir)) {
-                return true;
-            }
-        }
-
-        File minecraftDir = mcDirs.get(0);
-        return guiEnabled && MainForm.showNoMinecraftDialog(minecraftDir);
-    }
-
-    private static void startGUI() {
-        File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
-        if (!defaultMinecraft.exists()) {
-            mainForm.setBusy(false);
-        } else if (setMinecraft(defaultMinecraft, true)) {
-            mainForm.updateModList();
-        } else {
-            Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
-            mainForm.showCorruptJarError();
-            mainForm.setBusy(false);
-        }
-
-        mainForm.updateControls();
-    }
-
-    private static int autoPatch() {
-        int exitStatus = 1;
-        File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
-        if (!defaultMinecraft.exists()) {
-        } else if (setMinecraft(defaultMinecraft, true)) {
-            try {
-                getApplicableMods();
-                System.out.println();
-                System.out.println("#### Class map:");
-                showClassMaps(System.out);
-                if (patch()) {
-                    exitStatus = 0;
-                }
-                System.out.println();
-                System.out.println("#### Patch summary:");
-                showPatchResults(System.out);
-            } catch (Exception e) {
-                Logger.log(e);
-            }
-        } else {
-            Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
-        }
-        return exitStatus;
     }
 
     static boolean setMinecraft(File file, boolean createBackup) {
@@ -219,10 +165,7 @@ final public class MCPatcher {
         if (!ignoreCustomMods) {
             modList.loadCustomMods(MCPatcherUtils.getMinecraftPath("mcpatcher-mods"));
         }
-
-        if (mainForm != null) {
-            mainForm.setModList(modList);
-        }
+        ui.setModList(modList);
     }
 
     static void getApplicableMods() throws IOException, InterruptedException {
@@ -243,9 +186,7 @@ final public class MCPatcher {
 
         int procFiles = 0;
         for (JarEntry entry : Collections.list(origJar.entries())) {
-            if (mainForm != null) {
-                mainForm.updateProgress(++procFiles, origJar.size());
-            }
+            ui.updateProgress(++procFiles, origJar.size());
             String name = entry.getName();
 
             if (name.endsWith(".class")) {
@@ -456,9 +397,7 @@ final public class MCPatcher {
         int procFiles = 0;
         for (JarEntry entry : Collections.list(origJar.entries())) {
             checkInterrupt();
-            if (mainForm != null) {
-                mainForm.updateProgress(++procFiles, origJar.size());
-            }
+            ui.updateProgress(++procFiles, origJar.size());
             String name = entry.getName();
             boolean patched = false;
 
