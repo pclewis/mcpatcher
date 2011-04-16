@@ -7,12 +7,12 @@ import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
 
-public class HDTextureMod extends Mod {
+public class HDTexture extends Mod {
     static final String class_TileSize = "com.pclewis.mcpatcher.mod.TileSize";
     static final String class_TextureUtils = "com.pclewis.mcpatcher.mod.TextureUtils";
     static final String class_CustomAnimation = "com.pclewis.mcpatcher.mod.CustomAnimation";
 
-    public HDTextureMod() {
+    public HDTexture() {
         name = "HD Textures";
         author = "MCPatcher";
         description = "Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.";

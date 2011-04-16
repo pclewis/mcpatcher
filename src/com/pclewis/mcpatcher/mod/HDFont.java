@@ -8,8 +8,8 @@ import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
 
-public class HDFontMod extends Mod {
-    public HDFontMod() {
+public class HDFont extends Mod {
+    public HDFont() {
         name = "HD Font";
         author = "MCPatcher";
         description = "Provides support for higher resolution fonts.";
