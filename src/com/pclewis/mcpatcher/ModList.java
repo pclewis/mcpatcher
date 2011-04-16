@@ -2,8 +2,8 @@ package com.pclewis.mcpatcher;
 
 import com.pclewis.mcpatcher.mod.BaseMod;
 import com.pclewis.mcpatcher.mod.BetterGrass;
-import com.pclewis.mcpatcher.mod.HDFontMod;
-import com.pclewis.mcpatcher.mod.HDTextureMod;
+import com.pclewis.mcpatcher.mod.HDFont;
+import com.pclewis.mcpatcher.mod.HDTexture;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -30,8 +30,8 @@ class ModList {
     }
 
     public void loadBuiltInMods() {
-        add(new HDTextureMod());
-        add(new HDFontMod());
+        add(new HDTexture());
+        add(new HDFont());
         if (MCPatcher.experimentalMods) {
             add(new BetterGrass());
         }

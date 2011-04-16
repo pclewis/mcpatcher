@@ -107,7 +107,7 @@ public abstract class Mod {
      *     allowedDirs.add("");
      * </pre>
      * <p/>
-     * See HDFontMod.java (simple) and HDTextureMod.java (much more complex) for full examples.
+     * See HDFont.java (simple) and HDTexture.java (much more complex) for full examples.
      */
     public Mod() {
     }
