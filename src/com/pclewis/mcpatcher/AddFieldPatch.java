@@ -23,8 +23,8 @@ public class AddFieldPatch extends ClassPatch {
     /**
      * Add a new field.
      *
-     * @param name field name
-     * @param type field type descriptor
+     * @param name        field name
+     * @param type        field type descriptor
      * @param accessFlags Java access flags (public, private, etc.).
      * @see javassist.bytecode.AccessFlag
      */

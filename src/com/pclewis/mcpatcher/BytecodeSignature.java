@@ -64,7 +64,7 @@ abstract public class BytecodeSignature extends ClassSignature {
      * Called immediately after a successful match.  Gives an opportunity to extract bytecode
      * values using getCaptureGroup, for example.
      *
-     * @param classFile matched class file
+     * @param classFile  matched class file
      * @param methodInfo matched method
      */
     public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {

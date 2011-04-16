@@ -4,7 +4,6 @@ import com.pclewis.mcpatcher.*;
 import javassist.bytecode.*;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 
 import static javassist.bytecode.Opcode.*;
 
