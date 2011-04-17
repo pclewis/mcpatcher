@@ -1492,7 +1492,7 @@ HD Textures
         [1] array size 32x1024 -> int_numBytes
         [2] while i < 16 -> int_size
         [1] while i < 256 -> int_numPixels
-    Minecraft (net.minecraft.client.Minecraft.class)
+    Minecraft (net/minecraft/client/Minecraft.class)
         [1] TextureUtils.setMinecraft(this) on startup
         [1] TextureUtils.setTileSize(), renderEngine.setTileSize() on startup
         [9] remove registerTextureFX call

@@ -334,7 +334,7 @@ final public class MCPatcher {
                     out.printf("    %s", classMod.getDeobfClass());
                     if (tc.size() == 0) {
                     } else if (tc.size() == 1) {
-                        out.printf(" (%s.class)", tc.get(0));
+                        out.printf(" (%s)", ClassMap.classNameToFilename(tc.get(0)));
                     } else {
                         out.print(" (multiple matches:");
                         for (String s : tc) {
