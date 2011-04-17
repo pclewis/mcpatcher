@@ -8,13 +8,13 @@ import java.io.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 class MinecraftJar {
     private static final String VERSION_REGEX = "[0-9][-_.0-9a-zA-Z]+";
@@ -23,38 +23,23 @@ class MinecraftJar {
     private File outputFile;
     private String version;
     private String md5;
+    private String origMD5;
     private JarFile origJar;
     private JarOutputStream outputJar;
-
-    private static String origMD5;
-
-    static {
-        File md5File = MCPatcherUtils.getMinecraftPath("bin", "md5s");
-        if (md5File.exists()) {
-            FileInputStream is = null;
-            try {
-                Properties properties = new Properties();
-                is = new FileInputStream(md5File);
-                properties.load(is);
-                origMD5 = properties.getProperty("minecraft.jar");
-            } catch (IOException e) {
-                origMD5 = null;
-                Logger.log(e);
-            } finally {
-                Util.close(is);
-            }
-        }
-    }
 
     public MinecraftJar(File file) throws IOException {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getPath() + " does not exist");
         }
 
+        checkForDuplicateZipEntries(file);
+
         version = extractVersion(file);
         if (version == null) {
             throw new IOException("Could not determine version of " + file.getPath());
         }
+
+        origMD5 = getOrigMD5(version);
 
         if (file.getName().equals("minecraft.jar")) {
             origFile = new File(file.getParent(), "minecraft-" + version + ".jar");
@@ -68,16 +53,8 @@ class MinecraftJar {
         }
 
         md5 = Util.computeMD5(origFile);
-
-        HashSet<String> entries = new HashSet<String>();
-        getInputJar();
-        for (JarEntry entry : Collections.list(origJar.entries())) {
-            String name = entry.getName();
-            if (entries.contains(name)) {
-                closeStreams();
-                throw new ZipException("duplicate zip entry " + name);
-            }
-            entries.add(name);
+        if (md5 == null) {
+            throw new IOException("Could not compute md5 sum of " + file.getPath());
         }
     }
 
@@ -85,22 +62,33 @@ class MinecraftJar {
         return version;
     }
 
-    public String getMD5() {
-        return md5;
-    }
-
-    public static String getOrigMD5() {
-        return origMD5;
-    }
-
     public boolean isModded() {
         return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5);
     }
 
     public void logVersion() {
-        Logger.log(Logger.LOG_MAIN, "Minecraft version is %s (md5 %s)", getVersion(), getMD5());
-        if (isModded()) {
-            Logger.log(Logger.LOG_MAIN, "WARNING: possibly modded minecraft.jar (orig md5 %s)", getOrigMD5());
+        Logger.log(Logger.LOG_MAIN, "Minecraft version is %s (md5 %s)", version, md5);
+        if (origMD5 == null) {
+            Logger.log(Logger.LOG_MAIN, "WARNING: could not determine original md5 sum");
+        } else if (!origMD5.equals(md5)) {
+            Logger.log(Logger.LOG_MAIN, "WARNING: possibly modded minecraft.jar (orig md5 %s)", origMD5);
+        }
+    }
+
+    private static void checkForDuplicateZipEntries(File file) throws IOException {
+        ZipFile zip = null;
+        try {
+            HashSet<String> entries = new HashSet<String>();
+            zip = new ZipFile(file);
+            for (ZipEntry entry : Collections.list(zip.entries())) {
+                String name = entry.getName();
+                if (entries.contains(name)) {
+                    throw new ZipException("duplicate zip entry " + name);
+                }
+                entries.add(name);
+            }
+        } finally {
+            Util.close(zip);
         }
     }
 
@@ -144,6 +132,30 @@ class MinecraftJar {
         return version;
     }
 
+    private static String getOrigMD5(String version) {
+        String origMD5 = MCPatcherUtils.getString("md5", version, "");
+        if (!origMD5.equals("")) {
+            return origMD5;
+        }
+        File md5File = MCPatcherUtils.getMinecraftPath("bin", "md5s");
+        if (md5File.exists()) {
+            FileInputStream is = null;
+            try {
+                Properties properties = new Properties();
+                is = new FileInputStream(md5File);
+                properties.load(is);
+                origMD5 = properties.getProperty("minecraft.jar");
+                MCPatcherUtils.set("md5", version, origMD5);
+                return (origMD5);
+            } catch (IOException e) {
+                Logger.log(e);
+            } finally {
+                Util.close(is);
+            }
+        }
+        return null;
+    }
+
     static void setDefaultTexturePack() {
         File input = MCPatcherUtils.getMinecraftPath("options.txt");
         if (!input.exists()) {
@@ -185,6 +197,13 @@ class MinecraftJar {
 
     public void restoreBackup() throws IOException {
         closeStreams();
+        if (outputFile.exists() && outputFile.getName().equals("minecraft.jar")) {
+            String md5 = Util.computeMD5(outputFile);
+            if (md5 != null && origMD5 != null && md5.equals(origMD5)) {
+                Util.copyFile(outputFile, origFile);
+                return;
+            }
+        }
         if (origFile.exists()) {
             Util.copyFile(origFile, outputFile);
         }
