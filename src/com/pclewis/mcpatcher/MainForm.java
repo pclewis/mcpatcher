@@ -397,7 +397,11 @@ class MainForm {
         if (tabbedPane.getSelectedIndex() != TAB_OPTIONS) {
             for (Mod mod : MCPatcher.modList.getAll()) {
                 if (mod.configPanel != null) {
-                    mod.configPanel.save();
+                    try {
+                        mod.configPanel.save();
+                    } catch (Throwable e) {
+                        Logger.log(e);
+                    }
                 }
             }
         }
@@ -442,7 +446,7 @@ class MainForm {
                 panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), name));
                 optionsPanel.add(panel);
                 optionsPanel.add(Box.createRigidArea(new Dimension(1, 16)));
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 Logger.log(e);
             }
         }
