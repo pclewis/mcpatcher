@@ -61,12 +61,13 @@ final public class MCPatcher {
      * MCPatcher entry point.
      * <p/>
      * Valid parameters:<br>
+     * -version: print version string and exit<br>
      * -loglevel n: set log level to n (0-7)<br>
-     * -mcdir path: specify path to minecraft
+     * -mcdir path: specify path to minecraft<br>
      * -auto: apply all applicable mods to the default minecraft.jar and exit (no GUI)<br>
      * -ignorebuiltinmods: do not load mods built into mcpatcher<br>
-     * -ignorecustommods: do not load mods from the mcpatcher-mods directory
-     * -experimental: load mods considered "experimental"
+     * -ignorecustommods: do not load mods from the mcpatcher-mods directory<br>
+     * -experimental: load mods considered "experimental"<br>
      *
      * @param args command-line arguments
      */
@@ -82,6 +83,9 @@ final public class MCPatcher {
                     Logger.setLogLevel(Integer.parseInt(args[i]));
                 } catch (NumberFormatException e) {
                 }
+            } else if (args[i].equals("-version")) {
+                System.out.println(VERSION_STRING);
+                System.exit(0);
             } else if (args[i].equals("-mcdir") && i + 1 < args.length) {
                 i++;
                 enteredMCDir = args[i];
