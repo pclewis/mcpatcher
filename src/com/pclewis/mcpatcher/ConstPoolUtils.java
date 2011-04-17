@@ -30,7 +30,7 @@ class ConstPoolUtils {
         } else if (o instanceof ClassRef) {
             return ConstPool.CONST_Class;
         }
-        throw new AssertionError("Unhandled type: " + o.getClass().getName());
+        throw new IllegalArgumentException("Unhandled type: " + o.getClass().getName());
     }
 
     private static int addToPool(ConstPool cp, Object o) {
@@ -59,7 +59,7 @@ class ConstPoolUtils {
         } else if (o instanceof ClassRef) {
             return cp.addClassInfo(((ClassRef) o).getClassName());
         }
-        throw new AssertionError("Unhandled type: " + o.getClass().getName());
+        throw new IllegalArgumentException("Unhandled type: " + o.getClass().getName());
     }
 
     public static boolean checkEqual(ConstPool cp, int index, Object o) {
@@ -76,7 +76,7 @@ class ConstPoolUtils {
         } else if (o instanceof JavaRef) {
             return ((JavaRef) o).checkEqual(cp, index);
         }
-        throw new AssertionError("Unhandled type: " + o.getClass().getName());
+        throw new IllegalArgumentException("Unhandled type: " + o.getClass().getName());
     }
 
     private static int find(ConstPool cp, Object value) {
@@ -217,7 +217,7 @@ class ConstPoolUtils {
             case PUTFIELD:
             case PUTSTATIC:
                 if (!(value instanceof FieldRef)) {
-                    throw new AssertionError(Mnemonic.OPCODE[opcode] + " requires a FieldRef object");
+                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a FieldRef object");
                 }
                 break;
 
@@ -225,13 +225,13 @@ class ConstPoolUtils {
             case INVOKESTATIC:
             case INVOKESPECIAL:
                 if (!(value instanceof MethodRef)) {
-                    throw new AssertionError(Mnemonic.OPCODE[opcode] + " requires a MethodRef object");
+                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a MethodRef object");
                 }
                 break;
 
             case INVOKEINTERFACE:
                 if (!(value instanceof InterfaceMethodRef)) {
-                    throw new AssertionError(Mnemonic.OPCODE[opcode] + " requires an InterfaceMethodRef object");
+                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires an InterfaceMethodRef object");
                 }
                 int numArgs = parseDescriptor(((InterfaceMethodRef) value).getType()).size();
                 return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0), (byte) numArgs, 0};
@@ -242,7 +242,7 @@ class ConstPoolUtils {
             case ANEWARRAY:
             case NEW:
                 if (!(value instanceof ClassRef)) {
-                    throw new AssertionError(Mnemonic.OPCODE[opcode] + " requires a ClassRef object");
+                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a ClassRef object");
                 }
                 break;
 
