@@ -32,12 +32,12 @@ class MinecraftJar {
             throw new FileNotFoundException(file.getPath() + " does not exist");
         }
 
-        checkForDuplicateZipEntries(file);
-
         version = extractVersion(file);
         if (version == null) {
             throw new IOException("Could not determine version of " + file.getPath());
         }
+
+        checkForDuplicateZipEntries(file);
 
         origMD5 = getOrigMD5(version);
 
