@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -30,6 +31,10 @@ public abstract class Mod {
      * Brief description of the mod as displayed in the MCPatcher UI
      */
     protected String description = "";
+    /**
+     * Optional GUI config screen
+     */
+    protected ModConfigPanel configPanel = null;
     /**
      * List of ClassMod objects for the mod
      */
