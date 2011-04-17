@@ -32,8 +32,7 @@ class MainForm {
         "</tr>" +
         "<tr><td colspan=\"2\" style=\"font-weight: normal; font-style: italic;\">%4$s</td></tr>" +
         "</table>" +
-        "</html>"
-    ;
+        "</html>";
 
     private JPanel mainPanel;
     private JFrame frame;
