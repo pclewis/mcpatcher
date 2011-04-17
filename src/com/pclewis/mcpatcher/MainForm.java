@@ -1,8 +1,6 @@
 package com.pclewis.mcpatcher;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableCellRenderer;
@@ -57,7 +55,7 @@ class MainForm {
     private JButton copyClassMapButton;
     private JButton copyPatchResultsButton;
     private JScrollPane modTableScrollPane;
-    private JScrollPane optionsPanel;
+    private JPanel optionsPanel;
 
     private boolean busy = true;
     private Thread workerThread = null;
@@ -395,7 +393,7 @@ class MainForm {
         updateActiveTab();
     }
 
-    void updateActiveTab() {
+    private void updateActiveTab() {
         if (tabbedPane.getSelectedIndex() != TAB_OPTIONS) {
             for (Mod mod : MCPatcher.modList.getAll()) {
                 if (mod.configPanel != null) {
@@ -405,17 +403,7 @@ class MainForm {
         }
         switch (tabbedPane.getSelectedIndex()) {
             case TAB_OPTIONS:
-                for (Mod mod : MCPatcher.modList.getAll()) {
-                    optionsPanel.removeAll();
-                    if (mod.configPanel != null) {
-                        mod.configPanel.load();
-                        JPanel panel = mod.configPanel.getPanel();
-                        if (panel != null) {
-                            panel.setBorder(new EtchedBorder());
-                            optionsPanel.add(panel);
-                        }
-                    }
-                }
+                updateOptionsPanel();
                 break;
 
             case TAB_CLASS_MAP:
@@ -429,6 +417,35 @@ class MainForm {
             default:
                 break;
         }
+    }
+
+    private void updateOptionsPanel() {
+        optionsPanel.removeAll();
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+        for (Mod mod : MCPatcher.modList.getAll()) {
+            try {
+                if (mod.configPanel == null) {
+                    continue;
+                }
+                mod.configPanel.load();
+                JPanel panel = mod.configPanel.getPanel();
+                if (panel == null) {
+                    continue;
+                }
+                String name = mod.configPanel.getPanelName();
+                if (name == null) {
+                    name = mod.getName();
+                }
+                if (panel.getParent() != null) {
+                    panel.getParent().remove(panel);
+                }
+                panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), name));
+                optionsPanel.add(panel);
+            } catch (Exception e) {
+                Logger.log(e);
+            }
+        }
+        optionsPanel.validate();
     }
 
     private void showClassMaps() {

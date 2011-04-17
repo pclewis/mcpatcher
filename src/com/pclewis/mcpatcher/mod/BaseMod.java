@@ -3,6 +3,7 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -18,9 +19,9 @@ public class BaseMod extends Mod {
     }
 
     public class Config extends ModConfigPanel {
+        private JPanel panel;
         private JTextField heapSizeText;
         private JCheckBox debugCheckBox;
-        private JPanel panel;
 
         Config() {
             debugCheckBox.addActionListener(new ActionListener() {
@@ -33,6 +34,11 @@ public class BaseMod extends Mod {
         @Override
         public JPanel getPanel() {
             return panel;
+        }
+
+        @Override
+        public String getPanelName() {
+            return "General options";
         }
 
         @Override

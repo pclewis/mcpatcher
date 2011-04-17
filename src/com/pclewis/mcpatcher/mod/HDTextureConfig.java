@@ -4,6 +4,7 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.ModConfigPanel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
