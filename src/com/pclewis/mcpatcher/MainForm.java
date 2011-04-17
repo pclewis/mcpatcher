@@ -441,6 +441,7 @@ class MainForm {
                 }
                 panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), name));
                 optionsPanel.add(panel);
+                optionsPanel.add(Box.createRigidArea(new Dimension(1, 16)));
             } catch (Exception e) {
                 Logger.log(e);
             }
