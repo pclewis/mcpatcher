@@ -484,7 +484,7 @@ class MainForm {
         outputBrowseButton.setEnabled(!busy);
         modTable.setEnabled(!busy && origOk && outputSet);
         refreshButton.setEnabled(!busy);
-        testButton.setEnabled(!busy && outputOk);
+        testButton.setEnabled(!busy && outputOk && MCPatcherUtils.getMinecraftPath().equals(MCPatcherUtils.getDefaultGameDir()));
         patchButton.setEnabled(!busy && origOk && !output.equals(orig));
         undoButton.setEnabled(!busy && origOk && !output.equals(orig));
         tabbedPane.setEnabled(!busy);
