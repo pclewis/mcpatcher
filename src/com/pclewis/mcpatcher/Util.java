@@ -3,7 +3,7 @@ package com.pclewis.mcpatcher;
 import java.io.*;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
-import java.util.jar.JarFile;
+import java.util.zip.ZipFile;
 
 class Util {
     protected static byte b(int value, int index) {
@@ -61,10 +61,10 @@ class Util {
         }
     }
 
-    public static void close(JarFile jar) {
-        if (jar != null) {
+    public static void close(ZipFile zip) {
+        if (zip != null) {
             try {
-                jar.close();
+                zip.close();
             } catch (IOException e) {
                 Logger.log(e);
             }
