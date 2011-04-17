@@ -18,6 +18,13 @@ public class HDTexture extends Mod {
         description = "Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.";
         version = "1.0";
 
+        MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
+        MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true);
+        MCPatcherUtils.getBoolean("HDTexture", "customLava", true);
+        MCPatcherUtils.getBoolean("HDTexture", "animatedLava", true);
+        MCPatcherUtils.getBoolean("HDTexture", "animatedFire", true);
+        MCPatcherUtils.getBoolean("HDTexture", "customPortal", true);
+
         allowedDirs.clear();
         allowedDirs.add("");
         allowedDirs.add("net/minecraft/client");

@@ -118,6 +118,7 @@ final public class MCPatcher {
             MCPatcherUtils.set("lastVersion", VERSION_STRING);
             MCPatcherUtils.set("betaWarningShown", false);
             MCPatcherUtils.set("debug", BETA_VERSION > 0);
+            MCPatcherUtils.getInt("heapSize", 1024);
         }
         if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown", false)) {
             ui.showBetaWarning();
