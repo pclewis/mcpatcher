@@ -4,6 +4,8 @@ MCJARV = ../bin/minecraft-$(MCVER).jar
 MODJAR = ../mcpatcher-mods/mcpatcher-builtin.jar
 MCPATCHER = out/artifacts/mcpatcher/mcpatcher.jar
 PROFILER4J = $(HOME)/profiler4j-1.0-beta2/agent.jar
+LAUNCH4J = $(HOME)/launch4j/launch4j
+LAUNCH4J_XML = launch4j.xml
 CLASSPATH = lib/javassist.jar
 PACKAGE = com.pclewis.mcpatcher
 DOC_OUT = doc/javadoc
@@ -15,12 +17,18 @@ GOOD_LOG = good.log
 TMPDIR = t.1
 FILTER = perl -p -e 's/@[[:digit:]]+/@.../g; s/(INVOKE|GET|PUT)(VIRTUAL|STATIC|INTERFACE|FIELD|SPECIAL)( 0x[[:xdigit:]]{2}){2}/$$1$$2 0x.. 0x../g;'
 
-.PHONY: default build run test testfilter javadoc control profile clean modjar restore
+.PHONY: default build release run test testfilter javadoc control profile clean modjar restore
 
 default:
 
 build: $(MCPATCHER)
 	ant
+
+release: $(MCPATCHER)
+	cp -pf $(MCPATCHER) mcpatcher-$(shell java -jar $(MCPATCHER) -version).jar
+	sed -e 's/VERSION/$(shell java -jar $(MCPATCHER) -version)/g' $(LAUNCH4J_XML) > $(LAUNCH4J_XML).tmp
+	$(LAUNCH4J) $(shell pwd)/$(LAUNCH4J_XML).tmp
+	rm -f $(LAUNCH4J_XML).tmp
 
 run: $(MCPATCHER)
 	java -jar $(MCPATCHER)
@@ -49,7 +57,7 @@ profile: $(MCPATCHER) $(PROFILER4J)
 	java -Xmx512M -javaagent:$(PROFILER4J)=waitconn=true,verbosity=1 -jar $(MCPATCHER)
 
 clean:
-	rm -rf $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1 $(MCPATCHER) $(DOC_OUT) $(MODJAR) out
+	rm -rf $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1 $(MCPATCHER) $(DOC_OUT) $(MODJAR) out $(LAUNCH4J_XML).tmp mcpatcher-*.jar mcpatcher-*.exe
 
 modjar: $(MCPATCHER)
 	rm -rf $(TMPDIR)
