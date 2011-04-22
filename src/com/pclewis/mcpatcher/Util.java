@@ -113,5 +113,6 @@ class Util {
             System.getProperty("java.version"),
             bits
         );
+        Logger.log(Logger.LOG_MAIN, "Classpath: %s", System.getProperty("java.class.path"));
     }
 }
