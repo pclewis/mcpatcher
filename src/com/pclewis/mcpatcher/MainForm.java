@@ -55,12 +55,7 @@ class MainForm {
     private JButton copyClassMapButton;
     private JButton copyPatchResultsButton;
     private JScrollPane modTableScrollPane;
-    private JComboBox waterCombo;
-    private JComboBox lavaCombo;
-    private JComboBox fireCombo;
-    private JComboBox portalCombo;
-    private JTextField heapSizeText;
-    private JCheckBox debugCheckBox;
+    private JPanel optionsPanel;
 
     private boolean busy = true;
     private Thread workerThread = null;
@@ -272,100 +267,6 @@ class MainForm {
 
         ((DefaultCaret) patchResults.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         copyPatchResultsButton.addActionListener(new CopyToClipboardListener(patchResults));
-
-        waterCombo.addItem("Default");
-        waterCombo.addItem("Not Animated");
-        waterCombo.addItem("Custom Animated");
-        waterCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (waterCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set("HDTexture", "customWater", false);
-                            MCPatcherUtils.set("HDTexture", "animatedWater", true);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set("HDTexture", "customWater", false);
-                            MCPatcherUtils.set("HDTexture", "animatedWater", false);
-                            break;
-
-                        case 2:
-                            MCPatcherUtils.set("HDTexture", "customWater", true);
-                            MCPatcherUtils.set("HDTexture", "animatedWater", true);
-                            break;
-                    }
-                }
-            }
-        });
-
-        lavaCombo.addItem("Default");
-        lavaCombo.addItem("Not Animated");
-        lavaCombo.addItem("Custom Animated");
-        lavaCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (lavaCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set("HDTexture", "customLava", false);
-                            MCPatcherUtils.set("HDTexture", "animatedLava", true);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set("HDTexture", "customLava", false);
-                            MCPatcherUtils.set("HDTexture", "animatedLava", false);
-                            break;
-
-                        case 2:
-                            MCPatcherUtils.set("HDTexture", "customLava", true);
-                            MCPatcherUtils.set("HDTexture", "animatedLava", true);
-                            break;
-                    }
-                }
-            }
-        });
-
-        fireCombo.addItem("Default");
-        fireCombo.addItem("Not Animated");
-        fireCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (fireCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set("HDTexture", "animatedFire", true);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set("HDTexture", "animatedFire", false);
-                            break;
-                    }
-                }
-            }
-        });
-
-        portalCombo.addItem("Default");
-        portalCombo.addItem("Custom Animated");
-        portalCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (portalCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set("HDTexture", "customPortal", false);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set("HDTexture", "customPortal", true);
-                            break;
-                    }
-                }
-            }
-        });
-
-        debugCheckBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MCPatcherUtils.set("debug", debugCheckBox.isSelected());
-            }
-        });
     }
 
     public void show() {
@@ -492,45 +393,21 @@ class MainForm {
         updateActiveTab();
     }
 
-    void updateActiveTab() {
+    private void updateActiveTab() {
         if (tabbedPane.getSelectedIndex() != TAB_OPTIONS) {
-            try {
-                MCPatcherUtils.set("heapSize", Integer.parseInt(heapSizeText.getText()));
-            } catch (Exception e1) {
+            for (Mod mod : MCPatcher.modList.getAll()) {
+                if (mod.configPanel != null) {
+                    try {
+                        mod.configPanel.save();
+                    } catch (Throwable e) {
+                        Logger.log(e);
+                    }
+                }
             }
         }
         switch (tabbedPane.getSelectedIndex()) {
             case TAB_OPTIONS:
-                if (MCPatcherUtils.getBoolean("HDTexture", "customWater", true)) {
-                    waterCombo.setSelectedIndex(2);
-                } else if (MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true)) {
-                    waterCombo.setSelectedIndex(0);
-                } else {
-                    waterCombo.setSelectedIndex(1);
-                }
-
-                if (MCPatcherUtils.getBoolean("HDTexture", "customLava", true)) {
-                    lavaCombo.setSelectedIndex(2);
-                } else if (MCPatcherUtils.getBoolean("HDTexture", "animatedLava", true)) {
-                    lavaCombo.setSelectedIndex(0);
-                } else {
-                    lavaCombo.setSelectedIndex(1);
-                }
-
-                if (MCPatcherUtils.getBoolean("HDTexture", "animatedFire", true)) {
-                    fireCombo.setSelectedIndex(0);
-                } else {
-                    fireCombo.setSelectedIndex(1);
-                }
-
-                if (MCPatcherUtils.getBoolean("HDTexture", "customPortal", true)) {
-                    portalCombo.setSelectedIndex(1);
-                } else {
-                    portalCombo.setSelectedIndex(0);
-                }
-
-                heapSizeText.setText("" + MCPatcherUtils.getInt("heapSize", 1024));
-                debugCheckBox.setSelected(MCPatcherUtils.getBoolean("debug", false));
+                updateOptionsPanel();
                 break;
 
             case TAB_CLASS_MAP:
@@ -544,6 +421,36 @@ class MainForm {
             default:
                 break;
         }
+    }
+
+    private void updateOptionsPanel() {
+        optionsPanel.removeAll();
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+        for (Mod mod : MCPatcher.modList.getAll()) {
+            try {
+                if (mod.configPanel == null) {
+                    continue;
+                }
+                mod.configPanel.load();
+                JPanel panel = mod.configPanel.getPanel();
+                if (panel == null) {
+                    continue;
+                }
+                String name = mod.configPanel.getPanelName();
+                if (name == null) {
+                    name = mod.getName();
+                }
+                if (panel.getParent() != null) {
+                    panel.getParent().remove(panel);
+                }
+                panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), name));
+                optionsPanel.add(panel);
+                optionsPanel.add(Box.createRigidArea(new Dimension(1, 16)));
+            } catch (Throwable e) {
+                Logger.log(e);
+            }
+        }
+        optionsPanel.validate();
     }
 
     private void showClassMaps() {

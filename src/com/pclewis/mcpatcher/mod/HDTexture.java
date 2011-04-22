@@ -17,6 +17,7 @@ public class HDTexture extends Mod {
         author = "MCPatcher";
         description = "Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.";
         version = "1.0";
+        configPanel = new HDTextureConfig();
 
         MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
         MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true);
