@@ -26,6 +26,10 @@ final public class MCPatcher {
      */
     public static final int MINOR_VERSION = 0;
     /**
+     * MCPatcher release number
+     */
+    public static final int RELEASE_VERSION = 0;
+    /**
      * MCPatcher patch level
      */
     public static final int PATCH_VERSION = 0;
@@ -37,7 +41,8 @@ final public class MCPatcher {
      * MCPatcher version as a string
      */
     public static final String VERSION_STRING =
-        String.format("%d.%d.%d", MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION) +
+        String.format("%d.%d.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION) +
+            (PATCH_VERSION > 0 ? String.format("_%02d", PATCH_VERSION) : "") +
             (BETA_VERSION > 0 ? "-beta" + BETA_VERSION : "");
 
     /**
