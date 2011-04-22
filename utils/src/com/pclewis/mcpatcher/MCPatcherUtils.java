@@ -34,10 +34,10 @@ public class MCPatcherUtils {
         }
 
         if (isGame) {
-            if (setGameDir(new File("."))) {
+            if (setGameDir(new File(".")) || setGameDir(getDefaultGameDir())) {
                 System.out.println("MCPatcherUtils initialized. Directory " + minecraftDir.getPath());
             } else {
-                System.out.println("MCPatcherUtils initialized.");
+                System.out.println("MCPatcherUtils initialized. Current directory " + new File(".").getAbsolutePath());
             }
         }
     }
