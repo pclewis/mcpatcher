@@ -2,6 +2,7 @@ package com.pclewis.mcpatcher;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -191,7 +192,7 @@ public abstract class Mod {
 
     /**
      * Called by MCPatcher for each file in filesToAdd and filesToReplace.  Default implementation
-     * simply calls getResourceAsStream.
+     * gets the class resource.
      *
      * @param name name of file to open
      * @return a valid input stream, or null
@@ -200,11 +201,24 @@ public abstract class Mod {
      * @see #filesToReplace
      */
     public InputStream openFile(String name) throws IOException {
-        InputStream is = getClass().getResourceAsStream(name);
-        if (is == null) {
-            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+        Logger.log(Logger.LOG_MAIN, "DEBUG: attempting to open %s", name);
+        URL url = getClass().getResource(name);
+        if (url == null) {
+            Logger.log(Logger.LOG_MAIN, "DEBUG: url is null");
+            return null;
         }
-        return is;
+        Logger.log(Logger.LOG_MAIN, "DEBUG: got url %s", url.toString());
+        InputStream inputStream = url.openStream();
+        if (inputStream == null) {
+            Logger.log(Logger.LOG_MAIN, "DEBUG: openStream failed, retrying with getContextClassLoader");
+            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+            if (inputStream == null) {
+                Logger.log(Logger.LOG_MAIN, "DEBUG: failed again, giving up");
+                return null;
+            }
+        }
+        Logger.log(Logger.LOG_MAIN, "DEBUG: successfully opened %s", name);
+        return inputStream;
     }
 
     /**

@@ -417,12 +417,10 @@ final public class MCPatcher {
             InputStream inputStream = origJar.getInputStream(entry);
 
             for (Mod mod : modList.getSelected()) {
-                for (String f : mod.filesToReplace) {
-                    if (name.equals(f)) {
-                        if (addOrReplaceFile("replacing", mod, name, outputJar)) {
-                            patched = true;
-                            break;
-                        }
+                if (mod.filesToReplace.contains(name)) {
+                    if (addOrReplaceFile("replacing", mod, name, outputJar)) {
+                        patched = true;
+                        break;
                     }
                 }
             }
@@ -461,17 +459,16 @@ final public class MCPatcher {
 
         for (Mod mod : modList.getSelected()) {
             for (String name : mod.filesToAdd) {
-                if (!addOrReplaceFile("adding", mod, name, outputJar)) {
-                    throw new IOException(String.format("could not open %s for %s", name, mod.getName()));
-                }
+                addOrReplaceFile("adding", mod, name, outputJar);
             }
         }
     }
 
     private static boolean addOrReplaceFile(String action, Mod mod, String filename, JarOutputStream outputJar) throws IOException, BadBytecode {
-        InputStream inputStream = mod.openFile(filename);
+        String resource = "/" + filename;
+        InputStream inputStream = mod.openFile(resource);
         if (inputStream == null) {
-            return false;
+            throw new IOException(String.format("could not open %s for %s", resource, mod.getName()));
         }
         Logger.log(Logger.LOG_CLASS, "%s %s for %s", action, filename, mod.getName());
 
