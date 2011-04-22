@@ -1,78 +1,79 @@
-MCPatcher version is 2.0.0-beta4
+MCPatcher version is 2.0.0
 OS: Linux 2.6.35.12-88.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_23 (64 bit)
-Minecraft version is 1.4_01 (md5 9379e54b581ba4ef3acc3e326e87db91)
+Classpath: out/artifacts/mcpatcher/mcpatcher.jar
+Minecraft version is 1.5_01 (md5 d02fa9998e30693d8d989d5f88cf0040)
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.4_01.jar (714 files)
-  ai.class matches TextureFX.class
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (794 files)
+  ar.class matches Compass.class
+  as.class matches TextureFX.class
    a matches onTick
-  aj.class matches Compass.class
-  bo.class matches StillLava.class
-  ez.class matches GLAllocation.class
+  bz.class matches StillLava.class
+  ft.class matches GLAllocation.class
    b matches createDirectByteBuffer
-  f.class matches TexturePackBase.class
+  h.class matches TexturePackBase.class
    a matches getInputStream
-  gh.class matches Portal.class
-  gm.class matches ColorizerGrass.class
-  gr.class matches FlowLava.class
-  gw.class matches TexturePackList.class
-  hn.class matches ColorizerFoliage.class
-  ho.class matches RenderEngine.class
-  ir.class matches Watch.class
-  is.class matches GameSettings.class
-  lr.class matches FlowWater.class
-  me.class matches TexturePackDefault.class
-  nt.class matches ItemRenderer.class
-  os.class matches Fire.class
-  ox.class matches FontRenderer.class
-  ox.class matches FontRenderer.class
+  hf.class matches Portal.class
+  hl.class matches ColorizerGrass.class
+  hq.class matches FlowLava.class
+  hv.class matches TexturePackList.class
+  io.class matches ColorizerFoliage.class
+  ip.class matches RenderEngine.class
+  jy.class matches Watch.class
+  jz.class matches GameSettings.class
+  nl.class matches FlowWater.class
+  ob.class matches TexturePackDefault.class
+  qa.class matches ItemRenderer.class
+  ra.class matches Fire.class
+  rf.class matches FontRenderer.class
+  rf.class matches FontRenderer.class
    font registers = 5, 6
-  rv.class matches StillWater.class
+  ul.class matches StillWater.class
   net/minecraft/client/Minecraft.class matches Minecraft.class
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.4_01.jar (second pass)
-  RenderEngine (ho.class)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (second pass)
+  RenderEngine (ip.class)
    field e matches imageData
    field f matches textureList
    method a matches registerTextureFX
    method b matches refreshTextures
    method a matches readTextureImage
    method a matches setupTexture
-  TextureFX (ai.class)
+  TextureFX (as.class)
    field a matches imageData
    field b matches tileNumber
    field d matches field_1130_d
    field e matches tileSize
    field f matches tileImage
-  Compass (aj.class)
-  Fire (os.class)
-  StillLava (bo.class)
-  FlowLava (gr.class)
-  StillWater (rv.class)
-  FlowWater (lr.class)
-  ItemRenderer (nt.class)
-  Watch (ir.class)
-  Portal (gh.class)
+  Compass (ar.class)
+  Fire (ra.class)
+  StillLava (bz.class)
+  FlowLava (hq.class)
+  StillWater (ul.class)
+  FlowWater (nl.class)
+  ItemRenderer (qa.class)
+  Watch (jy.class)
+  Portal (hf.class)
   Minecraft (net/minecraft/client/Minecraft.class)
    field C matches texturePackList
    field o matches renderEngine
    field y matches gameSettings
    field p matches fontRenderer
-  GLAllocation (ez.class)
-  TexturePackList (gw.class)
+  GLAllocation (ft.class)
+  TexturePackList (hv.class)
    field a matches selectedTexturePack
    field c matches defaultTexturePack
    field e matches minecraft
-  TexturePackBase (f.class)
+  TexturePackBase (h.class)
    field a matches texturePackFileName
-  TexturePackDefault (me.class)
-  FontRenderer (ox.class)
-  GameSettings (is.class)
-  ColorizerFoliage (hn.class)
+  TexturePackDefault (ob.class)
+  FontRenderer (rf.class)
+  GameSettings (jz.class)
+  ColorizerFoliage (io.class)
    field a matches colorBuffer
-  ColorizerGrass (gm.class)
+  ColorizerGrass (hl.class)
    field a matches colorBuffer
-  FontRenderer (ox.class)
+  FontRenderer (rf.class)
 
 2 available mods:
 [YES] HD Textures 1.0 - Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.
@@ -80,50 +81,50 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4_01.jar (second pass)
 
 #### Class map:
 HD Textures
-    class ColorizerFoliage (hn.class)
+    class ColorizerFoliage (io.class)
         field colorBuffer -> a
-    class ColorizerGrass (gm.class)
+    class ColorizerGrass (hl.class)
         field colorBuffer -> a
-    class Compass (aj.class)
-    class Fire (os.class)
-    class FlowLava (gr.class)
-    class FlowWater (lr.class)
-    class FontRenderer (ox.class)
-    class GLAllocation (ez.class)
+    class Compass (ar.class)
+    class Fire (ra.class)
+    class FlowLava (hq.class)
+    class FlowWater (nl.class)
+    class FontRenderer (rf.class)
+    class GLAllocation (ft.class)
         method createDirectByteBuffer -> b
-    class GameSettings (is.class)
-    class ItemRenderer (nt.class)
+    class GameSettings (jz.class)
+    class ItemRenderer (qa.class)
     class Minecraft (net/minecraft/client/Minecraft.class)
         field fontRenderer -> p
         field gameSettings -> y
         field renderEngine -> o
         field texturePackList -> C
-    class Portal (gh.class)
-    class RenderEngine (ho.class)
+    class Portal (hf.class)
+    class RenderEngine (ip.class)
         method readTextureImage -> a
         method refreshTextures -> b
         method registerTextureFX -> a
         method setupTexture -> a
         field imageData -> e
         field textureList -> f
-    class StillLava (bo.class)
-    class StillWater (rv.class)
-    class TextureFX (ai.class)
+    class StillLava (bz.class)
+    class StillWater (ul.class)
+    class TextureFX (as.class)
         method onTick -> a
         field field_1130_d -> d
         field imageData -> a
         field tileImage -> f
         field tileNumber -> b
         field tileSize -> e
-    class TexturePackBase (f.class)
+    class TexturePackBase (h.class)
         method getInputStream -> a
         field texturePackFileName -> a
-    class TexturePackDefault (me.class)
-    class TexturePackList (gw.class)
+    class TexturePackDefault (ob.class)
+    class TexturePackList (hv.class)
         field defaultTexturePack -> c
         field minecraft -> e
         field selectedTexturePack -> a
-    class Watch (ir.class)
+    class Watch (jy.class)
     class com.pclewis.mcpatcher.mod.CustomAnimation extends TextureFX
         method onTick -> a
         field field_1130_d -> d
@@ -153,16 +154,12 @@ HD Textures
     class net.minecraft.src.Watch alias for Watch
 
 HD Font
-    class FontRenderer (ox.class)
+    class FontRenderer (rf.class)
     class net.minecraft.src.FontRenderer alias for FontRenderer
 
 
 Patching...
- applying TextureFX patch to ai.class for mod HD Textures
-    array size 1024 -> int_numBytes <init>@5
-     SIPUSH 0x04 0x00          GETSTATIC 0x00 0x36
-     NEWARRAY 0x08             NEWARRAY 0x08
- applying Compass patch to aj.class for mod HD Textures
+ applying Compass patch to ar.class for mod HD Textures
     7.5D -> double_compassCenterMin a@464
      LDC2_W 0x00 0x24          GETSTATIC 0x00 0xa6
     7.5D -> double_compassCenterMin a@675
@@ -206,7 +203,7 @@ Patching...
      GETFIELD 0x00 0x2f        GETFIELD 0x00 0x2f
      ICONST_0                  ICONST_0
      BIPUSH 0x10               GETSTATIC 0x00 0xaf
- applying GetResource patch to aj.class for mod HD Textures
+ applying GetResource patch to ar.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@30
      LDC 0x0e                  NOP
      LDC 0x02                  NOP
@@ -215,7 +212,11 @@ Patching...
                                NOP
                                LDC 0x02
                                INVOKESTATIC 0x00 0xc8
- applying StillLava patch to bo.class for mod HD Textures
+ applying TextureFX patch to as.class for mod HD Textures
+    array size 1024 -> int_numBytes <init>@5
+     SIPUSH 0x04 0x00          GETSTATIC 0x00 0x36
+     NEWARRAY 0x08             NEWARRAY 0x08
+ applying StillLava patch to bz.class for mod HD Textures
     array size 256 -> int_numPixels <init>@11
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x4a
      NEWARRAY 0x06             NEWARRAY 0x06
@@ -303,7 +304,7 @@ Patching...
     * 16 -> int_size a@350
      BIPUSH 0x10               GETSTATIC 0x00 0x4d
      IMUL                      IMUL
- applying GetResource patch to ev.class for mod HD Textures
+ applying GetResource patch to fn.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@5
      LDC_W 0x00 0x02           NOP
      LDC 0x01                  NOP
@@ -313,7 +314,7 @@ Patching...
                                NOP
                                LDC 0x01
                                INVOKESTATIC 0x00 0x4b
- applying Portal patch to gh.class for mod HD Textures
+ applying Portal patch to hf.class for mod HD Textures
     16.0F -> float_size <init>@98
      LDC 0x06                  GETSTATIC 0x00 0x50
     16.0F -> float_size <init>@112
@@ -340,7 +341,7 @@ Patching...
     while i < 256 -> int_numPixels a@26
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x5c
      IF_ICMPGE 0x00 0xb4       IF_ICMPGE 0x00 0xb4
- applying GetResource patch to gm.class for mod HD Textures
+ applying GetResource patch to hl.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <clinit>@7
      LDC 0x04                  NOP
      LDC 0x02                  NOP
@@ -349,9 +350,9 @@ Patching...
                                NOP
                                LDC 0x02
                                INVOKESTATIC 0x00 0x3c
- applying ColorizerGrass patch to gm.class for mod HD Textures
+ applying ColorizerGrass patch to hl.class for mod HD Textures
     make field colorBuffer public
- applying FlowLava patch to gr.class for mod HD Textures
+ applying FlowLava patch to hq.class for mod HD Textures
     array size 256 -> int_numPixels <init>@13
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x50
      NEWARRAY 0x06             NEWARRAY 0x06
@@ -445,22 +446,22 @@ Patching...
     * 16 -> int_size a@418
      BIPUSH 0x10               GETSTATIC 0x00 0x53
      IMUL                      IMUL
- applying TexturePackList patch to gw.class for mod HD Textures
+ applying TexturePackList patch to hv.class for mod HD Textures
     TexturePackList.setTileSize(selectedTexturePack) on texture pack change a@54
      ALOAD_0                   ALOAD_0
      GETFIELD 0x00 0x16        GETFIELD 0x00 0x16
      INVOKEVIRTUAL 0x00 0x1f   INVOKEVIRTUAL 0x00 0x1f
-     ICONST_1                  INVOKESTATIC 0x00 0xc6
+     ICONST_1                  INVOKESTATIC 0x00 0xc7
                                POP
                                ALOAD_0
                                GETFIELD 0x00 0x1a
                                DUP
-                               GETFIELD 0x00 0xca
+                               GETFIELD 0x00 0xcb
                                SWAP
-                               INVOKEVIRTUAL 0x00 0xce
-                               INVOKESTATIC 0x00 0xd1
+                               INVOKEVIRTUAL 0x00 0xcf
+                               INVOKESTATIC 0x00 0xd2
                                ICONST_1
- applying GetResource patch to hn.class for mod HD Textures
+ applying GetResource patch to io.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <clinit>@7
      LDC 0x05                  NOP
      LDC 0x04                  NOP
@@ -469,94 +470,94 @@ Patching...
                                NOP
                                LDC 0x04
                                INVOKESTATIC 0x00 0x3e
- applying ColorizerFoliage patch to hn.class for mod HD Textures
+ applying ColorizerFoliage patch to io.class for mod HD Textures
     make field colorBuffer public
- applying RenderEngine patch to ho.class for mod HD Textures
+ applying RenderEngine patch to ip.class for mod HD Textures
     (i % 16) * 16 + j * 16 -> (i % 16) * int_size + j * int_size a@116
      BIPUSH 0x10               BIPUSH 0x10
      IREM                      IREM
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
      IMUL                      IMUL
      ILOAD_3                   ILOAD_3
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
      IMUL                      IMUL
     (i / 16) * 16 + j * 16 -> (i / 16) * int_size + j * int_size a@133
      BIPUSH 0x10               BIPUSH 0x10
      IDIV                      IDIV
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
      IMUL                      IMUL
      ILOAD 0x04                ILOAD 0x04
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
      IMUL                      IMUL
     glTexSubImage2D(...,16,16) -> glTexSubImage2D(...,int_size,int_size) a@147
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
      SIPUSH 0x19 0x08          SIPUSH 0x19 0x08
      SIPUSH 0x14 0x01          SIPUSH 0x14 0x01
     glTexSubImage2D(...,16,16) -> glTexSubImage2D(...,int_size,int_size) a@534
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
-     BIPUSH 0x10               GETSTATIC 0x01 0x6a
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
+     BIPUSH 0x10               GETSTATIC 0x01 0x64
      SIPUSH 0x19 0x08          SIPUSH 0x19 0x08
      SIPUSH 0x14 0x01          SIPUSH 0x14 0x01
     readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...) a@71
-     INVOKEVIRTUAL 0x00 0x44   SWAP
-     INVOKESPECIAL 0x00 0x49   POP
+     INVOKEVIRTUAL 0x00 0x42   SWAP
+     INVOKESPECIAL 0x00 0x47   POP
                                SWAP
                                POP
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...) a@111
-     INVOKEVIRTUAL 0x00 0x44   SWAP
-     INVOKESPECIAL 0x00 0x49   POP
+     INVOKEVIRTUAL 0x00 0x42   SWAP
+     INVOKESPECIAL 0x00 0x47   POP
                                SWAP
                                POP
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...) a@153
-     INVOKEVIRTUAL 0x00 0x44   SWAP
-     INVOKESPECIAL 0x00 0x49   POP
+     INVOKEVIRTUAL 0x00 0x42   SWAP
+     INVOKESPECIAL 0x00 0x47   POP
                                SWAP
                                POP
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...) b@160
-     INVOKEVIRTUAL 0x00 0x44   SWAP
-     INVOKESPECIAL 0x00 0x49   POP
+     INVOKEVIRTUAL 0x00 0x42   SWAP
+     INVOKESPECIAL 0x00 0x47   POP
                                SWAP
                                POP
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...) b@197
-     INVOKEVIRTUAL 0x00 0x44   SWAP
-     INVOKESPECIAL 0x00 0x49   POP
+     INVOKEVIRTUAL 0x00 0x42   SWAP
+     INVOKESPECIAL 0x00 0x47   POP
                                SWAP
                                POP
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...) b@231
-     INVOKEVIRTUAL 0x00 0x44   SWAP
-     INVOKESPECIAL 0x00 0x49   POP
+     INVOKEVIRTUAL 0x00 0x42   SWAP
+     INVOKESPECIAL 0x00 0x47   POP
                                SWAP
                                POP
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...) b@246
-     INVOKEVIRTUAL 0x00 0x44   SWAP
-     INVOKESPECIAL 0x00 0x49   POP
+     INVOKEVIRTUAL 0x00 0x42   SWAP
+     INVOKESPECIAL 0x00 0x47   POP
                                SWAP
                                POP
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     getInputStream(...), readTextureImage -> getResourceAsBufferedImage(...) a@172
      ALOAD_2                   NOP
      ALOAD_1                   NOP
-     INVOKEVIRTUAL 0x00 0x44   NOP
+     INVOKEVIRTUAL 0x00 0x42   NOP
      ASTORE 0x04               NOP
      ALOAD 0x04                NOP
      IFNONNULL 0x00 0x0f       NOP
      ALOAD_0                   NOP
      ALOAD_0                   NOP
-     GETFIELD 0x00 0x3a        NOP
+     GETFIELD 0x00 0x38        NOP
      ILOAD_3                   NOP
-     INVOKEVIRTUAL 0x00 0x48   NOP
+     INVOKEVIRTUAL 0x00 0x46   NOP
      GOTO 0x00 0x0e            NOP
      ALOAD_0                   NOP
      ALOAD_0                   NOP
      ALOAD 0x04                NOP
-     INVOKESPECIAL 0x00 0x49   NOP
+     INVOKESPECIAL 0x00 0x47   NOP
                                NOP
                                NOP
                                NOP
@@ -569,98 +570,98 @@ Patching...
                                NOP
                                ALOAD_0
                                ALOAD_1
-                               INVOKESTATIC 0x01 0x70
+                               INVOKESTATIC 0x01 0x6a
     imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer() a@397
      ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
+     GETFIELD 0x00 0x31        NOP
+     INVOKEVIRTUAL 0x00 0x5d   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x31        NOP
+     ALOAD 0x06                NOP
      INVOKEVIRTUAL 0x00 0x60   NOP
      POP                       NOP
      ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
-     ALOAD 0x06                NOP
-     INVOKEVIRTUAL 0x00 0x63   NOP
-     POP                       NOP
-     ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
+     GETFIELD 0x00 0x31        NOP
      ICONST_0                  NOP
-     INVOKEVIRTUAL 0x00 0x62   NOP
+     INVOKEVIRTUAL 0x00 0x5f   NOP
      ALOAD 0x06                NOP
      ARRAYLENGTH               NOP
-     INVOKEVIRTUAL 0x00 0x5f   NOP
+     INVOKEVIRTUAL 0x00 0x5c   NOP
      POP                       NOP
                                NOP
                                NOP
                                NOP
                                ALOAD_0
                                ALOAD_0
-                               GETFIELD 0x00 0x33
+                               GETFIELD 0x00 0x31
                                ALOAD 0x06
-                               INVOKESTATIC 0x01 0x74
-                               PUTFIELD 0x00 0x33
+                               INVOKESTATIC 0x01 0x6e
+                               PUTFIELD 0x00 0x31
     imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer() a@44
      ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
+     GETFIELD 0x00 0x31        NOP
+     INVOKEVIRTUAL 0x00 0x5d   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x31        NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x23        NOP
      INVOKEVIRTUAL 0x00 0x60   NOP
      POP                       NOP
      ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
-     ALOAD_2                   NOP
-     GETFIELD 0x00 0x25        NOP
-     INVOKEVIRTUAL 0x00 0x63   NOP
-     POP                       NOP
-     ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
+     GETFIELD 0x00 0x31        NOP
      ICONST_0                  NOP
-     INVOKEVIRTUAL 0x00 0x62   NOP
-     ALOAD_2                   NOP
-     GETFIELD 0x00 0x25        NOP
-     ARRAYLENGTH               NOP
      INVOKEVIRTUAL 0x00 0x5f   NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x23        NOP
+     ARRAYLENGTH               NOP
+     INVOKEVIRTUAL 0x00 0x5c   NOP
      POP                       NOP
                                NOP
                                NOP
                                NOP
                                ALOAD_0
                                ALOAD_0
-                               GETFIELD 0x00 0x33
+                               GETFIELD 0x00 0x31
                                ALOAD_2
-                               GETFIELD 0x00 0x25
-                               INVOKESTATIC 0x01 0x74
-                               PUTFIELD 0x00 0x33
+                               GETFIELD 0x00 0x23
+                               INVOKESTATIC 0x01 0x6e
+                               PUTFIELD 0x00 0x31
     imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer() a@481
      ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
+     GETFIELD 0x00 0x31        NOP
+     INVOKEVIRTUAL 0x00 0x5d   NOP
+     POP                       NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x31        NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x23        NOP
      INVOKEVIRTUAL 0x00 0x60   NOP
      POP                       NOP
      ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
-     ALOAD_2                   NOP
-     GETFIELD 0x00 0x25        NOP
-     INVOKEVIRTUAL 0x00 0x63   NOP
-     POP                       NOP
-     ALOAD_0                   NOP
-     GETFIELD 0x00 0x33        NOP
+     GETFIELD 0x00 0x31        NOP
      ICONST_0                  NOP
-     INVOKEVIRTUAL 0x00 0x62   NOP
-     ALOAD_2                   NOP
-     GETFIELD 0x00 0x25        NOP
-     ARRAYLENGTH               NOP
      INVOKEVIRTUAL 0x00 0x5f   NOP
+     ALOAD_2                   NOP
+     GETFIELD 0x00 0x23        NOP
+     ARRAYLENGTH               NOP
+     INVOKEVIRTUAL 0x00 0x5c   NOP
      POP                       NOP
                                NOP
                                NOP
                                NOP
                                ALOAD_0
                                ALOAD_0
-                               GETFIELD 0x00 0x33
+                               GETFIELD 0x00 0x31
                                ALOAD_2
-                               GETFIELD 0x00 0x25
-                               INVOKESTATIC 0x01 0x74
-                               PUTFIELD 0x00 0x33
+                               GETFIELD 0x00 0x23
+                               INVOKESTATIC 0x01 0x6e
+                               PUTFIELD 0x00 0x31
     1048576 -> int_glBufferSize <init>@35
-     LDC 0x02                  GETSTATIC 0x01 0x77
+     LDC 0x02                  GETSTATIC 0x01 0x71
     insert method setTileSize (Lnet/minecraft/client/Minecraft;)V stack size 10, local vars 5
- applying Watch patch to ir.class for mod HD Textures
+ applying Watch patch to jy.class for mod HD Textures
     16.0D -> double_size a@332
      LDC2_W 0x00 0x23          GETSTATIC 0x00 0x90
     16.0D -> double_size a@354
@@ -714,7 +715,7 @@ Patching...
      BIPUSH 0x10               GETSTATIC 0x00 0x96
      IDIV                      IDIV
      I2D                       I2D
- applying GetResource patch to ir.class for mod HD Textures
+ applying GetResource patch to jy.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@39
      LDC 0x0d                  NOP
      LDC 0x02                  NOP
@@ -731,7 +732,7 @@ Patching...
                                NOP
                                LDC 0x03
                                INVOKESTATIC 0x00 0xa9
- applying FlowWater patch to lr.class for mod HD Textures
+ applying FlowWater patch to nl.class for mod HD Textures
     array size 256 -> int_numPixels <init>@13
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x47
      NEWARRAY 0x06             NEWARRAY 0x06
@@ -798,16 +799,16 @@ Patching...
     * 16 -> int_size a@290
      BIPUSH 0x10               GETSTATIC 0x00 0x4a
      IMUL                      IMUL
- applying GetResource patch to me.class for mod HD Textures
+ applying GetResource patch to ob.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@22
-     LDC 0x0a                  NOP
+     LDC 0x0b                  NOP
      LDC 0x02                  NOP
      INVOKEVIRTUAL 0x00 0x18   NOP
      INVOKESTATIC 0x00 0x19    NOP
                                NOP
                                LDC 0x02
-                               INVOKESTATIC 0x00 0x5a
- applying ItemRenderer patch to nt.class for mod HD Textures
+                               INVOKESTATIC 0x00 0x5b
+ applying ItemRenderer patch to qa.class for mod HD Textures
     tool pixel top a@729
      LDC 0x0d                  NOP
      FADD                      NOP
@@ -816,34 +817,34 @@ Patching...
      DCONST_0                  ALOAD_2
                                DCONST_0
     16.0F -> float_size a@442
-     LDC 0x20                  GETSTATIC 0x01 0x47
+     LDC 0x20                  GETSTATIC 0x01 0x46
     16.0F -> float_size a@572
-     LDC 0x20                  GETSTATIC 0x01 0x47
+     LDC 0x20                  GETSTATIC 0x01 0x46
     16.0F -> float_size a@705
-     LDC 0x20                  GETSTATIC 0x01 0x47
+     LDC 0x20                  GETSTATIC 0x01 0x46
     16.0F -> float_size a@842
-     LDC 0x20                  GETSTATIC 0x01 0x47
+     LDC 0x20                  GETSTATIC 0x01 0x46
     while i < 16 -> int_size a@434
-     BIPUSH 0x10               GETSTATIC 0x01 0x4a
+     BIPUSH 0x10               GETSTATIC 0x01 0x49
      IF_ICMPGE 0x00 0x6c       IF_ICMPGE 0x00 0x6c
     while i < 16 -> int_size a@565
-     BIPUSH 0x10               GETSTATIC 0x01 0x4a
+     BIPUSH 0x10               GETSTATIC 0x01 0x49
      IF_ICMPGE 0x00 0x6f       IF_ICMPGE 0x00 0x6f
     while i < 16 -> int_size a@699
-     BIPUSH 0x10               GETSTATIC 0x01 0x4a
+     BIPUSH 0x10               GETSTATIC 0x01 0x49
      IF_ICMPGE 0x00 0x72       IF_ICMPGE 0x00 0x72
     while i < 16 -> int_size a@837
-     BIPUSH 0x10               GETSTATIC 0x01 0x4a
+     BIPUSH 0x10               GETSTATIC 0x01 0x49
      IF_ICMPGE 0x00 0x6f       IF_ICMPGE 0x00 0x6f
     0.001953125F -> float_texNudge a@459
-     LDC 0x0b                  GETSTATIC 0x01 0x4d
+     LDC 0x0b                  GETSTATIC 0x01 0x4c
     0.001953125F -> float_texNudge a@591
-     LDC 0x0b                  GETSTATIC 0x01 0x4d
+     LDC 0x0b                  GETSTATIC 0x01 0x4c
     0.001953125F -> float_texNudge a@727
-     LDC 0x0b                  GETSTATIC 0x01 0x4d
+     LDC 0x0b                  GETSTATIC 0x01 0x4c
     0.001953125F -> float_texNudge a@866
-     LDC 0x0b                  GETSTATIC 0x01 0x4d
- applying Fire patch to os.class for mod HD Textures
+     LDC 0x0b                  GETSTATIC 0x01 0x4c
+ applying Fire patch to ra.class for mod HD Textures
     1.06F -> float_flameNudge a@143
      LDC 0x02                  GETSTATIC 0x00 0x3f
     array size 320 -> int_flameArraySize <init>@16
@@ -885,26 +886,26 @@ Patching...
     if i < 19 -> int_flameHeightMinus1 a@158
      BIPUSH 0x13               GETSTATIC 0x00 0x4e
      IF_ICMPLT 0x00 0x2b       IF_ICMPLT 0x00 0x2b
- applying FontRenderer patch to ox.class for mod HD Textures
+ applying FontRenderer patch to rf.class for mod HD Textures
     insert method initialize ()V stack size 11, local vars 18
- applying GetResource patch to ox.class for mod HD Textures
+ applying GetResource patch to rf.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@28
-     LDC 0x09                  NOP
+     LDC 0x0a                  NOP
      ALOAD_2                   NOP
-     INVOKEVIRTUAL 0x00 0x23   NOP
-     INVOKESTATIC 0x00 0x2e    NOP
+     INVOKEVIRTUAL 0x00 0x25   NOP
+     INVOKESTATIC 0x00 0x37    NOP
                                NOP
                                ALOAD_2
-                               INVOKESTATIC 0x00 0xbb
+                               INVOKESTATIC 0x00 0xd9
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) initialize@28
-     LDC 0x09                  NOP
+     LDC 0x0a                  NOP
      ALOAD_2                   NOP
-     INVOKEVIRTUAL 0x00 0x23   NOP
-     INVOKESTATIC 0x00 0x2e    NOP
+     INVOKEVIRTUAL 0x00 0x25   NOP
+     INVOKESTATIC 0x00 0x37    NOP
                                NOP
                                ALOAD_2
-                               INVOKESTATIC 0x00 0xbb
- applying FontRenderer patch to ox.class for mod HD Font
+                               INVOKESTATIC 0x00 0xd9
+ applying FontRenderer patch to rf.class for mod HD Font
     font width 7 -> i / 16 - 1 <init>@119
      BIPUSH 0x07               ILOAD 0x05
      ISTORE 0x0b               BIPUSH 0x10
@@ -971,7 +972,7 @@ Patching...
                                ILOAD 0x05
                                IDIV
                                IASTORE
- applying GetResource patch to qu.class for mod HD Textures
+ applying GetResource patch to ti.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@66
      LDC 0x16                  NOP
      LDC 0x0b                  NOP
@@ -980,8 +981,8 @@ Patching...
                                NOP
                                LDC 0x0b
                                INVOKESTATIC 0x00 0x99
- applying GetResource patch to rs.class for mod HD Textures
- applying StillWater patch to rv.class for mod HD Textures
+ applying GetResource patch to ui.class for mod HD Textures
+ applying StillWater patch to ul.class for mod HD Textures
     array size 256 -> int_numPixels <init>@11
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x44
      NEWARRAY 0x06             NEWARRAY 0x06
@@ -1045,62 +1046,62 @@ Patching...
  applying Minecraft patch to net/minecraft/client/Minecraft.class for mod HD Textures
     TextureUtils.setMinecraft(this) on startup a@220
      ALOAD_0                   ALOAD_0
-     NEW 0x00 0x6c             NEW 0x00 0x6c
+     NEW 0x00 0x6b             NEW 0x00 0x6b
      DUP                       DUP
      ALOAD_0                   ALOAD_0
      ALOAD_0                   ALOAD_0
-     GETFIELD 0x01 0x28        GETFIELD 0x01 0x28
-     INVOKESPECIAL 0x01 0xa8   INVOKESPECIAL 0x01 0xa8
-     PUTFIELD 0x01 0x14        PUTFIELD 0x01 0x14
+     GETFIELD 0x01 0x1d        GETFIELD 0x01 0x1d
+     INVOKESPECIAL 0x01 0xa4   INVOKESPECIAL 0x01 0xa4
+     PUTFIELD 0x01 0x09        PUTFIELD 0x01 0x09
                                ALOAD_0
-                               INVOKESTATIC 0x05 0xff
+                               INVOKESTATIC 0x05 0xee
     TextureUtils.setTileSize(), renderEngine.setTileSize() on startup a@240
      ALOAD_0                   ALOAD_0
-     NEW 0x00 0x71             NEW 0x00 0x71
+     NEW 0x00 0x70             NEW 0x00 0x70
      DUP                       DUP
      ALOAD_0                   ALOAD_0
-     GETFIELD 0x01 0x14        GETFIELD 0x01 0x14
+     GETFIELD 0x01 0x09        GETFIELD 0x01 0x09
      ALOAD_0                   ALOAD_0
-     GETFIELD 0x01 0x49        GETFIELD 0x01 0x49
-     INVOKESPECIAL 0x01 0xae   INVOKESPECIAL 0x01 0xae
-     PUTFIELD 0x01 0x3f        PUTFIELD 0x01 0x3f
-                               INVOKESTATIC 0x06 0x02
+     GETFIELD 0x01 0x3e        GETFIELD 0x01 0x3e
+     INVOKESPECIAL 0x01 0xaa   INVOKESPECIAL 0x01 0xaa
+     PUTFIELD 0x01 0x34        PUTFIELD 0x01 0x34
+                               INVOKESTATIC 0x05 0xf1
                                POP
                                ALOAD_0
-                               GETFIELD 0x01 0x3f
+                               GETFIELD 0x01 0x34
                                ALOAD_0
-                               INVOKEVIRTUAL 0x06 0x04
-    remove registerTextureFX call a@425
+                               INVOKEVIRTUAL 0x05 0xf3
+    remove registerTextureFX call a@459
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
+     GETFIELD 0x01 0x34        NOP
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x2e        NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     GETFIELD 0x01 0x23        NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@436
+    remove registerTextureFX call a@470
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
+     GETFIELD 0x01 0x34        NOP
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x2d        NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     GETFIELD 0x01 0x22        NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@447
+    remove registerTextureFX call a@481
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
-     NEW 0x00 0x69             NOP
+     GETFIELD 0x01 0x34        NOP
+     NEW 0x00 0x68             NOP
      DUP                       NOP
-     INVOKESPECIAL 0x01 0xa6   NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     INVOKESPECIAL 0x01 0xa2   NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
@@ -1109,14 +1110,14 @@ Patching...
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@461
+    remove registerTextureFX call a@495
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
-     NEW 0x00 0x51             NOP
+     GETFIELD 0x01 0x34        NOP
+     NEW 0x00 0x4e             NOP
      DUP                       NOP
      ALOAD_0                   NOP
      INVOKESPECIAL 0x01 0x5f   NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
@@ -1125,14 +1126,14 @@ Patching...
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@476
+    remove registerTextureFX call a@510
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
-     NEW 0x00 0x78             NOP
+     GETFIELD 0x01 0x34        NOP
+     NEW 0x00 0x8b             NOP
      DUP                       NOP
      ALOAD_0                   NOP
-     INVOKESPECIAL 0x01 0xba   NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     INVOKESPECIAL 0x01 0xea   NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
@@ -1141,13 +1142,13 @@ Patching...
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@491
+    remove registerTextureFX call a@525
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
-     NEW 0x00 0x96             NOP
+     GETFIELD 0x01 0x34        NOP
+     NEW 0x00 0x98             NOP
      DUP                       NOP
-     INVOKESPECIAL 0x02 0x10   NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     INVOKESPECIAL 0x02 0x32   NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
@@ -1156,13 +1157,13 @@ Patching...
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@505
+    remove registerTextureFX call a@539
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
-     NEW 0x00 0x6b             NOP
+     GETFIELD 0x01 0x34        NOP
+     NEW 0x00 0x6a             NOP
      DUP                       NOP
-     INVOKESPECIAL 0x01 0xa7   NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     INVOKESPECIAL 0x01 0xa3   NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
@@ -1171,14 +1172,14 @@ Patching...
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@519
+    remove registerTextureFX call a@553
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
-     NEW 0x00 0xab             NOP
+     GETFIELD 0x01 0x34        NOP
+     NEW 0x00 0xaa             NOP
      DUP                       NOP
      ICONST_0                  NOP
-     INVOKESPECIAL 0x02 0x7d   NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     INVOKESPECIAL 0x02 0x73   NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
@@ -1187,14 +1188,14 @@ Patching...
                                NOP
                                NOP
                                NOP
-    remove registerTextureFX call a@534
+    remove registerTextureFX call a@568
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3f        NOP
-     NEW 0x00 0xab             NOP
+     GETFIELD 0x01 0x34        NOP
+     NEW 0x00 0xaa             NOP
      DUP                       NOP
      ICONST_1                  NOP
-     INVOKESPECIAL 0x02 0x7d   NOP
-     INVOKEVIRTUAL 0x01 0xb0   NOP
+     INVOKESPECIAL 0x02 0x73   NOP
+     INVOKEVIRTUAL 0x01 0xac   NOP
                                NOP
                                NOP
                                NOP
@@ -1203,47 +1204,56 @@ Patching...
                                NOP
                                NOP
                                NOP
+DEBUG: attempting to open /com/pclewis/mcpatcher/MCPatcherUtils.class
+DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/MCPatcherUtils.class
+DEBUG: successfully opened /com/pclewis/mcpatcher/MCPatcherUtils.class
   adding com/pclewis/mcpatcher/MCPatcherUtils.class for __Base
+DEBUG: attempting to open /com/pclewis/mcpatcher/mod/TileSize.class
+DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/mod/TileSize.class
+DEBUG: successfully opened /com/pclewis/mcpatcher/mod/TileSize.class
   adding com/pclewis/mcpatcher/mod/TileSize.class for HD Textures
+DEBUG: attempting to open /com/pclewis/mcpatcher/mod/TextureUtils.class
+DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/mod/TextureUtils.class
+DEBUG: successfully opened /com/pclewis/mcpatcher/mod/TextureUtils.class
   adding com/pclewis/mcpatcher/mod/TextureUtils.class for HD Textures
-   method signature ()Lnet/minecraft/src/TexturePackBase; -> ()Lf;
-   method signature (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> (Lf;)Ljava/lang/String;
-   method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> (Lf;Ljava/lang/String;)Ljava/io/InputStream;
-   method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> (Lf;Ljava/lang/String;)Ljava/awt/image/BufferedImage;
-   method signature (Lnet/minecraft/src/TexturePackBase;)I -> (Lf;)I
-   method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> (Lf;Ljava/lang/String;)Z
-   field signature Lnet/minecraft/src/TexturePackBase; -> Lf;
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lf; setTileSize@12
+   method signature ()Lnet/minecraft/src/TexturePackBase; -> ()Lh;
+   method signature (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> (Lh;)Ljava/lang/String;
+   method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> (Lh;Ljava/lang/String;)Ljava/io/InputStream;
+   method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> (Lh;Ljava/lang/String;)Ljava/awt/image/BufferedImage;
+   method signature (Lnet/minecraft/src/TexturePackBase;)I -> (Lh;)I
+   method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> (Lh;Ljava/lang/String;)Z
+   field signature Lnet/minecraft/src/TexturePackBase; -> Lh;
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lh; setTileSize@12
      INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xf9
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lf; refreshTextureFX@85
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lh; refreshTextureFX@85
      INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xf9
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lf; getResourceAsStream@0
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lh; getResourceAsStream@0
      INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xf9
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lf; getResourceAsBufferedImage@0
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lh; getResourceAsBufferedImage@0
      INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xf9
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lf; getTileSize@0
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lh; getTileSize@0
      INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xf9
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lf; hasResource@0
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lh; hasResource@0
      INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0xf9
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lf;)Ljava/lang/String; setTileSize@15
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lh;)Ljava/lang/String; setTileSize@15
      INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0xfb
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lf;)Ljava/lang/String; getResourceAsBufferedImage@199
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lh;)Ljava/lang/String; getResourceAsBufferedImage@199
      INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0xfb
-    field ref net.minecraft.client.Minecraft.fontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.p Lox; setFontRenderer@12
+    field ref net.minecraft.client.Minecraft.fontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.p Lrf; setFontRenderer@12
      GETFIELD 0x00 0x0f        GETFIELD 0x01 0xff
-    field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.y Lis; setFontRenderer@18
+    field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.y Ljz; setFontRenderer@18
      GETFIELD 0x00 0x10        GETFIELD 0x02 0x03
-    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lho; setFontRenderer@26
+    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lip; setFontRenderer@26
      GETFIELD 0x00 0x12        GETFIELD 0x02 0x07
-    method ref net.minecraft.src.FontRenderer.initialize (Lnet/minecraft/src/GameSettings;Ljava/lang/String;Lnet/minecraft/src/RenderEngine;)V -> ox.initialize (Lis;Ljava/lang/String;Lho;)V setFontRenderer@29
+    method ref net.minecraft.src.FontRenderer.initialize (Lnet/minecraft/src/GameSettings;Ljava/lang/String;Lnet/minecraft/src/RenderEngine;)V -> rf.initialize (Ljz;Ljava/lang/String;Lip;)V setFontRenderer@29
      INVOKEVIRTUAL 0x00 0x13   INVOKEVIRTUAL 0x02 0x0c
-    method ref net.minecraft.src.Fire.<init> (I)V -> os.<init> (I)V refreshTextureFX@27
+    method ref net.minecraft.src.Fire.<init> (I)V -> ra.<init> (I)V refreshTextureFX@27
      INVOKESPECIAL 0x00 0x18   INVOKESPECIAL 0x02 0x10
-    method ref net.minecraft.src.Fire.<init> (I)V -> os.<init> (I)V refreshTextureFX@42
+    method ref net.minecraft.src.Fire.<init> (I)V -> ra.<init> (I)V refreshTextureFX@42
      INVOKESPECIAL 0x00 0x18   INVOKESPECIAL 0x02 0x10
-    method ref net.minecraft.src.Compass.<init> (Lnet/minecraft/client/Minecraft;)V -> aj.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@59
+    method ref net.minecraft.src.Compass.<init> (Lnet/minecraft/client/Minecraft;)V -> ar.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@59
      INVOKESPECIAL 0x00 0x1b   INVOKESPECIAL 0x02 0x14
-    method ref net.minecraft.src.Watch.<init> (Lnet/minecraft/client/Minecraft;)V -> ir.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@76
+    method ref net.minecraft.src.Watch.<init> (Lnet/minecraft/client/Minecraft;)V -> jy.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX@76
      INVOKESPECIAL 0x00 0x1d   INVOKESPECIAL 0x02 0x17
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX@130
      INVOKESPECIAL 0x00 0x22   INVOKESPECIAL 0x00 0x22
@@ -1255,69 +1265,72 @@ Patching...
      INVOKESPECIAL 0x00 0x22   INVOKESPECIAL 0x00 0x22
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX@324
      INVOKESPECIAL 0x00 0x22   INVOKESPECIAL 0x00 0x22
-    method ref net.minecraft.src.StillLava.<init> ()V -> bo.<init> ()V refreshTextureFX@177
+    method ref net.minecraft.src.StillLava.<init> ()V -> bz.<init> ()V refreshTextureFX@177
      INVOKESPECIAL 0x00 0x26   INVOKESPECIAL 0x02 0x1b
-    method ref net.minecraft.src.FlowLava.<init> ()V -> gr.<init> ()V refreshTextureFX@191
+    method ref net.minecraft.src.FlowLava.<init> ()V -> hq.<init> ()V refreshTextureFX@191
      INVOKESPECIAL 0x00 0x28   INVOKESPECIAL 0x02 0x1e
-    method ref net.minecraft.src.StillWater.<init> ()V -> rv.<init> ()V refreshTextureFX@270
+    method ref net.minecraft.src.StillWater.<init> ()V -> ul.<init> ()V refreshTextureFX@270
      INVOKESPECIAL 0x00 0x2e   INVOKESPECIAL 0x02 0x21
-    method ref net.minecraft.src.FlowWater.<init> ()V -> lr.<init> ()V refreshTextureFX@284
+    method ref net.minecraft.src.FlowWater.<init> ()V -> nl.<init> ()V refreshTextureFX@284
      INVOKESPECIAL 0x00 0x30   INVOKESPECIAL 0x02 0x24
-    method ref net.minecraft.src.Portal.<init> ()V -> gh.<init> ()V refreshTextureFX@341
+    method ref net.minecraft.src.Portal.<init> ()V -> hf.<init> ()V refreshTextureFX@341
      INVOKESPECIAL 0x00 0x36   INVOKESPECIAL 0x02 0x27
-    method ref net.minecraft.src.TextureFX.onTick ()V -> ai.a ()V refreshTextureFX@379
+    method ref net.minecraft.src.TextureFX.onTick ()V -> as.a ()V refreshTextureFX@379
      INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x02 0x2c
-    field ref net.minecraft.src.ColorizerFoliage.colorBuffer [I -> hn.a [I refreshTextureFX@385
+    field ref net.minecraft.src.ColorizerFoliage.colorBuffer [I -> io.a [I refreshTextureFX@385
      GETSTATIC 0x00 0x3c       GETSTATIC 0x02 0x30
-    field ref net.minecraft.src.ColorizerGrass.colorBuffer [I -> gm.a [I refreshTextureFX@393
+    field ref net.minecraft.src.ColorizerGrass.colorBuffer [I -> hl.a [I refreshTextureFX@393
      GETSTATIC 0x00 0x3f       GETSTATIC 0x02 0x33
-    field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.C Lgw; getSelectedTexturePack@13
+    field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.C Lhv; getSelectedTexturePack@13
      GETFIELD 0x00 0x42        GETFIELD 0x02 0x37
-    field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.C Lgw; getSelectedTexturePack@26
+    field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.C Lhv; getSelectedTexturePack@26
      GETFIELD 0x00 0x42        GETFIELD 0x02 0x37
-    field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> gw.a Lf; getSelectedTexturePack@29
+    field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> hv.a Lh; getSelectedTexturePack@29
      GETFIELD 0x00 0x43        GETFIELD 0x02 0x3b
-    field ref net.minecraft.src.TexturePackBase.texturePackFileName Ljava/lang/String; -> f.a Ljava/lang/String; getTexturePackName@10
+    field ref net.minecraft.src.TexturePackBase.texturePackFileName Ljava/lang/String; -> h.a Ljava/lang/String; getTexturePackName@10
      GETFIELD 0x00 0x45        GETFIELD 0x02 0x3f
-    method ref net.minecraft.src.GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> ez.b (I)Ljava/nio/ByteBuffer; getByteBuffer@49
+    method ref net.minecraft.src.GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> ft.b (I)Ljava/nio/ByteBuffer; getByteBuffer@49
      INVOKESTATIC 0x00 0x49    INVOKESTATIC 0x02 0x44
-    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> f.a (Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream@8
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream@8
      INVOKEVIRTUAL 0x00 0x4e   INVOKEVIRTUAL 0x02 0x46
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lf;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream@4
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lh;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream@4
      INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x48
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lf;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsBufferedImage@34
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lh;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsBufferedImage@34
      INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x48
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lf;Ljava/lang/String;)Ljava/io/InputStream; hasResource@2
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lh;Ljava/lang/String;)Ljava/io/InputStream; hasResource@2
      INVOKESTATIC 0x00 0x5c    INVOKESTATIC 0x02 0x48
-    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lf; getResourceAsBufferedImage@5
+    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lh; getResourceAsBufferedImage@5
      GETSTATIC 0x00 0x5d       GETSTATIC 0x02 0x4a
-    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lf; getResourceAsBufferedImage@124
+    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lh; getResourceAsBufferedImage@124
      GETSTATIC 0x00 0x5d       GETSTATIC 0x02 0x4a
-    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lf; getResourceAsBufferedImage@258
+    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lh; getResourceAsBufferedImage@258
      PUTSTATIC 0x00 0x5d       PUTSTATIC 0x02 0x4a
-    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lf; <clinit>@11
+    field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lh; <clinit>@11
      PUTSTATIC 0x00 0x5d       PUTSTATIC 0x02 0x4a
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lf;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getResourceAsBufferedImage@4
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lh;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getResourceAsBufferedImage@4
      INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x02 0x4c
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lf;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getTileSize@6
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lh;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getTileSize@6
      INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x02 0x4c
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Lnet/minecraft/src/TexturePackBase;)I -> com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Lf;)I getTileSize@3
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Lnet/minecraft/src/TexturePackBase;)I -> com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Lh;)I getTileSize@3
      INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0x4e
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Lf;Ljava/lang/String;)Z hasResource@4
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Lh;Ljava/lang/String;)Z hasResource@4
      INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0x50
-   string replace net/minecraft/src/StillWater -> rv @2000
-   string replace net/minecraft/src/TexturePackDefault -> me @1608
-   string replace net/minecraft/src/Watch -> ir @1551
-   string replace net/minecraft/src/Compass -> aj @1454
-   string replace net/minecraft/src/Portal -> gh @2103
-   string replace net/minecraft/src/FlowWater -> lr @1943
-   string replace net/minecraft/src/StillLava -> bo @1740
-   string replace net/minecraft/src/TextureFX -> ai @2209
-   string replace net/minecraft/src/FlowLava -> gr @1766
-   string replace net/minecraft/src/Fire -> os @1368
+   string replace net/minecraft/src/StillWater -> ul @2000
+   string replace net/minecraft/src/TexturePackDefault -> ob @1608
+   string replace net/minecraft/src/Watch -> jy @1551
+   string replace net/minecraft/src/Compass -> ar @1454
+   string replace net/minecraft/src/Portal -> hf @2103
+   string replace net/minecraft/src/FlowWater -> nl @1943
+   string replace net/minecraft/src/StillLava -> bz @1740
+   string replace net/minecraft/src/TextureFX -> as @2209
+   string replace net/minecraft/src/FlowLava -> hq @1766
+   string replace net/minecraft/src/Fire -> ra @1368
+DEBUG: attempting to open /com/pclewis/mcpatcher/mod/CustomAnimation.class
+DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/mod/CustomAnimation.class
+DEBUG: successfully opened /com/pclewis/mcpatcher/mod/CustomAnimation.class
   adding com/pclewis/mcpatcher/mod/CustomAnimation.class for HD Textures
    method onTick -> a
-    method ref net.minecraft.src.TextureFX.<init> (I)V -> ai.<init> (I)V <init>@2
+    method ref net.minecraft.src.TextureFX.<init> (I)V -> as.<init> (I)V <init>@2
      INVOKESPECIAL 0x00 0x01   INVOKESPECIAL 0x00 0xaa
     field ref com.pclewis.mcpatcher.mod.CustomAnimation.minScrollDelay I -> com/pclewis/mcpatcher/mod/CustomAnimation.minScrollDelay I <init>@7
      PUTFIELD 0x00 0x02        PUTFIELD 0x00 0x02
@@ -1407,13 +1420,13 @@ Patching...
      GETSTATIC 0x00 0x25       GETSTATIC 0x00 0x25
     field ref com.pclewis.mcpatcher.mod.CustomAnimation.rand Ljava/util/Random; -> com/pclewis/mcpatcher/mod/CustomAnimation.rand Ljava/util/Random; <clinit>@7
      PUTSTATIC 0x00 0x25       PUTSTATIC 0x00 0x25
-   string replace net/minecraft/src/TextureFX -> ai @58
+   string replace net/minecraft/src/TextureFX -> as @58
 
 Done!
 
 #### Patch summary:
 HD Textures
-    RenderEngine (ho.class)
+    RenderEngine (ip.class)
         [1] (i % 16) * 16 + j * 16 -> (i % 16) * int_size + j * int_size
         [1] (i / 16) * 16 + j * 16 -> (i / 16) * int_size + j * int_size
         [1] 1048576 -> int_glBufferSize
@@ -1422,9 +1435,9 @@ HD Textures
         [3] imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()
         [1] insert method setTileSize (Lnet/minecraft/client/Minecraft;)V
         [7] readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...)
-    TextureFX (ai.class)
+    TextureFX (as.class)
         [1] array size 1024 -> int_numBytes
-    Compass (aj.class)
+    Compass (ar.class)
         [4] * 16 -> int_size
         [1] -4 -> int_compassCrossMin
         [1] -8 -> int_compassNeedleMin
@@ -1435,7 +1448,7 @@ HD Textures
         [1] if i > 16 -> int_compassNeedleMax
         [1] if i > 4 -> int_compassCrossMax
         [1] while i < 256 -> int_numPixels
-    Fire (os.class)
+    Fire (ra.class)
         [1] % 20 -> int_flameHeight
         [4] * 16 -> int_size
         [1] 1.06F -> float_flameNudge
@@ -1444,38 +1457,38 @@ HD Textures
         [2] while i < 16 -> int_size
         [2] while i < 20 -> int_flameHeight
         [1] while i < 256 -> int_numPixels
-    StillLava (bo.class)
+    StillLava (bz.class)
         [10] & 15 -> int_sizeMinus1
         [12] * 16 -> int_size
         [4] array size 256 -> int_numPixels
         [2] while i < 16 -> int_size
         [1] while i < 256 -> int_numPixels
-    FlowLava (gr.class)
+    FlowLava (hq.class)
         [10] & 15 -> int_sizeMinus1
         [1] & 255 -> int_numPixelsMinus1
         [13] * 16 -> int_size
         [4] array size 256 -> int_numPixels
         [2] while i < 16 -> int_size
         [1] while i < 256 -> int_numPixels
-    StillWater (rv.class)
+    StillWater (ul.class)
         [2] & 15 -> int_sizeMinus1
         [9] * 16 -> int_size
         [4] array size 256 -> int_numPixels
         [4] while i < 16 -> int_size
         [1] while i < 256 -> int_numPixels
-    FlowWater (lr.class)
+    FlowWater (nl.class)
         [2] & 15 -> int_sizeMinus1
         [1] & 255 -> int_numPixelsMinus1
         [10] * 16 -> int_size
         [4] array size 256 -> int_numPixels
         [4] while i < 16 -> int_size
         [1] while i < 256 -> int_numPixels
-    ItemRenderer (nt.class)
+    ItemRenderer (qa.class)
         [4] 0.001953125F -> float_texNudge
         [4] 16.0F -> float_size
         [1] tool pixel top
         [4] while i < 16 -> int_size
-    Watch (ir.class)
+    Watch (jy.class)
         [1] % 16 -> int_size
         [2] & 15 -> int_sizeMinus1
         [3] * 16 -> int_size
@@ -1485,7 +1498,7 @@ HD Textures
         [2] array size 256 -> int_numPixels
         [2] getRGB(...16,16,...16) -> getRGB(...int_size,int_size,...int_size)
         [1] while i < 256 -> int_numPixels
-    Portal (gh.class)
+    Portal (hf.class)
         [1] * 16 -> int_size
         [2] * 8 -> int_sizeHalf
         [2] 16.0F -> float_size
@@ -1496,23 +1509,23 @@ HD Textures
         [1] TextureUtils.setMinecraft(this) on startup
         [1] TextureUtils.setTileSize(), renderEngine.setTileSize() on startup
         [9] remove registerTextureFX call
-    GLAllocation (ez.class)
-    TexturePackList (gw.class)
+    GLAllocation (ft.class)
+    TexturePackList (hv.class)
         [1] TexturePackList.setTileSize(selectedTexturePack) on texture pack change
-    TexturePackBase (f.class)
-    TexturePackDefault (me.class)
-    FontRenderer (ox.class)
+    TexturePackBase (h.class)
+    TexturePackDefault (ob.class)
+    FontRenderer (rf.class)
         [1] insert method initialize ()V
-    GameSettings (is.class)
-    GetResource (multiple matches: aj ev gm hn ir me ox qu rs)
+    GameSettings (jz.class)
+    GetResource (multiple matches: ar fn hl io jy ob rf ti ui)
         [10] ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...)
-    ColorizerFoliage (hn.class)
+    ColorizerFoliage (io.class)
         [1] make field colorBuffer public
-    ColorizerGrass (gm.class)
+    ColorizerGrass (hl.class)
         [1] make field colorBuffer public
 
 HD Font
-    FontRenderer (ox.class)
+    FontRenderer (rf.class)
         [2] font charWidth computation: j + 2 -> (128 * j + 256) / i
         [2] font whitespace width 2 -> i / 64
         [2] font width 7 -> i / 16 - 1
