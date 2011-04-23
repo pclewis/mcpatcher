@@ -4,7 +4,6 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.ModConfigPanel;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -18,75 +17,9 @@ public class HDTextureConfig extends ModConfigPanel {
     private JComboBox portalCombo;
 
     HDTextureConfig() {
-        waterCombo.addItem("Default");
-        waterCombo.addItem("Not Animated");
-        waterCombo.addItem("Custom Animated");
-        waterCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (waterCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customWater", false);
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedWater", true);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customWater", false);
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedWater", false);
-                            break;
-
-                        case 2:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customWater", true);
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedWater", true);
-                            break;
-                    }
-                }
-            }
-        });
-
-        lavaCombo.addItem("Default");
-        lavaCombo.addItem("Not Animated");
-        lavaCombo.addItem("Custom Animated");
-        lavaCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (lavaCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customLava", false);
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedLava", true);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customLava", false);
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedLava", false);
-                            break;
-
-                        case 2:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customLava", true);
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedLava", true);
-                            break;
-                    }
-                }
-            }
-        });
-
-        fireCombo.addItem("Default");
-        fireCombo.addItem("Not Animated");
-        fireCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (fireCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedFire", true);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "animatedFire", false);
-                            break;
-                    }
-                }
-            }
-        });
+        waterCombo.addItemListener(new AnimComboListener(waterCombo, "Water"));
+        lavaCombo.addItemListener(new AnimComboListener(lavaCombo, "Lava"));
+        fireCombo.addItemListener(new AnimComboListener(fireCombo, "Fire"));
 
         portalCombo.addItem("Default");
         portalCombo.addItem("Custom Animated");
@@ -114,27 +47,9 @@ public class HDTextureConfig extends ModConfigPanel {
 
     @Override
     public void load() {
-        if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "customWater", true)) {
-            waterCombo.setSelectedIndex(2);
-        } else if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "animatedWater", true)) {
-            waterCombo.setSelectedIndex(0);
-        } else {
-            waterCombo.setSelectedIndex(1);
-        }
-
-        if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "customLava", true)) {
-            lavaCombo.setSelectedIndex(2);
-        } else if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "animatedLava", true)) {
-            lavaCombo.setSelectedIndex(0);
-        } else {
-            lavaCombo.setSelectedIndex(1);
-        }
-
-        if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "animatedFire", true)) {
-            fireCombo.setSelectedIndex(0);
-        } else {
-            fireCombo.setSelectedIndex(1);
-        }
+        ((AnimComboListener) (waterCombo.getItemListeners()[0])).load();
+        ((AnimComboListener) (lavaCombo.getItemListeners()[0])).load();
+        ((AnimComboListener) (fireCombo.getItemListeners()[0])).load();
 
         if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "customPortal", true)) {
             portalCombo.setSelectedIndex(1);
@@ -145,5 +60,62 @@ public class HDTextureConfig extends ModConfigPanel {
 
     @Override
     public void save() {
+    }
+
+    private static class AnimComboListener implements ItemListener {
+        private static final int OPT_DEFAULT = 0;
+        private static final int OPT_NOT_ANIMATED = 1;
+        private static final int OPT_CUSTOM_ANIMATED = 2;
+
+        final private JComboBox comboBox;
+        final private String animatedTag;
+        final private String customTag;
+
+        public AnimComboListener(JComboBox comboBox, String tag) {
+            this.comboBox = comboBox;
+            customTag = "custom" + tag;
+            animatedTag = "animated" + tag;
+            comboBox.addItem("Default");
+            comboBox.addItem("Not Animated");
+            comboBox.addItem("Custom Animated");
+        }
+
+        public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                boolean custom;
+                boolean anim;
+                switch (comboBox.getSelectedIndex()) {
+                    case OPT_DEFAULT:
+                        custom = false;
+                        anim = true;
+                        break;
+
+                    case OPT_NOT_ANIMATED:
+                        custom = false;
+                        anim = false;
+                        break;
+
+                    case OPT_CUSTOM_ANIMATED:
+                        custom = true;
+                        anim = true;
+                        break;
+
+                    default:
+                        return;
+                }
+                MCPatcherUtils.set(MOD_CFG_NAME, customTag, custom);
+                MCPatcherUtils.set(MOD_CFG_NAME, animatedTag, anim);
+            }
+        }
+
+        public void load() {
+            if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, customTag, true)) {
+                comboBox.setSelectedIndex(OPT_CUSTOM_ANIMATED);
+            } else if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, animatedTag, true)) {
+                comboBox.setSelectedIndex(OPT_DEFAULT);
+            } else {
+                comboBox.setSelectedIndex(OPT_NOT_ANIMATED);
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@ public class TextureUtils {
     private static boolean animatedFire;
     private static boolean animatedLava;
     private static boolean animatedWater;
+    private static boolean customFire;
     private static boolean customLava;
     private static boolean customWater;
     private static boolean customPortal;
@@ -27,6 +28,8 @@ public class TextureUtils {
     public static final int LAVA_FLOWING_TEXTURE_INDEX = LAVA_STILL_TEXTURE_INDEX + 1; // Block.lavaMoving.blockIndexInTexture
     public static final int WATER_STILL_TEXTURE_INDEX = 12 * 16 + 13; // Block.waterStill.blockIndexInTexture
     public static final int WATER_FLOWING_TEXTURE_INDEX = WATER_STILL_TEXTURE_INDEX + 1; // Block.waterMoving.blockIndexInTexture
+    public static final int FIRE_E_W_TEXTURE_INDEX = 1 * 16 + 15; // Block.fire.blockIndexInTexture;
+    public static final int FIRE_N_S_TEXTURE_INDEX = FIRE_E_W_TEXTURE_INDEX + 16;
     public static final int PORTAL_TEXTURE_INDEX = 0 * 16 + 14; // Block.portal.blockIndexInTexture
 
     private static HashMap<String, Integer> expectedColumns = new HashMap<String, Integer>();
@@ -38,6 +41,7 @@ public class TextureUtils {
         animatedFire = MCPatcherUtils.getBoolean("HDTexture", "animatedFire", true);
         animatedLava = MCPatcherUtils.getBoolean("HDTexture", "animatedLava", true);
         animatedWater = MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true);
+        customFire = MCPatcherUtils.getBoolean("HDTexture", "customFire", true);
         customLava = MCPatcherUtils.getBoolean("HDTexture", "customLava", true);
         customWater = MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
         customPortal = MCPatcherUtils.getBoolean("HDTexture", "customPortal", true);
@@ -49,6 +53,8 @@ public class TextureUtils {
         expectedColumns.put("/custom_lava_flowing.png", 1);
         expectedColumns.put("/custom_water_still.png", 1);
         expectedColumns.put("/custom_water_flowing.png", 1);
+        expectedColumns.put("/custom_fire_n_s.png", 1);
+        expectedColumns.put("/custom_fire_e_w.png", 1);
         expectedColumns.put("/custom_portal.png", 1);
     }
 
@@ -75,10 +81,6 @@ public class TextureUtils {
 
         textureList.clear();
 
-        if (animatedFire) {
-            textureList.add(new Fire(0));
-            textureList.add(new Fire(1));
-        }
         textureList.add(new Compass(minecraft));
         textureList.add(new Watch(minecraft));
 
@@ -101,6 +103,13 @@ public class TextureUtils {
             textureList.add(new FlowWater());
         }
 
+        if (!isDefault && customFire && hasResource("/custom_fire_e_w.png") && hasResource("/custom_fire_n_s.png")) {
+            textureList.add(new CustomAnimation(FIRE_N_S_TEXTURE_INDEX, 0, 1, "fire_n_s", 2, 4));
+            textureList.add(new CustomAnimation(FIRE_E_W_TEXTURE_INDEX, 0, 1, "fire_e_w", 2, 4));
+        } else if (animatedFire) {
+            textureList.add(new Fire(0));
+            textureList.add(new Fire(1));
+        }
         if (!isDefault && customPortal && hasResource("/custom_portal.png")) {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
         } else {
