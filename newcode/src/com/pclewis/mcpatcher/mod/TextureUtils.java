@@ -40,15 +40,14 @@ public class TextureUtils {
         customLava = MCPatcherUtils.getBoolean("HDTexture", "customLava", true);
         customWater = MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
         customPortal = MCPatcherUtils.getBoolean("HDTexture", "customPortal", true);
-        MCPatcherUtils.saveProperties();
 
-        TextureUtils.expectedColumns.put("/gui/items.png", 16);
-        TextureUtils.expectedColumns.put("/misc/dial.png", 1);
-        TextureUtils.expectedColumns.put("/custom_lava_still.png", 1);
-        TextureUtils.expectedColumns.put("/custom_lava_flowing.png", 1);
-        TextureUtils.expectedColumns.put("/custom_water_still.png", 1);
-        TextureUtils.expectedColumns.put("/custom_water_flowing.png", 1);
-        TextureUtils.expectedColumns.put("/custom_portal.png", 1);
+        expectedColumns.put("/gui/items.png", 16);
+        expectedColumns.put("/misc/dial.png", 1);
+        expectedColumns.put("/custom_lava_still.png", 1);
+        expectedColumns.put("/custom_lava_flowing.png", 1);
+        expectedColumns.put("/custom_water_still.png", 1);
+        expectedColumns.put("/custom_water_flowing.png", 1);
+        expectedColumns.put("/custom_portal.png", 1);
     }
 
     public static boolean setTileSize() {
