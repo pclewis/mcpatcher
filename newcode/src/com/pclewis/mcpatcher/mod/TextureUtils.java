@@ -110,6 +110,7 @@ public class TextureUtils {
             textureList.add(new Fire(0));
             textureList.add(new Fire(1));
         }
+
         if (!isDefault && customPortal && hasResource("/custom_portal.png")) {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
         } else {

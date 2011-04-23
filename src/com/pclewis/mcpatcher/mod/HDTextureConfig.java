@@ -16,10 +16,17 @@ public class HDTextureConfig extends ModConfigPanel {
     private JComboBox fireCombo;
     private JComboBox portalCombo;
 
+    private AnimationComboListener[] comboListeners;
+
     HDTextureConfig() {
-        waterCombo.addItemListener(new AnimComboListener(waterCombo, "Water"));
-        lavaCombo.addItemListener(new AnimComboListener(lavaCombo, "Lava"));
-        fireCombo.addItemListener(new AnimComboListener(fireCombo, "Fire"));
+        comboListeners = new AnimationComboListener[3];
+        comboListeners[0] = new AnimationComboListener(waterCombo, "Water");
+        comboListeners[1] = new AnimationComboListener(lavaCombo, "Lava");
+        comboListeners[2] = new AnimationComboListener(fireCombo, "Fire");
+
+        waterCombo.addItemListener(comboListeners[0]);
+        lavaCombo.addItemListener(comboListeners[1]);
+        fireCombo.addItemListener(comboListeners[2]);
 
         portalCombo.addItem("Default");
         portalCombo.addItem("Custom Animated");
@@ -47,9 +54,9 @@ public class HDTextureConfig extends ModConfigPanel {
 
     @Override
     public void load() {
-        ((AnimComboListener) (waterCombo.getItemListeners()[0])).load();
-        ((AnimComboListener) (lavaCombo.getItemListeners()[0])).load();
-        ((AnimComboListener) (fireCombo.getItemListeners()[0])).load();
+        for (AnimationComboListener listener : comboListeners) {
+            listener.load();
+        }
 
         if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "customPortal", true)) {
             portalCombo.setSelectedIndex(1);
@@ -62,7 +69,7 @@ public class HDTextureConfig extends ModConfigPanel {
     public void save() {
     }
 
-    private static class AnimComboListener implements ItemListener {
+    private static class AnimationComboListener implements ItemListener {
         private static final int OPT_DEFAULT = 0;
         private static final int OPT_NOT_ANIMATED = 1;
         private static final int OPT_CUSTOM_ANIMATED = 2;
@@ -71,7 +78,7 @@ public class HDTextureConfig extends ModConfigPanel {
         final private String animatedTag;
         final private String customTag;
 
-        public AnimComboListener(JComboBox comboBox, String tag) {
+        public AnimationComboListener(JComboBox comboBox, String tag) {
             this.comboBox = comboBox;
             customTag = "custom" + tag;
             animatedTag = "animated" + tag;
