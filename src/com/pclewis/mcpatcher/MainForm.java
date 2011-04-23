@@ -395,19 +395,11 @@ class MainForm {
 
     private void updateActiveTab() {
         if (tabbedPane.getSelectedIndex() != TAB_OPTIONS) {
-            for (Mod mod : MCPatcher.modList.getAll()) {
-                if (mod.configPanel != null) {
-                    try {
-                        mod.configPanel.save();
-                    } catch (Throwable e) {
-                        Logger.log(e);
-                    }
-                }
-            }
+            saveOptions();
         }
         switch (tabbedPane.getSelectedIndex()) {
             case TAB_OPTIONS:
-                updateOptionsPanel();
+                loadOptions();
                 break;
 
             case TAB_CLASS_MAP:
@@ -423,7 +415,20 @@ class MainForm {
         }
     }
 
-    private void updateOptionsPanel() {
+    private void saveOptions() {
+        for (Mod mod : MCPatcher.modList.getAll()) {
+            if (mod.configPanel != null) {
+                try {
+                    mod.configPanel.save();
+                } catch (Throwable e) {
+                    Logger.log(e);
+                }
+            }
+        }
+        MCPatcherUtils.saveProperties();
+    }
+
+    private void loadOptions() {
         optionsPanel.removeAll();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         for (Mod mod : MCPatcher.modList.getAll()) {
