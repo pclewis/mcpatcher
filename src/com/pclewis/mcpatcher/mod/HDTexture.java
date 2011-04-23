@@ -638,12 +638,19 @@ public class HDTexture extends Mod {
             classSignatures.add(new ConstSignature(
                 new MethodRef("org.lwjgl.opengl.ARBShaderObjects", "glCreateProgramObjectARB", "()I")
             ).negate(true)); // don't match GLSL Shader Mod
+            classSignatures.add(new FilenameSignature("ZMod.class").negate(true)); // don't match zombe's Mod
+
+            classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glDeleteLists", "(II)V")));
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("java.nio.ByteBuffer", "allocateDirect", "(I)Ljava/nio/ByteBuffer;"))
-                    );
+                    if (methodInfo.getDescriptor().equals("(I)Ljava/nio/ByteBuffer;")) {
+                        return buildExpression(
+                            reference(methodInfo, INVOKESTATIC, new MethodRef("java.nio.ByteBuffer", "allocateDirect", "(I)Ljava/nio/ByteBuffer;"))
+                        );
+                    } else {
+                        return null;
+                    }
                 }
             }.setMethodName("createDirectByteBuffer"));
         }
