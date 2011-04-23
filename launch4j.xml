@@ -11,7 +11,7 @@
   <supportUrl></supportUrl>
   <customProcName>false</customProcName>
   <stayAlive>false</stayAlive>
-  <manifest></manifest>
+  <manifest>mcpatcher.manifest</manifest>
   <icon></icon>
   <jre>
     <path></path>
