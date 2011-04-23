@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TextureUtils {
     public static Minecraft minecraft;
@@ -41,6 +42,7 @@ public class TextureUtils {
         customWater = MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
         customPortal = MCPatcherUtils.getBoolean("HDTexture", "customPortal", true);
 
+        expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);
         expectedColumns.put("/misc/dial.png", 1);
         expectedColumns.put("/custom_lava_still.png", 1);
@@ -51,8 +53,8 @@ public class TextureUtils {
     }
 
     public static boolean setTileSize() {
-        int size = getTileSize();
         MCPatcherUtils.log("\nchanging skin to %s", getTexturePackName(getSelectedTexturePack()));
+        int size = getTileSize();
         if (size == TileSize.int_size) {
             MCPatcherUtils.log("tile size %d unchanged", size);
             return false;
@@ -218,13 +220,21 @@ public class TextureUtils {
     }
 
     public static int getTileSize(TexturePackBase texturePack) {
-        int size = 16;
-        try {
-            size = getResourceAsBufferedImage(texturePack, "/terrain.png").getWidth() / 16;
-        } catch (Exception e) {
-            e.printStackTrace();
+        int size = 0;
+        for (Map.Entry<String, Integer> entry : expectedColumns.entrySet()) {
+            try {
+                InputStream is = getResourceAsStream(texturePack, entry.getKey());
+                if (is != null) {
+                    BufferedImage bi = ImageIO.read(is);
+                    int newSize = bi.getWidth() / entry.getValue();
+                    MCPatcherUtils.log("  %s tile size is %d", entry.getKey(), newSize);
+                    size = Math.max(size, newSize);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return size;
+        return size > 0 ? size : 16;
     }
 
     public static int getTileSize() {
