@@ -19,32 +19,16 @@ public class HDTextureConfig extends ModConfigPanel {
     private AnimationComboListener[] comboListeners;
 
     HDTextureConfig() {
-        comboListeners = new AnimationComboListener[3];
+        comboListeners = new AnimationComboListener[4];
         comboListeners[0] = new AnimationComboListener(waterCombo, "Water");
         comboListeners[1] = new AnimationComboListener(lavaCombo, "Lava");
         comboListeners[2] = new AnimationComboListener(fireCombo, "Fire");
+        comboListeners[3] = new AnimationComboListener(portalCombo, "Portal");
 
         waterCombo.addItemListener(comboListeners[0]);
         lavaCombo.addItemListener(comboListeners[1]);
         fireCombo.addItemListener(comboListeners[2]);
-
-        portalCombo.addItem("Default");
-        portalCombo.addItem("Custom Animated");
-        portalCombo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    switch (portalCombo.getSelectedIndex()) {
-                        default:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customPortal", false);
-                            break;
-
-                        case 1:
-                            MCPatcherUtils.set(MOD_CFG_NAME, "customPortal", true);
-                            break;
-                    }
-                }
-            }
-        });
+        portalCombo.addItemListener(comboListeners[3]);
     }
 
     @Override
@@ -56,12 +40,6 @@ public class HDTextureConfig extends ModConfigPanel {
     public void load() {
         for (AnimationComboListener listener : comboListeners) {
             listener.load();
-        }
-
-        if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, "customPortal", true)) {
-            portalCombo.setSelectedIndex(1);
-        } else {
-            portalCombo.setSelectedIndex(0);
         }
     }
 

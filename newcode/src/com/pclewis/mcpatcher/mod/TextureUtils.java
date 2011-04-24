@@ -19,6 +19,7 @@ public class TextureUtils {
     private static boolean animatedFire;
     private static boolean animatedLava;
     private static boolean animatedWater;
+    private static boolean animatedPortal;
     private static boolean customFire;
     private static boolean customLava;
     private static boolean customWater;
@@ -41,6 +42,7 @@ public class TextureUtils {
         animatedFire = MCPatcherUtils.getBoolean("HDTexture", "animatedFire", true);
         animatedLava = MCPatcherUtils.getBoolean("HDTexture", "animatedLava", true);
         animatedWater = MCPatcherUtils.getBoolean("HDTexture", "animatedWater", true);
+        animatedPortal = MCPatcherUtils.getBoolean("HDTexture", "animatedPortal", true);
         customFire = MCPatcherUtils.getBoolean("HDTexture", "customFire", true);
         customLava = MCPatcherUtils.getBoolean("HDTexture", "customLava", true);
         customWater = MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
@@ -113,7 +115,7 @@ public class TextureUtils {
 
         if (!isDefault && customPortal && hasResource("/custom_portal.png")) {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
-        } else {
+        } else if (animatedPortal) {
             textureList.add(new Portal());
         }
 
