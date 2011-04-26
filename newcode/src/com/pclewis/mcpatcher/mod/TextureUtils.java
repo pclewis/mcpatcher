@@ -35,6 +35,7 @@ public class TextureUtils {
 
     private static HashMap<String, Integer> expectedColumns = new HashMap<String, Integer>();
 
+    private static boolean useTextureCache;
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
 
@@ -47,6 +48,8 @@ public class TextureUtils {
         customLava = MCPatcherUtils.getBoolean("HDTexture", "customLava", true);
         customWater = MCPatcherUtils.getBoolean("HDTexture", "customWater", true);
         customPortal = MCPatcherUtils.getBoolean("HDTexture", "customPortal", true);
+
+        useTextureCache = MCPatcherUtils.getBoolean("HDTexture", "useTextureCache", false);
 
         expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);
@@ -182,7 +185,7 @@ public class TextureUtils {
         BufferedImage image = null;
         boolean cached = false;
 
-        if (texturePack == lastTexturePack) {
+        if (useTextureCache && texturePack == lastTexturePack) {
             image = cache.get(resource);
             if (image != null) {
                 cached = true;
@@ -208,7 +211,7 @@ public class TextureUtils {
             throw new IOException(resource + " image is null");
         }
 
-        if (!cached && texturePack != lastTexturePack) {
+        if (useTextureCache && !cached && texturePack != lastTexturePack) {
             MCPatcherUtils.log("clearing texture cache (%d items)", cache.size());
             cache.clear();
         }
@@ -220,8 +223,10 @@ public class TextureUtils {
             if (i != null && image.getWidth() != i * TileSize.int_size) {
                 image = resizeImage(image, i * TileSize.int_size);
             }
-            lastTexturePack = texturePack;
-            cache.put(resource, image);
+            if (useTextureCache) {
+                lastTexturePack = texturePack;
+                cache.put(resource, image);
+            }
         }
 
         return image;

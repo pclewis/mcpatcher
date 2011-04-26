@@ -4,6 +4,8 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.ModConfigPanel;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -15,6 +17,7 @@ public class HDTextureConfig extends ModConfigPanel {
     private JComboBox lavaCombo;
     private JComboBox fireCombo;
     private JComboBox portalCombo;
+    private JCheckBox textureCacheCheckBox;
 
     private AnimationComboListener[] comboListeners;
 
@@ -29,6 +32,12 @@ public class HDTextureConfig extends ModConfigPanel {
         lavaCombo.addItemListener(comboListeners[1]);
         fireCombo.addItemListener(comboListeners[2]);
         portalCombo.addItemListener(comboListeners[3]);
+
+        textureCacheCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                MCPatcherUtils.set(MOD_CFG_NAME, "useTextureCache", textureCacheCheckBox.isSelected());
+            }
+        });
     }
 
     @Override
@@ -41,6 +50,20 @@ public class HDTextureConfig extends ModConfigPanel {
         for (AnimationComboListener listener : comboListeners) {
             listener.load();
         }
+        boolean is64bit = false;
+        try {
+            String datamodel = System.getProperty("sun.arch.data.model"); // sun-specific, but gets the arch of the jvm
+            String arch = System.getProperty("os.arch"); // generic, but gets the arch of the os, not the jvm (may be a 32-bit jvm on a 64-bit os)
+            if (datamodel != null) {
+                is64bit = (Integer.parseInt(datamodel) >= 64);
+            } else if (arch != null) {
+                is64bit = arch.contains("64");
+            } else {
+                is64bit = false;
+            }
+        } catch (Throwable e) {
+        }
+        textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MOD_CFG_NAME, "useTextureCache", is64bit));
     }
 
     @Override
