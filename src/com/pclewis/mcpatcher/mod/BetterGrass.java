@@ -47,7 +47,35 @@ public class BetterGrass extends Mod {
                 ARETURN,
                 BinaryRegex.end()
             ));
+            classSignatures.add(new FixedBytecodeSignature(
+                BinaryRegex.begin(),
+                ICONST_0,
+                IRETURN,
+                BinaryRegex.end()
+            ));
+            classSignatures.add(new FixedBytecodeSignature(
+                BinaryRegex.begin(),
+                ICONST_1,
+                IRETURN,
+                BinaryRegex.end()
+            ));
             classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
+            classSignatures.add(new ClassSignature() {
+                @Override
+                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+                    int count = 0;
+                    int flags = AccessFlag.PUBLIC | AccessFlag.STATIC | AccessFlag.FINAL;
+                    String descriptor = "L" + classFile.getName() + ";";
+                    for (Object o : classFile.getFields()) {
+                        FieldInfo fieldInfo = (FieldInfo) o;
+                        if ((fieldInfo.getAccessFlags() & flags) == flags &&
+                            fieldInfo.getDescriptor().equals(descriptor)) {
+                            count++;
+                        }
+                    }
+                    return count > 10;
+                }
+            });
 
             fieldMappers.add(new FieldMapper("ground", "LMaterial;") {
                 int count = 0;
@@ -181,6 +209,7 @@ public class BetterGrass extends Mod {
                     byte[] getArray = reference(methodInfo, GETSTATIC, array);
                     byte[] putArray = reference(methodInfo, PUTSTATIC, array);
                     return buildCode(
+                        // if (grassMatrix != null)
                         getArray,
                         ACONST_NULL,
                         IF_ACMPNE, branch("A"),
@@ -273,7 +302,7 @@ public class BetterGrass extends Mod {
                         builtSnow,
                         IF_ACMPEQ, branch("A"),
 
-                        // if (nm1.getBlockId(i+a[l][0], j-1, k+a[l][1]) == 3)
+                        // if (iblockaccess.getBlockId(i+a[l][0], j-1, k+a[l][1]) == 3)
                         ALOAD, 1,
                         ILOAD, 2,
                         matrix,
