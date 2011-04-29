@@ -13,7 +13,7 @@ public class FilenameSignature extends ClassSignature {
     }
 
     @Override
-    boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+    public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
         return filename.equals(this.filename);
     }
 }

@@ -21,7 +21,7 @@ public class ConstSignature extends ClassSignature {
     }
 
     @Override
-    boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+    public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
         ConstPool cp = classFile.getConstPool();
         for (int i = 1; i < cp.getSize(); i++) {
             if (match(cp, i)) {

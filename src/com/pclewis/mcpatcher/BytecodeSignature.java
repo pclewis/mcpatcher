@@ -34,7 +34,7 @@ abstract public class BytecodeSignature extends ClassSignature {
         return matcher.match(methodInfo);
     }
 
-    boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+    public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
             CodeAttribute codeAttribute = methodInfo.getCodeAttribute();

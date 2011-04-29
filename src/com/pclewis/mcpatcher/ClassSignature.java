@@ -25,7 +25,7 @@ abstract public class ClassSignature implements PatchComponent {
         return this;
     }
 
-    abstract boolean match(String filename, ClassFile classFile, ClassMap tempClassMap);
+    abstract public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap);
 
     /**
      * Called immediately after a successful match.  Gives an opportunity to extract bytecode
