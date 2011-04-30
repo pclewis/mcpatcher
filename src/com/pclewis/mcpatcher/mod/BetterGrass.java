@@ -12,10 +12,6 @@ public class BetterGrass extends Mod {
     private static final String field_MATRIX = "grassMatrix";
     private static final String fieldtype_MATRIX = "[[I";
 
-    private String colorMultiplierType;
-    private String colorMultiplierTypeStatic;
-    private byte[] colorMultiplierCode;
-
     public BetterGrass() {
         name = "Better Grass";
         author = "MCPatcher";
@@ -25,18 +21,11 @@ public class BetterGrass extends Mod {
         allowedDirs.clear();
         allowedDirs.add("");
 
-        classMods.add(new ColorizerGrassMod());
         classMods.add(new MaterialMod());
         classMods.add(new BlockMod());
         classMods.add(new BlockGrassMod());
         classMods.add(new IBlockAccessMod());
         classMods.add(new RenderBlocksMod());
-    }
-
-    private static class ColorizerGrassMod extends ClassMod {
-        public ColorizerGrassMod() {
-            classSignatures.add(new ConstSignature("/misc/grasscolor.png"));
-        }
     }
 
     private static class MaterialMod extends ClassMod {
@@ -153,49 +142,7 @@ public class BetterGrass extends Mod {
                 }
             });
 
-            classSignatures.add(new FixedBytecodeSignature(
-                DALOAD,
-                DSTORE, BinaryRegex.any(1, 12),
-                DALOAD,
-                DSTORE, BinaryRegex.any()
-            ) {
-                @Override
-                public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
-                    colorMultiplierType = methodInfo.getDescriptor();
-                    colorMultiplierTypeStatic = colorMultiplierType.replaceFirst("\\(", "(I");
-                    colorMultiplierCode = methodInfo.getCodeAttribute().getCode().clone();
-                    Logger.log(Logger.LOG_CONST, "colorMultiplier %s %d bytes",
-                        colorMultiplierType, colorMultiplierCode.length
-                    );
-                }
-            }.setMethodName("colorMultiplier"));
-
             patches.add(new AddFieldPatch(field_MATRIX, fieldtype_MATRIX, AccessFlag.PUBLIC | AccessFlag.STATIC));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "blockIndexInTexture 3 -> 0";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
-                        return buildExpression(
-                            ICONST_3
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        ICONST_0
-                    );
-                }
-            });
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -387,71 +334,6 @@ public class BetterGrass extends Mod {
                     );
                 }
             });
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "disable biome color for snow";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return BinaryRegex.capture(BinaryRegex.build(
-                        BinaryRegex.begin(),
-                        BinaryRegex.any(0, 30),
-                        DALOAD,
-                        DSTORE, BinaryRegex.any(1, 12),
-                        DALOAD,
-                        DSTORE, BinaryRegex.any(1, 30),
-                        BinaryRegex.end()
-                    ));
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        // Material material = iblockaccess.getBlockMaterial(i, j + 1, k);
-                        ALOAD_1,
-                        ILOAD_2,
-                        ILOAD_3,
-                        ICONST_1,
-                        IADD,
-                        ILOAD, 4,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
-                        DUP,
-
-                        // if (material == Material.snow)
-                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "snow", "LMaterial;")),
-                        IF_ACMPEQ, branch("A"),
-
-                        // if (material == Material.builtSnow)
-                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;")),
-                        IF_ACMPEQ, branch("B"),
-
-                        getCaptureGroup(1),
-
-                        // return 0xffffff;
-                        label("A"),
-                        POP,
-                        label("B"),
-                        push(methodInfo, 0xffffff),
-                        IRETURN
-                    );
-                }
-            });
-
-            patches.add(new AddMethodPatch("colorMultiplierStatic", null) {
-                @Override
-                protected void prePatch(ClassFile classFile) {
-                    type = colorMultiplierTypeStatic;
-                }
-
-                @Override
-                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
-                    methodInfo.setAccessFlags(methodInfo.getAccessFlags() | AccessFlag.STATIC);
-                    return colorMultiplierCode;
-                }
-            });
         }
     }
 
@@ -533,7 +415,7 @@ public class BetterGrass extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "if (getBlockTexture == 3) ...";
+                    return "if (getBlockTexture == 3) useBiomeColor = true";
                 }
 
                 @Override
