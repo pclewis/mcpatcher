@@ -413,19 +413,20 @@ public class BetterGrass extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (!methodInfo.getDescriptor().endsWith("IIIFFF)Z")) {
+                    if (methodInfo.getDescriptor().matches("^\\(L[^;]+;IIIFFF\\)Z$")) {
+                        return buildExpression(
+                            push(methodInfo, 0.5f),
+                            FSTORE, BinaryRegex.any(),
+                            push(methodInfo, 1.0f),
+                            FSTORE, BinaryRegex.any(),
+                            push(methodInfo, 0.8f),
+                            FSTORE, BinaryRegex.any(),
+                            push(methodInfo, 0.6f),
+                            FSTORE, BinaryRegex.any()
+                        );
+                    } else {
                         return null;
                     }
-                    return buildExpression(
-                        push(methodInfo, 0.5f),
-                        FSTORE, BinaryRegex.any(),
-                        push(methodInfo, 1.0f),
-                        FSTORE, BinaryRegex.any(),
-                        push(methodInfo, 0.8f),
-                        FSTORE, BinaryRegex.any(),
-                        push(methodInfo, 0.6f),
-                        FSTORE, BinaryRegex.any()
-                    );
                 }
             }.setMethodName("renderStandardBlockWithColorMultiplier"));
 
@@ -522,13 +523,15 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public boolean filterMethod(MethodInfo methodInfo) {
                     MethodRef m = (MethodRef) map(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z"));
-                    if (!m.getName().equals(methodInfo.getName()) || !m.getType().equals(methodInfo.getDescriptor())) {
-                        return null;
-                    }
+                    return m.getName().equals(methodInfo.getName()) && m.getType().equals(methodInfo.getDescriptor());
+                }
 
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
+                        // tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
                         ALOAD, BinaryRegex.capture(BinaryRegex.any()),
                         FLOAD, BinaryRegex.capture(BinaryRegex.any()),
                         FLOAD, BinaryRegex.capture(BinaryRegex.any()),
@@ -539,9 +542,9 @@ public class BetterGrass extends Mod {
                         FLOAD, BinaryRegex.capture(BinaryRegex.any()),
                         FLOAD, BinaryRegex.backReference(3),
                         FMUL,
-                        INVOKEVIRTUAL, BinaryRegex.capture(BinaryRegex.any(2)),
-                        //reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V")),
+                        INVOKEVIRTUAL, BinaryRegex.capture(BinaryRegex.any(2)), // Tessellator.setColorOpaque_F (FFF)V
 
+                        // int l = block.getBlockTexture(blockAccess, i, j, k, 2);
                         BinaryRegex.capture(BinaryRegex.build(
                             ALOAD_1,
                             ALOAD_0,
@@ -552,7 +555,6 @@ public class BetterGrass extends Mod {
                             BinaryRegex.any(1, 2),
                             reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
                         )),
-
                         ISTORE, BinaryRegex.capture(BinaryRegex.any())
                     );
                 }
