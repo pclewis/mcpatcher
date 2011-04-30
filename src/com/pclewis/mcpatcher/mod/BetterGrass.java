@@ -4,6 +4,7 @@ import com.pclewis.mcpatcher.*;
 import javassist.bytecode.*;
 
 import java.io.IOException;
+import java.util.List;
 
 import static javassist.bytecode.Opcode.*;
 
@@ -26,8 +27,10 @@ public class BetterGrass extends Mod {
 
         classMods.add(new ColorizerGrassMod());
         classMods.add(new MaterialMod());
+        classMods.add(new BlockMod());
         classMods.add(new BlockGrassMod());
-        classMods.add(new BlockDirtMod());
+        classMods.add(new IBlockAccessMod());
+        classMods.add(new RenderBlocksMod());
     }
 
     private static class ColorizerGrassMod extends ClassMod {
@@ -91,6 +94,14 @@ public class BetterGrass extends Mod {
                     return ++count == 2;
                 }
             });
+        }
+    }
+
+    private class BlockMod extends ClassMod {
+        public BlockMod() {
+            classSignatures.add(new ConstSignature(" is already occupied by "));
+
+            methodMappers.add(new MethodMapper("getBlockTexture", "(LIBlockAccess;IIII)I"));
         }
     }
 
@@ -334,7 +345,7 @@ public class BetterGrass extends Mod {
                         ICONST_0,
                         IRETURN,
 
-                        // material = nm1.getBlockMaterial(i+a[l][0], j, k+a[l][1]);
+                        // material = iblockaccess.getBlockMaterial(i+a[l][0], j, k+a[l][1]);
                         label("A"),
                         ALOAD, 1,
                         ILOAD, 2,
@@ -444,42 +455,158 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class BlockDirtMod extends ClassMod {
-        public BlockDirtMod() {
-            classSignatures.add(new BytecodeSignature() {
+    private class IBlockAccessMod extends ClassMod {
+        public IBlockAccessMod() {
+            classSignatures.add(new ClassSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        ILOAD_1,
-                        ILOAD_2,
-                        reference(methodInfo, GETSTATIC, new FieldRef("Material", "b", "LMaterial;")),
-                        INVOKESPECIAL, BinaryRegex.any(2),
-                        RETURN,
-                        BinaryRegex.end()
+                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+                    return classFile.isAbstract();
+                }
+            });
+
+            classSignatures.add(new ClassSignature() {
+                @Override
+                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+                    List list = classFile.getMethods();
+                    return list.size() >= 1 && ((MethodInfo) list.get(0)).getDescriptor().equals("(III)I");
+                }
+            });
+
+            methodMappers.add(new MethodMapper("getBlockMaterial", "(III)LMaterial;"));
+
+            methodMappers.add(new MethodMapper(null, "(III)I") {
+                private int count = 0;
+
+                @Override
+                public boolean match(MethodInfo methodInfo) {
+                    if (!super.match(methodInfo)) {
+                        return false;
+                    }
+                    switch (++count) {
+                        case 1:
+                            name = "getBlockId";
+                            return true;
+
+                        case 2:
+                            name = "getBlockMetadata";
+                            return true;
+
+                        default:
+                            return false;
+                    }
+                }
+            });
+        }
+    }
+
+    private class RenderBlocksMod extends ClassMod {
+        private int eastFace;
+        private int westFace;
+        private int northFace;
+        private int southFace;
+
+        public RenderBlocksMod() {
+            classSignatures.add(new FixedBytecodeSignature(
+                ICONST_0,
+                DUP,
+                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                DUP,
+                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                DUP,
+                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                DUP,
+                ISTORE, BinaryRegex.capture(BinaryRegex.any())
+            ) {
+                public void afterMatch(ClassFile classFile) {
+                    southFace = matcher.getCaptureGroup(1)[0] & 0xff;
+                    northFace = matcher.getCaptureGroup(2)[0] & 0xff;
+                    westFace = matcher.getCaptureGroup(3)[0] & 0xff;
+                    eastFace = matcher.getCaptureGroup(4)[0] & 0xff;
+                    Logger.log(Logger.LOG_CONST, "faces (N S E W) = (%d %d %d %d)",
+                        northFace, southFace, eastFace, westFace
                     );
                 }
             });
 
-            patches.add(new AddMethodPatch(null, null) {
+            fieldMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
+
+            patches.add(new BytecodePatch() {
                 @Override
-                protected void prePatch(ClassFile classFile) {
-                    type = colorMultiplierType;
-                    name = map(new MethodRef("BlockGrass", "colorMultiplier", type)).getName();
+                public String getDescription() {
+                    return "if (getBlockTexture == 3) ...";
                 }
 
                 @Override
-                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
-                    return buildCode(
-                        // return BlockGrass.colorMultiplierStatic(iblockaccess, i, j, k);
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return BinaryRegex.capture(buildExpression(
                         ICONST_0,
+                        DUP,
+                        ISTORE, southFace,
+                        DUP,
+                        ISTORE, northFace,
+                        DUP,
+                        ISTORE, westFace,
+                        DUP,
+                        ISTORE, eastFace
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+
                         ALOAD_1,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("BlockGrass", "colorMultiplierStatic", colorMultiplierTypeStatic)),
-                        IRETURN
+                        ICONST_2,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        IFNE, branch("east"),
+                        ICONST_1,
+                        ISTORE, eastFace,
+                        label("east"),
+
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        ICONST_3,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        IFNE, branch("west"),
+                        ICONST_1,
+                        ISTORE, westFace,
+                        label("west"),
+
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        ICONST_4,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        IFNE, branch("north"),
+                        ICONST_1,
+                        ISTORE, northFace,
+                        label("north"),
+
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        ICONST_5,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        IFNE, branch("south"),
+                        ICONST_1,
+                        ISTORE, southFace,
+                        label("south")
                     );
                 }
             });
