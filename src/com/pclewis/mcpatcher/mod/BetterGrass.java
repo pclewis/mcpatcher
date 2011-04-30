@@ -408,14 +408,33 @@ public class BetterGrass extends Mod {
                         northFace, southFace, eastFace, westFace
                     );
                 }
-            });
+            }.setMethodName("renderStandardBlockWithAmbientOcclusion"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (!methodInfo.getDescriptor().endsWith("IIIFFF)Z")) {
+                        return null;
+                    }
+                    return buildExpression(
+                        push(methodInfo, 0.5f),
+                        FSTORE, BinaryRegex.any(),
+                        push(methodInfo, 1.0f),
+                        FSTORE, BinaryRegex.any(),
+                        push(methodInfo, 0.8f),
+                        FSTORE, BinaryRegex.any(),
+                        push(methodInfo, 0.6f),
+                        FSTORE, BinaryRegex.any()
+                    );
+                }
+            }.setMethodName("renderStandardBlockWithColorMultiplier"));
 
             fieldMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
 
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "if (getBlockTexture == 3) useBiomeColor = true";
+                    return "if (getBlockTexture == 0) useBiomeColor = true (AO)";
                 }
 
                 @Override
@@ -435,17 +454,20 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    byte[] blockAccess = reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;"));
+                    byte[] getBlockTexture = reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"));
+
                     return buildCode(
                         getCaptureGroup(1),
 
                         ALOAD_1,
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                        blockAccess,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
                         ICONST_2,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        getBlockTexture,
                         IFNE, branch("east"),
                         ICONST_1,
                         ISTORE, eastFace,
@@ -453,12 +475,12 @@ public class BetterGrass extends Mod {
 
                         ALOAD_1,
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                        blockAccess,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
                         ICONST_3,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        getBlockTexture,
                         IFNE, branch("west"),
                         ICONST_1,
                         ISTORE, westFace,
@@ -466,12 +488,12 @@ public class BetterGrass extends Mod {
 
                         ALOAD_1,
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                        blockAccess,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
                         ICONST_4,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        getBlockTexture,
                         IFNE, branch("north"),
                         ICONST_1,
                         ISTORE, northFace,
@@ -479,16 +501,97 @@ public class BetterGrass extends Mod {
 
                         ALOAD_1,
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                        blockAccess,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
                         ICONST_5,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                        getBlockTexture,
                         IFNE, branch("south"),
                         ICONST_1,
                         ISTORE, southFace,
                         label("south")
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    MethodRef m = (MethodRef) map(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z"));
+                    if (!m.getName().equals(methodInfo.getName()) || !m.getType().equals(methodInfo.getDescriptor())) {
+                        return null;
+                    }
+
+                    return buildExpression(
+                        ALOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FMUL,
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, BinaryRegex.backReference(3),
+                        FMUL,
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, BinaryRegex.backReference(3),
+                        FMUL,
+                        INVOKEVIRTUAL, BinaryRegex.capture(BinaryRegex.any(2)),
+                        //reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V")),
+
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD_1,
+                            ALOAD_0,
+                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                            ILOAD_2,
+                            ILOAD_3,
+                            ILOAD, 4,
+                            BinaryRegex.any(1, 2),
+                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
+                        )),
+
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(7),
+                        DUP,
+                        ISTORE, getCaptureGroup(8),
+
+                        IFNE, branch("A"),
+                        ALOAD, getCaptureGroup(1),
+                        FLOAD, 14,
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        FLOAD, 15,
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        FLOAD, 16,
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        INVOKEVIRTUAL, getCaptureGroup(6),
+                        GOTO, branch("B"),
+
+                        label("A"),
+                        ALOAD, getCaptureGroup(1),
+                        FLOAD, getCaptureGroup(2),
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        FLOAD, getCaptureGroup(4),
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        FLOAD, getCaptureGroup(5),
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        INVOKEVIRTUAL, getCaptureGroup(6),
+
+                        label("B")
                     );
                 }
             });
