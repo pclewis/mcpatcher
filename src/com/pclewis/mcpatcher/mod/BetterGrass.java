@@ -352,6 +352,10 @@ public class BetterGrass extends Mod {
         private int northFace;
         private int southFace;
 
+        private int redMultiplier;
+        private int greenMultiplier;
+        private int blueMultiplier;
+
         public RenderBlocksMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 ICONST_0,
@@ -369,7 +373,7 @@ public class BetterGrass extends Mod {
                     northFace = matcher.getCaptureGroup(2)[0] & 0xff;
                     westFace = matcher.getCaptureGroup(3)[0] & 0xff;
                     eastFace = matcher.getCaptureGroup(4)[0] & 0xff;
-                    Logger.log(Logger.LOG_CONST, "faces (N S E W) = (%d %d %d %d)",
+                    Logger.log(Logger.LOG_CONST, "AO faces (N S E W) = (%d %d %d %d)",
                         northFace, southFace, eastFace, westFace
                     );
                 }
@@ -383,15 +387,42 @@ public class BetterGrass extends Mod {
                             push(methodInfo, 0.5f),
                             FSTORE, BinaryRegex.any(),
                             push(methodInfo, 1.0f),
-                            FSTORE, BinaryRegex.any(),
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
                             push(methodInfo, 0.8f),
                             FSTORE, BinaryRegex.any(),
                             push(methodInfo, 0.6f),
-                            FSTORE, BinaryRegex.any()
+                            FSTORE, BinaryRegex.any(),
+
+                            BinaryRegex.any(0, 20),
+
+                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, 5,
+                            FMUL,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, 6,
+                            FMUL,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, 7,
+                            FMUL,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any())
                         );
                     } else {
                         return null;
                     }
+                }
+
+                @Override
+                public void afterMatch(ClassFile classFile) {
+                    redMultiplier = matcher.getCaptureGroup(2)[0] & 0xff;
+                    greenMultiplier = matcher.getCaptureGroup(3)[0] & 0xff;
+                    blueMultiplier = matcher.getCaptureGroup(4)[0] & 0xff;
+                    Logger.log(Logger.LOG_CONST, "non-AO multipliers (R G B) = (%d %d %d)",
+                        redMultiplier, greenMultiplier, blueMultiplier
+                    );
                 }
             }.setMethodName("renderStandardBlockWithColorMultiplier"));
 
@@ -533,13 +564,13 @@ public class BetterGrass extends Mod {
 
                         IFNE, branch("A"),
                         ALOAD, getCaptureGroup(1),
-                        FLOAD, 14,
+                        FLOAD, redMultiplier,
                         FLOAD, getCaptureGroup(3),
                         FMUL,
-                        FLOAD, 15,
+                        FLOAD, greenMultiplier,
                         FLOAD, getCaptureGroup(3),
                         FMUL,
-                        FLOAD, 16,
+                        FLOAD, blueMultiplier,
                         FLOAD, getCaptureGroup(3),
                         FMUL,
                         INVOKEVIRTUAL, getCaptureGroup(6),

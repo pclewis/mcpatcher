@@ -12,7 +12,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (794 files)
   cn.class matches RenderBlocks.class
    a matches renderStandardBlockWithAmbientOcclusion
    b matches renderStandardBlockWithColorMultiplier
-   faces (N S E W) = (17 18 15 16)
+   AO faces (N S E W) = (17 18 15 16)
+   non-AO multipliers (R G B) = (14 15 16)
   ft.class matches GLAllocation.class
    b matches createDirectByteBuffer
   h.class matches TexturePackBase.class
