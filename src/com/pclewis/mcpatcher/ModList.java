@@ -32,9 +32,7 @@ class ModList {
     public void loadBuiltInMods() {
         add(new HDTexture());
         add(new HDFont());
-        if (MCPatcher.experimentalMods) {
-            add(new BetterGrass());
-        }
+        add(new BetterGrass());
     }
 
     public void loadCustomMods(File directory) {

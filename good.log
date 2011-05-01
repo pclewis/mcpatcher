@@ -1,6 +1,6 @@
-MCPatcher version is 2.0.0
-OS: Linux 2.6.35.12-88.fc14.x86_64 amd64
-JVM: Sun Microsystems Inc. 1.6.0_23 (64 bit)
+MCPatcher version is 2.0.1
+OS: Linux 2.6.35.12-90.fc14.x86_64 amd64
+JVM: Sun Microsystems Inc. 1.6.0_25 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.5_01 (md5 d02fa9998e30693d8d989d5f88cf0040)
 
@@ -9,6 +9,10 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (794 files)
   as.class matches TextureFX.class
    a matches onTick
   bz.class matches StillLava.class
+  cn.class matches RenderBlocks.class
+   a matches renderStandardBlockWithAmbientOcclusion
+   b matches renderStandardBlockWithColorMultiplier
+   faces (N S E W) = (17 18 15 16)
   ft.class matches GLAllocation.class
    b matches createDirectByteBuffer
   h.class matches TexturePackBase.class
@@ -21,6 +25,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (794 files)
   ip.class matches RenderEngine.class
   jy.class matches Watch.class
   jz.class matches GameSettings.class
+  kr.class matches Material.class
   nl.class matches FlowWater.class
   ob.class matches TexturePackDefault.class
   qa.class matches ItemRenderer.class
@@ -28,7 +33,13 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (794 files)
   rf.class matches FontRenderer.class
   rf.class matches FontRenderer.class
    font registers = 5, 6
+  to.class matches Block.class
   ul.class matches StillWater.class
+  vh.class matches BlockGrass.class
+   a matches getBlockTexture
+   getBlockMaterial ref 32
+  wf.class matches IBlockAccess.class
+   f matches getBlockMaterial
   net/minecraft/client/Minecraft.class matches Minecraft.class
 
 Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (second pass)
@@ -74,10 +85,22 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (second pass)
   ColorizerGrass (hl.class)
    field a matches colorBuffer
   FontRenderer (rf.class)
+  Material (kr.class)
+   field b matches ground
+  Block (to.class)
+   method a matches getBlockTexture
+  BlockGrass (vh.class)
+  IBlockAccess (wf.class)
+   method f matches getBlockMaterial
+   method a matches getBlockId
+   method e matches getBlockMetadata
+  RenderBlocks (cn.class)
+   field b matches blockAccess
 
-2 available mods:
+3 available mods:
 [YES] HD Textures 1.0 - Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.
 [YES] HD Font 1.0 - Provides support for higher resolution fonts.
+[YES] Better Grass 1.0 - Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.
 
 #### Class map:
 HD Textures
@@ -156,6 +179,29 @@ HD Textures
 HD Font
     class FontRenderer (rf.class)
     class net.minecraft.src.FontRenderer alias for FontRenderer
+
+Better Grass
+    class Block (to.class)
+        method getBlockTexture -> a
+    class BlockGrass (vh.class)
+        method getBlockTexture -> a
+    class IBlockAccess (wf.class)
+        method getBlockId -> a
+        method getBlockMaterial -> f
+        method getBlockMetadata -> e
+    class Material (kr.class)
+        field builtSnow -> t
+        field ground -> b
+        field snow -> s
+    class RenderBlocks (cn.class)
+        method renderStandardBlockWithAmbientOcclusion -> a
+        method renderStandardBlockWithColorMultiplier -> b
+        field blockAccess -> b
+    class net.minecraft.src.Block alias for Block
+    class net.minecraft.src.BlockGrass alias for BlockGrass
+    class net.minecraft.src.IBlockAccess alias for IBlockAccess
+    class net.minecraft.src.Material alias for Material
+    class net.minecraft.src.RenderBlocks alias for RenderBlocks
 
 
 Patching...
@@ -304,6 +350,225 @@ Patching...
     * 16 -> int_size a@350
      BIPUSH 0x10               GETSTATIC 0x00 0x4d
      IMUL                      IMUL
+ applying RenderBlocks patch to cn.class for mod Better Grass
+    if (getBlockTexture == 0) useBiomeColor = true (AO) a@482
+     label south -> instruction 571
+     label north -> instruction 552
+     label east -> instruction 514
+     label west -> instruction 533
+     branch offset IFNE east -> +6 @508
+     branch offset IFNE west -> +6 @527
+     branch offset IFNE north -> +6 @546
+     branch offset IFNE south -> +6 @565
+     ICONST_0                  ICONST_0
+     DUP                       DUP
+     ISTORE 0x12               ISTORE 0x12
+     DUP                       DUP
+     ISTORE 0x11               ISTORE 0x11
+     DUP                       DUP
+     ISTORE 0x10               ISTORE 0x10
+     DUP                       DUP
+     ISTORE 0x0f               ISTORE 0x0f
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0x92
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_2
+                               INVOKEVIRTUAL 0x00 0xfc
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x0f
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0x92
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_3
+                               INVOKEVIRTUAL 0x00 0xfc
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x10
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0x92
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_4
+                               INVOKEVIRTUAL 0x00 0xfc
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x11
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0x92
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_5
+                               INVOKEVIRTUAL 0x00 0xfc
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x12
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO) b@424
+     label A -> instruction 466
+     label B -> instruction 486
+     branch offset IFNE A -> +26 @440
+     branch offset GOTO B -> +23 @463
+     ALOAD 0x08                ALOAD_1
+     FLOAD 0x12                ALOAD_0
+     FLOAD 0x1b                GETFIELD 0x00 0x92
+     FMUL                      ILOAD_2
+     FLOAD 0x15                ILOAD_3
+     FLOAD 0x1b                ILOAD 0x04
+     FMUL                      ICONST_2
+     FLOAD 0x18                INVOKEVIRTUAL 0x00 0xfc
+     FLOAD 0x1b                DUP
+     FMUL                      ISTORE 0x1c
+     INVOKEVIRTUAL 0x00 0xec   IFNE 0x00 0x1a
+     ALOAD_1                   ALOAD 0x08
+     ALOAD_0                   FLOAD 0x0e
+     GETFIELD 0x00 0x92        FLOAD 0x1b
+     ILOAD_2                   FMUL
+     ILOAD_3                   FLOAD 0x0f
+     ILOAD 0x04                FLOAD 0x1b
+     ICONST_2                  FMUL
+     INVOKEVIRTUAL 0x00 0xfc   FLOAD 0x10
+     ISTORE 0x1c               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
+                               GOTO 0x00 0x17
+                               ALOAD 0x08
+                               FLOAD 0x12
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x15
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x18
+                               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO) b@612
+     label A -> instruction 654
+     label B -> instruction 674
+     branch offset IFNE A -> +26 @628
+     branch offset GOTO B -> +23 @651
+     ALOAD 0x08                ALOAD_1
+     FLOAD 0x12                ALOAD_0
+     FLOAD 0x1b                GETFIELD 0x00 0x92
+     FMUL                      ILOAD_2
+     FLOAD 0x15                ILOAD_3
+     FLOAD 0x1b                ILOAD 0x04
+     FMUL                      ICONST_3
+     FLOAD 0x18                INVOKEVIRTUAL 0x00 0xfc
+     FLOAD 0x1b                DUP
+     FMUL                      ISTORE 0x1c
+     INVOKEVIRTUAL 0x00 0xec   IFNE 0x00 0x1a
+     ALOAD_1                   ALOAD 0x08
+     ALOAD_0                   FLOAD 0x0e
+     GETFIELD 0x00 0x92        FLOAD 0x1b
+     ILOAD_2                   FMUL
+     ILOAD_3                   FLOAD 0x0f
+     ILOAD 0x04                FLOAD 0x1b
+     ICONST_3                  FMUL
+     INVOKEVIRTUAL 0x00 0xfc   FLOAD 0x10
+     ISTORE 0x1c               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
+                               GOTO 0x00 0x17
+                               ALOAD 0x08
+                               FLOAD 0x12
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x15
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x18
+                               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO) b@800
+     label A -> instruction 842
+     label B -> instruction 862
+     branch offset IFNE A -> +26 @816
+     branch offset GOTO B -> +23 @839
+     ALOAD 0x08                ALOAD_1
+     FLOAD 0x13                ALOAD_0
+     FLOAD 0x1b                GETFIELD 0x00 0x92
+     FMUL                      ILOAD_2
+     FLOAD 0x16                ILOAD_3
+     FLOAD 0x1b                ILOAD 0x04
+     FMUL                      ICONST_4
+     FLOAD 0x19                INVOKEVIRTUAL 0x00 0xfc
+     FLOAD 0x1b                DUP
+     FMUL                      ISTORE 0x1c
+     INVOKEVIRTUAL 0x00 0xec   IFNE 0x00 0x1a
+     ALOAD_1                   ALOAD 0x08
+     ALOAD_0                   FLOAD 0x0e
+     GETFIELD 0x00 0x92        FLOAD 0x1b
+     ILOAD_2                   FMUL
+     ILOAD_3                   FLOAD 0x0f
+     ILOAD 0x04                FLOAD 0x1b
+     ICONST_4                  FMUL
+     INVOKEVIRTUAL 0x00 0xfc   FLOAD 0x10
+     ISTORE 0x1c               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
+                               GOTO 0x00 0x17
+                               ALOAD 0x08
+                               FLOAD 0x13
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x16
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x19
+                               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO) b@988
+     label A -> instruction 1030
+     label B -> instruction 1050
+     branch offset IFNE A -> +26 @1004
+     branch offset GOTO B -> +23 @1027
+     ALOAD 0x08                ALOAD_1
+     FLOAD 0x13                ALOAD_0
+     FLOAD 0x1b                GETFIELD 0x00 0x92
+     FMUL                      ILOAD_2
+     FLOAD 0x16                ILOAD_3
+     FLOAD 0x1b                ILOAD 0x04
+     FMUL                      ICONST_5
+     FLOAD 0x19                INVOKEVIRTUAL 0x00 0xfc
+     FLOAD 0x1b                DUP
+     FMUL                      ISTORE 0x1c
+     INVOKEVIRTUAL 0x00 0xec   IFNE 0x00 0x1a
+     ALOAD_1                   ALOAD 0x08
+     ALOAD_0                   FLOAD 0x0e
+     GETFIELD 0x00 0x92        FLOAD 0x1b
+     ILOAD_2                   FMUL
+     ILOAD_3                   FLOAD 0x0f
+     ILOAD 0x04                FLOAD 0x1b
+     ICONST_5                  FMUL
+     INVOKEVIRTUAL 0x00 0xfc   FLOAD 0x10
+     ISTORE 0x1c               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
+                               GOTO 0x00 0x17
+                               ALOAD 0x08
+                               FLOAD 0x13
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x16
+                               FLOAD 0x1b
+                               FMUL
+                               FLOAD 0x19
+                               FLOAD 0x1b
+                               FMUL
+                               INVOKEVIRTUAL 0x00 0xec
  applying GetResource patch to fn.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@5
      LDC_W 0x00 0x02           NOP
@@ -1043,6 +1308,111 @@ Patching...
     * 16 -> int_size a@236
      BIPUSH 0x10               GETSTATIC 0x00 0x47
      IMUL                      IMUL
+ applying BlockGrass patch to vh.class for mod Better Grass
+    insert field grassMatrix [[I
+    initialize grassMatrix <init>@19
+     label A -> instruction 67
+     branch offset IF_ACMPNE A -> +44 @23
+                               GETSTATIC 0x00 0x67
+                               ACONST_NULL
+                               IF_ACMPNE 0x00 0x2c
+                               ICONST_4
+                               ICONST_2
+                               MULTIANEWARRAY 0x00 0x68 0x02
+                               PUTSTATIC 0x00 0x67
+                               GETSTATIC 0x00 0x67
+                               ICONST_0
+                               AALOAD
+                               ICONST_1
+                               ICONST_M1
+                               IASTORE
+                               GETSTATIC 0x00 0x67
+                               ICONST_1
+                               AALOAD
+                               ICONST_1
+                               ICONST_1
+                               IASTORE
+                               GETSTATIC 0x00 0x67
+                               ICONST_2
+                               AALOAD
+                               ICONST_0
+                               ICONST_M1
+                               IASTORE
+                               GETSTATIC 0x00 0x67
+                               ICONST_3
+                               AALOAD
+                               ICONST_0
+                               ICONST_1
+                               IASTORE
+    check surrounding blocks in getBlockTexture a@29
+     label A -> instruction 89
+     label B -> instruction 87
+     label C -> instruction 141
+     branch offset IF_ACMPEQ A -> +52 @37
+     branch offset IF_ACMPEQ A -> +44 @45
+     branch offset IF_ICMPEQ B -> +5 @82
+     branch offset IF_ACMPEQ C -> +14 @127
+     branch offset IF_ACMPEQ C -> +6 @135
+     ALOAD 0x06                IINC 0x05 0xfe
+     GETSTATIC 0x00 0x0b       ALOAD 0x06
+     IF_ACMPEQ 0x00 0x0b       GETSTATIC 0x00 0x0b
+     ALOAD 0x06                IF_ACMPEQ 0x00 0x34
+     GETSTATIC 0x00 0x0c       ALOAD 0x06
+     IF_ACMPNE 0x00 0x06       GETSTATIC 0x00 0x0c
+     BIPUSH 0x44               IF_ACMPEQ 0x00 0x2c
+     IRETURN                   ALOAD 0x01
+     ICONST_3                  ILOAD 0x02
+                               GETSTATIC 0x00 0x67
+                               ILOAD 0x05
+                               AALOAD
+                               ICONST_0
+                               IALOAD
+                               IADD
+                               ILOAD 0x03
+                               ICONST_1
+                               ISUB
+                               ILOAD 0x04
+                               GETSTATIC 0x00 0x67
+                               ILOAD 0x05
+                               AALOAD
+                               ICONST_1
+                               IALOAD
+                               IADD
+                               INVOKEINTERFACE 0x00 0x6a 0x04 0x00
+                               ICONST_2
+                               IF_ICMPEQ 0x00 0x05
+                               ICONST_3
+                               IRETURN
+                               ICONST_0
+                               IRETURN
+                               ALOAD 0x01
+                               ILOAD 0x02
+                               GETSTATIC 0x00 0x67
+                               ILOAD 0x05
+                               AALOAD
+                               ICONST_0
+                               IALOAD
+                               IADD
+                               ILOAD 0x03
+                               ILOAD 0x04
+                               GETSTATIC 0x00 0x67
+                               ILOAD 0x05
+                               AALOAD
+                               ICONST_1
+                               IALOAD
+                               IADD
+                               INVOKEINTERFACE 0x00 0x20 0x04 0x00
+                               ASTORE 0x06
+                               ALOAD 0x06
+                               GETSTATIC 0x00 0x0b
+                               IF_ACMPEQ 0x00 0x0e
+                               ALOAD 0x06
+                               GETSTATIC 0x00 0x0b
+                               IF_ACMPEQ 0x00 0x06
+                               BIPUSH 0x44
+                               IRETURN
+                               BIPUSH 0x42
+   increasing stack size from 4 to 6
  applying Minecraft patch to net/minecraft/client/Minecraft.class for mod HD Textures
     TextureUtils.setMinecraft(this) on startup a@220
      ALOAD_0                   ALOAD_0
@@ -1534,4 +1904,16 @@ HD Font
         [2] font whitespace width 2 -> i / 64
         [2] font width 7 -> i / 16 - 1
         [6] font width 8 -> i / 16
+
+Better Grass
+    Material (kr.class)
+    Block (to.class)
+    BlockGrass (vh.class)
+        [1] check surrounding blocks in getBlockTexture
+        [1] initialize grassMatrix
+        [1] insert field grassMatrix [[I
+    IBlockAccess (wf.class)
+    RenderBlocks (cn.class)
+        [1] if (getBlockTexture == 0) useBiomeColor = true (AO)
+        [4] if (getBlockTexture == 0) useBiomeColor = true (non-AO)
 
