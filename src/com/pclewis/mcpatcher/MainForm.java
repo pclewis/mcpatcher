@@ -436,7 +436,7 @@ class MainForm {
                 if (mod.configPanel == null) {
                     continue;
                 }
-                mod.configPanel.load();
+                mod.loadOptions();
                 JPanel panel = mod.configPanel.getPanel();
                 if (panel == null) {
                     continue;

@@ -204,6 +204,12 @@ public abstract class Mod {
         return enabled;
     }
 
+    void loadOptions() {
+        if (configPanel != null) {
+            configPanel.load();
+        }
+    }
+
     /**
      * Called by MCPatcher for each file in filesToAdd and filesToReplace.  Default implementation
      * gets the class resource.

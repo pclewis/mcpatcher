@@ -144,6 +144,7 @@ class ModList {
         if (!mod.internal) {
             visibleMods.add(mod);
         }
+        mod.loadOptions();
         return true;
     }
 
