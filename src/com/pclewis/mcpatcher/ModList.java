@@ -110,7 +110,14 @@ class ModList {
     public void enableValidMods() {
         for (int i = modsByIndex.size() - 1; i >= 0; i--) {
             Mod mod = modsByIndex.get(i);
-            selectMod(mod, mod.okToApply());
+            boolean enabled = mod.okToApply();
+            if (enabled) {
+                String name = mod.getConfigName();
+                if (name != null) {
+                    enabled = MCPatcherUtils.getBoolean(name, "enabled", mod.defaultEnabled);
+                }
+            }
+            selectMod(mod, enabled);
         }
     }
 
@@ -158,7 +165,12 @@ class ModList {
             Logger.log(e);
         }
         for (Map.Entry<Mod, Boolean> entry : inst.entrySet()) {
-            entry.getKey().setEnabled(entry.getValue());
+            mod = entry.getKey();
+            mod.setEnabled(entry.getValue());
+            String name = mod.getConfigName();
+            if (name != null) {
+                MCPatcherUtils.set(name, "enabled", mod.isEnabled());
+            }
         }
     }
 

@@ -14,6 +14,7 @@ public class HDFont extends Mod {
 
     public HDFont() {
         name = "HD Font";
+        configName = "HDFont";
         author = "MCPatcher";
         description = "Provides support for higher resolution fonts.";
         version = "1.0";

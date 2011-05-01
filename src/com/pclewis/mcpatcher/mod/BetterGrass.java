@@ -14,6 +14,7 @@ public class BetterGrass extends Mod {
 
     public BetterGrass() {
         name = "Better Grass";
+        configName = "BetterGrass";
         author = "MCPatcher";
         description = "Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.";
         version = "1.0";

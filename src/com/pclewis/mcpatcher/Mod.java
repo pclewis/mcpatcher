@@ -17,6 +17,10 @@ public abstract class Mod {
      */
     protected String name = "";
     /**
+     * Name of the mod used in mcpatcher.properties
+     */
+    protected String configName = null;
+    /**
      * Author of the mod
      */
     protected String author = "";
@@ -68,6 +72,7 @@ public abstract class Mod {
         }
     };
 
+    protected boolean defaultEnabled = true;
     protected ClassMap classMap = new ClassMap();
     private ArrayList<String> errors = new ArrayList<String>();
     private boolean enabled = false;
@@ -118,6 +123,10 @@ public abstract class Mod {
 
     public String getName() {
         return name;
+    }
+
+    public String getConfigName() {
+        return configName;
     }
 
     public String getAuthor() {
