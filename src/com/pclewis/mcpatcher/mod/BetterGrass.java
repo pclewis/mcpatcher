@@ -69,20 +69,7 @@ public class BetterGrass extends Mod {
                 }
             });
 
-            fieldMappers.add(new FieldMapper("ground", "LMaterial;") {
-                int count = 0;
-
-                @Override
-                public boolean match(FieldInfo fieldInfo) {
-                    if (!super.match(fieldInfo)) {
-                        return false;
-                    }
-                    if ((fieldInfo.getAccessFlags() & AccessFlag.STATIC) == 0) {
-                        return false;
-                    }
-                    return ++count == 2;
-                }
-            });
+            memberMappers.add(new FieldMapper(new String[] {null, "ground"}, "LMaterial;").accessFlag(AccessFlag.STATIC, true));
         }
     }
 
@@ -90,7 +77,7 @@ public class BetterGrass extends Mod {
         public BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
 
-            methodMappers.add(new MethodMapper("getBlockTexture", "(LIBlockAccess;IIII)I"));
+            memberMappers.add(new MethodMapper("getBlockTexture", "(LIBlockAccess;IIII)I"));
         }
     }
 
@@ -354,30 +341,8 @@ public class BetterGrass extends Mod {
                 }
             });
 
-            methodMappers.add(new MethodMapper("getBlockMaterial", "(III)LMaterial;"));
-
-            methodMappers.add(new MethodMapper(null, "(III)I") {
-                private int count = 0;
-
-                @Override
-                public boolean match(MethodInfo methodInfo) {
-                    if (!super.match(methodInfo)) {
-                        return false;
-                    }
-                    switch (++count) {
-                        case 1:
-                            name = "getBlockId";
-                            return true;
-
-                        case 2:
-                            name = "getBlockMetadata";
-                            return true;
-
-                        default:
-                            return false;
-                    }
-                }
-            });
+            memberMappers.add(new MethodMapper("getBlockMaterial", "(III)LMaterial;"));
+            memberMappers.add(new MethodMapper(new String[] {"getBlockId", "getBlockMetadata"}, "(III)I"));
         }
     }
 
@@ -430,7 +395,7 @@ public class BetterGrass extends Mod {
                 }
             }.setMethodName("renderStandardBlockWithColorMultiplier"));
 
-            fieldMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
+            memberMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
 
             patches.add(new BytecodePatch() {
                 @Override

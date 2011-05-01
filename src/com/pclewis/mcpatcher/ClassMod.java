@@ -4,6 +4,7 @@ import javassist.bytecode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,13 +46,9 @@ abstract public class ClassMod implements PatchComponent {
      */
     protected ArrayList<ClassPatch> patches = new ArrayList<ClassPatch>();
     /**
-     * List of class fields to deobfuscate in the target class - not used if global == true.
+     * List of class members to deobfuscate in the target class - not used if global == true.
      */
-    protected ArrayList<FieldMapper> fieldMappers = new ArrayList<FieldMapper>();
-    /**
-     * List of class methods to deobfuscate in the target class - not used if global == true.
-     */
-    protected ArrayList<MethodMapper> methodMappers = new ArrayList<MethodMapper>();
+    protected ArrayList<MemberMapper> memberMappers = new ArrayList<MemberMapper>();
     /**
      * By default, a ClassMod should only match a single class. Set this field to true to allow any number of matches.
      */
@@ -134,42 +131,43 @@ abstract public class ClassMod implements PatchComponent {
     protected boolean mapClassMembers(String filename, ClassFile classFile) throws Exception {
         boolean ok = true;
 
-        for (FieldMapper fm : fieldMappers) {
-            boolean found = false;
-            if (fm.descriptor != null) {
-                fm.descriptor = mod.getClassMap().mapTypeString(fm.descriptor);
+        for (MemberMapper mapper : memberMappers) {
+            String mapperType = mapper.getMapperType();
+            if (mapper.descriptor != null) {
+                mapper.descriptor = mod.getClassMap().mapTypeString(mapper.descriptor);
             }
-            for (Object o : classFile.getFields()) {
-                FieldInfo fi = (FieldInfo) o;
-                if (fm.match(fi)) {
-                    Logger.log(Logger.LOG_METHOD, "field %s matches %s", fi.getName(), fm.name);
-                    mod.getClassMap().addFieldMap(getDeobfClass(), fm.name, fi.getName());
-                    found = true;
+            if (mapper instanceof FieldMapper) {
+                FieldMapper fm = (FieldMapper) mapper;
+                for (Object o : classFile.getFields()) {
+                    FieldInfo fi = (FieldInfo) o;
+                    if (fm.match(fi)) {
+                        String name = fm.getName();
+                        if (name != null) {
+                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s", mapperType, fi.getName(), name);
+                            mod.getClassMap().addFieldMap(getDeobfClass(), name, fi.getName());
+                        }
+                        fm.afterMatch();
+                    }
                 }
-            }
-            if (!found) {
-                addError(String.format("no match found for field %s", fm.name));
-                Logger.log(Logger.LOG_METHOD, "no match found for field %s", fm.name);
-                ok = false;
-            }
-        }
-
-        for (MethodMapper mm : methodMappers) {
-            boolean found = false;
-            if (mm.descriptor != null) {
-                mm.descriptor = mod.getClassMap().mapTypeString(mm.descriptor);
-            }
-            for (Object o : classFile.getMethods()) {
-                MethodInfo mi = (MethodInfo) o;
-                if (mm.match(mi)) {
-                    Logger.log(Logger.LOG_METHOD, "method %s matches %s", mi.getName(), mm.name);
-                    mod.getClassMap().addMethodMap(getDeobfClass(), mm.name, mi.getName());
-                    found = true;
+            } else if (mapper instanceof MethodMapper) {
+                MethodMapper mm = (MethodMapper) mapper;
+                for (Object o : classFile.getMethods()) {
+                    MethodInfo mi = (MethodInfo) o;
+                    if (mm.match(mi)) {
+                        String name = mm.getName();
+                        if (name != null) {
+                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s", mapperType, mi.getName(), name);
+                            mod.getClassMap().addMethodMap(getDeobfClass(), name, mi.getName());
+                        }
+                        mm.afterMatch();
+                    }
                 }
+            } else {
+                throw new AssertionError("invalid type");
             }
-            if (!found) {
-                addError(String.format("no match found for method %s", mm.name));
-                Logger.log(Logger.LOG_METHOD, "no match found for method %s", mm.name);
+            if (!mapper.allMatched()) {
+                addError(String.format("no match found for %s %s", mapperType, mapper.getName()));
+                Logger.log(Logger.LOG_METHOD, "no match found for %s %s", mapperType, mapper.getName());
                 ok = false;
             }
         }
@@ -303,26 +301,95 @@ abstract public class ClassMod implements PatchComponent {
     }
 
     /**
-     * Represents a field to be located within a class.  By default, the match is done by type signature,
-     * but this can be overridden.
+     * Represents a field or method to be located within a class.  By default,
+     * the match is done by type signature, but this can be overridden.
      */
-    public class FieldMapper {
+    abstract class MemberMapper {
         /**
-         * Deobfuscated field name.
+         * Deobfuscated member name.
          */
-        protected String name;
+        protected String[] names;
         /**
-         * Java type descriptor, e.g., "[B" represents an array of bytes.
+         * Java type descriptor, e.g.,<br>
+         * "[B" represents an array of bytes.<br>
+         * "(I)Lnet/minecraft/client/Minecraft;" represents a method taking an int and returning a Minecraft object.
          */
         protected String descriptor;
+
+        private int setAccessFlags;
+        private int clearAccessFlags;
+        private int count;
+
+        /**
+         * @param names      descriptive field names
+         * @param descriptor Java type descriptor
+         */
+        public MemberMapper(String[] names, String descriptor) {
+            this.names = names.clone();
+            this.descriptor = descriptor;
+        }
 
         /**
          * @param name       descriptive field name
          * @param descriptor Java type descriptor
          */
+        public MemberMapper(String name, String descriptor) {
+            this(new String[] {name}, descriptor);
+        }
+
+        /**
+         * Specify a required access flag.
+         *
+         * @param flags access flags
+         * @param set   if true, flags are required; if false, flags are forbidden
+         * @return this
+         * @see AccessFlag
+         */
+        public MemberMapper accessFlag(int flags, boolean set) {
+            if (set) {
+                setAccessFlags |= flags;
+            } else {
+                clearAccessFlags |= flags;
+            }
+            return this;
+        }
+
+        boolean matchInfo(String descriptor, int flags) {
+            return descriptor.equals(this.descriptor) &&
+                (flags & setAccessFlags) == setAccessFlags &&
+                (flags & clearAccessFlags) == 0;
+        }
+
+        String getName() {
+            return count < names.length ? names[count] : null;
+        }
+
+        void afterMatch() {
+            count++;
+        }
+
+        boolean allMatched() {
+            return count >= names.length;
+        }
+
+        abstract String getMapperType();
+    }
+
+    /**
+     * Represents a field to be located within a class.  By default,
+     * the match is done by type signature, but this can be overridden.
+     */
+    public class FieldMapper extends MemberMapper {
+        public FieldMapper(String[] names, String descriptor) {
+            super(names, descriptor);
+        }
+
         public FieldMapper(String name, String descriptor) {
-            this.name = name;
-            this.descriptor = descriptor;
+            super(name, descriptor);
+        }
+
+        final String getMapperType() {
+            return "field";
         }
 
         /**
@@ -330,40 +397,33 @@ abstract public class ClassMod implements PatchComponent {
          * @return true if fieldInfo matches the desired field
          */
         public boolean match(FieldInfo fieldInfo) {
-            return fieldInfo.getDescriptor().equals(descriptor);
+            return matchInfo(fieldInfo.getDescriptor(), fieldInfo.getAccessFlags());
         }
     }
 
     /**
-     * Represents a method to be located within a class.  By default, the match is done by type signature,
-     * but this can be overridden.
+     * Represents a method to be located within a class.  By default,
+     * the match is done by type signature, but this can be overridden.
      */
-    public class MethodMapper {
-        /**
-         * Deobfuscated field name.
-         */
-        protected String name;
-        /**
-         * Java type descriptor, e.g., "(I)Lnet/minecraft/client/Minecraft;" represents a method taking an
-         * int and returning a Minecraft object.
-         */
-        protected String descriptor;
+    public class MethodMapper extends MemberMapper {
+        public MethodMapper(String[] names, String descriptor) {
+            super(names, descriptor);
+        }
 
-        /**
-         * @param name       descriptive method name
-         * @param descriptor Java type descriptor
-         */
         public MethodMapper(String name, String descriptor) {
-            this.name = name;
-            this.descriptor = descriptor;
+            super(name, descriptor);
+        }
+
+        final String getMapperType() {
+            return "method";
         }
 
         /**
-         * @param methodInfo candidate method
-         * @return true if methodInfo matches the desired method
+         * @param methodInfo candidate field
+         * @return true if fieldInfo matches the desired field
          */
         public boolean match(MethodInfo methodInfo) {
-            return methodInfo.getDescriptor().equals(descriptor);
+            return matchInfo(methodInfo.getDescriptor(), methodInfo.getAccessFlags());
         }
     }
 }

@@ -61,11 +61,10 @@ public class HDTexture extends Mod {
         public RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
-            fieldMappers.add(new FieldMapper("imageData", "Ljava/nio/ByteBuffer;"));
-            fieldMappers.add(new FieldMapper("textureList", "Ljava/util/List;"));
-
-            methodMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
-            methodMappers.add(new MethodMapper("refreshTextures", "()V") {
+            memberMappers.add(new FieldMapper("imageData", "Ljava/nio/ByteBuffer;"));
+            memberMappers.add(new FieldMapper("textureList", "Ljava/util/List;"));
+            memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
+            memberMappers.add(new MethodMapper("refreshTextures", "()V") {
                 @Override
                 public boolean match(MethodInfo methodInfo) {
                     if (!super.match(methodInfo) || methodInfo.getName().startsWith("<")) {
@@ -77,8 +76,8 @@ public class HDTexture extends Mod {
                     return bm.match(methodInfo);
                 }
             });
-            methodMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
-            methodMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
+            memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
+            memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -298,35 +297,8 @@ public class HDTexture extends Mod {
                 BinaryRegex.end()
             ).setMethodName("onTick"));
 
-            fieldMappers.add(new FieldMapper("imageData", "[B"));
-            fieldMappers.add(new FieldMapper("", "I") {
-                private int fieldNum = 0;
-
-                @Override
-                public boolean match(FieldInfo fieldInfo) {
-                    if (!fieldInfo.getDescriptor().equals(descriptor)) {
-                        return false;
-                    }
-                    switch (fieldNum) {
-                        case 0:
-                            name = "tileNumber";
-                            break;
-                        case 1:
-                            name = "field_1130_d";
-                            break;
-                        case 2:
-                            name = "tileSize";
-                            break;
-                        case 3:
-                            name = "tileImage";
-                            break;
-                        default:
-                            return false;
-                    }
-                    fieldNum++;
-                    return true;
-                }
-            });
+            memberMappers.add(new FieldMapper("imageData", "[B"));
+            memberMappers.add(new FieldMapper(new String[] {"tileNumber", null, "tileSize", "tileImage"}, "I"));
 
             patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
         }
@@ -546,10 +518,10 @@ public class HDTexture extends Mod {
         public MinecraftMod() {
             classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
 
-            fieldMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
-            fieldMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
-            fieldMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
-            fieldMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
+            memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
+            memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
+            memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
+            memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -661,19 +633,9 @@ public class HDTexture extends Mod {
             classSignatures.add(new ConstSignature(".zip"));
             classSignatures.add(new ConstSignature("texturepacks"));
 
-            fieldMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;") {
-                @Override
-                public boolean match(FieldInfo fieldInfo) {
-                    return super.match(fieldInfo) && (fieldInfo.getAccessFlags() & AccessFlag.PUBLIC) != 0;
-                }
-            });
-            fieldMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;") {
-                @Override
-                public boolean match(FieldInfo fieldInfo) {
-                    return super.match(fieldInfo) && (fieldInfo.getAccessFlags() & AccessFlag.PRIVATE) != 0;
-                }
-            });
-            fieldMappers.add(new FieldMapper("minecraft", "LMinecraft;"));
+            memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
+            memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
+            memberMappers.add(new FieldMapper("minecraft", "LMinecraft;"));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -732,18 +694,7 @@ public class HDTexture extends Mod {
                 }
             }.setMethodName("getInputStream"));
 
-            fieldMappers.add(new FieldMapper("texturePackFileName", "Ljava/lang/String;") {
-                boolean matched = false;
-
-                @Override
-                public boolean match(FieldInfo fieldInfo) {
-                    if (!super.match(fieldInfo) || matched) {
-                        return false;
-                    }
-                    matched = true;
-                    return true;
-                }
-            });
+            memberMappers.add(new FieldMapper("texturePackFileName", "Ljava/lang/String;"));
         }
     }
 
@@ -851,7 +802,7 @@ public class HDTexture extends Mod {
             this.name = name;
             classSignatures.add(new ConstSignature(resource));
 
-            fieldMappers.add(new FieldMapper("colorBuffer", "[I"));
+            memberMappers.add(new FieldMapper("colorBuffer", "[I"));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(name, "colorBuffer", "[I")));
         }

@@ -53,7 +53,6 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (second pass)
   TextureFX (as.class)
    field a matches imageData
    field b matches tileNumber
-   field d matches field_1130_d
    field e matches tileSize
    field f matches tileImage
   Compass (ar.class)
@@ -134,7 +133,6 @@ HD Textures
     class StillWater (ul.class)
     class TextureFX (as.class)
         method onTick -> a
-        field field_1130_d -> d
         field imageData -> a
         field tileImage -> f
         field tileNumber -> b
@@ -150,7 +148,6 @@ HD Textures
     class Watch (jy.class)
     class com.pclewis.mcpatcher.mod.CustomAnimation extends TextureFX
         method onTick -> a
-        field field_1130_d -> d
         field imageData -> a
         field tileImage -> f
         field tileNumber -> b
