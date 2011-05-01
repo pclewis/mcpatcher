@@ -39,8 +39,6 @@ class MinecraftJar {
 
         checkForDuplicateZipEntries(file);
 
-        origMD5 = getOrigMD5(version);
-
         if (file.getName().equals("minecraft.jar")) {
             origFile = new File(file.getParent(), "minecraft-" + version + ".jar");
             outputFile = file;
@@ -56,6 +54,8 @@ class MinecraftJar {
         if (md5 == null) {
             throw new IOException("Could not compute md5 sum of " + file.getPath());
         }
+
+        origMD5 = getOrigMD5(version, md5);
     }
 
     public String getVersion() {
@@ -132,7 +132,7 @@ class MinecraftJar {
         return version;
     }
 
-    private static String getOrigMD5(String version) {
+    private static String getOrigMD5(String version, String md5) {
         String origMD5 = MCPatcherUtils.getString("md5", version, "");
         if (!origMD5.equals("")) {
             return origMD5;
@@ -145,8 +145,10 @@ class MinecraftJar {
                 is = new FileInputStream(md5File);
                 properties.load(is);
                 origMD5 = properties.getProperty("minecraft.jar");
-                MCPatcherUtils.set("md5", version, origMD5);
-                return (origMD5);
+                if (origMD5.equals(md5)) {
+                    MCPatcherUtils.set("md5", version, origMD5);
+                    return (origMD5);
+                }
             } catch (IOException e) {
                 Logger.log(e);
             } finally {
