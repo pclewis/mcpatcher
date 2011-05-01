@@ -4,6 +4,7 @@ import javassist.bytecode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,13 +46,9 @@ abstract public class ClassMod implements PatchComponent {
      */
     protected ArrayList<ClassPatch> patches = new ArrayList<ClassPatch>();
     /**
-     * List of class fields to deobfuscate in the target class - not used if global == true.
+     * List of class members to deobfuscate in the target class - not used if global == true.
      */
-    protected ArrayList<FieldMapper> fieldMappers = new ArrayList<FieldMapper>();
-    /**
-     * List of class methods to deobfuscate in the target class - not used if global == true.
-     */
-    protected ArrayList<MethodMapper> methodMappers = new ArrayList<MethodMapper>();
+    protected ArrayList<MemberMapper> memberMappers = new ArrayList<MemberMapper>();
     /**
      * By default, a ClassMod should only match a single class. Set this field to true to allow any number of matches.
      */
@@ -134,46 +131,43 @@ abstract public class ClassMod implements PatchComponent {
     protected boolean mapClassMembers(String filename, ClassFile classFile) throws Exception {
         boolean ok = true;
 
-        for (FieldMapper fm : fieldMappers) {
-            if (fm.descriptor != null) {
-                fm.descriptor = mod.getClassMap().mapTypeString(fm.descriptor);
+        for (MemberMapper mapper : memberMappers) {
+            String mapperType = mapper.getMapperType();
+            if (mapper.descriptor != null) {
+                mapper.descriptor = mod.getClassMap().mapTypeString(mapper.descriptor);
             }
-            for (Object o : classFile.getFields()) {
-                FieldInfo fi = (FieldInfo) o;
-                if (fm.match(fi)) {
-                    String name = fm.getName();
-                    if (name != null) {
-                        Logger.log(Logger.LOG_METHOD, "field %s matches %s", fi.getName(), name);
-                        mod.getClassMap().addFieldMap(getDeobfClass(), name, fi.getName());
+            if (mapper instanceof FieldMapper) {
+                FieldMapper fm = (FieldMapper) mapper;
+                for (Object o : classFile.getFields()) {
+                    FieldInfo fi = (FieldInfo) o;
+                    if (fm.match(fi)) {
+                        String name = fm.getName();
+                        if (name != null) {
+                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s", mapperType, fi.getName(), name);
+                            mod.getClassMap().addFieldMap(getDeobfClass(), name, fi.getName());
+                        }
+                        fm.afterMatch();
                     }
-                    fm.afterMatch();
                 }
-            }
-            if (!fm.allMatched()) {
-                addError(String.format("no match found for field %s", fm.getName()));
-                Logger.log(Logger.LOG_METHOD, "no match found for field %s", fm.getName());
-                ok = false;
-            }
-        }
-
-        for (MethodMapper mm : methodMappers) {
-            if (mm.descriptor != null) {
-                mm.descriptor = mod.getClassMap().mapTypeString(mm.descriptor);
-            }
-            for (Object o : classFile.getMethods()) {
-                MethodInfo mi = (MethodInfo) o;
-                if (mm.match(mi)) {
-                    String name = mm.getName();
-                    if (name != null) {
-                        Logger.log(Logger.LOG_METHOD, "method %s matches %s", mi.getName(), name);
-                        mod.getClassMap().addMethodMap(getDeobfClass(), name, mi.getName());
+            } else if (mapper instanceof MethodMapper) {
+                MethodMapper mm = (MethodMapper) mapper;
+                for (Object o : classFile.getMethods()) {
+                    MethodInfo mi = (MethodInfo) o;
+                    if (mm.match(mi)) {
+                        String name = mm.getName();
+                        if (name != null) {
+                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s", mapperType, mi.getName(), name);
+                            mod.getClassMap().addMethodMap(getDeobfClass(), name, mi.getName());
+                        }
+                        mm.afterMatch();
                     }
-                    mm.afterMatch();
                 }
+            } else {
+                throw new AssertionError("invalid type");
             }
-            if (!mm.allMatched()) {
-                addError(String.format("no match found for method %s", mm.getName()));
-                Logger.log(Logger.LOG_METHOD, "no match found for method %s", mm.getName());
+            if (!mapper.allMatched()) {
+                addError(String.format("no match found for %s %s", mapperType, mapper.getName()));
+                Logger.log(Logger.LOG_METHOD, "no match found for %s %s", mapperType, mapper.getName());
                 ok = false;
             }
         }
@@ -377,11 +371,13 @@ abstract public class ClassMod implements PatchComponent {
         boolean allMatched() {
             return count >= names.length;
         }
+
+        abstract String getMapperType();
     }
 
     /**
-     * Represents a field to be located within a class.  By default, the match is done by type signature,
-     * but this can be overridden.
+     * Represents a field to be located within a class.  By default,
+     * the match is done by type signature, but this can be overridden.
      */
     public class FieldMapper extends MemberMapper {
         public FieldMapper(String[] names, String descriptor) {
@@ -390,6 +386,10 @@ abstract public class ClassMod implements PatchComponent {
 
         public FieldMapper(String name, String descriptor) {
             super(name, descriptor);
+        }
+
+        final String getMapperType() {
+            return "field";
         }
 
         /**
@@ -402,8 +402,8 @@ abstract public class ClassMod implements PatchComponent {
     }
 
     /**
-     * Represents a method to be located within a class.  By default, the match is done by type signature,
-     * but this can be overridden.
+     * Represents a method to be located within a class.  By default,
+     * the match is done by type signature, but this can be overridden.
      */
     public class MethodMapper extends MemberMapper {
         public MethodMapper(String[] names, String descriptor) {
@@ -412,6 +412,10 @@ abstract public class ClassMod implements PatchComponent {
 
         public MethodMapper(String name, String descriptor) {
             super(name, descriptor);
+        }
+
+        final String getMapperType() {
+            return "method";
         }
 
         /**

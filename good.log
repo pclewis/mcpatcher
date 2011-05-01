@@ -1,6 +1,6 @@
 MCPatcher version is 2.0.0
-OS: Linux 2.6.35.12-88.fc14.x86_64 amd64
-JVM: Sun Microsystems Inc. 1.6.0_23 (64 bit)
+OS: Linux 2.6.35.12-90.fc14.x86_64 amd64
+JVM: Sun Microsystems Inc. 1.6.0_25 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.5_01 (md5 d02fa9998e30693d8d989d5f88cf0040)
 
@@ -42,7 +42,6 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (second pass)
   TextureFX (as.class)
    field a matches imageData
    field b matches tileNumber
-   field d matches field_1130_d
    field e matches tileSize
    field f matches tileImage
   Compass (ar.class)
@@ -111,7 +110,6 @@ HD Textures
     class StillWater (ul.class)
     class TextureFX (as.class)
         method onTick -> a
-        field field_1130_d -> d
         field imageData -> a
         field tileImage -> f
         field tileNumber -> b
@@ -127,7 +125,6 @@ HD Textures
     class Watch (jy.class)
     class com.pclewis.mcpatcher.mod.CustomAnimation extends TextureFX
         method onTick -> a
-        field field_1130_d -> d
         field imageData -> a
         field tileImage -> f
         field tileNumber -> b

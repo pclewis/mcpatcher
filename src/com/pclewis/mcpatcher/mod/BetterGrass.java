@@ -49,20 +49,7 @@ public class BetterGrass extends Mod {
             ));
             classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
 
-            fieldMappers.add(new FieldMapper("ground", "LMaterial;") {
-                int count = 0;
-
-                @Override
-                public boolean match(FieldInfo fieldInfo) {
-                    if (!super.match(fieldInfo)) {
-                        return false;
-                    }
-                    if ((fieldInfo.getAccessFlags() & AccessFlag.STATIC) == 0) {
-                        return false;
-                    }
-                    return ++count == 2;
-                }
-            });
+            memberMappers.add(new FieldMapper(new String[] {null, "ground"}, "LMaterial;").accessFlag(AccessFlag.STATIC, true));
         }
     }
 
