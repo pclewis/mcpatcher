@@ -299,34 +299,7 @@ public class HDTexture extends Mod {
             ).setMethodName("onTick"));
 
             fieldMappers.add(new FieldMapper("imageData", "[B"));
-            fieldMappers.add(new FieldMapper("", "I") {
-                private int fieldNum = 0;
-
-                @Override
-                public boolean match(FieldInfo fieldInfo) {
-                    if (!fieldInfo.getDescriptor().equals(descriptor)) {
-                        return false;
-                    }
-                    switch (fieldNum) {
-                        case 0:
-                            name = "tileNumber";
-                            break;
-                        case 1:
-                            name = "field_1130_d";
-                            break;
-                        case 2:
-                            name = "tileSize";
-                            break;
-                        case 3:
-                            name = "tileImage";
-                            break;
-                        default:
-                            return false;
-                    }
-                    fieldNum++;
-                    return true;
-                }
-            });
+            fieldMappers.add(new FieldMapper(new String[] {"tileNumber", null, "tileSize", "tileImage"}, "I"));
 
             patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
         }
