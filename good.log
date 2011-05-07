@@ -1405,7 +1405,7 @@ Patching...
                                GETSTATIC 0x00 0x0b
                                IF_ACMPEQ 0x00 0x0e
                                ALOAD 0x06
-                               GETSTATIC 0x00 0x0b
+                               GETSTATIC 0x00 0x0c
                                IF_ACMPEQ 0x00 0x06
                                BIPUSH 0x44
                                IRETURN

@@ -308,7 +308,7 @@ public class BetterGrass extends Mod {
 
                         // if (material == Material.builtSnow)
                         ALOAD, material,
-                        snow,
+                        builtSnow,
                         IF_ACMPEQ, branch("C"),
 
                         // return 68;
