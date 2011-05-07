@@ -27,6 +27,19 @@ class Util {
         return bos.toByteArray();
     }
 
+    public static int demarshal(byte[] data, int offset, int length) {
+        int result = 0;
+        for (int i = 0; i < length; i++) {
+            result <<= 8;
+            result |= data[i + offset] & 0xff;
+        }
+        return result;
+    }
+
+    public static int demarshal(byte[] data) {
+        return demarshal(data, 0, data.length);
+    }
+
     public static void copyStream(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[1024];
         while (true) {

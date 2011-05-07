@@ -200,17 +200,13 @@ class ConstPoolUtils {
         return Util.marshal16(index);
     }
 
-    public static byte[] reference(ConstPool cp, int opcode, Object value, boolean add) {
-        int index = add ? findOrAdd(cp, value) : find(cp, value);
-        if (index < 0) {
-            return NOT_FOUND;
-        }
+    public static void matchOpcodeToRefType(int opcode, Object value) {
         opcode &= 0xff;
         switch (opcode) {
             case LDC:
             case LDC_W:
             case LDC2_W:
-                return getLoad(opcode, index);
+                break;
 
             case GETFIELD:
             case GETSTATIC:
@@ -233,8 +229,6 @@ class ConstPoolUtils {
                 if (!(value instanceof InterfaceMethodRef)) {
                     throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires an InterfaceMethodRef object");
                 }
-                int numArgs = parseDescriptor(((InterfaceMethodRef) value).getType()).size();
-                return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0), (byte) numArgs, 0};
 
             case INSTANCEOF:
             case CHECKCAST:
@@ -243,6 +237,62 @@ class ConstPoolUtils {
             case NEW:
                 if (!(value instanceof ClassRef)) {
                     throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a ClassRef object");
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public static void matchConstPoolTagToRefType(int tag, Object value) {
+        switch (tag) {
+            case ConstPool.CONST_Fieldref:
+                if (!(value instanceof FieldRef)) {
+                    throw new IllegalArgumentException("CONST_Fieldref requires a FieldRef object");
+                }
+                break;
+
+            case ConstPool.CONST_Methodref:
+                if (!(value instanceof MethodRef)) {
+                    throw new IllegalArgumentException("CONST_Methodref requires a MethodRef object");
+                }
+                break;
+
+            case ConstPool.CONST_InterfaceMethodref:
+                if (!(value instanceof InterfaceMethodRef)) {
+                    throw new IllegalArgumentException("CONST_InterfaceMethodref requires an InterfaceMethodRef object");
+                }
+                break;
+
+            case ConstPool.CONST_Class:
+                if (!(value instanceof ClassRef)) {
+                    throw new IllegalArgumentException("CONST_Class requires a ClassRef object");
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public static byte[] reference(ConstPool cp, int opcode, Object value, boolean add) {
+        int index = add ? findOrAdd(cp, value) : find(cp, value);
+        if (index < 0) {
+            return NOT_FOUND;
+        }
+        matchOpcodeToRefType(opcode, value);
+        opcode &= 0xff;
+        switch (opcode) {
+            case LDC:
+            case LDC_W:
+            case LDC2_W:
+                return getLoad(opcode, index);
+
+            case INVOKEINTERFACE:
+                if (value instanceof InterfaceMethodRef) {
+                    int numArgs = parseDescriptor(((InterfaceMethodRef) value).getType()).size();
+                    return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0), (byte) numArgs, 0};
                 }
                 break;
 
