@@ -6,15 +6,15 @@ import java.security.MessageDigest;
 import java.util.zip.ZipFile;
 
 class Util {
-    protected static byte b(int value, int index) {
+    static byte b(int value, int index) {
         return (byte) ((value >> (index * 8)) & 0xFF);
     }
 
-    protected static byte[] marshal16(int value) {
+    static byte[] marshal16(int value) {
         return new byte[]{Util.b(value, 1), Util.b(value, 0)};
     }
 
-    protected static byte[] marshalString(String value) {
+    static byte[] marshalString(String value) {
         byte[] bytes = value.getBytes();
         int len = bytes.length;
         ByteArrayOutputStream bos = new ByteArrayOutputStream(len + 2);
@@ -27,7 +27,7 @@ class Util {
         return bos.toByteArray();
     }
 
-    public static int demarshal(byte[] data, int offset, int length) {
+    static int demarshal(byte[] data, int offset, int length) {
         int result = 0;
         for (int i = 0; i < length; i++) {
             result <<= 8;
@@ -36,11 +36,11 @@ class Util {
         return result;
     }
 
-    public static int demarshal(byte[] data) {
+    static int demarshal(byte[] data) {
         return demarshal(data, 0, data.length);
     }
 
-    public static void copyStream(InputStream input, OutputStream output) throws IOException {
+    static void copyStream(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[1024];
         while (true) {
             int count = input.read(buffer);
@@ -51,7 +51,7 @@ class Util {
         }
     }
 
-    public static void copyFile(File input, File output) throws IOException {
+    static void copyFile(File input, File output) throws IOException {
         FileInputStream is = null;
         FileOutputStream os = null;
         try {
@@ -64,7 +64,7 @@ class Util {
         }
     }
 
-    public static void close(Closeable closeable) {
+    static void close(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
@@ -74,7 +74,7 @@ class Util {
         }
     }
 
-    public static void close(ZipFile zip) {
+    static void close(ZipFile zip) {
         if (zip != null) {
             try {
                 zip.close();
@@ -84,7 +84,7 @@ class Util {
         }
     }
 
-    public static String computeMD5(File file) {
+    static String computeMD5(File file) {
         String md5 = null;
         FileInputStream input = null;
         ByteArrayOutputStream output = null;
@@ -107,7 +107,7 @@ class Util {
         return md5;
     }
 
-    public static void logOSInfo() {
+    static void logOSInfo() {
         Logger.log(Logger.LOG_MAIN, "MCPatcher version is %s", MCPatcher.VERSION_STRING);
         Logger.log(Logger.LOG_MAIN, "OS: %s %s %s",
             System.getProperty("os.name"),
