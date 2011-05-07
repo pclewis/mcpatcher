@@ -229,6 +229,7 @@ class ConstPoolUtils {
                 if (!(value instanceof InterfaceMethodRef)) {
                     throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires an InterfaceMethodRef object");
                 }
+                break;
 
             case INSTANCEOF:
             case CHECKCAST:
