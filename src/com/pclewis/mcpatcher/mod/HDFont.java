@@ -99,7 +99,6 @@ public class HDFont extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo mi) throws IOException {
-                    HDFont mod = (HDFont) getMod();
                     return buildCode(
                         ILOAD, ((HDFont) getMod()).imageWidthRegister,
                         push(mi, 16),
