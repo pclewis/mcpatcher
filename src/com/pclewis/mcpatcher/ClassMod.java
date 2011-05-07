@@ -110,14 +110,18 @@ abstract public class ClassMod implements PatchComponent {
 
     /**
      * Used to quickly rule out candidate class files based on filename alone.  The default implementation
-     * allows only files in the allowedDirs list.
+     * allows only default minecraft classes in the default package or in net.minecraft.client.
      *
      * @param filename full path of .class file within the .jar
      * @return true if a class file should be considered for patching
      */
     protected boolean filterFile(String filename) {
-        String dir = filename.replaceFirst("[^/]+$", "").replaceFirst("/$", "");
-        return mod.allowedDirs.contains(dir);
+        String className = ClassMap.filenameToClassName(filename);
+        if (global) {
+            return !className.startsWith("com.jcraft.") && !className.startsWith("paulscode.");
+        } else {
+            return className.startsWith("net.minecraft.client.") || className.matches("^[a-z]{1,4}$");
+        }
     }
 
     /**

@@ -19,9 +19,6 @@ public class HDFont extends Mod {
         description = "Provides support for higher resolution fonts.";
         version = "1.0";
 
-        allowedDirs.clear();
-        allowedDirs.add("");
-
         classMods.add(new FontRendererMod());
     }
 

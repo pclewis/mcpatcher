@@ -52,25 +52,6 @@ public abstract class Mod {
      * List of files to add to the output minecraft.jar
      */
     protected ArrayList<String> filesToAdd = new ArrayList<String>();
-    /**
-     * List of directories in minecraft.jar to consider for patching (default: all directories in vanilla
-     * minecraft.jar)<p/>
-     * NOTE: Most mods will want to restrict themselves to files in the root of the jar:<br>
-     * allowedDirs.clear();<br>
-     * allowedDirs.add("");
-     */
-    protected ArrayList<String> allowedDirs = new ArrayList<String>() {
-        {
-            add("");
-            add("com/jcraft/jogg");
-            add("com/jcraft/jorbis");
-            add("net/minecraft/client");
-            add("net/minecraft/isom");
-            add("paulscode/sound");
-            add("paulscode/sound/codecs");
-            add("paulscode/sound/libraries");
-        }
-    };
 
     protected boolean defaultEnabled = true;
     protected ClassMap classMap = new ClassMap();

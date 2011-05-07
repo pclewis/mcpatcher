@@ -20,10 +20,6 @@ public class HDTexture extends Mod {
         version = "1.0";
         configPanel = new HDTextureConfig();
 
-        allowedDirs.clear();
-        allowedDirs.add("");
-        allowedDirs.add("net/minecraft/client");
-
         classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
         classMods.add(new CompassMod());
