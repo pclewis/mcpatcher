@@ -18,6 +18,7 @@ public class BetterGrass extends Mod {
         author = "MCPatcher";
         description = "Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.";
         version = "1.0";
+        defaultEnabled = false;
 
         classMods.add(new MaterialMod());
         classMods.add(new BlockMod());

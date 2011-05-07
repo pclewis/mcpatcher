@@ -55,6 +55,7 @@ final public class MCPatcher {
 
     private static boolean ignoreBuiltInMods = false;
     private static boolean ignoreCustomMods = false;
+    private static boolean enableAllMods = false;
     static boolean experimentalMods = false;
 
     private static UserInterface ui;
@@ -72,6 +73,7 @@ final public class MCPatcher {
      * -auto: apply all applicable mods to the default minecraft.jar and exit (no GUI)<br>
      * -ignorebuiltinmods: do not load mods built into mcpatcher<br>
      * -ignorecustommods: do not load mods from the mcpatcher-mods directory<br>
+     * -enableallmods: enable all valid mods instead of selected mods from last time<br>
      * -experimental: load mods considered "experimental"<br>
      *
      * @param args command-line arguments
@@ -100,6 +102,8 @@ final public class MCPatcher {
                 ignoreBuiltInMods = true;
             } else if (args[i].equals("-ignorecustommods")) {
                 ignoreCustomMods = true;
+            } else if (args[i].equals("-enableallmods")) {
+                enableAllMods = true;
             } else if (args[i].equals("-experimental")) {
                 experimentalMods = true;
             }
@@ -183,7 +187,7 @@ final public class MCPatcher {
         resolveModDependencies();
         printModList();
 
-        modList.enableValidMods();
+        modList.enableValidMods(enableAllMods);
     }
 
     private static void mapModClasses(JarFile origJar) throws IOException, InterruptedException {

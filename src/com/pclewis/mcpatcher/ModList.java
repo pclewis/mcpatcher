@@ -107,11 +107,11 @@ class ModList {
         return modsByIndex.size();
     }
 
-    public void enableValidMods() {
+    public void enableValidMods(boolean enableAll) {
         for (int i = modsByIndex.size() - 1; i >= 0; i--) {
             Mod mod = modsByIndex.get(i);
             boolean enabled = mod.okToApply();
-            if (enabled) {
+            if (enabled && ! enableAll) {
                 String name = mod.getConfigName();
                 if (name != null) {
                     enabled = MCPatcherUtils.getBoolean(name, "enabled", mod.defaultEnabled);
