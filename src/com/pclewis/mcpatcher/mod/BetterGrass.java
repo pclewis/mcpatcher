@@ -100,12 +100,8 @@ public class BetterGrass extends Mod {
                 @Override
                 public void afterMatch(ClassFile classFile) {
                     material = matcher.getCaptureGroup(1).clone();
-                    int snow = ((matcher.getCaptureGroup(2)[1] << 8) | matcher.getCaptureGroup(2)[2]) & 0xffff;
-                    int builtSnow = ((matcher.getCaptureGroup(3)[1] << 8) | matcher.getCaptureGroup(3)[2]) & 0xffff;
-                    ConstPool cp = classFile.getConstPool();
-                    classMap.addClassMap("Material", cp.getFieldrefClassName(snow));
-                    classMap.addFieldMap("Material", "snow", cp.getFieldrefName(snow));
-                    classMap.addFieldMap("Material", "builtSnow", cp.getFieldrefName(builtSnow));
+                    mapReference(classFile, matcher.getCaptureGroup(2), new FieldRef("Material", "snow", "LMaterial;"));
+                    mapReference(classFile, matcher.getCaptureGroup(3), new FieldRef("Material", "builtSnow", "LMaterial;"));
                 }
             }.setMethodName("getBlockTexture"));
 
@@ -120,11 +116,7 @@ public class BetterGrass extends Mod {
                 @Override
                 public void afterMatch(ClassFile classFile) {
                     getBlockMaterial = matcher.getCaptureGroup(1).clone();
-                    int index = (getBlockMaterial[1] << 8) | getBlockMaterial[2];
-                    ConstPool cp = classFile.getConstPool();
-                    classMap.addClassMap("IBlockAccess", cp.getInterfaceMethodrefClassName(index));
-                    classMap.addMethodMap("IBlockAccess", "getBlockMaterial", cp.getInterfaceMethodrefName(index));
-                    Logger.log(Logger.LOG_CONST, "getBlockMaterial ref %d", index);
+                    mapReference(classFile, getBlockMaterial, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;"));
                 }
             });
 
