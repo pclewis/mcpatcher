@@ -38,7 +38,6 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.5_01.jar (794 files)
   ul.class matches StillWater.class
   vh.class matches BlockGrass.class
    a matches getBlockTexture
-   getBlockMaterial ref 32
   wf.class matches IBlockAccess.class
    f matches getBlockMaterial
   net/minecraft/client/Minecraft.class matches Minecraft.class
