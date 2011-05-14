@@ -2,10 +2,11 @@ package com.pclewis.mcpatcher;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -13,7 +14,7 @@ public class ZipTreeDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JScrollPane treePane;
+    private JPanel treePanel;
 
     private JTree tree;
 
@@ -26,7 +27,7 @@ public class ZipTreeDialog extends JDialog {
 
         setContentPane(contentPane);
         setTitle("Select folder to add to minecraft.jar");
-        setMinimumSize(new Dimension(256, 256));
+        setMinimumSize(new Dimension(384, 384));
         setResizable(true);
         setModal(true);
         pack();
@@ -68,18 +69,38 @@ public class ZipTreeDialog extends JDialog {
         dispose();
     }
 
-    private void updateTree() {
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode("/");
-        treePane.removeAll();
-        tree = new JTree(node);
-        for (ZipEntry entry : Collections.list(zipFile.entries())) {
-            if (!entry.isDirectory()) {
-                continue;
-            }
-            String name = entry.getName().replaceFirst("/$", "");
-            String baseName = name.replaceAll(".*/", "");
-            Logger.log(Logger.LOG_GUI, "%s", name);
+    private DefaultMutableTreeNode addPath(HashMap<String, DefaultMutableTreeNode> map, String path) {
+        path = ("" + path).replaceFirst("/$", "");
+        DefaultMutableTreeNode node = map.get(path);
+        if (node != null) {
+            return node;
         }
-        treePane.add(tree);
+        if (path.equals("")) {
+            node = new DefaultMutableTreeNode("/");
+        } else {
+            String dir = path.replaceFirst("[^/]+$", "");
+            String baseName = path.replaceFirst(".*/", "");
+            System.out.printf("%s - %s\n", dir, baseName);
+            node = new DefaultMutableTreeNode(baseName);
+            addPath(map, dir).add(node);
+        }
+        map.put(path, node);
+        return node;
+    }
+
+    private void updateTree() {
+        HashMap<String, DefaultMutableTreeNode> map = new HashMap<String, DefaultMutableTreeNode>();
+        tree = new JTree(addPath(map, ""));
+        for (ZipEntry entry : Collections.list(zipFile.entries())) {
+            if (entry.isDirectory()) {
+                addPath(map, entry.getName());
+            }
+        }
+        tree.setRootVisible(true);
+        tree.setExpandsSelectedPaths(true);
+        tree.setSelectionPath(new TreePath("/"));
+        treePanel.removeAll();
+        treePanel.add(tree);
+        treePanel.validate();
     }
 }
