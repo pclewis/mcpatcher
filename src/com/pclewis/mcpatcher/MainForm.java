@@ -572,9 +572,6 @@ class MainForm {
             public void removeTableModelListener(TableModelListener l) {
             }
         });
-        modTable.getColumnModel().getColumn(0).setCellRenderer(new ModCheckBoxRenderer());
-        modTable.getColumnModel().getColumn(1).setCellRenderer(new ModTextRenderer());
-        modTable.doLayout();
         redrawModList();
     }
 
@@ -607,6 +604,9 @@ class MainForm {
     }
 
     public void redrawModList() {
+        modTable.doLayout();
+        modTable.getColumnModel().getColumn(0).setCellRenderer(new ModCheckBoxRenderer());
+        modTable.getColumnModel().getColumn(1).setCellRenderer(new ModTextRenderer());
         TableModel model = modTable.getModel();
         int rows = model.getRowCount();
         int cols = model.getColumnCount();
