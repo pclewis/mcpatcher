@@ -56,6 +56,10 @@ class MainForm {
     private JButton copyPatchResultsButton;
     private JScrollPane modTableScrollPane;
     private JPanel optionsPanel;
+    private JButton upButton;
+    private JButton addButton;
+    private JButton downButton;
+    private JButton removeButton;
 
     private boolean busy = true;
     private Thread workerThread = null;
@@ -386,6 +390,10 @@ class MainForm {
         origBrowseButton.setEnabled(!busy);
         outputBrowseButton.setEnabled(!busy);
         modTable.setEnabled(!busy && origOk && outputSet);
+        upButton.setEnabled(!busy);
+        downButton.setEnabled(!busy);
+        addButton.setEnabled(!busy);
+        removeButton.setEnabled(!busy);
         refreshButton.setEnabled(!busy);
         testButton.setEnabled(!busy && outputOk && MCPatcherUtils.getMinecraftPath().equals(MCPatcherUtils.getDefaultGameDir()));
         patchButton.setEnabled(!busy && origOk && !output.equals(orig));
