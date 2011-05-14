@@ -120,11 +120,11 @@ public class ZipTreeDialog extends JDialog {
         }
 
         public int compareTo(ZipTreeNode node) {
-            return compareTo(node.path);
+            return this.path.compareTo(node.path);
         }
 
-        public int compareTo(String path) {
-            return this.path.compareTo(path);
+        public boolean equals(ZipTreeNode node) {
+            return compareTo(node) == 0;
         }
     }
 

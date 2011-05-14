@@ -6,6 +6,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Vector;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class AddModDialog extends JDialog {
@@ -16,6 +19,7 @@ public class AddModDialog extends JDialog {
     private JButton browseButton;
     private JTextField prefixField;
     private JButton chooseButton;
+    private JList fileList;
 
     private ZipFile zipFile;
     private ZipTreeDialog zipDialog;
@@ -61,19 +65,19 @@ public class AddModDialog extends JDialog {
                 JFileChooser fd = new JFileChooser();
                 fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 fd.setFileHidingEnabled(false);
-                fd.setDialogTitle("Select mod");
+                fd.setDialogTitle("Select mod zip file");
                 fd.setCurrentDirectory(MCPatcherUtils.getMinecraftPath());
                 fd.setAcceptAllFileFilterUsed(false);
                 fd.setFileFilter(new FileFilter() {
                     @Override
                     public boolean accept(File f) {
                         String filename = f.getName().toLowerCase();
-                        return f.isDirectory() || filename.endsWith(".zip") || filename.endsWith(".jar");
+                        return f.isDirectory() || filename.endsWith(".zip");
                     }
 
                     @Override
                     public String getDescription() {
-                        return "*.zip;*.jar";
+                        return "*.zip";
                     }
                 });
                 if (fd.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
@@ -132,6 +136,7 @@ public class AddModDialog extends JDialog {
                 if (newPrefix != null) {
                     prefixField.setText(newPrefix);
                 }
+                updateFileList();
             } catch (IOException e) {
                 inputField.setText("");
                 JOptionPane.showMessageDialog(null,
@@ -153,6 +158,20 @@ public class AddModDialog extends JDialog {
             zipDialog.dispose();
             zipDialog = null;
         }
+    }
+
+    private void updateFileList() {
+        Vector<String> items = new Vector<String>();
+        String prefix = prefixField.getText();
+        for (ZipEntry entry : Collections.list(zipFile.entries())) {
+            String name = entry.getName();
+            if (!entry.isDirectory() && name.startsWith(prefix)) {
+                String suffix = name.substring(prefix.length());
+                items.add(suffix);
+            }
+        }
+        Collections.sort(items);
+        fileList.setListData(items);
     }
 
     Mod getMod() {

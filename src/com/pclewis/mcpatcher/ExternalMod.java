@@ -15,7 +15,7 @@ class ExternalMod extends Mod {
         this.zipFile = zipFile;
         this.prefix = prefix;
 
-        name = new File(zipFile.getName()).getName();
+        name = new File(zipFile.getName()).getName().replaceFirst("\\.[^.]+$", "");
         if (!prefix.equals("")) {
             description = String.format("Copy files from %s folder", prefix);
         }

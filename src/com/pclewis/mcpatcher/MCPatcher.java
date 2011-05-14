@@ -12,6 +12,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 
 /**
  * Main program entry point.
@@ -433,11 +434,11 @@ final public class MCPatcher {
                         throw new IOException(String.format("could not open %s for %s", name, mod.getName()));
                     }
                     Logger.log(Logger.LOG_CLASS, "replacing %s for %s", name, mod.getName());
-                    break;
+                    patched = true;
                 }
             }
 
-            if (!patched && name.endsWith(".class")) {
+            if (name.endsWith(".class")) {
                 ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
                 ClassFile classFile = new ClassFile(new DataInputStream(inputStream));
 
@@ -449,7 +450,9 @@ final public class MCPatcher {
                     }
                 }
 
-                patched = applyPatches(name, classFile, classMods);
+                if (applyPatches(name, classFile, classMods)) {
+                    patched = true;
+                }
                 if (patched) {
                     outputJar.putNextEntry(new ZipEntry(name));
                     classFile.compact();
@@ -497,6 +500,10 @@ final public class MCPatcher {
                 Util.copyStream(inputStream, outputJar);
             }
             outputJar.closeEntry();
+        } catch (ZipException e) {
+            if (!e.toString().contains("duplicate entry")) {
+                throw e;
+            }
         } finally {
             Util.close(inputStream);
         }
