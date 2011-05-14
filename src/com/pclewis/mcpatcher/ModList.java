@@ -17,7 +17,6 @@ import java.util.jar.JarFile;
 
 class ModList {
     private Vector<Mod> modsByIndex = new Vector<Mod>();
-    private Vector<Mod> visibleMods = new Vector<Mod>();
     private HashMap<String, Mod> modsByName = new HashMap<String, Mod>();
     private boolean applied = false;
 
@@ -26,13 +25,13 @@ class ModList {
     public ModList() {
         baseMod = new BaseMod();
         baseMod.internal = true;
-        add(baseMod);
+        addNoReplace(baseMod);
     }
 
     public void loadBuiltInMods() {
-        add(new HDTexture());
-        add(new HDFont());
-        add(new BetterGrass());
+        addNoReplace(new HDTexture());
+        addNoReplace(new HDFont());
+        addNoReplace(new BetterGrass());
     }
 
     public void loadCustomMods(File directory) {
@@ -68,7 +67,7 @@ class ModList {
                     int flags = cl.getModifiers();
                     if (!Modifier.isAbstract(flags) && Modifier.isPublic(flags)) {
                         Mod mod = (Mod) cl.newInstance();
-                        if (add(mod)) {
+                        if (addNoReplace(mod)) {
                             Logger.log(Logger.LOG_MOD, "new %s()", cl.getName());
                         }
                     }
@@ -82,6 +81,12 @@ class ModList {
     }
 
     public Vector<Mod> getVisible() {
+        Vector<Mod> visibleMods = new Vector<Mod>();
+        for (Mod mod : modsByIndex) {
+            if (!mod.internal) {
+                visibleMods.add(mod);
+            }
+        }
         return visibleMods;
     }
 
@@ -129,7 +134,70 @@ class ModList {
         this.applied = applied;
     }
 
-    private boolean add(Mod mod) {
+    public void remove(Mod mod) {
+        String name = mod.getName();
+        for (int i = 0; i < modsByIndex.size(); i++) {
+            if (modsByIndex.get(i) == mod) {
+                modsByIndex.remove(i);
+                modsByName.remove(name);
+            }
+        }
+    }
+
+    public void addFirst(Mod mod) {
+        String name = mod.getName();
+        Mod oldMod = modsByName.get(name);
+        if (oldMod != null) {
+            remove(oldMod);
+        }
+        modsByIndex.add(0, mod);
+        modsByName.put(name, mod);
+    }
+
+    public void addLast(Mod mod) {
+        String name = mod.getName();
+        Mod oldMod = modsByName.get(name);
+        if (oldMod != null) {
+            remove(oldMod);
+        }
+        modsByIndex.add(mod);
+        modsByName.put(name, mod);
+    }
+
+    public int moveUp(int index) {
+        return move(index, -1);
+    }
+
+    public int moveDown(int index) {
+        return move(index, 1);
+    }
+
+    private int move(int index, int offset) {
+        int newIndex = index + offset;
+        Vector<Mod> visibleMods = getVisible();
+        if (index >= 0 && index < visibleMods.size() && newIndex >= 0 && newIndex < visibleMods.size()) {
+            Mod mod1 = visibleMods.get(index);
+            Mod mod2 = visibleMods.get(newIndex);
+            int i = -1;
+            int j = -1;
+            for (int k = 0; k < modsByIndex.size(); k++) {
+                if (mod1 == modsByIndex.get(k)) {
+                    i = k;
+                }
+                if (mod2 == modsByIndex.get(k)) {
+                    j = k;
+                }
+            }
+            if (i > 0 && j > 0) {
+                modsByIndex.set(i, mod2);
+                modsByIndex.set(j, mod1);
+                index = newIndex;
+            }
+        }
+        return index;
+    }
+
+    private boolean addNoReplace(Mod mod) {
         if (mod == null) {
             return false;
         }
@@ -141,9 +209,6 @@ class ModList {
         mod.setRefs();
         modsByName.put(name, mod);
         modsByIndex.add(mod);
-        if (!mod.internal) {
-            visibleMods.add(mod);
-        }
         mod.loadOptions();
         return true;
     }

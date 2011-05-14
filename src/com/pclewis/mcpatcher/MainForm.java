@@ -195,20 +195,47 @@ class MainForm {
             }
         });
 
+        upButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int row = modTable.getSelectedRow();
+                if (row >= 0) {
+                    row = MCPatcher.modList.moveUp(row);
+                    modTable.clearSelection();
+                    modTable.addRowSelectionInterval(row, row);
+                    redrawModList();
+                }
+            }
+        });
+
+        downButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int row = modTable.getSelectedRow();
+                if (row >= 0) {
+                    row = MCPatcher.modList.moveDown(row);
+                    modTable.clearSelection();
+                    modTable.addRowSelectionInterval(row, row);
+                    redrawModList();
+                }
+            }
+        });
+
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Mod mod = null;
                 try {
                     addModDialog = new AddModDialog();
                     addModDialog.setLocationRelativeTo(frame);
                     addModDialog.setVisible(true);
-                    mod = addModDialog.getMod();
+                    Mod mod = addModDialog.getMod();
                     if (mod != null) {
+                        MCPatcher.modList.addFirst(mod);
+                        System.out.printf("added mod %s\n", mod.getName());
+                        redrawModList();
                     }
                 } catch (Exception e1) {
                     Logger.log(e1);
                 } finally {
                     hideDialog();
+                    updateControls();
                 }
             }
 

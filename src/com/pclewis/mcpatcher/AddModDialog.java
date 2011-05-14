@@ -17,6 +17,7 @@ public class AddModDialog extends JDialog {
     private JTextField prefixField;
     private JButton chooseButton;
 
+    private ZipFile zipFile;
     private ZipTreeDialog zipDialog;
     private Mod mod;
     private boolean busy;
@@ -98,6 +99,7 @@ public class AddModDialog extends JDialog {
     }
 
     private void onOK() {
+        mod = new ExternalMod(zipFile, prefixField.getText());
         dispose();
     }
 
@@ -122,7 +124,7 @@ public class AddModDialog extends JDialog {
         File inputFile = new File(inputField.getText());
         if (inputFile.exists()) {
             try {
-                ZipFile zipFile = new ZipFile(inputFile);
+                zipFile = new ZipFile(inputFile);
                 zipDialog = new ZipTreeDialog(zipFile, prefixField.getText());
                 zipDialog.setLocationRelativeTo(this);
                 zipDialog.setVisible(true);
