@@ -426,7 +426,7 @@ final public class MCPatcher {
             InputStream inputStream = origJar.getInputStream(entry);
 
             for (Mod mod : modList.getSelected()) {
-                if (mod.filesToReplace.contains(name)) {
+                if (mod.filesToAdd.contains(name)) {
                     if (addOrReplaceFile("replacing", mod, name, outputJar)) {
                         patched = true;
                         break;
@@ -468,7 +468,9 @@ final public class MCPatcher {
 
         for (Mod mod : modList.getSelected()) {
             for (String name : mod.filesToAdd) {
-                addOrReplaceFile("adding", mod, name, outputJar);
+                if (origJar.getEntry(name) == null) {
+                    addOrReplaceFile("adding", mod, name, outputJar);
+                }
             }
         }
     }

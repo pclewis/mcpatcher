@@ -25,7 +25,7 @@ class ExternalMod extends Mod {
             String name = entry.getName();
             if (name.startsWith(prefix)) {
                 String suffix = name.substring(prefix.length());
-                filesToReplace.add(suffix);
+                filesToAdd.add(suffix);
             }
         }
     }

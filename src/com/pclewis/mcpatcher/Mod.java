@@ -45,11 +45,7 @@ public abstract class Mod {
      */
     protected ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
     /**
-     * List of files to replace completely in the output minecraft.jar (rather than patching them)
-     */
-    protected ArrayList<String> filesToReplace = new ArrayList<String>();
-    /**
-     * List of files to add to the output minecraft.jar
+     * List of files to add or replace in the output minecraft.jar
      */
     protected ArrayList<String> filesToAdd = new ArrayList<String>();
 
