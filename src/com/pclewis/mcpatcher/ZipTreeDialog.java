@@ -1,10 +1,13 @@
 package com.pclewis.mcpatcher;
 
 import javax.swing.*;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
@@ -15,13 +18,12 @@ public class ZipTreeDialog extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JPanel treePanel;
-
     private JTree tree;
 
     private ZipFile zipFile;
     private String prefix;
 
-    public ZipTreeDialog(ZipFile zipFile, String prefix) {
+    public ZipTreeDialog(final ZipFile zipFile, String prefix) {
         this.zipFile = zipFile;
         this.prefix = prefix;
 
@@ -58,7 +60,72 @@ public class ZipTreeDialog extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        updateTree();
+        tree.setModel(new TreeModel() {
+            public Object getRoot() {
+                return new MyTreeNode("/", "");
+            }
+
+            public Object getChild(Object parent, int index) {
+                return getChildren(parent).get(index);
+            }
+
+            public int getChildCount(Object parent) {
+                return getChildren(parent).size();
+            }
+
+            public boolean isLeaf(Object node) {
+                return false;
+            }
+
+            public void valueForPathChanged(TreePath path, Object newValue) {
+            }
+
+            public int getIndexOfChild(Object parent, Object child) {
+                return getChildren(parent).indexOf((MyTreeNode) child);
+            }
+
+            public void addTreeModelListener(TreeModelListener l) {
+            }
+
+            public void removeTreeModelListener(TreeModelListener l) {
+            }
+
+            private ArrayList<MyTreeNode> getChildren(Object object) {
+                String parent = ((MyTreeNode) object).path;
+                ArrayList<MyTreeNode> list = new ArrayList<MyTreeNode>();
+                for (ZipEntry entry : Collections.list(zipFile.entries())) {
+                    String name = entry.getName();
+                    if (entry.isDirectory() && name.startsWith(parent)) {
+                        String suffix = name.substring(parent.length()).replaceFirst("/$", "");
+                        if (!suffix.equals("") && !suffix.contains("/")) {
+                            list.add(new MyTreeNode(suffix, name));
+                        }
+                    }
+                }
+                return list;
+            }
+
+            class MyTreeNode {
+                String label;
+                String path;
+
+                MyTreeNode(String label, String path) {
+                    this.label = label;
+                    this.path = path;
+                }
+
+                public String toString() {
+                    return label;
+                }
+
+                public int compareTo(MyTreeNode node) {
+                    return path.compareTo(node.path);
+                }
+            }
+        });
+        tree.setRootVisible(true);
+        tree.setExpandsSelectedPaths(true);
+        tree.setSelectionPath(new TreePath("/"));
     }
 
     private void onOK() {
@@ -67,40 +134,5 @@ public class ZipTreeDialog extends JDialog {
 
     private void onCancel() {
         dispose();
-    }
-
-    private DefaultMutableTreeNode addPath(HashMap<String, DefaultMutableTreeNode> map, String path) {
-        path = ("" + path).replaceFirst("/$", "");
-        DefaultMutableTreeNode node = map.get(path);
-        if (node != null) {
-            return node;
-        }
-        if (path.equals("")) {
-            node = new DefaultMutableTreeNode("/");
-        } else {
-            String dir = path.replaceFirst("[^/]+$", "");
-            String baseName = path.replaceFirst(".*/", "");
-            System.out.printf("%s - %s\n", dir, baseName);
-            node = new DefaultMutableTreeNode(baseName);
-            addPath(map, dir).add(node);
-        }
-        map.put(path, node);
-        return node;
-    }
-
-    private void updateTree() {
-        HashMap<String, DefaultMutableTreeNode> map = new HashMap<String, DefaultMutableTreeNode>();
-        tree = new JTree(addPath(map, ""));
-        for (ZipEntry entry : Collections.list(zipFile.entries())) {
-            if (entry.isDirectory()) {
-                addPath(map, entry.getName());
-            }
-        }
-        tree.setRootVisible(true);
-        tree.setExpandsSelectedPaths(true);
-        tree.setSelectionPath(new TreePath("/"));
-        treePanel.removeAll();
-        treePanel.add(tree);
-        treePanel.validate();
     }
 }
