@@ -322,9 +322,11 @@ final public class MCPatcher {
             out.println();
         } else {
             for (Mod mod : modList.getVisible()) {
-                out.printf("%s\n", mod.getName());
-                mod.getClassMap().print(out, "    ");
-                out.println();
+                if (!mod.getClassMap().getClassMap().isEmpty()) {
+                    out.printf("%s\n", mod.getName());
+                    mod.getClassMap().print(out, "    ");
+                    out.println();
+                }
             }
         }
     }
@@ -426,6 +428,7 @@ final public class MCPatcher {
 
             InputStream inputStream = origJar.getInputStream(entry);
 
+            Mod fromMod = null;
             for (Mod mod : modList.getSelected()) {
                 if (mod.filesToAdd.contains(name)) {
                     Util.close(inputStream);
@@ -434,25 +437,29 @@ final public class MCPatcher {
                         throw new IOException(String.format("could not open %s for %s", name, mod.getName()));
                     }
                     Logger.log(Logger.LOG_CLASS, "replacing %s for %s", name, mod.getName());
-                    patched = true;
+                    fromMod = mod;
                 }
             }
 
             if (name.endsWith(".class")) {
                 ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
                 ClassFile classFile = new ClassFile(new DataInputStream(inputStream));
+                String className = ClassMap.filenameToClassName(name);
 
                 for (Mod mod : modList.getSelected()) {
+                    int i = modList.indexOf(fromMod);
+                    int j = modList.indexOf(mod);
+                    if (j > 0 && i > j) {
+                        continue;
+                    }
                     for (ClassMod classMod : mod.getClassMods()) {
-                        if (classMod.targetClasses.contains(ClassMap.filenameToClassName(name))) {
+                        if (classMod.targetClasses.contains(className)) {
                             classMods.add(classMod);
                         }
                     }
                 }
 
-                if (applyPatches(name, classFile, classMods)) {
-                    patched = true;
-                }
+                patched = applyPatches(name, classFile, classMods);
                 if (patched) {
                     outputJar.putNextEntry(new ZipEntry(name));
                     classFile.compact();
@@ -464,7 +471,11 @@ final public class MCPatcher {
             if (!patched) {
                 outputJar.putNextEntry(new ZipEntry(name));
                 Util.close(inputStream);
-                inputStream = origJar.getInputStream(entry);
+                if (fromMod == null) {
+                    inputStream = origJar.getInputStream(entry);
+                } else {
+                    inputStream = fromMod.openFile(name);
+                }
                 Util.copyStream(inputStream, outputJar);
                 outputJar.closeEntry();
             }

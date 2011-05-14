@@ -151,7 +151,8 @@ class ModList {
             remove(oldMod);
         }
         for (int i = 0; i < modsByIndex.size(); i++) {
-            if (!modsByIndex.get(i).internal) {
+            oldMod = modsByIndex.get(i);
+            if (!oldMod.internal && !(oldMod instanceof ExternalMod)) {
                 modsByIndex.add(i, mod);
                 break;
             }
@@ -218,6 +219,15 @@ class ModList {
         modsByIndex.add(mod);
         mod.loadOptions();
         return true;
+    }
+
+    public int indexOf(Mod mod) {
+        for (int i = 0; i < modsByIndex.size(); i++) {
+            if (mod == modsByIndex.get(i)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private class ModDependencyException extends Exception {
