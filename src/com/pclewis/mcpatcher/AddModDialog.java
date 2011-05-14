@@ -18,7 +18,7 @@ public class AddModDialog extends JDialog {
     private JButton chooseButton;
 
     private ZipTreeDialog zipDialog;
-
+    private Mod mod;
     private boolean busy;
 
     public AddModDialog() {
@@ -93,6 +93,7 @@ public class AddModDialog extends JDialog {
     }
 
     public void dispose() {
+        hideZipDialog();
         super.dispose();
     }
 
@@ -101,6 +102,7 @@ public class AddModDialog extends JDialog {
     }
 
     private void onCancel() {
+        mod = null;
         dispose();
     }
 
@@ -116,9 +118,7 @@ public class AddModDialog extends JDialog {
     }
 
     private void showZipDialog() {
-        if (zipDialog != null) {
-            zipDialog.dispose();
-        }
+        hideZipDialog();
         File inputFile = new File(inputField.getText());
         if (inputFile.exists()) {
             try {
@@ -126,11 +126,34 @@ public class AddModDialog extends JDialog {
                 zipDialog = new ZipTreeDialog(zipFile, prefixField.getText());
                 zipDialog.setLocationRelativeTo(this);
                 zipDialog.setVisible(true);
+                String newPrefix = zipDialog.getPrefix();
+                if (newPrefix != null) {
+                    prefixField.setText(newPrefix);
+                }
             } catch (IOException e) {
+                inputField.setText("");
+                JOptionPane.showMessageDialog(null,
+                    "There was an error reading\n" +
+                        inputFile.getPath() + "\n" +
+                        "The file may be corrupt.",
+                    "Error reading zip file", JOptionPane.ERROR_MESSAGE
+                );
                 Logger.log(e);
-                return;
+            } finally {
+                hideZipDialog();
             }
         }
         updateControls();
+    }
+
+    private void hideZipDialog() {
+        if (zipDialog != null) {
+            zipDialog.dispose();
+            zipDialog = null;
+        }
+    }
+
+    Mod getMod() {
+        return mod;
     }
 }

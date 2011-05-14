@@ -2,14 +2,12 @@ package com.pclewis.mcpatcher;
 
 import javax.swing.*;
 import javax.swing.event.TreeModelListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -17,14 +15,11 @@ public class ZipTreeDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JPanel treePanel;
     private JTree tree;
 
-    private ZipFile zipFile;
     private String prefix;
 
     public ZipTreeDialog(final ZipFile zipFile, String prefix) {
-        this.zipFile = zipFile;
         this.prefix = prefix;
 
         setContentPane(contentPane);
@@ -62,7 +57,7 @@ public class ZipTreeDialog extends JDialog {
 
         tree.setModel(new TreeModel() {
             public Object getRoot() {
-                return new MyTreeNode("/", "");
+                return new ZipTreeNode("/", "");
             }
 
             public Object getChild(Object parent, int index) {
@@ -81,7 +76,7 @@ public class ZipTreeDialog extends JDialog {
             }
 
             public int getIndexOfChild(Object parent, Object child) {
-                return getChildren(parent).indexOf((MyTreeNode) child);
+                return getChildren(parent).indexOf((ZipTreeNode) child);
             }
 
             public void addTreeModelListener(TreeModelListener l) {
@@ -90,49 +85,58 @@ public class ZipTreeDialog extends JDialog {
             public void removeTreeModelListener(TreeModelListener l) {
             }
 
-            private ArrayList<MyTreeNode> getChildren(Object object) {
-                String parent = ((MyTreeNode) object).path;
-                ArrayList<MyTreeNode> list = new ArrayList<MyTreeNode>();
+            private ArrayList<ZipTreeNode> getChildren(Object object) {
+                String parent = ((ZipTreeNode) object).path;
+                ArrayList<ZipTreeNode> list = new ArrayList<ZipTreeNode>();
                 for (ZipEntry entry : Collections.list(zipFile.entries())) {
                     String name = entry.getName();
                     if (entry.isDirectory() && name.startsWith(parent)) {
                         String suffix = name.substring(parent.length()).replaceFirst("/$", "");
                         if (!suffix.equals("") && !suffix.contains("/")) {
-                            list.add(new MyTreeNode(suffix, name));
+                            list.add(new ZipTreeNode(suffix, name));
                         }
                     }
                 }
                 return list;
             }
-
-            class MyTreeNode {
-                String label;
-                String path;
-
-                MyTreeNode(String label, String path) {
-                    this.label = label;
-                    this.path = path;
-                }
-
-                public String toString() {
-                    return label;
-                }
-
-                public int compareTo(MyTreeNode node) {
-                    return path.compareTo(node.path);
-                }
-            }
         });
-        tree.setRootVisible(true);
-        tree.setExpandsSelectedPaths(true);
-        tree.setSelectionPath(new TreePath("/"));
+        tree.setSelectionPath(new TreePath("/" + prefix));
+    }
+
+    static class ZipTreeNode {
+        String label;
+        String path;
+
+        ZipTreeNode(String label, String path) {
+            this.label = label;
+            this.path = path;
+        }
+
+        public String toString() {
+            return label;
+        }
+
+        public int compareTo(ZipTreeNode node) {
+            return compareTo(node.path);
+        }
+
+        public int compareTo(String path) {
+            return this.path.compareTo(path);
+        }
     }
 
     private void onOK() {
+        TreePath path = tree.getSelectionPath();
+        prefix = ((ZipTreeNode) path.getLastPathComponent()).path;
         dispose();
     }
 
     private void onCancel() {
+        prefix = null;
         dispose();
+    }
+
+    String getPrefix() {
+        return prefix;
     }
 }

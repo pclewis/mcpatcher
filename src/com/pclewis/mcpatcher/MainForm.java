@@ -197,36 +197,27 @@ class MainForm {
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                Mod mod = null;
+                try {
+                    addModDialog = new AddModDialog();
+                    addModDialog.setLocationRelativeTo(frame);
+                    addModDialog.setVisible(true);
+                    mod = addModDialog.getMod();
+                    if (mod != null) {
+                    }
+                } catch (Exception e1) {
+                    Logger.log(e1);
+                } finally {
+                    hideDialog();
+                }
+            }
+
+            private void hideDialog() {
                 if (addModDialog != null) {
                     addModDialog.setVisible(false);
                     addModDialog.dispose();
+                    addModDialog = null;
                 }
-                addModDialog = new AddModDialog();
-                addModDialog.setLocationRelativeTo(frame);
-                addModDialog.addWindowListener(new WindowListener() {
-                    public void windowOpened(WindowEvent e) {
-                    }
-
-                    public void windowClosing(WindowEvent e) {
-                        updateControls();
-                    }
-
-                    public void windowClosed(WindowEvent e) {
-                    }
-
-                    public void windowIconified(WindowEvent e) {
-                    }
-
-                    public void windowDeiconified(WindowEvent e) {
-                    }
-
-                    public void windowActivated(WindowEvent e) {
-                    }
-
-                    public void windowDeactivated(WindowEvent e) {
-                    }
-                });
-                addModDialog.setVisible(true);
             }
         });
 
