@@ -61,6 +61,8 @@ class MainForm {
     private JButton downButton;
     private JButton removeButton;
 
+    private AddModDialog addModDialog;
+
     private boolean busy = true;
     private Thread workerThread = null;
 
@@ -190,6 +192,41 @@ class MainForm {
                     }
                 }
                 super.mouseClicked(e);
+            }
+        });
+
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (addModDialog != null) {
+                    addModDialog.setVisible(false);
+                    addModDialog.dispose();
+                }
+                addModDialog = new AddModDialog();
+                addModDialog.setLocationRelativeTo(frame);
+                addModDialog.addWindowListener(new WindowListener() {
+                    public void windowOpened(WindowEvent e) {
+                    }
+
+                    public void windowClosing(WindowEvent e) {
+                        updateControls();
+                    }
+
+                    public void windowClosed(WindowEvent e) {
+                    }
+
+                    public void windowIconified(WindowEvent e) {
+                    }
+
+                    public void windowDeiconified(WindowEvent e) {
+                    }
+
+                    public void windowActivated(WindowEvent e) {
+                    }
+
+                    public void windowDeactivated(WindowEvent e) {
+                    }
+                });
+                addModDialog.setVisible(true);
             }
         });
 
