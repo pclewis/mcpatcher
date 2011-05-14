@@ -376,6 +376,8 @@ class MainForm {
             origField.setText(MCPatcher.minecraft.getInputFile().getPath());
             outputField.setText(MCPatcher.minecraft.getOutputFile().getPath());
         }
+        origField.setToolTipText(origField.getText());
+        outputField.setToolTipText(outputField.getText());
         boolean outputSet = !outputField.getText().equals("");
         File orig = new File(origField.getText());
         File output = new File(outputField.getText());
