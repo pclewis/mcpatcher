@@ -1,11 +1,14 @@
 package com.pclewis.mcpatcher;
 
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
@@ -14,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Vector;
 
 class MainForm {
     private static final int TAB_MODS = 0;
@@ -201,8 +205,8 @@ class MainForm {
                 if (row >= 0) {
                     row = MCPatcher.modList.moveUp(row);
                     modTable.clearSelection();
-                    modTable.addRowSelectionInterval(row, row);
                     redrawModList();
+                    modTable.addRowSelectionInterval(row, row);
                 }
             }
         });
@@ -213,8 +217,8 @@ class MainForm {
                 if (row >= 0) {
                     row = MCPatcher.modList.moveDown(row);
                     modTable.clearSelection();
-                    modTable.addRowSelectionInterval(row, row);
                     redrawModList();
+                    modTable.addRowSelectionInterval(row, row);
                 }
             }
         });
@@ -228,7 +232,8 @@ class MainForm {
                     Mod mod = addModDialog.getMod();
                     if (mod != null) {
                         MCPatcher.modList.addFirst(mod);
-                        System.out.printf("added mod %s\n", mod.getName());
+                        mod.setEnabled(true);
+                        modTable.clearSelection();
                         redrawModList();
                     }
                 } catch (Exception e1) {
@@ -244,6 +249,18 @@ class MainForm {
                     addModDialog.setVisible(false);
                     addModDialog.dispose();
                     addModDialog = null;
+                }
+            }
+        });
+
+        removeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int row = modTable.getSelectedRow();
+                Mod mod = (Mod) modTable.getModel().getValueAt(row, 0);
+                if (mod instanceof ExternalMod) {
+                    MCPatcher.modList.remove(mod);
+                    modTable.clearSelection();
+                    redrawModList();
                 }
             }
         });
@@ -538,7 +555,7 @@ class MainForm {
     }
 
     public void setModList(final ModList modList) {
-        modTable.setModel(new TableModel() {
+        modTable.setModel(new DefaultTableModel() {
             public int getRowCount() {
                 return modList == null ? 0 : modList.getVisible().size();
             }
@@ -560,16 +577,15 @@ class MainForm {
             }
 
             public Object getValueAt(int rowIndex, int columnIndex) {
-                return (modList != null && rowIndex >= 0 && rowIndex < modList.getVisible().size()) ? modList.getVisible().get(rowIndex) : null;
+                if (modList == null || rowIndex < 0) {
+                    return null;
+                } else {
+                    Vector<Mod> visible = modList.getVisible();
+                    return rowIndex < visible.size() ? visible.get(rowIndex) : null;
+                }
             }
 
             public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            }
-
-            public void addTableModelListener(TableModelListener l) {
-            }
-
-            public void removeTableModelListener(TableModelListener l) {
             }
         });
         redrawModList();
@@ -604,17 +620,11 @@ class MainForm {
     }
 
     public void redrawModList() {
-        modTable.doLayout();
         modTable.getColumnModel().getColumn(0).setCellRenderer(new ModCheckBoxRenderer());
         modTable.getColumnModel().getColumn(1).setCellRenderer(new ModTextRenderer());
-        TableModel model = modTable.getModel();
-        int rows = model.getRowCount();
-        int cols = model.getColumnCount();
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                model.setValueAt(null, i, j);
-            }
-        }
+        AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+        model.fireTableDataChanged();
+        modTable.doLayout();
     }
 
     private class ModCheckBoxRenderer extends JCheckBox implements TableCellRenderer {

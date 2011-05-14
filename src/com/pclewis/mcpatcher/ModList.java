@@ -150,8 +150,14 @@ class ModList {
         if (oldMod != null) {
             remove(oldMod);
         }
-        modsByIndex.add(0, mod);
+        for (int i = 0; i < modsByIndex.size(); i++) {
+            if (!modsByIndex.get(i).internal) {
+                modsByIndex.add(i, mod);
+                break;
+            }
+        }
         modsByName.put(name, mod);
+        mod.setRefs();
     }
 
     public void addLast(Mod mod) {
@@ -162,6 +168,7 @@ class ModList {
         }
         modsByIndex.add(mod);
         modsByName.put(name, mod);
+        mod.setRefs();
     }
 
     public int moveUp(int index) {
