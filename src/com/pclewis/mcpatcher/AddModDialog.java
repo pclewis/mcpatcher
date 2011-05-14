@@ -5,6 +5,8 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import java.util.zip.ZipFile;
 
 public class AddModDialog extends JDialog {
     private JPanel contentPane;
@@ -14,6 +16,8 @@ public class AddModDialog extends JDialog {
     private JButton browseButton;
     private JTextField prefixField;
     private JButton chooseButton;
+
+    private ZipTreeDialog zipDialog;
 
     private boolean busy;
 
@@ -72,6 +76,8 @@ public class AddModDialog extends JDialog {
                     }
                 });
                 if (fd.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
+                    inputField.setText(fd.getSelectedFile().getPath());
+                    showZipDialog();
                 }
                 updateControls();
             }
@@ -79,10 +85,15 @@ public class AddModDialog extends JDialog {
 
         chooseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                showZipDialog();
             }
         });
 
         setBusy(false);
+    }
+
+    public void dispose() {
+        super.dispose();
     }
 
     private void onOK() {
@@ -102,5 +113,24 @@ public class AddModDialog extends JDialog {
         File file = new File(inputField.getText());
         browseButton.setEnabled(!busy);
         chooseButton.setEnabled(!busy && file.exists());
+    }
+
+    private void showZipDialog() {
+        if (zipDialog != null) {
+            zipDialog.dispose();
+        }
+        File inputFile = new File(inputField.getText());
+        if (inputFile.exists()) {
+            try {
+                ZipFile zipFile = new ZipFile(inputFile);
+                zipDialog = new ZipTreeDialog(zipFile, prefixField.getText());
+                zipDialog.setLocationRelativeTo(this);
+                zipDialog.setVisible(true);
+            } catch (IOException e) {
+                Logger.log(e);
+                return;
+            }
+        }
+        updateControls();
     }
 }
