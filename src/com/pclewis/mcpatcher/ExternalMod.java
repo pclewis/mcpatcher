@@ -16,14 +16,13 @@ class ExternalMod extends Mod {
         this.prefix = prefix;
 
         name = new File(zipFile.getName()).getName();
-        description = String.format("Copy files from %s", prefix);
+        if (!prefix.equals("")) {
+            description = String.format("Copy files from %s folder", prefix);
+        }
 
         for (ZipEntry entry : Collections.list(zipFile.entries())) {
-            if (entry.isDirectory()) {
-                continue;
-            }
             String name = entry.getName();
-            if (name.startsWith(prefix)) {
+            if (!entry.isDirectory() && name.startsWith(prefix)) {
                 String suffix = name.substring(prefix.length());
                 filesToAdd.add(suffix);
             }
@@ -33,7 +32,6 @@ class ExternalMod extends Mod {
     @Override
     public InputStream openFile(String filename) throws IOException {
         String path = prefix + filename.replaceFirst("^/", "");
-        Logger.log(Logger.LOG_CLASS, "opening %s (%s + %s)", path, prefix, filename);
         return zipFile.getInputStream(new ZipEntry(path));
     }
 }

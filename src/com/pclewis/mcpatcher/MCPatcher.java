@@ -427,10 +427,13 @@ final public class MCPatcher {
 
             for (Mod mod : modList.getSelected()) {
                 if (mod.filesToAdd.contains(name)) {
-                    if (addOrReplaceFile("replacing", mod, name, outputJar)) {
-                        patched = true;
-                        break;
+                    Util.close(inputStream);
+                    inputStream = mod.openFile(name);
+                    if (inputStream == null) {
+                        throw new IOException(String.format("could not open %s for %s", name, mod.getName()));
                     }
+                    Logger.log(Logger.LOG_CLASS, "replacing %s for %s", name, mod.getName());
+                    break;
                 }
             }
 
