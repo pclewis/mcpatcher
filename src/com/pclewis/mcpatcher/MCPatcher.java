@@ -51,6 +51,7 @@ final public class MCPatcher {
     static MinecraftJar minecraft = null;
     static ModList modList;
 
+    private static boolean ignoreSavedMods = false;
     private static boolean ignoreBuiltInMods = false;
     private static boolean ignoreCustomMods = false;
     private static boolean enableAllMods = false;
@@ -69,6 +70,7 @@ final public class MCPatcher {
      * -loglevel n: set log level to n (0-7)<br>
      * -mcdir path: specify path to minecraft<br>
      * -auto: apply all applicable mods to the default minecraft.jar and exit (no GUI)<br>
+     * -ignoresavedmods: do not load mods from mcpatcher.xml<br>
      * -ignorebuiltinmods: do not load mods built into mcpatcher<br>
      * -ignorecustommods: do not load mods from the mcpatcher-mods directory<br>
      * -enableallmods: enable all valid mods instead of selected mods from last time<br>
@@ -96,6 +98,8 @@ final public class MCPatcher {
                 enteredMCDir = args[i];
             } else if (args[i].equals("-auto")) {
                 guiEnabled = false;
+            } else if (args[i].equals("-ignoresavedmods")) {
+                ignoreSavedMods = true;
             } else if (args[i].equals("-ignorebuiltinmods")) {
                 ignoreBuiltInMods = true;
             } else if (args[i].equals("-ignorecustommods")) {
@@ -144,7 +148,7 @@ final public class MCPatcher {
     }
 
     static void saveProperties() {
-        if (modList != null) {
+        if (!ignoreSavedMods && modList != null) {
             modList.updateProperties();
         }
         MCPatcherUtils.saveProperties();
@@ -175,7 +179,9 @@ final public class MCPatcher {
 
     static void getAllMods() {
         modList = new ModList();
-        modList.loadSavedMods();
+        if (!ignoreSavedMods) {
+            modList.loadSavedMods();
+        }
         if (!ignoreBuiltInMods) {
             modList.loadBuiltInMods();
         }
