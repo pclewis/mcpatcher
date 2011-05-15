@@ -426,19 +426,22 @@ final public class MCPatcher {
                 continue;
             }
 
-            InputStream inputStream = origJar.getInputStream(entry);
-
             Mod fromMod = null;
             for (Mod mod : modList.getSelected()) {
                 if (mod.filesToAdd.contains(name)) {
-                    Util.close(inputStream);
-                    inputStream = mod.openFile(name);
-                    if (inputStream == null) {
-                        throw new IOException(String.format("could not open %s for %s", name, mod.getName()));
-                    }
-                    Logger.log(Logger.LOG_CLASS, "replacing %s for %s", name, mod.getName());
                     fromMod = mod;
                 }
+            }
+
+            InputStream inputStream;
+            if (fromMod == null) {
+                inputStream = origJar.getInputStream(entry);
+            } else {
+                inputStream = fromMod.openFile(name);
+                if (inputStream == null) {
+                    throw new IOException(String.format("could not open %s for %s", name, fromMod.getName()));
+                }
+                Logger.log(Logger.LOG_MOD, "replacing %s for %s", name, fromMod.getName());
             }
 
             if (name.endsWith(".class")) {
