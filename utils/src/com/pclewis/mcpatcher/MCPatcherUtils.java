@@ -51,12 +51,12 @@ public class MCPatcherUtils {
      *     </mods>
      * </mcpatcher-profile>
      */
-    static final String TAG_ROOT = "mcpatcher-profile";
+    static final String TAG_ROOT = "mcpatcherProfile";
     static final String TAG_CONFIG1 = "config";
     public static final String TAG_DEBUG = "debug";
-    public static final String TAG_JAVA_HEAP_SIZE = "java-heap-size";
-    static final String TAG_LAST_VERSION = "last-version";
-    static final String TAG_BETA_WARNING_SHOWN = "beta-warning-shown";
+    public static final String TAG_JAVA_HEAP_SIZE = "javaHeapSize";
+    static final String TAG_LAST_VERSION = "lastVersion";
+    static final String TAG_BETA_WARNING_SHOWN = "betaWarningShown";
     static final String TAG_MODS = "mods";
     static final String TAG_MOD = "mod";
     static final String TAG_NAME = "name";
@@ -67,9 +67,9 @@ public class MCPatcherUtils {
     static final String TAG_ENABLED = "enabled";
     static final String TAG_CONFIG = "config";
     static final String ATTR_VERSION = "version";
-    static final String VAL_BUILTIN = "built-in";
-    static final String VAL_EXTERNAL_ZIP = "external-zip";
-    static final String VAL_EXTERNAL_JAR = "external-jar";
+    static final String VAL_BUILTIN = "builtIn";
+    static final String VAL_EXTERNAL_ZIP = "externalZip";
+    static final String VAL_EXTERNAL_JAR = "externalJar";
 
     private MCPatcherUtils() {
     }
@@ -132,6 +132,7 @@ public class MCPatcherUtils {
                 } else {
                     xml = builder.newDocument();
                     buildNewProperties();
+                    saveProperties();
                 }
             } catch (Exception e) {
                 xml = null;
@@ -158,8 +159,7 @@ public class MCPatcherUtils {
                 }
             }
 
-            debug = getBoolean("debug", false);
-            saveProperties();
+            debug = getBoolean(TAG_DEBUG, false);
             return true;
         }
         return false;
@@ -171,14 +171,8 @@ public class MCPatcherUtils {
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             String tag = entry.getKey().toString();
             String value = entry.getValue().toString();
-            if (tag.equals("debug")) {
-                set(TAG_DEBUG, value);
-            } else if (tag.equals("lastVersion")) {
-                set(TAG_LAST_VERSION, value);
-            } else if (tag.equals("betaWarningShown")) {
-                set(TAG_BETA_WARNING_SHOWN, value);
-            } else if (tag.equals("heapSize")) {
-                set(TAG_JAVA_HEAP_SIZE, value);
+            if (tag.equals(TAG_DEBUG) || tag.equals(TAG_LAST_VERSION) || tag.equals(TAG_BETA_WARNING_SHOWN) || tag.equals(TAG_JAVA_HEAP_SIZE)) {
+                set(tag, value);
             } else if (tag.startsWith("HDTexture.")) {
                 tag = tag.substring(10);
                 if (!tag.equals("enabled")) {
@@ -323,9 +317,13 @@ public class MCPatcherUtils {
         Element element = xml.createElement(TAG_MOD);
         parent.appendChild(element);
         Element element1 = xml.createElement(TAG_NAME);
-        element.appendChild(element1);
         Text text = xml.createTextNode(mod);
         element1.appendChild(text);
+        element.appendChild(element1);
+        element1 = xml.createElement(TAG_ENABLED);
+        element.appendChild(element1);
+        element1 = xml.createElement(TAG_TYPE);
+        element.appendChild(element1);
         return element;
     }
 
@@ -360,6 +358,9 @@ public class MCPatcherUtils {
             getRoot();
             getConfig();
             getMods();
+            setText(getMod("HD Textures"), TAG_ENABLED, "true");
+            setText(getMod("HD Font"), TAG_ENABLED, "true");
+            setText(getMod("Better Grass"), TAG_ENABLED, "true");
         }
     }
 
