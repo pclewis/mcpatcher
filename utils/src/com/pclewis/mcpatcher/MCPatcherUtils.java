@@ -228,6 +228,18 @@ public class MCPatcherUtils {
         return null;
     }
 
+    static void setText(Element parent, String tag, String value) {
+        if (parent == null) {
+            return;
+        }
+        Element element = getElement(parent, tag);
+        while (element.hasChildNodes()) {
+            element.removeChild(element.getFirstChild());
+        }
+        Text text = xml.createTextNode(value);
+        element.appendChild(text);
+    }
+
     static void remove(Node node) {
         if (node != null) {
             Node parent = node.getParentNode();
@@ -274,6 +286,24 @@ public class MCPatcherUtils {
         return getElement(getRoot(), TAG_MODS);
     }
 
+    static boolean hasMod(String mod) {
+        Element parent = getMods();
+        if (parent != null) {
+            NodeList list = parent.getElementsByTagName(TAG_MOD);
+            for (int i = 0; i < list.getLength(); i++) {
+                Element element = (Element) list.item(i);
+                NodeList list1 = element.getElementsByTagName(TAG_NAME);
+                if (list1.getLength() > 0) {
+                    element = (Element) list1.item(0);
+                    if (mod.equals(getText(element))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     static Element getMod(String mod) {
         Element parent = getMods();
         if (parent == null) {
@@ -296,6 +326,14 @@ public class MCPatcherUtils {
         Text text = xml.createTextNode(mod);
         element1.appendChild(text);
         return element;
+    }
+
+    static boolean isModEnabled(String mod) {
+        return Boolean.parseBoolean(getText(getMod(mod), TAG_ENABLED));
+    }
+
+    static void setModEnabled(String mod, boolean enabled) {
+        setText(getMod(mod), TAG_ENABLED, Boolean.toString(enabled));
     }
 
     static Element getModConfig(String mod) {

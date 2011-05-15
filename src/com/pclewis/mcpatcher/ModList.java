@@ -112,10 +112,8 @@ class ModList {
             Mod mod = modsByIndex.get(i);
             boolean enabled = mod.okToApply();
             if (enabled && ! enableAll) {
-                String name = mod.getConfigName();
-                if (name != null) {
-                    enabled = MCPatcherUtils.getBoolean(name, "enabled", mod.defaultEnabled);
-                }
+                String name = mod.getName();
+                enabled = MCPatcherUtils.isModEnabled(mod.getName());
             }
             selectMod(mod, enabled);
         }
@@ -168,10 +166,7 @@ class ModList {
         for (Map.Entry<Mod, Boolean> entry : inst.entrySet()) {
             mod = entry.getKey();
             mod.setEnabled(entry.getValue());
-            String name = mod.getConfigName();
-            if (name != null) {
-                MCPatcherUtils.set(name, "enabled", mod.isEnabled());
-            }
+            MCPatcherUtils.setModEnabled(mod.getName(), mod.isEnabled());
         }
     }
 

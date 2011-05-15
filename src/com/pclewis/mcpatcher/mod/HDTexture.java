@@ -14,7 +14,6 @@ public class HDTexture extends Mod {
 
     public HDTexture() {
         name = "HD Textures";
-        configName = "HDTexture";
         author = "MCPatcher";
         description = "Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.";
         version = "1.0";
