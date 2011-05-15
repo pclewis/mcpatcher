@@ -195,16 +195,12 @@ public abstract class Mod {
      * @return a valid input stream, or null
      * @throws IOException I/O error
      * @see #filesToAdd
-     * @see #filesToReplace
      */
     public InputStream openFile(String name) throws IOException {
-        Logger.log(Logger.LOG_MAIN, "DEBUG: attempting to open %s", name);
         URL url = getClass().getResource(name);
         if (url == null) {
-            Logger.log(Logger.LOG_MAIN, "DEBUG: url is null");
             return null;
         }
-        Logger.log(Logger.LOG_MAIN, "DEBUG: got url %s", url.toString());
         InputStream inputStream = url.openStream();
         if (inputStream == null) {
             Logger.log(Logger.LOG_MAIN, "DEBUG: openStream failed, retrying with getContextClassLoader");
@@ -214,7 +210,6 @@ public abstract class Mod {
                 return null;
             }
         }
-        Logger.log(Logger.LOG_MAIN, "DEBUG: successfully opened %s", name);
         return inputStream;
     }
 
