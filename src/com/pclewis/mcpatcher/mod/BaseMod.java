@@ -3,7 +3,6 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.*;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -26,7 +25,7 @@ public class BaseMod extends Mod {
         Config() {
             debugCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(null, "debug", debugCheckBox.isSelected());
+                    MCPatcherUtils.set(null, MCPatcherUtils.TAG_DEBUG, debugCheckBox.isSelected());
                 }
             });
         }
@@ -43,14 +42,14 @@ public class BaseMod extends Mod {
 
         @Override
         public void load() {
-            heapSizeText.setText("" + MCPatcherUtils.getInt("heapSize", 1024));
-            debugCheckBox.setSelected(MCPatcherUtils.getBoolean("debug", false));
+            heapSizeText.setText("" + MCPatcherUtils.getInt(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, 1024));
+            debugCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.TAG_DEBUG, false));
         }
 
         @Override
         public void save() {
             try {
-                MCPatcherUtils.set(null, "heapSize", Integer.parseInt(heapSizeText.getText()));
+                MCPatcherUtils.set(null, MCPatcherUtils.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
             } catch (Exception e) {
             }
         }

@@ -133,10 +133,6 @@ class MinecraftJar {
     }
 
     private static String getOrigMD5(String version, String md5) {
-        String origMD5 = MCPatcherUtils.getString("md5", version, "");
-        if (!origMD5.equals("")) {
-            return origMD5;
-        }
         File md5File = MCPatcherUtils.getMinecraftPath("bin", "md5s");
         if (md5File.exists()) {
             FileInputStream is = null;
@@ -144,9 +140,8 @@ class MinecraftJar {
                 Properties properties = new Properties();
                 is = new FileInputStream(md5File);
                 properties.load(is);
-                origMD5 = properties.getProperty("minecraft.jar");
+                String origMD5 = properties.getProperty("minecraft.jar");
                 if (origMD5.equals(md5)) {
-                    MCPatcherUtils.set("md5", version, origMD5);
                     return (origMD5);
                 }
             } catch (IOException e) {
@@ -266,7 +261,7 @@ class MinecraftJar {
             cp.append(File.pathSeparatorChar);
         }
 
-        int heapSize = MCPatcherUtils.getInt("heapSize", 1024);
+        int heapSize = MCPatcherUtils.getInt(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, 1024);
         ProcessBuilder pb = new ProcessBuilder(
             "java",
             "-cp", cp.toString(),

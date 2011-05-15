@@ -10,6 +10,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -22,6 +23,52 @@ public class MCPatcherUtils {
     private static Document xml;
     private static boolean debug = false;
     private static boolean isGame;
+
+    /*
+     * <mcpatcher-profile>
+     *     <config>
+     *         <debug>false</debug>
+     *         <java-heap-size>1024</java-heap-size>
+     *         <last-version>2.0.1</last-version>
+     *         <beta-warning-shown>false</beta-warning-shown>
+     *     </config>
+     *     <mods>
+     *         <mod>
+     *             <name>HD Textures</name>
+     *             <type>builtin</type>
+     *             <enabled>true</enabled>
+     *             <config>
+     *                 <useAnimatedTextures>true</useAnimatedTextures>
+     *             </config>
+     *         </mod>
+     *         <mod>
+     *             <name>ModLoader</name>
+     *             <type>external zip</type>
+     *             <path>/home/user/.minecraft/mods/ModLoader.zip</path>
+     *             <prefix />
+     *             <enabled>true</enabled>
+     *         </mod>
+     *     </mods>
+     * </mcpatcher-profile>
+     */
+    static final String TAG_ROOT = "mcpatcher-profile";
+    static final String TAG_CONFIG1 = "config";
+    public static final String TAG_DEBUG = "debug";
+    public static final String TAG_JAVA_HEAP_SIZE = "java-heap-size";
+    static final String TAG_LAST_VERSION = "last-version";
+    static final String TAG_BETA_WARNING_SHOWN = "beta-warning-shown";
+    static final String TAG_MODS = "mods";
+    static final String TAG_MOD = "mod";
+    static final String TAG_NAME = "name";
+    static final String TAG_TYPE = "type";
+    static final String TAG_PATH = "path";
+    static final String TAG_PREFIX = "prefix";
+    static final String TAG_ENABLED = "enabled";
+    static final String TAG_CONFIG = "config";
+    static final String ATTR_VERSION = "version";
+    static final String VAL_BUILTIN = "built-in";
+    static final String VAL_EXTERNAL_ZIP = "external-zip";
+    static final String VAL_EXTERNAL_JAR = "external-jar";
 
     private MCPatcherUtils() {
     }
@@ -90,6 +137,26 @@ public class MCPatcherUtils {
                 e.printStackTrace();
             }
 
+            File propFile = new File(minecraftDir, "mcpatcher.properties");
+            if (propFile.exists()) {
+                FileInputStream is = null;
+                try {
+                    is = new FileInputStream(propFile);
+                    convertPropertiesToXML(is);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (is != null) {
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    //propFile.delete();
+                }
+            }
+
             debug = getBoolean("debug", false);
             saveProperties();
             return true;
@@ -97,51 +164,28 @@ public class MCPatcherUtils {
         return false;
     }
 
-    /*
-     * <mcpatcher-profile>
-     *     <config>
-     *         <debug>false</debug>
-     *         <java-heap-size>1024</java-heap-size>
-     *         <last-version>2.0.1</last-version>
-     *         <beta-warning-shown>false</beta-warning-shown>
-     *     </config>
-     *     <mods>
-     *         <mod>
-     *             <name>HD Textures</name>
-     *             <type>builtin</type>
-     *             <enabled>true</enabled>
-     *             <config>
-     *                 <useAnimatedTextures>true</useAnimatedTextures>
-     *             </config>
-     *         </mod>
-     *         <mod>
-     *             <name>ModLoader</name>
-     *             <type>external zip</type>
-     *             <path>/home/user/.minecraft/mods/ModLoader.zip</path>
-     *             <prefix />
-     *             <enabled>true</enabled>
-     *         </mod>
-     *     </mods>
-     * </mcpatcher-profile>
-     */
-    static final String TAG_ROOT = "mcpatcher-profile";
-    static final String TAG_CONFIG1 = "config";
-    static final String TAG_DEBUG = "debug";
-    static final String TAG_JAVA_HEAP_SIZE = "java-heap-size";
-    static final String TAG_LAST_VERSION = "last-version";
-    static final String TAG_BETA_WARNING_SHOWN = "beta-warning-shown";
-    static final String TAG_MODS = "mods";
-    static final String TAG_MOD = "mod";
-    static final String TAG_NAME = "name";
-    static final String TAG_TYPE = "type";
-    static final String TAG_PATH = "path";
-    static final String TAG_PREFIX = "prefix";
-    static final String TAG_ENABLED = "enabled";
-    static final String TAG_CONFIG = "config";
-    static final String ATTR_VERSION = "version";
-    static final String VAL_BUILTIN = "built-in";
-    static final String VAL_EXTERNAL_ZIP = "external-zip";
-    static final String VAL_EXTERNAL_JAR = "external-jar";
+    private static void convertPropertiesToXML(InputStream input) throws IOException {
+        Properties properties = new Properties();
+        properties.load(input);
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            String tag = entry.getKey().toString();
+            String value = entry.getValue().toString();
+            if (tag.equals("debug")) {
+                set(TAG_DEBUG, value);
+            } else if (tag.equals("lastVersion")) {
+                set(TAG_LAST_VERSION, value);
+            } else if (tag.equals("betaWarningShown")) {
+                set(TAG_BETA_WARNING_SHOWN, value);
+            } else if (tag.equals("heapSize")) {
+                set(TAG_JAVA_HEAP_SIZE, value);
+            } else if (tag.startsWith("HDTexture.")) {
+                tag = tag.substring(10);
+                if (!tag.equals("enabled")) {
+                    set("HD Textures", tag, value);
+                }
+            }
+        }
+    }
 
     static Element getElement(Element parent, String tag) {
         if (parent == null) {
@@ -174,7 +218,7 @@ public class MCPatcherUtils {
                 for (int i = 0; i < list.getLength(); i++) {
                     Node node1 = list.item(i);
                     if (node1.getNodeType() == Node.TEXT_NODE) {
-                        return ((Text) node).getData();
+                        return ((Text) node1).getData();
                     }
                 }
 
@@ -196,7 +240,12 @@ public class MCPatcherUtils {
     }
 
     static Element getRoot() {
-        return getElement(xml.getDocumentElement(), TAG_ROOT);
+        Element root = xml.getDocumentElement();
+        if (root == null) {
+            root = xml.createElement(TAG_ROOT);
+            xml.appendChild(root);
+        }
+        return root;
     }
 
     static Element getConfig() {
@@ -495,6 +544,7 @@ public class MCPatcherUtils {
                 DOMSource source = new DOMSource(xml);
                 trans.transform(source, new StreamResult(os));
                 saved = true;
+                System.out.printf("wrote %s\n", xmlFile.getPath());
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
