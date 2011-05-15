@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="20" y="20" width="512" height="583"/>
+      <xy x="20" y="20" width="512" height="584"/>
     </constraints>
     <properties>
       <opaque value="true"/>
@@ -222,7 +222,7 @@
                         </constraints>
                         <properties>
                           <enabled value="false"/>
-                          <text value="Up"/>
+                          <icon value="images/uparrow.png"/>
                           <toolTipText value="Move selected mod up in the list"/>
                         </properties>
                       </component>
@@ -232,7 +232,7 @@
                         </constraints>
                         <properties>
                           <enabled value="false"/>
-                          <text value="Add..."/>
+                          <icon value="images/add.png"/>
                           <toolTipText value="Add external mod"/>
                         </properties>
                       </component>
@@ -242,7 +242,7 @@
                         </constraints>
                         <properties>
                           <enabled value="false"/>
-                          <text value="Down"/>
+                          <icon value="images/downarrow.png"/>
                           <toolTipText value="Move selected mod down in the list"/>
                         </properties>
                       </component>
@@ -262,7 +262,7 @@
                         </constraints>
                         <properties>
                           <enabled value="false"/>
-                          <text value="Remove"/>
+                          <icon value="images/remove.png"/>
                           <toolTipText value="Remove the selected mod"/>
                         </properties>
                       </component>
