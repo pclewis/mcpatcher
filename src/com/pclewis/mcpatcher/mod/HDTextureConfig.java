@@ -10,7 +10,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 public class HDTextureConfig extends ModConfigPanel {
-    private static final String MOD_CFG_NAME = "HDTexture";
+    private static final String MOD_CFG_NAME = "HD Textures";
 
     private JPanel panel;
     private JComboBox waterCombo;
