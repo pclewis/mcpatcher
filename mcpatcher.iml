@@ -8,7 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="javassist" level="project" />
-    <orderEntry type="library" name="jgoodies" level="project" />
     <orderEntry type="module" module-name="utils" />
   </component>
 </module>
