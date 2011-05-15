@@ -127,12 +127,18 @@ public class MCPatcherUtils {
     private static boolean loadProperties() {
         if (minecraftDir != null && minecraftDir.exists()) {
             xmlFile = new File(minecraftDir, "mcpatcher.xml");
+            xml = null;
             try {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 if (xmlFile.exists()) {
-                    xml = builder.parse(xmlFile);
-                } else {
+                    try {
+                        xml = builder.parse(xmlFile);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (xml == null) {
                     xml = builder.newDocument();
                     buildNewProperties();
                     saveProperties();
@@ -250,6 +256,9 @@ public class MCPatcherUtils {
     }
 
     static Element getRoot() {
+        if (xml == null) {
+            return null;
+        }
         Element root = xml.getDocumentElement();
         if (root == null) {
             root = xml.createElement(TAG_ROOT);
