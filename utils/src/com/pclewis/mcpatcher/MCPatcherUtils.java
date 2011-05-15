@@ -18,11 +18,8 @@ import java.util.Properties;
  */
 public class MCPatcherUtils {
     private static File minecraftDir = null;
-    private static File propFile = null;
     private static File xmlFile = null;
     private static Document xml;
-    private static Properties properties;
-    private static boolean needSaveProps = false;
     private static boolean debug = false;
     private static boolean isGame;
 
@@ -30,7 +27,6 @@ public class MCPatcherUtils {
     }
 
     static {
-        properties = new Properties();
         isGame = true;
         try {
             if (Class.forName("com.pclewis.mcpatcher.MCPatcher") != null) {
@@ -78,25 +74,7 @@ public class MCPatcherUtils {
     }
 
     private static boolean loadProperties() {
-        propFile = null;
-        properties = new Properties();
-        needSaveProps = false;
         if (minecraftDir != null && minecraftDir.exists()) {
-            propFile = new File(minecraftDir, "mcpatcher.properties");
-            if (propFile.exists()) {
-                try {
-                    properties.load(new FileInputStream(propFile));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                remove("HDTexture", "enableAnimations");
-                remove("HDTexture", "useCustomAnimations");
-                remove("HDTexture", "glBufferSize");
-            } else {
-                needSaveProps = true;
-            }
-            debug = getBoolean("debug", false);
-
             xmlFile = new File(minecraftDir, "mcpatcher.xml");
             try {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -112,6 +90,7 @@ public class MCPatcherUtils {
                 e.printStackTrace();
             }
 
+            debug = getBoolean("debug", false);
             saveProperties();
             return true;
         }
@@ -160,8 +139,9 @@ public class MCPatcherUtils {
     static final String TAG_ENABLED = "enabled";
     static final String TAG_CONFIG = "config";
     static final String ATTR_VERSION = "version";
-    static final String VAL_BUILTIN = "built in";
-    static final String VAL_EXTERNAL_ZIP = "external zip";
+    static final String VAL_BUILTIN = "built-in";
+    static final String VAL_EXTERNAL_ZIP = "external-zip";
+    static final String VAL_EXTERNAL_JAR = "external-jar";
 
     static Element getElement(Element parent, String tag) {
         if (parent == null) {
@@ -202,6 +182,13 @@ public class MCPatcherUtils {
                 break;
         }
         return null;
+    }
+
+    static void remove(Node node) {
+        if (node != null) {
+            Node parent = node.getParentNode();
+            parent.removeChild(node);
+        }
     }
 
     static String getText(Element parent, String tag) {
@@ -348,55 +335,54 @@ public class MCPatcherUtils {
         System.out.printf("ERROR: " + format + "\n", params);
     }
 
-    private static String getPropertyKey(String mod, String name) {
-        if (mod == null || mod.equals("")) {
-            return name;
-        } else {
-            return mod + "." + name;
-        }
-    }
-
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
      * @param mod          name of mod
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return String value
      */
-    public static String getString(String mod, String name, Object defaultValue) {
-        String key = getPropertyKey(mod, name);
-        String value = defaultValue.toString();
-        if (!properties.containsKey(key)) {
-            properties.setProperty(key, value);
-            needSaveProps = true;
+    public static String getString(String mod, String tag, Object defaultValue) {
+        if (mod == null) {
+            return getString(tag, defaultValue);
         }
-        return properties.getProperty(key, value);
+        String value = getModConfigValue(mod, tag);
+        if (value == null) {
+            value = defaultValue.toString();
+            setModConfigValue(mod, tag, value);
+        }
+        return value;
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return String value
      */
-    public static String getString(String name, Object defaultValue) {
-        return getString(null, name, defaultValue);
+    public static String getString(String tag, Object defaultValue) {
+        String value = getConfigValue(tag);
+        if (value == null) {
+            value = defaultValue.toString();
+            setConfigValue(tag, value);
+        }
+        return value;
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
      * @param mod          name of mod
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
-    public static int getInt(String mod, String name, int defaultValue) {
+    public static int getInt(String mod, String tag, int defaultValue) {
         int value;
         try {
-            value = Integer.parseInt(getString(mod, name, defaultValue));
+            value = Integer.parseInt(getString(mod, tag, defaultValue));
         } catch (NumberFormatException e) {
             value = defaultValue;
         }
@@ -404,26 +390,26 @@ public class MCPatcherUtils {
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
-    public static int getInt(String name, int defaultValue) {
-        return getInt(null, name, defaultValue);
+    public static int getInt(String tag, int defaultValue) {
+        return getInt(null, tag, defaultValue);
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
      * @param mod          name of mod
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
-    public static boolean getBoolean(String mod, String name, boolean defaultValue) {
-        String value = getString(mod, name, defaultValue).toLowerCase();
+    public static boolean getBoolean(String mod, String tag, boolean defaultValue) {
+        String value = getString(mod, tag, defaultValue).toLowerCase();
         if (value.equals("false")) {
             return false;
         } else if (value.equals("true")) {
@@ -434,95 +420,93 @@ public class MCPatcherUtils {
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
-    public static boolean getBoolean(String name, boolean defaultValue) {
-        return getBoolean(null, name, defaultValue);
+    public static boolean getBoolean(String tag, boolean defaultValue) {
+        return getBoolean(null, tag, defaultValue);
     }
 
     /**
-     * Sets a value in mcpatcher.properties.
+     * Sets a value in mcpatcher.xml.
      *
      * @param mod   name of mod
-     * @param name  property name
+     * @param tag   property name
      * @param value property value (must support toString())
      */
-    public static void set(String mod, String name, Object value) {
-        String key = getPropertyKey(mod, name);
-        String oldValue = properties.getProperty(key);
-        String newValue = value.toString();
-        properties.setProperty(key, newValue);
-        if (!newValue.equals(oldValue)) {
-            needSaveProps = true;
+    public static void set(String mod, String tag, Object value) {
+        if (mod == null) {
+            set(tag, value);
+            return;
         }
-    }
-
-    static void set(String name, Object value) {
-        set(null, name, value);
+        setModConfigValue(mod, tag, value.toString());
     }
 
     /**
-     * Remove a value from mcpatcher.properties.
+     * Set a global config value in mcpatcher.xml.
      *
-     * @param mod  name of mod
-     * @param name property name
+     * @param tag   property name
+     * @param value property value (must support toString())
      */
-    public static void remove(String mod, String name) {
-        String key = getPropertyKey(mod, name);
-        if (properties.containsKey(key)) {
-            properties.remove(key);
-            needSaveProps = true;
-        }
-    }
-
-    static void remove(String name) {
-        remove(null, name);
+    static void set(String tag, Object value) {
+        setConfigValue(tag, value.toString());
     }
 
     /**
-     * Save all properties to mcpatcher.properties.
+     * Remove a value from mcpatcher.xml.
+     *
+     * @param mod name of mod
+     * @param tag property name
+     */
+    public static void remove(String mod, String tag) {
+        if (mod == null) {
+            remove(mod);
+        } else {
+            remove(getModConfig(mod, tag));
+        }
+    }
+
+    /**
+     * Remove a global config value from mcpatcher.xml.
+     *
+     * @param tag property name
+     */
+    static void remove(String tag) {
+        remove(getConfig(tag));
+    }
+
+    /**
+     * Save all properties to mcpatcher.xml.
      *
      * @return true if successful
      */
     public static boolean saveProperties() {
-        if (!needSaveProps) {
-            return true;
-        }
         boolean saved = false;
-        FileOutputStream os = null;
-        if (properties != null && propFile != null) {
+        if (xml != null && xmlFile != null) {
+            FileOutputStream os = null;
             try {
-                os = new FileOutputStream(propFile);
-                properties.store(os, "settings for MCPatcher");
+                os = new FileOutputStream(xmlFile);
+                TransformerFactory factory = TransformerFactory.newInstance();
+                Transformer trans = factory.newTransformer();
+                trans.setOutputProperty(OutputKeys.INDENT, "yes");
+                DOMSource source = new DOMSource(xml);
+                trans.transform(source, new StreamResult(os));
                 saved = true;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 if (os != null) {
                     try {
                         os.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
-        if (xml != null && xmlFile != null) {
-            try {
-                TransformerFactory factory = TransformerFactory.newInstance();
-                Transformer trans = factory.newTransformer();
-                trans.setOutputProperty(OutputKeys.INDENT, "yes");
-                DOMSource source = new DOMSource(xml);
-                trans.transform(source, new StreamResult(xmlFile.toURI().getPath()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        needSaveProps = false;
         return saved;
     }
 }
