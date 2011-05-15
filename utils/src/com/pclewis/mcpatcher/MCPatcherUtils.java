@@ -4,10 +4,12 @@ import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -94,25 +96,23 @@ public class MCPatcherUtils {
                 needSaveProps = true;
             }
             debug = getBoolean("debug", false);
-            saveProperties();
 
             xmlFile = new File(minecraftDir, "mcpatcher.xml");
-            DocumentBuilder builder = null;
-            xml = null;
-            if (xmlFile.exists()) {
-                try {
-                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    builder = factory.newDocumentBuilder();
+            try {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                if (xmlFile.exists()) {
                     xml = builder.parse(xmlFile);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } else {
+                    xml = builder.newDocument();
+                    buildNewProperties();
                 }
-            }
-            if (builder != null && xml == null) {
-                xml = builder.newDocument();
-                buildNewProperties();
+            } catch (Exception e) {
+                xml = null;
+                e.printStackTrace();
             }
 
+            saveProperties();
             return true;
         }
         return false;
@@ -164,6 +164,9 @@ public class MCPatcherUtils {
     static final String VAL_EXTERNAL_ZIP = "external zip";
 
     static Element getElement(Element parent, String tag) {
+        if (parent == null) {
+            return null;
+        }
         NodeList list = parent.getElementsByTagName(tag);
         Element element;
         if (list.getLength() == 0) {
@@ -176,26 +179,27 @@ public class MCPatcherUtils {
     }
 
     static String getText(Node node) {
-        if (node != null) {
-            switch (node.getNodeType()) {
-                case Node.TEXT_NODE:
-                    return ((Text) node).getData();
+        if (node == null) {
+            return null;
+        }
+        switch (node.getNodeType()) {
+            case Node.TEXT_NODE:
+                return ((Text) node).getData();
 
-                case Node.ATTRIBUTE_NODE:
-                    return ((Attr) node).getValue();
+            case Node.ATTRIBUTE_NODE:
+                return ((Attr) node).getValue();
 
-                case Node.ELEMENT_NODE:
-                    NodeList list = node.getChildNodes();
-                    for (int i = 0; i < list.getLength(); i++) {
-                        Node node1 = list.item(i);
-                        if (node1.getNodeType() == Node.TEXT_NODE) {
-                            return ((Text) node).getData();
-                        }
+            case Node.ELEMENT_NODE:
+                NodeList list = node.getChildNodes();
+                for (int i = 0; i < list.getLength(); i++) {
+                    Node node1 = list.item(i);
+                    if (node1.getNodeType() == Node.TEXT_NODE) {
+                        return ((Text) node).getData();
                     }
+                }
 
-                default:
-                    break;
-            }
+            default:
+                break;
         }
         return null;
     }
@@ -220,12 +224,25 @@ public class MCPatcherUtils {
         return getText(getConfig(tag));
     }
 
+    static void setConfigValue(String tag, String value) {
+        Element element = getConfig(tag);
+        if (element != null) {
+            while (element.hasChildNodes()) {
+                element.removeChild(element.getFirstChild());
+            }
+            element.appendChild(xml.createTextNode(value));
+        }
+    }
+
     static Element getMods() {
         return getElement(getRoot(), TAG_MODS);
     }
 
     static Element getMod(String mod) {
         Element parent = getMods();
+        if (parent == null) {
+            return null;
+        }
         NodeList list = parent.getElementsByTagName(TAG_MOD);
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
@@ -249,13 +266,30 @@ public class MCPatcherUtils {
         return getElement(getMod(mod), TAG_CONFIG1);
     }
 
+    static Element getModConfig(String mod, String tag) {
+        return getElement(getModConfig(mod), tag);
+    }
+
     static String getModConfigValue(String mod, String tag) {
-        return getText(getModConfig(mod), tag);
+        return getText(getModConfig(mod, tag));
+    }
+
+    static void setModConfigValue(String mod, String tag, String value) {
+        Element element = getModConfig(mod, tag);
+        if (element != null) {
+            while (element.hasChildNodes()) {
+                element.removeChild(element.getFirstChild());
+            }
+            element.appendChild(xml.createTextNode(value));
+        }
     }
 
     private static void buildNewProperties() {
-        Element root = xml.createElement(TAG_ROOT);
-        xml.appendChild(root);
+        if (xml != null) {
+            getRoot();
+            getConfig();
+            getMods();
+        }
     }
 
     /**
@@ -475,6 +509,17 @@ public class MCPatcherUtils {
                         e1.printStackTrace();
                     }
                 }
+            }
+        }
+        if (xml != null && xmlFile != null) {
+            try {
+                TransformerFactory factory = TransformerFactory.newInstance();
+                Transformer trans = factory.newTransformer();
+                trans.setOutputProperty(OutputKeys.INDENT, "yes");
+                DOMSource source = new DOMSource(xml);
+                trans.transform(source, new StreamResult(xmlFile.toURI().getPath()));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         needSaveProps = false;
