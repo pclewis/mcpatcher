@@ -72,7 +72,7 @@ class MainForm {
                 cancelWorker();
                 frame.setVisible(false);
                 frame.dispose();
-                MCPatcherUtils.saveProperties();
+                MCPatcher.saveProperties();
                 System.exit(0);
             }
 
@@ -247,7 +247,7 @@ class MainForm {
                 tabbedPane.setSelectedIndex(TAB_LOG);
                 setBusy(true);
                 setStatusText("Launching %s...", MCPatcher.minecraft.getOutputFile().getName());
-                MCPatcherUtils.saveProperties();
+                MCPatcher.saveProperties();
                 runWorker(new MinecraftThread());
             }
         });
@@ -427,7 +427,7 @@ class MainForm {
                 }
             }
         }
-        MCPatcherUtils.saveProperties();
+        MCPatcher.saveProperties();
     }
 
     private void loadOptions() {

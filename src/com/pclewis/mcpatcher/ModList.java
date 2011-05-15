@@ -4,6 +4,9 @@ import com.pclewis.mcpatcher.mod.BaseMod;
 import com.pclewis.mcpatcher.mod.BetterGrass;
 import com.pclewis.mcpatcher.mod.HDFont;
 import com.pclewis.mcpatcher.mod.HDTexture;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -166,7 +169,6 @@ class ModList {
         for (Map.Entry<Mod, Boolean> entry : inst.entrySet()) {
             mod = entry.getKey();
             mod.setEnabled(entry.getValue());
-            MCPatcherUtils.setModEnabled(mod.getName(), mod.isEnabled());
         }
     }
 
@@ -222,6 +224,76 @@ class ModList {
                     }
                 }
             }
+        }
+    }
+
+    public void loadSavedMods() {
+        Element mods = MCPatcherUtils.getMods();
+        if (mods == null) {
+            return;
+        }
+        NodeList list = mods.getElementsByTagName(MCPatcherUtils.TAG_MOD);
+        for (int i = 0; i < list.getLength(); i++) {
+            Element element = (Element) list.item(i);
+            String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
+            String type = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_TYPE);
+            if (name == null || type == null) {
+            } else if (type.equals(MCPatcherUtils.VAL_BUILTIN)) {
+                if (name.equals("HD Textures")) {
+                    add(new HDTexture());
+                } else if (name.equals("HD Font")) {
+                    add(new HDFont());
+                } else if (name.equals("Better Grass")) {
+                    add(new BetterGrass());
+                }
+            }
+        }
+    }
+
+    private void updateModElement(Mod mod, Element element) {
+        MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
+    }
+
+    private Element defaultModElement(Mod mod) {
+        Element mods = MCPatcherUtils.getMods();
+        if (mods == null) {
+            return null;
+        }
+        Element element = MCPatcherUtils.getMod(mod.getName());
+        MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.defaultEnabled));
+        updateModElement(mod, element);
+        return element;
+    }
+
+    void updateProperties() {
+        Element mods = MCPatcherUtils.getMods();
+        if (mods == null) {
+            return;
+        }
+        HashMap<String, Element> oldElements = new HashMap<String, Element>();
+        while (mods.hasChildNodes()) {
+            Node node = mods.getFirstChild();
+            if (node instanceof Element) {
+                Element element = (Element) node;
+                String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
+                if (name != null) {
+                    oldElements.put(name, element);
+                }
+            }
+            mods.removeChild(node);
+        }
+        for (Mod mod : modsByIndex) {
+            if (mod.internal) {
+                continue;
+            }
+            Element element = oldElements.get(mod.getName());
+            if (element == null) {
+                element = defaultModElement(mod);
+                oldElements.remove(mod.getName());
+            }
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.isEnabled() && mod.okToApply()));
+            updateModElement(mod, element);
+            mods.appendChild(element);
         }
     }
 }

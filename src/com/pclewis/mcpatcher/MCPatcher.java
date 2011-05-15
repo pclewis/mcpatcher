@@ -140,9 +140,16 @@ final public class MCPatcher {
         }
 
         if (ui.shouldExit()) {
-            MCPatcherUtils.saveProperties();
+            saveProperties();
             System.exit(exitStatus);
         }
+    }
+
+    static void saveProperties() {
+        if (modList != null) {
+            modList.updateProperties();
+        }
+        MCPatcherUtils.saveProperties();
     }
 
     static void checkInterrupt() throws InterruptedException {
