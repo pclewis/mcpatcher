@@ -175,6 +175,7 @@ final public class MCPatcher {
 
     static void getAllMods() {
         modList = new ModList();
+        modList.loadSavedMods();
         if (!ignoreBuiltInMods) {
             modList.loadBuiltInMods();
         }

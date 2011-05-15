@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.lang.model.element.ElementVisitor;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.net.URLClassLoader;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipFile;
 
 class ModList {
     private Vector<Mod> modsByIndex = new Vector<Mod>();
@@ -32,9 +34,15 @@ class ModList {
     }
 
     public void loadBuiltInMods() {
-        addNoReplace(new HDTexture());
-        addNoReplace(new HDFont());
-        addNoReplace(new BetterGrass());
+        if (!modsByName.containsKey("HD Textures")) {
+            addNoReplace(new HDTexture());
+        }
+        if (!modsByName.containsKey("HD Font")) {
+            addNoReplace(new HDFont());
+        }
+        if (!modsByName.containsKey("Better Grass")) {
+            addNoReplace(new BetterGrass());
+        }
     }
 
     public void loadCustomMods(File directory) {
@@ -134,11 +142,13 @@ class ModList {
         for (int i = modsByIndex.size() - 1; i >= 0; i--) {
             Mod mod = modsByIndex.get(i);
             boolean enabled = mod.okToApply();
-            if (enabled && !enableAll) {
-                //String name = mod.getName();
-                //enabled = MCPatcherUtils.isModEnabled(mod.getName());
+            if (enabled) {
+                if (enableAll) {
+                    selectMod(mod, true);
+                }
+            } else {
+                selectMod(mod, false);
             }
-            selectMod(mod, enabled);
         }
     }
 
@@ -235,7 +245,14 @@ class ModList {
         mod.setRefs();
         modsByName.put(name, mod);
         modsByIndex.add(mod);
-        if (!MCPatcherUtils.hasMod(mod.getName())) {
+        if (MCPatcherUtils.hasMod(mod.getName())) {
+            String enabled = MCPatcherUtils.getText(MCPatcherUtils.getMod(mod.getName()), MCPatcherUtils.TAG_ENABLED);
+            if (enabled == null) {
+                mod.setEnabled(mod.defaultEnabled);
+            } else {
+                mod.setEnabled(Boolean.parseBoolean(enabled));
+            }
+        } else {
             MCPatcherUtils.getMods().appendChild(defaultModElement(mod));
         }
         mod.loadOptions();
@@ -345,12 +362,14 @@ class ModList {
             return;
         }
         NodeList list = mods.getElementsByTagName(MCPatcherUtils.TAG_MOD);
+        ArrayList<Element> invalidEntries = new ArrayList<Element>();
         for (int i = 0; i < list.getLength(); i++) {
             Element element = (Element) list.item(i);
             String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
             String type = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_TYPE);
             Mod mod = null;
             if (name == null || type == null) {
+                invalidEntries.add(element);
             } else if (type.equals(MCPatcherUtils.VAL_BUILTIN)) {
                 if (name.equals("HD Textures")) {
                     mod = new HDTexture();
@@ -358,6 +377,23 @@ class ModList {
                     mod = new HDFont();
                 } else if (name.equals("Better Grass")) {
                     mod = new BetterGrass();
+                } else {
+                    invalidEntries.add(element);
+                }
+            } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_ZIP)) {
+                String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
+                String prefix = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PREFIX);
+                if (path != null && prefix != null) {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        try {
+                            mod = new ExternalMod(new ZipFile(file), prefix);
+                        } catch (IOException e) {
+                            Logger.log(e);
+                        }
+                    }
+                } else {
+                    invalidEntries.add(element);
                 }
             } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_JAR)) {
                 String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
@@ -367,16 +403,28 @@ class ModList {
                     if (file.exists()) {
                         mod = loadCustomMod(file, className);
                     }
+                } else {
+                    invalidEntries.add(element);
                 }
+            } else {
+                invalidEntries.add(element);
             }
             if (mod != null) {
                 addNoReplace(mod);
             }
         }
+        for (Element element : invalidEntries) {
+            mods.removeChild(element);
+        }
     }
 
     private void updateModElement(Mod mod, Element element) {
-        if (mod.customJar == null) {
+        if (mod instanceof ExternalMod) {
+            ExternalMod extmod = (ExternalMod) mod;
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_ZIP);
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PATH, extmod.zipFile.getName());
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PREFIX, extmod.prefix);
+        } else if (mod.customJar == null) {
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
         } else {
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_JAR);

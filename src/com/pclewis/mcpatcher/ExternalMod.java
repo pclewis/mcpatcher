@@ -8,8 +8,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 class ExternalMod extends Mod {
-    private ZipFile zipFile;
-    private String prefix;
+    ZipFile zipFile;
+    String prefix;
 
     public ExternalMod(ZipFile zipFile, String prefix) {
         this.zipFile = zipFile;
