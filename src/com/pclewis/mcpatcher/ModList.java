@@ -246,16 +246,7 @@ class ModList {
         mod.setRefs();
         modsByName.put(name, mod);
         modsByIndex.add(mod);
-        if (MCPatcherUtils.hasMod(mod.getName())) {
-            String enabled = MCPatcherUtils.getText(MCPatcherUtils.getMod(mod.getName()), MCPatcherUtils.TAG_ENABLED);
-            if (enabled == null) {
-                mod.setEnabled(mod.defaultEnabled);
-            } else {
-                mod.setEnabled(Boolean.parseBoolean(enabled));
-            }
-        } else {
-            MCPatcherUtils.getMods().appendChild(defaultModElement(mod));
-        }
+        mod.setEnabled(mod.defaultEnabled);
         mod.loadOptions();
         return true;
     }
@@ -368,6 +359,7 @@ class ModList {
             Element element = (Element) list.item(i);
             String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
             String type = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_TYPE);
+            String enabled = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_ENABLED);
             Mod mod = null;
             if (name == null || type == null) {
                 invalidEntries.add(element);
@@ -411,7 +403,11 @@ class ModList {
                 invalidEntries.add(element);
             }
             if (mod != null) {
-                addNoReplace(mod);
+                if (addNoReplace(mod)) {
+                    if (enabled != null) {
+                        mod.setEnabled(Boolean.parseBoolean(enabled));
+                    }
+                }
             }
         }
         for (Element element : invalidEntries) {
