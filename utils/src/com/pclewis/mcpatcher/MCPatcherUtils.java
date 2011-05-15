@@ -1,9 +1,16 @@
 package com.pclewis.mcpatcher;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import org.w3c.dom.*;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -12,17 +19,62 @@ import java.util.Properties;
  */
 public class MCPatcherUtils {
     private static File minecraftDir = null;
-    private static File propFile = null;
-    private static Properties properties;
-    private static boolean needSaveProps = false;
+    private static File xmlFile = null;
+    private static Document xml;
     private static boolean debug = false;
     private static boolean isGame;
+
+    /*
+     * <mcpatcher-profile>
+     *     <config>
+     *         <debug>false</debug>
+     *         <java-heap-size>1024</java-heap-size>
+     *         <last-version>2.0.1</last-version>
+     *         <beta-warning-shown>false</beta-warning-shown>
+     *     </config>
+     *     <mods>
+     *         <mod>
+     *             <name>HD Textures</name>
+     *             <type>builtin</type>
+     *             <enabled>true</enabled>
+     *             <config>
+     *                 <useAnimatedTextures>true</useAnimatedTextures>
+     *             </config>
+     *         </mod>
+     *         <mod>
+     *             <name>ModLoader</name>
+     *             <type>external zip</type>
+     *             <path>/home/user/.minecraft/mods/ModLoader.zip</path>
+     *             <prefix />
+     *             <enabled>true</enabled>
+     *         </mod>
+     *     </mods>
+     * </mcpatcher-profile>
+     */
+    static final String TAG_ROOT = "mcpatcherProfile";
+    static final String TAG_CONFIG1 = "config";
+    public static final String TAG_DEBUG = "debug";
+    public static final String TAG_JAVA_HEAP_SIZE = "javaHeapSize";
+    static final String TAG_LAST_VERSION = "lastVersion";
+    static final String TAG_BETA_WARNING_SHOWN = "betaWarningShown";
+    static final String TAG_MODS = "mods";
+    static final String TAG_MOD = "mod";
+    static final String TAG_NAME = "name";
+    static final String TAG_TYPE = "type";
+    static final String TAG_PATH = "path";
+    static final String TAG_PREFIX = "prefix";
+    static final String TAG_CLASS = "class";
+    static final String TAG_ENABLED = "enabled";
+    static final String TAG_CONFIG = "config";
+    static final String ATTR_VERSION = "version";
+    static final String VAL_BUILTIN = "builtIn";
+    static final String VAL_EXTERNAL_ZIP = "externalZip";
+    static final String VAL_EXTERNAL_JAR = "externalJar";
 
     private MCPatcherUtils() {
     }
 
     static {
-        properties = new Properties();
         isGame = true;
         try {
             if (Class.forName("com.pclewis.mcpatcher.MCPatcher") != null) {
@@ -70,28 +122,246 @@ public class MCPatcherUtils {
     }
 
     private static boolean loadProperties() {
-        propFile = null;
-        properties = new Properties();
-        needSaveProps = false;
         if (minecraftDir != null && minecraftDir.exists()) {
-            propFile = new File(minecraftDir, "mcpatcher.properties");
-            if (propFile.exists()) {
-                try {
-                    properties.load(new FileInputStream(propFile));
-                } catch (IOException e) {
-                    e.printStackTrace();
+            xmlFile = new File(minecraftDir, "mcpatcher.xml");
+            try {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                if (xmlFile.exists()) {
+                    xml = builder.parse(xmlFile);
+                } else {
+                    xml = builder.newDocument();
+                    buildNewProperties();
+                    saveProperties();
                 }
-                remove("HDTexture", "enableAnimations");
-                remove("HDTexture", "useCustomAnimations");
-                remove("HDTexture", "glBufferSize");
-            } else {
-                needSaveProps = true;
+            } catch (Exception e) {
+                xml = null;
+                e.printStackTrace();
             }
-            debug = getBoolean("debug", false);
-            saveProperties();
+
+            File propFile = new File(minecraftDir, "mcpatcher.properties");
+            if (propFile.exists()) {
+                FileInputStream is = null;
+                try {
+                    is = new FileInputStream(propFile);
+                    convertPropertiesToXML(is);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (is != null) {
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    propFile.delete();
+                }
+            }
+
+            debug = getBoolean(TAG_DEBUG, false);
             return true;
         }
         return false;
+    }
+
+    private static void convertPropertiesToXML(InputStream input) throws IOException {
+        Properties properties = new Properties();
+        properties.load(input);
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            String tag = entry.getKey().toString();
+            String value = entry.getValue().toString();
+            if (tag.equals(TAG_DEBUG) || tag.equals(TAG_LAST_VERSION) || tag.equals(TAG_BETA_WARNING_SHOWN) || tag.equals(TAG_JAVA_HEAP_SIZE)) {
+                set(tag, value);
+            } else if (tag.startsWith("HDTexture.")) {
+                tag = tag.substring(10);
+                if (!tag.equals("enabled")) {
+                    set("HD Textures", tag, value);
+                }
+            }
+        }
+    }
+
+    static Element getElement(Element parent, String tag) {
+        if (parent == null) {
+            return null;
+        }
+        NodeList list = parent.getElementsByTagName(tag);
+        Element element;
+        if (list.getLength() == 0) {
+            element = xml.createElement(tag);
+            parent.appendChild(element);
+        } else {
+            element = (Element) list.item(0);
+        }
+        return element;
+    }
+
+    static String getText(Node node) {
+        if (node == null) {
+            return null;
+        }
+        switch (node.getNodeType()) {
+            case Node.TEXT_NODE:
+                return ((Text) node).getData();
+
+            case Node.ATTRIBUTE_NODE:
+                return ((Attr) node).getValue();
+
+            case Node.ELEMENT_NODE:
+                NodeList list = node.getChildNodes();
+                for (int i = 0; i < list.getLength(); i++) {
+                    Node node1 = list.item(i);
+                    if (node1.getNodeType() == Node.TEXT_NODE) {
+                        return ((Text) node1).getData();
+                    }
+                }
+
+            default:
+                break;
+        }
+        return null;
+    }
+
+    static void setText(Element parent, String tag, String value) {
+        if (parent == null) {
+            return;
+        }
+        Element element = getElement(parent, tag);
+        while (element.hasChildNodes()) {
+            element.removeChild(element.getFirstChild());
+        }
+        Text text = xml.createTextNode(value);
+        element.appendChild(text);
+    }
+
+    static void remove(Node node) {
+        if (node != null) {
+            Node parent = node.getParentNode();
+            parent.removeChild(node);
+        }
+    }
+
+    static String getText(Element parent, String tag) {
+        return getText(getElement(parent, tag));
+    }
+
+    static Element getRoot() {
+        Element root = xml.getDocumentElement();
+        if (root == null) {
+            root = xml.createElement(TAG_ROOT);
+            xml.appendChild(root);
+        }
+        return root;
+    }
+
+    static Element getConfig() {
+        return getElement(getRoot(), TAG_CONFIG1);
+    }
+
+    static Element getConfig(String tag) {
+        return getElement(getConfig(), tag);
+    }
+
+    static String getConfigValue(String tag) {
+        return getText(getConfig(tag));
+    }
+
+    static void setConfigValue(String tag, String value) {
+        Element element = getConfig(tag);
+        if (element != null) {
+            while (element.hasChildNodes()) {
+                element.removeChild(element.getFirstChild());
+            }
+            element.appendChild(xml.createTextNode(value));
+        }
+    }
+
+    static Element getMods() {
+        return getElement(getRoot(), TAG_MODS);
+    }
+
+    static boolean hasMod(String mod) {
+        Element parent = getMods();
+        if (parent != null) {
+            NodeList list = parent.getElementsByTagName(TAG_MOD);
+            for (int i = 0; i < list.getLength(); i++) {
+                Element element = (Element) list.item(i);
+                NodeList list1 = element.getElementsByTagName(TAG_NAME);
+                if (list1.getLength() > 0) {
+                    element = (Element) list1.item(0);
+                    if (mod.equals(getText(element))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    static Element getMod(String mod) {
+        Element parent = getMods();
+        if (parent == null) {
+            return null;
+        }
+        NodeList list = parent.getElementsByTagName(TAG_MOD);
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node instanceof Element) {
+                Element element = (Element) node;
+                if (mod.equals(getText(element, TAG_NAME))) {
+                    return element;
+                }
+            }
+        }
+        Element element = xml.createElement(TAG_MOD);
+        parent.appendChild(element);
+        Element element1 = xml.createElement(TAG_NAME);
+        Text text = xml.createTextNode(mod);
+        element1.appendChild(text);
+        element.appendChild(element1);
+        element1 = xml.createElement(TAG_ENABLED);
+        element.appendChild(element1);
+        element1 = xml.createElement(TAG_TYPE);
+        element.appendChild(element1);
+        return element;
+    }
+
+    static void setModEnabled(String mod, boolean enabled) {
+        setText(getMod(mod), TAG_ENABLED, Boolean.toString(enabled));
+    }
+
+    static Element getModConfig(String mod) {
+        return getElement(getMod(mod), TAG_CONFIG1);
+    }
+
+    static Element getModConfig(String mod, String tag) {
+        return getElement(getModConfig(mod), tag);
+    }
+
+    static String getModConfigValue(String mod, String tag) {
+        return getText(getModConfig(mod, tag));
+    }
+
+    static void setModConfigValue(String mod, String tag, String value) {
+        Element element = getModConfig(mod, tag);
+        if (element != null) {
+            while (element.hasChildNodes()) {
+                element.removeChild(element.getFirstChild());
+            }
+            element.appendChild(xml.createTextNode(value));
+        }
+    }
+
+    private static void buildNewProperties() {
+        if (xml != null) {
+            getRoot();
+            getConfig();
+            getMods();
+            setText(getMod("HD Textures"), TAG_ENABLED, "true");
+            setText(getMod("HD Font"), TAG_ENABLED, "true");
+            setText(getMod("Better Grass"), TAG_ENABLED, "true");
+        }
     }
 
     /**
@@ -150,55 +420,54 @@ public class MCPatcherUtils {
         System.out.printf("ERROR: " + format + "\n", params);
     }
 
-    private static String getPropertyKey(String mod, String name) {
-        if (mod == null || mod.equals("")) {
-            return name;
-        } else {
-            return mod + "." + name;
-        }
-    }
-
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
      * @param mod          name of mod
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return String value
      */
-    public static String getString(String mod, String name, Object defaultValue) {
-        String key = getPropertyKey(mod, name);
-        String value = defaultValue.toString();
-        if (!properties.containsKey(key)) {
-            properties.setProperty(key, value);
-            needSaveProps = true;
+    public static String getString(String mod, String tag, Object defaultValue) {
+        if (mod == null) {
+            return getString(tag, defaultValue);
         }
-        return properties.getProperty(key, value);
+        String value = getModConfigValue(mod, tag);
+        if (value == null) {
+            value = defaultValue.toString();
+            setModConfigValue(mod, tag, value);
+        }
+        return value;
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return String value
      */
-    public static String getString(String name, Object defaultValue) {
-        return getString(null, name, defaultValue);
+    public static String getString(String tag, Object defaultValue) {
+        String value = getConfigValue(tag);
+        if (value == null) {
+            value = defaultValue.toString();
+            setConfigValue(tag, value);
+        }
+        return value;
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
      * @param mod          name of mod
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
-    public static int getInt(String mod, String name, int defaultValue) {
+    public static int getInt(String mod, String tag, int defaultValue) {
         int value;
         try {
-            value = Integer.parseInt(getString(mod, name, defaultValue));
+            value = Integer.parseInt(getString(mod, tag, defaultValue));
         } catch (NumberFormatException e) {
             value = defaultValue;
         }
@@ -206,26 +475,26 @@ public class MCPatcherUtils {
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return int value or 0
      */
-    public static int getInt(String name, int defaultValue) {
-        return getInt(null, name, defaultValue);
+    public static int getInt(String tag, int defaultValue) {
+        return getInt(null, tag, defaultValue);
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
      * @param mod          name of mod
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
-    public static boolean getBoolean(String mod, String name, boolean defaultValue) {
-        String value = getString(mod, name, defaultValue).toLowerCase();
+    public static boolean getBoolean(String mod, String tag, boolean defaultValue) {
+        String value = getString(mod, tag, defaultValue).toLowerCase();
         if (value.equals("false")) {
             return false;
         } else if (value.equals("true")) {
@@ -236,84 +505,93 @@ public class MCPatcherUtils {
     }
 
     /**
-     * Gets a value from mcpatcher.properties.
+     * Gets a value from mcpatcher.xml.
      *
-     * @param name         property name
+     * @param tag          property name
      * @param defaultValue default value if not found in .properties file
      * @return boolean value
      */
-    public static boolean getBoolean(String name, boolean defaultValue) {
-        return getBoolean(null, name, defaultValue);
+    public static boolean getBoolean(String tag, boolean defaultValue) {
+        return getBoolean(null, tag, defaultValue);
     }
 
     /**
-     * Sets a value in mcpatcher.properties.
+     * Sets a value in mcpatcher.xml.
      *
      * @param mod   name of mod
-     * @param name  property name
+     * @param tag   property name
      * @param value property value (must support toString())
      */
-    public static void set(String mod, String name, Object value) {
-        String key = getPropertyKey(mod, name);
-        String oldValue = properties.getProperty(key);
-        String newValue = value.toString();
-        properties.setProperty(key, newValue);
-        if (!newValue.equals(oldValue)) {
-            needSaveProps = true;
+    public static void set(String mod, String tag, Object value) {
+        if (mod == null) {
+            set(tag, value);
+            return;
         }
-    }
-
-    static void set(String name, Object value) {
-        set(null, name, value);
+        setModConfigValue(mod, tag, value.toString());
     }
 
     /**
-     * Remove a value from mcpatcher.properties.
+     * Set a global config value in mcpatcher.xml.
      *
-     * @param mod  name of mod
-     * @param name property name
+     * @param tag   property name
+     * @param value property value (must support toString())
      */
-    public static void remove(String mod, String name) {
-        String key = getPropertyKey(mod, name);
-        if (properties.containsKey(key)) {
-            properties.remove(key);
-            needSaveProps = true;
-        }
-    }
-
-    static void remove(String name) {
-        remove(null, name);
+    static void set(String tag, Object value) {
+        setConfigValue(tag, value.toString());
     }
 
     /**
-     * Save all properties to mcpatcher.properties.
+     * Remove a value from mcpatcher.xml.
+     *
+     * @param mod name of mod
+     * @param tag property name
+     */
+    public static void remove(String mod, String tag) {
+        if (mod == null) {
+            remove(mod);
+        } else {
+            remove(getModConfig(mod, tag));
+        }
+    }
+
+    /**
+     * Remove a global config value from mcpatcher.xml.
+     *
+     * @param tag property name
+     */
+    static void remove(String tag) {
+        remove(getConfig(tag));
+    }
+
+    /**
+     * Save all properties to mcpatcher.xml.
      *
      * @return true if successful
      */
     public static boolean saveProperties() {
-        if (!needSaveProps) {
-            return true;
-        }
         boolean saved = false;
-        FileOutputStream os = null;
-        if (properties != null && propFile != null) {
+        if (xml != null && xmlFile != null) {
+            FileOutputStream os = null;
             try {
-                os = new FileOutputStream(propFile);
-                properties.store(os, "settings for MCPatcher");
+                os = new FileOutputStream(xmlFile);
+                TransformerFactory factory = TransformerFactory.newInstance();
+                Transformer trans = factory.newTransformer();
+                trans.setOutputProperty(OutputKeys.INDENT, "yes");
+                DOMSource source = new DOMSource(xml);
+                trans.transform(source, new StreamResult(os));
                 saved = true;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 if (os != null) {
                     try {
                         os.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
-        needSaveProps = false;
         return saved;
     }
 }

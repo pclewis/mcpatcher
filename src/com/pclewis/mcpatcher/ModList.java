@@ -4,6 +4,9 @@ import com.pclewis.mcpatcher.mod.BaseMod;
 import com.pclewis.mcpatcher.mod.BetterGrass;
 import com.pclewis.mcpatcher.mod.HDFont;
 import com.pclewis.mcpatcher.mod.HDTexture;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -57,23 +60,38 @@ class ModList {
         URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
         for (JarEntry entry : Collections.list(jar.entries())) {
             if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
-                Class<?> cl = null;
-                try {
-                    cl = loader.loadClass(ClassMap.filenameToClassName(entry.getName()));
-                } catch (NoClassDefFoundError e) {
-                    Logger.log(Logger.LOG_MOD, "WARNING: skipping %s: %s", entry.getName(), e.toString());
-                }
-                if (cl != null && !cl.isInterface() && Mod.class.isAssignableFrom(cl)) {
-                    int flags = cl.getModifiers();
-                    if (!Modifier.isAbstract(flags) && Modifier.isPublic(flags)) {
-                        Mod mod = (Mod) cl.newInstance();
-                        if (addNoReplace(mod)) {
-                            Logger.log(Logger.LOG_MOD, "new %s()", cl.getName());
-                        }
-                    }
+                Mod mod = loadCustomMod(loader, ClassMap.filenameToClassName(entry.getName()));
+                if (mod != null && addNoReplace(mod)) {
+                    Logger.log(Logger.LOG_MOD, "new %s()", mod.getClass().getName());
                 }
             }
         }
+    }
+
+    private Mod loadCustomMod(File file, String className) {
+        try {
+            URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
+            return loadCustomMod(loader, className);
+        } catch (Exception e) {
+            Logger.log(e);
+        }
+        return null;
+    }
+
+    private Mod loadCustomMod(URLClassLoader loader, String className) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        Class<?> cl = null;
+        try {
+            cl = loader.loadClass(className);
+        } catch (NoClassDefFoundError e) {
+            Logger.log(Logger.LOG_MOD, "WARNING: skipping %s: %s", className, e.toString());
+        }
+        if (cl != null && !cl.isInterface() && Mod.class.isAssignableFrom(cl)) {
+            int flags = cl.getModifiers();
+            if (!Modifier.isAbstract(flags) && Modifier.isPublic(flags)) {
+                return (Mod) cl.newInstance();
+            }
+        }
+        return null;
     }
 
     public Vector<Mod> getAll() {
@@ -116,11 +134,9 @@ class ModList {
         for (int i = modsByIndex.size() - 1; i >= 0; i--) {
             Mod mod = modsByIndex.get(i);
             boolean enabled = mod.okToApply();
-            if (enabled && ! enableAll) {
-                String name = mod.getConfigName();
-                if (name != null) {
-                    enabled = MCPatcherUtils.getBoolean(name, "enabled", mod.defaultEnabled);
-                }
+            if (enabled && !enableAll) {
+                //String name = mod.getName();
+                //enabled = MCPatcherUtils.isModEnabled(mod.getName());
             }
             selectMod(mod, enabled);
         }
@@ -219,6 +235,9 @@ class ModList {
         mod.setRefs();
         modsByName.put(name, mod);
         modsByIndex.add(mod);
+        if (!MCPatcherUtils.hasMod(mod.getName())) {
+            MCPatcherUtils.getMods().appendChild(defaultModElement(mod));
+        }
         mod.loadOptions();
         return true;
     }
@@ -262,10 +281,6 @@ class ModList {
         for (Map.Entry<Mod, Boolean> entry : inst.entrySet()) {
             mod = entry.getKey();
             mod.setEnabled(entry.getValue());
-            String name = mod.getConfigName();
-            if (name != null) {
-                MCPatcherUtils.set(name, "enabled", mod.isEnabled());
-            }
         }
     }
 
@@ -320,6 +335,96 @@ class ModList {
                         break;
                     }
                 }
+            }
+        }
+    }
+
+    public void loadSavedMods() {
+        Element mods = MCPatcherUtils.getMods();
+        if (mods == null) {
+            return;
+        }
+        NodeList list = mods.getElementsByTagName(MCPatcherUtils.TAG_MOD);
+        for (int i = 0; i < list.getLength(); i++) {
+            Element element = (Element) list.item(i);
+            String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
+            String type = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_TYPE);
+            Mod mod = null;
+            if (name == null || type == null) {
+            } else if (type.equals(MCPatcherUtils.VAL_BUILTIN)) {
+                if (name.equals("HD Textures")) {
+                    mod = new HDTexture();
+                } else if (name.equals("HD Font")) {
+                    mod = new HDFont();
+                } else if (name.equals("Better Grass")) {
+                    mod = new BetterGrass();
+                }
+            } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_JAR)) {
+                String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
+                String className = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_CLASS);
+                if (path != null && className != null) {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        mod = loadCustomMod(file, className);
+                    }
+                }
+            }
+            if (mod != null) {
+                addNoReplace(mod);
+            }
+        }
+    }
+
+    private void updateModElement(Mod mod, Element element) {
+        if (mod.customJar == null) {
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
+        } else {
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_JAR);
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PATH, mod.customJar.getName());
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_CLASS, mod.getClass().getCanonicalName());
+        }
+    }
+
+    private Element defaultModElement(Mod mod) {
+        Element mods = MCPatcherUtils.getMods();
+        if (mods == null) {
+            return null;
+        }
+        Element element = MCPatcherUtils.getMod(mod.getName());
+        MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.defaultEnabled));
+        updateModElement(mod, element);
+        return element;
+    }
+
+    void updateProperties() {
+        Element mods = MCPatcherUtils.getMods();
+        if (mods == null) {
+            return;
+        }
+        HashMap<String, Element> oldElements = new HashMap<String, Element>();
+        while (mods.hasChildNodes()) {
+            Node node = mods.getFirstChild();
+            if (node instanceof Element) {
+                Element element = (Element) node;
+                String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
+                if (name != null) {
+                    oldElements.put(name, element);
+                }
+            }
+            mods.removeChild(node);
+        }
+        for (Mod mod : modsByIndex) {
+            if (mod.internal) {
+                continue;
+            }
+            Element element = oldElements.get(mod.getName());
+            if (element == null) {
+                defaultModElement(mod);
+            } else {
+                MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.isEnabled() && mod.okToApply()));
+                updateModElement(mod, element);
+                mods.appendChild(element);
+                oldElements.remove(mod.getName());
             }
         }
     }

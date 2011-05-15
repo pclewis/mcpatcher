@@ -121,15 +121,15 @@ final public class MCPatcher {
 
         Util.logOSInfo();
 
-        if (!MCPatcherUtils.getString("lastVersion", "").equals(VERSION_STRING)) {
-            MCPatcherUtils.set("lastVersion", VERSION_STRING);
-            MCPatcherUtils.set("betaWarningShown", false);
-            MCPatcherUtils.set("debug", BETA_VERSION > 0);
-            MCPatcherUtils.getInt("heapSize", 1024);
+        if (!MCPatcherUtils.getString(MCPatcherUtils.TAG_LAST_VERSION, "").equals(VERSION_STRING)) {
+            MCPatcherUtils.set(MCPatcherUtils.TAG_LAST_VERSION, VERSION_STRING);
+            MCPatcherUtils.set(MCPatcherUtils.TAG_BETA_WARNING_SHOWN, false);
+            MCPatcherUtils.set(MCPatcherUtils.TAG_DEBUG, BETA_VERSION > 0);
+            MCPatcherUtils.getInt(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, 1024);
         }
-        if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean("betaWarningShown", false)) {
+        if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean(MCPatcherUtils.TAG_BETA_WARNING_SHOWN, false)) {
             ui.showBetaWarning();
-            MCPatcherUtils.set("betaWarningShown", true);
+            MCPatcherUtils.set(MCPatcherUtils.TAG_BETA_WARNING_SHOWN, true);
         }
 
         getAllMods();
@@ -138,9 +138,16 @@ final public class MCPatcher {
         }
 
         if (ui.shouldExit()) {
-            MCPatcherUtils.saveProperties();
+            saveProperties();
             System.exit(exitStatus);
         }
+    }
+
+    static void saveProperties() {
+        if (modList != null) {
+            modList.updateProperties();
+        }
+        MCPatcherUtils.saveProperties();
     }
 
     static void checkInterrupt() throws InterruptedException {

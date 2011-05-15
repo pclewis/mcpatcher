@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.jar.JarFile;
 
 /**
  * Base class for all mods.
@@ -16,10 +17,6 @@ public abstract class Mod {
      * Name of the mod as displayed in the MCPatcher UI
      */
     protected String name = "";
-    /**
-     * Name of the mod used in mcpatcher.properties
-     */
-    protected String configName = null;
     /**
      * Author of the mod
      */
@@ -54,6 +51,7 @@ public abstract class Mod {
     private ArrayList<String> errors = new ArrayList<String>();
     private boolean enabled = false;
     boolean internal = false;
+    JarFile customJar = null;
     ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
     HashMap<String, String> filesAdded = new HashMap<String, String>();
 
@@ -101,10 +99,6 @@ public abstract class Mod {
 
     public String getName() {
         return name;
-    }
-
-    public String getConfigName() {
-        return configName;
     }
 
     public String getAuthor() {
