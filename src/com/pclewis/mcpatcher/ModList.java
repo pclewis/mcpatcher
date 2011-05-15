@@ -30,6 +30,7 @@ class ModList {
     public ModList() {
         baseMod = new BaseMod();
         baseMod.internal = true;
+        baseMod.setEnabled(true);
         addNoReplace(baseMod);
     }
 
@@ -383,7 +384,7 @@ class ModList {
             } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_ZIP)) {
                 String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
                 String prefix = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PREFIX);
-                if (path != null && prefix != null) {
+                if (path != null) {
                     File file = new File(path);
                     if (file.exists()) {
                         try {

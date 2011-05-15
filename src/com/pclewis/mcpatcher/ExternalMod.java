@@ -12,6 +12,9 @@ class ExternalMod extends Mod {
     String prefix;
 
     public ExternalMod(ZipFile zipFile, String prefix) {
+        if (prefix == null) {
+            prefix = "";
+        }
         this.zipFile = zipFile;
         this.prefix = prefix;
 
