@@ -155,7 +155,7 @@ public class MCPatcherUtils {
                             e.printStackTrace();
                         }
                     }
-                    //propFile.delete();
+                    propFile.delete();
                 }
             }
 
