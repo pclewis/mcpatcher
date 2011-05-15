@@ -24,9 +24,15 @@ public class AddModDialog extends JDialog {
     private ZipFile zipFile;
     private ZipTreeDialog zipDialog;
     private Mod mod;
-    private boolean busy;
 
     public AddModDialog() {
+        this(null, "");
+    }
+
+    public AddModDialog(ZipFile zipFile, String prefix) {
+        this.zipFile = zipFile;
+        prefixField.setText(prefix);
+
         setContentPane(contentPane);
         setTitle("Add external mod");
         setMinimumSize(new Dimension(512, 512));
@@ -62,29 +68,7 @@ public class AddModDialog extends JDialog {
 
         browseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fd = new JFileChooser();
-                fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                fd.setFileHidingEnabled(false);
-                fd.setDialogTitle("Select mod zip file");
-                fd.setCurrentDirectory(MCPatcherUtils.getMinecraftPath());
-                fd.setAcceptAllFileFilterUsed(false);
-                fd.setFileFilter(new FileFilter() {
-                    @Override
-                    public boolean accept(File f) {
-                        String filename = f.getName().toLowerCase();
-                        return f.isDirectory() || filename.endsWith(".zip");
-                    }
-
-                    @Override
-                    public String getDescription() {
-                        return "*.zip";
-                    }
-                });
-                if (fd.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
-                    inputField.setText(fd.getSelectedFile().getPath());
-                    showZipDialog();
-                }
-                updateControls();
+                showBrowseDialog();
             }
         });
 
@@ -94,7 +78,10 @@ public class AddModDialog extends JDialog {
             }
         });
 
-        setBusy(false);
+        updateControls();
+        if (prefix.equals("")) {
+            showBrowseDialog();
+        }
     }
 
     public void dispose() {
@@ -112,15 +99,38 @@ public class AddModDialog extends JDialog {
         dispose();
     }
 
-    private void setBusy(boolean busy) {
-        this.busy = busy;
-        updateControls();
+    private void updateControls() {
+        chooseButton.setEnabled(new File(inputField.getText()).exists());
     }
 
-    private void updateControls() {
-        File file = new File(inputField.getText());
-        browseButton.setEnabled(!busy);
-        chooseButton.setEnabled(!busy && file.exists());
+    private void showBrowseDialog() {
+        JFileChooser fd = new JFileChooser();
+        fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fd.setFileHidingEnabled(false);
+        fd.setDialogTitle("Select mod zip file");
+        File dir = MCPatcherUtils.getMinecraftPath("mods");
+        if (!dir.isDirectory()) {
+            dir = MCPatcherUtils.getMinecraftPath();
+        }
+        fd.setCurrentDirectory(dir);
+        fd.setAcceptAllFileFilterUsed(false);
+        fd.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                String filename = f.getName().toLowerCase();
+                return f.isDirectory() || filename.endsWith(".zip");
+            }
+
+            @Override
+            public String getDescription() {
+                return "*.zip";
+            }
+        });
+        if (fd.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
+            inputField.setText(fd.getSelectedFile().getPath());
+            showZipDialog();
+        }
+        updateControls();
     }
 
     private void showZipDialog() {

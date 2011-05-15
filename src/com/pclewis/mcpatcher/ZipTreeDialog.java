@@ -103,7 +103,7 @@ public class ZipTreeDialog extends JDialog {
         for (int i = 0; i < tree.getRowCount(); i++) {
             tree.expandRow(i);
         }
-        tree.setSelectionPath(new TreePath(new ZipTreeNode("", "/" + prefix)));
+        tree.setSelectionRow(0);
     }
 
     static class ZipTreeNode {
