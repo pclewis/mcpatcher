@@ -1,5 +1,9 @@
 package com.pclewis.mcpatcher;
 
+import org.w3c.dom.*;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,6 +17,8 @@ import java.util.Properties;
 public class MCPatcherUtils {
     private static File minecraftDir = null;
     private static File propFile = null;
+    private static File xmlFile = null;
+    private static Document xml;
     private static Properties properties;
     private static boolean needSaveProps = false;
     private static boolean debug = false;
@@ -89,9 +95,167 @@ public class MCPatcherUtils {
             }
             debug = getBoolean("debug", false);
             saveProperties();
+
+            xmlFile = new File(minecraftDir, "mcpatcher.xml");
+            DocumentBuilder builder = null;
+            xml = null;
+            if (xmlFile.exists()) {
+                try {
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    builder = factory.newDocumentBuilder();
+                    xml = builder.parse(xmlFile);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (builder != null && xml == null) {
+                xml = builder.newDocument();
+                buildNewProperties();
+            }
+
             return true;
         }
         return false;
+    }
+
+    /*
+     * <mcpatcher-profile>
+     *     <config>
+     *         <debug>false</debug>
+     *         <java-heap-size>1024</java-heap-size>
+     *         <last-version>2.0.1</last-version>
+     *         <beta-warning-shown>false</beta-warning-shown>
+     *     </config>
+     *     <mods>
+     *         <mod>
+     *             <name>HD Textures</name>
+     *             <type>builtin</type>
+     *             <enabled>true</enabled>
+     *             <config>
+     *                 <useAnimatedTextures>true</useAnimatedTextures>
+     *             </config>
+     *         </mod>
+     *         <mod>
+     *             <name>ModLoader</name>
+     *             <type>external zip</type>
+     *             <path>/home/user/.minecraft/mods/ModLoader.zip</path>
+     *             <prefix />
+     *             <enabled>true</enabled>
+     *         </mod>
+     *     </mods>
+     * </mcpatcher-profile>
+     */
+    static final String TAG_ROOT = "mcpatcher-profile";
+    static final String TAG_CONFIG1 = "config";
+    static final String TAG_DEBUG = "debug";
+    static final String TAG_JAVA_HEAP_SIZE = "java-heap-size";
+    static final String TAG_LAST_VERSION = "last-version";
+    static final String TAG_BETA_WARNING_SHOWN = "beta-warning-shown";
+    static final String TAG_MODS = "mods";
+    static final String TAG_MOD = "mod";
+    static final String TAG_NAME = "name";
+    static final String TAG_TYPE = "type";
+    static final String TAG_PATH = "path";
+    static final String TAG_PREFIX = "prefix";
+    static final String TAG_ENABLED = "enabled";
+    static final String TAG_CONFIG = "config";
+    static final String ATTR_VERSION = "version";
+    static final String VAL_BUILTIN = "built in";
+    static final String VAL_EXTERNAL_ZIP = "external zip";
+
+    static Element getElement(Element parent, String tag) {
+        NodeList list = parent.getElementsByTagName(tag);
+        Element element;
+        if (list.getLength() == 0) {
+            element = xml.createElement(tag);
+            parent.appendChild(element);
+        } else {
+            element = (Element) list.item(0);
+        }
+        return element;
+    }
+
+    static String getText(Node node) {
+        if (node != null) {
+            switch (node.getNodeType()) {
+                case Node.TEXT_NODE:
+                    return ((Text) node).getData();
+
+                case Node.ATTRIBUTE_NODE:
+                    return ((Attr) node).getValue();
+
+                case Node.ELEMENT_NODE:
+                    NodeList list = node.getChildNodes();
+                    for (int i = 0; i < list.getLength(); i++) {
+                        Node node1 = list.item(i);
+                        if (node1.getNodeType() == Node.TEXT_NODE) {
+                            return ((Text) node).getData();
+                        }
+                    }
+
+                default:
+                    break;
+            }
+        }
+        return null;
+    }
+
+    static String getText(Element parent, String tag) {
+        return getText(getElement(parent, tag));
+    }
+
+    static Element getRoot() {
+        return getElement(xml.getDocumentElement(), TAG_ROOT);
+    }
+
+    static Element getConfig() {
+        return getElement(getRoot(), TAG_CONFIG1);
+    }
+
+    static Element getConfig(String tag) {
+        return getElement(getConfig(), tag);
+    }
+
+    static String getConfigValue(String tag) {
+        return getText(getConfig(tag));
+    }
+
+    static Element getMods() {
+        return getElement(getRoot(), TAG_MODS);
+    }
+
+    static Element getMod(String mod) {
+        Element parent = getMods();
+        NodeList list = parent.getElementsByTagName(TAG_MOD);
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node instanceof Element) {
+                Element element = (Element) node;
+                if (mod.equals(getText(element, TAG_NAME))) {
+                    return element;
+                }
+            }
+        }
+        Element element = xml.createElement(TAG_MOD);
+        parent.appendChild(element);
+        Element element1 = xml.createElement(TAG_NAME);
+        element.appendChild(element1);
+        Text text = xml.createTextNode(mod);
+        element1.appendChild(text);
+        return element;
+    }
+
+    static Element getModConfig(String mod) {
+        return getElement(getMod(mod), TAG_CONFIG1);
+    }
+
+    static String getModConfigValue(String mod, String tag) {
+        return getText(getModConfig(mod), tag);
+    }
+
+    private static void buildNewProperties() {
+        Element root = xml.createElement(TAG_ROOT);
+        xml.appendChild(root);
     }
 
     /**
