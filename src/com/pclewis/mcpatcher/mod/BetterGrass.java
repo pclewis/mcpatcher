@@ -13,7 +13,7 @@ public class BetterGrass extends Mod {
     private static final String fieldtype_MATRIX = "[[I";
 
     public BetterGrass() {
-        name = "Better Grass";
+        name = MCPatcherUtils.VAL_BETTER_GRASS;
         author = "MCPatcher";
         description = "Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.";
         version = "1.0";

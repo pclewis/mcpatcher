@@ -10,8 +10,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 public class HDTextureConfig extends ModConfigPanel {
-    private static final String MOD_CFG_NAME = "HD Textures";
-
     private JPanel panel;
     private JComboBox waterCombo;
     private JComboBox lavaCombo;
@@ -35,7 +33,7 @@ public class HDTextureConfig extends ModConfigPanel {
 
         textureCacheCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                MCPatcherUtils.set(MOD_CFG_NAME, "useTextureCache", textureCacheCheckBox.isSelected());
+                MCPatcherUtils.set(MCPatcherUtils.VAL_HD_TEXTURES, "useTextureCache", textureCacheCheckBox.isSelected());
             }
         });
     }
@@ -63,7 +61,7 @@ public class HDTextureConfig extends ModConfigPanel {
             }
         } catch (Throwable e) {
         }
-        textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MOD_CFG_NAME, "useTextureCache", is64bit));
+        textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "useTextureCache", is64bit));
     }
 
     @Override
@@ -111,15 +109,15 @@ public class HDTextureConfig extends ModConfigPanel {
                     default:
                         return;
                 }
-                MCPatcherUtils.set(MOD_CFG_NAME, customTag, custom);
-                MCPatcherUtils.set(MOD_CFG_NAME, animatedTag, anim);
+                MCPatcherUtils.set(MCPatcherUtils.VAL_HD_TEXTURES, customTag, custom);
+                MCPatcherUtils.set(MCPatcherUtils.VAL_HD_TEXTURES, animatedTag, anim);
             }
         }
 
         public void load() {
-            if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, customTag, true)) {
+            if (MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, customTag, true)) {
                 comboBox.setSelectedIndex(OPT_CUSTOM_ANIMATED);
-            } else if (MCPatcherUtils.getBoolean(MOD_CFG_NAME, animatedTag, true)) {
+            } else if (MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, animatedTag, true)) {
                 comboBox.setSelectedIndex(OPT_DEFAULT);
             } else {
                 comboBox.setSelectedIndex(OPT_NOT_ANIMATED);

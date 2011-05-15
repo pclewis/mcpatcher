@@ -70,6 +70,9 @@ public class MCPatcherUtils {
     static final String VAL_BUILTIN = "builtIn";
     static final String VAL_EXTERNAL_ZIP = "externalZip";
     static final String VAL_EXTERNAL_JAR = "externalJar";
+    public static final String VAL_HD_TEXTURES = "HD Textures";
+    public static final String VAL_HD_FONT = "HD Font";
+    public static final String VAL_BETTER_GRASS = "Better Grass";
 
     private MCPatcherUtils() {
     }
@@ -176,7 +179,7 @@ public class MCPatcherUtils {
             } else if (tag.startsWith("HDTexture.")) {
                 tag = tag.substring(10);
                 if (!tag.equals("enabled")) {
-                    set("HD Textures", tag, value);
+                    set(VAL_HD_TEXTURES, tag, value);
                 }
             }
         }
@@ -358,9 +361,9 @@ public class MCPatcherUtils {
             getRoot();
             getConfig();
             getMods();
-            setText(getMod("HD Textures"), TAG_ENABLED, "true");
-            setText(getMod("HD Font"), TAG_ENABLED, "true");
-            setText(getMod("Better Grass"), TAG_ENABLED, "true");
+            setText(getMod(VAL_HD_TEXTURES), TAG_ENABLED, "true");
+            setText(getMod(VAL_HD_FONT), TAG_ENABLED, "true");
+            setText(getMod(VAL_BETTER_GRASS), TAG_ENABLED, "true");
         }
     }
 

@@ -40,16 +40,16 @@ public class TextureUtils {
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
 
     static {
-        animatedFire = MCPatcherUtils.getBoolean("HD Textures", "animatedFire", true);
-        animatedLava = MCPatcherUtils.getBoolean("HD Textures", "animatedLava", true);
-        animatedWater = MCPatcherUtils.getBoolean("HD Textures", "animatedWater", true);
-        animatedPortal = MCPatcherUtils.getBoolean("HD Textures", "animatedPortal", true);
-        customFire = MCPatcherUtils.getBoolean("HD Textures", "customFire", true);
-        customLava = MCPatcherUtils.getBoolean("HD Textures", "customLava", true);
-        customWater = MCPatcherUtils.getBoolean("HD Textures", "customWater", true);
-        customPortal = MCPatcherUtils.getBoolean("HD Textures", "customPortal", true);
+        animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedFire", true);
+        animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedLava", true);
+        animatedWater = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedWater", true);
+        animatedPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedPortal", true);
+        customFire = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customFire", true);
+        customLava = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customLava", true);
+        customWater = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customWater", true);
+        customPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customPortal", true);
 
-        useTextureCache = MCPatcherUtils.getBoolean("HD Textures", "useTextureCache", false);
+        useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "useTextureCache", false);
 
         expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);
