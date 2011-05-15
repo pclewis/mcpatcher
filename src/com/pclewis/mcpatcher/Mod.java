@@ -1,10 +1,10 @@
 package com.pclewis.mcpatcher;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Base class for all mods.
@@ -55,6 +55,7 @@ public abstract class Mod {
     private boolean enabled = false;
     boolean internal = false;
     ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
+    HashMap<String, String> filesAdded = new HashMap<String, String>();
 
     /**
      * Initialize mod.
@@ -142,6 +143,7 @@ public abstract class Mod {
     }
 
     void resetCounts() {
+        filesAdded.clear();
         for (ClassMod classMod : getClassMods()) {
             for (ClassPatch classPatch : classMod.patches) {
                 classPatch.numMatches.clear();

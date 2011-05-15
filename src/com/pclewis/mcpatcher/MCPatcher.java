@@ -4,10 +4,7 @@ import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -338,10 +335,18 @@ final public class MCPatcher {
             out.println();
         } else {
             for (Mod mod : modList.getSelected()) {
-                if (mod.getClassMods().size() == 0) {
+                if (mod.getClassMods().size() == 0 && mod.filesAdded.isEmpty()) {
                     continue;
                 }
                 out.printf("%s\n", mod.getName());
+                for (Map.Entry<String, String> entry : mod.filesAdded.entrySet()) {
+                    out.printf("    %s %s\n", entry.getValue(), entry.getKey());
+                }
+                for (String name : mod.filesToAdd) {
+                    if (!mod.filesAdded.containsKey(name)) {
+                        out.printf("    WARNING: %s not added (possible conflict)\n", name);
+                    }
+                }
                 for (ClassMod classMod : mod.getClassMods()) {
                     ArrayList<String> tc = classMod.targetClasses;
                     out.printf("    %s", classMod.getDeobfClass());
@@ -442,6 +447,7 @@ final public class MCPatcher {
                     throw new IOException(String.format("could not open %s for %s", name, fromMod.getName()));
                 }
                 Logger.log(Logger.LOG_MOD, "replacing %s for %s", name, fromMod.getName());
+                fromMod.filesAdded.put(name, "replaced");
             }
 
             if (name.endsWith(".class")) {
@@ -489,19 +495,19 @@ final public class MCPatcher {
         for (Mod mod : modList.getSelected()) {
             for (String name : mod.filesToAdd) {
                 if (origJar.getEntry(name) == null) {
-                    addOrReplaceFile("adding", mod, name, outputJar);
+                    addFile(mod, name, outputJar);
                 }
             }
         }
     }
 
-    private static boolean addOrReplaceFile(String action, Mod mod, String filename, JarOutputStream outputJar) throws IOException, BadBytecode {
+    private static boolean addFile(Mod mod, String filename, JarOutputStream outputJar) throws IOException, BadBytecode {
         String resource = "/" + filename;
         InputStream inputStream = mod.openFile(resource);
         if (inputStream == null) {
             throw new IOException(String.format("could not open %s for %s", resource, mod.getName()));
         }
-        Logger.log(Logger.LOG_CLASS, "%s %s for %s", action, filename, mod.getName());
+        Logger.log(Logger.LOG_CLASS, "adding %s for %s", filename, mod.getName());
 
         try {
             outputJar.putNextEntry(new ZipEntry(filename));
@@ -514,6 +520,7 @@ final public class MCPatcher {
                 Util.copyStream(inputStream, outputJar);
             }
             outputJar.closeEntry();
+            mod.filesAdded.put(filename, "added");
         } catch (ZipException e) {
             if (!e.toString().contains("duplicate entry")) {
                 throw e;

@@ -1571,17 +1571,8 @@ Patching...
                                NOP
                                NOP
                                NOP
-DEBUG: attempting to open /com/pclewis/mcpatcher/MCPatcherUtils.class
-DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/MCPatcherUtils.class
-DEBUG: successfully opened /com/pclewis/mcpatcher/MCPatcherUtils.class
   adding com/pclewis/mcpatcher/MCPatcherUtils.class for __Base
-DEBUG: attempting to open /com/pclewis/mcpatcher/mod/TileSize.class
-DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/mod/TileSize.class
-DEBUG: successfully opened /com/pclewis/mcpatcher/mod/TileSize.class
   adding com/pclewis/mcpatcher/mod/TileSize.class for HD Textures
-DEBUG: attempting to open /com/pclewis/mcpatcher/mod/TextureUtils.class
-DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/mod/TextureUtils.class
-DEBUG: successfully opened /com/pclewis/mcpatcher/mod/TextureUtils.class
   adding com/pclewis/mcpatcher/mod/TextureUtils.class for HD Textures
    method signature ()Lnet/minecraft/src/TexturePackBase; -> ()Lh;
    method signature (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> (Lh;)Ljava/lang/String;
@@ -1696,9 +1687,6 @@ DEBUG: successfully opened /com/pclewis/mcpatcher/mod/TextureUtils.class
    string replace net/minecraft/src/TextureFX -> as @2399
    string replace net/minecraft/src/FlowLava -> hq @1700
    string replace net/minecraft/src/Fire -> ra @2070
-DEBUG: attempting to open /com/pclewis/mcpatcher/mod/CustomAnimation.class
-DEBUG: got url jar:file:/home/prupe/.minecraft/mcpatcher/out/artifacts/mcpatcher/mcpatcher.jar!/com/pclewis/mcpatcher/mod/CustomAnimation.class
-DEBUG: successfully opened /com/pclewis/mcpatcher/mod/CustomAnimation.class
   adding com/pclewis/mcpatcher/mod/CustomAnimation.class for HD Textures
    method onTick -> a
     method ref net.minecraft.src.TextureFX.<init> (I)V -> as.<init> (I)V <init>@2
@@ -1796,7 +1784,13 @@ DEBUG: successfully opened /com/pclewis/mcpatcher/mod/CustomAnimation.class
 Done!
 
 #### Patch summary:
+__Base
+    added com/pclewis/mcpatcher/MCPatcherUtils.class
+
 HD Textures
+    added com/pclewis/mcpatcher/mod/TextureUtils.class
+    added com/pclewis/mcpatcher/mod/TileSize.class
+    added com/pclewis/mcpatcher/mod/CustomAnimation.class
     RenderEngine (ip.class)
         [1] (i % 16) * 16 + j * 16 -> (i % 16) * int_size + j * int_size
         [1] (i / 16) * 16 + j * 16 -> (i / 16) * int_size + j * int_size
