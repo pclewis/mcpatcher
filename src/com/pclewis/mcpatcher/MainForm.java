@@ -203,10 +203,13 @@ class MainForm {
             public void actionPerformed(ActionEvent e) {
                 int row = modTable.getSelectedRow();
                 if (row >= 0) {
-                    row = MCPatcher.modList.moveUp(row);
+                    int newRow = MCPatcher.modList.moveUp(row);
                     modTable.clearSelection();
-                    redrawModList();
-                    modTable.addRowSelectionInterval(row, row);
+                    AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+                    model.fireTableRowsUpdated(Math.min(row, newRow), Math.max(row, newRow));
+                    ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
+                    renderer.resetRowHeights();
+                    modTable.addRowSelectionInterval(newRow, newRow);
                 }
             }
         });
@@ -215,10 +218,13 @@ class MainForm {
             public void actionPerformed(ActionEvent e) {
                 int row = modTable.getSelectedRow();
                 if (row >= 0) {
-                    row = MCPatcher.modList.moveDown(row);
+                    int newRow = MCPatcher.modList.moveDown(row);
                     modTable.clearSelection();
-                    redrawModList();
-                    modTable.addRowSelectionInterval(row, row);
+                    AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+                    model.fireTableRowsUpdated(Math.min(row, newRow), Math.max(row, newRow));
+                    ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
+                    renderer.resetRowHeights();
+                    modTable.addRowSelectionInterval(newRow, newRow);
                 }
             }
         });
@@ -231,10 +237,13 @@ class MainForm {
                     addModDialog.setVisible(true);
                     Mod mod = addModDialog.getMod();
                     if (mod != null) {
-                        MCPatcher.modList.addFirst(mod);
+                        int row = MCPatcher.modList.addFirst(mod);
                         mod.setEnabled(true);
                         modTable.clearSelection();
-                        redrawModList();
+                        AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+                        model.fireTableRowsInserted(row, row);
+                        ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
+                        renderer.resetRowHeights();
                     }
                 } catch (Exception e1) {
                     Logger.log(e1);
@@ -260,7 +269,10 @@ class MainForm {
                 if (mod instanceof ExternalMod) {
                     MCPatcher.modList.remove(mod);
                     modTable.clearSelection();
-                    redrawModList();
+                    AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+                    model.fireTableRowsDeleted(row, row);
+                    ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
+                    renderer.resetRowHeights();
                 }
             }
         });
@@ -624,7 +636,6 @@ class MainForm {
         modTable.getColumnModel().getColumn(1).setCellRenderer(new ModTextRenderer());
         AbstractTableModel model = (AbstractTableModel) modTable.getModel();
         model.fireTableDataChanged();
-        modTable.doLayout();
     }
 
     private class ModCheckBoxRenderer extends JCheckBox implements TableCellRenderer {
@@ -661,6 +672,10 @@ class MainForm {
 
         private String htmlEscape(String s) {
             return s == null ? "" : s.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        }
+
+        public void resetRowHeights() {
+            rowSize.clear();
         }
 
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

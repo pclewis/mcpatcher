@@ -144,7 +144,7 @@ class ModList {
         }
     }
 
-    public void addFirst(Mod mod) {
+    public int addFirst(Mod mod) {
         String name = mod.getName();
         Mod oldMod = modsByName.get(name);
         if (oldMod != null) {
@@ -159,9 +159,10 @@ class ModList {
         }
         modsByName.put(name, mod);
         mod.setRefs();
+        return indexOfVisible(mod);
     }
 
-    public void addLast(Mod mod) {
+    public int addLast(Mod mod) {
         String name = mod.getName();
         Mod oldMod = modsByName.get(name);
         if (oldMod != null) {
@@ -170,6 +171,7 @@ class ModList {
         modsByIndex.add(mod);
         modsByName.put(name, mod);
         mod.setRefs();
+        return indexOfVisible(mod);
     }
 
     public int moveUp(int index) {
@@ -224,6 +226,16 @@ class ModList {
     public int indexOf(Mod mod) {
         for (int i = 0; i < modsByIndex.size(); i++) {
             if (mod == modsByIndex.get(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public int indexOfVisible(Mod mod) {
+        Vector<Mod> visible = getVisible();
+        for (int i = 0; i < visible.size(); i++) {
+            if (mod == visible.get(i)) {
                 return i;
             }
         }
