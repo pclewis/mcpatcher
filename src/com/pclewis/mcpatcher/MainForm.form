@@ -11,7 +11,7 @@
     </properties>
     <border type="none"/>
     <children>
-      <grid id="5c249" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="5c249" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -24,7 +24,9 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <labelFor value="6029f"/>
               <text value="Original"/>
+              <toolTipText value="Input file used for patching"/>
             </properties>
           </component>
           <component id="6029f" class="javax.swing.JTextField" binding="origField">
@@ -45,6 +47,7 @@
             </constraints>
             <properties>
               <text value="&amp;Browse"/>
+              <toolTipText value="Select input file"/>
             </properties>
           </component>
           <component id="63dfc" class="javax.swing.JLabel">
@@ -52,7 +55,9 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <labelFor value="4555"/>
               <text value="Output"/>
+              <toolTipText value="Output file that will be written"/>
             </properties>
           </component>
           <component id="4555" class="javax.swing.JTextField" binding="outputField">
@@ -73,6 +78,7 @@
             </constraints>
             <properties>
               <text value="Br&amp;owse"/>
+              <toolTipText value="Select output file"/>
             </properties>
           </component>
         </children>
@@ -157,17 +163,17 @@
                       </component>
                     </children>
                   </scrollpane>
-                  <grid id="a9785" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="a9785" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties/>
                     <border type="none"/>
                     <children>
                       <component id="b645e" class="javax.swing.JButton" binding="undoButton">
                         <constraints>
-                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <enabled value="false"/>
@@ -186,19 +192,9 @@
                           <visible value="false"/>
                         </properties>
                       </component>
-                      <component id="f588d" class="javax.swing.JButton" binding="testButton">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <text value="&amp;Test Minecraft"/>
-                          <toolTipText value="Test Minecraft (single-player only)"/>
-                        </properties>
-                      </component>
                       <component id="d76f9" class="javax.swing.JButton" binding="patchButton">
                         <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <enabled value="false"/>
@@ -206,10 +202,10 @@
                           <toolTipText value="Apply selected mods"/>
                         </properties>
                       </component>
-                      <grid id="594d0" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                      <grid id="594d0" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="true" same-size-vertically="true" hgap="-1" vgap="-1">
                         <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints>
-                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties/>
                         <border type="none"/>
@@ -221,7 +217,7 @@
                             <properties>
                               <enabled value="false"/>
                               <icon value="images/uparrow.png"/>
-                              <toolTipText value="Move selected mod up in the list"/>
+                              <toolTipText value="Move selected item up the list"/>
                             </properties>
                           </component>
                           <component id="fa55e" class="javax.swing.JButton" binding="addButton">
@@ -231,7 +227,7 @@
                             <properties>
                               <enabled value="false"/>
                               <icon value="images/add.png"/>
-                              <toolTipText value="Add external mod"/>
+                              <toolTipText value="Add an external zip-based mod"/>
                             </properties>
                           </component>
                           <component id="fb33d" class="javax.swing.JButton" binding="downButton">
@@ -241,7 +237,7 @@
                             <properties>
                               <enabled value="false"/>
                               <icon value="images/downarrow.png"/>
-                              <toolTipText value="Move selected mod down in the list"/>
+                              <toolTipText value="Move selected item down the list"/>
                             </properties>
                           </component>
                           <component id="bee6e" class="javax.swing.JButton" binding="removeButton">
@@ -251,11 +247,21 @@
                             <properties>
                               <enabled value="false"/>
                               <icon value="images/remove.png"/>
-                              <toolTipText value="Remove the selected mod"/>
+                              <toolTipText value="Remove the selected item"/>
                             </properties>
                           </component>
                         </children>
                       </grid>
+                      <component id="f588d" class="javax.swing.JButton" binding="testButton">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                          <text value="&amp;Test Minecraft"/>
+                          <toolTipText value="Test Minecraft (single-player only)"/>
+                        </properties>
+                      </component>
                     </children>
                   </grid>
                 </children>

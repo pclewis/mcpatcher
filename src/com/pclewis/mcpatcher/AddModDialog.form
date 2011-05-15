@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="54" width="580" height="310"/>
+      <xy x="48" y="54" width="580" height="312"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -62,7 +62,9 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Input"/>
+              <labelFor value="b7d15"/>
+              <text value="Mod"/>
+              <toolTipText value="Path to zip file containing mod"/>
             </properties>
           </component>
           <component id="a237f" class="javax.swing.JLabel">
@@ -70,7 +72,9 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="File prefix"/>
+              <labelFor value="7e7"/>
+              <text value="Subfolder"/>
+              <toolTipText value="Name of folder within zip file to add to minecraft.jar"/>
             </properties>
           </component>
           <component id="b7d15" class="javax.swing.JTextField" binding="inputField">
@@ -91,6 +95,7 @@
             </constraints>
             <properties>
               <text value="&amp;Browse"/>
+              <toolTipText value="Select mod zip file"/>
             </properties>
           </component>
           <component id="7e7" class="javax.swing.JTextField" binding="prefixField">
@@ -109,6 +114,7 @@
             </constraints>
             <properties>
               <text value="&amp;Choose"/>
+              <toolTipText value="Select subfolder"/>
             </properties>
           </component>
         </children>
