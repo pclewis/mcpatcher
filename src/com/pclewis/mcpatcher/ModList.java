@@ -61,23 +61,38 @@ class ModList {
         URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
         for (JarEntry entry : Collections.list(jar.entries())) {
             if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
-                Class<?> cl = null;
-                try {
-                    cl = loader.loadClass(ClassMap.filenameToClassName(entry.getName()));
-                } catch (NoClassDefFoundError e) {
-                    Logger.log(Logger.LOG_MOD, "WARNING: skipping %s: %s", entry.getName(), e.toString());
-                }
-                if (cl != null && !cl.isInterface() && Mod.class.isAssignableFrom(cl)) {
-                    int flags = cl.getModifiers();
-                    if (!Modifier.isAbstract(flags) && Modifier.isPublic(flags)) {
-                        Mod mod = (Mod) cl.newInstance();
-                        if (add(mod)) {
-                            Logger.log(Logger.LOG_MOD, "new %s()", cl.getName());
-                        }
-                    }
+                Mod mod = loadCustomMod(loader, ClassMap.filenameToClassName(entry.getName()));
+                if (mod != null && add(mod)) {
+                    Logger.log(Logger.LOG_MOD, "new %s()", mod.getClass().getName());
                 }
             }
         }
+    }
+
+    private Mod loadCustomMod(File file, String className) {
+        try {
+            URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
+            return loadCustomMod(loader, className);
+        } catch (Exception e) {
+            Logger.log(e);
+        }
+        return null;
+    }
+
+    private Mod loadCustomMod(URLClassLoader loader, String className) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        Class<?> cl = null;
+        try {
+            cl = loader.loadClass(className);
+        } catch (NoClassDefFoundError e) {
+            Logger.log(Logger.LOG_MOD, "WARNING: skipping %s: %s", className, e.toString());
+        }
+        if (cl != null && !cl.isInterface() && Mod.class.isAssignableFrom(cl)) {
+            int flags = cl.getModifiers();
+            if (!Modifier.isAbstract(flags) && Modifier.isPublic(flags)) {
+                return (Mod) cl.newInstance();
+            }
+        }
+        return null;
     }
 
     public Vector<Mod> getAll() {
@@ -114,9 +129,9 @@ class ModList {
         for (int i = modsByIndex.size() - 1; i >= 0; i--) {
             Mod mod = modsByIndex.get(i);
             boolean enabled = mod.okToApply();
-            if (enabled && ! enableAll) {
-                String name = mod.getName();
-                enabled = MCPatcherUtils.isModEnabled(mod.getName());
+            if (enabled && !enableAll) {
+                //String name = mod.getName();
+                //enabled = MCPatcherUtils.isModEnabled(mod.getName());
             }
             selectMod(mod, enabled);
         }
@@ -144,6 +159,9 @@ class ModList {
         modsByIndex.add(mod);
         if (!mod.internal) {
             visibleMods.add(mod);
+        }
+        if (!MCPatcherUtils.hasMod(mod.getName())) {
+            MCPatcherUtils.getMods().appendChild(defaultModElement(mod));
         }
         mod.loadOptions();
         return true;
@@ -237,21 +255,40 @@ class ModList {
             Element element = (Element) list.item(i);
             String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
             String type = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_TYPE);
+            Mod mod = null;
             if (name == null || type == null) {
             } else if (type.equals(MCPatcherUtils.VAL_BUILTIN)) {
                 if (name.equals("HD Textures")) {
-                    add(new HDTexture());
+                    mod = new HDTexture();
                 } else if (name.equals("HD Font")) {
-                    add(new HDFont());
+                    mod = new HDFont();
                 } else if (name.equals("Better Grass")) {
-                    add(new BetterGrass());
+                    mod = new BetterGrass();
                 }
+            } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_JAR)) {
+                String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
+                String className = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_CLASS);
+                if (path != null && className != null) {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        mod = loadCustomMod(file, className);
+                    }
+                }
+            }
+            if (mod != null) {
+                add(mod);
             }
         }
     }
 
     private void updateModElement(Mod mod, Element element) {
-        MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
+        if (mod.customJar == null) {
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
+        } else {
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_JAR);
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PATH, mod.customJar.getName());
+            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_CLASS, mod.getClass().getCanonicalName());
+        }
     }
 
     private Element defaultModElement(Mod mod) {
@@ -288,12 +325,13 @@ class ModList {
             }
             Element element = oldElements.get(mod.getName());
             if (element == null) {
-                element = defaultModElement(mod);
+                defaultModElement(mod);
+            } else {
+                MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.isEnabled() && mod.okToApply()));
+                updateModElement(mod, element);
+                mods.appendChild(element);
                 oldElements.remove(mod.getName());
             }
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.isEnabled() && mod.okToApply()));
-            updateModElement(mod, element);
-            mods.appendChild(element);
         }
     }
 }

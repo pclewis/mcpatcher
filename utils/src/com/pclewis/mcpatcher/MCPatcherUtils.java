@@ -63,6 +63,7 @@ public class MCPatcherUtils {
     static final String TAG_TYPE = "type";
     static final String TAG_PATH = "path";
     static final String TAG_PREFIX = "prefix";
+    static final String TAG_CLASS = "class";
     static final String TAG_ENABLED = "enabled";
     static final String TAG_CONFIG = "config";
     static final String ATTR_VERSION = "version";
@@ -328,10 +329,6 @@ public class MCPatcherUtils {
         return element;
     }
 
-    static boolean isModEnabled(String mod) {
-        return Boolean.parseBoolean(getText(getMod(mod), TAG_ENABLED));
-    }
-
     static void setModEnabled(String mod, boolean enabled) {
         setText(getMod(mod), TAG_ENABLED, Boolean.toString(enabled));
     }
@@ -582,7 +579,6 @@ public class MCPatcherUtils {
                 DOMSource source = new DOMSource(xml);
                 trans.transform(source, new StreamResult(os));
                 saved = true;
-                System.out.printf("wrote %s\n", xmlFile.getPath());
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
