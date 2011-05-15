@@ -30,7 +30,6 @@ class ModList {
     public ModList() {
         baseMod = new BaseMod();
         baseMod.internal = true;
-        baseMod.setEnabled(true);
         addNoReplace(baseMod);
     }
 
