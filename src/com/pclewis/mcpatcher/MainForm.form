@@ -216,7 +216,7 @@
                             </constraints>
                             <properties>
                               <enabled value="false"/>
-                              <icon value="images/uparrow.png"/>
+                              <icon value="resources/uparrow.png"/>
                               <toolTipText value="Move selected item up the list"/>
                             </properties>
                           </component>
@@ -226,7 +226,7 @@
                             </constraints>
                             <properties>
                               <enabled value="false"/>
-                              <icon value="images/add.png"/>
+                              <icon value="resources/add.png"/>
                               <toolTipText value="Add an external zip-based mod"/>
                             </properties>
                           </component>
@@ -236,7 +236,7 @@
                             </constraints>
                             <properties>
                               <enabled value="false"/>
-                              <icon value="images/downarrow.png"/>
+                              <icon value="resources/downarrow.png"/>
                               <toolTipText value="Move selected item down the list"/>
                             </properties>
                           </component>
@@ -246,7 +246,7 @@
                             </constraints>
                             <properties>
                               <enabled value="false"/>
-                              <icon value="images/remove.png"/>
+                              <icon value="resources/remove.png"/>
                               <toolTipText value="Remove the selected item"/>
                             </properties>
                           </component>
