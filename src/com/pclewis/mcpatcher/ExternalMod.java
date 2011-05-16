@@ -27,7 +27,9 @@ class ExternalMod extends Mod {
             String name = entry.getName();
             if (!entry.isDirectory() && name.startsWith(prefix)) {
                 String suffix = name.substring(prefix.length());
-                filesToAdd.add(suffix);
+                if (!suffix.startsWith("META-INF")) {
+                    filesToAdd.add(suffix);
+                }
             }
         }
     }
