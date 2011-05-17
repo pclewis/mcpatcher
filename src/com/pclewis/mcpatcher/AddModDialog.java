@@ -12,6 +12,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class AddModDialog extends JDialog {
+    static private File modDir = null;
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -108,11 +110,16 @@ public class AddModDialog extends JDialog {
         fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fd.setFileHidingEnabled(false);
         fd.setDialogTitle("Select mod zip file");
-        File dir = MCPatcherUtils.getMinecraftPath("mods");
-        if (!dir.isDirectory()) {
-            dir = MCPatcherUtils.getMinecraftPath();
+        if (modDir == null || !modDir.isDirectory()) {
+            modDir = MCPatcherUtils.getMinecraftPath("mcpatcher-mods");
+            if (!modDir.isDirectory()) {
+                modDir = MCPatcherUtils.getMinecraftPath("mods");
+                if (!modDir.isDirectory()) {
+                    modDir = MCPatcherUtils.getMinecraftPath();
+                }
+            }
         }
-        fd.setCurrentDirectory(dir);
+        fd.setCurrentDirectory(modDir);
         fd.setAcceptAllFileFilterUsed(false);
         fd.setFileFilter(new FileFilter() {
             @Override
@@ -127,7 +134,9 @@ public class AddModDialog extends JDialog {
             }
         });
         if (fd.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
-            inputField.setText(fd.getSelectedFile().getPath());
+            File file = fd.getSelectedFile();
+            inputField.setText(file.getPath());
+            modDir = file.getParentFile();
             showZipDialog();
         }
         updateControls();
