@@ -394,6 +394,27 @@ final public class MCPatcher {
         }
     }
 
+    static ArrayList<String> getConflicts() {
+        ArrayList<String> conflicts = new ArrayList<String>();
+        ArrayList<Mod> mods = modList.getSelected();
+        int n = mods.size();
+        for (int i = 0; i < n; i++) {
+            Mod mod1 = mods.get(i);
+            for (int j = i + 1; j < n; j++) {
+                Mod mod2 = mods.get(j);
+                for (String s : mod2.filesToAdd) {
+                    if (mod1.filesToAdd.contains(s)) {
+                        conflicts.add(String.format(
+                            "%s from %s conflicts with %s",
+                            s, mod2.getName(), mod1.getName()
+                        ));
+                    }
+                }
+            }
+        }
+        return conflicts;
+    }
+
     static boolean patch() {
         modList.setApplied(true);
         boolean patchOk = false;

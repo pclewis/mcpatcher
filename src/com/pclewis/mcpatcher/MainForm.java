@@ -280,7 +280,26 @@ class MainForm {
         patchButton.addActionListener(new ActionListener() {
             class PatchThread implements Runnable {
                 public void run() {
-                    if (!MCPatcher.patch()) {
+                    boolean patchOk = true;
+                    ArrayList<String> conflicts = MCPatcher.getConflicts();
+                    if (conflicts.size() > 0) {
+                        StringBuilder message = new StringBuilder(
+                            "Conflicts detected between the selected mods:\n\n"
+                        );
+                        for (String s : conflicts) {
+                            message.append(" - ");
+                            message.append(s);
+                            message.append('\n');
+                        }
+                        message.append("\nContinue patching anyway?");
+                        int result = JOptionPane.showConfirmDialog(
+                            frame, message.toString(), "Mod conflict detected", JOptionPane.YES_NO_OPTION
+                        );
+                        if (result != JOptionPane.YES_OPTION) {
+                            patchOk = false;
+                        }
+                    }
+                    if (patchOk && !MCPatcher.patch()) {
                         tabbedPane.setSelectedIndex(TAB_LOG);
                         JOptionPane.showMessageDialog(frame,
                             "There was an error during patching.  " +
