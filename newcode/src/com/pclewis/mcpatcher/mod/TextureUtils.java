@@ -9,8 +9,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class TextureUtils {
@@ -38,6 +40,8 @@ public class TextureUtils {
     private static boolean useTextureCache;
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
+    private static HashSet<Class<? extends TextureFX>> textureFXs = new HashSet<Class<? extends TextureFX>>();
+    private static HashSet<Class<? extends TextureFX>> builtInTextureFX = new HashSet<Class<? extends TextureFX>>();
 
     static {
         animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedFire", true);
@@ -61,6 +65,17 @@ public class TextureUtils {
         expectedColumns.put("/custom_fire_n_s.png", 1);
         expectedColumns.put("/custom_fire_e_w.png", 1);
         expectedColumns.put("/custom_portal.png", 1);
+
+        builtInTextureFX.add(TextureFX.class);
+        builtInTextureFX.add(Compass.class);
+        builtInTextureFX.add(Watch.class);
+        builtInTextureFX.add(StillLava.class);
+        builtInTextureFX.add(FlowLava.class);
+        builtInTextureFX.add(StillWater.class);
+        builtInTextureFX.add(FlowWater.class);
+        builtInTextureFX.add(Fire.class);
+        builtInTextureFX.add(Portal.class);
+        builtInTextureFX.add(CustomAnimation.class);
     }
 
     public static boolean setTileSize() {
@@ -79,6 +94,13 @@ public class TextureUtils {
     public static void setFontRenderer() {
         MCPatcherUtils.log("setFontRenderer()");
         minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
+    }
+
+    public static void registerTextureFX(TextureFX textureFX) {
+        Class<? extends TextureFX> cl = textureFX.getClass();
+        if (!builtInTextureFX.contains(cl) && textureFXs.add(cl)) {
+            MCPatcherUtils.log("registering new TextureFX class %s", cl.getName());
+        }
     }
 
     public static void refreshTextureFX(java.util.List<TextureFX> textureList) {
@@ -120,6 +142,44 @@ public class TextureUtils {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
         } else if (animatedPortal) {
             textureList.add(new Portal());
+        }
+
+        for (Class<? extends TextureFX> cl : textureFXs) {
+            constructor_loop:
+            for (int i = 0; i < 4; i++) {
+                TextureFX fx = null;
+                Constructor<? extends TextureFX> constructor;
+                try {
+                    switch (i) {
+                        case 0:
+                            constructor = cl.getConstructor(Minecraft.class, Integer.TYPE);
+                            fx = constructor.newInstance(minecraft, TileSize.int_size);
+                            break;
+
+                        case 1:
+                            constructor = cl.getConstructor(Minecraft.class);
+                            fx = constructor.newInstance(minecraft);
+                            break;
+
+                        case 2:
+                            constructor = cl.getConstructor();
+                            fx = constructor.newInstance();
+                            break;
+
+                        default:
+                            MCPatcherUtils.log("no suitable constructor found for %s, deregistering", cl.getName());
+                            textureFXs.remove(cl);
+                            break constructor_loop;
+                    }
+                } catch (NoSuchMethodException e) {
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (fx != null) {
+                    textureList.add(fx);
+                    break;
+                }
+            }
         }
 
         for (TextureFX t : textureList) {

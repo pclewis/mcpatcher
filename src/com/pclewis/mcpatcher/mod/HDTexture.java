@@ -244,6 +244,32 @@ public class HDTexture extends Mod {
                 }
             });
 
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "call TextureUtils.registerTextureFX";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getDescriptor().equals(getClassMap().mapTypeString("(LTextureFX;)V"))) {
+                        return buildExpression(
+                            BinaryRegex.begin()
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_1,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "registerTextureFX", "(LTextureFX;)V"))
+                    );
+                }
+            });
+
             patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
 
             patches.add(new AddMethodPatch("setTileSize", "(Lnet/minecraft/client/Minecraft;)V") {
