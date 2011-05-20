@@ -47,6 +47,7 @@ final public class MCPatcher {
      * Name of utility class always injected into output minecraft.jar
      */
     public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
+    public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
 
     static MinecraftJar minecraft = null;
     static ModList modList;
@@ -125,15 +126,15 @@ final public class MCPatcher {
 
         Util.logOSInfo();
 
-        if (!MCPatcherUtils.getString(MCPatcherUtils.TAG_LAST_VERSION, "").equals(VERSION_STRING)) {
-            MCPatcherUtils.set(MCPatcherUtils.TAG_LAST_VERSION, VERSION_STRING);
-            MCPatcherUtils.set(MCPatcherUtils.TAG_BETA_WARNING_SHOWN, false);
-            MCPatcherUtils.set(MCPatcherUtils.TAG_DEBUG, BETA_VERSION > 0);
-            MCPatcherUtils.getInt(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, 1024);
+        if (!MCPatcherUtils.getString(Config.TAG_LAST_VERSION, "").equals(VERSION_STRING)) {
+            MCPatcherUtils.set(Config.TAG_LAST_VERSION, VERSION_STRING);
+            MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, false);
+            MCPatcherUtils.set(Config.TAG_DEBUG, BETA_VERSION > 0);
+            MCPatcherUtils.getInt(Config.TAG_JAVA_HEAP_SIZE, 1024);
         }
-        if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean(MCPatcherUtils.TAG_BETA_WARNING_SHOWN, false)) {
+        if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean(Config.TAG_BETA_WARNING_SHOWN, false)) {
             ui.showBetaWarning();
-            MCPatcherUtils.set(MCPatcherUtils.TAG_BETA_WARNING_SHOWN, true);
+            MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, true);
         }
 
         getAllMods();
@@ -151,7 +152,7 @@ final public class MCPatcher {
         if (!ignoreSavedMods && modList != null) {
             modList.updateProperties();
         }
-        MCPatcherUtils.saveProperties();
+        MCPatcherUtils.config.saveProperties();
     }
 
     static void checkInterrupt() throws InterruptedException {

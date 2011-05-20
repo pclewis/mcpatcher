@@ -346,21 +346,22 @@ class ModList {
     }
 
     public void loadSavedMods() {
-        Element mods = MCPatcherUtils.getMods();
+        Config config = MCPatcherUtils.config;
+        Element mods = config.getMods();
         if (mods == null) {
             return;
         }
-        NodeList list = mods.getElementsByTagName(MCPatcherUtils.TAG_MOD);
+        NodeList list = mods.getElementsByTagName(Config.TAG_MOD);
         ArrayList<Element> invalidEntries = new ArrayList<Element>();
         for (int i = 0; i < list.getLength(); i++) {
             Element element = (Element) list.item(i);
-            String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
-            String type = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_TYPE);
-            String enabled = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_ENABLED);
+            String name = config.getText(element, Config.TAG_NAME);
+            String type = config.getText(element, Config.TAG_TYPE);
+            String enabled = config.getText(element, Config.TAG_ENABLED);
             Mod mod = null;
             if (name == null || type == null) {
                 invalidEntries.add(element);
-            } else if (type.equals(MCPatcherUtils.VAL_BUILTIN)) {
+            } else if (type.equals(Config.VAL_BUILTIN)) {
                 if (name.equals(MCPatcherUtils.VAL_HD_TEXTURES)) {
                     mod = new HDTexture();
                 } else if (name.equals(MCPatcherUtils.VAL_HD_FONT)) {
@@ -370,18 +371,18 @@ class ModList {
                 } else {
                     invalidEntries.add(element);
                 }
-            } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_ZIP)) {
-                String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
-                Element files = MCPatcherUtils.getElement(element, MCPatcherUtils.TAG_FILES);
+            } else if (type.equals(Config.VAL_EXTERNAL_ZIP)) {
+                String path = config.getText(element, Config.TAG_PATH);
+                Element files = config.getElement(element, Config.TAG_FILES);
                 if (path != null && files != null) {
                     File file = new File(path);
                     if (file.exists()) {
                         HashMap<String, String> fileMap = new HashMap<String, String>();
-                        NodeList fileNodes = files.getElementsByTagName(MCPatcherUtils.TAG_FILE);
+                        NodeList fileNodes = files.getElementsByTagName(Config.TAG_FILE);
                         for (int j = 0; j < fileNodes.getLength(); j++) {
                             Element fileElem = (Element) fileNodes.item(j);
-                            String from = MCPatcherUtils.getText(fileElem, MCPatcherUtils.TAG_FROM);
-                            String to = MCPatcherUtils.getText(fileElem, MCPatcherUtils.TAG_TO);
+                            String from = config.getText(fileElem, Config.TAG_FROM);
+                            String to = config.getText(fileElem, Config.TAG_TO);
                             if (from != null && to != null) {
                                 fileMap.put(to, from);
                             }
@@ -395,9 +396,9 @@ class ModList {
                 } else {
                     invalidEntries.add(element);
                 }
-            } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_JAR)) {
-                String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
-                String className = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_CLASS);
+            } else if (type.equals(Config.VAL_EXTERNAL_JAR)) {
+                String path = config.getText(element, Config.TAG_PATH);
+                String className = config.getText(element, Config.TAG_CLASS);
                 if (path != null && className != null) {
                     File file = new File(path);
                     if (file.exists()) {
@@ -423,46 +424,49 @@ class ModList {
     }
 
     private void updateModElement(Mod mod, Element element) {
+        Config config = MCPatcherUtils.config;
         if (mod instanceof ExternalMod) {
             ExternalMod extmod = (ExternalMod) mod;
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_ZIP);
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PATH, extmod.zipFile.getName());
-            Element files = MCPatcherUtils.getElement(element, MCPatcherUtils.TAG_FILES);
+            config.setText(element, Config.TAG_TYPE, Config.VAL_EXTERNAL_ZIP);
+            config.setText(element, Config.TAG_PATH, extmod.zipFile.getName());
+            Element files = config.getElement(element, Config.TAG_FILES);
             while (files.hasChildNodes()) {
                 files.removeChild(files.getFirstChild());
             }
             for (Map.Entry<String, String> entry : extmod.fileMap.entrySet()) {
-                Element fileElem = MCPatcherUtils.xml.createElement(MCPatcherUtils.TAG_FILE);
-                Element pathElem = MCPatcherUtils.xml.createElement(MCPatcherUtils.TAG_FROM);
-                pathElem.appendChild(MCPatcherUtils.xml.createTextNode(entry.getValue()));
+                Element fileElem = config.xml.createElement(Config.TAG_FILE);
+                Element pathElem = config.xml.createElement(Config.TAG_FROM);
+                pathElem.appendChild(config.xml.createTextNode(entry.getValue()));
                 fileElem.appendChild(pathElem);
-                pathElem = MCPatcherUtils.xml.createElement(MCPatcherUtils.TAG_TO);
-                pathElem.appendChild(MCPatcherUtils.xml.createTextNode(entry.getKey()));
+                pathElem = config.xml.createElement(Config.TAG_TO);
+                pathElem.appendChild(config.xml.createTextNode(entry.getKey()));
                 fileElem.appendChild(pathElem);
                 files.appendChild(fileElem);
             }
         } else if (mod.customJar == null) {
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
+            config.setText(element, Config.TAG_TYPE, Config.VAL_BUILTIN);
         } else {
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_JAR);
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PATH, mod.customJar.getName());
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_CLASS, mod.getClass().getCanonicalName());
+            config.setText(element, Config.TAG_TYPE, Config.VAL_EXTERNAL_JAR);
+            config.setText(element, Config.TAG_PATH, mod.customJar.getName());
+            config.setText(element, Config.TAG_CLASS, mod.getClass().getCanonicalName());
         }
     }
 
     private Element defaultModElement(Mod mod) {
-        Element mods = MCPatcherUtils.getMods();
+        Config config = MCPatcherUtils.config;
+        Element mods = config.getMods();
         if (mods == null) {
             return null;
         }
-        Element element = MCPatcherUtils.getMod(mod.getName());
-        MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.defaultEnabled));
+        Element element = config.getMod(mod.getName());
+        config.setText(element, Config.TAG_ENABLED, Boolean.toString(mod.defaultEnabled));
         updateModElement(mod, element);
         return element;
     }
 
     void updateProperties() {
-        Element mods = MCPatcherUtils.getMods();
+        Config config = MCPatcherUtils.config;
+        Element mods = config.getMods();
         if (mods == null) {
             return;
         }
@@ -471,7 +475,7 @@ class ModList {
             Node node = mods.getFirstChild();
             if (node instanceof Element) {
                 Element element = (Element) node;
-                String name = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_NAME);
+                String name = config.getText(element, Config.TAG_NAME);
                 if (name != null) {
                     oldElements.put(name, element);
                 }
@@ -486,7 +490,7 @@ class ModList {
             if (element == null) {
                 defaultModElement(mod);
             } else {
-                MCPatcherUtils.setText(element, MCPatcherUtils.TAG_ENABLED, Boolean.toString(mod.isEnabled() && mod.okToApply()));
+                config.setText(element, Config.TAG_ENABLED, Boolean.toString(mod.isEnabled() && mod.okToApply()));
                 updateModElement(mod, element);
                 mods.appendChild(element);
                 oldElements.remove(mod.getName());

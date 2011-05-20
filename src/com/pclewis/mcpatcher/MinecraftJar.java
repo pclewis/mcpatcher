@@ -261,7 +261,7 @@ class MinecraftJar {
             cp.append(File.pathSeparatorChar);
         }
 
-        int heapSize = MCPatcherUtils.getInt(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, 1024);
+        int heapSize = MCPatcherUtils.getInt(Config.TAG_JAVA_HEAP_SIZE, 1024);
         ProcessBuilder pb = new ProcessBuilder(
             "java",
             "-cp", cp.toString(),

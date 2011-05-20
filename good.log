@@ -1575,6 +1575,7 @@ Patching...
                                NOP
                                NOP
   adding com/pclewis/mcpatcher/MCPatcherUtils.class for __Base
+  adding com/pclewis/mcpatcher/Config.class for __Base
   adding com/pclewis/mcpatcher/mod/TileSize.class for HD Textures
   adding com/pclewis/mcpatcher/mod/TextureUtils.class for HD Textures
    method signature (Lnet/minecraft/src/TextureFX;)V -> (Las;)V
@@ -1790,6 +1791,7 @@ Done!
 #### Patch summary:
 __Base
     added com/pclewis/mcpatcher/MCPatcherUtils.class
+    added com/pclewis/mcpatcher/Config.class
 
 HD Textures
     added com/pclewis/mcpatcher/mod/TextureUtils.class

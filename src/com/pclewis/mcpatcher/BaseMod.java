@@ -13,6 +13,7 @@ class BaseMod extends Mod {
         configPanel = new Config();
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.CONFIG_CLASS));
     }
 
     public class Config extends ModConfigPanel {
@@ -23,7 +24,7 @@ class BaseMod extends Mod {
         Config() {
             debugCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(MCPatcherUtils.TAG_DEBUG, debugCheckBox.isSelected());
+                    MCPatcherUtils.set(com.pclewis.mcpatcher.Config.TAG_DEBUG, debugCheckBox.isSelected());
                 }
             });
         }
@@ -40,14 +41,14 @@ class BaseMod extends Mod {
 
         @Override
         public void load() {
-            heapSizeText.setText("" + MCPatcherUtils.getInt(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, 1024));
-            debugCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.TAG_DEBUG, false));
+            heapSizeText.setText("" + MCPatcherUtils.getInt(com.pclewis.mcpatcher.Config.TAG_JAVA_HEAP_SIZE, 1024));
+            debugCheckBox.setSelected(MCPatcherUtils.getBoolean(com.pclewis.mcpatcher.Config.TAG_DEBUG, false));
         }
 
         @Override
         public void save() {
             try {
-                MCPatcherUtils.set(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
+                MCPatcherUtils.set(com.pclewis.mcpatcher.Config.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
             } catch (Exception e) {
             }
         }
