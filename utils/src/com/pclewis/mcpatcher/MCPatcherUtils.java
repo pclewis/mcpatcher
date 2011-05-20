@@ -20,7 +20,7 @@ import java.util.Properties;
 public class MCPatcherUtils {
     private static File minecraftDir = null;
     private static File xmlFile = null;
-    private static Document xml;
+    static Document xml;
     private static boolean debug = false;
     private static boolean isGame;
 
@@ -62,7 +62,10 @@ public class MCPatcherUtils {
     static final String TAG_NAME = "name";
     static final String TAG_TYPE = "type";
     static final String TAG_PATH = "path";
-    static final String TAG_PREFIX = "prefix";
+    static final String TAG_FILES = "files";
+    static final String TAG_FILE = "file";
+    static final String TAG_FROM = "from";
+    static final String TAG_TO = "to";
     static final String TAG_CLASS = "class";
     static final String TAG_ENABLED = "enabled";
     static final String TAG_CONFIG = "config";

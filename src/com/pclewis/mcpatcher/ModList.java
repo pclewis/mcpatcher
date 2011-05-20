@@ -374,17 +374,25 @@ class ModList {
                 }
             } else if (type.equals(MCPatcherUtils.VAL_EXTERNAL_ZIP)) {
                 String path = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PATH);
-                String prefix = MCPatcherUtils.getText(element, MCPatcherUtils.TAG_PREFIX);
-                if (path != null) {
+                Element files = MCPatcherUtils.getElement(element, MCPatcherUtils.TAG_FILES);
+                if (path != null && files != null) {
                     File file = new File(path);
                     if (file.exists()) {
-                        /* TODO
+                        HashMap<String, String> fileMap = new HashMap<String, String>();
+                        NodeList fileNodes = files.getElementsByTagName(MCPatcherUtils.TAG_FILE);
+                        for (int j = 0; j < fileNodes.getLength(); j++) {
+                            Element fileElem = (Element) fileNodes.item(j);
+                            String from = MCPatcherUtils.getText(fileElem, MCPatcherUtils.TAG_FROM);
+                            String to = MCPatcherUtils.getText(fileElem, MCPatcherUtils.TAG_TO);
+                            if (from != null && to != null) {
+                                fileMap.put(to, from);
+                            }
+                        }
                         try {
-                            mod = new ExternalMod(new ZipFile(file), null);
+                            mod = new ExternalMod(new ZipFile(file), fileMap);
                         } catch (IOException e) {
                             Logger.log(e);
                         }
-                        */
                     }
                 } else {
                     invalidEntries.add(element);
@@ -421,7 +429,20 @@ class ModList {
             ExternalMod extmod = (ExternalMod) mod;
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_ZIP);
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PATH, extmod.zipFile.getName());
-            // TODO: MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PREFIX, extmod.prefix);
+            Element files = MCPatcherUtils.getElement(element, MCPatcherUtils.TAG_FILES);
+            while (files.hasChildNodes()) {
+                files.removeChild(files.getFirstChild());
+            }
+            for (Map.Entry<String, String> entry : extmod.fileMap.entrySet()) {
+                Element fileElem = MCPatcherUtils.xml.createElement(MCPatcherUtils.TAG_FILE);
+                Element pathElem = MCPatcherUtils.xml.createElement(MCPatcherUtils.TAG_FROM);
+                pathElem.appendChild(MCPatcherUtils.xml.createTextNode(entry.getValue()));
+                fileElem.appendChild(pathElem);
+                pathElem = MCPatcherUtils.xml.createElement(MCPatcherUtils.TAG_TO);
+                pathElem.appendChild(MCPatcherUtils.xml.createTextNode(entry.getKey()));
+                fileElem.appendChild(pathElem);
+                files.appendChild(fileElem);
+            }
         } else if (mod.customJar == null) {
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
         } else {
