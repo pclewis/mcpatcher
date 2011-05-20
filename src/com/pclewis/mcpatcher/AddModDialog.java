@@ -31,14 +31,14 @@ public class AddModDialog extends JDialog {
     private Mod mod;
 
     public AddModDialog() {
-        this(null, null);
+        this(null);
     }
 
-    public AddModDialog(ZipFile zipFile, HashMap<String, String> fileMap1) {
-        this.zipFile = zipFile;
+    public AddModDialog(ExternalMod mod) {
         this.fileMap = new HashMap<String, String>();
-        if (fileMap1 != null) {
-            this.fileMap.putAll(fileMap1);
+        if (mod != null) {
+            zipFile = mod.zipFile;
+            fileMap.putAll(mod.fileMap);
         }
 
         setContentPane(contentPane);
@@ -100,7 +100,7 @@ public class AddModDialog extends JDialog {
             }
         });
 
-            updateControls();
+        updateControls();
         if (zipFile == null) {
             showBrowseDialog();
         } else {
@@ -160,7 +160,8 @@ public class AddModDialog extends JDialog {
             File file = fd.getSelectedFile();
             inputField.setText(file.getPath());
             modDir = file.getParentFile();
-            fileTable.removeAll();
+            fileMap.clear();
+            ((FileTableModel) fileTable.getModel()).fireTableDataChanged();
             showZipDialog();
         }
         updateControls();
@@ -208,8 +209,10 @@ public class AddModDialog extends JDialog {
             String name = entry.getName();
             if (!entry.isDirectory() && name.startsWith(prefix)) {
                 String suffix = name.substring(prefix.length());
-                fileMap.put(suffix, name);
-                changed = true;
+                if (!suffix.startsWith("META-INF")) {
+                    fileMap.put(suffix, name);
+                    changed = true;
+                }
             }
         }
         if (changed) {

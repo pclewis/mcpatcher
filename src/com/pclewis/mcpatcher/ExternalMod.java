@@ -16,16 +16,10 @@ class ExternalMod extends Mod {
     public ExternalMod(ZipFile zipFile, HashMap<String, String> fileMap) {
         this.zipFile = zipFile;
         this.fileMap = new HashMap<String, String>();
-        for (Map.Entry<String, String> entry : fileMap.entrySet()) {
-            String key = entry.getKey().replaceFirst("^/", "");
-            String value = entry.getValue().replaceFirst("^/", "");
-            if (!entry.getKey().startsWith("META-INF")) {
-                this.fileMap.put(key, value);
-            }
-        }
+        this.fileMap.putAll(fileMap);
 
         name = new File(zipFile.getName()).getName().replaceFirst("\\.[^.]+$", "");
-        description = String.format("%d files to add or replace", this.fileMap.size());
+        description = String.format("%d files to add or replace.", this.fileMap.size());
 
         filesToAdd.addAll(this.fileMap.keySet());
     }
