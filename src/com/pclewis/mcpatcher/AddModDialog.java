@@ -1,7 +1,5 @@
 package com.pclewis.mcpatcher;
 
-import com.sun.istack.internal.Nullable;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
@@ -29,6 +27,7 @@ public class AddModDialog extends JDialog {
     private ZipTreeDialog zipDialog;
     private HashMap<String, String> fileMap;
     private Mod mod;
+    private boolean editMode;
 
     public AddModDialog() {
         this(null);
@@ -37,6 +36,7 @@ public class AddModDialog extends JDialog {
     public AddModDialog(ExternalMod mod) {
         this.fileMap = new HashMap<String, String>();
         if (mod != null) {
+            editMode = true;
             zipFile = mod.zipFile;
             fileMap.putAll(mod.fileMap);
         }
@@ -113,6 +113,10 @@ public class AddModDialog extends JDialog {
     }
 
     private void onOK() {
+        if (zipFile == null || fileMap == null) {
+            onCancel();
+            return;
+        }
         mod = new ExternalMod(zipFile, fileMap);
         dispose();
     }
@@ -124,6 +128,7 @@ public class AddModDialog extends JDialog {
 
     private void updateControls() {
         boolean exists = new File(inputField.getText()).exists();
+        browseButton.setVisible(!editMode);
         addButton.setEnabled(exists);
         removeButton.setEnabled(exists);
     }
@@ -161,6 +166,8 @@ public class AddModDialog extends JDialog {
             inputField.setText(file.getPath());
             modDir = file.getParentFile();
             fileMap.clear();
+            Util.close(zipFile);
+            zipFile = null;
             ((FileTableModel) fileTable.getModel()).fireTableDataChanged();
             showZipDialog();
         }
@@ -170,30 +177,28 @@ public class AddModDialog extends JDialog {
     private void showZipDialog() {
         hideZipDialog();
         File inputFile = new File(inputField.getText());
-        if (inputFile.exists()) {
-            try {
-                zipFile = new ZipFile(inputFile);
-                zipDialog = new ZipTreeDialog(zipFile);
-                zipDialog.setLocationRelativeTo(this);
-                zipDialog.setVisible(true);
-                String newPrefix = zipDialog.getPrefix();
-                if (newPrefix != null) {
-                    addFiles(newPrefix);
-                }
-            } catch (IOException e) {
-                inputField.setText("");
-                JOptionPane.showMessageDialog(null,
-                    "There was an error reading\n" +
-                        inputFile.getPath() + "\n" +
-                        "The file may be corrupt.",
-                    "Error reading zip file", JOptionPane.ERROR_MESSAGE
-                );
-                Logger.log(e);
-            } finally {
-                hideZipDialog();
+        try {
+            zipFile = new ZipFile(inputFile);
+            zipDialog = new ZipTreeDialog(zipFile);
+            zipDialog.setLocationRelativeTo(this);
+            zipDialog.setVisible(true);
+            String newPrefix = zipDialog.getPrefix();
+            if (newPrefix != null) {
+                addFiles(newPrefix);
             }
+        } catch (IOException e) {
+            inputField.setText("");
+            JOptionPane.showMessageDialog(null,
+                "There was an error reading\n" +
+                    inputFile.getPath() + "\n" +
+                    e.toString(),
+                "Error reading zip file", JOptionPane.ERROR_MESSAGE
+            );
+            Logger.log(e);
+        } finally {
+            hideZipDialog();
+            updateControls();
         }
-        updateControls();
     }
 
     private void hideZipDialog() {
