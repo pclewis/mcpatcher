@@ -53,8 +53,8 @@ public class MCPatcherUtils {
      */
     static final String TAG_ROOT = "mcpatcherProfile";
     static final String TAG_CONFIG1 = "config";
-    public static final String TAG_DEBUG = "debug";
-    public static final String TAG_JAVA_HEAP_SIZE = "javaHeapSize";
+    static final String TAG_DEBUG = "debug";
+    static final String TAG_JAVA_HEAP_SIZE = "javaHeapSize";
     static final String TAG_LAST_VERSION = "lastVersion";
     static final String TAG_BETA_WARNING_SHOWN = "betaWarningShown";
     static final String TAG_MODS = "mods";
@@ -68,7 +68,6 @@ public class MCPatcherUtils {
     static final String TAG_TO = "to";
     static final String TAG_CLASS = "class";
     static final String TAG_ENABLED = "enabled";
-    static final String TAG_CONFIG = "config";
     static final String ATTR_VERSION = "version";
     static final String VAL_BUILTIN = "builtIn";
     static final String VAL_EXTERNAL_ZIP = "externalZip";
@@ -444,11 +443,8 @@ public class MCPatcherUtils {
      * @return String value
      */
     public static String getString(String mod, String tag, Object defaultValue) {
-        if (mod == null) {
-            return getString(tag, defaultValue);
-        }
         String value = getModConfigValue(mod, tag);
-        if (value == null) {
+        if (value == null && defaultValue != null) {
             value = defaultValue.toString();
             setModConfigValue(mod, tag, value);
         }
@@ -464,7 +460,7 @@ public class MCPatcherUtils {
      */
     public static String getString(String tag, Object defaultValue) {
         String value = getConfigValue(tag);
-        if (value == null) {
+        if (value == null && defaultValue != null) {
             value = defaultValue.toString();
             setConfigValue(tag, value);
         }
@@ -497,7 +493,13 @@ public class MCPatcherUtils {
      * @return int value or 0
      */
     public static int getInt(String tag, int defaultValue) {
-        return getInt(null, tag, defaultValue);
+        int value;
+        try {
+            value = Integer.parseInt(getString(tag, defaultValue));
+        } catch (NumberFormatException e) {
+            value = defaultValue;
+        }
+        return value;
     }
 
     /**
@@ -527,7 +529,14 @@ public class MCPatcherUtils {
      * @return boolean value
      */
     public static boolean getBoolean(String tag, boolean defaultValue) {
-        return getBoolean(null, tag, defaultValue);
+        String value = getString(tag, defaultValue).toLowerCase();
+        if (value.equals("false")) {
+            return false;
+        } else if (value.equals("true")) {
+            return true;
+        } else {
+            return defaultValue;
+        }
     }
 
     /**
@@ -538,10 +547,6 @@ public class MCPatcherUtils {
      * @param value property value (must support toString())
      */
     public static void set(String mod, String tag, Object value) {
-        if (mod == null) {
-            set(tag, value);
-            return;
-        }
         setModConfigValue(mod, tag, value.toString());
     }
 
@@ -562,11 +567,7 @@ public class MCPatcherUtils {
      * @param tag property name
      */
     public static void remove(String mod, String tag) {
-        if (mod == null) {
-            remove(mod);
-        } else {
-            remove(getModConfig(mod, tag));
-        }
+        remove(getModConfig(mod, tag));
     }
 
     /**

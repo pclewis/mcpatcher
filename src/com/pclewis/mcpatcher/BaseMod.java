@@ -1,12 +1,10 @@
-package com.pclewis.mcpatcher.mod;
-
-import com.pclewis.mcpatcher.*;
+package com.pclewis.mcpatcher;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class BaseMod extends Mod {
+class BaseMod extends Mod {
     public BaseMod() {
         name = "__Base";
         author = "MCPatcher";
@@ -25,7 +23,7 @@ public class BaseMod extends Mod {
         Config() {
             debugCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(null, MCPatcherUtils.TAG_DEBUG, debugCheckBox.isSelected());
+                    MCPatcherUtils.set(MCPatcherUtils.TAG_DEBUG, debugCheckBox.isSelected());
                 }
             });
         }
@@ -49,7 +47,7 @@ public class BaseMod extends Mod {
         @Override
         public void save() {
             try {
-                MCPatcherUtils.set(null, MCPatcherUtils.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
+                MCPatcherUtils.set(MCPatcherUtils.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
             } catch (Exception e) {
             }
         }

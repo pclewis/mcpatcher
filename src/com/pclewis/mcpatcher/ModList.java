@@ -1,6 +1,5 @@
 package com.pclewis.mcpatcher;
 
-import com.pclewis.mcpatcher.mod.BaseMod;
 import com.pclewis.mcpatcher.mod.BetterGrass;
 import com.pclewis.mcpatcher.mod.HDFont;
 import com.pclewis.mcpatcher.mod.HDTexture;
@@ -8,7 +7,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.lang.model.element.ElementVisitor;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
