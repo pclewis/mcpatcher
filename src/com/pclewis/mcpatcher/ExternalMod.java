@@ -32,7 +32,7 @@ class ExternalMod extends Mod {
 
     @Override
     public InputStream openFile(String filename) throws IOException {
-        String path = fileMap.get(filename);
+        String path = fileMap.get(filename.replaceFirst("^/", ""));
         if (path == null) {
             return null;
         } else {
