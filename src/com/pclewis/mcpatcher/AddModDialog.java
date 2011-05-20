@@ -1,8 +1,9 @@
 package com.pclewis.mcpatcher;
 
+import com.sun.istack.internal.Nullable;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -33,11 +34,11 @@ public class AddModDialog extends JDialog {
         this(null, null);
     }
 
-    public AddModDialog(ZipFile zipFile, HashMap<String, String> fileMap) {
+    public AddModDialog(ZipFile zipFile, HashMap<String, String> fileMap1) {
         this.zipFile = zipFile;
         this.fileMap = new HashMap<String, String>();
-        if (fileMap != null) {
-            this.fileMap.putAll(fileMap);
+        if (fileMap1 != null) {
+            this.fileMap.putAll(fileMap1);
         }
 
         setContentPane(contentPane);
@@ -68,10 +69,10 @@ public class AddModDialog extends JDialog {
         });
 
         contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+                public void actionPerformed(ActionEvent e) {
+                    onCancel();
+                }
+            }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         browseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -89,10 +90,17 @@ public class AddModDialog extends JDialog {
 
         removeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                int rowIndex = fileTable.getSelectedRow();
+                FileTableModel model = (FileTableModel) fileTable.getModel();
+                Map.Entry<String, String> row = model.getRow(rowIndex);
+                if (row != null) {
+                    fileMap.remove(row.getKey());
+                    model.fireTableRowsDeleted(rowIndex, rowIndex);
+                }
             }
         });
 
-        updateControls();
+            updateControls();
         if (zipFile == null) {
             showBrowseDialog();
         } else {
@@ -105,7 +113,6 @@ public class AddModDialog extends JDialog {
     }
 
     private void onOK() {
-        HashMap<String, String> fileMap = new HashMap<String, String>();
         mod = new ExternalMod(zipFile, fileMap);
         dispose();
     }
@@ -170,7 +177,7 @@ public class AddModDialog extends JDialog {
                 zipDialog.setVisible(true);
                 String newPrefix = zipDialog.getPrefix();
                 if (newPrefix != null) {
-                    updateFileList(newPrefix);
+                    addFiles(newPrefix);
                 }
             } catch (IOException e) {
                 inputField.setText("");
@@ -195,16 +202,19 @@ public class AddModDialog extends JDialog {
         }
     }
 
-    private void updateFileList(String prefix) {
-        Vector<String> items = new Vector<String>();
+    private void addFiles(String prefix) {
+        boolean changed = false;
         for (ZipEntry entry : Collections.list(zipFile.entries())) {
             String name = entry.getName();
             if (!entry.isDirectory() && name.startsWith(prefix)) {
                 String suffix = name.substring(prefix.length());
                 fileMap.put(suffix, name);
+                changed = true;
             }
         }
-        ((DefaultTableModel) fileTable.getModel()).fireTableDataChanged();
+        if (changed) {
+            ((DefaultTableModel) fileTable.getModel()).fireTableDataChanged();
+        }
     }
 
     Mod getMod() {
@@ -213,7 +223,7 @@ public class AddModDialog extends JDialog {
 
     private class FileTableModel extends DefaultTableModel {
         FileTableModel() {
-            super(new Object[] {"From", "To"}, 0);
+            super(new Object[]{"From", "To"}, 0);
         }
 
         public int getRowCount() {
@@ -228,11 +238,24 @@ public class AddModDialog extends JDialog {
             return false;
         }
 
-        public Object getValueAt(int rowIndex, int columnIndex) {
+        Map.Entry<String, String> getRow(int rowIndex) {
             ArrayList<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>();
             list.addAll(fileMap.entrySet());
+            Collections.sort(list, new Comparator<Map.Entry<String, String>>() {
+                public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
+                    return o1.getValue().compareTo(o2.getValue());
+                }
+            });
             if (rowIndex >= 0 && rowIndex < list.size()) {
-                Map.Entry<String, String> entry = list.get(rowIndex);
+                return list.get(rowIndex);
+            } else {
+                return null;
+            }
+        }
+
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            Map.Entry<String, String> entry = getRow(rowIndex);
+            if (entry != null) {
                 switch (columnIndex) {
                     case 0:
                         return entry.getValue();
