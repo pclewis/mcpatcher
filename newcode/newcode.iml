@@ -8,7 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="stubs" />
-    <orderEntry type="module" module-name="utils" />
+    <orderEntry type="module" module-name="shared" />
   </component>
 </module>
 

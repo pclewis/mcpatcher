@@ -4,8 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/mcpatcher.iml" filepath="$PROJECT_DIR$/mcpatcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/newcode/newcode.iml" filepath="$PROJECT_DIR$/newcode/newcode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shared/shared.iml" filepath="$PROJECT_DIR$/shared/shared.iml" />
       <module fileurl="file://$PROJECT_DIR$/stubs/stubs.iml" filepath="$PROJECT_DIR$/stubs/stubs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/utils/utils.iml" filepath="$PROJECT_DIR$/utils/utils.iml" />
     </modules>
   </component>
 </project>

@@ -154,77 +154,77 @@
   </target>
   
   
-  <!-- Module utils -->
+  <!-- Module shared -->
   
-  <dirname property="module.utils.basedir" file="${ant.file}"/>
+  <dirname property="module.shared.basedir" file="${ant.file}"/>
   
   
   
-  <property name="compiler.args.utils" value="${compiler.args}"/>
+  <property name="compiler.args.shared" value="${compiler.args}"/>
   
-  <property name="utils.output.dir" value="${module.utils.basedir}/out/production/utils"/>
-  <property name="utils.testoutput.dir" value="${module.utils.basedir}/out/test/utils"/>
+  <property name="shared.output.dir" value="${module.shared.basedir}/out/production/shared"/>
+  <property name="shared.testoutput.dir" value="${module.shared.basedir}/out/test/shared"/>
   
-  <path id="utils.module.bootclasspath">
+  <path id="shared.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
   
-  <path id="utils.module.production.classpath"/>
+  <path id="shared.module.production.classpath"/>
   
-  <path id="utils.runtime.production.module.classpath">
-    <pathelement location="${utils.output.dir}"/>
+  <path id="shared.runtime.production.module.classpath">
+    <pathelement location="${shared.output.dir}"/>
   </path>
   
-  <path id="utils.module.classpath">
-    <pathelement location="${utils.output.dir}"/>
+  <path id="shared.module.classpath">
+    <pathelement location="${shared.output.dir}"/>
   </path>
   
-  <path id="utils.runtime.module.classpath">
-    <pathelement location="${utils.testoutput.dir}"/>
-    <pathelement location="${utils.output.dir}"/>
+  <path id="shared.runtime.module.classpath">
+    <pathelement location="${shared.testoutput.dir}"/>
+    <pathelement location="${shared.output.dir}"/>
   </path>
   
   
-  <patternset id="excluded.from.module.utils">
+  <patternset id="excluded.from.module.shared">
     <patternset refid="ignored.files"/>
   </patternset>
   
-  <patternset id="excluded.from.compilation.utils">
-    <patternset refid="excluded.from.module.utils"/>
+  <patternset id="excluded.from.compilation.shared">
+    <patternset refid="excluded.from.module.shared"/>
   </patternset>
   
-  <path id="utils.module.sourcepath">
-    <dirset dir="${module.utils.basedir}/utils">
+  <path id="shared.module.sourcepath">
+    <dirset dir="${module.shared.basedir}/shared">
       <include name="src"/>
     </dirset>
   </path>
   
   
-  <target name="compile.module.utils" depends="compile.module.utils.production,compile.module.utils.tests" description="Compile module utils"/>
+  <target name="compile.module.shared" depends="compile.module.shared.production,compile.module.shared.tests" description="Compile module shared"/>
   
-  <target name="compile.module.utils.production" depends="register.custom.compilers" description="Compile module utils; production classes">
-    <mkdir dir="${utils.output.dir}"/>
-    <javac2 destdir="${utils.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.utils}"/>
-      <bootclasspath refid="utils.module.bootclasspath"/>
-      <classpath refid="utils.module.production.classpath"/>
-      <src refid="utils.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.utils"/>
+  <target name="compile.module.shared.production" depends="register.custom.compilers" description="Compile module shared; production classes">
+    <mkdir dir="${shared.output.dir}"/>
+    <javac2 destdir="${shared.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+      <compilerarg line="${compiler.args.shared}"/>
+      <bootclasspath refid="shared.module.bootclasspath"/>
+      <classpath refid="shared.module.production.classpath"/>
+      <src refid="shared.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.shared"/>
     </javac2>
     
-    <copy todir="${utils.output.dir}">
-      <fileset dir="${module.utils.basedir}/utils/src">
+    <copy todir="${shared.output.dir}">
+      <fileset dir="${module.shared.basedir}/shared/src">
         <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>
     </copy>
   </target>
   
-  <target name="compile.module.utils.tests" depends="register.custom.compilers,compile.module.utils.production" description="compile module utils; test classes" unless="skip.tests"/>
+  <target name="compile.module.shared.tests" depends="register.custom.compilers,compile.module.shared.production" description="compile module shared; test classes" unless="skip.tests"/>
   
-  <target name="clean.module.utils" description="cleanup module">
-    <delete dir="${utils.output.dir}"/>
-    <delete dir="${utils.testoutput.dir}"/>
+  <target name="clean.module.shared" description="cleanup module">
+    <delete dir="${shared.output.dir}"/>
+    <delete dir="${shared.testoutput.dir}"/>
   </target>
   
   
@@ -245,22 +245,22 @@
   
   <path id="mcpatcher.module.production.classpath">
     <path refid="library.javassist.classpath"/>
-    <pathelement location="${utils.output.dir}"/>
+    <pathelement location="${shared.output.dir}"/>
     <path refid="library.forms.classpath"/>
   </path>
   
   <path id="mcpatcher.runtime.production.module.classpath">
     <pathelement location="${mcpatcher.output.dir}"/>
     <path refid="library.javassist.classpath"/>
-    <path refid="utils.runtime.production.module.classpath"/>
+    <path refid="shared.runtime.production.module.classpath"/>
     <path refid="library.forms.classpath"/>
   </path>
   
   <path id="mcpatcher.module.classpath">
     <pathelement location="${mcpatcher.output.dir}"/>
     <path refid="library.javassist.classpath"/>
-    <pathelement location="${utils.testoutput.dir}"/>
-    <pathelement location="${utils.output.dir}"/>
+    <pathelement location="${shared.testoutput.dir}"/>
+    <pathelement location="${shared.output.dir}"/>
     <path refid="library.forms.classpath"/>
   </path>
   
@@ -268,7 +268,7 @@
     <pathelement location="${mcpatcher.testoutput.dir}"/>
     <pathelement location="${mcpatcher.output.dir}"/>
     <path refid="library.javassist.classpath"/>
-    <path refid="utils.runtime.module.classpath"/>
+    <path refid="shared.runtime.module.classpath"/>
     <path refid="library.forms.classpath"/>
   </path>
   
@@ -282,7 +282,7 @@
   </patternset>
   
   <path id="mcpatcher.module.sourcepath">
-    <dirset dir="${module.mcpatcher.basedir}/../../mc/mcpatcher">
+    <dirset dir="${module.mcpatcher.basedir}">
       <include name="src"/>
     </dirset>
   </path>
@@ -290,7 +290,7 @@
   
   <target name="compile.module.mcpatcher" depends="compile.module.mcpatcher.production,compile.module.mcpatcher.tests" description="Compile module mcpatcher"/>
   
-  <target name="compile.module.mcpatcher.production" depends="register.custom.compilers,compile.module.utils" description="Compile module mcpatcher; production classes">
+  <target name="compile.module.mcpatcher.production" depends="register.custom.compilers,compile.module.shared" description="Compile module mcpatcher; production classes">
     <mkdir dir="${mcpatcher.output.dir}"/>
     <javac2 destdir="${mcpatcher.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.mcpatcher}"/>
@@ -333,28 +333,28 @@
   
   <path id="newcode.module.production.classpath">
     <pathelement location="${stubs.output.dir}"/>
-    <pathelement location="${utils.output.dir}"/>
+    <pathelement location="${shared.output.dir}"/>
   </path>
   
   <path id="newcode.runtime.production.module.classpath">
     <pathelement location="${newcode.output.dir}"/>
     <path refid="stubs.runtime.production.module.classpath"/>
-    <path refid="utils.runtime.production.module.classpath"/>
+    <path refid="shared.runtime.production.module.classpath"/>
   </path>
   
   <path id="newcode.module.classpath">
     <pathelement location="${newcode.output.dir}"/>
     <pathelement location="${stubs.testoutput.dir}"/>
     <pathelement location="${stubs.output.dir}"/>
-    <pathelement location="${utils.testoutput.dir}"/>
-    <pathelement location="${utils.output.dir}"/>
+    <pathelement location="${shared.testoutput.dir}"/>
+    <pathelement location="${shared.output.dir}"/>
   </path>
   
   <path id="newcode.runtime.module.classpath">
     <pathelement location="${newcode.testoutput.dir}"/>
     <pathelement location="${newcode.output.dir}"/>
     <path refid="stubs.runtime.module.classpath"/>
-    <path refid="utils.runtime.module.classpath"/>
+    <path refid="shared.runtime.module.classpath"/>
   </path>
   
   
@@ -375,7 +375,7 @@
   
   <target name="compile.module.newcode" depends="compile.module.newcode.production,compile.module.newcode.tests" description="Compile module newcode"/>
   
-  <target name="compile.module.newcode.production" depends="register.custom.compilers,compile.module.stubs,compile.module.utils" description="Compile module newcode; production classes">
+  <target name="compile.module.newcode.production" depends="register.custom.compilers,compile.module.stubs,compile.module.shared" description="Compile module newcode; production classes">
     <mkdir dir="${newcode.output.dir}"/>
     <javac2 destdir="${newcode.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.newcode}"/>
@@ -404,9 +404,9 @@
     <!-- Perform any build initialization in this target -->
   </target>
   
-  <target name="clean" depends="clean.module.stubs, clean.module.utils, clean.module.mcpatcher, clean.module.newcode" description="cleanup all"/>
+  <target name="clean" depends="clean.module.stubs, clean.module.shared, clean.module.mcpatcher, clean.module.newcode" description="cleanup all"/>
   
-  <target name="build.modules" depends="init, clean, compile.module.stubs, compile.module.utils, compile.module.mcpatcher, compile.module.newcode" description="build all modules"/>
+  <target name="build.modules" depends="init, clean, compile.module.stubs, compile.module.shared, compile.module.mcpatcher, compile.module.newcode" description="build all modules"/>
   
   <target name="init.artifacts">
     <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
@@ -415,7 +415,7 @@
     <property name="temp.jar.path.mcpatcher.jar" value="${artifacts.temp.dir}/mcpatcher.jar"/>
   </target>
   
-  <target name="artifact.mcpatcher" depends="init.artifacts, compile.module.mcpatcher, compile.module.newcode, compile.module.utils" description="Build &apos;mcpatcher&apos; artifact">
+  <target name="artifact.mcpatcher" depends="init.artifacts, compile.module.mcpatcher, compile.module.newcode, compile.module.shared" description="Build &apos;mcpatcher&apos; artifact">
     <property name="artifact.temp.output.mcpatcher" value="${artifacts.temp.dir}/mcpatcher"/>
     <mkdir dir="${artifact.temp.output.mcpatcher}"/>
     <jar destfile="${temp.jar.path.mcpatcher.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
@@ -424,7 +424,7 @@
       <zipfileset src="${idea.home}/lib/forms_rt.jar"/>
       <zipfileset file="${basedir}/src/META-INF/MANIFEST.MF" prefix="META-INF"/>
       <zipfileset dir="${newcode.output.dir}"/>
-      <zipfileset dir="${utils.output.dir}"/>
+      <zipfileset dir="${shared.output.dir}"/>
     </jar>
     <copy file="${temp.jar.path.mcpatcher.jar}" tofile="${artifact.temp.output.mcpatcher}/mcpatcher.jar"/>
   </target>
