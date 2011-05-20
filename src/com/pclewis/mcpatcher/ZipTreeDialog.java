@@ -19,8 +19,8 @@ public class ZipTreeDialog extends JDialog {
 
     private String prefix;
 
-    public ZipTreeDialog(final ZipFile zipFile, String prefix) {
-        this.prefix = prefix;
+    public ZipTreeDialog(final ZipFile zipFile) {
+        prefix = "";
 
         setContentPane(contentPane);
         setTitle("Select folder to add to minecraft.jar");

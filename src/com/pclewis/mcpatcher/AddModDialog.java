@@ -2,12 +2,13 @@ package com.pclewis.mcpatcher;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Vector;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -19,21 +20,25 @@ public class AddModDialog extends JDialog {
     private JButton buttonCancel;
     private JTextField inputField;
     private JButton browseButton;
-    private JTextField prefixField;
-    private JButton chooseButton;
-    private JList fileList;
+    private JTable fileTable;
+    private JButton addButton;
+    private JButton removeButton;
 
     private ZipFile zipFile;
     private ZipTreeDialog zipDialog;
+    private HashMap<String, String> fileMap;
     private Mod mod;
 
     public AddModDialog() {
-        this(null, "");
+        this(null, null);
     }
 
-    public AddModDialog(ZipFile zipFile, String prefix) {
+    public AddModDialog(ZipFile zipFile, HashMap<String, String> fileMap) {
         this.zipFile = zipFile;
-        prefixField.setText(prefix);
+        this.fileMap = new HashMap<String, String>();
+        if (fileMap != null) {
+            this.fileMap.putAll(fileMap);
+        }
 
         setContentPane(contentPane);
         setTitle("Add external mod");
@@ -74,15 +79,23 @@ public class AddModDialog extends JDialog {
             }
         });
 
-        chooseButton.addActionListener(new ActionListener() {
+        fileTable.setModel(new FileTableModel());
+
+        addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 showZipDialog();
             }
         });
 
+        removeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
         updateControls();
-        if (prefix.equals("")) {
+        if (zipFile == null) {
             showBrowseDialog();
+        } else {
         }
     }
 
@@ -92,7 +105,8 @@ public class AddModDialog extends JDialog {
     }
 
     private void onOK() {
-        mod = new ExternalMod(zipFile, prefixField.getText());
+        HashMap<String, String> fileMap = new HashMap<String, String>();
+        mod = new ExternalMod(zipFile, fileMap);
         dispose();
     }
 
@@ -102,7 +116,9 @@ public class AddModDialog extends JDialog {
     }
 
     private void updateControls() {
-        chooseButton.setEnabled(new File(inputField.getText()).exists());
+        boolean exists = new File(inputField.getText()).exists();
+        addButton.setEnabled(exists);
+        removeButton.setEnabled(exists);
     }
 
     private void showBrowseDialog() {
@@ -137,6 +153,7 @@ public class AddModDialog extends JDialog {
             File file = fd.getSelectedFile();
             inputField.setText(file.getPath());
             modDir = file.getParentFile();
+            fileTable.removeAll();
             showZipDialog();
         }
         updateControls();
@@ -148,14 +165,13 @@ public class AddModDialog extends JDialog {
         if (inputFile.exists()) {
             try {
                 zipFile = new ZipFile(inputFile);
-                zipDialog = new ZipTreeDialog(zipFile, prefixField.getText());
+                zipDialog = new ZipTreeDialog(zipFile);
                 zipDialog.setLocationRelativeTo(this);
                 zipDialog.setVisible(true);
                 String newPrefix = zipDialog.getPrefix();
                 if (newPrefix != null) {
-                    prefixField.setText(newPrefix);
+                    updateFileList(newPrefix);
                 }
-                updateFileList();
             } catch (IOException e) {
                 inputField.setText("");
                 JOptionPane.showMessageDialog(null,
@@ -179,21 +195,59 @@ public class AddModDialog extends JDialog {
         }
     }
 
-    private void updateFileList() {
+    private void updateFileList(String prefix) {
         Vector<String> items = new Vector<String>();
-        String prefix = prefixField.getText();
         for (ZipEntry entry : Collections.list(zipFile.entries())) {
             String name = entry.getName();
             if (!entry.isDirectory() && name.startsWith(prefix)) {
                 String suffix = name.substring(prefix.length());
-                items.add(suffix);
+                fileMap.put(suffix, name);
             }
         }
-        Collections.sort(items);
-        fileList.setListData(items);
+        ((DefaultTableModel) fileTable.getModel()).fireTableDataChanged();
     }
 
     Mod getMod() {
         return mod;
+    }
+
+    private class FileTableModel extends DefaultTableModel {
+        FileTableModel() {
+            super(new Object[] {"From", "To"}, 0);
+        }
+
+        public int getRowCount() {
+            return fileMap.size();
+        }
+
+        public Class<?> getColumnClass(int columnIndex) {
+            return String.class;
+        }
+
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return false;
+        }
+
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            ArrayList<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>();
+            list.addAll(fileMap.entrySet());
+            if (rowIndex >= 0 && rowIndex < list.size()) {
+                Map.Entry<String, String> entry = list.get(rowIndex);
+                switch (columnIndex) {
+                    case 0:
+                        return entry.getValue();
+
+                    case 1:
+                        return entry.getKey();
+
+                    default:
+                        break;
+                }
+            }
+            return null;
+        }
+
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        }
     }
 }

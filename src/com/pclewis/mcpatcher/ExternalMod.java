@@ -4,39 +4,39 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 class ExternalMod extends Mod {
     ZipFile zipFile;
-    String prefix;
+    HashMap<String, String> fileMap;
 
-    public ExternalMod(ZipFile zipFile, String prefix) {
-        if (prefix == null) {
-            prefix = "";
-        }
+    public ExternalMod(ZipFile zipFile, HashMap<String, String> fileMap) {
         this.zipFile = zipFile;
-        this.prefix = prefix;
-
-        name = new File(zipFile.getName()).getName().replaceFirst("\\.[^.]+$", "");
-        if (!prefix.equals("")) {
-            description = String.format("Copy files from %s folder", prefix);
-        }
-
-        for (ZipEntry entry : Collections.list(zipFile.entries())) {
-            String name = entry.getName();
-            if (!entry.isDirectory() && name.startsWith(prefix)) {
-                String suffix = name.substring(prefix.length());
-                if (!suffix.startsWith("META-INF")) {
-                    filesToAdd.add(suffix);
-                }
+        this.fileMap = new HashMap<String, String>();
+        for (Map.Entry<String, String> entry : fileMap.entrySet()) {
+            String key = entry.getKey().replaceFirst("^/", "");
+            String value = entry.getValue().replaceFirst("^/", "");
+            if (!entry.getKey().startsWith("META-INF")) {
+                this.fileMap.put(key, value);
             }
         }
+
+        name = new File(zipFile.getName()).getName().replaceFirst("\\.[^.]+$", "");
+        description = String.format("%d files to add or replace", this.fileMap.size());
+
+        filesToAdd.addAll(this.fileMap.keySet());
     }
 
     @Override
     public InputStream openFile(String filename) throws IOException {
-        String path = prefix + filename.replaceFirst("^/", "");
-        return zipFile.getInputStream(new ZipEntry(path));
+        String path = fileMap.get(filename);
+        if (path == null) {
+            return null;
+        } else {
+            return zipFile.getInputStream(new ZipEntry(path));
+        }
     }
 }

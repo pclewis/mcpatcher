@@ -378,11 +378,13 @@ class ModList {
                 if (path != null) {
                     File file = new File(path);
                     if (file.exists()) {
+                        /* TODO
                         try {
-                            mod = new ExternalMod(new ZipFile(file), prefix);
+                            mod = new ExternalMod(new ZipFile(file), null);
                         } catch (IOException e) {
                             Logger.log(e);
                         }
+                        */
                     }
                 } else {
                     invalidEntries.add(element);
@@ -419,7 +421,7 @@ class ModList {
             ExternalMod extmod = (ExternalMod) mod;
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_EXTERNAL_ZIP);
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PATH, extmod.zipFile.getName());
-            MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PREFIX, extmod.prefix);
+            // TODO: MCPatcherUtils.setText(element, MCPatcherUtils.TAG_PREFIX, extmod.prefix);
         } else if (mod.customJar == null) {
             MCPatcherUtils.setText(element, MCPatcherUtils.TAG_TYPE, MCPatcherUtils.VAL_BUILTIN);
         } else {
