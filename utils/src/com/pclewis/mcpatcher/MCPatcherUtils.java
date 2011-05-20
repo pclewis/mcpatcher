@@ -593,7 +593,7 @@ public class MCPatcherUtils {
                 Transformer trans = factory.newTransformer();
                 trans.setOutputProperty(OutputKeys.INDENT, "yes");
                 DOMSource source = new DOMSource(xml);
-                trans.transform(source, new StreamResult(os));
+                trans.transform(source, new StreamResult(new OutputStreamWriter(os, "UTF-8")));
                 saved = true;
             } catch (Exception e) {
                 e.printStackTrace();
