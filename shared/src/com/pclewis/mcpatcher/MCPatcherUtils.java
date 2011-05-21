@@ -15,9 +15,9 @@ public class MCPatcherUtils {
     private static boolean isGame;
     static Config config = null;
 
-    public static final String VAL_HD_TEXTURES = "HD Textures";
-    public static final String VAL_HD_FONT = "HD Font";
-    public static final String VAL_BETTER_GRASS = "Better Grass";
+    public static final String HD_TEXTURES = "HD Textures";
+    public static final String HD_FONT = "HD Font";
+    public static final String BETTER_GRASS = "Better Grass";
 
     private MCPatcherUtils() {
     }

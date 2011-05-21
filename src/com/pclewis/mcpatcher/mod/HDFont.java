@@ -13,7 +13,7 @@ public class HDFont extends Mod {
     private int imageHeightRegister;
 
     public HDFont() {
-        name = MCPatcherUtils.VAL_HD_FONT;
+        name = MCPatcherUtils.HD_FONT;
         author = "MCPatcher";
         description = "Provides support for higher resolution fonts.";
         version = "1.0";

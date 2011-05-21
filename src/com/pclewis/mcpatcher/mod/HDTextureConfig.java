@@ -33,7 +33,7 @@ public class HDTextureConfig extends ModConfigPanel {
 
         textureCacheCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                MCPatcherUtils.set(MCPatcherUtils.VAL_HD_TEXTURES, "useTextureCache", textureCacheCheckBox.isSelected());
+                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "useTextureCache", textureCacheCheckBox.isSelected());
             }
         });
     }
@@ -61,7 +61,7 @@ public class HDTextureConfig extends ModConfigPanel {
             }
         } catch (Throwable e) {
         }
-        textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "useTextureCache", is64bit));
+        textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", is64bit));
     }
 
     @Override
@@ -109,15 +109,15 @@ public class HDTextureConfig extends ModConfigPanel {
                     default:
                         return;
                 }
-                MCPatcherUtils.set(MCPatcherUtils.VAL_HD_TEXTURES, customTag, custom);
-                MCPatcherUtils.set(MCPatcherUtils.VAL_HD_TEXTURES, animatedTag, anim);
+                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, customTag, custom);
+                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, animatedTag, anim);
             }
         }
 
         public void load() {
-            if (MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, customTag, true)) {
+            if (MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, customTag, true)) {
                 comboBox.setSelectedIndex(OPT_CUSTOM_ANIMATED);
-            } else if (MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, animatedTag, true)) {
+            } else if (MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, animatedTag, true)) {
                 comboBox.setSelectedIndex(OPT_DEFAULT);
             } else {
                 comboBox.setSelectedIndex(OPT_NOT_ANIMATED);

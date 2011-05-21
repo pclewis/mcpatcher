@@ -16,7 +16,7 @@ public class HDTexture extends Mod {
     static final String class_CustomAnimation = "com.pclewis.mcpatcher.mod.CustomAnimation";
 
     public HDTexture() {
-        name = MCPatcherUtils.VAL_HD_TEXTURES;
+        name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.";
         version = "1.0";

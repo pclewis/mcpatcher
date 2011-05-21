@@ -44,16 +44,16 @@ public class TextureUtils {
     private static HashSet<Class<? extends TextureFX>> builtInTextureFX = new HashSet<Class<? extends TextureFX>>();
 
     static {
-        animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedFire", true);
-        animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedLava", true);
-        animatedWater = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedWater", true);
-        animatedPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "animatedPortal", true);
-        customFire = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customFire", true);
-        customLava = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customLava", true);
-        customWater = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customWater", true);
-        customPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "customPortal", true);
+        animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
+        animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedLava", true);
+        animatedWater = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedWater", true);
+        animatedPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedPortal", true);
+        customFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customFire", true);
+        customLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customLava", true);
+        customWater = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customWater", true);
+        customPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customPortal", true);
 
-        useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.VAL_HD_TEXTURES, "useTextureCache", false);
+        useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", false);
 
         expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);

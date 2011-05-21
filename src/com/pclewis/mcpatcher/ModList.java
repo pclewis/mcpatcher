@@ -32,13 +32,13 @@ class ModList {
     }
 
     public void loadBuiltInMods() {
-        if (!modsByName.containsKey(MCPatcherUtils.VAL_HD_TEXTURES)) {
+        if (!modsByName.containsKey(MCPatcherUtils.HD_TEXTURES)) {
             addNoReplace(new HDTexture());
         }
-        if (!modsByName.containsKey(MCPatcherUtils.VAL_HD_FONT)) {
+        if (!modsByName.containsKey(MCPatcherUtils.HD_FONT)) {
             addNoReplace(new HDFont());
         }
-        if (!modsByName.containsKey(MCPatcherUtils.VAL_BETTER_GRASS)) {
+        if (!modsByName.containsKey(MCPatcherUtils.BETTER_GRASS)) {
             addNoReplace(new BetterGrass());
         }
     }
@@ -362,11 +362,11 @@ class ModList {
             if (name == null || type == null) {
                 invalidEntries.add(element);
             } else if (type.equals(Config.VAL_BUILTIN)) {
-                if (name.equals(MCPatcherUtils.VAL_HD_TEXTURES)) {
+                if (name.equals(MCPatcherUtils.HD_TEXTURES)) {
                     mod = new HDTexture();
-                } else if (name.equals(MCPatcherUtils.VAL_HD_FONT)) {
+                } else if (name.equals(MCPatcherUtils.HD_FONT)) {
                     mod = new HDFont();
-                } else if (name.equals(MCPatcherUtils.VAL_BETTER_GRASS)) {
+                } else if (name.equals(MCPatcherUtils.BETTER_GRASS)) {
                     mod = new BetterGrass();
                 } else {
                     invalidEntries.add(element);

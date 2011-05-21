@@ -121,7 +121,7 @@ class Config {
             } else if (tag.startsWith("HDTexture.")) {
                 tag = tag.substring(10);
                 if (!tag.equals("enabled")) {
-                    MCPatcherUtils.set(MCPatcherUtils.VAL_HD_TEXTURES, tag, value);
+                    MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, tag, value);
                 }
             }
         }
@@ -306,9 +306,9 @@ class Config {
             getRoot();
             getConfig();
             getMods();
-            setText(getMod(MCPatcherUtils.VAL_HD_TEXTURES), TAG_ENABLED, "true");
-            setText(getMod(MCPatcherUtils.VAL_HD_FONT), TAG_ENABLED, "true");
-            setText(getMod(MCPatcherUtils.VAL_BETTER_GRASS), TAG_ENABLED, "true");
+            setText(getMod(MCPatcherUtils.HD_TEXTURES), TAG_ENABLED, "true");
+            setText(getMod(MCPatcherUtils.HD_FONT), TAG_ENABLED, "true");
+            setText(getMod(MCPatcherUtils.BETTER_GRASS), TAG_ENABLED, "true");
         }
     }
 
