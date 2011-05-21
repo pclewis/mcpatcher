@@ -3,7 +3,6 @@ package com.pclewis.mcpatcher;
 import java.io.*;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
-import java.util.zip.ZipFile;
 
 class Util {
     static byte b(int value, int index) {
@@ -59,28 +58,8 @@ class Util {
             os = new FileOutputStream(output);
             copyStream(is, os);
         } finally {
-            close(is);
-            close(os);
-        }
-    }
-
-    static void close(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException e) {
-                Logger.log(e);
-            }
-        }
-    }
-
-    static void close(ZipFile zip) {
-        if (zip != null) {
-            try {
-                zip.close();
-            } catch (IOException e) {
-                Logger.log(e);
-            }
+            MCPatcherUtils.close(is);
+            MCPatcherUtils.close(os);
         }
     }
 
@@ -95,14 +74,14 @@ class Util {
             output = new ByteArrayOutputStream();
             dos = new DigestOutputStream(output, md);
             copyStream(input, dos);
-            close(dos);
+            MCPatcherUtils.close(dos);
             md5 = BinaryRegex.binToStr(md.digest()).replaceAll(" ", "");
         } catch (Exception e) {
             Logger.log(e);
         } finally {
-            close(input);
-            close(dos);
-            close(output);
+            MCPatcherUtils.close(input);
+            MCPatcherUtils.close(dos);
+            MCPatcherUtils.close(output);
         }
         return md5;
     }

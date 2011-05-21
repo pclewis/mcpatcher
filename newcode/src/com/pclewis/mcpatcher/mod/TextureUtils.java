@@ -258,11 +258,7 @@ public class TextureUtils {
                 try {
                     image = ImageIO.read(is);
                 } finally {
-                    try {
-                        is.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+                    MCPatcherUtils.close(is);
                 }
             }
         }
@@ -321,12 +317,7 @@ public class TextureUtils {
     public static boolean hasResource(TexturePackBase texturePack, String resource) {
         InputStream is = getResourceAsStream(texturePack, resource);
         boolean has = (is != null);
-        if (is != null) {
-            try {
-                is.close();
-            } catch (IOException e) {
-            }
-        }
+        MCPatcherUtils.close(is);
         return has;
     }
 

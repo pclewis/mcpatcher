@@ -167,7 +167,7 @@ public class AddModDialog extends JDialog {
             inputField.setText(file.getPath());
             modDir = file.getParentFile();
             fileMap.clear();
-            Util.close(zipFile);
+            MCPatcherUtils.close(zipFile);
             zipFile = null;
             ((FileTableModel) fileTable.getModel()).fireTableDataChanged();
             showZipDialog();

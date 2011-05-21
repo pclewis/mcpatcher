@@ -1,6 +1,9 @@
 package com.pclewis.mcpatcher;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.util.zip.ZipFile;
 
 /**
  * Collection of static methods available to mods at runtime.  This class is always injected into
@@ -292,6 +295,36 @@ public class MCPatcherUtils {
     static void remove(String tag) {
         if (config != null) {
             config.remove(config.getConfig(tag));
+        }
+    }
+
+    /**
+     * Convenience method to close a stream ignoring exceptions.
+     *
+     * @param closeable closeable object
+     */
+    public static void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Convenience method to close a zip file ignoring exceptions.
+     *
+     * @param zip zip file
+     */
+    public static void close(ZipFile zip) {
+        if (zip != null) {
+            try {
+                zip.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

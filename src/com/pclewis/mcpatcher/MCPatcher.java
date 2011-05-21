@@ -518,7 +518,7 @@ final public class MCPatcher {
 
             if (!patched) {
                 outputJar.putNextEntry(new ZipEntry(name));
-                Util.close(inputStream);
+                MCPatcherUtils.close(inputStream);
                 if (fromMod == null) {
                     inputStream = origJar.getInputStream(entry);
                 } else {
@@ -528,7 +528,7 @@ final public class MCPatcher {
                 outputJar.closeEntry();
             }
 
-            Util.close(inputStream);
+            MCPatcherUtils.close(inputStream);
         }
 
         for (Mod mod : modList.getSelected()) {
@@ -565,7 +565,7 @@ final public class MCPatcher {
                 throw e;
             }
         } finally {
-            Util.close(inputStream);
+            MCPatcherUtils.close(inputStream);
         }
 
         return true;

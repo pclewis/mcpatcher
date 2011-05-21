@@ -88,7 +88,7 @@ class MinecraftJar {
                 entries.add(name);
             }
         } finally {
-            Util.close(zip);
+            MCPatcherUtils.close(zip);
         }
     }
 
@@ -126,8 +126,8 @@ class MinecraftJar {
         } catch (Exception e) {
             Logger.log(e);
         } finally {
-            Util.close(is);
-            Util.close(jar);
+            MCPatcherUtils.close(is);
+            MCPatcherUtils.close(jar);
         }
         return version;
     }
@@ -147,7 +147,7 @@ class MinecraftJar {
             } catch (IOException e) {
                 Logger.log(e);
             } finally {
-                Util.close(is);
+                MCPatcherUtils.close(is);
             }
         }
         return null;
@@ -174,8 +174,8 @@ class MinecraftJar {
         } catch (IOException e) {
             Logger.log(e);
         } finally {
-            Util.close(br);
-            Util.close(pw);
+            MCPatcherUtils.close(br);
+            MCPatcherUtils.close(pw);
         }
         try {
             Util.copyFile(output, input);
@@ -239,13 +239,13 @@ class MinecraftJar {
         try {
             jar = new JarFile(outputFile);
         } finally {
-            Util.close(jar);
+            MCPatcherUtils.close(jar);
         }
     }
 
     public void closeStreams() {
-        Util.close(origJar);
-        Util.close(outputJar);
+        MCPatcherUtils.close(origJar);
+        MCPatcherUtils.close(outputJar);
         origJar = null;
         outputJar = null;
     }
