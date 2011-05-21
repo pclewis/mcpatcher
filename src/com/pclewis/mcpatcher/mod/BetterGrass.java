@@ -1,7 +1,10 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.*;
+import javassist.bytecode.AccessFlag;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.FieldInfo;
+import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -67,7 +70,7 @@ public class BetterGrass extends Mod {
                 }
             });
 
-            memberMappers.add(new FieldMapper(new String[] {null, "ground"}, "LMaterial;").accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(new String[]{null, "ground"}, "LMaterial;").accessFlag(AccessFlag.STATIC, true));
         }
     }
 
@@ -332,7 +335,7 @@ public class BetterGrass extends Mod {
             });
 
             memberMappers.add(new MethodMapper("getBlockMaterial", "(III)LMaterial;"));
-            memberMappers.add(new MethodMapper(new String[] {"getBlockId", "getBlockMetadata"}, "(III)I"));
+            memberMappers.add(new MethodMapper(new String[]{"getBlockId", "getBlockMetadata"}, "(III)I"));
         }
     }
 

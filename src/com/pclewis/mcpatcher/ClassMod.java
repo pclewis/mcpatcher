@@ -4,7 +4,6 @@ import javassist.bytecode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -338,7 +337,7 @@ abstract public class ClassMod implements PatchComponent {
          * @param descriptor Java type descriptor
          */
         public MemberMapper(String name, String descriptor) {
-            this(new String[] {name}, descriptor);
+            this(new String[]{name}, descriptor);
         }
 
         /**

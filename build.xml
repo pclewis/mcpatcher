@@ -1,443 +1,463 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="mcpatcher" default="all">
-  
-  
-  <property file="build.properties"/>
-  <!-- Uncomment the following property if no tests compilation is needed -->
-  <!-- 
-  <property name="skip.tests" value="true"/>
-   -->
-  
-  <!-- Compiler options -->
-  
-  <property name="compiler.debug" value="on"/>
-  <property name="compiler.generate.no.warnings" value="off"/>
-  <property name="compiler.args" value="-target 1.5"/>
-  <property name="compiler.max.memory" value="128m"/>
-  <patternset id="ignored.files">
-    <exclude name="**/CVS/**"/>
-    <exclude name="**/SCCS/**"/>
-    <exclude name="**/RCS/**"/>
-    <exclude name="**/rcs/**"/>
-    <exclude name="**/.DS_Store/**"/>
-    <exclude name="**/.svn/**"/>
-    <exclude name="**/.pyc/**"/>
-    <exclude name="**/.pyo/**"/>
-    <exclude name="**/*.pyc/**"/>
-    <exclude name="**/*.pyo/**"/>
-    <exclude name="**/.git/**"/>
-    <exclude name="**/*.hprof/**"/>
-    <exclude name="**/_svn/**"/>
-    <exclude name="**/.hg/**"/>
-    <exclude name="**/*.lib/**"/>
-    <exclude name="**/*~/**"/>
-  </patternset>
-  <patternset id="library.patterns">
-    <include name="*.zip"/>
-    <include name="*.war"/>
-    <include name="*.egg"/>
-    <include name="*.ear"/>
-    <include name="*.swc"/>
-    <include name="*.jar"/>
-  </patternset>
-  <patternset id="compiler.resources">
-    <include name="**/?*.properties"/>
-    <include name="**/?*.xml"/>
-    <include name="**/?*.gif"/>
-    <include name="**/?*.png"/>
-    <include name="**/?*.jpeg"/>
-    <include name="**/?*.jpg"/>
-    <include name="**/?*.html"/>
-    <include name="**/?*.dtd"/>
-    <include name="**/?*.tld"/>
-    <include name="**/?*.ftl"/>
-  </patternset>
-  
-  
-  <!-- Project Libraries -->
-  
-  <path id="library.forms.classpath">
-    <pathelement location="${idea.home}/lib/forms_rt.jar"/>
-  </path>
-  
-  <path id="library.javassist.classpath">
-    <pathelement location="${basedir}/lib/javassist.jar"/>
-  </path>
-  <!-- Register Custom Compiler Taskdefs -->
-  <property name="javac2.home" value="${idea.home}/lib"/>
-  <path id="javac2.classpath">
-    <pathelement location="${javac2.home}/javac2.jar"/>
-    <pathelement location="${javac2.home}/jdom.jar"/>
-    <pathelement location="${javac2.home}/asm.jar"/>
-    <pathelement location="${javac2.home}/asm-commons.jar"/>
-    <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
-  </path>
-  <target name="register.custom.compilers">
-    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
-  </target>
-  
-  <!-- Modules -->
-  
-  
-  <!-- Module stubs -->
-  
-  <dirname property="module.stubs.basedir" file="${ant.file}"/>
-  
-  
-  
-  <property name="compiler.args.stubs" value="${compiler.args}"/>
-  
-  <property name="stubs.output.dir" value="${module.stubs.basedir}/out/production/stubs"/>
-  <property name="stubs.testoutput.dir" value="${module.stubs.basedir}/out/test/stubs"/>
-  
-  <path id="stubs.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="stubs.module.production.classpath"/>
-  
-  <path id="stubs.runtime.production.module.classpath">
-    <pathelement location="${stubs.output.dir}"/>
-  </path>
-  
-  <path id="stubs.module.classpath">
-    <pathelement location="${stubs.output.dir}"/>
-  </path>
-  
-  <path id="stubs.runtime.module.classpath">
-    <pathelement location="${stubs.testoutput.dir}"/>
-    <pathelement location="${stubs.output.dir}"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.stubs">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.stubs">
-    <patternset refid="excluded.from.module.stubs"/>
-  </patternset>
-  
-  <path id="stubs.module.sourcepath">
-    <dirset dir="${module.stubs.basedir}/stubs">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.stubs" depends="compile.module.stubs.production,compile.module.stubs.tests" description="Compile module stubs"/>
-  
-  <target name="compile.module.stubs.production" depends="register.custom.compilers" description="Compile module stubs; production classes">
-    <mkdir dir="${stubs.output.dir}"/>
-    <javac2 destdir="${stubs.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.stubs}"/>
-      <bootclasspath refid="stubs.module.bootclasspath"/>
-      <classpath refid="stubs.module.production.classpath"/>
-      <src refid="stubs.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.stubs"/>
-    </javac2>
-    
-    <copy todir="${stubs.output.dir}">
-      <fileset dir="${module.stubs.basedir}/stubs/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.stubs.tests" depends="register.custom.compilers,compile.module.stubs.production" description="compile module stubs; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.stubs" description="cleanup module">
-    <delete dir="${stubs.output.dir}"/>
-    <delete dir="${stubs.testoutput.dir}"/>
-  </target>
-  
-  
-  <!-- Module shared -->
-  
-  <dirname property="module.shared.basedir" file="${ant.file}"/>
-  
-  
-  
-  <property name="compiler.args.shared" value="${compiler.args}"/>
-  
-  <property name="shared.output.dir" value="${module.shared.basedir}/out/production/shared"/>
-  <property name="shared.testoutput.dir" value="${module.shared.basedir}/out/test/shared"/>
-  
-  <path id="shared.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="shared.module.production.classpath"/>
-  
-  <path id="shared.runtime.production.module.classpath">
-    <pathelement location="${shared.output.dir}"/>
-  </path>
-  
-  <path id="shared.module.classpath">
-    <pathelement location="${shared.output.dir}"/>
-  </path>
-  
-  <path id="shared.runtime.module.classpath">
-    <pathelement location="${shared.testoutput.dir}"/>
-    <pathelement location="${shared.output.dir}"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.shared">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.shared">
-    <patternset refid="excluded.from.module.shared"/>
-  </patternset>
-  
-  <path id="shared.module.sourcepath">
-    <dirset dir="${module.shared.basedir}/shared">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.shared" depends="compile.module.shared.production,compile.module.shared.tests" description="Compile module shared"/>
-  
-  <target name="compile.module.shared.production" depends="register.custom.compilers" description="Compile module shared; production classes">
-    <mkdir dir="${shared.output.dir}"/>
-    <javac2 destdir="${shared.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.shared}"/>
-      <bootclasspath refid="shared.module.bootclasspath"/>
-      <classpath refid="shared.module.production.classpath"/>
-      <src refid="shared.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.shared"/>
-    </javac2>
-    
-    <copy todir="${shared.output.dir}">
-      <fileset dir="${module.shared.basedir}/shared/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.shared.tests" depends="register.custom.compilers,compile.module.shared.production" description="compile module shared; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.shared" description="cleanup module">
-    <delete dir="${shared.output.dir}"/>
-    <delete dir="${shared.testoutput.dir}"/>
-  </target>
-  
-  
-  <!-- Module mcpatcher -->
-  
-  <dirname property="module.mcpatcher.basedir" file="${ant.file}"/>
-  
-  
-  
-  <property name="compiler.args.mcpatcher" value="${compiler.args}"/>
-  
-  <property name="mcpatcher.output.dir" value="${module.mcpatcher.basedir}/out/production/mcpatcher"/>
-  <property name="mcpatcher.testoutput.dir" value="${module.mcpatcher.basedir}/out/test/mcpatcher"/>
-  
-  <path id="mcpatcher.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="mcpatcher.module.production.classpath">
-    <path refid="library.javassist.classpath"/>
-    <pathelement location="${shared.output.dir}"/>
-    <path refid="library.forms.classpath"/>
-  </path>
-  
-  <path id="mcpatcher.runtime.production.module.classpath">
-    <pathelement location="${mcpatcher.output.dir}"/>
-    <path refid="library.javassist.classpath"/>
-    <path refid="shared.runtime.production.module.classpath"/>
-    <path refid="library.forms.classpath"/>
-  </path>
-  
-  <path id="mcpatcher.module.classpath">
-    <pathelement location="${mcpatcher.output.dir}"/>
-    <path refid="library.javassist.classpath"/>
-    <pathelement location="${shared.testoutput.dir}"/>
-    <pathelement location="${shared.output.dir}"/>
-    <path refid="library.forms.classpath"/>
-  </path>
-  
-  <path id="mcpatcher.runtime.module.classpath">
-    <pathelement location="${mcpatcher.testoutput.dir}"/>
-    <pathelement location="${mcpatcher.output.dir}"/>
-    <path refid="library.javassist.classpath"/>
-    <path refid="shared.runtime.module.classpath"/>
-    <path refid="library.forms.classpath"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.mcpatcher">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.mcpatcher">
-    <patternset refid="excluded.from.module.mcpatcher"/>
-  </patternset>
-  
-  <path id="mcpatcher.module.sourcepath">
-    <dirset dir="${module.mcpatcher.basedir}">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.mcpatcher" depends="compile.module.mcpatcher.production,compile.module.mcpatcher.tests" description="Compile module mcpatcher"/>
-  
-  <target name="compile.module.mcpatcher.production" depends="register.custom.compilers,compile.module.shared" description="Compile module mcpatcher; production classes">
-    <mkdir dir="${mcpatcher.output.dir}"/>
-    <javac2 destdir="${mcpatcher.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.mcpatcher}"/>
-      <bootclasspath refid="mcpatcher.module.bootclasspath"/>
-      <classpath refid="mcpatcher.module.production.classpath"/>
-      <src refid="mcpatcher.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.mcpatcher"/>
-    </javac2>
-    
-    <copy todir="${mcpatcher.output.dir}">
-      <fileset dir="${module.mcpatcher.basedir}/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.mcpatcher.tests" depends="register.custom.compilers,compile.module.mcpatcher.production" description="compile module mcpatcher; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.mcpatcher" description="cleanup module">
-    <delete dir="${mcpatcher.output.dir}"/>
-    <delete dir="${mcpatcher.testoutput.dir}"/>
-  </target>
-  
-  
-  <!-- Module newcode -->
-  
-  <dirname property="module.newcode.basedir" file="${ant.file}"/>
-  
-  
-  
-  <property name="compiler.args.newcode" value="${compiler.args}"/>
-  
-  <property name="newcode.output.dir" value="${module.newcode.basedir}/out/production/newcode"/>
-  <property name="newcode.testoutput.dir" value="${module.newcode.basedir}/out/test/newcode"/>
-  
-  <path id="newcode.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="newcode.module.production.classpath">
-    <pathelement location="${stubs.output.dir}"/>
-    <pathelement location="${shared.output.dir}"/>
-  </path>
-  
-  <path id="newcode.runtime.production.module.classpath">
-    <pathelement location="${newcode.output.dir}"/>
-    <path refid="stubs.runtime.production.module.classpath"/>
-    <path refid="shared.runtime.production.module.classpath"/>
-  </path>
-  
-  <path id="newcode.module.classpath">
-    <pathelement location="${newcode.output.dir}"/>
-    <pathelement location="${stubs.testoutput.dir}"/>
-    <pathelement location="${stubs.output.dir}"/>
-    <pathelement location="${shared.testoutput.dir}"/>
-    <pathelement location="${shared.output.dir}"/>
-  </path>
-  
-  <path id="newcode.runtime.module.classpath">
-    <pathelement location="${newcode.testoutput.dir}"/>
-    <pathelement location="${newcode.output.dir}"/>
-    <path refid="stubs.runtime.module.classpath"/>
-    <path refid="shared.runtime.module.classpath"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.newcode">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.newcode">
-    <patternset refid="excluded.from.module.newcode"/>
-  </patternset>
-  
-  <path id="newcode.module.sourcepath">
-    <dirset dir="${module.newcode.basedir}/newcode">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.newcode" depends="compile.module.newcode.production,compile.module.newcode.tests" description="Compile module newcode"/>
-  
-  <target name="compile.module.newcode.production" depends="register.custom.compilers,compile.module.stubs,compile.module.shared" description="Compile module newcode; production classes">
-    <mkdir dir="${newcode.output.dir}"/>
-    <javac2 destdir="${newcode.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.newcode}"/>
-      <bootclasspath refid="newcode.module.bootclasspath"/>
-      <classpath refid="newcode.module.production.classpath"/>
-      <src refid="newcode.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.newcode"/>
-    </javac2>
-    
-    <copy todir="${newcode.output.dir}">
-      <fileset dir="${module.newcode.basedir}/newcode/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.newcode.tests" depends="register.custom.compilers,compile.module.newcode.production" description="compile module newcode; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.newcode" description="cleanup module">
-    <delete dir="${newcode.output.dir}"/>
-    <delete dir="${newcode.testoutput.dir}"/>
-  </target>
-  
-  <target name="init" description="Build initialization">
-    <!-- Perform any build initialization in this target -->
-  </target>
-  
-  <target name="clean" depends="clean.module.stubs, clean.module.shared, clean.module.mcpatcher, clean.module.newcode" description="cleanup all"/>
-  
-  <target name="build.modules" depends="init, clean, compile.module.stubs, compile.module.shared, compile.module.mcpatcher, compile.module.newcode" description="build all modules"/>
-  
-  <target name="init.artifacts">
-    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
-    <property name="artifact.output.mcpatcher" value="${basedir}/out/artifacts/mcpatcher"/>
-    <mkdir dir="${artifacts.temp.dir}"/>
-    <property name="temp.jar.path.mcpatcher.jar" value="${artifacts.temp.dir}/mcpatcher.jar"/>
-  </target>
-  
-  <target name="artifact.mcpatcher" depends="init.artifacts, compile.module.mcpatcher, compile.module.newcode, compile.module.shared" description="Build &apos;mcpatcher&apos; artifact">
-    <property name="artifact.temp.output.mcpatcher" value="${artifacts.temp.dir}/mcpatcher"/>
-    <mkdir dir="${artifact.temp.output.mcpatcher}"/>
-    <jar destfile="${temp.jar.path.mcpatcher.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
-      <zipfileset dir="${mcpatcher.output.dir}"/>
-      <zipfileset src="${basedir}/lib/javassist.jar"/>
-      <zipfileset src="${idea.home}/lib/forms_rt.jar"/>
-      <zipfileset file="${basedir}/src/META-INF/MANIFEST.MF" prefix="META-INF"/>
-      <zipfileset dir="${newcode.output.dir}"/>
-      <zipfileset dir="${shared.output.dir}"/>
-    </jar>
-    <copy file="${temp.jar.path.mcpatcher.jar}" tofile="${artifact.temp.output.mcpatcher}/mcpatcher.jar"/>
-  </target>
-  
-  <target name="build.all.artifacts" depends="artifact.mcpatcher" description="Build all artifacts">
-    <mkdir dir="${artifact.output.mcpatcher}"/>
-    <copy todir="${artifact.output.mcpatcher}">
-      <fileset dir="${artifact.temp.output.mcpatcher}"/>
-    </copy>
-    
-    <!-- Delete temporary files -->
-    <delete dir="${artifacts.temp.dir}"/>
-  </target>
-  
-  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+
+
+    <property file="build.properties"/>
+    <!-- Uncomment the following property if no tests compilation is needed -->
+    <!--
+   <property name="skip.tests" value="true"/>
+    -->
+
+    <!-- Compiler options -->
+
+    <property name="compiler.debug" value="on"/>
+    <property name="compiler.generate.no.warnings" value="off"/>
+    <property name="compiler.args" value="-target 1.5"/>
+    <property name="compiler.max.memory" value="128m"/>
+    <patternset id="ignored.files">
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/SCCS/**"/>
+        <exclude name="**/RCS/**"/>
+        <exclude name="**/rcs/**"/>
+        <exclude name="**/.DS_Store/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="**/.pyc/**"/>
+        <exclude name="**/.pyo/**"/>
+        <exclude name="**/*.pyc/**"/>
+        <exclude name="**/*.pyo/**"/>
+        <exclude name="**/.git/**"/>
+        <exclude name="**/*.hprof/**"/>
+        <exclude name="**/_svn/**"/>
+        <exclude name="**/.hg/**"/>
+        <exclude name="**/*.lib/**"/>
+        <exclude name="**/*~/**"/>
+    </patternset>
+    <patternset id="library.patterns">
+        <include name="*.zip"/>
+        <include name="*.war"/>
+        <include name="*.egg"/>
+        <include name="*.ear"/>
+        <include name="*.swc"/>
+        <include name="*.jar"/>
+    </patternset>
+    <patternset id="compiler.resources">
+        <include name="**/?*.properties"/>
+        <include name="**/?*.xml"/>
+        <include name="**/?*.gif"/>
+        <include name="**/?*.png"/>
+        <include name="**/?*.jpeg"/>
+        <include name="**/?*.jpg"/>
+        <include name="**/?*.html"/>
+        <include name="**/?*.dtd"/>
+        <include name="**/?*.tld"/>
+        <include name="**/?*.ftl"/>
+    </patternset>
+
+
+    <!-- Project Libraries -->
+
+    <path id="library.forms.classpath">
+        <pathelement location="${idea.home}/lib/forms_rt.jar"/>
+    </path>
+
+    <path id="library.javassist.classpath">
+        <pathelement location="${basedir}/lib/javassist.jar"/>
+    </path>
+    <!-- Register Custom Compiler Taskdefs -->
+    <property name="javac2.home" value="${idea.home}/lib"/>
+    <path id="javac2.classpath">
+        <pathelement location="${javac2.home}/javac2.jar"/>
+        <pathelement location="${javac2.home}/jdom.jar"/>
+        <pathelement location="${javac2.home}/asm.jar"/>
+        <pathelement location="${javac2.home}/asm-commons.jar"/>
+        <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
+    </path>
+    <target name="register.custom.compilers">
+        <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
+        <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions"
+                 classpathref="javac2.classpath"/>
+    </target>
+
+    <!-- Modules -->
+
+
+    <!-- Module stubs -->
+
+    <dirname property="module.stubs.basedir" file="${ant.file}"/>
+
+
+    <property name="compiler.args.stubs" value="${compiler.args}"/>
+
+    <property name="stubs.output.dir" value="${module.stubs.basedir}/out/production/stubs"/>
+    <property name="stubs.testoutput.dir" value="${module.stubs.basedir}/out/test/stubs"/>
+
+    <path id="stubs.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="stubs.module.production.classpath"/>
+
+    <path id="stubs.runtime.production.module.classpath">
+        <pathelement location="${stubs.output.dir}"/>
+    </path>
+
+    <path id="stubs.module.classpath">
+        <pathelement location="${stubs.output.dir}"/>
+    </path>
+
+    <path id="stubs.runtime.module.classpath">
+        <pathelement location="${stubs.testoutput.dir}"/>
+        <pathelement location="${stubs.output.dir}"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.stubs">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.stubs">
+        <patternset refid="excluded.from.module.stubs"/>
+    </patternset>
+
+    <path id="stubs.module.sourcepath">
+        <dirset dir="${module.stubs.basedir}/stubs">
+            <include name="src"/>
+        </dirset>
+    </path>
+
+
+    <target name="compile.module.stubs" depends="compile.module.stubs.production,compile.module.stubs.tests"
+            description="Compile module stubs"/>
+
+    <target name="compile.module.stubs.production" depends="register.custom.compilers"
+            description="Compile module stubs; production classes">
+        <mkdir dir="${stubs.output.dir}"/>
+        <javac2 destdir="${stubs.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}"
+                memorymaximumsize="${compiler.max.memory}" fork="true">
+            <compilerarg line="${compiler.args.stubs}"/>
+            <bootclasspath refid="stubs.module.bootclasspath"/>
+            <classpath refid="stubs.module.production.classpath"/>
+            <src refid="stubs.module.sourcepath"/>
+            <patternset refid="excluded.from.compilation.stubs"/>
+        </javac2>
+
+        <copy todir="${stubs.output.dir}">
+            <fileset dir="${module.stubs.basedir}/stubs/src">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile.module.stubs.tests" depends="register.custom.compilers,compile.module.stubs.production"
+            description="compile module stubs; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.stubs" description="cleanup module">
+        <delete dir="${stubs.output.dir}"/>
+        <delete dir="${stubs.testoutput.dir}"/>
+    </target>
+
+
+    <!-- Module shared -->
+
+    <dirname property="module.shared.basedir" file="${ant.file}"/>
+
+
+    <property name="compiler.args.shared" value="${compiler.args}"/>
+
+    <property name="shared.output.dir" value="${module.shared.basedir}/out/production/shared"/>
+    <property name="shared.testoutput.dir" value="${module.shared.basedir}/out/test/shared"/>
+
+    <path id="shared.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="shared.module.production.classpath"/>
+
+    <path id="shared.runtime.production.module.classpath">
+        <pathelement location="${shared.output.dir}"/>
+    </path>
+
+    <path id="shared.module.classpath">
+        <pathelement location="${shared.output.dir}"/>
+    </path>
+
+    <path id="shared.runtime.module.classpath">
+        <pathelement location="${shared.testoutput.dir}"/>
+        <pathelement location="${shared.output.dir}"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.shared">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.shared">
+        <patternset refid="excluded.from.module.shared"/>
+    </patternset>
+
+    <path id="shared.module.sourcepath">
+        <dirset dir="${module.shared.basedir}/shared">
+            <include name="src"/>
+        </dirset>
+    </path>
+
+
+    <target name="compile.module.shared" depends="compile.module.shared.production,compile.module.shared.tests"
+            description="Compile module shared"/>
+
+    <target name="compile.module.shared.production" depends="register.custom.compilers"
+            description="Compile module shared; production classes">
+        <mkdir dir="${shared.output.dir}"/>
+        <javac2 destdir="${shared.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}"
+                memorymaximumsize="${compiler.max.memory}" fork="true">
+            <compilerarg line="${compiler.args.shared}"/>
+            <bootclasspath refid="shared.module.bootclasspath"/>
+            <classpath refid="shared.module.production.classpath"/>
+            <src refid="shared.module.sourcepath"/>
+            <patternset refid="excluded.from.compilation.shared"/>
+        </javac2>
+
+        <copy todir="${shared.output.dir}">
+            <fileset dir="${module.shared.basedir}/shared/src">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile.module.shared.tests" depends="register.custom.compilers,compile.module.shared.production"
+            description="compile module shared; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.shared" description="cleanup module">
+        <delete dir="${shared.output.dir}"/>
+        <delete dir="${shared.testoutput.dir}"/>
+    </target>
+
+
+    <!-- Module mcpatcher -->
+
+    <dirname property="module.mcpatcher.basedir" file="${ant.file}"/>
+
+
+    <property name="compiler.args.mcpatcher" value="${compiler.args}"/>
+
+    <property name="mcpatcher.output.dir" value="${module.mcpatcher.basedir}/out/production/mcpatcher"/>
+    <property name="mcpatcher.testoutput.dir" value="${module.mcpatcher.basedir}/out/test/mcpatcher"/>
+
+    <path id="mcpatcher.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="mcpatcher.module.production.classpath">
+        <path refid="library.javassist.classpath"/>
+        <pathelement location="${shared.output.dir}"/>
+        <path refid="library.forms.classpath"/>
+    </path>
+
+    <path id="mcpatcher.runtime.production.module.classpath">
+        <pathelement location="${mcpatcher.output.dir}"/>
+        <path refid="library.javassist.classpath"/>
+        <path refid="shared.runtime.production.module.classpath"/>
+        <path refid="library.forms.classpath"/>
+    </path>
+
+    <path id="mcpatcher.module.classpath">
+        <pathelement location="${mcpatcher.output.dir}"/>
+        <path refid="library.javassist.classpath"/>
+        <pathelement location="${shared.testoutput.dir}"/>
+        <pathelement location="${shared.output.dir}"/>
+        <path refid="library.forms.classpath"/>
+    </path>
+
+    <path id="mcpatcher.runtime.module.classpath">
+        <pathelement location="${mcpatcher.testoutput.dir}"/>
+        <pathelement location="${mcpatcher.output.dir}"/>
+        <path refid="library.javassist.classpath"/>
+        <path refid="shared.runtime.module.classpath"/>
+        <path refid="library.forms.classpath"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.mcpatcher">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.mcpatcher">
+        <patternset refid="excluded.from.module.mcpatcher"/>
+    </patternset>
+
+    <path id="mcpatcher.module.sourcepath">
+        <dirset dir="${module.mcpatcher.basedir}">
+            <include name="src"/>
+        </dirset>
+    </path>
+
+
+    <target name="compile.module.mcpatcher" depends="compile.module.mcpatcher.production,compile.module.mcpatcher.tests"
+            description="Compile module mcpatcher"/>
+
+    <target name="compile.module.mcpatcher.production" depends="register.custom.compilers,compile.module.shared"
+            description="Compile module mcpatcher; production classes">
+        <mkdir dir="${mcpatcher.output.dir}"/>
+        <javac2 destdir="${mcpatcher.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}"
+                memorymaximumsize="${compiler.max.memory}" fork="true">
+            <compilerarg line="${compiler.args.mcpatcher}"/>
+            <bootclasspath refid="mcpatcher.module.bootclasspath"/>
+            <classpath refid="mcpatcher.module.production.classpath"/>
+            <src refid="mcpatcher.module.sourcepath"/>
+            <patternset refid="excluded.from.compilation.mcpatcher"/>
+        </javac2>
+
+        <copy todir="${mcpatcher.output.dir}">
+            <fileset dir="${module.mcpatcher.basedir}/src">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile.module.mcpatcher.tests"
+            depends="register.custom.compilers,compile.module.mcpatcher.production"
+            description="compile module mcpatcher; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.mcpatcher" description="cleanup module">
+        <delete dir="${mcpatcher.output.dir}"/>
+        <delete dir="${mcpatcher.testoutput.dir}"/>
+    </target>
+
+
+    <!-- Module newcode -->
+
+    <dirname property="module.newcode.basedir" file="${ant.file}"/>
+
+
+    <property name="compiler.args.newcode" value="${compiler.args}"/>
+
+    <property name="newcode.output.dir" value="${module.newcode.basedir}/out/production/newcode"/>
+    <property name="newcode.testoutput.dir" value="${module.newcode.basedir}/out/test/newcode"/>
+
+    <path id="newcode.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="newcode.module.production.classpath">
+        <pathelement location="${stubs.output.dir}"/>
+        <pathelement location="${shared.output.dir}"/>
+    </path>
+
+    <path id="newcode.runtime.production.module.classpath">
+        <pathelement location="${newcode.output.dir}"/>
+        <path refid="stubs.runtime.production.module.classpath"/>
+        <path refid="shared.runtime.production.module.classpath"/>
+    </path>
+
+    <path id="newcode.module.classpath">
+        <pathelement location="${newcode.output.dir}"/>
+        <pathelement location="${stubs.testoutput.dir}"/>
+        <pathelement location="${stubs.output.dir}"/>
+        <pathelement location="${shared.testoutput.dir}"/>
+        <pathelement location="${shared.output.dir}"/>
+    </path>
+
+    <path id="newcode.runtime.module.classpath">
+        <pathelement location="${newcode.testoutput.dir}"/>
+        <pathelement location="${newcode.output.dir}"/>
+        <path refid="stubs.runtime.module.classpath"/>
+        <path refid="shared.runtime.module.classpath"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.newcode">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.newcode">
+        <patternset refid="excluded.from.module.newcode"/>
+    </patternset>
+
+    <path id="newcode.module.sourcepath">
+        <dirset dir="${module.newcode.basedir}/newcode">
+            <include name="src"/>
+        </dirset>
+    </path>
+
+
+    <target name="compile.module.newcode" depends="compile.module.newcode.production,compile.module.newcode.tests"
+            description="Compile module newcode"/>
+
+    <target name="compile.module.newcode.production"
+            depends="register.custom.compilers,compile.module.stubs,compile.module.shared"
+            description="Compile module newcode; production classes">
+        <mkdir dir="${newcode.output.dir}"/>
+        <javac2 destdir="${newcode.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}"
+                memorymaximumsize="${compiler.max.memory}" fork="true">
+            <compilerarg line="${compiler.args.newcode}"/>
+            <bootclasspath refid="newcode.module.bootclasspath"/>
+            <classpath refid="newcode.module.production.classpath"/>
+            <src refid="newcode.module.sourcepath"/>
+            <patternset refid="excluded.from.compilation.newcode"/>
+        </javac2>
+
+        <copy todir="${newcode.output.dir}">
+            <fileset dir="${module.newcode.basedir}/newcode/src">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile.module.newcode.tests" depends="register.custom.compilers,compile.module.newcode.production"
+            description="compile module newcode; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.newcode" description="cleanup module">
+        <delete dir="${newcode.output.dir}"/>
+        <delete dir="${newcode.testoutput.dir}"/>
+    </target>
+
+    <target name="init" description="Build initialization">
+        <!-- Perform any build initialization in this target -->
+    </target>
+
+    <target name="clean" depends="clean.module.stubs, clean.module.shared, clean.module.mcpatcher, clean.module.newcode"
+            description="cleanup all"/>
+
+    <target name="build.modules"
+            depends="init, clean, compile.module.stubs, compile.module.shared, compile.module.mcpatcher, compile.module.newcode"
+            description="build all modules"/>
+
+    <target name="init.artifacts">
+        <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+        <property name="artifact.output.mcpatcher" value="${basedir}/out/artifacts/mcpatcher"/>
+        <mkdir dir="${artifacts.temp.dir}"/>
+        <property name="temp.jar.path.mcpatcher.jar" value="${artifacts.temp.dir}/mcpatcher.jar"/>
+    </target>
+
+    <target name="artifact.mcpatcher"
+            depends="init.artifacts, compile.module.mcpatcher, compile.module.newcode, compile.module.shared"
+            description="Build &apos;mcpatcher&apos; artifact">
+        <property name="artifact.temp.output.mcpatcher" value="${artifacts.temp.dir}/mcpatcher"/>
+        <mkdir dir="${artifact.temp.output.mcpatcher}"/>
+        <jar destfile="${temp.jar.path.mcpatcher.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+            <zipfileset dir="${mcpatcher.output.dir}"/>
+            <zipfileset src="${basedir}/lib/javassist.jar"/>
+            <zipfileset src="${idea.home}/lib/forms_rt.jar"/>
+            <zipfileset file="${basedir}/src/META-INF/MANIFEST.MF" prefix="META-INF"/>
+            <zipfileset dir="${newcode.output.dir}"/>
+            <zipfileset dir="${shared.output.dir}"/>
+        </jar>
+        <copy file="${temp.jar.path.mcpatcher.jar}" tofile="${artifact.temp.output.mcpatcher}/mcpatcher.jar"/>
+    </target>
+
+    <target name="build.all.artifacts" depends="artifact.mcpatcher" description="Build all artifacts">
+        <mkdir dir="${artifact.output.mcpatcher}"/>
+        <copy todir="${artifact.output.mcpatcher}">
+            <fileset dir="${artifact.temp.output.mcpatcher}"/>
+        </copy>
+
+        <!-- Delete temporary files -->
+        <delete dir="${artifacts.temp.dir}"/>
+    </target>
+
+    <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
 </project>

@@ -1,7 +1,10 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.*;
+import javassist.bytecode.AccessFlag;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
@@ -313,7 +316,7 @@ public class HDTexture extends Mod {
             ).setMethodName("onTick"));
 
             memberMappers.add(new FieldMapper("imageData", "[B"));
-            memberMappers.add(new FieldMapper(new String[] {"tileNumber", null, "tileSize", "tileImage"}, "I"));
+            memberMappers.add(new FieldMapper(new String[]{"tileNumber", null, "tileSize", "tileImage"}, "I"));
 
             patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
         }

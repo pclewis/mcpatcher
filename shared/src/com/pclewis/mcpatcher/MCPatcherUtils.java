@@ -1,6 +1,6 @@
 package com.pclewis.mcpatcher;
 
-import java.io.*;
+import java.io.File;
 
 /**
  * Collection of static methods available to mods at runtime.  This class is always injected into

@@ -1,8 +1,9 @@
 package com.pclewis.mcpatcher;
 
-import javassist.bytecode.*;
-
-import java.util.ArrayList;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.MethodInfo;
 
 /**
  * ClassSignature that matches a particular bytecode sequence.
@@ -77,8 +78,8 @@ abstract public class BytecodeSignature extends ClassSignature {
      * Add class/field/method to class map based on a bytecode reference.
      *
      * @param classFile class file
-     * @param opcode bytecode opcode
-     * @param index reference index in class constant pool
+     * @param opcode    bytecode opcode
+     * @param index     reference index in class constant pool
      * @param reference deobfuscated class/field/method
      */
     protected void mapReference(ClassFile classFile, int opcode, int index, JavaRef reference) {
@@ -106,7 +107,7 @@ abstract public class BytecodeSignature extends ClassSignature {
      * Add class/field/method to class map based on a bytecode reference.
      *
      * @param classFile class file
-     * @param data matching bytecode (opcode + 2-byte const pool index)
+     * @param data      matching bytecode (opcode + 2-byte const pool index)
      * @param reference deobfuscated class/field/method
      */
     protected void mapReference(ClassFile classFile, byte[] data, JavaRef reference) {
