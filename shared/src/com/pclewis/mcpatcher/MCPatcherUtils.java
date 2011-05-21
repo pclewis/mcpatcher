@@ -67,8 +67,13 @@ public class MCPatcherUtils {
     }
 
     private static boolean loadProperties() {
+        config = null;
         if (minecraftDir != null && minecraftDir.exists()) {
-            config = new Config(minecraftDir);
+            try {
+                config = new Config(minecraftDir);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             debug = getBoolean(Config.TAG_DEBUG, false);
             return true;
         }
@@ -140,6 +145,9 @@ public class MCPatcherUtils {
      * @return String value
      */
     public static String getString(String mod, String tag, Object defaultValue) {
+        if (config == null) {
+            return defaultValue == null ? null : defaultValue.toString();
+        }
         String value = config.getModConfigValue(mod, tag);
         if (value == null && defaultValue != null) {
             value = defaultValue.toString();
@@ -156,6 +164,9 @@ public class MCPatcherUtils {
      * @return String value
      */
     public static String getString(String tag, Object defaultValue) {
+        if (config == null) {
+            return defaultValue == null ? null : defaultValue.toString();
+        }
         String value = config.getConfigValue(tag);
         if (value == null && defaultValue != null) {
             value = defaultValue.toString();
@@ -244,7 +255,9 @@ public class MCPatcherUtils {
      * @param value property value (must support toString())
      */
     public static void set(String mod, String tag, Object value) {
-        config.setModConfigValue(mod, tag, value.toString());
+        if (config != null) {
+            config.setModConfigValue(mod, tag, value.toString());
+        }
     }
 
     /**
@@ -254,7 +267,9 @@ public class MCPatcherUtils {
      * @param value property value (must support toString())
      */
     static void set(String tag, Object value) {
-        config.setConfigValue(tag, value.toString());
+        if (config != null) {
+            config.setConfigValue(tag, value.toString());
+        }
     }
 
     /**
@@ -264,7 +279,9 @@ public class MCPatcherUtils {
      * @param tag property name
      */
     public static void remove(String mod, String tag) {
-        config.remove(config.getModConfig(mod, tag));
+        if (config != null) {
+            config.remove(config.getModConfig(mod, tag));
+        }
     }
 
     /**
@@ -273,6 +290,8 @@ public class MCPatcherUtils {
      * @param tag property name
      */
     static void remove(String tag) {
-        config.remove(config.getConfig(tag));
+        if (config != null) {
+            config.remove(config.getConfig(tag));
+        }
     }
 }

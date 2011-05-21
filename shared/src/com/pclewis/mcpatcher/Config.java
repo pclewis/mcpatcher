@@ -4,6 +4,7 @@ import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -66,26 +67,22 @@ class Config {
     static final String VAL_EXTERNAL_ZIP = "externalZip";
     static final String VAL_EXTERNAL_JAR = "externalJar";
 
-    Config(File minecraftDir) {
+    Config(File minecraftDir) throws ParserConfigurationException {
         xmlFile = new File(minecraftDir, "mcpatcher.xml");
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            if (xmlFile.exists()) {
-                try {
-                    xml = builder.parse(xmlFile);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        boolean save = false;
+        if (xmlFile.exists()) {
+            try {
+                xml = builder.parse(xmlFile);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (xml == null) {
-                xml = builder.newDocument();
-                buildNewProperties();
-                saveProperties();
-            }
-        } catch (Exception e) {
-            xml = null;
-            e.printStackTrace();
+        }
+        if (xml == null) {
+            xml = builder.newDocument();
+            buildNewProperties();
+            save = true;
         }
 
         File propFile = new File(minecraftDir, "mcpatcher.properties");
@@ -94,6 +91,7 @@ class Config {
             try {
                 is = new FileInputStream(propFile);
                 convertPropertiesToXML(is);
+                save = true;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -106,6 +104,9 @@ class Config {
                 }
                 propFile.delete();
             }
+        }
+        if (save) {
+            saveProperties();
         }
     }
 
