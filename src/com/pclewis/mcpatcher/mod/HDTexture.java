@@ -257,7 +257,9 @@ public class HDTexture extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     if (methodInfo.getDescriptor().equals(getClassMap().mapTypeString("(LTextureFX;)V"))) {
                         return buildExpression(
-                            BinaryRegex.begin()
+                            BinaryRegex.begin(),
+                            BinaryRegex.any(0, 50),
+                            BinaryRegex.end()
                         );
                     } else {
                         return null;
@@ -267,8 +269,11 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("RenderEngine", "textureList", "Ljava/util/List;")),
                         ALOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "registerTextureFX", "(LTextureFX;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "registerTextureFX", "(Ljava/util/List;LTextureFX;)V")),
+                        RETURN
                     );
                 }
             });
@@ -598,6 +603,7 @@ public class HDTexture extends Mod {
             });
 
             patches.add(new BytecodePatch() {
+                private JavaRef renderEngine = new FieldRef("Minecraft", "renderEngine", "LRenderEngine;");
                 private JavaRef registerTextureFX = new MethodRef("RenderEngine", "registerTextureFX", "(LTextureFX;)V");
 
                 @Override
@@ -609,8 +615,8 @@ public class HDTexture extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         ALOAD_0,
-                        GETFIELD, // RenderEngine
-                        BinaryRegex.any(0, 12),
+                        reference(methodInfo, GETFIELD, renderEngine),
+                        BinaryRegex.any(0, 10),
                         reference(methodInfo, INVOKEVIRTUAL, registerTextureFX)
                     );
                 }

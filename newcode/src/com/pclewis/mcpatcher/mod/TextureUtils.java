@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +41,7 @@ public class TextureUtils {
     private static boolean useTextureCache;
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
-    private static HashSet<Class<? extends TextureFX>> textureFXs = new HashSet<Class<? extends TextureFX>>();
+    private static HashSet<Class<? extends TextureFX>> textureFXClasses = new HashSet<Class<? extends TextureFX>>();
     private static HashSet<Class<? extends TextureFX>> builtInTextureFX = new HashSet<Class<? extends TextureFX>>();
 
     static {
@@ -96,10 +97,46 @@ public class TextureUtils {
         minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
     }
 
-    public static void registerTextureFX(TextureFX textureFX) {
-        Class<? extends TextureFX> cl = textureFX.getClass();
-        if (!builtInTextureFX.contains(cl) && textureFXs.add(cl)) {
-            MCPatcherUtils.log("registering new TextureFX class %s", cl.getName());
+    private static TextureFX newTextureFX(Class<? extends TextureFX> textureFXClass) throws InvocationTargetException, InstantiationException, NoSuchMethodException {
+        for (int i = 0; i < 3; i++) {
+            Constructor<? extends TextureFX> constructor;
+            try {
+                switch (i) {
+                    case 0:
+                        constructor = textureFXClass.getConstructor(Minecraft.class, Integer.TYPE);
+                        return constructor.newInstance(minecraft, TileSize.int_size);
+
+                    case 1:
+                        constructor = textureFXClass.getConstructor(Minecraft.class);
+                        return constructor.newInstance(minecraft);
+
+                    case 2:
+                        constructor = textureFXClass.getConstructor();
+                        return constructor.newInstance();
+
+                    default:
+                        break;
+                }
+            } catch (NoSuchMethodException e) {
+            } catch (IllegalAccessException e) {
+            }
+        }
+        throw new NoSuchMethodException("no suitable constructor found");
+    }
+
+    public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {
+        Class<? extends TextureFX> textureFXClass = textureFX.getClass();
+        if (!builtInTextureFX.contains(textureFXClass)) {
+            try {
+                TextureFX fx = newTextureFX(textureFXClass);
+                textureList.add(fx);
+                fx.onTick();
+                if (textureFXClasses.add(textureFXClass)) {
+                    MCPatcherUtils.log("registered new TextureFX class %s", textureFXClass.getName());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -144,41 +181,13 @@ public class TextureUtils {
             textureList.add(new Portal());
         }
 
-        for (Class<? extends TextureFX> cl : textureFXs) {
-            constructor_loop:
-            for (int i = 0; i < 4; i++) {
-                TextureFX fx = null;
-                Constructor<? extends TextureFX> constructor;
-                try {
-                    switch (i) {
-                        case 0:
-                            constructor = cl.getConstructor(Minecraft.class, Integer.TYPE);
-                            fx = constructor.newInstance(minecraft, TileSize.int_size);
-                            break;
-
-                        case 1:
-                            constructor = cl.getConstructor(Minecraft.class);
-                            fx = constructor.newInstance(minecraft);
-                            break;
-
-                        case 2:
-                            constructor = cl.getConstructor();
-                            fx = constructor.newInstance();
-                            break;
-
-                        default:
-                            MCPatcherUtils.log("no suitable constructor found for %s, deregistering", cl.getName());
-                            textureFXs.remove(cl);
-                            break constructor_loop;
-                    }
-                } catch (NoSuchMethodException e) {
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (fx != null) {
-                    textureList.add(fx);
-                    break;
-                }
+        for (Class<? extends TextureFX> textureFXClass : textureFXClasses) {
+            try {
+                textureList.add(newTextureFX(textureFXClass));
+            } catch (Exception e) {
+                e.printStackTrace();
+                textureFXClasses.remove(textureFXClass);
+                MCPatcherUtils.log("deregistered %s", textureFXClass.getName());
             }
         }
 
