@@ -93,9 +93,9 @@ abstract public class BytecodePatch extends ClassPatch {
             }
             classMod.resolveLabels(repl, matcher.getStart() + skip);
             ci.write(repl, matcher.getStart() + skip);
-            offset = matcher.getStart() + repl.length + gap;
+            offset = matcher.getStart() + repl.length + skip;
             if (Logger.isLogLevel(Logger.LOG_BYTECODE)) {
-                ArrayList<String> txtAfter = bytecodeToString(ca, matcher.getStart(), matcher.getStart() + repl.length + skip);
+                ArrayList<String> txtAfter = bytecodeToString(ca, matcher.getStart(), offset);
                 logBytecodePatch(txtBefore, txtAfter);
             }
             patched = true;
