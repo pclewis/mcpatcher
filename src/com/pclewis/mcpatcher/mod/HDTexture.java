@@ -41,8 +41,9 @@ public class HDTexture extends Mod {
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
-        classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
-        classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
+        classMods.add(new ColorizerMod("ColorizerWater", false, false));
+        classMods.add(new ColorizerMod("ColorizerGrass", true, false));
+        classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
 
         filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
@@ -69,6 +70,7 @@ public class HDTexture extends Mod {
                 }
             });
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
+            memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
 
             patches.add(new BytecodePatch() {
@@ -822,9 +824,28 @@ public class HDTexture extends Mod {
     private static class ColorizerMod extends ClassMod {
         private String name;
 
-        public ColorizerMod(String name, String resource) {
+        public ColorizerMod(String name, boolean has255, boolean has6396257) {
             this.name = name;
-            classSignatures.add(new ConstSignature(resource));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getName().equals("<clinit>")) {
+                        return buildExpression(
+                            BinaryRegex.begin(),
+                            push(methodInfo, 65536),
+                            NEWARRAY, T_INT,
+                            PUTSTATIC, BinaryRegex.any(2),
+                            RETURN,
+                            BinaryRegex.end()
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+            classSignatures.add(new ConstSignature(6396257).negate(!has6396257));
+            classSignatures.add(new ConstSignature(255.0).negate(!has255));
 
             memberMappers.add(new FieldMapper("colorBuffer", "[I"));
 
