@@ -124,7 +124,12 @@ public abstract class Mod {
         return classMap;
     }
 
-    public void minecraftVersion(int[] versionNumbers) {
+    /**
+     * Hook for doing any minecraft version-specific mod setup.
+     *
+     * @param minecraftVersionNumbers array of minecraft version numbers, e.g., 1.6.5 -> {1, 6, 5}
+     */
+    public void preSetup(int[] minecraftVersionNumbers) {
     }
 
     void setRefs() {
@@ -210,10 +215,6 @@ public abstract class Mod {
             }
         }
         return inputStream;
-    }
-
-    protected static String getMinecraftVersion() {
-        return MCPatcher.minecraft == null ? null : MCPatcher.minecraft.getVersion();
     }
 
     /**

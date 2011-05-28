@@ -206,7 +206,7 @@ final public class MCPatcher {
                 } catch (NumberFormatException e) {
                 }
             }
-            mod.minecraftVersion(versionNumbers);
+            mod.preSetup(versionNumbers);
             mod.setRefs();
         }
 

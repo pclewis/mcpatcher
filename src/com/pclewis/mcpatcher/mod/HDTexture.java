@@ -16,7 +16,6 @@ public class HDTexture extends Mod {
     static final String class_CustomAnimation = "com.pclewis.mcpatcher.mod.CustomAnimation";
 
     RenderEngineMod renderEngineMod;
-    boolean pre16;
 
     public HDTexture() {
         name = MCPatcherUtils.HD_TEXTURES;
@@ -51,19 +50,19 @@ public class HDTexture extends Mod {
     }
 
     @Override
-    public void minecraftVersion(int[] versionNumbers) {
-        pre16 = versionNumbers.length >= 2 &&
-            (versionNumbers[0] < 1 || (versionNumbers[0] == 1 && versionNumbers[1] < 6));
+    public void preSetup(int[] minecraftVersionNumbers) {
+        boolean pre16 = minecraftVersionNumbers.length >= 2 &&
+            (minecraftVersionNumbers[0] < 1 || (minecraftVersionNumbers[0] == 1 && minecraftVersionNumbers[1] < 6));
         if (pre16) {
             classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
-            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
             classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
+            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
         } else {
             classMods.add(new ColorizerMod("ColorizerWater", false, false));
             classMods.add(new ColorizerMod("ColorizerGrass", true, false));
             classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
         }
-        renderEngineMod.preSetup();
+        renderEngineMod.preSetup(pre16);
     }
 
     private class RenderEngineMod extends ClassMod {
@@ -324,7 +323,7 @@ public class HDTexture extends Mod {
             });
         }
 
-        void preSetup() {
+        void preSetup(boolean pre16) {
             if (!pre16) {
                 memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
             }
