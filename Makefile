@@ -1,4 +1,4 @@
-MCVER = 1.5_01
+MCVER = 1.6.4
 MCJAR = ../bin/minecraft.jar
 MCJARV = ../bin/minecraft-$(MCVER).jar
 MODJAR = ../mcpatcher-mods/mcpatcher-builtin.jar
@@ -15,7 +15,7 @@ TEST_OPTS = -ignoresavedmods -ignorecustommods -enableallmods -auto -loglevel 5
 TEST_LOG = test.log
 GOOD_LOG = good.log
 TMPDIR = t.1
-FILTER = perl -p -e 's/@[[:digit:]]+/@.../g; s/(INVOKE|GET|PUT)(VIRTUAL|STATIC|INTERFACE|FIELD|SPECIAL)( 0x[[:xdigit:]]{2}){2}/$$1$$2 0x.. 0x../g; s/^(OS|JVM|Classpath): .*/$$1: .../;'
+FILTER = perl -p -e 's/@[[:digit:]]+/@.../g; s/(INVOKE|GET|PUT)(VIRTUAL|STATIC|INTERFACE|FIELD|SPECIAL)( 0x[[:xdigit:]]{2}){2}/$$1$$2 0x.. 0x../g; s/^(OS|JVM|Classpath): .*/$$1: .../; s/\b[a-z]+\.class/xx.class/g;'
 
 .PHONY: default build release run test testfilter javadoc control profile clean modjar restore
 

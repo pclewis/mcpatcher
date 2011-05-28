@@ -2,9 +2,9 @@ MCPatcher version is 2.1.0
 OS: Linux 2.6.35.13-91.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_25 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
-Minecraft version is 1.6.2 (md5 01330b1c930102a683a4dd8d792e632e)
+Minecraft version is 1.6.4 (md5 5c4df6f120336f113180698613853dba)
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.2.jar (824 files)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.4.jar (824 files)
   au.class matches Compass.class
   av.class matches TextureFX.class
    a matches onTick
@@ -43,7 +43,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.2.jar (824 files)
    f matches getBlockMaterial
   net/minecraft/client/Minecraft.class matches Minecraft.class
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.2.jar (second pass)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.4.jar (second pass)
   RenderEngine (jf.class)
    field f matches imageData
    field g matches textureList
@@ -1549,33 +1549,33 @@ Patching...
      DUP                       DUP
      ALOAD_0                   ALOAD_0
      ALOAD_0                   ALOAD_0
-     GETFIELD 0x01 0x25        GETFIELD 0x01 0x25
-     INVOKESPECIAL 0x01 0xb1   INVOKESPECIAL 0x01 0xb1
-     PUTFIELD 0x01 0x0f        PUTFIELD 0x01 0x0f
+     GETFIELD 0x01 0x22        GETFIELD 0x01 0x22
+     INVOKESPECIAL 0x01 0xae   INVOKESPECIAL 0x01 0xae
+     PUTFIELD 0x01 0x0c        PUTFIELD 0x01 0x0c
                                ALOAD_0
-                               INVOKESTATIC 0x06 0x18
+                               INVOKESTATIC 0x06 0x14
     TextureUtils.setTileSize(), renderEngine.setTileSize() on startup a@226
      ALOAD_0                   ALOAD_0
      NEW 0x00 0x8a             NEW 0x00 0x8a
      DUP                       DUP
      ALOAD_0                   ALOAD_0
-     GETFIELD 0x01 0x0f        GETFIELD 0x01 0x0f
+     GETFIELD 0x01 0x0c        GETFIELD 0x01 0x0c
      ALOAD_0                   ALOAD_0
-     GETFIELD 0x01 0x47        GETFIELD 0x01 0x47
-     INVOKESPECIAL 0x01 0xef   INVOKESPECIAL 0x01 0xef
-     PUTFIELD 0x01 0x3d        PUTFIELD 0x01 0x3d
-                               INVOKESTATIC 0x06 0x1b
+     GETFIELD 0x01 0x44        GETFIELD 0x01 0x44
+     INVOKESPECIAL 0x01 0xec   INVOKESPECIAL 0x01 0xec
+     PUTFIELD 0x01 0x3a        PUTFIELD 0x01 0x3a
+                               INVOKESTATIC 0x06 0x17
                                POP
                                ALOAD_0
-                               GETFIELD 0x01 0x3d
+                               GETFIELD 0x01 0x3a
                                ALOAD_0
-                               INVOKEVIRTUAL 0x06 0x1d
+                               INVOKEVIRTUAL 0x06 0x19
     remove registerTextureFX call a@507
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x2b        NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     GETFIELD 0x01 0x28        NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1584,10 +1584,10 @@ Patching...
                                NOP
     remove registerTextureFX call a@518
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x2a        NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     GETFIELD 0x01 0x27        NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1596,11 +1596,11 @@ Patching...
                                NOP
     remove registerTextureFX call a@529
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      NEW 0x00 0x6a             NOP
      DUP                       NOP
-     INVOKESPECIAL 0x01 0xad   NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     INVOKESPECIAL 0x01 0xaa   NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1611,12 +1611,12 @@ Patching...
                                NOP
     remove registerTextureFX call a@543
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      NEW 0x00 0x50             NOP
      DUP                       NOP
      ALOAD_0                   NOP
-     INVOKESPECIAL 0x01 0x67   NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     INVOKESPECIAL 0x01 0x64   NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1627,12 +1627,12 @@ Patching...
                                NOP
     remove registerTextureFX call a@558
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      NEW 0x00 0x92             NOP
      DUP                       NOP
      ALOAD_0                   NOP
-     INVOKESPECIAL 0x01 0xfb   NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     INVOKESPECIAL 0x01 0xf8   NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1643,11 +1643,11 @@ Patching...
                                NOP
     remove registerTextureFX call a@573
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      NEW 0x00 0x9f             NOP
      DUP                       NOP
-     INVOKESPECIAL 0x02 0x47   NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     INVOKESPECIAL 0x02 0x44   NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1658,11 +1658,11 @@ Patching...
                                NOP
     remove registerTextureFX call a@587
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      NEW 0x00 0x6e             NOP
      DUP                       NOP
-     INVOKESPECIAL 0x01 0xb0   NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     INVOKESPECIAL 0x01 0xad   NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1673,12 +1673,12 @@ Patching...
                                NOP
     remove registerTextureFX call a@601
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      NEW 0x00 0xb1             NOP
      DUP                       NOP
      ICONST_0                  NOP
-     INVOKESPECIAL 0x02 0x88   NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     INVOKESPECIAL 0x02 0x85   NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
@@ -1689,12 +1689,12 @@ Patching...
                                NOP
     remove registerTextureFX call a@616
      ALOAD_0                   NOP
-     GETFIELD 0x01 0x3d        NOP
+     GETFIELD 0x01 0x3a        NOP
      NEW 0x00 0xb1             NOP
      DUP                       NOP
      ICONST_1                  NOP
-     INVOKESPECIAL 0x02 0x88   NOP
-     INVOKEVIRTUAL 0x01 0xf1   NOP
+     INVOKESPECIAL 0x02 0x85   NOP
+     INVOKEVIRTUAL 0x01 0xee   NOP
                                NOP
                                NOP
                                NOP
