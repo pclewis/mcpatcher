@@ -43,7 +43,6 @@ public class TextureUtils {
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
     private static HashSet<Class<? extends TextureFX>> textureFXClasses = new HashSet<Class<? extends TextureFX>>();
-    private static HashSet<Class<? extends TextureFX>> builtInTextureFX = new HashSet<Class<? extends TextureFX>>();
 
     static {
         animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
@@ -67,17 +66,6 @@ public class TextureUtils {
         expectedColumns.put("/custom_fire_n_s.png", 1);
         expectedColumns.put("/custom_fire_e_w.png", 1);
         expectedColumns.put("/custom_portal.png", 1);
-
-        builtInTextureFX.add(TextureFX.class);
-        builtInTextureFX.add(Compass.class);
-        builtInTextureFX.add(Watch.class);
-        builtInTextureFX.add(StillLava.class);
-        builtInTextureFX.add(FlowLava.class);
-        builtInTextureFX.add(StillWater.class);
-        builtInTextureFX.add(FlowWater.class);
-        builtInTextureFX.add(Fire.class);
-        builtInTextureFX.add(Portal.class);
-        builtInTextureFX.add(CustomAnimation.class);
     }
 
     public static boolean setTileSize() {
@@ -98,17 +86,28 @@ public class TextureUtils {
         minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
     }
 
-    private static boolean isModLoaderTextureFX(Class<?> textureFXClass) {
-        while (textureFXClass != null && textureFXClass != Object.class) {
-            if (textureFXClass.getName().equals("ModTexture")) {
-                return true;
-            }
-            textureFXClass = textureFXClass.getSuperclass();
+    public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {
+        TextureFX fx = refreshTextureFX(textureFX);
+        if (fx != null) {
+            MCPatcherUtils.log("registering new TextureFX class %s", textureFX.getClass().getName());
+            textureList.add(fx);
+            fx.onTick();
         }
-        return false;
     }
 
-    private static TextureFX newTextureFX(Class<? extends TextureFX> textureFXClass) throws InvocationTargetException, InstantiationException, NoSuchMethodException {
+    private static TextureFX refreshTextureFX(TextureFX textureFX) {
+        if (textureFX instanceof Compass ||
+            textureFX instanceof Watch ||
+            textureFX instanceof StillLava ||
+            textureFX instanceof FlowLava ||
+            textureFX instanceof StillWater ||
+            textureFX instanceof FlowWater ||
+            textureFX instanceof Fire ||
+            textureFX instanceof Portal ||
+            textureFX instanceof CustomAnimation) {
+            return null;
+        }
+        Class<? extends TextureFX> textureFXClass = textureFX.getClass();
         for (int i = 0; i < 3; i++) {
             Constructor<? extends TextureFX> constructor;
             try {
@@ -130,25 +129,17 @@ public class TextureUtils {
                 }
             } catch (NoSuchMethodException e) {
             } catch (IllegalAccessException e) {
-            }
-        }
-        throw new NoSuchMethodException("no suitable constructor found in " + textureFXClass.getName());
-    }
-
-    public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {
-        Class<? extends TextureFX> textureFXClass = textureFX.getClass();
-        if (!builtInTextureFX.contains(textureFXClass) && !isModLoaderTextureFX(textureFXClass)) {
-            try {
-                TextureFX fx = newTextureFX(textureFXClass);
-                textureList.add(fx);
-                fx.onTick();
-                if (textureFXClasses.add(textureFXClass)) {
-                    MCPatcherUtils.log("registered new TextureFX class %s", textureFXClass.getName());
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        if (textureFX.imageData.length != TileSize.int_numBytes) {
+            MCPatcherUtils.log("resizing %s buffer from %d to %d bytes",
+                textureFXClass.getName(), textureFX.imageData.length, TileSize.int_numBytes
+            );
+            textureFX.imageData = new byte[TileSize.int_numBytes];
+        }
+        return textureFX;
     }
 
     public static void refreshTextureFX(java.util.List<TextureFX> textureList) {
@@ -156,8 +147,9 @@ public class TextureUtils {
 
         ArrayList<TextureFX> savedTextureFX = new ArrayList<TextureFX>();
         for (TextureFX t : textureList) {
-            if (isModLoaderTextureFX(t.getClass())) {
-                savedTextureFX.add(t);
+            TextureFX fx = refreshTextureFX(t);
+            if (fx != null) {
+                savedTextureFX.add(fx);
             }
         }
         textureList.clear();
@@ -196,16 +188,6 @@ public class TextureUtils {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
         } else if (animatedPortal) {
             textureList.add(new Portal());
-        }
-
-        for (Class<? extends TextureFX> textureFXClass : textureFXClasses) {
-            try {
-                textureList.add(newTextureFX(textureFXClass));
-            } catch (Exception e) {
-                e.printStackTrace();
-                textureFXClasses.remove(textureFXClass);
-                MCPatcherUtils.log("deregistered %s", textureFXClass.getName());
-            }
         }
 
         for (TextureFX t : savedTextureFX) {
