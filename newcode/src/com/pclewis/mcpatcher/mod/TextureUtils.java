@@ -42,7 +42,6 @@ public class TextureUtils {
     private static boolean useTextureCache;
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
-    private static HashSet<Class<? extends TextureFX>> textureFXClasses = new HashSet<Class<? extends TextureFX>>();
 
     static {
         animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
