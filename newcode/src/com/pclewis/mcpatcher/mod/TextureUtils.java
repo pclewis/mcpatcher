@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -97,6 +98,16 @@ public class TextureUtils {
         minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
     }
 
+    private static boolean isModLoaderTextureFX(Class<?> textureFXClass) {
+        while (textureFXClass != null && textureFXClass != Object.class) {
+            if (textureFXClass.getName().equals("ModTexture")) {
+                return true;
+            }
+            textureFXClass = textureFXClass.getSuperclass();
+        }
+        return false;
+    }
+
     private static TextureFX newTextureFX(Class<? extends TextureFX> textureFXClass) throws InvocationTargetException, InstantiationException, NoSuchMethodException {
         for (int i = 0; i < 3; i++) {
             Constructor<? extends TextureFX> constructor;
@@ -121,12 +132,12 @@ public class TextureUtils {
             } catch (IllegalAccessException e) {
             }
         }
-        throw new NoSuchMethodException("no suitable constructor found");
+        throw new NoSuchMethodException("no suitable constructor found in " + textureFXClass.getName());
     }
 
     public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {
         Class<? extends TextureFX> textureFXClass = textureFX.getClass();
-        if (!builtInTextureFX.contains(textureFXClass)) {
+        if (!builtInTextureFX.contains(textureFXClass) && !isModLoaderTextureFX(textureFXClass)) {
             try {
                 TextureFX fx = newTextureFX(textureFXClass);
                 textureList.add(fx);
@@ -143,6 +154,12 @@ public class TextureUtils {
     public static void refreshTextureFX(java.util.List<TextureFX> textureList) {
         MCPatcherUtils.log("refreshTextureFX()");
 
+        ArrayList<TextureFX> savedTextureFX = new ArrayList<TextureFX>();
+        for (TextureFX t : textureList) {
+            if (isModLoaderTextureFX(t.getClass())) {
+                savedTextureFX.add(t);
+            }
+        }
         textureList.clear();
 
         textureList.add(new Compass(minecraft));
@@ -189,6 +206,10 @@ public class TextureUtils {
                 textureFXClasses.remove(textureFXClass);
                 MCPatcherUtils.log("deregistered %s", textureFXClass.getName());
             }
+        }
+
+        for (TextureFX t : savedTextureFX) {
+            textureList.add(t);
         }
 
         for (TextureFX t : textureList) {
