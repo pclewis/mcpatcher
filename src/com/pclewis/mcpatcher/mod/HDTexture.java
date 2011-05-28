@@ -653,11 +653,6 @@ public class HDTexture extends Mod {
 
     private static class GLAllocationMod extends ClassMod {
         public GLAllocationMod() {
-            classSignatures.add(new ConstSignature(
-                new MethodRef("org.lwjgl.opengl.ARBShaderObjects", "glCreateProgramObjectARB", "()I")
-            ).negate(true)); // don't match GLSL Shader Mod
-            classSignatures.add(new FilenameSignature("ZMod.class").negate(true)); // don't match zombe's Mod
-
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glDeleteLists", "(II)V")));
             classSignatures.add(new BytecodeSignature() {
                 @Override
