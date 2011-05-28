@@ -124,6 +124,9 @@ public abstract class Mod {
         return classMap;
     }
 
+    public void minecraftVersion(int[] versionNumbers) {
+    }
+
     void setRefs() {
         for (ClassMod classMod : getClassMods()) {
             classMod.mod = this;
@@ -207,6 +210,10 @@ public abstract class Mod {
             }
         }
         return inputStream;
+    }
+
+    protected static String getMinecraftVersion() {
+        return MCPatcher.minecraft == null ? null : MCPatcher.minecraft.getVersion();
     }
 
     /**

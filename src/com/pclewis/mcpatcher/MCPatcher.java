@@ -197,6 +197,18 @@ final public class MCPatcher {
 
     static void getApplicableMods() throws IOException, InterruptedException {
         JarFile origJar = minecraft.getInputJar();
+        for (Mod mod : modList.getAll()) {
+            String[] tokens = minecraft.getVersion().split("[^0-9]+");
+            int[] versionNumbers = new int[tokens.length];
+            for (int i = 0; i < tokens.length; i++) {
+                try {
+                    versionNumbers[i] = Integer.parseInt(tokens[i]);
+                } catch (NumberFormatException e) {
+                }
+            }
+            mod.minecraftVersion(versionNumbers);
+            mod.setRefs();
+        }
 
         mapModClasses(origJar);
         mapModClassMembers(origJar);

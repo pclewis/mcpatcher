@@ -15,6 +15,9 @@ public class HDTexture extends Mod {
     static final String class_TextureUtils = "com.pclewis.mcpatcher.mod.TextureUtils";
     static final String class_CustomAnimation = "com.pclewis.mcpatcher.mod.CustomAnimation";
 
+    RenderEngineMod renderEngineMod;
+    boolean pre16;
+
     public HDTexture() {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
@@ -22,7 +25,7 @@ public class HDTexture extends Mod {
         version = "1.0";
         configPanel = new HDTextureConfig();
 
-        classMods.add(new RenderEngineMod());
+        classMods.add(renderEngineMod = new RenderEngineMod());
         classMods.add(new TextureFXMod());
         classMods.add(new CompassMod());
         classMods.add(new FireMod());
@@ -41,16 +44,29 @@ public class HDTexture extends Mod {
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
-        classMods.add(new ColorizerMod("ColorizerWater", false, false));
-        classMods.add(new ColorizerMod("ColorizerGrass", true, false));
-        classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
 
         filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
     }
 
-    private static class RenderEngineMod extends ClassMod {
+    @Override
+    public void minecraftVersion(int[] versionNumbers) {
+        pre16 = versionNumbers.length >= 2 &&
+            (versionNumbers[0] < 1 || (versionNumbers[0] == 1 && versionNumbers[1] < 6));
+        if (pre16) {
+            classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
+            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
+            classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
+        } else {
+            classMods.add(new ColorizerMod("ColorizerWater", false, false));
+            classMods.add(new ColorizerMod("ColorizerGrass", true, false));
+            classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
+        }
+        renderEngineMod.preSetup();
+    }
+
+    private class RenderEngineMod extends ClassMod {
         public RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
@@ -70,7 +86,6 @@ public class HDTexture extends Mod {
                 }
             });
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
-            memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
 
             patches.add(new BytecodePatch() {
@@ -307,6 +322,12 @@ public class HDTexture extends Mod {
                     );
                 }
             });
+        }
+
+        void preSetup() {
+            if (!pre16) {
+                memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
+            }
         }
     }
 
@@ -824,8 +845,22 @@ public class HDTexture extends Mod {
     private static class ColorizerMod extends ClassMod {
         private String name;
 
-        public ColorizerMod(String name, boolean has255, boolean has6396257) {
+        private ColorizerMod(String name) {
             this.name = name;
+
+            memberMappers.add(new FieldMapper("colorBuffer", "[I"));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef(name, "colorBuffer", "[I")));
+        }
+
+        public ColorizerMod(String name, String resource) {
+            this(name);
+
+            classSignatures.add(new ConstSignature(resource));
+        }
+
+        public ColorizerMod(String name, boolean has255, boolean has6396257) {
+            this(name);
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -846,10 +881,6 @@ public class HDTexture extends Mod {
             });
             classSignatures.add(new ConstSignature(6396257).negate(!has6396257));
             classSignatures.add(new ConstSignature(255.0).negate(!has255));
-
-            memberMappers.add(new FieldMapper("colorBuffer", "[I"));
-
-            patches.add(new MakeMemberPublicPatch(new FieldRef(name, "colorBuffer", "[I")));
         }
 
         @Override

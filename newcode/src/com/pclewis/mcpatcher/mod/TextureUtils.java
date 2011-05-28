@@ -198,7 +198,9 @@ public class TextureUtils {
             t.onTick();
         }
 
-        refreshColorizer(ColorizerWater.colorBuffer, "/misc/watercolor.png");
+        if (ColorizerWater.colorBuffer != ColorizerFoliage.colorBuffer) {
+            refreshColorizer(ColorizerWater.colorBuffer, "/misc/watercolor.png");
+        }
         refreshColorizer(ColorizerGrass.colorBuffer, "/misc/grasscolor.png");
         refreshColorizer(ColorizerFoliage.colorBuffer, "/misc/foliagecolor.png");
 
