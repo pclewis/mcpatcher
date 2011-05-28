@@ -472,7 +472,7 @@ public class HDTexture extends Mod {
                         FADD,
                         BinaryRegex.capture(buildExpression(
                             FSTORE, BinaryRegex.any(),
-                            ALOAD_2,
+                            BytecodeMatcher.anyALOAD,
                             DCONST_0
                         ))
                     );
