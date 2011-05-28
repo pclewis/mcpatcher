@@ -2,3 +2,5 @@ doc/javadoc
 out
 .idea/workspace.xml
 Notes
+*.orig
+*.rej
