@@ -10,18 +10,18 @@ class BaseMod extends Mod {
         author = "MCPatcher";
         description = "Internal mod required by the patcher.";
         version = "1.0";
-        configPanel = new Config();
+        configPanel = new ConfigPanel();
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.CONFIG_CLASS));
     }
 
-    public class Config extends ModConfigPanel {
+    class ConfigPanel extends ModConfigPanel {
         private JPanel panel;
         private JTextField heapSizeText;
         private JCheckBox debugCheckBox;
 
-        Config() {
+        ConfigPanel() {
             debugCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     MCPatcherUtils.set(com.pclewis.mcpatcher.Config.TAG_DEBUG, debugCheckBox.isSelected());
