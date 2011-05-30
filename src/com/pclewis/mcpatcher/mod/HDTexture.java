@@ -488,10 +488,10 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        LDC, BinaryRegex.any(),
+                        push(methodInfo, 0.0625F),
                         FADD,
                         BinaryRegex.capture(buildExpression(
-                            FSTORE, BinaryRegex.any(),
+                            BytecodeMatcher.anyFSTORE,
                             BytecodeMatcher.anyALOAD,
                             DCONST_0
                         ))
@@ -508,7 +508,7 @@ public class HDTexture extends Mod {
 
             patches.add(new TileSizePatch(16.0F, "float_size"));
             patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
-            patches.add(new TileSizePatch(1.0F / 512.0F, "float_texNudge"));
+            patches.add(new TileSizePatch(0.001953125F, "float_texNudge"));
         }
     }
 
