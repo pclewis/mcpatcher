@@ -510,8 +510,7 @@ public class HDTexture extends Mod {
 
             patches.add(new TileSizePatch(16.0F, "float_size"));
             patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
-            patches.add(new TileSizePatch.ToolTexPatch(true));
-            patches.add(new TileSizePatch.ToolTexPatch(false));
+            patches.add(new TileSizePatch.ToolTexPatch());
             patches.add(new TileSizePatch(0.001953125F, "float_texNudge"));
         }
     }
