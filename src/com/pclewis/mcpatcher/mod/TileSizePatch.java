@@ -207,4 +207,45 @@ class TileSizePatch extends BytecodePatch {
             );
         }
     }
+
+    protected static class ToolTexPatch extends BytecodePatch {
+        private boolean add;
+
+        public ToolTexPatch(boolean add) {
+            this.add = add;
+        }
+
+        @Override
+        public String getDescription() {
+            return "tool tex nonsense" + (add ? " + 15.99" : "");
+        }
+
+        @Override
+        public String getMatchExpression(MethodInfo methodInfo) {
+            return buildExpression(
+                push(methodInfo, 16),
+                BinaryRegex.capture(BinaryRegex.subset(new byte[] {IREM, IDIV}, true)),
+                push(methodInfo, 16),
+                IMUL,
+                I2F,
+                BinaryRegex.build(push(methodInfo, add ? 15.99F : 0.0F)),
+                FADD,
+                push(methodInfo, 256.0F)
+            );
+        }
+
+        @Override
+        public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+            return buildCode(
+                push(methodInfo, 16),
+                getCaptureGroup(1),
+                reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "int_size", "I")),
+                IMUL,
+                I2F,
+                add ? reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "float_sizeMinus0_01", "F")) : push(methodInfo, 0.0F),
+                FADD,
+                reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "float_size16", "F"))
+            );
+        }
+    }
 }

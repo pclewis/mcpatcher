@@ -22,6 +22,7 @@ final public class TileSize {
 
     public static float float_size;
     public static float float_sizeMinus1;
+    public static float float_sizeMinus0_01;
     public static float float_sizeHalf;
     public static float float_size16;
     public static float float_texNudge;
@@ -54,6 +55,7 @@ final public class TileSize {
 
         float_size = (float) int_size;
         float_sizeMinus1 = float_size - 1.0F;
+        float_sizeMinus0_01 = float_size - 0.01F;
         float_sizeHalf = float_size / 2.0F;
         float_size16 = float_size * 16.0F;
         float_texNudge = 1.0F / (float_size * float_size * 2.0F);
