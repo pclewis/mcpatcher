@@ -309,8 +309,9 @@ public class TextureUtils {
     public static int getTileSize(TexturePackBase texturePack) {
         int size = 0;
         for (Map.Entry<String, Integer> entry : expectedColumns.entrySet()) {
+            InputStream is = null;
             try {
-                InputStream is = getResourceAsStream(texturePack, entry.getKey());
+                is = getResourceAsStream(texturePack, entry.getKey());
                 if (is != null) {
                     BufferedImage bi = ImageIO.read(is);
                     int newSize = bi.getWidth() / entry.getValue();
@@ -319,6 +320,8 @@ public class TextureUtils {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                MCPatcherUtils.close(is);
             }
         }
         return size > 0 ? size : 16;
