@@ -148,7 +148,9 @@ public class AddModDialog extends JDialog {
                 }
             }
         }
-        fd.setCurrentDirectory(modDir);
+        if (modDir != null && modDir.isDirectory()) {
+            fd.setCurrentDirectory(modDir);
+        }
         fd.setAcceptAllFileFilterUsed(false);
         fd.setFileFilter(new FileFilter() {
             @Override
