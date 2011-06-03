@@ -228,7 +228,7 @@ final public class MCPatcher {
             ui.updateProgress(++procFiles, origJar.size());
             String name = entry.getName();
 
-            if (name.endsWith(".class")) {
+            if (MinecraftJar.isClassFile(name)) {
                 ClassFile classFile = new ClassFile(new DataInputStream(origJar.getInputStream(entry)));
 
                 for (Mod mod : modList.getAll()) {
@@ -501,7 +501,7 @@ final public class MCPatcher {
                 fromMod.filesAdded.put(name, "replaced");
             }
 
-            if (name.endsWith(".class")) {
+            if (MinecraftJar.isClassFile(name)) {
                 ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
                 ClassFile classFile = new ClassFile(new DataInputStream(inputStream));
                 String className = ClassMap.filenameToClassName(name);
@@ -562,7 +562,7 @@ final public class MCPatcher {
 
         try {
             outputJar.putNextEntry(new ZipEntry(filename));
-            if (filename.endsWith(".class")) {
+            if (MinecraftJar.isClassFile(filename)) {
                 ClassFile classFile = new ClassFile(new DataInputStream(inputStream));
                 mod.classMap.apply(classFile);
                 classFile.compact();

@@ -153,6 +153,10 @@ class MinecraftJar {
         return null;
     }
 
+    static boolean isClassFile(String filename) {
+        return filename.endsWith(".class") && !filename.startsWith("__MACOSX");
+    }
+
     static void setDefaultTexturePack() {
         File input = MCPatcherUtils.getMinecraftPath("options.txt");
         if (!input.exists()) {

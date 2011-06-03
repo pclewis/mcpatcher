@@ -65,7 +65,7 @@ class ModList {
         final JarFile jar = new JarFile(file);
         URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
         for (JarEntry entry : Collections.list(jar.entries())) {
-            if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
+            if (!entry.isDirectory() && MinecraftJar.isClassFile(entry.getName())) {
                 Mod mod = loadCustomMod(loader, ClassMap.filenameToClassName(entry.getName()));
                 if (mod != null && addNoReplace(mod)) {
                     Logger.log(Logger.LOG_MOD, "new %s()", mod.getClass().getName());
