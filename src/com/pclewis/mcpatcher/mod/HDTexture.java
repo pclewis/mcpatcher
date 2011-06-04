@@ -481,38 +481,7 @@ public class HDTexture extends Mod {
             classSignatures.add(new ConstSignature(0.0625F));
             classSignatures.add(new ConstSignature(0.001953125F));
 
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "tool pixel top";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        BinaryRegex.capture(BinaryRegex.build(
-                            BytecodeMatcher.anyFLOAD,
-                            BytecodeMatcher.anyFLOAD,
-                            FMUL
-                        )),
-                        push(methodInfo, 0.0625F),
-                        BinaryRegex.capture(BinaryRegex.build(
-                            FADD,
-                            BytecodeMatcher.anyFSTORE
-                        ))
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        getCaptureGroup(1),
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "float_reciprocal", "F")),
-                        getCaptureGroup(2)
-                    );
-                }
-            });
-
+            patches.add(new TileSizePatch.ToolPixelTopPatch());
             patches.add(new TileSizePatch(16.0F, "float_size"));
             patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
             patches.add(new TileSizePatch.ToolTexPatch());

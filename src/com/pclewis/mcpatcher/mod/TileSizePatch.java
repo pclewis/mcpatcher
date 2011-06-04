@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.BinaryRegex;
+import com.pclewis.mcpatcher.BytecodeMatcher;
 import com.pclewis.mcpatcher.BytecodePatch;
 import com.pclewis.mcpatcher.FieldRef;
 import javassist.bytecode.MethodInfo;
@@ -246,6 +247,38 @@ class TileSizePatch extends BytecodePatch {
                 offset,
                 FADD,
                 reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "float_size16", "F"))
+            );
+        }
+    }
+
+    protected static class ToolPixelTopPatch extends BytecodePatch {
+        @Override
+        public String getDescription() {
+            return "tool pixel top";
+        }
+
+        @Override
+        public String getMatchExpression(MethodInfo methodInfo) {
+            return buildExpression(
+                BinaryRegex.capture(BinaryRegex.build(
+                    BytecodeMatcher.anyFLOAD,
+                    BytecodeMatcher.anyFLOAD,
+                    FMUL
+                )),
+                push(methodInfo, 0.0625F),
+                BinaryRegex.capture(BinaryRegex.build(
+                    FADD,
+                    BytecodeMatcher.anyFSTORE
+                ))
+            );
+        }
+
+        @Override
+        public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+            return buildCode(
+                getCaptureGroup(1),
+                reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "float_reciprocal", "F")),
+                getCaptureGroup(2)
             );
         }
     }
