@@ -478,6 +478,8 @@ public class HDTexture extends Mod {
     private static class ItemRendererMod extends ClassMod {
         public ItemRendererMod() {
             classSignatures.add(new ConstSignature(-0.9375F));
+            classSignatures.add(new ConstSignature(0.0625F));
+            classSignatures.add(new ConstSignature(0.001953125F));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -488,12 +490,15 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        LDC, BinaryRegex.any(),
-                        FADD,
-                        BinaryRegex.capture(buildExpression(
-                            FSTORE, BinaryRegex.any(),
-                            BytecodeMatcher.anyALOAD,
-                            DCONST_0
+                        BinaryRegex.capture(BinaryRegex.build(
+                            BytecodeMatcher.anyFLOAD,
+                            BytecodeMatcher.anyFLOAD,
+                            FMUL
+                        )),
+                        push(methodInfo, 0.0625F),
+                        BinaryRegex.capture(BinaryRegex.build(
+                            FADD,
+                            BytecodeMatcher.anyFSTORE
                         ))
                     );
                 }
@@ -501,14 +506,17 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        getCaptureGroup(1)
+                        getCaptureGroup(1),
+                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "float_reciprocal", "F")),
+                        getCaptureGroup(2)
                     );
                 }
             });
 
             patches.add(new TileSizePatch(16.0F, "float_size"));
             patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
-            patches.add(new TileSizePatch(1.0F / 512.0F, "float_texNudge"));
+            patches.add(new TileSizePatch.ToolTexPatch());
+            patches.add(new TileSizePatch(0.001953125F, "float_texNudge"));
         }
     }
 
