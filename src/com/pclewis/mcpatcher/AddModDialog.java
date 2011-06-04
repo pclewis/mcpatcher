@@ -84,7 +84,7 @@ public class AddModDialog extends JDialog {
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                showZipDialog();
+                showZipDialog(true);
             }
         });
 
@@ -168,20 +168,22 @@ public class AddModDialog extends JDialog {
             MCPatcherUtils.close(zipFile);
             zipFile = null;
             ((FileTableModel) fileTable.getModel()).fireTableDataChanged();
-            showZipDialog();
+            showZipDialog(false);
         }
         updateControls();
         return zipFile != null;
     }
 
-    private void showZipDialog() {
+    private void showZipDialog(boolean addMode) {
         hideZipDialog();
         File inputFile = new File(inputField.getText());
         try {
             zipFile = new ZipFile(inputFile);
             zipDialog = new ZipTreeDialog(zipFile);
-            zipDialog.setLocationRelativeTo(this);
-            zipDialog.setVisible(true);
+            if (addMode || zipDialog.hasSubfolders()) {
+                zipDialog.setLocationRelativeTo(this);
+                zipDialog.setVisible(true);
+            }
             String newPrefix = zipDialog.getPrefix();
             if (newPrefix != null) {
                 addFiles(newPrefix);
@@ -203,6 +205,7 @@ public class AddModDialog extends JDialog {
 
     private void hideZipDialog() {
         if (zipDialog != null) {
+            zipDialog.setVisible(false);
             zipDialog.dispose();
             zipDialog = null;
         }

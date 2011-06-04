@@ -139,6 +139,15 @@ public class ZipTreeDialog extends JDialog {
         dispose();
     }
 
+    boolean hasSubfolders() {
+        if (tree.getModel().getChildCount(tree.getModel().getRoot()) > 0) {
+            return true;
+        } else {
+            prefix = "";
+            return false;
+        }
+    }
+
     String getPrefix() {
         return prefix;
     }
