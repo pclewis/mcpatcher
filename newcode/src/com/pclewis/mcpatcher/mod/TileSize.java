@@ -25,6 +25,7 @@ final public class TileSize {
     public static float float_sizeMinus0_01;
     public static float float_sizeHalf;
     public static float float_size16;
+    public static float float_reciprocal;
     public static float float_texNudge;
     public static float float_flameNudge;
 
@@ -58,6 +59,7 @@ final public class TileSize {
         float_sizeMinus0_01 = float_size - 0.01F;
         float_sizeHalf = float_size / 2.0F;
         float_size16 = float_size * 16.0F;
+        float_reciprocal = 1.0F / float_size;
         float_texNudge = 1.0F / (float_size * float_size * 2.0F);
         if (size < 64) {
             float_flameNudge = 1.0F + 0.96F / float_size;

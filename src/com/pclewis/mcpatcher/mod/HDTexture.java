@@ -490,12 +490,15 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
+                        BinaryRegex.capture(BinaryRegex.build(
+                            BytecodeMatcher.anyFLOAD,
+                            BytecodeMatcher.anyFLOAD,
+                            FMUL
+                        )),
                         push(methodInfo, 0.0625F),
-                        FADD,
-                        BinaryRegex.capture(buildExpression(
-                            BytecodeMatcher.anyFSTORE,
-                            BytecodeMatcher.anyALOAD,
-                            DCONST_0
+                        BinaryRegex.capture(BinaryRegex.build(
+                            FADD,
+                            BytecodeMatcher.anyFSTORE
                         ))
                     );
                 }
@@ -503,7 +506,9 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        getCaptureGroup(1)
+                        getCaptureGroup(1),
+                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "float_reciprocal", "F")),
+                        getCaptureGroup(2)
                     );
                 }
             });
