@@ -91,12 +91,14 @@ public class AddModDialog extends JDialog {
 
         removeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int rowIndex = fileTable.getSelectedRow();
                 FileTableModel model = (FileTableModel) fileTable.getModel();
-                Map.Entry<String, String> row = model.getRow(rowIndex);
-                if (row != null) {
-                    fileMap.remove(row.getKey());
-                    model.fireTableRowsDeleted(rowIndex, rowIndex);
+                int rowIndex;
+                while ((rowIndex = fileTable.getSelectedRow()) >= 0) {
+                    Map.Entry<String, String> row = model.getRow(rowIndex);
+                    if (row != null) {
+                        fileMap.remove(row.getKey());
+                        model.fireTableRowsDeleted(rowIndex, rowIndex);
+                    }
                 }
             }
         });
