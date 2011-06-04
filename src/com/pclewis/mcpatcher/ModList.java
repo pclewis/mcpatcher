@@ -231,6 +231,18 @@ class ModList {
         return index;
     }
 
+    public int replace(Mod oldMod, Mod newMod) {
+        int index = indexOf(oldMod);
+        if (index >= 0 && oldMod.getName().equals(newMod.getName())) {
+            modsByIndex.set(index, newMod);
+            modsByName.put(newMod.getName(), newMod);
+            return indexOfVisible(newMod);
+        } else {
+            remove(oldMod);
+            return addFirst(newMod);
+        }
+    }
+
     private boolean addNoReplace(Mod mod) {
         if (mod == null) {
             return false;

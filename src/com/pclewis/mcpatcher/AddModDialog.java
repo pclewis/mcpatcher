@@ -38,6 +38,7 @@ public class AddModDialog extends JDialog {
         if (mod != null) {
             editMode = true;
             zipFile = mod.zipFile;
+            inputField.setText(zipFile.getName());
             fileMap.putAll(mod.fileMap);
         }
 
