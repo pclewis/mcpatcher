@@ -473,7 +473,7 @@ final public class MCPatcher {
             String name = entry.getName();
             boolean patched = false;
 
-            if (name.startsWith("META-INF")) {
+            if (name.startsWith("META-INF") || name.startsWith("__MACOSX")) {
                 continue; // leave out manifest
             }
             if (entry.isDirectory()) {
