@@ -2,9 +2,9 @@ MCPatcher version is 2.1.0_01
 OS: Linux 2.6.35.13-91.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_25 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
-Minecraft version is 1.6.5 (md5 2aba888864b32038c8d22ee5df71b7c8)
+Minecraft version is 1.6.6 (md5 ce80072464433cd5b05d505aa8ff29d1)
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.5.jar (824 files)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.6.jar (824 files)
   au.class matches Compass.class
   av.class matches TextureFX.class
    a matches onTick
@@ -43,7 +43,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.5.jar (824 files)
    f matches getBlockMaterial
   net/minecraft/client/Minecraft.class matches Minecraft.class
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.5.jar (second pass)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.6.jar (second pass)
   RenderEngine (jf.class)
    field f matches imageData
    field g matches textureList
@@ -1206,41 +1206,84 @@ Patching...
                                LDC 0x02
                                INVOKESTATIC 0x00 0x5b
  applying ItemRenderer patch to qv.class for mod HD Textures
-    tool pixel top a@735
-     LDC 0x13                  NOP
-     FADD                      NOP
-     FSTORE 0x11               NOP
-     ALOAD_3                   FSTORE 0x11
-     DCONST_0                  ALOAD_3
-                               DCONST_0
+    tool pixel top a@597
+     FLOAD 0x09                FLOAD 0x09
+     FLOAD 0x0f                FLOAD 0x0f
+     FMUL                      FMUL
+     LDC 0x13                  GETSTATIC 0x01 0x7f
+     FADD                      FADD
+     FSTORE 0x11               FSTORE 0x11
+    tool pixel top a@731
+     FLOAD 0x09                FLOAD 0x09
+     FLOAD 0x0f                FLOAD 0x0f
+     FMUL                      FMUL
+     LDC 0x13                  GETSTATIC 0x01 0x7f
+     FADD                      FADD
+     FSTORE 0x11               FSTORE 0x11
     16.0F -> float_size a@446
-     LDC 0x29                  GETSTATIC 0x01 0x7f
+     LDC 0x29                  GETSTATIC 0x01 0x82
     16.0F -> float_size a@577
-     LDC 0x29                  GETSTATIC 0x01 0x7f
-    16.0F -> float_size a@711
-     LDC 0x29                  GETSTATIC 0x01 0x7f
-    16.0F -> float_size a@850
-     LDC 0x29                  GETSTATIC 0x01 0x7f
+     LDC 0x29                  GETSTATIC 0x01 0x82
+    16.0F -> float_size a@712
+     LDC 0x29                  GETSTATIC 0x01 0x82
+    16.0F -> float_size a@852
+     LDC 0x29                  GETSTATIC 0x01 0x82
     while i < 16 -> int_size a@438
-     BIPUSH 0x10               GETSTATIC 0x01 0x82
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
      IF_ICMPGE 0x00 0x6d       IF_ICMPGE 0x00 0x6d
     while i < 16 -> int_size a@570
-     BIPUSH 0x10               GETSTATIC 0x01 0x82
-     IF_ICMPGE 0x00 0x70       IF_ICMPGE 0x00 0x70
-    while i < 16 -> int_size a@705
-     BIPUSH 0x10               GETSTATIC 0x01 0x82
-     IF_ICMPGE 0x00 0x74       IF_ICMPGE 0x00 0x74
-    while i < 16 -> int_size a@845
-     BIPUSH 0x10               GETSTATIC 0x01 0x82
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
      IF_ICMPGE 0x00 0x71       IF_ICMPGE 0x00 0x71
-    0.001953125F -> float_texNudge a@464
-     LDC 0x0f                  GETSTATIC 0x01 0x85
-    0.001953125F -> float_texNudge a@597
-     LDC 0x0f                  GETSTATIC 0x01 0x85
-    0.001953125F -> float_texNudge a@733
-     LDC 0x0f                  GETSTATIC 0x01 0x85
-    0.001953125F -> float_texNudge a@874
-     LDC 0x0f                  GETSTATIC 0x01 0x85
+    while i < 16 -> int_size a@706
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
+     IF_ICMPGE 0x00 0x75       IF_ICMPGE 0x00 0x75
+    while i < 16 -> int_size a@847
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
+     IF_ICMPGE 0x00 0x71       IF_ICMPGE 0x00 0x71
+    tool tex calculation a@132
+     BIPUSH 0x10               BIPUSH 0x10
+     IREM                      IREM
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
+     IMUL                      IMUL
+     I2F                       I2F
+     FCONST_0                  FCONST_0
+     FADD                      FADD
+     LDC 0x35                  GETSTATIC 0x01 0x88
+    tool tex calculation a@150
+     BIPUSH 0x10               BIPUSH 0x10
+     IREM                      IREM
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
+     IMUL                      IMUL
+     I2F                       I2F
+     LDC 0x28                  GETSTATIC 0x01 0x8b
+     FADD                      FADD
+     LDC 0x35                  GETSTATIC 0x01 0x88
+    tool tex calculation a@170
+     BIPUSH 0x10               BIPUSH 0x10
+     IDIV                      IDIV
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
+     IMUL                      IMUL
+     I2F                       I2F
+     FCONST_0                  FCONST_0
+     FADD                      FADD
+     LDC 0x35                  GETSTATIC 0x01 0x88
+    tool tex calculation a@188
+     BIPUSH 0x10               BIPUSH 0x10
+     IDIV                      IDIV
+     BIPUSH 0x10               GETSTATIC 0x01 0x85
+     IMUL                      IMUL
+     I2F                       I2F
+     LDC 0x28                  GETSTATIC 0x01 0x8b
+     FADD                      FADD
+     LDC 0x35                  GETSTATIC 0x01 0x88
+    0.001953125F -> float_texNudge a@474
+     LDC 0x0f                  GETSTATIC 0x01 0x8e
+    0.001953125F -> float_texNudge a@607
+     LDC 0x0f                  GETSTATIC 0x01 0x8e
+    0.001953125F -> float_texNudge a@744
+     LDC 0x0f                  GETSTATIC 0x01 0x8e
+    0.001953125F -> float_texNudge a@886
+     LDC 0x0f                  GETSTATIC 0x01 0x8e
  applying Fire patch to ry.class for mod HD Textures
     1.06F -> float_flameNudge a@143
      LDC 0x02                  GETSTATIC 0x00 0x3f
@@ -1819,7 +1862,7 @@ Patching...
      INVOKESTATIC 0x00 0x76    INVOKESTATIC 0x02 0xc1
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lh;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsBufferedImage@40
      INVOKESTATIC 0x00 0x76    INVOKESTATIC 0x02 0xc1
-    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lh;Ljava/lang/String;)Ljava/io/InputStream; getTileSize@43
+    method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lh;Ljava/lang/String;)Ljava/io/InputStream; getTileSize@46
      INVOKESTATIC 0x00 0x76    INVOKESTATIC 0x02 0xc1
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lh;Ljava/lang/String;)Ljava/io/InputStream; hasResource@2
      INVOKESTATIC 0x00 0x76    INVOKESTATIC 0x02 0xc1
@@ -2013,7 +2056,8 @@ HD Textures
     ItemRenderer (qv.class)
         [4] 0.001953125F -> float_texNudge
         [4] 16.0F -> float_size
-        [1] tool pixel top
+        [2] tool pixel top
+        [4] tool tex calculation
         [4] while i < 16 -> int_size
     Watch (kq.class)
         [1] % 16 -> int_size
