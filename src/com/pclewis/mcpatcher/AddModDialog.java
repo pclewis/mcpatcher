@@ -101,10 +101,6 @@ public class AddModDialog extends JDialog {
         });
 
         updateControls();
-        if (zipFile == null) {
-            showBrowseDialog();
-        } else {
-        }
     }
 
     public void dispose() {
@@ -133,7 +129,7 @@ public class AddModDialog extends JDialog {
         removeButton.setEnabled(exists);
     }
 
-    private void showBrowseDialog() {
+    boolean showBrowseDialog() {
         JFileChooser fd = new JFileChooser();
         fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fd.setFileHidingEnabled(false);
@@ -175,6 +171,7 @@ public class AddModDialog extends JDialog {
             showZipDialog();
         }
         updateControls();
+        return zipFile != null;
     }
 
     private void showZipDialog() {

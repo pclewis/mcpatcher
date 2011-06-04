@@ -232,6 +232,9 @@ class MainForm {
             public void actionPerformed(ActionEvent e) {
                 try {
                     addModDialog = new AddModDialog();
+                    if (!addModDialog.showBrowseDialog()) {
+                        return;
+                    }
                     addModDialog.setLocationRelativeTo(frame);
                     addModDialog.setVisible(true);
                     Mod mod = addModDialog.getMod();
