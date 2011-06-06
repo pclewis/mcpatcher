@@ -133,7 +133,8 @@ final public class MCPatcher {
             MCPatcherUtils.set(Config.TAG_LAST_VERSION, VERSION_STRING);
             MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, false);
             MCPatcherUtils.set(Config.TAG_DEBUG, BETA_VERSION > 0);
-            MCPatcherUtils.getInt(Config.TAG_JAVA_HEAP_SIZE, 1024);
+            MCPatcherUtils.set(Config.TAG_JAVA_HEAP_SIZE, Util.bits >= 64 ? 1024 : 768);
+            MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "useTextureCache", Util.bits >= 64);
         }
         if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean(Config.TAG_BETA_WARNING_SHOWN, false)) {
             ui.showBetaWarning();

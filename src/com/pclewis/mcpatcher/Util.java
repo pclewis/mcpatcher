@@ -5,6 +5,8 @@ import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 
 class Util {
+    static int bits;
+
     static byte b(int value, int index) {
         return (byte) ((value >> (index * 8)) & 0xFF);
     }
@@ -93,17 +95,18 @@ class Util {
             System.getProperty("os.version"),
             System.getProperty("os.arch")
         );
-        String bits;
+        String bitString;
         try {
-            int b = Integer.parseInt(System.getProperty("sun.arch.data.model"));
-            bits = String.format(" (%d bit)", b);
+            bits = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+            bitString = String.format(" (%d bit)", bits);
         } catch (Throwable e) {
-            bits = "";
+            bits = 0;
+            bitString = "";
         }
         Logger.log(Logger.LOG_MAIN, "JVM: %s %s%s",
             System.getProperty("java.vendor"),
             System.getProperty("java.version"),
-            bits
+            bitString
         );
         Logger.log(Logger.LOG_MAIN, "Classpath: %s", System.getProperty("java.class.path"));
     }
