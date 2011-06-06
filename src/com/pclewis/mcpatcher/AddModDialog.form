@@ -98,7 +98,7 @@
         <properties/>
         <border type="etched" title="Files to insert"/>
         <children>
-          <scrollpane id="56aa5">
+          <scrollpane id="56aa5" binding="fileTableScrollPane">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -108,7 +108,6 @@
               <component id="c00b1" class="javax.swing.JTable" binding="fileTable">
                 <constraints/>
                 <properties>
-                  <fillsViewportHeight value="true"/>
                   <preferredScrollableViewportSize width="450" height="300"/>
                 </properties>
               </component>

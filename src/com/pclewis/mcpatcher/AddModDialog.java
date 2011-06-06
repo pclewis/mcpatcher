@@ -22,6 +22,7 @@ public class AddModDialog extends JDialog {
     private JTable fileTable;
     private JButton addButton;
     private JButton removeButton;
+    private JScrollPane fileTableScrollPane;
 
     private ZipFile zipFile;
     private ZipTreeDialog zipDialog;
@@ -81,6 +82,7 @@ public class AddModDialog extends JDialog {
             }
         });
 
+        fileTableScrollPane.getViewport().setBackground(fileTable.getBackground());
         fileTable.setModel(new FileTableModel());
 
         addButton.addActionListener(new ActionListener() {
