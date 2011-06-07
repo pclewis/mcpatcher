@@ -387,7 +387,9 @@ class MainForm {
         });
 
         ((DefaultCaret) logText.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        Logger.setOutput(new JTextAreaPrintStream(logText));
+        JTextAreaPrintStream output = new JTextAreaPrintStream(logText);
+        System.setOut(output);
+        System.setErr(output);
         copyLogButton.addActionListener(new CopyToClipboardListener(logText));
 
         ((DefaultCaret) classMap.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);

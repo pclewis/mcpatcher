@@ -37,14 +37,6 @@ public class Logger {
         return level <= logLevel;
     }
 
-    static void setOutput(PrintStream out) {
-        Logger.out = out;
-    }
-
-    static PrintStream getOutput() {
-        return out;
-    }
-
     /**
      * Write a blank line to the log.
      *
