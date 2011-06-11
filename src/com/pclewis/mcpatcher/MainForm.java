@@ -789,7 +789,7 @@ class MainForm {
 
         public void actionPerformed(ActionEvent e) {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-                new StringSelection("[code]\n" + textArea.getText() + "[/code]\n"), null
+                new StringSelection("[spoiler][code]\n" + textArea.getText() + "[/code][/spoiler]\n"), null
             );
         }
     }
