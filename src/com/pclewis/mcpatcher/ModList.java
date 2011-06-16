@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher;
 
 import com.pclewis.mcpatcher.mod.BetterGrass;
+import com.pclewis.mcpatcher.mod.GLSLShader;
 import com.pclewis.mcpatcher.mod.HDFont;
 import com.pclewis.mcpatcher.mod.HDTexture;
 import org.w3c.dom.Element;
@@ -40,6 +41,9 @@ class ModList {
         }
         if (!modsByName.containsKey(MCPatcherUtils.BETTER_GRASS)) {
             addNoReplace(new BetterGrass());
+        }
+        if (!modsByName.containsKey(MCPatcherUtils.GLSL_SHADER)) {
+            addNoReplace(new GLSLShader());
         }
     }
 
