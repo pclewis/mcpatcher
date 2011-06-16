@@ -3,6 +3,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.src.*;
 
 import java.nio.*;
 
@@ -569,7 +570,7 @@ public class Shaders {
 		}
 	}
 	
-	public static void addVideoSettings(List controlList, int width, int height, int existingButtons) {
+	public static void addVideoSettings(List<GuiButton> controlList, int width, int height, int existingButtons) {
 		for (int n = 0; n < options.size(); ++n, ++existingButtons) {
 			controlList.add(new GuiSmallButton(13370200 + n, (width / 2 - 155) + (existingButtons % 2) * 160, height / 6 + 24 * (existingButtons >> 1), options.get(n).getString()));
 		}
