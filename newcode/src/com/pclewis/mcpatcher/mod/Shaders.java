@@ -24,6 +24,8 @@ public class Shaders {
     }
 
     private static void initShaders() {
+        System.out.println("initShaders()");
+
         entityAttrib = -1;
         baseProgram = setupProgram("/shaders/base.vsh", "#define _ENABLE_GL_TEXTURE_2D\n", "/shaders/base.fsh", "#define _ENABLE_GL_TEXTURE_2D\n");
         baseProgramNoT2D = setupProgram("/shaders/base.vsh", "", "/shaders/base.fsh", "");
@@ -33,6 +35,8 @@ public class Shaders {
     }
 
     private static void destroyShaders() {
+        System.out.println("destroyShaders()");
+
         if (baseProgram != 0) {
             ARBShaderObjects.glDeleteObjectARB(baseProgram);
             baseProgram = 0;
@@ -55,6 +59,8 @@ public class Shaders {
     }
 
     private static int setupProgram(String vShaderPath, String vPrefix, String fShaderPath, String fPrefix) {
+        System.out.printf("setupProgram(%s, %s, %s, %s)\n", vShaderPath, vPrefix, fShaderPath, fPrefix);
+
         int program = ARBShaderObjects.glCreateProgramObjectARB();
 
         int vShader = 0;
@@ -301,12 +307,16 @@ public class Shaders {
     }
 
     public static void setUpBuffers() {
+        System.out.println("setUpBuffers()");
+
         if (mc != null) {
             setUpBuffers(mc);
         }
     }
 
     public static void setUpBuffers(Minecraft mc) {
+        System.out.println("setUpBuffers(minecraft)");
+
         Shaders.mc = mc;
         if (!isInitialized) {
             initOptions();
@@ -432,17 +442,17 @@ public class Shaders {
             }
             if (i < Block.blocksList.length && Block.blocksList[i] != null) {
                 lightSources[i] = new LightSource(Block.lightValue[i]);
-                if (Block.blocksList[i] == Block.torchWood) {
+                if (i == 50 /* wood torch */) {
                     lightSources[i].setSpecular(1.0F, 0.9F, 0.5F, 1.0F);
-                } else if (Block.blocksList[i] == Block.torchRedstoneActive) {
+                } else if (i == 76 /* redstone torch (active) */) {
                     lightSources[i].setSpecular(1.0F, 0.0F, 0.0F, 1.0F);
-                } else if (Block.blocksList[i] == Block.lightStone) {
+                } else if (i == 89 /* light stone */) {
                     lightSources[i].setSpecular(1.0F, 1.0F, 0.8F, 1.0F);
                 }
-            } else if (Item.itemsList[i] == Item.bucketLava) {
-                lightSources[i] = new LightSource(Block.lightValue[Block.lavaStill.blockID]);
+            } else if (i == 327 /* lava bucket */) {
+                lightSources[i] = new LightSource(Block.lightValue[Block.blocksList[11 /* lava still */].blockID]);
                 lightSources[i].setSpecular(1.0F, 0.5F, 0.0F, 1.0F);
-            } else if (Item.itemsList[i] == Item.bucketWater) {
+            } else if (i == 326 /* water bucket */) {
                 lightSources[i] = new LightSource(2.0F);
                 lightSources[i].setSpecular(0.0F, 0.0F, 0.3F, 1.0F);
             }
