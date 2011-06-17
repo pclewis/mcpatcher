@@ -131,6 +131,61 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("ambient.weather.rain"));
             classSignatures.add(new ConstSignature(0x2b24abb));
             classSignatures.add(new ConstSignature(0x66397));
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.util.Random", "nextGaussian", "()D"))
+                    );
+                }
+            }.setMethodName("renderWorld1"));
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glColorMask", "(ZZZZ)V"))
+                    );
+                }
+            }.setMethodName("renderWorld2"));
+
+            memberMappers.add(new FieldMapper(
+                new String[] {
+                    "farPlaneDistance",
+                    null, null, null, null, null, null, null, null, null, null,
+                    "fogColorRed", "fogColorGreen", "fogColorBlue",
+                    "fogColor2", "fogColor1"
+                },
+                "F"
+            ));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "call Shaders.processScene";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return BinaryRegex.capture(BinaryRegex.or(
+                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld1", "(F)V"))),
+                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld2", "(FJ)V")))
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorRed", "F")),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorGreen", "F")),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorBlue", "F")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "processScene", "(FFF)V"))
+                    );
+                }
+            });
         }
     }
 }
