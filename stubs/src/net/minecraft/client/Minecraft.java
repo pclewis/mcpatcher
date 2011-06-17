@@ -2,6 +2,8 @@ package net.minecraft.client;
 
 import net.minecraft.src.*;
 
+import java.io.File;
+
 public class Minecraft {
     public TexturePackList texturePackList;
     public RenderEngine renderEngine;
@@ -11,4 +13,8 @@ public class Minecraft {
     public EntityPlayerSP thePlayer;
     public int displayWidth;
     public int displayHeight;
+
+    public static File getAppDir(String s) {
+        return null;
+    }
 }

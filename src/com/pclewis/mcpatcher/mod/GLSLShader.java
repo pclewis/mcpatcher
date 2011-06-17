@@ -61,6 +61,11 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.FINAL, false)
             );
 
+            memberMappers.add(new MethodMapper("getAppDir", "(Ljava/lang/String;)Ljava/io/File;")
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, true)
+            );
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {

@@ -5,6 +5,7 @@ package com.pclewis.mcpatcher.mod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 
+import java.io.*;
 import java.nio.*;
 
 import org.lwjgl.LWJGLException;
@@ -14,9 +15,6 @@ import org.lwjgl.BufferUtils;
 import java.util.prefs.Preferences;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class Shaders {
 
@@ -138,6 +136,25 @@ public class Shaders {
         }
     }
 
+    private static BufferedReader getResource(String filename) throws IOException {
+        InputStream inputStream = (Shaders.class).getResourceAsStream(filename);
+        if (inputStream == null) {
+            File file = new File(new File(Minecraft.getAppDir("minecraft"), "shaders"), filename);
+            if (file.exists()) {
+                inputStream = new FileInputStream(file);
+                if (inputStream == null) {
+                    System.out.printf("failed to open %s\n", filename);
+                    return null;
+                } else {
+                    System.out.printf("opened %s\n", file.getAbsolutePath());
+                }
+            }
+        } else {
+            System.out.printf("opened %s from minecraft.jar\n", filename);
+        }
+        return new BufferedReader(new InputStreamReader(inputStream));
+    }
+
     private static int createVertShader(String filename, String prefixCode) {
         int vertShader = ARBShaderObjects.glCreateShaderObjectARB(ARBVertexShader.GL_VERTEX_SHADER_ARB);
         if (vertShader == 0) {
@@ -146,7 +163,7 @@ public class Shaders {
         String vertexCode = prefixCode;
         String line;
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader((Shaders.class).getResourceAsStream(filename)));
+            BufferedReader reader = getResource(filename);
             while ((line = reader.readLine()) != null) {
                 if (line.matches("#version .*")) {
                     vertexCode = line + "\n" + vertexCode;
@@ -174,7 +191,7 @@ public class Shaders {
         String fragCode = prefixCode;
         String line;
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader((Shaders.class).getResourceAsStream(filename)));
+            BufferedReader reader = getResource(filename);
             while ((line = reader.readLine()) != null) {
                 if (line.matches("#version .*")) {
                     fragCode = line + "\n" + fragCode;
