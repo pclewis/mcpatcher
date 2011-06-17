@@ -307,7 +307,7 @@ abstract public class ClassMod implements PatchComponent {
      * Represents a field or method to be located within a class.  By default,
      * the match is done by type signature, but this can be overridden.
      */
-    abstract class MemberMapper {
+    public abstract class MemberMapper {
         /**
          * Deobfuscated member name.
          */
