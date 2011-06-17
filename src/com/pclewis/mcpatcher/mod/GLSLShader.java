@@ -37,6 +37,12 @@ public class GLSLShader extends Mod {
         classMods.add(new GuiVideoSettingsMod());
         classMods.add(new TessellatorMod());
         classMods.add(new RenderBlocksMod());
+        classMods.add(new EntityPlayerMod());
+        classMods.add(new EntityPlayerSPMod());
+        classMods.add(new InventoryPlayerMod());
+        classMods.add(new ItemStackMod());
+        classMods.add(new WorldMod());
+        classMods.add(new WorldInfoMod());
 
         filesToAdd.add("com/pclewis/mcpatcher/mod/Shaders.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/Shaders$1.class");
@@ -51,6 +57,8 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
+            memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
+            memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
 
             memberMappers.add(new FieldMapper(new String[] {
                 "displayWidth",
@@ -782,6 +790,80 @@ public class GLSLShader extends Mod {
                     return null;
                 }
             });
+        }
+    }
+
+    private class EntityPlayerMod extends ClassMod {
+        public EntityPlayerMod() {
+            classSignatures.add(new ConstSignature("humanoid"));
+            classSignatures.add(new ConstSignature("/mob/char.png"));
+
+            memberMappers.add(new FieldMapper("inventory", "LInventoryPlayer;"));
+        }
+
+        @Override
+        public boolean mapClassMembers(String filename, ClassFile classFile) throws Exception {
+            if (super.mapClassMembers(filename, classFile)) {
+                mod.getClassMap().addInheritance("EntityPlayer", "EntityPlayerSP");
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private class EntityPlayerSPMod extends ClassMod {
+        public EntityPlayerSPMod() {
+            classSignatures.add(new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"));
+            classSignatures.add(new ConstSignature("portal.trigger"));
+        }
+    }
+
+    private class InventoryPlayerMod extends ClassMod {
+        public InventoryPlayerMod() {
+            classSignatures.add(new ConstSignature("Inventory"));
+            classSignatures.add(new ConstSignature("Slot"));
+
+            memberMappers.add(new MethodMapper("getCurrentItem", "()LItemStack;"));
+        }
+    }
+
+    private class ItemStackMod extends ClassMod {
+        public ItemStackMod() {
+            classSignatures.add(new ConstSignature("id"));
+            classSignatures.add(new ConstSignature("Count"));
+            classSignatures.add(new ConstSignature("Damage"));
+
+            memberMappers.add(new FieldMapper(new String[] {
+                "stackSize",
+                "animationsToGo",
+                "itemID"
+            }, "I")
+                .accessFlag(AccessFlag.PUBLIC, true)
+            );
+        }
+    }
+
+    private class WorldMod extends ClassMod {
+        public WorldMod() {
+            classSignatures.add(new ConstSignature("More than "));
+            classSignatures.add(new ConstSignature(" updates, aborting lighting updates"));
+
+            memberMappers.add(new FieldMapper("worldInfo", "LWorldInfo;"));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef("World", "worldInfo", "LWorldInfo;")));
+        }
+    }
+
+    private class WorldInfoMod extends ClassMod {
+        public WorldInfoMod() {
+            classSignatures.add(new ConstSignature("RandomSeed"));
+            classSignatures.add(new ConstSignature("SpawnX"));
+
+            memberMappers.add(new MethodMapper(new String[] {
+                "getRandomSeed",
+                "getWorldTime"
+            }, "()J"));
         }
     }
 }
