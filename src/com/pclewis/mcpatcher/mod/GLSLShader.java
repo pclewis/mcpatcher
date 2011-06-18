@@ -20,6 +20,7 @@ public class GLSLShader extends Mod {
 
         classMods.add(new MinecraftMod());
         classMods.add(new GLViewportMod());
+        classMods.add(new HDTexture.GLAllocationMod());
         classMods.add(new RenderEngineMod());
         classMods.add(new RenderGlobalMod());
         classMods.add(new RenderLivingMod());
@@ -830,6 +831,8 @@ public class GLSLShader extends Mod {
                 }
             });
 
+            memberMappers.add(new FieldMapper("byteBuffer", "Ljava/nio/ByteBuffer;"));
+
             patches.add(new AddFieldPatch("shadersBuffer", "Ljava/nio/ByteBuffer;"));
             patches.add(new AddFieldPatch("shadersShortBuffer", "Ljava/nio/ShortBuffer;"));
             patches.add(new AddFieldPatch("shadersData", "[S"));
@@ -871,6 +874,21 @@ public class GLSLShader extends Mod {
                         ICONST_0,
                         SASTORE,
                         reference(methodInfo, PUTFIELD, new FieldRef("Tessellator", "shadersData", "[S")),
+
+                        // shadersBuffer = GLAllocation.createDirectByteBuffer(i / 2);
+                        ALOAD_0,
+                        ILOAD_1,
+                        ICONST_2,
+                        IDIV,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("GLAllocation", "createDirectByteBuffer", "(I)Ljava/nio/ByteBuffer;")),
+                        reference(methodInfo, PUTFIELD, new FieldRef("Tessellator", "shadersBuffer", "Ljava/nio/ByteBuffer;")),
+
+                        // shadersShortBuffer = shadersBuffer.asShortBuffer();
+                        ALOAD_0,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "shadersBuffer", "Ljava/nio/ByteBuffer;")),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.nio.ByteBuffer", "asShortBuffer", "()Ljava/nio/ShortBuffer;")),
+                        reference(methodInfo, PUTFIELD, new FieldRef("Tessellator", "shadersShortBuffer", "Ljava/nio/ShortBuffer;")),
 
                         RETURN
                     );
