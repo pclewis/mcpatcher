@@ -22,6 +22,7 @@ public class GLSLShader extends Mod {
         defaultEnabled = false;
 
         classMods.add(new MinecraftMod());
+        classMods.add(new GLViewportMod());
         classMods.add(new RenderEngineMod());
         classMods.add(new RenderGlobalMod());
         classMods.add(new RenderLivingMod());
@@ -101,27 +102,6 @@ public class GLSLShader extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "GL11.glViewport -> Shaders.viewport";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glViewport", "(IIII)V"))
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "viewport", "(IIII)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
                     return "Display.update -> Shaders.updateDisplay";
                 }
 
@@ -164,6 +144,35 @@ public class GLSLShader extends Mod {
                         ALOAD_0,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setUpBuffers", "(LMinecraft;)V")),
                         RETURN
+                    );
+                }
+            });
+        }
+    }
+
+    private class GLViewportMod extends ClassMod {
+        public GLViewportMod() {
+            global = true;
+
+            classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glViewport", "(IIII)V")));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "GL11.glViewport -> Shaders.viewport";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glViewport", "(IIII)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "viewport", "(IIII)V"))
                     );
                 }
             });
