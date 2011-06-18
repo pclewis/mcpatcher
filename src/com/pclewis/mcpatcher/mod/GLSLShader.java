@@ -191,7 +191,7 @@ public class GLSLShader extends Mod {
 
     private class RenderGlobalMod extends ClassMod {
         public RenderGlobalMod() {
-            classSignatures.add(new ConstSignature("random.click"));
+            classSignatures.add(new ConstSignature("smoke"));
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
