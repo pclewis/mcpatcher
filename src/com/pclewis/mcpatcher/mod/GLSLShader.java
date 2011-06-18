@@ -921,6 +921,53 @@ public class GLSLShader extends Mod {
                 }
             });
 
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "fix normal calculation";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD_0,
+                            ILOAD, 4,
+                            ILOAD, 5,
+                            BIPUSH, 8,
+                            ISHL,
+                            IOR,
+                            ILOAD, 6,
+                            BIPUSH, 16,
+                            ISHL,
+                            IOR
+                        )),
+                        BinaryRegex.capture(BinaryRegex.build(
+                            PUTFIELD, BinaryRegex.any(2)
+                        ))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+
+                        // (normal & 0xffffff00) | (byte)(int)(f * 127.0f)
+                        push(methodInfo, 0xffffff00),
+                        IAND,
+                        FLOAD_1,
+                        push(methodInfo, 127.0f),
+                        FMUL,
+                        F2I,
+                        I2B,
+                        IOR,
+
+                        getCaptureGroup(2)
+                    );
+                }
+            });
+
             patches.add(new AddMethodPatch("setEntity", "(III)V") {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
