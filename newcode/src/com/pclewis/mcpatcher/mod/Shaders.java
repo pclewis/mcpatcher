@@ -657,6 +657,16 @@ public class Shaders {
         }
     }
 
+    public static void addVertex(Tessellator tessellator) {
+        if (tessellator.drawMode == 7 && Tessellator.convertQuadsToTriangles && tessellator.addedVertices % 4 == 0 && tessellator.hasNormals) {
+            tessellator.rawBuffer[tessellator.rawBufferIndex + 6] = tessellator.rawBuffer[(tessellator.rawBufferIndex - 24) + 6];
+            shadersBuffer.putShort(shadersData[0]).putShort(shadersData[1]);
+            tessellator.rawBuffer[tessellator.rawBufferIndex + 8 + 6] = tessellator.rawBuffer[((tessellator.rawBufferIndex + 8) - 16) + 6];
+            shadersBuffer.putShort(shadersData[0]).putShort(shadersData[1]);
+        }
+        shadersBuffer.putShort(shadersData[0]).putShort(shadersData[1]);
+    }
+
     private static class Option {
         public Option(String key, int def) {
             this.key = key;

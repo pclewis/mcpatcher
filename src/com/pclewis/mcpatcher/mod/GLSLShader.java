@@ -956,6 +956,35 @@ public class GLSLShader extends Mod {
                     );
                 }
             });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "call Shaders.addVertex";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return BinaryRegex.capture(BinaryRegex.build(
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        DUP,
+                        GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
+                        ICONST_1,
+                        IADD,
+                        PUTFIELD, BinaryRegex.backReference(2)
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        ALOAD_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "addVertex", "(LTessellator;)V"))
+                    );
+                }
+            });
         }
     }
 
