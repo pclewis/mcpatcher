@@ -895,6 +895,32 @@ public class GLSLShader extends Mod {
                 }
             });
 
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "clear shadersBuffer";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return BinaryRegex.capture(BinaryRegex.build(
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "byteBuffer", "Ljava/nio/ByteBuffer;")),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.nio.ByteBuffer", "clear", "()Ljava/nio/Buffer;"))
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "shadersBuffer", "Ljava/nio/ByteBuffer;")),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.nio.ByteBuffer", "clear", "()Ljava/nio/Buffer;"))
+                    );
+                }
+            });
+
             patches.add(new AddMethodPatch("setEntity", "(III)V") {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
