@@ -16,7 +16,7 @@ public class GLSLShader extends Mod {
     private static final String class_GL11 = "org.lwjgl.opengl.GL11";
 
     public GLSLShader() {
-        name = MCPatcherUtils.GLSL_SHADER;
+        name = MCPatcherUtils.GLSL_SHADERS;
         description = "Adds graphical shaders to the game.  Based on daxnitro's mod.";
         version = "1.0";
         defaultEnabled = false;

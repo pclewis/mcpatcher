@@ -18,7 +18,7 @@ public class MCPatcherUtils {
     public static final String HD_TEXTURES = "HD Textures";
     public static final String HD_FONT = "HD Font";
     public static final String BETTER_GRASS = "Better Grass";
-    public static final String GLSL_SHADER = "GLSL Shader";
+    public static final String GLSL_SHADERS = "GLSL Shaders";
 
     private MCPatcherUtils() {
     }

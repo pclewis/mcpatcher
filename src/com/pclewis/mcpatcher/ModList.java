@@ -42,7 +42,7 @@ class ModList {
         if (!modsByName.containsKey(MCPatcherUtils.BETTER_GRASS)) {
             addNoReplace(new BetterGrass());
         }
-        if (!modsByName.containsKey(MCPatcherUtils.GLSL_SHADER)) {
+        if (!modsByName.containsKey(MCPatcherUtils.GLSL_SHADERS)) {
             addNoReplace(new GLSLShader());
         }
     }
@@ -384,7 +384,7 @@ class ModList {
                     mod = new HDFont();
                 } else if (name.equals(MCPatcherUtils.BETTER_GRASS)) {
                     mod = new BetterGrass();
-                } else if (name.equals(MCPatcherUtils.GLSL_SHADER)) {
+                } else if (name.equals(MCPatcherUtils.GLSL_SHADERS)) {
                     mod = new GLSLShader();
                 } else {
                     invalidEntries.add(element);
