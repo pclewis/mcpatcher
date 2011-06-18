@@ -935,6 +935,27 @@ public class GLSLShader extends Mod {
                     );
                 }
             });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "glDrawArrays -> Shaders.drawGLArrays";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDrawArrays", "(III)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "drawGLArrays", "(III)V"))
+                    );
+                }
+            });
         }
     }
 
