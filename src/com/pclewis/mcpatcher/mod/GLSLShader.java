@@ -1,7 +1,10 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.*;
+import javassist.bytecode.AccessFlag;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.FieldInfo;
+import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
@@ -61,7 +64,7 @@ public class GLSLShader extends Mod {
             memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
             memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
 
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 "displayWidth",
                 "displayHeight"
             }, "I")
@@ -314,7 +317,7 @@ public class GLSLShader extends Mod {
             memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
 
             memberMappers.add(new FieldMapper(
-                new String[] {
+                new String[]{
                     "farPlaneDistance",
                     null, null, null, null, null, null, null, null, null, null,
                     "fogColorRed", "fogColorGreen", "fogColorBlue",
@@ -324,7 +327,7 @@ public class GLSLShader extends Mod {
             ));
 
             memberMappers.add(new MethodMapper(
-                new String[] {
+                new String[]{
                     "setupCameraTransform",
                     "renderFirstPersonEffects" /* func_4135_b */
                 },
@@ -549,7 +552,7 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.FINAL, true)
             );
 
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 "lightOpacity",
                 "lightValue"
             }, "[I")
@@ -564,7 +567,7 @@ public class GLSLShader extends Mod {
         public GameSettingsMod() {
             classSignatures.add(new ConstSignature("key.forward"));
 
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 "renderDistance"
             }, "I")
                 .accessFlag(AccessFlag.PUBLIC, true)
@@ -572,7 +575,7 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.FINAL, false)
             );
 
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 "invertMouse",
                 "viewBobbing",
                 "anaglyph"
@@ -645,7 +648,7 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new FieldMapper("displayString", "Ljava/lang/String;"));
 
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 "width",
                 "height",
                 "xPosition",
@@ -690,7 +693,7 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new MethodMapper("setWorldAndResolution", "(LMinecraft;II)V"));
             memberMappers.add(new FieldMapper("controlList", "Ljava/util/List;"));
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 "width",
                 "height"
             }, "I")
@@ -840,7 +843,7 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.PRIVATE, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 null,
                 null,
                 "hasNormals"
@@ -848,7 +851,7 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.PRIVATE, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 null,
                 null,
                 "rawBufferIndex",
@@ -1034,9 +1037,9 @@ public class GLSLShader extends Mod {
             memberMappers.add(new MethodMapper("renderBlockByRenderType", "(LBlock;III)Z"));
 
             patches.add(new BytecodePatch() {
-                private final float[] x = new float[] {0, 0, 0, 0, -1, 1};
-                private final float[] y = new float[] {-1, 1, 0, 0, 0, 0};
-                private final float[] z = new float[] {0, 0, -1, 1, 0, 0};
+                private final float[] x = new float[]{0, 0, 0, 0, -1, 1};
+                private final float[] y = new float[]{-1, 1, 0, 0, 0, 0};
+                private final float[] z = new float[]{0, 0, -1, 1, 0, 0};
 
                 @Override
                 public String getDescription() {
@@ -1117,7 +1120,7 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("Count"));
             classSignatures.add(new ConstSignature("Damage"));
 
-            memberMappers.add(new FieldMapper(new String[] {
+            memberMappers.add(new FieldMapper(new String[]{
                 "stackSize",
                 "animationsToGo",
                 "itemID"
@@ -1138,7 +1141,7 @@ public class GLSLShader extends Mod {
                     return buildExpression(
                         FCONST_1,
                         BytecodeMatcher.anyFLOAD,
-                        push(methodInfo, (float)Math.PI),
+                        push(methodInfo, (float) Math.PI),
                         FMUL,
                         FCONST_2,
                         FMUL,
@@ -1175,7 +1178,7 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("RandomSeed"));
             classSignatures.add(new ConstSignature("SpawnX"));
 
-            memberMappers.add(new MethodMapper(new String[] {
+            memberMappers.add(new MethodMapper(new String[]{
                 "getRandomSeed",
                 "getWorldTime"
             }, "()J"));
