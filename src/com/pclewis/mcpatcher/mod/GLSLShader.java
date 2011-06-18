@@ -24,6 +24,7 @@ public class GLSLShader extends Mod {
         classMods.add(new MinecraftMod());
         classMods.add(new RenderEngineMod());
         classMods.add(new RenderGlobalMod());
+        classMods.add(new RenderLivingMod());
         classMods.add(new EntityRendererMod());
         classMods.add(new EntityLivingMod());
         classMods.add(new ItemMod());
@@ -191,6 +192,70 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new MethodMapper("clipRenderersByFrustrum", "(LICamera;F)V"));
             memberMappers.add(new MethodMapper("sortAndRender", "(LEntityLiving;ID)I"));
+        }
+    }
+
+    private class RenderLivingMod extends ClassMod {
+        public RenderLivingMod() {
+            classSignatures.add(new ConstSignature("deadmau5"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 514),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDepthFunc", "(I)V"))
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "apply baseProgramNoT2D";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return BinaryRegex.capture(BinaryRegex.build(
+                        push(methodInfo, 514),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDepthFunc", "(I)V"))
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "baseProgramNoT2D", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V")),
+                        getCaptureGroup(1)
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "apply baseProgram";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return BinaryRegex.capture(BinaryRegex.build(
+                        push(methodInfo, 515),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDepthFunc", "(I)V"))
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "baseProgram", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V")),
+                        getCaptureGroup(1)
+                    );
+                }
+            });
         }
     }
 
