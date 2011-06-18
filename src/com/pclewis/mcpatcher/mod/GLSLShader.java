@@ -622,6 +622,8 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("/gui/gui.png"));
             classSignatures.add(new ConstSignature(0xffa0a0a0));
 
+            memberMappers.add(new FieldMapper("displayString", "Ljava/lang/String;"));
+
             memberMappers.add(new FieldMapper(new String[] {
                 "width",
                 "height",
