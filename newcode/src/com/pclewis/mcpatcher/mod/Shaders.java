@@ -4,17 +4,15 @@ package com.pclewis.mcpatcher.mod;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.*;
 
 import java.io.*;
 import java.nio.*;
-
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.*;
-import org.lwjgl.BufferUtils;
-
-import java.util.prefs.Preferences;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 public class Shaders {
 
@@ -633,6 +631,32 @@ public class Shaders {
         }
     }
 
+    public static void initBuffer(int size) {
+        shadersBuffer = GLAllocation.createDirectByteBuffer(size * 2);
+        shadersShortBuffer = shadersBuffer.asShortBuffer();
+        shadersData = new short[]{-1, 0};
+    }
+
+    public static void clearBuffer() {
+        shadersBuffer.clear();
+    }
+
+    public static void setEntity(int i, int j, int k) {
+        shadersData[0] = (short) i;
+        shadersData[1] = (short) (j + k * 16);
+    }
+
+    public static void drawGLArrays(int mode, int first, int count) {
+        if (entityAttrib >= 0) {
+            ARBVertexProgram.glEnableVertexAttribArrayARB(Shaders.entityAttrib);
+            ARBVertexProgram.glVertexAttribPointerARB(Shaders.entityAttrib, 2, false, false, 4, (ShortBuffer) shadersShortBuffer.position(0));
+        }
+        GL11.glDrawArrays(mode, first, count);
+        if (entityAttrib >= 0) {
+            ARBVertexProgram.glDisableVertexAttribArrayARB(Shaders.entityAttrib);
+        }
+    }
+
     private static class Option {
         public Option(String key, int def) {
             this.key = key;
@@ -701,6 +725,10 @@ public class Shaders {
     public static int baseTextureId = 0;
     public static int depthTextureId = 0;
     public static int depthTexture2Id = 0;
+
+    private static ByteBuffer shadersBuffer;
+    private static ShortBuffer shadersShortBuffer;
+    private static short[] shadersData;
 
     public static Minecraft mc = null;
 

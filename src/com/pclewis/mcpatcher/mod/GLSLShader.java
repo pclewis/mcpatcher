@@ -857,39 +857,9 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // shadersData = new short[2];
-                        ALOAD_0,
-                        ICONST_2,
-                        NEWARRAY, T_SHORT,
-
-                        // shadersData[0] = -1;
-                        DUP,
-                        ICONST_0,
-                        ICONST_M1,
-                        SASTORE,
-
-                        // shadersData[1] = 0;
-                        DUP,
-                        ICONST_1,
-                        ICONST_0,
-                        SASTORE,
-                        reference(methodInfo, PUTFIELD, new FieldRef("Tessellator", "shadersData", "[S")),
-
-                        // shadersBuffer = GLAllocation.createDirectByteBuffer(i / 2);
-                        ALOAD_0,
+                        // Shaders.initBuffer(i);
                         ILOAD_1,
-                        ICONST_2,
-                        IDIV,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("GLAllocation", "createDirectByteBuffer", "(I)Ljava/nio/ByteBuffer;")),
-                        reference(methodInfo, PUTFIELD, new FieldRef("Tessellator", "shadersBuffer", "Ljava/nio/ByteBuffer;")),
-
-                        // shadersShortBuffer = shadersBuffer.asShortBuffer();
-                        ALOAD_0,
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "shadersBuffer", "Ljava/nio/ByteBuffer;")),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.nio.ByteBuffer", "asShortBuffer", "()Ljava/nio/ShortBuffer;")),
-                        reference(methodInfo, PUTFIELD, new FieldRef("Tessellator", "shadersShortBuffer", "Ljava/nio/ShortBuffer;")),
-
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "initBuffer", "(I)V")),
                         RETURN
                     );
                 }
@@ -914,9 +884,7 @@ public class GLSLShader extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "shadersBuffer", "Ljava/nio/ByteBuffer;")),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.nio.ByteBuffer", "clear", "()Ljava/nio/Buffer;"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "clearBuffer", "()V"))
                     );
                 }
             });
@@ -964,41 +932,6 @@ public class GLSLShader extends Mod {
                         IOR,
 
                         getCaptureGroup(2)
-                    );
-                }
-            });
-
-            patches.add(new AddMethodPatch("setEntity", "(III)V") {
-                @Override
-                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
-                    return buildCode(
-                        // if (Shaders.entityAttrib >= 0)
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "entityAttrib", "I")),
-                        ICONST_0,
-                        IF_ICMPLT, branch("A"),
-
-                        // shadersData[0] = (short)i;
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "shadersData", "[S")),
-                        ICONST_0,
-                        ILOAD_1,
-                        I2S,
-                        SASTORE,
-
-                        // shadersData[1] = (short)(j + k * 16);
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "shadersData", "[S")),
-                        ICONST_1,
-                        ILOAD_2,
-                        ILOAD_3,
-                        BIPUSH, 16,
-                        IMUL,
-                        IADD,
-                        I2S,
-                        SASTORE,
-
-                        label("A"),
-                        RETURN
                     );
                 }
             });
@@ -1188,7 +1121,7 @@ public class GLSLShader extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "call Tessellator.instance.setEntity";
+                    return "call Shaders.setEntity";
                 }
 
                 @Override
@@ -1213,9 +1146,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // Tessellator.instance.setEntity(block1.blockID, worldObj.getBlockLightValue(i4, l3, k3), Block.lightValue[block1.blockID]);
-                        reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
-
+                        // Shaders.setEntity(block1.blockID, worldObj.getBlockLightValue(i4, l3, k3), Block.lightValue[block1.blockID]);
                         getCaptureGroup(2), // block1
                         reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
 
@@ -1229,7 +1160,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
                         IALOAD,
 
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setEntity", "(III)V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setEntity", "(III)V")),
 
                         getCaptureGroup(1)
                     );
@@ -1239,7 +1170,7 @@ public class GLSLShader extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "clear Tessellator.instance.setEntity";
+                    return "clear Shaders.setEntity";
                 }
 
                 @Override
@@ -1259,12 +1190,11 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // Tessellator.instance.setEntity(-1, 0, 0);
-                        reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
+                        // Shaders.setEntity(-1, 0, 0);
                         ICONST_M1,
                         ICONST_0,
                         ICONST_0,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setEntity", "(III)V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setEntity", "(III)V")),
 
                         RETURN
                     );
