@@ -201,6 +201,28 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new MethodMapper("clipRenderersByFrustrum", "(LICamera;F)V"));
             memberMappers.add(new MethodMapper("sortAndRender", "(LEntityLiving;ID)I"));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "call Shaders.setCelestialPosition";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setCelestialPosition", "()V"))
+                    );
+                }
+            });
         }
     }
 
@@ -924,6 +946,26 @@ public class GLSLShader extends Mod {
         public WorldMod() {
             classSignatures.add(new ConstSignature("More than "));
             classSignatures.add(new ConstSignature(" updates, aborting lighting updates"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        FCONST_1,
+                        BytecodeMatcher.anyFLOAD,
+                        push(methodInfo, (float)Math.PI),
+                        FMUL,
+                        FCONST_2,
+                        FMUL,
+                        INVOKESTATIC, BinaryRegex.any(2),
+                        FCONST_2,
+                        FMUL,
+                        push(methodInfo, 0.75F),
+                        FADD,
+                        FSUB
+                    );
+                }
+            }.setMethodName("getStarBrightness"));
 
             memberMappers.add(new FieldMapper("worldInfo", "LWorldInfo;"));
 
