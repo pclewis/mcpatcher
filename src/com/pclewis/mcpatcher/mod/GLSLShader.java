@@ -881,11 +881,16 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
                     return buildCode(
+                        // if (Shaders.entityAttrib >= 0)
+                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "entityAttrib", "I")),
+                        ICONST_0,
+                        IF_ICMPLT, branch("A"),
+
                         // shadersData[0] = (short)i;
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "shadersData", "[S")),
                         ICONST_0,
-                        ALOAD_1,
+                        ILOAD_1,
                         I2S,
                         SASTORE,
 
@@ -901,6 +906,7 @@ public class GLSLShader extends Mod {
                         I2S,
                         SASTORE,
 
+                        label("A"),
                         RETURN
                     );
                 }
@@ -1043,6 +1049,18 @@ public class GLSLShader extends Mod {
                 }
             }.setMethodName("getStarBrightness"));
 
+            classSignatures.add(new FixedBytecodeSignature(
+                BinaryRegex.begin(),
+                ALOAD_0,
+                ILOAD_1,
+                ILOAD_2,
+                ILOAD_3,
+                ICONST_1,
+                INVOKEVIRTUAL, BinaryRegex.any(2),
+                IRETURN,
+                BinaryRegex.end()
+            ).setMethodName("getBlockLightValue"));
+
             memberMappers.add(new FieldMapper("worldInfo", "LWorldInfo;"));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef("World", "worldInfo", "LWorldInfo;")));
@@ -1106,18 +1124,58 @@ public class GLSLShader extends Mod {
                     return buildCode(
                         // Tessellator.instance.setEntity(block1.blockID, worldObj.getBlockLightValue(i4, l3, k3), Block.lightValue[block1.blockID]);
                         reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
+
                         getCaptureGroup(2), // block1
                         reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
-                        getCaptureGroup(3), // i4, l3, k3
+
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef("WorldRenderer", "worldObj", "LWorld;")),
+                        getCaptureGroup(3), // i4, l3, k3
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getBlockLightValue", "(III)I")),
+
                         reference(methodInfo, GETSTATIC, new FieldRef("Block", "lightValue", "[I")),
                         getCaptureGroup(2), // block1
+                        reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
                         IALOAD,
+
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setEntity", "(III)V")),
 
                         getCaptureGroup(1)
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "clear Tessellator.instance.setEntity";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    JavaRef updateRenderer = classMap.map(new MethodRef("WorldRenderer", "updateRenderer", "()V"));
+                    if (methodInfo.getDescriptor().equals(updateRenderer.getType()) &&
+                        methodInfo.getName().equals(updateRenderer.getName())) {
+                        return buildExpression(
+                            RETURN,
+                            BinaryRegex.end()
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Tessellator.instance.setEntity(-1, 0, 0);
+                        reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
+                        ICONST_M1,
+                        ICONST_0,
+                        ICONST_0,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setEntity", "(III)V")),
+
+                        RETURN
                     );
                 }
             });
