@@ -832,10 +832,39 @@ public class GLSLShader extends Mod {
             });
 
             memberMappers.add(new FieldMapper("byteBuffer", "Ljava/nio/ByteBuffer;"));
+            memberMappers.add(new FieldMapper("rawBuffer", "[I")
+                .accessFlag(AccessFlag.PRIVATE, true)
+                .accessFlag(AccessFlag.STATIC, false)
+            );
+            memberMappers.add(new FieldMapper("convertQuadsToTriangles", "Z")
+                .accessFlag(AccessFlag.PRIVATE, true)
+                .accessFlag(AccessFlag.STATIC, true)
+            );
+            memberMappers.add(new FieldMapper(new String[] {
+                null,
+                null,
+                "hasNormals"
+            }, "Z")
+                .accessFlag(AccessFlag.PRIVATE, true)
+                .accessFlag(AccessFlag.STATIC, false)
+            );
+            memberMappers.add(new FieldMapper(new String[] {
+                null,
+                null,
+                "rawBufferIndex",
+                "addedVertices",
+                "drawMode"
+            }, "I")
+                .accessFlag(AccessFlag.PRIVATE, true)
+                .accessFlag(AccessFlag.STATIC, false)
+            );
 
-            patches.add(new AddFieldPatch("shadersBuffer", "Ljava/nio/ByteBuffer;"));
-            patches.add(new AddFieldPatch("shadersShortBuffer", "Ljava/nio/ShortBuffer;"));
-            patches.add(new AddFieldPatch("shadersData", "[S"));
+            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "rawBuffer", "[I")));
+            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "convertQuadsToTriangles", "Z")));
+            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "hasNormals", "Z")));
+            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "rawBufferIndex", "I")));
+            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "addedVertices", "I")));
+            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "drawMode", "I")));
 
             patches.add(new BytecodePatch() {
                 @Override
