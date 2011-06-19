@@ -1,4 +1,6 @@
-// Code written by daxnitro.  Do what you want with it but give me some credit if you use it in whole or in part.
+// Original code written by daxnitro.  Used with permission.
+// http://nitrous.daxnitro.com/repo/
+// daxnitro [at] gmail.com
 
 package com.pclewis.mcpatcher.mod;
 

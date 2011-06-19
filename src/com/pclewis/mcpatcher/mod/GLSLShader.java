@@ -1,3 +1,7 @@
+// Bytecode patches adapted from Hooks.java in daxnitro's original glsl mod.
+// http://nitrous.daxnitro.com/repo/
+// daxnitro [at] gmail.com
+
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
@@ -19,6 +23,7 @@ public class GLSLShader extends Mod {
         name = MCPatcherUtils.GLSL_SHADERS;
         description = "Adds graphical shaders to the game.  Based on daxnitro's mod.";
         version = "1.0";
+        website = "http://nitrous.daxnitro.com/repo/";
         defaultEnabled = false;
 
         classMods.add(new MinecraftMod());
