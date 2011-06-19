@@ -92,10 +92,20 @@ public class BytecodeMatcher extends BinaryMatcher {
      * Regex that matches any opcode+16-bit const pool index
      *
      * @param opcode opcode, e.g., INVOKEVIRTUAL
-     * @return
+     * @return regex
      */
     public static String anyReference(int opcode) {
         return BinaryRegex.build(opcode, BinaryRegex.any(opcode == INVOKEINTERFACE ? 4 : 2));
+    }
+
+    /**
+     * Convenience method for BinaryRegex.capture(anyReference(...))
+     *
+     * @param opcode opcode, e.g., INVOKEVIRTUAL
+     * @return regex
+     */
+    public static String captureReference(int opcode) {
+        return BinaryRegex.capture(anyReference(opcode));
     }
 
     /**
