@@ -58,7 +58,7 @@ abstract public class BytecodeSignature extends ClassSignature {
                     int index = Util.demarshal(code, 1, 2);
                     ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
                     ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
-                    tempClassMap.addMap(ConstPoolUtils.getRefForIndex(constPool, index), xref);
+                    tempClassMap.addMap(xref, ConstPoolUtils.getRefForIndex(constPool, index));
                 }
                 afterMatch(classFile, methodInfo);
                 return true;
