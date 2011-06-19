@@ -79,6 +79,14 @@ abstract public class BytecodeSignature extends ClassSignature {
         return this;
     }
 
+    /**
+     * Adds a class cross-reference to a bytecode signature.  After a match, the const pool reference
+     * in the capture group will be added to the class map.
+     *
+     * @param captureGroup matcher capture group
+     * @param javaRef      field/method ref using descriptive names
+     * @return this
+     */
     public BytecodeSignature addXref(int captureGroup, JavaRef javaRef) {
         xrefs.put(captureGroup, javaRef);
         return this;
@@ -92,45 +100,5 @@ abstract public class BytecodeSignature extends ClassSignature {
      * @param methodInfo matched method
      */
     public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
-    }
-
-    /**
-     * Add class/field/method to class map based on a bytecode reference.
-     *
-     * @param classFile class file
-     * @param opcode    bytecode opcode
-     * @param index     reference index in class constant pool
-     * @param reference deobfuscated class/field/method
-     */
-    protected void mapReference(ClassFile classFile, int opcode, int index, JavaRef reference) {
-        ConstPoolUtils.matchOpcodeToRefType(opcode, reference);
-        ConstPool constPool = classFile.getConstPool();
-        ClassMap classMap = classMod.mod.classMap;
-        ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), reference);
-        String className = reference.getClassName();
-        String name = reference.getName();
-        if (reference instanceof FieldRef) {
-            classMap.addClassMap(className, constPool.getFieldrefClassName(index));
-            classMap.addFieldMap(className, name, constPool.getFieldrefName(index));
-        } else if (reference instanceof MethodRef) {
-            classMap.addClassMap(className, constPool.getMethodrefClassName(index));
-            classMap.addMethodMap(className, name, constPool.getMethodrefName(index));
-        } else if (reference instanceof InterfaceMethodRef) {
-            classMap.addClassMap(className, constPool.getInterfaceMethodrefClassName(index));
-            classMap.addMethodMap(className, name, constPool.getInterfaceMethodrefName(index));
-        } else if (reference instanceof ClassRef) {
-            classMap.addClassMap(className, constPool.getClassInfo(index));
-        }
-    }
-
-    /**
-     * Add class/field/method to class map based on a bytecode reference.
-     *
-     * @param classFile class file
-     * @param data      matching bytecode (opcode + 2-byte const pool index)
-     * @param reference deobfuscated class/field/method
-     */
-    protected void mapReference(ClassFile classFile, byte[] data, JavaRef reference) {
-        mapReference(classFile, data[0], Util.demarshal(data, 1, 2), reference);
     }
 }
