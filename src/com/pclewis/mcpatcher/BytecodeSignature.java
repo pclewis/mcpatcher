@@ -5,6 +5,9 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * ClassSignature that matches a particular bytecode sequence.
  */
@@ -19,6 +22,8 @@ abstract public class BytecodeSignature extends ClassSignature {
      * @see BytecodeMatcher
      */
     protected BytecodeMatcher matcher;
+
+    HashMap<Integer, JavaRef> xrefs = new HashMap<Integer, JavaRef>();
 
     /**
      * Generate a regular expression for the current method.
@@ -45,6 +50,16 @@ abstract public class BytecodeSignature extends ClassSignature {
                     tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
                     tempClassMap.addMethodMap(deobfName, methodName, methodInfo.getName());
                 }
+                ConstPool constPool = methodInfo.getConstPool();
+                for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
+                    int captureGroup = entry.getKey();
+                    JavaRef xref = entry.getValue();
+                    byte[] code = matcher.getCaptureGroup(captureGroup);
+                    int index = Util.demarshal(code, 1, 2);
+                    ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
+                    ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
+                    tempClassMap.addMap(ConstPoolUtils.getRefForIndex(constPool, index), xref);
+                }
                 afterMatch(classFile, methodInfo);
                 return true;
             }
@@ -61,6 +76,11 @@ abstract public class BytecodeSignature extends ClassSignature {
      */
     public BytecodeSignature setMethodName(String methodName) {
         this.methodName = methodName;
+        return this;
+    }
+
+    public BytecodeSignature addXref(int captureGroup, JavaRef javaRef) {
+        xrefs.put(captureGroup, javaRef);
         return this;
     }
 
