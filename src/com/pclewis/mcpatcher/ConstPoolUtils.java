@@ -277,6 +277,40 @@ class ConstPoolUtils {
         }
     }
 
+    public static JavaRef getRefForIndex(ConstPool constPool, int index) {
+        int tag = constPool.getTag(index);
+        switch (tag) {
+            case ConstPool.CONST_Fieldref:
+                return new FieldRef(
+                    constPool.getFieldrefClassName(index),
+                    constPool.getFieldrefName(index),
+                    constPool.getFieldrefType(index)
+                );
+
+            case ConstPool.CONST_Methodref:
+                return new MethodRef(
+                    constPool.getMethodrefClassName(index),
+                    constPool.getMethodrefName(index),
+                    constPool.getMethodrefType(index)
+                );
+
+            case ConstPool.CONST_InterfaceMethodref:
+                return new InterfaceMethodRef(
+                    constPool.getInterfaceMethodrefClassName(index),
+                    constPool.getInterfaceMethodrefName(index),
+                    constPool.getInterfaceMethodrefType(index)
+                );
+
+            case ConstPool.CONST_Class:
+                return new ClassRef(constPool.getClassInfo(index));
+
+            default:
+                throw new IllegalArgumentException(
+                    String.format("cannot create JavaRef for constPool[%d] tag %d", index, tag)
+                );
+        }
+    }
+
     public static byte[] reference(ConstPool cp, int opcode, Object value, boolean add) {
         int index = add ? findOrAdd(cp, value) : find(cp, value);
         if (index < 0) {

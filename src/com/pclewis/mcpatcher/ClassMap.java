@@ -145,6 +145,70 @@ public class ClassMap {
     }
 
     /**
+     * Add class/field/method mappings.
+     * <p/>
+     * @param from descriptive reference
+     * @param to   obfuscated reference
+     */
+    public void addMap(JavaRef from, JavaRef to) {
+        if (!from.getClass().equals(to.getClass())) {
+            throw new IllegalArgumentException(String.format("cannot map %s to %s", from.toString(), to.toString()));
+        }
+        addClassMap(from.getClassName(), to.getClassName());
+        if (from instanceof MethodRef || from instanceof InterfaceMethodRef) {
+            addMethodMap(from.getClassName(), from.getName(), to.getName());
+            addTypeDescriptorMap(from.getType(), to.getType());
+        } else if (from instanceof FieldRef) {
+            addFieldMap(from.getClassName(), from.getName(), to.getName());
+            addTypeDescriptorMap(from.getType(), to.getType());
+        }
+    }
+
+    /**
+     * Add class mappings based on a pair of type descriptors, e.g., (LClassA;I)LClassB; -> (Lab;I)Lbc;
+     * <p/>
+     * @param fromType type descriptor using descriptive names
+     * @param toType   type descriptor using obfuscated names
+     * @throws IllegalArgumentException if descriptors do not match
+     */
+    public void addTypeDescriptorMap(String fromType, String toType) {
+        int i;
+        int j;
+        int i1;
+        int j1;
+        for (i = 0, j = 0; i < fromType.length() && j < toType.length(); i = i1 + 1, j = j1 + 1) {
+            i1 = i;
+            j1 = j;
+            if (fromType.charAt(i) == 'L') {
+                i1 = fromType.indexOf(';', i);
+                j1 = toType.indexOf(';', j);
+                if (i1 < 0) {
+                    throw new IllegalArgumentException(String.format(
+                        "invalid type descriptor %s", fromType
+                    ));
+                }
+                if (j1 < 0) {
+                    throw new IllegalArgumentException(String.format(
+                        "invalid type descriptor %s", toType
+                    ));
+                }
+                String from = fromType.substring(i + 1, i1).replace('.', '/');
+                String to = toType.substring(j + 1, j1).replace('.', '/');
+                if (!from.equals(to)) {
+                    addClassMap(from, to);
+                }
+            } else if (fromType.charAt(i) != toType.charAt(j)) {
+                break;
+            }
+        }
+        if (i < fromType.length() || j < toType.length()) {
+            throw new IllegalArgumentException(String.format(
+                "incompatible type descriptors %s and %s", fromType, toType
+            ));
+        }
+    }
+
+    /**
      * Copy a parent's class map to a child class.
      *
      * @param parent name of parent class already in the ClassMap
@@ -585,9 +649,7 @@ public class ClassMap {
     private ClassMapEntry merge(ClassMapEntry entry) {
         ClassMapEntry newEntry = classMap.get(entry.descName);
         if (newEntry != null) {
-            return newEntry;
-        }
-        if (entry.aliasFor != null) {
+        } else if (entry.aliasFor != null) {
             newEntry = new ClassMapEntry(entry.descName, merge(entry.aliasFor));
         } else if (entry.parent != null) {
             newEntry = new ClassMapEntry(entry.descName, entry.obfName, merge(entry.parent));
