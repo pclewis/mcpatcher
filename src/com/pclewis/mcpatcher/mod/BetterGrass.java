@@ -86,17 +86,16 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private static class BlockGrassMod extends ClassMod {
-        private byte[] getBlockMaterial;
+    private class BlockGrassMod extends ClassMod {
         private byte[] material;
 
         public BlockGrassMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                BinaryRegex.capture(BinaryRegex.build(GETSTATIC, BinaryRegex.any(2))),
+                BytecodeMatcher.captureReference(GETSTATIC),
                 IF_ACMPEQ, BinaryRegex.any(2),
                 ALOAD, BinaryRegex.backReference(1),
-                BinaryRegex.capture(BinaryRegex.build(GETSTATIC, BinaryRegex.any(2))),
+                BytecodeMatcher.captureReference(GETSTATIC),
                 IF_ACMPNE, BinaryRegex.any(2),
                 BIPUSH, 68,
                 IRETURN,
@@ -104,12 +103,14 @@ public class BetterGrass extends Mod {
                 IRETURN
             ) {
                 @Override
-                public void afterMatch(ClassFile classFile) {
-                    material = matcher.getCaptureGroup(1).clone();
-                    mapReference(classFile, matcher.getCaptureGroup(2), new FieldRef("Material", "snow", "LMaterial;"));
-                    mapReference(classFile, matcher.getCaptureGroup(3), new FieldRef("Material", "builtSnow", "LMaterial;"));
+                public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                    material = matcher.getCaptureGroup(1);
                 }
-            }.setMethodName("getBlockTexture"));
+            }
+                .addXref(2, new FieldRef("Material", "snow", "LMaterial;"))
+                .addXref(3, new FieldRef("Material", "builtSnow", "LMaterial;"))
+                .setMethodName("getBlockTexture")
+            );
 
             classSignatures.add(new FixedBytecodeSignature(
                 BIPUSH, 9,
@@ -117,14 +118,8 @@ public class BetterGrass extends Mod {
             ));
 
             classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.capture(BinaryRegex.build(INVOKEINTERFACE, BinaryRegex.any(4)))
-            ) {
-                @Override
-                public void afterMatch(ClassFile classFile) {
-                    getBlockMaterial = matcher.getCaptureGroup(1).clone();
-                    mapReference(classFile, getBlockMaterial, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;"));
-                }
-            });
+                BytecodeMatcher.captureReference(INVOKEINTERFACE)
+            ).addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")));
 
             patches.add(new AddFieldPatch(field_MATRIX, fieldtype_MATRIX, AccessFlag.PUBLIC | AccessFlag.STATIC));
 
@@ -294,7 +289,7 @@ public class BetterGrass extends Mod {
                         ICONST_1,
                         IALOAD,
                         IADD,
-                        getBlockMaterial,
+                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
                         ASTORE, material,
 
                         // if (material == Material.snow)
