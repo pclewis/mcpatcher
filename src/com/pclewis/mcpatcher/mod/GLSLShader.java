@@ -302,6 +302,7 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("ambient.weather.rain"));
             classSignatures.add(new ConstSignature(0x2b24abb));
             classSignatures.add(new ConstSignature(0x66397));
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -310,6 +311,7 @@ public class GLSLShader extends Mod {
                     );
                 }
             }.setMethodName("renderWorld1"));
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -424,7 +426,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I")),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "bindTexture", "(II)V")),
 
-                        // Shaders.bindTexture(33986 /*GL_TEXTURE2_ARB*/, mc.renderEngine.getTexture("/terrain_nh.png"));
+                        // Shaders.bindTexture(33986 /*GL_TEXTURE2_ARB*/, mc.renderEngine.getTexture("/terrain_s.png"));
                         push(methodInfo, 33986),
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "mc", "LMinecraft;")),
@@ -672,6 +674,7 @@ public class GLSLShader extends Mod {
                 BIPUSH, 20,
                 ALOAD, 5
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 ALOAD_0,
@@ -698,6 +701,7 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new MethodMapper("setWorldAndResolution", "(LMinecraft;II)V"));
             memberMappers.add(new FieldMapper("controlList", "Ljava/util/List;"));
+
             memberMappers.add(new FieldMapper(new String[]{
                 "width",
                 "height"
@@ -711,6 +715,7 @@ public class GLSLShader extends Mod {
         public GuiVideoSettingsMod() {
             classSignatures.add(new ConstSignature("options.videoTitle"));
             classSignatures.add(new ConstSignature("gui.done"));
+
             classSignatures.add(new FixedBytecodeSignature(
                 SIPUSH, 0, 200,
                 IF_ICMPNE
@@ -840,14 +845,17 @@ public class GLSLShader extends Mod {
             });
 
             memberMappers.add(new FieldMapper("byteBuffer", "Ljava/nio/ByteBuffer;"));
+
             memberMappers.add(new FieldMapper("rawBuffer", "[I")
                 .accessFlag(AccessFlag.PRIVATE, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
+
             memberMappers.add(new FieldMapper("convertQuadsToTriangles", "Z")
                 .accessFlag(AccessFlag.PRIVATE, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
+
             memberMappers.add(new FieldMapper(new String[]{
                 null,
                 null,
@@ -856,6 +864,7 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.PRIVATE, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
+
             memberMappers.add(new FieldMapper(new String[]{
                 null,
                 null,
@@ -1022,6 +1031,7 @@ public class GLSLShader extends Mod {
                 "renderNorthFace",
                 "renderSouthFace"
             };
+
             memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
             memberMappers.add(new MethodMapper("renderBlockByRenderType", "(LBlock;III)Z"));
 
