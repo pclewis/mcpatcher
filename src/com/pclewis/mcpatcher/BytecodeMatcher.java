@@ -89,6 +89,16 @@ public class BytecodeMatcher extends BinaryMatcher {
     );
 
     /**
+     * Regex that matches any opcode+16-bit const pool index
+     *
+     * @param opcode opcode, e.g., INVOKEVIRTUAL
+     * @return
+     */
+    public static String anyReference(int opcode) {
+        return BinaryRegex.build(opcode, BinaryRegex.any(opcode == INVOKEINTERFACE ? 4 : 2));
+    }
+
+    /**
      * Construct a new matcher for the given regular expression.
      *
      * @param objects BinaryRegex elements that make up the expression to match
