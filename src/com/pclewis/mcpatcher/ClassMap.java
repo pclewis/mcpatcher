@@ -151,7 +151,7 @@ public class ClassMap {
      * @param to   obfuscated reference
      */
     public void addMap(JavaRef from, JavaRef to) {
-        if (!from.getClass().equals(getClass())) {
+        if (!from.getClass().equals(to.getClass())) {
             throw new IllegalArgumentException(String.format("cannot map %s to %s", from.toString(), to.toString()));
         }
         addClassMap(from.getClassName(), to.getClassName());
