@@ -145,6 +145,15 @@ public class ClassMap {
     }
 
     /**
+     * Add class/field/method mappings.
+     * <p/>
+     * @param from obfuscated reference
+     * @param to   descriptive reference
+     */
+    public void addMap(JavaRef from, JavaRef to) {
+    }
+
+    /**
      * Copy a parent's class map to a child class.
      *
      * @param parent name of parent class already in the ClassMap
