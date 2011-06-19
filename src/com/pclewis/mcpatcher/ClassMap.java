@@ -649,9 +649,7 @@ public class ClassMap {
     private ClassMapEntry merge(ClassMapEntry entry) {
         ClassMapEntry newEntry = classMap.get(entry.descName);
         if (newEntry != null) {
-            return newEntry;
-        }
-        if (entry.aliasFor != null) {
+        } else if (entry.aliasFor != null) {
             newEntry = new ClassMapEntry(entry.descName, merge(entry.aliasFor));
         } else if (entry.parent != null) {
             newEntry = new ClassMapEntry(entry.descName, entry.obfName, merge(entry.parent));
