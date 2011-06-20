@@ -137,14 +137,13 @@ public class Shaders {
     }
 
     private static BufferedReader getResource(String filename) throws IOException {
-        InputStream inputStream = (Shaders.class).getResourceAsStream(filename);
+        InputStream inputStream = Shaders.class.getResourceAsStream(filename);
         if (inputStream == null) {
-            File file = new File(new File(Minecraft.getAppDir("minecraft"), "shaders"), filename);
+            File file = new File(Minecraft.getAppDir("minecraft"), filename);
             if (file.exists()) {
                 inputStream = new FileInputStream(file);
                 if (inputStream == null) {
                     System.out.printf("failed to open %s\n", filename);
-                    return null;
                 } else {
                     System.out.printf("opened %s\n", file.getAbsolutePath());
                 }
@@ -152,7 +151,7 @@ public class Shaders {
         } else {
             System.out.printf("opened %s from minecraft.jar\n", filename);
         }
-        return new BufferedReader(new InputStreamReader(inputStream));
+        return inputStream == null ? null : new BufferedReader(new InputStreamReader(inputStream));
     }
 
     private static int createVertShader(String filename, String prefixCode) {
@@ -413,6 +412,41 @@ public class Shaders {
     public static void copyDepthTexture(int texture) {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
         GL11.glCopyTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_DEPTH_COMPONENT, 0, 0, renderWidth, renderHeight, 0);
+    }
+
+    private static int getTexture(String filename) {
+        TexturePackBase texturePack = mc.renderEngine.texturePackList.selectedTexturePack;
+        InputStream is = texturePack.getInputStream(filename);
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.printf("loading %s\n", filename);
+            return mc.renderEngine.getTexture(filename);
+        }
+        return 0;
+    }
+
+    public static void refreshTextures() {
+        if (terrain_nhTextureId != 0) {
+            GL11.glDeleteTextures(terrain_nhTextureId);
+        }
+        if (terrain_sTextureId != 0) {
+            GL11.glDeleteTextures(terrain_sTextureId);
+        }
+        terrain_nhTextureId = getTexture("/terrain_nh.png");
+        terrain_sTextureId = getTexture("/terrain_s.png");
+    }
+
+    public static void bindTerrainMaps() {
+        if (terrain_nhTextureId != 0) {
+            bindTexture(33985 /*GL_TEXTURE1_ARB*/, terrain_nhTextureId);
+        }
+        if (terrain_sTextureId != 0) {
+            bindTexture(33986 /*GL_TEXTURE2_ARB*/, terrain_sTextureId);
+        }
     }
 
     public static void bindTexture(int activeTexture, int texture) {
@@ -737,6 +771,8 @@ public class Shaders {
     public static int baseTextureId = 0;
     public static int depthTextureId = 0;
     public static int depthTexture2Id = 0;
+    public static int terrain_nhTextureId = 0;
+    public static int terrain_sTextureId = 0;
 
     private static ByteBuffer shadersBuffer;
     private static ShortBuffer shadersShortBuffer;

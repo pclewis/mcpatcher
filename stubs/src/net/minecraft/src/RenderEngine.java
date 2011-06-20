@@ -1,4 +1,7 @@
 package net.minecraft.src;
 
-public class RenderEngine {
+abstract public class RenderEngine {
+    public TexturePackList texturePackList;
+
+    abstract public int getTexture(String s);
 }

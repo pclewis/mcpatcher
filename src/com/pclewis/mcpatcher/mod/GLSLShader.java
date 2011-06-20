@@ -190,7 +190,79 @@ public class GLSLShader extends Mod {
         public RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
+            classSignatures.add(new FixedBytecodeSignature(
+                BinaryRegex.begin(),
+                ALOAD_0,
+                BytecodeMatcher.captureReference(GETFIELD),
+                BytecodeMatcher.captureReference(GETFIELD),
+                ASTORE_2,
+                ALOAD_0
+            )
+                .addXref(1, new FieldRef("RenderEngine", "texturePackList", "LTexturePackList;"))
+                .addXref(2, new FieldRef("TexturePackList", "selectedTexturePack", "LTexturePackBase;"))
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_0,
+                        ALOAD_0,
+                        ALOAD_2,
+                        ALOAD_1,
+                        BIPUSH, 7,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;")),
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        BytecodeMatcher.anyReference(INVOKESPECIAL),
+                        BytecodeMatcher.anyReference(INVOKESPECIAL)
+                    );
+                }
+            }.addXref(1, new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
+
+            memberMappers.add(new MethodMapper("refreshTextures", "()V") {
+                @Override
+                public boolean match(MethodInfo methodInfo) {
+                    if (!super.match(methodInfo) || methodInfo.getName().startsWith("<")) {
+                        return false;
+                    }
+                    BytecodeMatcher bm = new BytecodeMatcher(
+                        push(methodInfo, "%clamp%")
+                    );
+                    return bm.match(methodInfo);
+                }
+            });
+
             memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I"));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef("RenderEngine", "texturePackList", "LTexturePackList;")));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "call Shaders.refreshTextures";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    JavaRef refreshTextures = map(new MethodRef("RenderEngine", "refreshTextures", "()V"));
+                    if (methodInfo.getDescriptor().equals(refreshTextures.getType()) &&
+                        methodInfo.getName().equals(refreshTextures.getName())) {
+                        return buildExpression(
+                            RETURN
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "refreshTextures", "()V")),
+                        RETURN
+                    );
+                }
+            });
         }
     }
 
@@ -417,23 +489,8 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // Shaders.bindTexture(33985 /*GL_TEXTURE1_ARB*/, mc.renderEngine.getTexture("/terrain_nh.png"));
-                        push(methodInfo, 33985),
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "mc", "LMinecraft;")),
-                        reference(methodInfo, GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
-                        push(methodInfo, "/terrain_nh.png"),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "bindTexture", "(II)V")),
-
-                        // Shaders.bindTexture(33986 /*GL_TEXTURE2_ARB*/, mc.renderEngine.getTexture("/terrain_s.png"));
-                        push(methodInfo, 33986),
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "mc", "LMinecraft;")),
-                        reference(methodInfo, GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
-                        push(methodInfo, "/terrain_s.png"),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "bindTexture", "(II)V")),
+                        // Shaders.bindTerrainMaps();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "bindTerrainMaps", "()V")),
 
                         // Shaders.setRenderType(1);
                         ICONST_1,
