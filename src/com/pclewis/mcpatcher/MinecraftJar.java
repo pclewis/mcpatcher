@@ -140,10 +140,7 @@ class MinecraftJar {
                 Properties properties = new Properties();
                 is = new FileInputStream(md5File);
                 properties.load(is);
-                String origMD5 = properties.getProperty("minecraft.jar");
-                if (origMD5.equals(md5)) {
-                    return (origMD5);
-                }
+                return properties.getProperty("minecraft.jar");
             } catch (IOException e) {
                 Logger.log(e);
             } finally {
