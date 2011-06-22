@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * @see BinaryRegex
  */
 abstract public class BytecodePatch extends ClassPatch {
-    private BytecodeMatcher matcher;
+    BytecodeMatcher matcher;
 
     /**
      * Can be overridden to skip certain methods during patching.
@@ -164,5 +164,35 @@ abstract public class BytecodePatch extends ClassPatch {
      */
     final protected byte[] getCaptureGroup(int group) {
         return matcher.getCaptureGroup(group);
+    }
+
+    /**
+     * BytecodePatch that inserts code after a match.
+     */
+    abstract public static class InsertAfter extends BytecodePatch {
+        @Override
+        final public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+            return buildCode(
+                matcher.getMatch(),
+                getInsertBytes(methodInfo)
+            );
+        }
+
+        abstract public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException;
+    }
+
+    /**
+     * BytecodePatch that inserts code before a match.
+     */
+    abstract public static class InsertBefore extends BytecodePatch {
+        @Override
+        final public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+            return buildCode(
+                getInsertBytes(methodInfo),
+                matcher.getMatch()
+            );
+        }
+
+        abstract public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException;
     }
 }
