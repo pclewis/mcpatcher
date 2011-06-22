@@ -372,8 +372,6 @@ public class GLSLShader extends Mod {
     private class EntityRendererMod extends ClassMod {
         public EntityRendererMod() {
             classSignatures.add(new ConstSignature("ambient.weather.rain"));
-            classSignatures.add(new ConstSignature(0x2b24abb));
-            classSignatures.add(new ConstSignature(0x66397));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -393,17 +391,71 @@ public class GLSLShader extends Mod {
                 }
             }.setMethodName("renderWorld2"));
 
-            memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 2915 /*GL_FOG_START*/),
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        push(methodInfo, 0.25f),
+                        FMUL,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glFogf", "(IF)V"))
+                    );
+                }
+            }.addXref(1, new FieldRef("EntityRenderer", "farPlaneDistance", "F")));
 
-            memberMappers.add(new FieldMapper(
-                new String[]{
-                    "farPlaneDistance",
-                    null, null, null, null, null, null, null, null, null, null,
-                    "fogColorRed", "fogColorGreen", "fogColorBlue",
-                    "fogColor2", "fogColor1"
-                },
-                "F"
-            ));
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 2918 /* GL_FOG_COLOR */),
+                        ALOAD_0,
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        FCONST_1,
+                        BytecodeMatcher.anyReference(INVOKESPECIAL),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glFog", "(ILjava/nio/FloatBuffer;)V"))
+                    );
+                }
+            }
+                .addXref(1, new FieldRef("EntityRenderer", "fogColorRed", "F"))
+                .addXref(2, new FieldRef("EntityRenderer", "fogColorGreen", "F"))
+                .addXref(3, new FieldRef("EntityRenderer", "fogColorBlue", "F"))
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // float f10 = fogColor2 + (fogColor1 - fogColor2) * f;
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        ALOAD_0,
+                        BinaryRegex.backReference(1),
+                        FSUB,
+                        FLOAD_1,
+                        FMUL,
+                        FADD,
+                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                        // fogColorRed *= f10;
+                        ALOAD_0,
+                        DUP
+                    );
+                }
+            }
+                .addXref(1, new FieldRef("EntityRenderer", "fogColor2", "F"))
+                .addXref(2, new FieldRef("EntityRenderer", "fogColor1", "F"))
+            );
+
+            memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
 
             memberMappers.add(new MethodMapper(
                 new String[]{
