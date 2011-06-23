@@ -52,6 +52,14 @@ abstract public class ClassMod implements PatchComponent {
      * By default, a ClassMod should only match a single class. Set this field to true to allow any number of matches.
      */
     protected boolean global = false;
+    /**
+     * Descriptive name of parent class if any.
+     */
+    protected String parentClass;
+    /**
+     * Descriptive names of interfaces implemented by the class.
+     */
+    protected String[] interfaces;
 
     ArrayList<String> targetClasses = new ArrayList<String>();
     ArrayList<String> errors = new ArrayList<String>();
@@ -84,6 +92,17 @@ abstract public class ClassMod implements PatchComponent {
         targetClasses.add(classFile.getName());
         if (targetClasses.size() == 1 && !global) {
             mod.classMap.merge(newMap);
+            if (parentClass != null) {
+                mod.classMap.addClassMap(parentClass, classFile.getSuperclass());
+                mod.classMap.addInheritance(parentClass, deobfName);
+            }
+            if (interfaces != null) {
+                String[] obfInterfaces = classFile.getInterfaces();
+                for (int i = 0; i < Math.min(interfaces.length, obfInterfaces.length); i++) {
+                    mod.classMap.addClassMap(interfaces[i], obfInterfaces[i]);
+                    mod.classMap.addInheritance(interfaces[i], deobfName);
+                }
+            }
         }
 
         return true;

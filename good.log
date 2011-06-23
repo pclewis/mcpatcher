@@ -1,5 +1,5 @@
 MCPatcher version is 2.1.0_02
-OS: Linux 2.6.35.13-91.fc14.x86_64 amd64
+OS: Linux 2.6.35.13-92.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_25 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.6.6 (md5 ce80072464433cd5b05d505aa8ff29d1)
@@ -153,12 +153,6 @@ HD Textures
         field minecraft -> e
         field selectedTexturePack -> a
     class Watch (kq.class)
-    class com.pclewis.mcpatcher.mod.CustomAnimation extends TextureFX
-        method onTick -> a
-        field imageData -> a
-        field tileImage -> f
-        field tileNumber -> b
-        field tileSize -> e
     class net.minecraft.client.Minecraft alias for Minecraft
     class net.minecraft.src.ColorizerFoliage alias for ColorizerFoliage
     class net.minecraft.src.ColorizerGrass alias for ColorizerGrass
