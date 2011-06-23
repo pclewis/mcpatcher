@@ -349,12 +349,8 @@ public class HDTexture extends Mod {
         }
 
         @Override
-        public boolean mapClassMembers(String filename, ClassFile classFile) throws Exception {
-            if (!super.mapClassMembers(filename, classFile)) {
-                return false;
-            }
-            mod.getClassMap().addInheritance("TextureFX", class_CustomAnimation);
-            return true;
+        public void prePatch(String filename, ClassFile classFile) {
+            mod.getClassMap().addInheritance(getDeobfClass(), class_CustomAnimation);
         }
     }
 
