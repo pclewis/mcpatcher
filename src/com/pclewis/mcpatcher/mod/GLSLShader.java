@@ -694,6 +694,8 @@ public class GLSLShader extends Mod {
 
     private class FrustrumMod extends ClassMod {
         public FrustrumMod() {
+            interfaces = new String[]{"ICamera"};
+
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 ALOAD_0,
@@ -731,12 +733,7 @@ public class GLSLShader extends Mod {
 
                 INVOKEVIRTUAL, BinaryRegex.any(2),
                 IRETURN
-            ) {
-                @Override
-                public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
-                    classMap.addClassMap("ICamera", classFile.getInterfaces()[0]);
-                }
-            });
+            ));
         }
     }
 
@@ -1175,20 +1172,12 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new FieldMapper("inventory", "LInventoryPlayer;"));
         }
-
-        @Override
-        public boolean mapClassMembers(String filename, ClassFile classFile) throws Exception {
-            if (super.mapClassMembers(filename, classFile)) {
-                mod.getClassMap().addInheritance("EntityPlayer", "EntityPlayerSP");
-                return true;
-            } else {
-                return false;
-            }
-        }
     }
 
     private class EntityPlayerSPMod extends ClassMod {
         public EntityPlayerSPMod() {
+            parentClass = "EntityPlayer";
+
             classSignatures.add(new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"));
             classSignatures.add(new ConstSignature("portal.trigger"));
         }
