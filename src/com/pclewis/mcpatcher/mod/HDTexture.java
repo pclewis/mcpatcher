@@ -69,21 +69,22 @@ public class HDTexture extends Mod {
         public RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getDescriptor().equals("()V")) {
+                        return buildExpression(
+                            push(methodInfo, "%clamp%")
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }.setMethodName("refreshTextures"));
+
             memberMappers.add(new FieldMapper("imageData", "Ljava/nio/ByteBuffer;"));
             memberMappers.add(new FieldMapper("textureList", "Ljava/util/List;"));
             memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
-            memberMappers.add(new MethodMapper("refreshTextures", "()V") {
-                @Override
-                public boolean match(MethodInfo methodInfo) {
-                    if (!super.match(methodInfo) || methodInfo.getName().startsWith("<")) {
-                        return false;
-                    }
-                    BytecodeMatcher bm = new BytecodeMatcher(
-                        push(methodInfo, "%clamp%")
-                    );
-                    return bm.match(methodInfo);
-                }
-            });
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
 
@@ -336,6 +337,7 @@ public class HDTexture extends Mod {
                 SIPUSH, 0x04, 0x00, // 1024
                 NEWARRAY, T_BYTE
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 RETURN,
@@ -359,6 +361,7 @@ public class HDTexture extends Mod {
             classSignatures.add(new ConstSignature("/gui/items.png"));
             classSignatures.add(new ConstSignature("/misc/dial.png").negate(true));
             classSignatures.add(new ConstSignature(new MethodRef("java.lang.Math", "sin", "(D)D")));
+
             classSignatures.add(new FixedBytecodeSignature(
                 ALOAD_0,
                 SIPUSH, 0x01, 0x00, // 256
@@ -376,7 +379,6 @@ public class HDTexture extends Mod {
             patches.add(new TileSizePatch.IfGreaterPatch(4, "int_compassCrossMax"));
             patches.add(new TileSizePatch(-8, "int_compassNeedleMin"));
             patches.add(new TileSizePatch.IfGreaterPatch(16, "int_compassNeedleMax"));
-
             patches.add(new TileSizePatch.GetRGBPatch());
         }
     }
@@ -384,6 +386,7 @@ public class HDTexture extends Mod {
     private static class FireMod extends ClassMod {
         public FireMod() {
             classSignatures.add(new ConstSignature(new MethodRef("java.lang.Math", "random", "()D")));
+
             classSignatures.add(new FixedBytecodeSignature(
                 SIPUSH, 0x01, 0x40, // 320
                 NEWARRAY, T_FLOAT,
@@ -400,14 +403,15 @@ public class HDTexture extends Mod {
             patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
             patches.add(new TileSizePatch.WhilePatch(20, "int_flameHeight"));
             patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
+            patches.add(new TileSizePatch.ModPatch(20, "int_flameHeight"));
+            patches.add(new TileSizePatch.IfLessPatch(19, "int_flameHeightMinus1"));
+
             patches.add(new TileSizePatch.MultiplyPatch(16, "int_size") {
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
                     return !methodInfo.getName().equals("<init>");
                 }
             });
-            patches.add(new TileSizePatch.ModPatch(20, "int_flameHeight"));
-            patches.add(new TileSizePatch.IfLessPatch(19, "int_flameHeightMinus1"));
         }
     }
 
@@ -428,6 +432,7 @@ public class HDTexture extends Mod {
             ));
 
             final double rand = (lava ? 0.005 : flow ? 0.2 : 0.05);
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -496,13 +501,14 @@ public class HDTexture extends Mod {
             patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
             patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
             patches.add(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
+            patches.add(new TileSizePatch.DivPatch(16, "int_size"));
+
             patches.add(new TileSizePatch.ModPatch(16, "int_size") {
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
                     return !methodInfo.getName().equals("<init>");
                 }
             });
-            patches.add(new TileSizePatch.DivPatch(16, "int_size"));
         }
     }
 
@@ -627,6 +633,7 @@ public class HDTexture extends Mod {
     private static class GLAllocationMod extends ClassMod {
         public GLAllocationMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glDeleteLists", "(II)V")));
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -695,8 +702,10 @@ public class HDTexture extends Mod {
     private static class TexturePackBaseMod extends ClassMod {
         public TexturePackBaseMod() {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
+
             classSignatures.add(new ConstSignature(getResourceAsStream));
             classSignatures.add(new ConstSignature("pack.txt").negate(true));
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -726,6 +735,7 @@ public class HDTexture extends Mod {
                 DCONST_0,
                 ILOAD
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 ALOAD, BinaryRegex.any(),
                 ICONST_0,
@@ -846,6 +856,7 @@ public class HDTexture extends Mod {
                     }
                 }
             });
+
             classSignatures.add(new ConstSignature(6396257).negate(!has6396257));
             classSignatures.add(new ConstSignature(255.0).negate(!has255));
         }

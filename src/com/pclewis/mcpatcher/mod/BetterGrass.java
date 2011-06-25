@@ -40,19 +40,23 @@ public class BetterGrass extends Mod {
                 ARETURN,
                 BinaryRegex.end()
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 ICONST_0,
                 IRETURN,
                 BinaryRegex.end()
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 ICONST_1,
                 IRETURN,
                 BinaryRegex.end()
             ));
+
             classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
+
             classSignatures.add(new ClassSignature() {
                 @Override
                 public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
