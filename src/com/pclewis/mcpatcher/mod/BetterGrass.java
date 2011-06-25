@@ -78,7 +78,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class BlockMod extends ClassMod {
+    private static class BlockMod extends ClassMod {
         public BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
 
@@ -86,7 +86,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class BlockGrassMod extends ClassMod {
+    private static class BlockGrassMod extends ClassMod {
         private byte[] getBlockMaterial;
         private byte[] material;
 
@@ -321,7 +321,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class IBlockAccessMod extends ClassMod {
+    private static class IBlockAccessMod extends ClassMod {
         public IBlockAccessMod() {
             classSignatures.add(new ClassSignature() {
                 @Override
@@ -343,7 +343,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class RenderBlocksMod extends ClassMod {
+    private static class RenderBlocksMod extends ClassMod {
         private int eastFace;
         private int westFace;
         private int northFace;
