@@ -40,19 +40,23 @@ public class BetterGrass extends Mod {
                 ARETURN,
                 BinaryRegex.end()
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 ICONST_0,
                 IRETURN,
                 BinaryRegex.end()
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 ICONST_1,
                 IRETURN,
                 BinaryRegex.end()
             ));
+
             classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
+
             classSignatures.add(new ClassSignature() {
                 @Override
                 public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
@@ -74,7 +78,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class BlockMod extends ClassMod {
+    private static class BlockMod extends ClassMod {
         public BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
 
@@ -82,7 +86,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class BlockGrassMod extends ClassMod {
+    private static class BlockGrassMod extends ClassMod {
         private byte[] material;
 
         public BlockGrassMod() {
@@ -312,7 +316,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class IBlockAccessMod extends ClassMod {
+    private static class IBlockAccessMod extends ClassMod {
         public IBlockAccessMod() {
             classSignatures.add(new ClassSignature() {
                 @Override
@@ -334,7 +338,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class RenderBlocksMod extends ClassMod {
+    private static class RenderBlocksMod extends ClassMod {
         private int eastFace;
         private int westFace;
         private int northFace;

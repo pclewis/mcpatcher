@@ -25,6 +25,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.6.jar (824 files)
   ih.class matches TexturePackList.class
   je.class matches ColorizerFoliage.class
   jf.class matches RenderEngine.class
+   b matches refreshTextures
   kq.class matches Watch.class
   kr.class matches GameSettings.class
   lj.class matches Material.class
@@ -48,7 +49,6 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.6.6.jar (second pass)
    field f matches imageData
    field g matches textureList
    method a matches registerTextureFX
-   method b matches refreshTextures
    method a matches readTextureImage
    method a matches setupTexture
    method a matches readTextureImageData
@@ -1099,13 +1099,13 @@ Patching...
     & 15 -> int_sizeMinus1 a@369
      BIPUSH 0x0f               GETSTATIC 0x00 0x9b
      IAND                      IAND
-    % 16 -> int_size a@282
-     BIPUSH 0x10               GETSTATIC 0x00 0x95
-     IREM                      IREM
-    / 16 -> int_size a@300
+    / 16 -> int_size a@299
      BIPUSH 0x10               GETSTATIC 0x00 0x95
      IDIV                      IDIV
      I2D                       I2D
+    % 16 -> int_size a@282
+     BIPUSH 0x10               GETSTATIC 0x00 0x95
+     IREM                      IREM
  applying GetResource patch to kq.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>@39
      LDC 0x0d                  NOP
@@ -1302,24 +1302,24 @@ Patching...
     while i < 16 -> int_size a@86
      BIPUSH 0x10               GETSTATIC 0x00 0x4b
      IF_ICMPGE 0x00 0x1d       IF_ICMPGE 0x00 0x1d
-    * 16 -> int_size a@32
-     BIPUSH 0x10               GETSTATIC 0x00 0x4b
-     IMUL                      IMUL
-    * 16 -> int_size a@111
-     BIPUSH 0x10               GETSTATIC 0x00 0x4b
-     IMUL                      IMUL
-    * 16 -> int_size a@141
-     BIPUSH 0x10               GETSTATIC 0x00 0x4b
-     IMUL                      IMUL
-    * 16 -> int_size a@168
-     BIPUSH 0x10               GETSTATIC 0x00 0x4b
-     IMUL                      IMUL
     % 20 -> int_flameHeight a@29
      BIPUSH 0x14               GETSTATIC 0x00 0x48
      IREM                      IREM
-    if i < 19 -> int_flameHeightMinus1 a@158
+    if i < 19 -> int_flameHeightMinus1 a@155
      BIPUSH 0x13               GETSTATIC 0x00 0x4e
-     IF_ICMPLT 0x00 0x2b       IF_ICMPLT 0x00 0x2b
+     IF_ICMPLT 0x00 0x2a       IF_ICMPLT 0x00 0x2a
+    * 16 -> int_size a@33
+     BIPUSH 0x10               GETSTATIC 0x00 0x4b
+     IMUL                      IMUL
+    * 16 -> int_size a@112
+     BIPUSH 0x10               GETSTATIC 0x00 0x4b
+     IMUL                      IMUL
+    * 16 -> int_size a@142
+     BIPUSH 0x10               GETSTATIC 0x00 0x4b
+     IMUL                      IMUL
+    * 16 -> int_size a@170
+     BIPUSH 0x10               GETSTATIC 0x00 0x4b
+     IMUL                      IMUL
  applying FontRenderer patch to se.class for mod HD Textures
     insert method initialize ()V stack size 11, local vars 18
  applying GetResource patch to se.class for mod HD Textures

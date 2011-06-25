@@ -29,6 +29,7 @@ public class HDFont extends Mod {
                 DCONST_0,
                 ILOAD
             ));
+
             classSignatures.add(new FixedBytecodeSignature(
                 ALOAD, BinaryRegex.any(),
                 ICONST_0,
