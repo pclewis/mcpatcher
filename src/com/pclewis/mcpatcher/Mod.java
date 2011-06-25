@@ -205,6 +205,7 @@ public abstract class Mod {
         if (url == null) {
             return null;
         }
+        url = new URL(url.toString().replaceAll("!(?=.*!)", "%21"));
         InputStream inputStream = url.openStream();
         if (inputStream == null) {
             Logger.log(Logger.LOG_MAIN, "DEBUG: openStream failed, retrying with getContextClassLoader");
