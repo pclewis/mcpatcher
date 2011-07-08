@@ -59,7 +59,7 @@ abstract public class BytecodePatch extends ClassPatch {
         ArrayList<String> txtBefore = null;
 
         while (matcher.match(mi, offset)) {
-            recordPatch(String.format("%s@%d", mi.getName(), matcher.getStart()));
+            recordPatch(String.format("%s%s@%d", mi.getName(), mi.getDescriptor(), matcher.getStart()));
 
             byte repl[];
             try {
