@@ -15,7 +15,7 @@ TEST_OPTS = -ignoresavedmods -ignorecustommods -enableallmods -auto -loglevel 5
 TEST_LOG = test.log
 GOOD_LOG = good.log
 TMPDIR = t.1
-FILTER = perl -p -e 's/@[[:digit:]]+/@.../g; s/(INVOKE|GET|PUT)(VIRTUAL|STATIC|INTERFACE|FIELD|SPECIAL)( 0x[[:xdigit:]]{2}){2}/$$1$$2 0x.. 0x../g; s/^(OS|JVM|Classpath): .*/$$1: .../; s/\b[a-z]+\.class/xx.class/g;'
+FILTER = perl -p -e 's/@[[:digit:]]+/@.../g; s/(INVOKE|GET|PUT)(VIRTUAL|STATIC|INTERFACE|FIELD|SPECIAL)( 0x[[:xdigit:]]{2}){2}/$$1$$2 0x.. 0x../g; s/^(OS|JVM|Classpath): .*/$$1: .../; s/\b[a-z]+\.class/xx.class/g; s/L[a-z]+;/Lxx;/g;'
 
 .PHONY: default build release run test testfilter javadoc control profile clean modjar restore
 
