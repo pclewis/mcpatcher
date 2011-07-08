@@ -295,6 +295,63 @@ public class HDTexture extends Mod {
                 }
             });
 
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "null check in setupTexture";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getDescriptor().equals("(Ljava/awt/image/BufferedImage;I)V")) {
+                        return buildExpression(
+                            BinaryRegex.begin()
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_1,
+                        IFNONNULL, branch("A"),
+                        RETURN,
+                        label("A")
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "null check in getImageRGB";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getDescriptor().equals("(Ljava/awt/image/BufferedImage;[I)[I")) {
+                        return buildExpression(
+                            BinaryRegex.begin()
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_1,
+                        IFNONNULL, branch("A"),
+                        ALOAD_2,
+                        ARETURN,
+                        label("A")
+                    );
+                }
+            });
+
             patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
 
             patches.add(new AddMethodPatch("setTileSize", "(Lnet/minecraft/client/Minecraft;)V") {
