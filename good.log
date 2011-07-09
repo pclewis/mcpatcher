@@ -1394,6 +1394,19 @@ Patching...
                                GETFIELD 0x00 0x36
                                ALOAD_1
                                INVOKESTATIC 0x01 0x7f
+    null check in setupTexture a(Ljava/awt/image/BufferedImage;I)V@0
+     label A -> instruction 5
+     branch offset IFNONNULL A -> +4 @1
+                               ALOAD_1
+                               IFNONNULL 0x00 0x04
+                               RETURN
+    null check in getImageRGB a(Ljava/awt/image/BufferedImage;[I)[I@0
+     label A -> instruction 6
+     branch offset IFNONNULL A -> +5 @1
+                               ALOAD_1
+                               IFNONNULL 0x00 0x05
+                               ALOAD_2
+                               ARETURN
     1048576 -> int_glBufferSize <init>(Lik;Lkv;)V@46
      LDC 0x02                  GETSTATIC 0x01 0x82
     insert method setTileSize (Lnet/minecraft/client/Minecraft;)V stack size 10, local vars 5
@@ -2645,6 +2658,8 @@ HD Textures
         [2] glTexSubImage2D(...,16,16) -> glTexSubImage2D(...,int_size,int_size)
         [4] imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()
         [1] insert method setTileSize (Lnet/minecraft/client/Minecraft;)V
+        [1] null check in getImageRGB
+        [1] null check in setupTexture
         [14] readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...)
     TextureFX (aw.class)
         [1] array size 1024 -> int_numBytes
