@@ -30,6 +30,19 @@ public class ZipTreeDialog extends JDialog {
         pack();
         getRootPane().setDefaultButton(buttonOK);
 
+        // Some zip files are missing directory entries, so construct the list of directories here
+        final ArrayList<String> dirs = new ArrayList<String>();
+        for (ZipEntry entry : Collections.list(zipFile.entries())) {
+            String name = entry.getName();
+            if (!entry.isDirectory()) {
+                name = name.replaceFirst("/?[^/]+$", "/");
+            }
+            if (!dirs.contains(name)) {
+                dirs.add(name);
+            }
+        }
+        Collections.sort(dirs);
+
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
@@ -88,9 +101,8 @@ public class ZipTreeDialog extends JDialog {
             private ArrayList<ZipTreeNode> getChildren(Object object) {
                 String parent = ((ZipTreeNode) object).path;
                 ArrayList<ZipTreeNode> list = new ArrayList<ZipTreeNode>();
-                for (ZipEntry entry : Collections.list(zipFile.entries())) {
-                    String name = entry.getName();
-                    if (entry.isDirectory() && name.startsWith(parent)) {
+                for (String name : dirs) {
+                    if (name.startsWith(parent)) {
                         String suffix = name.substring(parent.length()).replaceFirst("/$", "");
                         if (!suffix.equals("") && !suffix.contains("/")) {
                             list.add(new ZipTreeNode(suffix, name));
