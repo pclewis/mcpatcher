@@ -296,7 +296,7 @@ abstract public class ClassMod implements PatchComponent {
                     baos.write(0);
                 }
             } else {
-                throw new AssertionError("invalid type");
+                throw new AssertionError("invalid type: " + o.getClass().toString());
             }
         }
         return baos.toByteArray();
