@@ -148,7 +148,7 @@ abstract class UserInterface {
                 System.out.println();
                 System.out.println("#### Patch summary:");
                 MCPatcher.showPatchResults(System.out);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 Logger.log(e);
             }
             return ok;

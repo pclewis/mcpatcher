@@ -78,7 +78,7 @@ class ModList {
         try {
             URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
             return loadCustomMod(loader, className);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Logger.log(e);
         }
         return null;

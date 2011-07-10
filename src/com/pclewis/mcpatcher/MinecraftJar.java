@@ -123,7 +123,7 @@ class MinecraftJar {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Logger.log(e);
         } finally {
             MCPatcherUtils.close(is);

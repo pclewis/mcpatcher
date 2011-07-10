@@ -250,7 +250,7 @@ final public class MCPatcher {
                             }
                         } catch (InterruptedException e) {
                             throw e;
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             classMod.addError(e.toString());
                             Logger.log(e);
                         }
@@ -294,7 +294,7 @@ final public class MCPatcher {
                         classMod.addToConstPool = false;
                         classMod.mapClassMembers(name, classFile);
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     classMod.addError(e.toString());
                     Logger.log(e);
                 }
@@ -450,7 +450,7 @@ final public class MCPatcher {
             Logger.log(Logger.LOG_MAIN);
             Logger.log(Logger.LOG_MAIN, "Done!");
             patchOk = true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Logger.log(e);
             Logger.log(Logger.LOG_MAIN);
             Logger.log(Logger.LOG_MAIN, "Restoring original minecraft.jar due to previous error");

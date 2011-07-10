@@ -266,7 +266,7 @@ class MainForm {
                         ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
                         renderer.resetRowHeights();
                     }
-                } catch (Exception e1) {
+                } catch (Throwable e1) {
                     Logger.log(e1);
                 } finally {
                     hideDialog();
