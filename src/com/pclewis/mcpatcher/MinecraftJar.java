@@ -21,6 +21,7 @@ class MinecraftJar {
 
     private File origFile;
     private File outputFile;
+    private int alphaBeta;
     private String version;
     private String md5;
     private String origMD5;
@@ -32,7 +33,7 @@ class MinecraftJar {
             throw new FileNotFoundException(file.getPath() + " does not exist");
         }
 
-        version = extractVersion(file);
+        extractVersion(file);
         if (version == null) {
             throw new IOException("Could not determine version of " + file.getPath());
         }
@@ -56,6 +57,19 @@ class MinecraftJar {
         }
 
         origMD5 = getOrigMD5(version, md5);
+    }
+
+    public int[] getVersionNumbers() {
+        String[] tokens = getVersion().split("[^0-9]+");
+        int[] versionNumbers = new int[tokens.length + 1];
+        versionNumbers[0] = alphaBeta;
+        for (int i = 0; i < tokens.length; i++) {
+            try {
+                versionNumbers[i + 1] = Integer.parseInt(tokens[i]);
+            } catch (NumberFormatException e) {
+            }
+        }
+        return versionNumbers;
     }
 
     public String getVersion() {
@@ -92,12 +106,12 @@ class MinecraftJar {
         }
     }
 
-    private static String extractVersion(File file) {
+    private String extractVersion(File file) {
         if (!file.exists()) {
             return null;
         }
 
-        String version = null;
+        version = null;
         JarFile jar = null;
         InputStream is = null;
         try {
@@ -108,7 +122,7 @@ class MinecraftJar {
             }
             is = jar.getInputStream(mc);
             ClassFile cf = new ClassFile(new DataInputStream(is));
-            Pattern p = Pattern.compile("Minecraft (?:Alpha |Beta )?v?(" + VERSION_REGEX + ")");
+            Pattern p = Pattern.compile("Minecraft (Alpha |Beta )?v?(" + VERSION_REGEX + ")");
             for (Object o : cf.getMethods()) {
                 MethodInfo mi = (MethodInfo) o;
                 ConstPool cp = mi.getConstPool();
@@ -117,7 +131,14 @@ class MinecraftJar {
                         String value = cp.getStringInfo(i);
                         Matcher m = p.matcher(value);
                         if (m.find()) {
-                            version = m.group(1);
+                            if (m.group(1).equals("Alpha ")) {
+                                alphaBeta = 1;
+                            } else if (m.group(1).equals("Beta ")) {
+                                alphaBeta = 2;
+                            } else {
+                                alphaBeta = 3;
+                            }
+                            version = m.group(2);
                             break;
                         }
                     }

@@ -49,10 +49,26 @@ public class HDTexture extends Mod {
         filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
     }
 
+    private static int compareVersionNumbers(int[] a, int[] b) {
+        for (int i = 0; i < a.length && i < b.length; i++) {
+            if (a[i] < b[i]) {
+                return -1;
+            } else if (a[i] > b[i]) {
+                return 1;
+            }
+        }
+        if (a.length < b.length) {
+            return -1;
+        } else if (a.length > b.length) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     @Override
     public void preSetup(int[] minecraftVersionNumbers) {
-        boolean pre16 = minecraftVersionNumbers.length >= 2 &&
-            (minecraftVersionNumbers[0] < 1 || (minecraftVersionNumbers[0] == 1 && minecraftVersionNumbers[1] < 6));
+        boolean pre16 = compareVersionNumbers(minecraftVersionNumbers, new int[] {2 /* beta */, 1, 6}) < 0;
         if (pre16) {
             classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
             classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
