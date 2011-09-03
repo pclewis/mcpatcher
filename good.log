@@ -1,6 +1,6 @@
 MCPatcher version is 2.1.0_02
-OS: Linux 2.6.35.13-92.fc14.x86_64 amd64
-JVM: Sun Microsystems Inc. 1.6.0_25 (64 bit)
+OS: Linux 2.6.35.14-95.fc14.x86_64 amd64
+JVM: Sun Microsystems Inc. 1.6.0_27 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.7.3 (md5 eae3353fdaa7e10a59b4cb5b45bfa10d)
 
