@@ -4,10 +4,7 @@ import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -544,9 +541,17 @@ final public class MCPatcher {
             MCPatcherUtils.close(inputStream);
         }
 
+        HashMap<String, Mod> allFilesToAdd = new HashMap<String, Mod>();
         for (Mod mod : modList.getSelected()) {
             for (String name : mod.filesToAdd) {
                 if (origJar.getEntry(name) == null) {
+                    allFilesToAdd.put(name, mod);
+                }
+            }
+        }
+        for (Mod mod : modList.getSelected()) {
+            for (String name : mod.filesToAdd) {
+                if (mod == allFilesToAdd.get(name)) {
                     addFile(mod, name, outputJar);
                 }
             }
