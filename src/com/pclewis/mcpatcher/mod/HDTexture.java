@@ -182,11 +182,7 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        SWAP,
-                        POP,
-                        SWAP,
-                        POP,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "getResourceAsBufferedImage", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
                     );
                 }
             });
