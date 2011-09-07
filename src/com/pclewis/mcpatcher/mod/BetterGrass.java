@@ -86,7 +86,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private static class BlockGrassMod extends ClassMod {
+    private class BlockGrassMod extends ClassMod {
         private byte[] material;
 
         public BlockGrassMod() {
@@ -358,7 +358,8 @@ public class BetterGrass extends Mod {
                 DUP,
                 ISTORE, BinaryRegex.capture(BinaryRegex.any()),
                 DUP,
-                ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                BytecodeMatcher.anyISTORE
             ) {
                 public void afterMatch(ClassFile classFile) {
                     southFace = matcher.getCaptureGroup(1)[0] & 0xff;
@@ -437,7 +438,8 @@ public class BetterGrass extends Mod {
                         DUP,
                         ISTORE, westFace,
                         DUP,
-                        ISTORE, eastFace
+                        ISTORE, eastFace,
+                        BytecodeMatcher.anyISTORE
                     ));
                 }
 
@@ -449,6 +451,7 @@ public class BetterGrass extends Mod {
                     return buildCode(
                         getCaptureGroup(1),
 
+                        // if (block.getBlockTexture(blockAccess, i, j, k, 2) == 0) eastFace = true;
                         ALOAD_1,
                         ALOAD_0,
                         blockAccess,
@@ -462,6 +465,7 @@ public class BetterGrass extends Mod {
                         ISTORE, eastFace,
                         label("east"),
 
+                        // if (block.getBlockTexture(blockAccess, i, j, k, 3) == 0) westFace = true;
                         ALOAD_1,
                         ALOAD_0,
                         blockAccess,
@@ -475,6 +479,7 @@ public class BetterGrass extends Mod {
                         ISTORE, westFace,
                         label("west"),
 
+                        // if (block.getBlockTexture(blockAccess, i, j, k, 4) == 0) northFace = true;
                         ALOAD_1,
                         ALOAD_0,
                         blockAccess,
@@ -488,6 +493,7 @@ public class BetterGrass extends Mod {
                         ISTORE, northFace,
                         label("north"),
 
+                        // if (block.getBlockTexture(blockAccess, i, j, k, 5) == 0) southFace = true;
                         ALOAD_1,
                         ALOAD_0,
                         blockAccess,

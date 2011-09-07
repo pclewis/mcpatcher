@@ -266,7 +266,7 @@ class MainForm {
                         ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
                         renderer.resetRowHeights();
                     }
-                } catch (Exception e1) {
+                } catch (Throwable e1) {
                     Logger.log(e1);
                 } finally {
                     hideDialog();
@@ -304,17 +304,13 @@ class MainForm {
                     boolean patchOk = true;
                     ArrayList<String> conflicts = MCPatcher.getConflicts();
                     if (conflicts.size() > 0) {
-                        StringBuilder message = new StringBuilder(
-                            "Conflicts detected between the selected mods:\n\n"
-                        );
+                        StringBuilder message = new StringBuilder();
                         for (String s : conflicts) {
-                            message.append(" - ");
-                            message.append(s);
-                            message.append('\n');
+                            message.append(s).append('\n');
                         }
-                        message.append("\nContinue patching anyway?");
+                        ConflictDialog dialog = new ConflictDialog(message.toString());
                         int result = JOptionPane.showConfirmDialog(
-                            frame, message.toString(), "Mod conflict detected", JOptionPane.YES_NO_OPTION
+                            frame, dialog.getContentPane(), "Mod conflict detected", JOptionPane.YES_NO_OPTION
                         );
                         if (result != JOptionPane.YES_OPTION) {
                             patchOk = false;
@@ -713,7 +709,7 @@ class MainForm {
         private HashMap<Integer, Integer> rowSize = new HashMap<Integer, Integer>();
 
         private String htmlEscape(String s) {
-            return s == null ? "" : s.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+            return s == null ? "" : s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
         }
 
         public void resetRowHeights() {

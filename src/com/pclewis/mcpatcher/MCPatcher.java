@@ -4,10 +4,7 @@ import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -33,7 +30,7 @@ final public class MCPatcher {
     /**
      * MCPatcher patch level
      */
-    public static final int PATCH_VERSION = 2;
+    public static final int PATCH_VERSION = 3;
     /**
      * MCPatcher beta version if > 0
      */
@@ -199,15 +196,7 @@ final public class MCPatcher {
     static void getApplicableMods() throws IOException, InterruptedException {
         JarFile origJar = minecraft.getInputJar();
         for (Mod mod : modList.getAll()) {
-            String[] tokens = minecraft.getVersion().split("[^0-9]+");
-            int[] versionNumbers = new int[tokens.length];
-            for (int i = 0; i < tokens.length; i++) {
-                try {
-                    versionNumbers[i] = Integer.parseInt(tokens[i]);
-                } catch (NumberFormatException e) {
-                }
-            }
-            mod.preSetup(versionNumbers);
+            mod.preSetup(minecraft.getVersionNumbers());
             mod.setRefs();
         }
 
@@ -250,7 +239,7 @@ final public class MCPatcher {
                             }
                         } catch (InterruptedException e) {
                             throw e;
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             classMod.addError(e.toString());
                             Logger.log(e);
                         }
@@ -294,7 +283,7 @@ final public class MCPatcher {
                         classMod.addToConstPool = false;
                         classMod.mapClassMembers(name, classFile);
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     classMod.addError(e.toString());
                     Logger.log(e);
                 }
@@ -450,7 +439,7 @@ final public class MCPatcher {
             Logger.log(Logger.LOG_MAIN);
             Logger.log(Logger.LOG_MAIN, "Done!");
             patchOk = true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Logger.log(e);
             Logger.log(Logger.LOG_MAIN);
             Logger.log(Logger.LOG_MAIN, "Restoring original minecraft.jar due to previous error");
@@ -544,9 +533,17 @@ final public class MCPatcher {
             MCPatcherUtils.close(inputStream);
         }
 
+        HashMap<String, Mod> allFilesToAdd = new HashMap<String, Mod>();
         for (Mod mod : modList.getSelected()) {
             for (String name : mod.filesToAdd) {
                 if (origJar.getEntry(name) == null) {
+                    allFilesToAdd.put(name, mod);
+                }
+            }
+        }
+        for (Mod mod : modList.getSelected()) {
+            for (String name : mod.filesToAdd) {
+                if (mod == allFilesToAdd.get(name)) {
                     addFile(mod, name, outputJar);
                 }
             }

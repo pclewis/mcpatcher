@@ -314,6 +314,10 @@ public class TextureUtils {
         return getResourceAsBufferedImage(getSelectedTexturePack(), resource);
     }
 
+    public static BufferedImage getResourceAsBufferedImage(Object o1, Object o2, String resource) throws IOException {
+        return getResourceAsBufferedImage(resource);
+    }
+
     public static int getTileSize(TexturePackBase texturePack) {
         int size = 0;
         for (Map.Entry<String, Integer> entry : expectedColumns.entrySet()) {
