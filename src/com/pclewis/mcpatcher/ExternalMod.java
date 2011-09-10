@@ -31,4 +31,14 @@ class ExternalMod extends Mod {
             return zipFile.getInputStream(new ZipEntry(path));
         }
     }
+
+    void closeZip() {
+        MCPatcherUtils.close(zipFile);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        closeZip();
+        super.finalize();
+    }
 }
