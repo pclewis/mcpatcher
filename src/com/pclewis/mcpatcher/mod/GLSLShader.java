@@ -91,8 +91,9 @@ public class GLSLShader extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Display, "create", "()V"))
+                    return BinaryRegex.or(
+                        BinaryRegex.build(reference(methodInfo, INVOKESTATIC, new MethodRef(class_Display, "create", "()V"))),
+                        BinaryRegex.build(reference(methodInfo, INVOKESTATIC, new MethodRef(class_Display, "create", "(Lorg/lwjgl/opengl/PixelFormat;)V")))
                     );
                 }
 
@@ -385,20 +386,6 @@ public class GLSLShader extends Mod {
                     );
                 }
             }.setMethodName("renderWorld2"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 2915 /*GL_FOG_START*/),
-                        ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        push(methodInfo, 0.25f),
-                        FMUL,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glFogf", "(IF)V"))
-                    );
-                }
-            }.addXref(1, new FieldRef("EntityRenderer", "farPlaneDistance", "F")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -897,7 +884,10 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         FLOAD_1,
-                        push(methodInfo, 128.0F),
+                        BinaryRegex.or(
+                            BinaryRegex.build(push(methodInfo, 128.0F)),
+                            BinaryRegex.build(push(methodInfo, 127.0F))
+                        ),
                         FMUL,
                         F2I,
                         I2B,
@@ -1210,8 +1200,9 @@ public class GLSLShader extends Mod {
 
     private class WorldMod extends ClassMod {
         public WorldMod() {
-            classSignatures.add(new ConstSignature("More than "));
-            classSignatures.add(new ConstSignature(" updates, aborting lighting updates"));
+            classSignatures.add(new ConstSignature("ambient.cave.cave"));
+            classSignatures.add(new ConstSignature("Saving level"));
+            classSignatures.add(new ConstSignature("Saving chunks"));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
