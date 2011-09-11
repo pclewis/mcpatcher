@@ -1,13 +1,20 @@
 package net.minecraft.client;
 
-import net.minecraft.src.FontRenderer;
-import net.minecraft.src.GameSettings;
-import net.minecraft.src.RenderEngine;
-import net.minecraft.src.TexturePackList;
+import net.minecraft.src.*;
+
+import java.io.File;
 
 public class Minecraft {
     public TexturePackList texturePackList;
     public RenderEngine renderEngine;
     public GameSettings gameSettings;
     public FontRenderer fontRenderer;
+    public World theWorld;
+    public EntityPlayerSP thePlayer;
+    public int displayWidth;
+    public int displayHeight;
+
+    public static File getAppDir(String s) {
+        return null;
+    }
 }

@@ -230,6 +230,10 @@ public class TextureUtils {
         return buffer;
     }
 
+    public static boolean isRequiredResource(String resource) {
+        return !resource.startsWith("/custom_") && !resource.equals("/terrain_nh.png") && !resource.equals("/terrain_s.png");
+    }
+
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
         InputStream is = null;
         if (texturePack != null) {
@@ -242,7 +246,7 @@ public class TextureUtils {
         if (is == null) {
             is = TextureUtils.class.getResourceAsStream(resource);
         }
-        if (is == null && !resource.startsWith("/custom_")) {
+        if (is == null && isRequiredResource(resource)) {
             is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
             MCPatcherUtils.warn("falling back on thread class loader for %s: %s",
                 resource, (is == null ? "failed" : "success")
@@ -278,7 +282,11 @@ public class TextureUtils {
         }
 
         if (image == null) {
-            throw new IOException(resource + " image is null");
+            if (isRequiredResource(resource)) {
+                throw new IOException(resource + " image is null");
+            } else {
+                return null;
+            }
         }
 
         if (useTextureCache && !cached && texturePack != lastTexturePack) {

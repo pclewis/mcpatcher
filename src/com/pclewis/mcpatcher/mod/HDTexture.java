@@ -699,7 +699,7 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class GLAllocationMod extends ClassMod {
+    public static class GLAllocationMod extends ClassMod {
         public GLAllocationMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glDeleteLists", "(II)V")));
 

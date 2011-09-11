@@ -9,6 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="stubs" />
     <orderEntry type="module" module-name="shared" />
+    <orderEntry type="library" name="lwjgl" level="project" />
   </component>
 </module>
 

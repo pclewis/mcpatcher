@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher;
 
 import com.pclewis.mcpatcher.mod.BetterGrass;
+import com.pclewis.mcpatcher.mod.GLSLShader;
 import com.pclewis.mcpatcher.mod.HDFont;
 import com.pclewis.mcpatcher.mod.HDTexture;
 import com.pclewis.mcpatcher.mod.OneEight;
@@ -44,6 +45,9 @@ class ModList {
         }
         if (!modsByName.containsKey(MCPatcherUtils.ONE_EIGHT)) {
             addNoReplace(new OneEight());
+        }
+        if (!modsByName.containsKey(MCPatcherUtils.GLSL_SHADERS)) {
+            addNoReplace(new GLSLShader());
         }
     }
 
@@ -386,6 +390,8 @@ class ModList {
                     mod = new BetterGrass();
                 } else if (name.equals(MCPatcherUtils.ONE_EIGHT)) {
                     mod = new OneEight();
+                } else if (name.equals(MCPatcherUtils.GLSL_SHADERS)) {
+                    mod = new GLSLShader();
                 } else {
                     invalidEntries.add(element);
                 }

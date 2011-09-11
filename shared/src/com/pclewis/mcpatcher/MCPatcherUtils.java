@@ -19,6 +19,7 @@ public class MCPatcherUtils {
     public static final String HD_FONT = "HD Font";
     public static final String BETTER_GRASS = "Better Grass";
     public static final String ONE_EIGHT = "1.8 Bug Fixes";
+    public static final String GLSL_SHADERS = "GLSL Shaders";
 
     private MCPatcherUtils() {
     }
