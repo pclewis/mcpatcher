@@ -525,20 +525,22 @@ public class BetterGrass extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        // tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
-                        ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        FMUL,
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD, BinaryRegex.backReference(3),
-                        FMUL,
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD, BinaryRegex.backReference(3),
-                        FMUL,
-                        INVOKEVIRTUAL, BinaryRegex.capture(BinaryRegex.any(2)), // Tessellator.setColorOpaque_F (FFF)V
+                        // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.backReference(3),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.backReference(3),
+                            FMUL,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        )),
 
-                        // int l = block.getBlockTexture(blockAccess, i, j, k, 2);
+                        // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
                         BinaryRegex.capture(BinaryRegex.build(
                             ALOAD_1,
                             ALOAD_0,
@@ -556,12 +558,12 @@ public class BetterGrass extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        getCaptureGroup(7),
+                        getCaptureGroup(5),
                         DUP,
-                        ISTORE, getCaptureGroup(8),
+                        ISTORE, getCaptureGroup(6),
 
                         IFNE, branch("A"),
-                        ALOAD, getCaptureGroup(1),
+                        ALOAD, getCaptureGroup(2),
                         FLOAD, redMultiplier,
                         FLOAD, getCaptureGroup(3),
                         FMUL,
@@ -571,21 +573,11 @@ public class BetterGrass extends Mod {
                         FLOAD, blueMultiplier,
                         FLOAD, getCaptureGroup(3),
                         FMUL,
-                        INVOKEVIRTUAL, getCaptureGroup(6),
+                        getCaptureGroup(4),
                         GOTO, branch("B"),
 
                         label("A"),
-                        ALOAD, getCaptureGroup(1),
-                        FLOAD, getCaptureGroup(2),
-                        FLOAD, getCaptureGroup(3),
-                        FMUL,
-                        FLOAD, getCaptureGroup(4),
-                        FLOAD, getCaptureGroup(3),
-                        FMUL,
-                        FLOAD, getCaptureGroup(5),
-                        FLOAD, getCaptureGroup(3),
-                        FMUL,
-                        INVOKEVIRTUAL, getCaptureGroup(6),
+                        getCaptureGroup(1),
 
                         label("B")
                     );
