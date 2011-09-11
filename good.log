@@ -106,7 +106,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.7.3.jar (second pass)
   Spider (yx.class)
 
 4 available mods:
-[YES] HD Textures 1.0 - Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.
+[YES] HD Textures 1.0 - Provides support for texture packs of size 32x32 and higher.
 [YES] HD Font 1.0 - Provides support for higher resolution fonts.
 [YES] Better Grass 1.0 - Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.
 [ NO] 1.8 Bug Fixes 1.0 - Fixes various bugs in the 1.8 pre-release.
