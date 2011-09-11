@@ -15,8 +15,8 @@ public class OneEight extends Mod {
         version = "1.0";
 
         classMods.add(new FurnaceMod());
-        classMods.add(new EyeTextureMod("Spider", "/mob/spider_eyes.png"));
-        classMods.add(new EyeTextureMod("Enderman", "/mob/enderman_eyes.png"));
+        //classMods.add(new EyeTextureMod("Spider", "/mob/spider_eyes.png"));
+        //classMods.add(new EyeTextureMod("Enderman", "/mob/enderman_eyes.png"));
     }
 
     private static class FurnaceMod extends ClassMod {

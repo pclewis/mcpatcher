@@ -221,7 +221,7 @@ public class TextureUtils {
         final int have = buffer.capacity();
         final int needed = data.length;
         if (needed > have || have >= 4 * needed) {
-            MCPatcherUtils.log("resizing gl buffer from 0x%x to 0x%x", have, needed);
+            //MCPatcherUtils.log("resizing gl buffer from 0x%x to 0x%x", have, needed);
             buffer = GLAllocation.createDirectByteBuffer(needed);
         }
         buffer.put(data);
@@ -296,6 +296,19 @@ public class TextureUtils {
             if (useTextureCache) {
                 lastTexturePack = texturePack;
                 cache.put(resource, image);
+            }
+            if (resource.contains("_eyes.")) {
+                int p = 0;
+                for (int x = 0; x < image.getWidth(); x++) {
+                    for (int y = 0; y < image.getHeight(); y++) {
+                        int argb = image.getRGB(x, y);
+                        if ((argb & 0xff000000) == 0 && argb != 0) {
+                            image.setRGB(x, y, 0);
+                            p++;
+                        }
+                    }
+                }
+                MCPatcherUtils.log("  fixed %d transparent pixels", p, resource);
             }
         }
 
