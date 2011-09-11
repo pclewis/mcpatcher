@@ -15,8 +15,8 @@ public class OneEight extends Mod {
         version = "1.0";
 
         classMods.add(new FurnaceMod());
-        classMods.add(new MobEyeMod("Spider", "/mob/spider_eyes.png"));
-        classMods.add(new MobEyeMod("Enderman", "/mob/enderman_eyes.png"));
+        classMods.add(new EyeTextureMod("Spider", "/mob/spider_eyes.png"));
+        classMods.add(new EyeTextureMod("Enderman", "/mob/enderman_eyes.png"));
     }
 
     private static class FurnaceMod extends ClassMod {
@@ -79,10 +79,10 @@ public class OneEight extends Mod {
         }
     }
 
-    private static class MobEyeMod extends ClassMod {
+    private static class EyeTextureMod extends ClassMod {
         private String name;
 
-        public MobEyeMod(final String name, final String resource) {
+        public EyeTextureMod(final String name, final String resource) {
             this.name = name;
 
             classSignatures.add(new BytecodeSignature() {
@@ -93,17 +93,6 @@ public class OneEight extends Mod {
                     );
                 }
             }.setMethodName("overlayTexture"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        ICONST_1, /* GL_ONE */
-                        ICONST_1, /* GL_ONE */
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glBlendFunc", "(II)V"))
-                    );
-                }
-            });
 
             patches.add(new BytecodePatch() {
                 @Override
