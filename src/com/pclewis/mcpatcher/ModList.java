@@ -384,6 +384,8 @@ class ModList {
                     mod = new HDFont();
                 } else if (name.equals(MCPatcherUtils.BETTER_GRASS)) {
                     mod = new BetterGrass();
+                } else if (name.equals(MCPatcherUtils.ONE_EIGHT)) {
+                    mod = new OneEight();
                 } else {
                     invalidEntries.add(element);
                 }
