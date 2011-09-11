@@ -3,6 +3,7 @@ package com.pclewis.mcpatcher;
 import com.pclewis.mcpatcher.mod.BetterGrass;
 import com.pclewis.mcpatcher.mod.HDFont;
 import com.pclewis.mcpatcher.mod.HDTexture;
+import com.pclewis.mcpatcher.mod.OneEight;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -40,6 +41,9 @@ class ModList {
         }
         if (!modsByName.containsKey(MCPatcherUtils.BETTER_GRASS)) {
             addNoReplace(new BetterGrass());
+        }
+        if (!modsByName.containsKey(MCPatcherUtils.ONE_EIGHT)) {
+            addNoReplace(new OneEight());
         }
     }
 
