@@ -46,7 +46,7 @@ class ModList {
         if (!modsByName.containsKey(MCPatcherUtils.ONE_EIGHT)) {
             addNoReplace(new OneEight());
         }
-        if (!modsByName.containsKey(MCPatcherUtils.GLSL_SHADERS)) {
+        if (MCPatcher.experimentalMods && !modsByName.containsKey(MCPatcherUtils.GLSL_SHADERS)) {
             addNoReplace(new GLSLShader());
         }
     }
@@ -390,7 +390,7 @@ class ModList {
                     mod = new BetterGrass();
                 } else if (name.equals(MCPatcherUtils.ONE_EIGHT)) {
                     mod = new OneEight();
-                } else if (name.equals(MCPatcherUtils.GLSL_SHADERS)) {
+                } else if (MCPatcher.experimentalMods && name.equals(MCPatcherUtils.GLSL_SHADERS)) {
                     mod = new GLSLShader();
                 } else {
                     invalidEntries.add(element);
