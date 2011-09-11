@@ -1,11 +1,10 @@
-MCPatcher version is 2.1.0_03
-OS: Linux 2.6.35.14-95.fc14.x86_64 amd64
+MCPatcher version is 2.1.1
+OS: Linux 2.6.35.14-96.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_27 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.7.3 (md5 eae3353fdaa7e10a59b4cb5b45bfa10d)
 
 Analyzing /home/prupe/.minecraft/bin/minecraft-1.7.3.jar (834 files)
-  ab.class matches GuiSmallButton.class
   av.class matches Compass.class
   aw.class matches TextureFX.class
    a matches onTick
@@ -15,68 +14,38 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.7.3.jar (834 files)
    b matches renderStandardBlockWithColorMultiplier
    AO faces (N S E W) = (17 18 15 16)
    non-AO multipliers (R G B) = (14 15 16)
-  cv.class matches RenderBlocks.class
-  da.class matches GuiScreen.class
-  dc.class matches EntityPlayerSP.class
-  dk.class matches WorldRenderer.class
-   a matches updateRenderer
-  ei.class matches WorldInfo.class
-  fd.class matches World.class
-   e matches getStarBrightness
-   n matches getBlockLightValue
   ge.class matches GLAllocation.class
    c matches createDirectByteBuffer
-  ge.class matches GLAllocation.class
-   c matches createDirectByteBuffer
-  gm.class matches Item.class
-  gs.class matches EntityPlayer.class
-  gv.class matches RenderLiving.class
   hs.class matches Portal.class
-  ht.class matches EnumOptions.class
   hw.class matches ColorizerWater.class
   i.class matches TexturePackBase.class
    a matches getInputStream
   ia.class matches ColorizerGrass.class
   if.class matches FlowLava.class
   ik.class matches TexturePackList.class
-  ix.class matches InventoryPlayer.class
-  iz.class matches ItemStack.class
   jh.class matches ColorizerFoliage.class
   ji.class matches RenderEngine.class
    b matches refreshTextures
-  ji.class matches RenderEngine.class
-  ke.class matches GuiButton.class
   ku.class matches Watch.class
   kv.class matches GameSettings.class
-  kv.class matches GameSettings.class
   ln.class matches Material.class
-  ls.class matches EntityLiving.class
-  n.class matches RenderGlobal.class
-   b matches renderClouds
-  nj.class matches GuiVideoSettings.class
-   a matches actionPerformed
-  nw.class matches Tessellator.class
-   b matches setNormal
   oh.class matches FlowWater.class
   pa.class matches TexturePackDefault.class
-  px.class matches EntityRenderer.class
-   a matches renderWorld2
-   c matches renderWorld1
   ra.class matches ItemRenderer.class
   sd.class matches Fire.class
   sj.class matches FontRenderer.class
   sj.class matches FontRenderer.class
    font registers = 5, 6
-  sr.class matches Frustrum.class
-  uu.class matches Block.class
+  sk.class matches Furnace.class
   uu.class matches Block.class
   vs.class matches StillWater.class
   wp.class matches BlockGrass.class
    a matches getBlockTexture
   xp.class matches IBlockAccess.class
    f matches getBlockMaterial
+  yx.class matches Spider.class
   net/minecraft/client/Minecraft.class matches Minecraft.class
-  net/minecraft/client/Minecraft.class matches Minecraft.class
+ no classes matched Enderman
 
 Analyzing /home/prupe/.minecraft/bin/minecraft-1.7.3.jar (second pass)
   RenderEngine (ji.class)
@@ -133,95 +102,15 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.7.3.jar (second pass)
    method e matches getBlockMetadata
   RenderBlocks (cv.class)
    field c matches blockAccess
-  Minecraft (net/minecraft/client/Minecraft.class)
-   field p matches renderEngine
-   field z matches gameSettings
-   field h matches thePlayer
-   field f matches theWorld
-   field d matches displayWidth
-   field e matches displayHeight
-   method a matches getAppDir
-  GLAllocation (ge.class)
-  RenderEngine (ji.class)
-   method b matches refreshTextures
-   method b matches getTexture
-  RenderGlobal (n.class)
-   method a matches clipRenderersByFrustrum
-   method a matches sortAndRender
-  RenderLiving (gv.class)
-  EntityRenderer (px.class)
-   field j matches mc
-   method a matches setupCameraTransform
-   method b matches renderFirstPersonEffects
-  EntityLiving (ls.class)
-  Item (gm.class)
-   field c matches itemsList
-  Block (uu.class)
-   field m matches blocksList
-   field bn matches blockID
-   field q matches lightOpacity
-   field s matches lightValue
-  GameSettings (kv.class)
-   field e matches renderDistance
-   field d matches invertMouse
-   field f matches viewBobbing
-   field g matches anaglyph
-  Frustrum (sr.class)
-  EnumOptions (ht.class)
-  GuiButton (ke.class)
-   field e matches displayString
-   field a matches width
-   field b matches height
-   field c matches xPosition
-   field d matches yPosition
-   field f matches id
-  GuiSmallButton (ab.class)
-  GuiScreen (da.class)
-   method a matches setWorldAndResolution
-   field e matches controlList
-   field c matches width
-   field d matches height
-  GuiVideoSettings (nj.class)
-   method b matches initGui
-   field l matches options
-  Tessellator (nw.class)
-   field d matches byteBuffer
-   field g matches rawBuffer
-   field b matches convertQuadsToTriangles
-   field n matches hasNormals
-   field o matches rawBufferIndex
-   field p matches addedVertices
-   field r matches drawMode
-  RenderBlocks (cv.class)
-   method a matches renderBottomFace
-   method b matches renderTopFace
-   method c matches renderEastFace
-   method d matches renderWestFace
-   method e matches renderNorthFace
-   method f matches renderSouthFace
-   method b matches renderBlockByRenderType
-  EntityPlayer (gs.class)
-   field c matches inventory
-  EntityPlayerSP (dc.class)
-  InventoryPlayer (ix.class)
-   method b matches getCurrentItem
-  ItemStack (iz.class)
-   field a matches stackSize
-   field b matches animationsToGo
-   field c matches itemID
-  World (fd.class)
-   field x matches worldInfo
-  WorldInfo (ei.class)
-   method b matches getRandomSeed
-   method f matches getWorldTime
-  WorldRenderer (dk.class)
-   field a matches worldObj
+  Furnace (sk.class)
+  Spider (yx.class)
 
 4 available mods:
 [YES] HD Textures 1.0 - Provides support for texture packs of 32x32, 64x64, 128x128, and 256x256.
 [YES] HD Font 1.0 - Provides support for higher resolution fonts.
 [YES] Better Grass 1.0 - Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.
-[YES] GLSL Shaders 1.0 - Adds graphical shaders to the game.  Based on daxnitro's mod.
+[ NO] 1.8 Bug Fixes 1.0 - Fixes various bugs in the 1.8 pre-release.
+ no classes matched Enderman
 
 #### Class map:
 HD Textures
@@ -320,141 +209,11 @@ Better Grass
     class net.minecraft.src.Material alias for Material
     class net.minecraft.src.RenderBlocks alias for RenderBlocks
 
-GLSL Shaders
-    class Block (uu.class)
-        field blockID -> bn
-        field blocksList -> m
-        field lightOpacity -> q
-        field lightValue -> s
-    class EntityLiving (ls.class)
-    class EntityPlayer (gs.class)
-        field inventory -> c
-    class EntityPlayerSP (dc.class) extends EntityPlayer
-        field inventory -> c
-    class EntityRenderer (px.class)
-        method renderFirstPersonEffects -> b
-        method renderWorld1 -> c
-        method renderWorld2 -> a
-        method setupCameraTransform -> a
-        field farPlaneDistance -> k
-        field fogColor1 -> M
-        field fogColor2 -> L
-        field fogColorBlue -> i
-        field fogColorGreen -> h
-        field fogColorRed -> g
-        field mc -> j
-    class EnumOptions (ht.class)
-    class Frustrum (sr.class) extends ICamera
-    class GLAllocation (ge.class)
-        method createDirectByteBuffer -> c
-    class GameSettings (kv.class)
-        field anaglyph -> g
-        field invertMouse -> d
-        field renderDistance -> e
-        field viewBobbing -> f
-    class GuiButton (ke.class)
-        field displayString -> e
-        field height -> b
-        field id -> f
-        field width -> a
-        field xPosition -> c
-        field yPosition -> d
-    class GuiScreen (da.class)
-        method setWorldAndResolution -> a
-        field controlList -> e
-        field height -> d
-        field width -> c
-    class GuiSmallButton (ab.class)
-    class GuiVideoSettings (nj.class)
-        method actionPerformed -> a
-        method initGui -> b
-        field options -> l
-    class ICamera (yn.class)
-    class InventoryPlayer (ix.class)
-        method getCurrentItem -> b
-    class Item (gm.class)
-        field itemsList -> c
-    class ItemStack (iz.class)
-        field animationsToGo -> b
-        field itemID -> c
-        field stackSize -> a
-    class Minecraft (net/minecraft/client/Minecraft.class)
-        method getAppDir -> a
-        field displayHeight -> e
-        field displayWidth -> d
-        field gameSettings -> z
-        field renderEngine -> p
-        field thePlayer -> h
-        field theWorld -> f
-    class RenderBlocks (cv.class)
-        method renderBlockByRenderType -> b
-        method renderBottomFace -> a
-        method renderEastFace -> c
-        method renderNorthFace -> e
-        method renderSouthFace -> f
-        method renderTopFace -> b
-        method renderWestFace -> d
-    class RenderEngine (ji.class)
-        method getTexture -> b
-        method refreshTextures -> b
-        field texturePackList -> l
-    class RenderGlobal (n.class)
-        method clipRenderersByFrustrum -> a
-        method renderClouds -> b
-        method sortAndRender -> a
-    class RenderLiving (gv.class)
-    class Tessellator (nw.class)
-        method setNormal -> b
-        field addedVertices -> p
-        field byteBuffer -> d
-        field convertQuadsToTriangles -> b
-        field drawMode -> r
-        field hasNormals -> n
-        field instance -> a
-        field rawBuffer -> g
-        field rawBufferIndex -> o
-    class TexturePackBase (i.class)
-        method getInputStream -> a
-    class TexturePackList (ik.class)
-        field selectedTexturePack -> a
-    class World (fd.class)
-        method getBlockLightValue -> n
-        method getStarBrightness -> e
-        field worldInfo -> x
-    class WorldInfo (ei.class)
-        method getRandomSeed -> b
-        method getWorldTime -> f
-    class WorldRenderer (dk.class)
-        method updateRenderer -> a
-        field worldObj -> a
-    class net.minecraft.client.Minecraft alias for Minecraft
-    class net.minecraft.src.Block alias for Block
-    class net.minecraft.src.EntityLiving alias for EntityLiving
-    class net.minecraft.src.EntityPlayer alias for EntityPlayer
-    class net.minecraft.src.EntityPlayerSP alias for EntityPlayerSP
-    class net.minecraft.src.EntityRenderer alias for EntityRenderer
-    class net.minecraft.src.EnumOptions alias for EnumOptions
-    class net.minecraft.src.Frustrum alias for Frustrum
-    class net.minecraft.src.GLAllocation alias for GLAllocation
-    class net.minecraft.src.GameSettings alias for GameSettings
-    class net.minecraft.src.GuiButton alias for GuiButton
-    class net.minecraft.src.GuiScreen alias for GuiScreen
-    class net.minecraft.src.GuiSmallButton alias for GuiSmallButton
-    class net.minecraft.src.GuiVideoSettings alias for GuiVideoSettings
-    class net.minecraft.src.ICamera alias for ICamera
-    class net.minecraft.src.InventoryPlayer alias for InventoryPlayer
-    class net.minecraft.src.Item alias for Item
-    class net.minecraft.src.ItemStack alias for ItemStack
-    class net.minecraft.src.RenderBlocks alias for RenderBlocks
-    class net.minecraft.src.RenderEngine alias for RenderEngine
-    class net.minecraft.src.RenderGlobal alias for RenderGlobal
-    class net.minecraft.src.RenderLiving alias for RenderLiving
-    class net.minecraft.src.Tessellator alias for Tessellator
-    class net.minecraft.src.TexturePackBase alias for TexturePackBase
-    class net.minecraft.src.TexturePackList alias for TexturePackList
-    class net.minecraft.src.World alias for World
-    class net.minecraft.src.WorldInfo alias for WorldInfo
-    class net.minecraft.src.WorldRenderer alias for WorldRenderer
+1.8 Bug Fixes
+    class Furnace (sk.class)
+    class Spider (yx.class)
+    class net.minecraft.src.Furnace alias for Furnace
+    class net.minecraft.src.Spider alias for Spider
 
 
 Patching...
@@ -886,86 +645,6 @@ Patching...
                                FLOAD 0x1b
                                FMUL
                                INVOKEVIRTUAL 0x01 0x0e
- applying RenderBlocks patch to cv.class for mod GLSL Shaders
-    set normal when rendering block face a(Luu;DDDI)V@0
-     GETSTATIC 0x00 0xcb       GETSTATIC 0x00 0xcb
-     ASTORE 0x09               ASTORE 0x09
-                               ALOAD 0x09
-                               FCONST_0
-                               LDC 0x04
-                               FCONST_0
-                               INVOKEVIRTUAL 0x01 0x10
-    set normal when rendering block face b(Luu;DDDI)V@0
-     GETSTATIC 0x00 0xcb       GETSTATIC 0x00 0xcb
-     ASTORE 0x09               ASTORE 0x09
-                               ALOAD 0x09
-                               FCONST_0
-                               FCONST_1
-                               FCONST_0
-                               INVOKEVIRTUAL 0x01 0x10
-    set normal when rendering block face c(Luu;DDDI)V@0
-     GETSTATIC 0x00 0xcb       GETSTATIC 0x00 0xcb
-     ASTORE 0x09               ASTORE 0x09
-                               ALOAD 0x09
-                               FCONST_0
-                               FCONST_0
-                               LDC 0x04
-                               INVOKEVIRTUAL 0x01 0x10
-    set normal when rendering block face d(Luu;DDDI)V@0
-     GETSTATIC 0x00 0xcb       GETSTATIC 0x00 0xcb
-     ASTORE 0x09               ASTORE 0x09
-                               ALOAD 0x09
-                               FCONST_0
-                               FCONST_0
-                               FCONST_1
-                               INVOKEVIRTUAL 0x01 0x10
-    set normal when rendering block face e(Luu;DDDI)V@0
-     GETSTATIC 0x00 0xcb       GETSTATIC 0x00 0xcb
-     ASTORE 0x09               ASTORE 0x09
-                               ALOAD 0x09
-                               LDC 0x04
-                               FCONST_0
-                               FCONST_0
-                               INVOKEVIRTUAL 0x01 0x10
-    set normal when rendering block face f(Luu;DDDI)V@0
-     GETSTATIC 0x00 0xcb       GETSTATIC 0x00 0xcb
-     ASTORE 0x09               ASTORE 0x09
-                               ALOAD 0x09
-                               FCONST_1
-                               FCONST_0
-                               FCONST_0
-                               INVOKEVIRTUAL 0x01 0x10
- applying WorldRenderer patch to dk.class for mod GLSL Shaders
-    call Shaders.setEntity a()V@452
-     ILOAD 0x0d                ALOAD 0x13
-     ALOAD 0x0a                GETFIELD 0x01 0x0a
-     ALOAD 0x13                ALOAD_0
-     ILOAD 0x11                GETFIELD 0x00 0x1c
-     ILOAD 0x0f                ILOAD 0x11
-     ILOAD 0x10                ILOAD 0x0f
-     INVOKEVIRTUAL 0x00 0x3d   ILOAD 0x10
-     IOR                       INVOKEVIRTUAL 0x01 0x0e
-     ISTORE 0x0d               GETSTATIC 0x01 0x11
-                               ALOAD 0x13
-                               GETFIELD 0x01 0x0a
-                               IALOAD
-                               INVOKESTATIC 0x01 0x16
-                               ILOAD 0x0d
-                               ALOAD 0x0a
-                               ALOAD 0x13
-                               ILOAD 0x11
-                               ILOAD 0x0f
-                               ILOAD 0x10
-                               INVOKEVIRTUAL 0x00 0x3d
-                               IOR
-                               ISTORE 0x0d
-    clear Shaders.setEntity a()V@656
-                               ICONST_M1
-                               ICONST_0
-                               ICONST_0
-                               INVOKESTATIC 0x01 0x16
- applying World patch to fd.class for mod GLSL Shaders
-    make field worldInfo public
  applying GetResource patch to fy.class for mod HD Textures
     ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...) <init>()V@5
      LDC_W 0x00 0x02           NOP
@@ -976,17 +655,6 @@ Patching...
                                NOP
                                LDC 0x01
                                INVOKESTATIC 0x00 0x4b
- applying RenderLiving patch to gv.class for mod GLSL Shaders
-    apply baseProgramNoT2D a(Lls;DDDFF)V@440
-     SIPUSH 0x02 0x02          GETSTATIC 0x01 0x0e
-     INVOKESTATIC 0x00 0x58    INVOKESTATIC 0x01 0x11
-                               SIPUSH 0x02 0x02
-                               INVOKESTATIC 0x00 0x58
-    apply baseProgram a(Lls;DDDFF)V@717
-     SIPUSH 0x02 0x03          GETSTATIC 0x01 0x14
-     INVOKESTATIC 0x00 0x58    INVOKESTATIC 0x01 0x11
-                               SIPUSH 0x02 0x03
-                               INVOKESTATIC 0x00 0x58
  applying Portal patch to hs.class for mod HD Textures
     16.0F -> float_size <init>()V@98
      LDC 0x06                  GETSTATIC 0x00 0x50
@@ -1398,10 +1066,6 @@ Patching...
     1048576 -> int_glBufferSize <init>(Lik;Lkv;)V@46
      LDC 0x02                  GETSTATIC 0x01 0x85
     insert method setTileSize (Lnet/minecraft/client/Minecraft;)V stack size 10, local vars 5
- applying RenderEngine patch to ji.class for mod GLSL Shaders
-    make field texturePackList public
-    call Shaders.refreshTextures b()V@479
-                               INVOKESTATIC 0x01 0x92
  applying Watch patch to ku.class for mod HD Textures
     16.0D -> double_size a()V@332
      LDC2_W 0x00 0x23          GETSTATIC 0x00 0x8f
@@ -1473,59 +1137,6 @@ Patching...
                                NOP
                                LDC 0x03
                                INVOKESTATIC 0x00 0xa8
- applying RenderGlobal patch to n.class for mod GLSL Shaders
-    call Shaders.setCelestialPosition a(F)V@802
-     INVOKEVIRTUAL 0x01 0x4f   INVOKEVIRTUAL 0x01 0x4f
-                               INVOKESTATIC 0x04 0x13
- applying GuiVideoSettings patch to nj.class for mod GLSL Shaders
-    add buttons to video options b()V@245
-                               ALOAD_0
-                               GETFIELD 0x00 0xad
-                               ALOAD_0
-                               GETFIELD 0x00 0xaf
-                               ALOAD_0
-                               GETFIELD 0x00 0xb1
-                               GETSTATIC 0x00 0x26
-                               ARRAYLENGTH
-                               INVOKESTATIC 0x00 0xb7
-    handle gui button press a(Lke;)V@139
-                               ALOAD_1
-                               INVOKESTATIC 0x00 0xba
- applying Tessellator patch to nw.class for mod GLSL Shaders
-    make field rawBuffer public
-    make field convertQuadsToTriangles public
-    make field hasNormals public
-    make field rawBufferIndex public
-    make field addedVertices public
-    make field drawMode public
-    initialize shadersData <init>(I)V@153
-                               ILOAD_1
-                               INVOKESTATIC 0x01 0x23
-    clear shadersBuffer d()V@5
-     ALOAD_0                   ALOAD_0
-     GETFIELD 0x00 0x2a        GETFIELD 0x00 0x2a
-     INVOKEVIRTUAL 0x00 0x4a   INVOKEVIRTUAL 0x00 0x4a
-                               INVOKESTATIC 0x01 0x26
-    fix normal calculation b(FFF)V@20
-     FLOAD_1                   FLOAD_1
-     LDC 0x09                  LDC 0x08
-     FMUL                      FMUL
-     F2I                       F2I
-     I2B                       I2B
-     ISTORE 0x04               ISTORE 0x04
-    glDrawArrays -> Shaders.drawGLArrays a()V@351
-     INVOKESTATIC 0x00 0x60    INVOKESTATIC 0x01 0x29
-    glDrawArrays -> Shaders.drawGLArrays a()V@366
-     INVOKESTATIC 0x00 0x60    INVOKESTATIC 0x01 0x29
-    call Shaders.addVertex a(DDD)V@0
-     ALOAD_0                   ALOAD_0
-     DUP                       DUP
-     GETFIELD 0x00 0x36        GETFIELD 0x00 0x36
-     ICONST_1                  ICONST_1
-     IADD                      IADD
-     PUTFIELD 0x00 0x36        PUTFIELD 0x00 0x36
-                               ALOAD_0
-                               INVOKESTATIC 0x01 0x2d
  applying FlowWater patch to oh.class for mod HD Textures
     array size 256 -> int_numPixels <init>()V@13
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x47
@@ -1602,104 +1213,6 @@ Patching...
                                NOP
                                LDC 0x02
                                INVOKESTATIC 0x00 0x5b
- applying GLViewport patch to px.class for mod GLSL Shaders
-    GL11.glViewport -> Shaders.viewport b(F)V@528
-     INVOKESTATIC 0x01 0x5b    INVOKESTATIC 0x03 0x87
-    GL11.glViewport -> Shaders.viewport a(FJ)V@258
-     INVOKESTATIC 0x01 0x5b    INVOKESTATIC 0x03 0x87
- applying EntityRenderer patch to px.class for mod GLSL Shaders
-    call Shaders.processScene b(F)V@361
-     INVOKEVIRTUAL 0x01 0x61   INVOKEVIRTUAL 0x01 0x61
-                               ALOAD_0
-                               GETFIELD 0x00 0xd3
-                               ALOAD_0
-                               GETFIELD 0x00 0xd4
-                               ALOAD_0
-                               GETFIELD 0x00 0xd5
-                               INVOKESTATIC 0x03 0x8a
-    call Shaders.processScene b(F)V@395
-     INVOKEVIRTUAL 0x01 0x61   INVOKEVIRTUAL 0x01 0x61
-                               ALOAD_0
-                               GETFIELD 0x00 0xd3
-                               ALOAD_0
-                               GETFIELD 0x00 0xd4
-                               ALOAD_0
-                               GETFIELD 0x00 0xd5
-                               INVOKESTATIC 0x03 0x8a
-    call Shaders.processScene a(FJ)V@932
-     INVOKEVIRTUAL 0x01 0x66   INVOKEVIRTUAL 0x01 0x66
-                               ALOAD_0
-                               GETFIELD 0x00 0xd3
-                               ALOAD_0
-                               GETFIELD 0x00 0xd4
-                               ALOAD_0
-                               GETFIELD 0x00 0xd5
-                               INVOKESTATIC 0x03 0x8a
-    apply baseProgram a(FJ)V@346
-     NEW 0x00 0x5c             GETSTATIC 0x03 0x8d
-     DUP                       INVOKESTATIC 0x03 0x90
-     INVOKESPECIAL 0x01 0x75   NEW 0x00 0x5c
-     ASTORE 0x0f               DUP
-                               INVOKESPECIAL 0x01 0x75
-                               ASTORE 0x0f
-    apply baseProgram, baseProgramBM a(FJ)V@485
-     ALOAD 0x05                INVOKESTATIC 0x03 0x93
-     ALOAD 0x04                ICONST_1
-     ICONST_0                  INVOKESTATIC 0x03 0x96
-     FLOAD_1                   GETSTATIC 0x03 0x99
-     F2D                       INVOKESTATIC 0x03 0x90
-     INVOKEVIRTUAL 0x01 0x34   ALOAD 0x05
-                               ALOAD 0x04
-                               ICONST_0
-                               FLOAD_1
-                               F2D
-                               INVOKEVIRTUAL 0x01 0x34
-                               ICONST_0
-                               INVOKESTATIC 0x03 0x96
-                               GETSTATIC 0x03 0x8d
-                               INVOKESTATIC 0x03 0x90
-    apply baseProgram, baseProgramBM a(FJ)V@747
-     ALOAD 0x05                INVOKESTATIC 0x03 0x93
-     ALOAD 0x04                ICONST_1
-     ICONST_1                  INVOKESTATIC 0x03 0x96
-     FLOAD_1                   GETSTATIC 0x03 0x99
-     F2D                       INVOKESTATIC 0x03 0x90
-     INVOKEVIRTUAL 0x01 0x34   ALOAD 0x05
-                               ALOAD 0x04
-                               ICONST_1
-                               FLOAD_1
-                               F2D
-                               INVOKEVIRTUAL 0x01 0x34
-                               ICONST_0
-                               INVOKESTATIC 0x03 0x96
-                               GETSTATIC 0x03 0x8d
-                               INVOKESTATIC 0x03 0x90
-    apply baseProgram, baseProgramBM a(FJ)V@850
-     ALOAD 0x05                INVOKESTATIC 0x03 0x93
-     ALOAD 0x04                ICONST_1
-     ICONST_1                  INVOKESTATIC 0x03 0x96
-     FLOAD_1                   GETSTATIC 0x03 0x99
-     F2D                       INVOKESTATIC 0x03 0x90
-     INVOKEVIRTUAL 0x01 0x34   ALOAD 0x05
-                               ALOAD 0x04
-                               ICONST_1
-                               FLOAD_1
-                               F2D
-                               INVOKEVIRTUAL 0x01 0x34
-                               ICONST_0
-                               INVOKESTATIC 0x03 0x96
-                               GETSTATIC 0x03 0x8d
-                               INVOKESTATIC 0x03 0x90
-    copy depth texture (clouds) a(FJ)V@1053
-     INVOKEVIRTUAL 0x01 0x37   INVOKEVIRTUAL 0x01 0x37
-                               GETSTATIC 0x03 0x9c
-                               INVOKESTATIC 0x03 0x9f
-    copy depth texture (camera) a(FJ)V@1093
-     INVOKESPECIAL 0x01 0x64   INVOKESPECIAL 0x01 0x64
-                               GETSTATIC 0x03 0xa2
-                               INVOKESTATIC 0x03 0x9f
-                               ICONST_0
-                               INVOKESTATIC 0x03 0x90
  applying ItemRenderer patch to ra.class for mod HD Textures
     tool pixel top a(Lls;Liz;)V@602
      FLOAD 0x09                FLOAD 0x09
@@ -1982,9 +1495,6 @@ Patching...
     * 16 -> int_size a()V@236
      BIPUSH 0x10               GETSTATIC 0x00 0x47
      IMUL                      IMUL
- applying GLViewport patch to vu.class for mod GLSL Shaders
-    GL11.glViewport -> Shaders.viewport b()V@16
-     INVOKESTATIC 0x00 0x46    INVOKESTATIC 0x00 0xd4
  applying BlockGrass patch to wp.class for mod Better Grass
     insert field grassMatrix [[I
     initialize grassMatrix <init>(I)V@19
@@ -2251,32 +1761,6 @@ Patching...
                                NOP
                                NOP
                                NOP
- applying Minecraft patch to net/minecraft/client/Minecraft.class for mod GLSL Shaders
-    call setUpBuffers on init a()V@135
-     INVOKESTATIC 0x02 0x54    INVOKESTATIC 0x02 0x54
-                               ALOAD_0
-                               INVOKESTATIC 0x06 0x1e
-    call setUpBuffers on init a()V@160
-     INVOKESTATIC 0x02 0x54    INVOKESTATIC 0x02 0x54
-                               ALOAD_0
-                               INVOKESTATIC 0x06 0x1e
-    Display.update -> Shaders.updateDisplay run()V@274
-     INVOKESTATIC 0x02 0x5f    ALOAD_0
-                               INVOKESTATIC 0x06 0x21
-    Display.update -> Shaders.updateDisplay run()V@412
-     INVOKESTATIC 0x02 0x5f    ALOAD_0
-                               INVOKESTATIC 0x06 0x21
-    Display.update -> Shaders.updateDisplay j()V@174
-     INVOKESTATIC 0x02 0x5f    ALOAD_0
-                               INVOKESTATIC 0x06 0x21
-    call setUpBuffers on resize a(II)V@67
-                               ALOAD_0
-                               INVOKESTATIC 0x06 0x1e
- applying GLViewport patch to net/minecraft/client/Minecraft.class for mod GLSL Shaders
-    GL11.glViewport -> Shaders.viewport a()V@665
-     INVOKESTATIC 0x02 0x74    INVOKESTATIC 0x06 0x24
-    GL11.glViewport -> Shaders.viewport x()V@80
-     INVOKESTATIC 0x02 0x74    INVOKESTATIC 0x06 0x24
   adding com/pclewis/mcpatcher/MCPatcherUtils.class for __Base
   adding com/pclewis/mcpatcher/Config.class for __Base
   adding com/pclewis/mcpatcher/mod/TileSize.class for HD Textures
@@ -2291,47 +1775,47 @@ Patching...
    method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> (Li;Ljava/lang/String;)Z
    field signature Lnet/minecraft/src/TexturePackBase; -> Li;
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Li; setTileSize()Z@8
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x7a
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8a
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Li; refreshTextureFX(Ljava/util/List;)V@104
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x7a
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8a
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Li; getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x7a
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8a
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Li; getResourceAsBufferedImage(Ljava/lang/String;)Ljava/awt/image/BufferedImage;@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x7a
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8a
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Li; getTileSize()I@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x7a
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8a
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Li; hasResource(Ljava/lang/String;)Z@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x7a
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8a
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Li;)Ljava/lang/String; setTileSize()Z@11
-     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x7c
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x8c
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Li;)Ljava/lang/String; getResourceAsBufferedImage(Li;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@200
-     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x7c
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x8c
     field ref net.minecraft.client.Minecraft.fontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.q Lsj; setFontRenderer()V@12
-     GETFIELD 0x00 0x0f        GETFIELD 0x02 0x80
+     GETFIELD 0x00 0x0f        GETFIELD 0x02 0x90
     field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.z Lkv; setFontRenderer()V@18
-     GETFIELD 0x00 0x10        GETFIELD 0x02 0x84
+     GETFIELD 0x00 0x10        GETFIELD 0x02 0x94
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Lji; setFontRenderer()V@26
-     GETFIELD 0x00 0x12        GETFIELD 0x02 0x88
+     GETFIELD 0x00 0x12        GETFIELD 0x02 0x97
     method ref net.minecraft.src.FontRenderer.initialize (Lnet/minecraft/src/GameSettings;Ljava/lang/String;Lnet/minecraft/src/RenderEngine;)V -> sj.initialize (Lkv;Ljava/lang/String;Lji;)V setFontRenderer()V@29
-     INVOKEVIRTUAL 0x00 0x13   INVOKEVIRTUAL 0x02 0x8d
+     INVOKEVIRTUAL 0x00 0x13   INVOKEVIRTUAL 0x02 0x9c
     method ref com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lnet/minecraft/src/TextureFX;)Lnet/minecraft/src/TextureFX; -> com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Law;)Law; registerTextureFX(Ljava/util/List;Law;)V@1
-     INVOKESTATIC 0x00 0x14    INVOKESTATIC 0x02 0x8f
+     INVOKESTATIC 0x00 0x14    INVOKESTATIC 0x02 0x9e
     method ref com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lnet/minecraft/src/TextureFX;)Lnet/minecraft/src/TextureFX; -> com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Law;)Law; refreshTextureFX(Ljava/util/List;)V@44
-     INVOKESTATIC 0x00 0x14    INVOKESTATIC 0x02 0x8f
+     INVOKESTATIC 0x00 0x14    INVOKESTATIC 0x02 0x9e
     method ref net.minecraft.src.TextureFX.onTick ()V -> aw.a ()V registerTextureFX(Ljava/util/List;Law;)V@37
-     INVOKEVIRTUAL 0x00 0x19   INVOKEVIRTUAL 0x02 0x94
+     INVOKEVIRTUAL 0x00 0x19   INVOKEVIRTUAL 0x02 0xa3
     method ref net.minecraft.src.TextureFX.onTick ()V -> aw.a ()V refreshTextureFX(Ljava/util/List;)V@556
-     INVOKEVIRTUAL 0x00 0x19   INVOKEVIRTUAL 0x02 0x94
+     INVOKEVIRTUAL 0x00 0x19   INVOKEVIRTUAL 0x02 0xa3
     field ref net.minecraft.src.TextureFX.imageData [B -> aw.a [B refreshTextureFX(Law;)Law;@233
-     GETFIELD 0x00 0x2d        GETFIELD 0x02 0x96
+     GETFIELD 0x00 0x2d        GETFIELD 0x02 0xa5
     field ref net.minecraft.src.TextureFX.imageData [B -> aw.a [B refreshTextureFX(Law;)Law;@259
-     GETFIELD 0x00 0x2d        GETFIELD 0x02 0x96
+     GETFIELD 0x00 0x2d        GETFIELD 0x02 0xa5
     field ref net.minecraft.src.TextureFX.imageData [B -> aw.a [B refreshTextureFX(Law;)Law;@285
-     PUTFIELD 0x00 0x2d        PUTFIELD 0x02 0x96
+     PUTFIELD 0x00 0x2d        PUTFIELD 0x02 0xa5
     method ref net.minecraft.src.Compass.<init> (Lnet/minecraft/client/Minecraft;)V -> av.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@78
-     INVOKESPECIAL 0x00 0x38   INVOKESPECIAL 0x02 0x9a
+     INVOKESPECIAL 0x00 0x38   INVOKESPECIAL 0x02 0xa9
     method ref net.minecraft.src.Watch.<init> (Lnet/minecraft/client/Minecraft;)V -> ku.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@95
-     INVOKESPECIAL 0x00 0x39   INVOKESPECIAL 0x02 0x9d
+     INVOKESPECIAL 0x00 0x39   INVOKESPECIAL 0x02 0xac
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@149
      INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@173
@@ -2347,63 +1831,63 @@ Patching...
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@452
      INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
     method ref net.minecraft.src.StillLava.<init> ()V -> cg.<init> ()V refreshTextureFX(Ljava/util/List;)V@196
-     INVOKESPECIAL 0x00 0x40   INVOKESPECIAL 0x02 0xa1
+     INVOKESPECIAL 0x00 0x40   INVOKESPECIAL 0x02 0xb0
     method ref net.minecraft.src.FlowLava.<init> ()V -> if.<init> ()V refreshTextureFX(Ljava/util/List;)V@210
-     INVOKESPECIAL 0x00 0x41   INVOKESPECIAL 0x02 0xa4
+     INVOKESPECIAL 0x00 0x41   INVOKESPECIAL 0x02 0xb3
     method ref net.minecraft.src.StillWater.<init> ()V -> vs.<init> ()V refreshTextureFX(Ljava/util/List;)V@289
-     INVOKESPECIAL 0x00 0x46   INVOKESPECIAL 0x02 0xa7
+     INVOKESPECIAL 0x00 0x46   INVOKESPECIAL 0x02 0xb6
     method ref net.minecraft.src.FlowWater.<init> ()V -> oh.<init> ()V refreshTextureFX(Ljava/util/List;)V@303
-     INVOKESPECIAL 0x00 0x47   INVOKESPECIAL 0x02 0xaa
+     INVOKESPECIAL 0x00 0x47   INVOKESPECIAL 0x02 0xb9
     method ref net.minecraft.src.Fire.<init> (I)V -> sd.<init> (I)V refreshTextureFX(Ljava/util/List;)V@397
-     INVOKESPECIAL 0x00 0x4f   INVOKESPECIAL 0x02 0xae
+     INVOKESPECIAL 0x00 0x4f   INVOKESPECIAL 0x02 0xbd
     method ref net.minecraft.src.Fire.<init> (I)V -> sd.<init> (I)V refreshTextureFX(Ljava/util/List;)V@412
-     INVOKESPECIAL 0x00 0x4f   INVOKESPECIAL 0x02 0xae
+     INVOKESPECIAL 0x00 0x4f   INVOKESPECIAL 0x02 0xbd
     method ref net.minecraft.src.Portal.<init> ()V -> hs.<init> ()V refreshTextureFX(Ljava/util/List;)V@475
-     INVOKESPECIAL 0x00 0x54   INVOKESPECIAL 0x02 0xb1
+     INVOKESPECIAL 0x00 0x54   INVOKESPECIAL 0x02 0xc0
     field ref net.minecraft.src.ColorizerWater.colorBuffer [I -> hw.a [I refreshTextureFX(Ljava/util/List;)V@562
-     GETSTATIC 0x00 0x56       GETSTATIC 0x02 0xb5
+     GETSTATIC 0x00 0x56       GETSTATIC 0x02 0xc4
     field ref net.minecraft.src.ColorizerWater.colorBuffer [I -> hw.a [I refreshTextureFX(Ljava/util/List;)V@571
-     GETSTATIC 0x00 0x56       GETSTATIC 0x02 0xb5
+     GETSTATIC 0x00 0x56       GETSTATIC 0x02 0xc4
     field ref net.minecraft.src.ColorizerFoliage.colorBuffer [I -> jh.a [I refreshTextureFX(Ljava/util/List;)V@565
-     GETSTATIC 0x00 0x57       GETSTATIC 0x02 0xb8
+     GETSTATIC 0x00 0x57       GETSTATIC 0x02 0xc7
     field ref net.minecraft.src.ColorizerFoliage.colorBuffer [I -> jh.a [I refreshTextureFX(Ljava/util/List;)V@587
-     GETSTATIC 0x00 0x57       GETSTATIC 0x02 0xb8
+     GETSTATIC 0x00 0x57       GETSTATIC 0x02 0xc7
     field ref net.minecraft.src.ColorizerGrass.colorBuffer [I -> ia.a [I refreshTextureFX(Ljava/util/List;)V@579
-     GETSTATIC 0x00 0x5a       GETSTATIC 0x02 0xbb
+     GETSTATIC 0x00 0x5a       GETSTATIC 0x02 0xca
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.D Lik; getSelectedTexturePack()Li;@13
-     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xbf
+     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xce
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.D Lik; getSelectedTexturePack()Li;@26
-     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xbf
+     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xce
     field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> ik.a Li; getSelectedTexturePack()Li;@29
-     GETFIELD 0x00 0x5f        GETFIELD 0x02 0xc3
+     GETFIELD 0x00 0x5f        GETFIELD 0x02 0xd2
     field ref net.minecraft.src.TexturePackBase.texturePackFileName Ljava/lang/String; -> i.a Ljava/lang/String; getTexturePackName(Li;)Ljava/lang/String;@10
-     GETFIELD 0x00 0x61        GETFIELD 0x02 0xc6
-    method ref net.minecraft.src.GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> ge.c (I)Ljava/nio/ByteBuffer; getByteBuffer(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;@49
-     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x02 0xcb
+     GETFIELD 0x00 0x61        GETFIELD 0x02 0xd5
+    method ref net.minecraft.src.GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> ge.c (I)Ljava/nio/ByteBuffer; getByteBuffer(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;@26
+     INVOKESTATIC 0x00 0x64    INVOKESTATIC 0x02 0xda
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> i.a (Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream(Li;Ljava/lang/String;)Ljava/io/InputStream;@8
-     INVOKEVIRTUAL 0x00 0x6f   INVOKEVIRTUAL 0x02 0xcd
+     INVOKEVIRTUAL 0x00 0x6e   INVOKEVIRTUAL 0x02 0xdc
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Li;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;@4
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xcf
+     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0xde
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Li;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsBufferedImage(Li;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@40
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xcf
+     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0xde
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Li;Ljava/lang/String;)Ljava/io/InputStream; getTileSize(Li;)I@46
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xcf
+     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0xde
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Li;Ljava/lang/String;)Ljava/io/InputStream; hasResource(Li;Ljava/lang/String;)Z@2
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xcf
+     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x02 0xde
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Li; getResourceAsBufferedImage(Li;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@11
-     GETSTATIC 0x00 0x7c       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x7b       GETSTATIC 0x02 0xe0
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Li; getResourceAsBufferedImage(Li;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@125
-     GETSTATIC 0x00 0x7c       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x7b       GETSTATIC 0x02 0xe0
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Li; getResourceAsBufferedImage(Li;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@265
-     PUTSTATIC 0x00 0x7c       PUTSTATIC 0x02 0xd1
+     PUTSTATIC 0x00 0x7b       PUTSTATIC 0x02 0xe0
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Li; <clinit>()V@11
-     PUTSTATIC 0x00 0x7c       PUTSTATIC 0x02 0xd1
+     PUTSTATIC 0x00 0x7b       PUTSTATIC 0x02 0xe0
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Li;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getResourceAsBufferedImage(Ljava/lang/String;)Ljava/awt/image/BufferedImage;@4
-     INVOKESTATIC 0x00 0x95    INVOKESTATIC 0x02 0xd3
+     INVOKESTATIC 0x00 0x9a    INVOKESTATIC 0x02 0xe2
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Lnet/minecraft/src/TexturePackBase;)I -> com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Li;)I getTileSize()I@3
-     INVOKESTATIC 0x00 0x9f    INVOKESTATIC 0x02 0xd5
+     INVOKESTATIC 0x00 0xa4    INVOKESTATIC 0x02 0xe4
     method ref com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Li;Ljava/lang/String;)Z hasResource(Ljava/lang/String;)Z@4
-     INVOKESTATIC 0x00 0xa0    INVOKESTATIC 0x02 0xd7
+     INVOKESTATIC 0x00 0xa5    INVOKESTATIC 0x02 0xe6
    string replace net/minecraft/src/StillWater -> vs @2088
    string replace net/minecraft/src/TexturePackDefault -> pa @3185
    string replace net/minecraft/src/Watch -> ku @1994
@@ -2507,124 +1991,6 @@ Patching...
     field ref com.pclewis.mcpatcher.mod.CustomAnimation.rand Ljava/util/Random; -> com/pclewis/mcpatcher/mod/CustomAnimation.rand Ljava/util/Random; <clinit>()V@7
      PUTSTATIC 0x00 0x25       PUTSTATIC 0x00 0x25
    string replace net/minecraft/src/TextureFX -> aw @58
-  adding com/pclewis/mcpatcher/mod/Shaders.class for GLSL Shaders
-   method signature (Lnet/minecraft/src/GuiButton;)V -> (Lke;)V
-   method signature (Lnet/minecraft/src/Tessellator;)V -> (Lnw;)V
-    field ref net.minecraft.client.Minecraft.thePlayer Lnet/minecraft/src/EntityPlayerSP; -> net/minecraft/client/Minecraft.h Ldc; useProgram(I)V@132
-     GETFIELD 0x00 0x30        GETFIELD 0x03 0xbc
-    field ref net.minecraft.src.EntityPlayerSP.inventory Lnet/minecraft/src/InventoryPlayer; -> dc.c Lix; useProgram(I)V@135
-     GETFIELD 0x00 0x31        GETFIELD 0x03 0xc2
-    method ref net.minecraft.src.InventoryPlayer.getCurrentItem ()Lnet/minecraft/src/ItemStack; -> ix.b ()Liz; useProgram(I)V@138
-     INVOKEVIRTUAL 0x00 0x32   INVOKEVIRTUAL 0x03 0xc8
-    field ref net.minecraft.src.ItemStack.itemID I -> iz.c I useProgram(I)V@150
-     GETFIELD 0x00 0x33        GETFIELD 0x03 0xcc
-    field ref net.minecraft.client.Minecraft.theWorld Lnet/minecraft/src/World; -> net/minecraft/client/Minecraft.f Lfd; useProgram(I)V@310
-     GETFIELD 0x00 0x3d        GETFIELD 0x03 0xd0
-    field ref net.minecraft.src.World.worldInfo Lnet/minecraft/src/WorldInfo; -> fd.x Lei; useProgram(I)V@313
-     GETFIELD 0x00 0x3e        GETFIELD 0x03 0xd5
-    method ref net.minecraft.src.WorldInfo.getWorldTime ()J -> ei.f ()J useProgram(I)V@316
-     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x03 0xd9
-    field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.z Lkv; useProgram(I)V@414
-     GETFIELD 0x00 0x4a        GETFIELD 0x03 0xdd
-    field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.z Lkv; processScene(FFF)V@3
-     GETFIELD 0x00 0x4a        GETFIELD 0x03 0xdd
-    field ref net.minecraft.src.GameSettings.renderDistance I -> kv.e I useProgram(I)V@417
-     GETFIELD 0x00 0x4b        GETFIELD 0x03 0xe1
-    method ref net.minecraft.client.Minecraft.getAppDir (Ljava/lang/String;)Ljava/io/File; -> net/minecraft/client/Minecraft.a (Ljava/lang/String;)Ljava/io/File; getResource(Ljava/lang/String;)Ljava/io/BufferedReader;@18
-     INVOKESTATIC 0x00 0x50    INVOKESTATIC 0x03 0xe4
-    field ref net.minecraft.src.GameSettings.anaglyph Z -> kv.g Z processScene(FFF)V@6
-     GETFIELD 0x00 0x7d        GETFIELD 0x03 0xe7
-    field ref net.minecraft.client.Minecraft.displayWidth I -> net/minecraft/client/Minecraft.d I updateDisplay(Lnet/minecraft/client/Minecraft;)V@128
-     GETFIELD 0x00 0x9c        GETFIELD 0x03 0xea
-    field ref net.minecraft.client.Minecraft.displayWidth I -> net/minecraft/client/Minecraft.d I updateDisplay(Lnet/minecraft/client/Minecraft;)V@140
-     GETFIELD 0x00 0x9c        GETFIELD 0x03 0xea
-    field ref net.minecraft.client.Minecraft.displayWidth I -> net/minecraft/client/Minecraft.d I updateDisplay(Lnet/minecraft/client/Minecraft;)V@203
-     GETFIELD 0x00 0x9c        GETFIELD 0x03 0xea
-    field ref net.minecraft.client.Minecraft.displayWidth I -> net/minecraft/client/Minecraft.d I updateDisplay(Lnet/minecraft/client/Minecraft;)V@222
-     GETFIELD 0x00 0x9c        GETFIELD 0x03 0xea
-    field ref net.minecraft.client.Minecraft.displayWidth I -> net/minecraft/client/Minecraft.d I setUpBuffers(Lnet/minecraft/client/Minecraft;)V@90
-     GETFIELD 0x00 0x9c        GETFIELD 0x03 0xea
-    field ref net.minecraft.client.Minecraft.displayWidth I -> net/minecraft/client/Minecraft.d I setUpBuffers(Lnet/minecraft/client/Minecraft;)V@190
-     GETFIELD 0x00 0x9c        GETFIELD 0x03 0xea
-    field ref net.minecraft.client.Minecraft.displayHeight I -> net/minecraft/client/Minecraft.e I updateDisplay(Lnet/minecraft/client/Minecraft;)V@132
-     GETFIELD 0x00 0x9d        GETFIELD 0x03 0xeb
-    field ref net.minecraft.client.Minecraft.displayHeight I -> net/minecraft/client/Minecraft.e I updateDisplay(Lnet/minecraft/client/Minecraft;)V@145
-     GETFIELD 0x00 0x9d        GETFIELD 0x03 0xeb
-    field ref net.minecraft.client.Minecraft.displayHeight I -> net/minecraft/client/Minecraft.e I updateDisplay(Lnet/minecraft/client/Minecraft;)V@189
-     GETFIELD 0x00 0x9d        GETFIELD 0x03 0xeb
-    field ref net.minecraft.client.Minecraft.displayHeight I -> net/minecraft/client/Minecraft.e I updateDisplay(Lnet/minecraft/client/Minecraft;)V@208
-     GETFIELD 0x00 0x9d        GETFIELD 0x03 0xeb
-    field ref net.minecraft.client.Minecraft.displayHeight I -> net/minecraft/client/Minecraft.e I setUpBuffers(Lnet/minecraft/client/Minecraft;)V@98
-     GETFIELD 0x00 0x9d        GETFIELD 0x03 0xeb
-    field ref net.minecraft.client.Minecraft.displayHeight I -> net/minecraft/client/Minecraft.e I setUpBuffers(Lnet/minecraft/client/Minecraft;)V@197
-     GETFIELD 0x00 0x9d        GETFIELD 0x03 0xeb
-    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Lji; getTexture(Ljava/lang/String;)I@3
-     GETFIELD 0x00 0xbe        GETFIELD 0x03 0xef
-    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Lji; getTexture(Ljava/lang/String;)I@55
-     GETFIELD 0x00 0xbe        GETFIELD 0x03 0xef
-    field ref net.minecraft.src.RenderEngine.texturePackList Lnet/minecraft/src/TexturePackList; -> ji.l Lik; getTexture(Ljava/lang/String;)I@6
-     GETFIELD 0x00 0xbf        GETFIELD 0x03 0xf5
-    field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> ik.a Li; getTexture(Ljava/lang/String;)I@9
-     GETFIELD 0x00 0xc0        GETFIELD 0x03 0xfa
-    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> i.a (Ljava/lang/String;)Ljava/io/InputStream; getTexture(Ljava/lang/String;)I@15
-     INVOKEVIRTUAL 0x00 0xc1   INVOKEVIRTUAL 0x03 0xfd
-    method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> ji.b (Ljava/lang/String;)I getTexture(Ljava/lang/String;)I@59
-     INVOKEVIRTUAL 0x00 0xc6   INVOKEVIRTUAL 0x03 0xff
-    field ref net.minecraft.src.Item.itemsList [Lnet/minecraft/src/Item; -> gm.c [Lgm; initLightSources()V@0
-     GETSTATIC 0x00 0xd5       GETSTATIC 0x04 0x04
-    field ref net.minecraft.src.Item.itemsList [Lnet/minecraft/src/Item; -> gm.c [Lgm; initLightSources()V@13
-     GETSTATIC 0x00 0xd5       GETSTATIC 0x04 0x04
-    field ref net.minecraft.src.Item.itemsList [Lnet/minecraft/src/Item; -> gm.c [Lgm; initLightSources()V@20
-     GETSTATIC 0x00 0xd5       GETSTATIC 0x04 0x04
-    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> uu.m [Luu; initLightSources()V@32
-     GETSTATIC 0x00 0xd7       GETSTATIC 0x04 0x0a
-    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> uu.m [Luu; initLightSources()V@39
-     GETSTATIC 0x00 0xd7       GETSTATIC 0x04 0x0a
-    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> uu.m [Luu; initLightSources()V@149
-     GETSTATIC 0x00 0xd7       GETSTATIC 0x04 0x0a
-    field ref net.minecraft.src.Block.lightValue [I -> uu.s [I initLightSources()V@55
-     GETSTATIC 0x00 0xd8       GETSTATIC 0x04 0x0d
-    field ref net.minecraft.src.Block.lightValue [I -> uu.s [I initLightSources()V@146
-     GETSTATIC 0x00 0xd8       GETSTATIC 0x04 0x0d
-    field ref net.minecraft.src.Block.blockID I -> uu.bn I initLightSources()V@155
-     GETFIELD 0x00 0xde        GETFIELD 0x04 0x10
-    method ref net.minecraft.src.GuiSmallButton.<init> (IIILjava/lang/String;)V -> ab.<init> (IIILjava/lang/String;)V addVideoSettings(Ljava/util/List;III)V@64
-     INVOKESPECIAL 0x00 0xf0   INVOKESPECIAL 0x04 0x14
-    field ref net.minecraft.src.GuiButton.id I -> ke.f I actionPerformed(Lke;)V@1
-     GETFIELD 0x00 0xf2        GETFIELD 0x04 0x18
-    field ref net.minecraft.src.GuiButton.displayString Ljava/lang/String; -> ke.e Ljava/lang/String; actionPerformed(Lke;)V@46
-     PUTFIELD 0x00 0xf4        PUTFIELD 0x04 0x1a
-    method ref net.minecraft.src.GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> ge.c (I)Ljava/nio/ByteBuffer; initBuffer(I)V@3
-     INVOKESTATIC 0x00 0xf5    INVOKESTATIC 0x04 0x1e
-    field ref net.minecraft.src.Tessellator.drawMode I -> nw.r I addVertex(Lnw;)V@1
-     GETFIELD 0x01 0x01        GETFIELD 0x04 0x23
-    field ref net.minecraft.src.Tessellator.convertQuadsToTriangles Z -> nw.b Z addVertex(Lnw;)V@9
-     GETSTATIC 0x01 0x02       GETSTATIC 0x04 0x25
-    field ref net.minecraft.src.Tessellator.addedVertices I -> nw.p I addVertex(Lnw;)V@16
-     GETFIELD 0x01 0x03        GETFIELD 0x04 0x27
-    field ref net.minecraft.src.Tessellator.hasNormals Z -> nw.n Z addVertex(Lnw;)V@25
-     GETFIELD 0x01 0x04        GETFIELD 0x04 0x29
-    field ref net.minecraft.src.Tessellator.rawBuffer [I -> nw.g [I addVertex(Lnw;)V@32
-     GETFIELD 0x01 0x05        GETFIELD 0x04 0x2b
-    field ref net.minecraft.src.Tessellator.rawBuffer [I -> nw.g [I addVertex(Lnw;)V@43
-     GETFIELD 0x01 0x05        GETFIELD 0x04 0x2b
-    field ref net.minecraft.src.Tessellator.rawBuffer [I -> nw.g [I addVertex(Lnw;)V@79
-     GETFIELD 0x01 0x05        GETFIELD 0x04 0x2b
-    field ref net.minecraft.src.Tessellator.rawBuffer [I -> nw.g [I addVertex(Lnw;)V@93
-     GETFIELD 0x01 0x05        GETFIELD 0x04 0x2b
-    field ref net.minecraft.src.Tessellator.rawBufferIndex I -> nw.o I addVertex(Lnw;)V@36
-     GETFIELD 0x01 0x06        GETFIELD 0x04 0x2e
-    field ref net.minecraft.src.Tessellator.rawBufferIndex I -> nw.o I addVertex(Lnw;)V@47
-     GETFIELD 0x01 0x06        GETFIELD 0x04 0x2e
-    field ref net.minecraft.src.Tessellator.rawBufferIndex I -> nw.o I addVertex(Lnw;)V@83
-     GETFIELD 0x01 0x06        GETFIELD 0x04 0x2e
-    field ref net.minecraft.src.Tessellator.rawBufferIndex I -> nw.o I addVertex(Lnw;)V@97
-     GETFIELD 0x01 0x06        GETFIELD 0x04 0x2e
-   string replace net/minecraft/src/GuiSmallButton -> ab @10136
-  adding com/pclewis/mcpatcher/mod/Shaders$1.class for GLSL Shaders
-  adding com/pclewis/mcpatcher/mod/Shaders$2.class for GLSL Shaders
-  adding com/pclewis/mcpatcher/mod/Shaders$LightSource.class for GLSL Shaders
-  adding com/pclewis/mcpatcher/mod/Shaders$Option.class for GLSL Shaders
 
 Done!
 
@@ -2759,68 +2125,4 @@ Better Grass
     RenderBlocks (cv.class)
         [2] if (getBlockTexture == 0) useBiomeColor = true (AO)
         [4] if (getBlockTexture == 0) useBiomeColor = true (non-AO)
-
-GLSL Shaders
-    added com/pclewis/mcpatcher/mod/Shaders$LightSource.class
-    added com/pclewis/mcpatcher/mod/Shaders$Option.class
-    added com/pclewis/mcpatcher/mod/Shaders$1.class
-    added com/pclewis/mcpatcher/mod/Shaders.class
-    added com/pclewis/mcpatcher/mod/Shaders$2.class
-    Minecraft (net/minecraft/client/Minecraft.class)
-        [3] Display.update -> Shaders.updateDisplay
-        [2] call setUpBuffers on init
-        [1] call setUpBuffers on resize
-    GLViewport (multiple matches: px vu net.minecraft.client.Minecraft)
-        [5] GL11.glViewport -> Shaders.viewport
-    GLAllocation (ge.class)
-    RenderEngine (ji.class)
-        [1] call Shaders.refreshTextures
-        [1] make field texturePackList public
-    RenderGlobal (n.class)
-        [1] call Shaders.setCelestialPosition
-    RenderLiving (gv.class)
-        [1] apply baseProgram
-        [1] apply baseProgramNoT2D
-    EntityRenderer (px.class)
-        [1] apply baseProgram
-        [3] apply baseProgram, baseProgramBM
-        [3] call Shaders.processScene
-        [1] copy depth texture (camera)
-        [1] copy depth texture (clouds)
-    EntityLiving (ls.class)
-    Item (gm.class)
-    Block (uu.class)
-    GameSettings (kv.class)
-    Frustrum (sr.class)
-    EnumOptions (ht.class)
-    GuiButton (ke.class)
-    GuiSmallButton (ab.class)
-    GuiScreen (da.class)
-    GuiVideoSettings (nj.class)
-        [1] add buttons to video options
-        [1] handle gui button press
-    Tessellator (nw.class)
-        [1] call Shaders.addVertex
-        [1] clear shadersBuffer
-        [1] fix normal calculation
-        [2] glDrawArrays -> Shaders.drawGLArrays
-        [1] initialize shadersData
-        [1] make field addedVertices public
-        [1] make field convertQuadsToTriangles public
-        [1] make field drawMode public
-        [1] make field hasNormals public
-        [1] make field rawBuffer public
-        [1] make field rawBufferIndex public
-    RenderBlocks (cv.class)
-        [6] set normal when rendering block face
-    EntityPlayer (gs.class)
-    EntityPlayerSP (dc.class)
-    InventoryPlayer (ix.class)
-    ItemStack (iz.class)
-    World (fd.class)
-        [1] make field worldInfo public
-    WorldInfo (ei.class)
-    WorldRenderer (dk.class)
-        [1] call Shaders.setEntity
-        [1] clear Shaders.setEntity
 
