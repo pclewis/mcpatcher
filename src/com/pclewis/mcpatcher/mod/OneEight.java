@@ -11,10 +11,11 @@ public class OneEight extends Mod {
     public OneEight() {
         name = MCPatcherUtils.ONE_EIGHT;
         author = "MCPatcher";
-        description = "Fixes furnace crash bug in 1.8 pre-release.  Based on idshift's zz.class patch.";
+        description = "Fixes various bugs in the 1.8 pre-release.";
         version = "1.0";
 
         classMods.add(new FurnaceMod());
+        classMods.add(new SpiderMod());
     }
 
     private static class FurnaceMod extends ClassMod {
@@ -26,7 +27,7 @@ public class OneEight extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "Fix crash when placing items into furnace";
+                    return "fix crash when placing items into furnace";
                 }
 
                 @Override
@@ -71,6 +72,55 @@ public class OneEight extends Mod {
 
                         label("B"),
                         getCaptureGroup(2)
+                    );
+                }
+            });
+        }
+    }
+
+    private static class SpiderMod extends ClassMod {
+        public SpiderMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, "/mob/spider_eyes.png")
+                    );
+                }
+            }.setMethodName("overlaySpiderTexture"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ICONST_1, /* GL_ONE */
+                        ICONST_1, /* GL_ONE */
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glBlendFunc", "(II)V"))
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "fix spider eye texture overlay";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ICONST_1, /* GL_ONE */
+                        ICONST_1, /* GL_ONE */
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glBlendFunc", "(II)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        push(methodInfo, 770), /* GL_SRC_ALPHA */
+                        push(methodInfo, 771), /* GL_ONE_MINUS_SRC_ALPHA */
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glBlendFunc", "(II)V"))
                     );
                 }
             });
