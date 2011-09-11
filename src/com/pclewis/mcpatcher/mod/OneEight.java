@@ -15,7 +15,8 @@ public class OneEight extends Mod {
         version = "1.0";
 
         classMods.add(new FurnaceMod());
-        classMods.add(new SpiderMod());
+        classMods.add(new MobEyeMod("Spider", "/mob/spider_eyes.png"));
+        classMods.add(new MobEyeMod("Enderman", "/mob/enderman_eyes.png"));
     }
 
     private static class FurnaceMod extends ClassMod {
@@ -78,16 +79,20 @@ public class OneEight extends Mod {
         }
     }
 
-    private static class SpiderMod extends ClassMod {
-        public SpiderMod() {
+    private static class MobEyeMod extends ClassMod {
+        private String name;
+
+        public MobEyeMod(final String name, final String resource) {
+            this.name = name;
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        push(methodInfo, "/mob/spider_eyes.png")
+                        push(methodInfo, resource)
                     );
                 }
-            }.setMethodName("overlaySpiderTexture"));
+            }.setMethodName("overlayTexture"));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -103,7 +108,7 @@ public class OneEight extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "fix spider eye texture overlay";
+                    return String.format("fix %s eye texture overlay", name);
                 }
 
                 @Override
@@ -124,6 +129,11 @@ public class OneEight extends Mod {
                     );
                 }
             });
+        }
+
+        @Override
+        public String getDeobfClass() {
+            return name;
         }
     }
 }
