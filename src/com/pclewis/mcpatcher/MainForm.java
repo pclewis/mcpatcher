@@ -651,8 +651,9 @@ class MainForm {
                     MCPatcher.getApplicableMods();
                     if (MCPatcher.minecraft.isModded()) {
                         JOptionPane.showMessageDialog(frame,
-                            "Your minecraft.jar appears to be an older version or is already modded.\n" +
-                                "This may work fine, but if the game crashes or you have problems patching:\n" +
+                            "Your minecraft.jar appears to be an older or preview version\n" +
+                                "or is already modded.  This may work fine, but if the game\n" +
+                                "crashes or you have problems patching:\n" +
                                 " - Re-download the game by using Force Update in the launcher.\n" +
                                 " - Delete the backup minecraft-" + MCPatcher.minecraft.getVersion() + ".jar\n" +
                                 " - If you are using other mods, try applying them after running MCPatcher.",
