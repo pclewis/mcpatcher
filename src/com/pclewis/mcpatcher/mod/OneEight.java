@@ -11,8 +11,9 @@ public class OneEight extends Mod {
     public OneEight() {
         name = MCPatcherUtils.ONE_EIGHT;
         author = "MCPatcher";
-        description = "Fixes various bugs in the 1.8 pre-release.";
+        description = "(Experimental) Fixes various bugs in the 1.8 pre-release.";
         version = "1.0";
+        defaultEnabled = false;
 
         classMods.add(new FurnaceMod());
         classMods.add(new EyeTextureMod("Spider", "/mob/spider_eyes.png"));
