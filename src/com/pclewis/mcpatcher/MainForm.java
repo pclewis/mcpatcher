@@ -27,8 +27,8 @@ class MainForm {
 
     private static final Color MOD_BUSY_COLOR = new Color(192, 192, 192);
     private static final String MOD_DESC_FORMAT = "<html>" +
-        "<table border=\"0\" width=\"%1$d\"><tr style=\"font-weight: bold; font-size: larger;\">" +
-        "<td align=\"left\">%2$s</td>" +
+        "<table border=\"0\" cellspacing=\"0\" cellpadding=\"1\" style=\"padding-top: 2px; padding-bottom: 2px;\" width=\"%1$d\"><tr>" +
+        "<td align=\"left\"><font size=\"5\">%2$s</font></td>" +
         "<td align=\"right\">%3$s</td>" +
         "</tr>" +
         "<tr><td colspan=\"2\" style=\"font-weight: normal; font-style: italic;\">%4$s</td></tr>" +
