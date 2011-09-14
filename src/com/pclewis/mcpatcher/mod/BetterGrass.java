@@ -429,16 +429,32 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    return BinaryRegex.capture(buildExpression(
+                    return BinaryRegex.capture(BinaryRegex.build(
                         ICONST_0,
-                        DUP,
-                        ISTORE, southFace,
-                        DUP,
-                        ISTORE, northFace,
-                        DUP,
-                        ISTORE, westFace,
-                        DUP,
-                        ISTORE, eastFace,
+                        BinaryRegex.or(
+                            BinaryRegex.build(
+                                // vanilla minecraft
+                                DUP,
+                                ISTORE, southFace,
+                                DUP,
+                                ISTORE, northFace,
+                                DUP,
+                                ISTORE, westFace,
+                                DUP,
+                                ISTORE, eastFace
+                            ),
+                            BinaryRegex.build(
+                                // ModLoader
+                                ISTORE, southFace,
+                                ICONST_0,
+                                ISTORE, northFace,
+                                ICONST_0,
+                                ISTORE, westFace,
+                                ICONST_0,
+                                ISTORE, eastFace,
+                                ICONST_0
+                            )
+                        ),
                         BytecodeMatcher.anyISTORE
                     ));
                 }
