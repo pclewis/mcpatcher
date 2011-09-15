@@ -2,9 +2,9 @@ MCPatcher version is 2.1.1
 OS: Linux 2.6.35.14-96.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_27 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
-Minecraft version is 1.8 (md5 a59a9fd4c726a573b0a2bdd10d857f59)
+Minecraft version is 1.8.1 (md5 f8c5a2ccd3bc996792bbe436d8cc08bc)
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.8.jar (984 files)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.8.1.jar (984 files)
   adg.class matches IBlockAccess.class
   bb.class matches StillLava.class
   dl.class matches GLAllocation.class
@@ -43,7 +43,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.8.jar (984 files)
   xn.class matches FlowWater.class
   net/minecraft/client/Minecraft.class matches Minecraft.class
 
-Analyzing /home/prupe/.minecraft/bin/minecraft-1.8.jar (second pass)
+Analyzing /home/prupe/.minecraft/bin/minecraft-1.8.1.jar (second pass)
   RenderEngine (ur.class)
    field h matches imageData
    field i matches textureList
