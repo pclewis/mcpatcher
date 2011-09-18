@@ -529,7 +529,7 @@ public class BetterGrass extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO)";
+                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO pre-1.8)";
                 }
 
                 @Override
@@ -596,6 +596,81 @@ public class BetterGrass extends Mod {
                         getCaptureGroup(1),
 
                         label("B")
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8)";
+                }
+
+                @Override
+                public boolean filterMethod(MethodInfo methodInfo) {
+                    MethodRef m = (MethodRef) map(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z"));
+                    return m.getName().equals(methodInfo.getName()) && m.getType().equals(methodInfo.getDescriptor());
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD_1,
+                            ALOAD_0,
+                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                            ILOAD_2,
+                            ILOAD_3,
+                            ILOAD, 4,
+                            BinaryRegex.any(1, 2),
+                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
+                        )),
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                        BinaryRegex.capture(BinaryRegex.any(20, 40)),
+
+                        // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        ))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        ISTORE, getCaptureGroup(2),
+
+                        // Tessellator.setColorOpaque_F(f * f18, f1 * f21, f2 * f24);
+                        ILOAD, getCaptureGroup(2),
+                        IFNE, branch("A"),
+                        ALOAD, getCaptureGroup(5),
+                        FLOAD, 5,
+                        FLOAD, getCaptureGroup(6),
+                        FMUL,
+                        FLOAD, 6,
+                        FLOAD, getCaptureGroup(7),
+                        FMUL,
+                        FLOAD, 7,
+                        FLOAD, getCaptureGroup(8),
+                        FMUL,
+                        getCaptureGroup(9),
+
+                        label("A"),
+                        getCaptureGroup(3),
+                        getCaptureGroup(4)
                     );
                 }
             });

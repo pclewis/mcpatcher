@@ -1062,6 +1062,222 @@ Patching...
                                IFNE 0x00 0x06
                                ICONST_1
                                ISTORE 0x12
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8) b(Llr;IIIFFF)Z@432
+     label A -> instruction 472
+     branch offset IFNE A -> +23 @449
+     ALOAD_1                   ALOAD_1
+     ALOAD_0                   ALOAD_0
+     GETFIELD 0x00 0xf5        GETFIELD 0x00 0xf5
+     ILOAD_2                   ILOAD_2
+     ILOAD_3                   ILOAD_3
+     ILOAD 0x04                ILOAD 0x04
+     ICONST_2                  ICONST_2
+     INVOKEVIRTUAL 0x01 0x2f   INVOKEVIRTUAL 0x01 0x2f
+     ISTORE 0x1c               ISTORE 0x1c
+     ALOAD_0                   ILOAD 0x1c
+     ALOAD_1                   IFNE 0x00 0x17
+     ILOAD_2                   ALOAD 0x08
+     I2D                       FLOAD 0x05
+     ILOAD_3                   FLOAD 0x05
+     I2D                       FMUL
+     ILOAD 0x04                FLOAD 0x06
+     I2D                       FLOAD 0x06
+     ILOAD 0x1c                FMUL
+     INVOKEVIRTUAL 0x01 0x4e   FLOAD 0x07
+     GETSTATIC 0x00 0xcc       FLOAD 0x07
+     IFEQ 0x00 0x32            FMUL
+     ILOAD 0x1c                INVOKEVIRTUAL 0x01 0x6a
+     ICONST_3                  ALOAD_0
+     IF_ICMPNE 0x00 0x2c       ALOAD_1
+     ALOAD_0                   ILOAD_2
+     GETFIELD 0x00 0xf6        I2D
+     IFGE 0x00 0x25            ILOAD_3
+     ALOAD 0x08                I2D
+     FLOAD 0x12                ILOAD 0x04
+     FLOAD 0x05                I2D
+     FMUL                      ILOAD 0x1c
+     FLOAD 0x15                INVOKEVIRTUAL 0x01 0x4e
+     FLOAD 0x06                GETSTATIC 0x00 0xcc
+     FMUL                      IFEQ 0x00 0x32
+     FLOAD 0x18                ILOAD 0x1c
+     FLOAD 0x07                ICONST_3
+     FMUL                      IF_ICMPNE 0x00 0x2c
+     INVOKEVIRTUAL 0x01 0x6a   ALOAD_0
+                               GETFIELD 0x00 0xf6
+                               IFGE 0x00 0x25
+                               ALOAD 0x08
+                               FLOAD 0x12
+                               FLOAD 0x05
+                               FMUL
+                               FLOAD 0x15
+                               FLOAD 0x06
+                               FMUL
+                               FLOAD 0x18
+                               FLOAD 0x07
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x6a
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8) b(Llr;IIIFFF)Z@611
+     label A -> instruction 651
+     branch offset IFNE A -> +23 @628
+     ALOAD_1                   ALOAD_1
+     ALOAD_0                   ALOAD_0
+     GETFIELD 0x00 0xf5        GETFIELD 0x00 0xf5
+     ILOAD_2                   ILOAD_2
+     ILOAD_3                   ILOAD_3
+     ILOAD 0x04                ILOAD 0x04
+     ICONST_3                  ICONST_3
+     INVOKEVIRTUAL 0x01 0x2f   INVOKEVIRTUAL 0x01 0x2f
+     ISTORE 0x1c               ISTORE 0x1c
+     ALOAD_0                   ILOAD 0x1c
+     ALOAD_1                   IFNE 0x00 0x17
+     ILOAD_2                   ALOAD 0x08
+     I2D                       FLOAD 0x05
+     ILOAD_3                   FLOAD 0x05
+     I2D                       FMUL
+     ILOAD 0x04                FLOAD 0x06
+     I2D                       FLOAD 0x06
+     ILOAD 0x1c                FMUL
+     INVOKEVIRTUAL 0x01 0x52   FLOAD 0x07
+     GETSTATIC 0x00 0xcc       FLOAD 0x07
+     IFEQ 0x00 0x32            FMUL
+     ILOAD 0x1c                INVOKEVIRTUAL 0x01 0x6a
+     ICONST_3                  ALOAD_0
+     IF_ICMPNE 0x00 0x2c       ALOAD_1
+     ALOAD_0                   ILOAD_2
+     GETFIELD 0x00 0xf6        I2D
+     IFGE 0x00 0x25            ILOAD_3
+     ALOAD 0x08                I2D
+     FLOAD 0x12                ILOAD 0x04
+     FLOAD 0x05                I2D
+     FMUL                      ILOAD 0x1c
+     FLOAD 0x15                INVOKEVIRTUAL 0x01 0x52
+     FLOAD 0x06                GETSTATIC 0x00 0xcc
+     FMUL                      IFEQ 0x00 0x32
+     FLOAD 0x18                ILOAD 0x1c
+     FLOAD 0x07                ICONST_3
+     FMUL                      IF_ICMPNE 0x00 0x2c
+     INVOKEVIRTUAL 0x01 0x6a   ALOAD_0
+                               GETFIELD 0x00 0xf6
+                               IFGE 0x00 0x25
+                               ALOAD 0x08
+                               FLOAD 0x12
+                               FLOAD 0x05
+                               FMUL
+                               FLOAD 0x15
+                               FLOAD 0x06
+                               FMUL
+                               FLOAD 0x18
+                               FLOAD 0x07
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x6a
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8) b(Llr;IIIFFF)Z@790
+     label A -> instruction 830
+     branch offset IFNE A -> +23 @807
+     ALOAD_1                   ALOAD_1
+     ALOAD_0                   ALOAD_0
+     GETFIELD 0x00 0xf5        GETFIELD 0x00 0xf5
+     ILOAD_2                   ILOAD_2
+     ILOAD_3                   ILOAD_3
+     ILOAD 0x04                ILOAD 0x04
+     ICONST_4                  ICONST_4
+     INVOKEVIRTUAL 0x01 0x2f   INVOKEVIRTUAL 0x01 0x2f
+     ISTORE 0x1c               ISTORE 0x1c
+     ALOAD_0                   ILOAD 0x1c
+     ALOAD_1                   IFNE 0x00 0x17
+     ILOAD_2                   ALOAD 0x08
+     I2D                       FLOAD 0x05
+     ILOAD_3                   FLOAD 0x05
+     I2D                       FMUL
+     ILOAD 0x04                FLOAD 0x06
+     I2D                       FLOAD 0x06
+     ILOAD 0x1c                FMUL
+     INVOKEVIRTUAL 0x01 0x53   FLOAD 0x07
+     GETSTATIC 0x00 0xcc       FLOAD 0x07
+     IFEQ 0x00 0x32            FMUL
+     ILOAD 0x1c                INVOKEVIRTUAL 0x01 0x6a
+     ICONST_3                  ALOAD_0
+     IF_ICMPNE 0x00 0x2c       ALOAD_1
+     ALOAD_0                   ILOAD_2
+     GETFIELD 0x00 0xf6        I2D
+     IFGE 0x00 0x25            ILOAD_3
+     ALOAD 0x08                I2D
+     FLOAD 0x13                ILOAD 0x04
+     FLOAD 0x05                I2D
+     FMUL                      ILOAD 0x1c
+     FLOAD 0x16                INVOKEVIRTUAL 0x01 0x53
+     FLOAD 0x06                GETSTATIC 0x00 0xcc
+     FMUL                      IFEQ 0x00 0x32
+     FLOAD 0x19                ILOAD 0x1c
+     FLOAD 0x07                ICONST_3
+     FMUL                      IF_ICMPNE 0x00 0x2c
+     INVOKEVIRTUAL 0x01 0x6a   ALOAD_0
+                               GETFIELD 0x00 0xf6
+                               IFGE 0x00 0x25
+                               ALOAD 0x08
+                               FLOAD 0x13
+                               FLOAD 0x05
+                               FMUL
+                               FLOAD 0x16
+                               FLOAD 0x06
+                               FMUL
+                               FLOAD 0x19
+                               FLOAD 0x07
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x6a
+    if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8) b(Llr;IIIFFF)Z@969
+     label A -> instruction 1009
+     branch offset IFNE A -> +23 @986
+     ALOAD_1                   ALOAD_1
+     ALOAD_0                   ALOAD_0
+     GETFIELD 0x00 0xf5        GETFIELD 0x00 0xf5
+     ILOAD_2                   ILOAD_2
+     ILOAD_3                   ILOAD_3
+     ILOAD 0x04                ILOAD 0x04
+     ICONST_5                  ICONST_5
+     INVOKEVIRTUAL 0x01 0x2f   INVOKEVIRTUAL 0x01 0x2f
+     ISTORE 0x1c               ISTORE 0x1c
+     ALOAD_0                   ILOAD 0x1c
+     ALOAD_1                   IFNE 0x00 0x17
+     ILOAD_2                   ALOAD 0x08
+     I2D                       FLOAD 0x05
+     ILOAD_3                   FLOAD 0x05
+     I2D                       FMUL
+     ILOAD 0x04                FLOAD 0x06
+     I2D                       FLOAD 0x06
+     ILOAD 0x1c                FMUL
+     INVOKEVIRTUAL 0x01 0x55   FLOAD 0x07
+     GETSTATIC 0x00 0xcc       FLOAD 0x07
+     IFEQ 0x00 0x32            FMUL
+     ILOAD 0x1c                INVOKEVIRTUAL 0x01 0x6a
+     ICONST_3                  ALOAD_0
+     IF_ICMPNE 0x00 0x2c       ALOAD_1
+     ALOAD_0                   ILOAD_2
+     GETFIELD 0x00 0xf6        I2D
+     IFGE 0x00 0x25            ILOAD_3
+     ALOAD 0x08                I2D
+     FLOAD 0x13                ILOAD 0x04
+     FLOAD 0x05                I2D
+     FMUL                      ILOAD 0x1c
+     FLOAD 0x16                INVOKEVIRTUAL 0x01 0x55
+     FLOAD 0x06                GETSTATIC 0x00 0xcc
+     FMUL                      IFEQ 0x00 0x32
+     FLOAD 0x19                ILOAD 0x1c
+     FLOAD 0x07                ICONST_3
+     FMUL                      IF_ICMPNE 0x00 0x2c
+     INVOKEVIRTUAL 0x01 0x6a   ALOAD_0
+                               GETFIELD 0x00 0xf6
+                               IFGE 0x00 0x25
+                               ALOAD 0x08
+                               FLOAD 0x13
+                               FLOAD 0x05
+                               FMUL
+                               FLOAD 0x16
+                               FLOAD 0x06
+                               FMUL
+                               FLOAD 0x19
+                               FLOAD 0x07
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x6a
  applying Portal patch to tp.class for mod HD Textures
     16.0F -> float_size <init>()V@98
      LDC 0x06                  GETSTATIC 0x00 0x50
@@ -1960,4 +2176,5 @@ Better Grass
     IBlockAccess (adg.class)
     RenderBlocks (qo.class)
         [2] if (getBlockTexture == 0) useBiomeColor = true (AO)
+        [4] if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8)
 
