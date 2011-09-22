@@ -24,6 +24,13 @@ class ModList {
     private HashMap<String, Mod> modsByName = new HashMap<String, Mod>();
     private boolean applied = false;
 
+    private static BuiltInMod[] builtInMods = new BuiltInMod[]{
+        new BuiltInMod(MCPatcherUtils.HD_TEXTURES, HDTexture.class, false),
+        new BuiltInMod(MCPatcherUtils.HD_FONT, HDFont.class, false),
+        new BuiltInMod(MCPatcherUtils.BETTER_GRASS, BetterGrass.class, false),
+        new BuiltInMod(MCPatcherUtils.GLSL_SHADERS, GLSLShader.class, true),
+    };
+
     Mod baseMod;
 
     public ModList() {
@@ -33,18 +40,13 @@ class ModList {
     }
 
     public void loadBuiltInMods() {
-        if (!modsByName.containsKey(MCPatcherUtils.HD_TEXTURES)) {
-            addNoReplace(new HDTexture());
-        }
-        if (!modsByName.containsKey(MCPatcherUtils.HD_FONT)) {
-            addNoReplace(new HDFont());
-        }
-        if (!modsByName.containsKey(MCPatcherUtils.BETTER_GRASS)) {
-            addNoReplace(new BetterGrass());
-        }
-        if (MCPatcher.experimentalMods) {
-            if (!modsByName.containsKey(MCPatcherUtils.GLSL_SHADERS)) {
-                addNoReplace(new GLSLShader());
+        for (BuiltInMod builtInMod : builtInMods) {
+            if (MCPatcher.experimentalMods || !builtInMod.experimental) {
+                try {
+                    addNoReplace(builtInMod.modClass.newInstance());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -380,15 +382,16 @@ class ModList {
             if (name == null || type == null) {
                 invalidEntries.add(element);
             } else if (type.equals(Config.VAL_BUILTIN)) {
-                if (name.equals(MCPatcherUtils.HD_TEXTURES)) {
-                    mod = new HDTexture();
-                } else if (name.equals(MCPatcherUtils.HD_FONT)) {
-                    mod = new HDFont();
-                } else if (name.equals(MCPatcherUtils.BETTER_GRASS)) {
-                    mod = new BetterGrass();
-                } else if (MCPatcher.experimentalMods && name.equals(MCPatcherUtils.GLSL_SHADERS)) {
-                    mod = new GLSLShader();
-                } else {
+                for (BuiltInMod builtInMod : builtInMods) {
+                    if (name.equals(builtInMod.name) && (MCPatcher.experimentalMods || ! builtInMod.experimental)) {
+                        try {
+                            mod = builtInMod.modClass.newInstance();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                if (mod == null) {
                     invalidEntries.add(element);
                 }
             } else if (type.equals(Config.VAL_EXTERNAL_ZIP)) {
@@ -515,6 +518,27 @@ class ModList {
                 mods.appendChild(element);
                 oldElements.remove(mod.getName());
             }
+        }
+    }
+
+    public static boolean isExperimental(String name) {
+        for (BuiltInMod builtInMod : builtInMods) {
+            if (builtInMod.name.equals(name)) {
+                return builtInMod.experimental;
+            }
+        }
+        return false;
+    }
+
+    private static class BuiltInMod {
+        String name;
+        Class<? extends Mod> modClass;
+        boolean experimental;
+
+        BuiltInMod(String name, Class<? extends Mod> modClass, boolean experimental) {
+            this.name = name;
+            this.modClass = modClass;
+            this.experimental = experimental;
         }
     }
 }

@@ -31,7 +31,7 @@ class MainForm {
         "<td align=\"left\"><font size=\"5\">%2$s</font></td>" +
         "<td align=\"right\">%3$s</td>" +
         "</tr>" +
-        "<tr><td colspan=\"2\" style=\"font-weight: normal; font-style: italic;\">%4$s</td></tr>" +
+        "<tr><td colspan=\"2\" style=\"font-weight: normal; font-style: italic;\">%4$s%5$s</td></tr>" +
         "</table>" +
         "</html>";
 
@@ -725,6 +725,7 @@ class MainForm {
                 Math.max(frameWidth - 75, 350),
                 htmlEscape(mod.getName()),
                 htmlEscape(mod.getVersion()),
+                (ModList.isExperimental(mod.getName()) ? "<font color=\"red\">(Experimental)</font> " : ""),
                 htmlEscape(mod.getDescription())
             ));
             if (!table.isEnabled() || !mod.okToApply()) {

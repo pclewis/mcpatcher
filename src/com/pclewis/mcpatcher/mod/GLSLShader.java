@@ -21,7 +21,7 @@ public class GLSLShader extends Mod {
 
     public GLSLShader() {
         name = MCPatcherUtils.GLSL_SHADERS;
-        description = "(Experimental) Adds graphical shaders to the game.  Based on daxnitro's mod.";
+        description = "Adds graphical shaders to the game.  Based on daxnitro's mod.";
         version = "1.0";
         website = "http://nitrous.daxnitro.com/repo/";
         defaultEnabled = false;
