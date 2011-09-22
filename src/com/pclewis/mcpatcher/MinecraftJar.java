@@ -17,11 +17,10 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 class MinecraftJar {
-    private static final String VERSION_REGEX = "[0-9][-_.0-9a-zA-Z]+";
-
     private File origFile;
     private File outputFile;
     private int alphaBeta;
+    private int preview;
     private String version;
     private String md5;
     private String origMD5;
@@ -31,6 +30,20 @@ class MinecraftJar {
     public MinecraftJar(File file) throws IOException {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getPath() + " does not exist");
+        }
+
+        try {
+            File jar19 = MCPatcherUtils.getMinecraftPath("bin", "minecraft-1.9.jar");
+            File jar19pre1 = MCPatcherUtils.getMinecraftPath("bin", "minecraft-1.9pre1.jar");
+            if (jar19.exists() && !jar19pre1.exists()) {
+                String jarMD5 = Util.computeMD5(jar19);
+                if ("b4d9681a1118949d7753e19c35c61ec7".equals(jarMD5)) {
+                    Logger.log(Logger.LOG_JAR, "copying %s to %s", jar19.getName(), jar19pre1.getName());
+                    Util.copyFile(jar19, jar19pre1);
+                }
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
 
         extractVersion(file);
@@ -77,7 +90,7 @@ class MinecraftJar {
     }
 
     public boolean isModded() {
-        return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5);
+        return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5) && preview == 0;
     }
 
     public void logVersion() {
@@ -122,25 +135,40 @@ class MinecraftJar {
             }
             is = jar.getInputStream(mc);
             ClassFile cf = new ClassFile(new DataInputStream(is));
-            Pattern p = Pattern.compile("Minecraft (Alpha |Beta )?v?(" + VERSION_REGEX + ")");
-            for (Object o : cf.getMethods()) {
-                MethodInfo mi = (MethodInfo) o;
-                ConstPool cp = mi.getConstPool();
-                for (int i = 1; i < cp.getSize(); i++) {
-                    if (cp.getTag(i) == ConstPool.CONST_String) {
-                        String value = cp.getStringInfo(i);
-                        Matcher m = p.matcher(value);
-                        if (m.find()) {
-                            if (m.group(1).equals("Alpha ")) {
-                                alphaBeta = 1;
-                            } else if (m.group(1).equals("Beta ")) {
-                                alphaBeta = 2;
-                            } else {
-                                alphaBeta = 3;
-                            }
-                            version = m.group(2);
-                            break;
+            Pattern p = Pattern.compile(
+                "Minecraft\\s+(Alpha|Beta)?\\s*v?([0-9][-_.0-9a-zA-Z]+)\\s*(Pre\\S*\\s*(\\d+)?)?",
+                Pattern.CASE_INSENSITIVE
+            );
+            ConstPool cp = cf.getConstPool();
+            for (int i = 1; i < cp.getSize(); i++) {
+                if (cp.getTag(i) == ConstPool.CONST_String) {
+                    String value = cp.getStringInfo(i);
+                    Matcher m = p.matcher(value);
+                    if (m.find()) {
+                        if (m.group(1).toLowerCase().startsWith("alpha")) {
+                            alphaBeta = 1;
+                        } else if (m.group(1).toLowerCase().startsWith("beta")) {
+                            alphaBeta = 2;
+                        } else {
+                            alphaBeta = 3;
                         }
+                        version = m.group(2);
+                        if (m.group(3) == null || m.group(3).equals("")) {
+                            preview = 0;
+                        } else if (m.group(4) == null || m.group(4).equals("")) {
+                            preview = 1;
+                        } else {
+                            try {
+                                preview = Integer.parseInt(m.group(4));
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                                preview = 1;
+                            }
+                        }
+                        if (preview > 0) {
+                            version = version + "pre" + preview;
+                        }
+                        break;
                     }
                 }
             }
