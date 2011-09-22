@@ -4,7 +4,6 @@ import com.pclewis.mcpatcher.mod.BetterGrass;
 import com.pclewis.mcpatcher.mod.GLSLShader;
 import com.pclewis.mcpatcher.mod.HDFont;
 import com.pclewis.mcpatcher.mod.HDTexture;
-import com.pclewis.mcpatcher.mod.OneEight;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,9 +43,6 @@ class ModList {
             addNoReplace(new BetterGrass());
         }
         if (MCPatcher.experimentalMods) {
-            if (!modsByName.containsKey(MCPatcherUtils.ONE_EIGHT)) {
-                addNoReplace(new OneEight());
-            }
             if (!modsByName.containsKey(MCPatcherUtils.GLSL_SHADERS)) {
                 addNoReplace(new GLSLShader());
             }
@@ -390,8 +386,6 @@ class ModList {
                     mod = new HDFont();
                 } else if (name.equals(MCPatcherUtils.BETTER_GRASS)) {
                     mod = new BetterGrass();
-                } else if (MCPatcher.experimentalMods && name.equals(MCPatcherUtils.ONE_EIGHT)) {
-                    mod = new OneEight();
                 } else if (MCPatcher.experimentalMods && name.equals(MCPatcherUtils.GLSL_SHADERS)) {
                     mod = new GLSLShader();
                 } else {
