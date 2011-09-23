@@ -32,19 +32,9 @@ class MinecraftJar {
             throw new FileNotFoundException(file.getPath() + " does not exist");
         }
 
-        try {
-            File jar19 = MCPatcherUtils.getMinecraftPath("bin", "minecraft-1.9.jar");
-            File jar19pre1 = MCPatcherUtils.getMinecraftPath("bin", "minecraft-1.9pre1.jar");
-            if (jar19.exists() && !jar19pre1.exists()) {
-                String jarMD5 = Util.computeMD5(jar19);
-                if ("b4d9681a1118949d7753e19c35c61ec7".equals(jarMD5)) {
-                    Logger.log(Logger.LOG_JAR, "copying %s to %s", jar19.getName(), jar19pre1.getName());
-                    Util.copyFile(jar19, jar19pre1);
-                }
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
+        fixPreviewJarName("1.8", "pre1", "7ce3238b148bb67a3b84cf59b7516f55");
+        fixPreviewJarName("1.8", "pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
+        fixPreviewJarName("1.9", "pre1", "b4d9681a1118949d7753e19c35c61ec7");
 
         extractVersion(file);
         if (version == null) {
@@ -99,6 +89,22 @@ class MinecraftJar {
             Logger.log(Logger.LOG_MAIN, "WARNING: could not determine original md5 sum");
         } else if (!origMD5.equals(md5)) {
             Logger.log(Logger.LOG_MAIN, "WARNING: possibly modded minecraft.jar (orig md5 %s)", origMD5);
+        }
+    }
+
+    private static void fixPreviewJarName(String version, String pre, String md5) {
+        try {
+            File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
+            File jarPre = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + pre + ".jar");
+            if (jar.exists() && !jarPre.exists()) {
+                String jarMD5 = Util.computeMD5(jar);
+                if (md5.equals(jarMD5)) {
+                    Logger.log(Logger.LOG_JAR, "renaming %s to %s", jar.getName(), jarPre.getName());
+                    jar.renameTo(jarPre);
+                }
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 
