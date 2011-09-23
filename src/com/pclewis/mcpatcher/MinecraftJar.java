@@ -99,7 +99,7 @@ class MinecraftJar {
             if (jar.exists() && !jarPre.exists()) {
                 String jarMD5 = Util.computeMD5(jar);
                 if (md5.equals(jarMD5)) {
-                    Logger.log(Logger.LOG_JAR, "renaming %s to %s", jar.getName(), jarPre.getName());
+                    Logger.log(Logger.LOG_JAR, "Renaming %s to %s", jar.getName(), jarPre.getName());
                     jar.renameTo(jarPre);
                 }
             }
