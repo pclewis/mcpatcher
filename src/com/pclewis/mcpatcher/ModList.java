@@ -41,7 +41,7 @@ class ModList {
 
     public void loadBuiltInMods() {
         for (BuiltInMod builtInMod : builtInMods) {
-            if (MCPatcher.experimentalMods || !builtInMod.experimental) {
+            if (!modsByName.containsKey(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
                 try {
                     addNoReplace(builtInMod.modClass.newInstance());
                 } catch (Exception e) {
@@ -257,6 +257,7 @@ class ModList {
         }
         String name = mod.getName();
         if (modsByName.containsKey(name)) {
+            Logger.log(Logger.LOG_MOD, "WARNING: duplicate mod %s ignored", name);
             return false;
         }
         mod.setRefs();
