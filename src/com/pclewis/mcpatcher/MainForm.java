@@ -293,6 +293,10 @@ class MainForm {
                     modTable.clearSelection();
                     AbstractTableModel model = (AbstractTableModel) modTable.getModel();
                     model.fireTableRowsDeleted(row, row);
+                    if (row >= model.getRowCount()) {
+                        row--;
+                    }
+                    modTable.addRowSelectionInterval(row, row);
                     ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
                     renderer.resetRowHeights();
                 }
