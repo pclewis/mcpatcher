@@ -257,7 +257,6 @@ class ModList {
         }
         String name = mod.getName();
         if (modsByName.containsKey(name)) {
-            Logger.log(Logger.LOG_MOD, "WARNING: duplicate mod %s ignored", name);
             return false;
         }
         mod.setRefs();
