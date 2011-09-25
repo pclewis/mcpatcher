@@ -40,6 +40,7 @@ public class TextureUtils {
     private static HashMap<String, Integer> expectedColumns = new HashMap<String, Integer>();
 
     private static boolean useTextureCache;
+    private static boolean reclaimGLMemory;
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
 
@@ -54,6 +55,7 @@ public class TextureUtils {
         customPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customPortal", true);
 
         useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", false);
+        reclaimGLMemory = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false);
 
         expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);
@@ -220,7 +222,7 @@ public class TextureUtils {
         buffer.clear();
         final int have = buffer.capacity();
         final int needed = data.length;
-        if (needed > have || have >= 4 * needed) {
+        if (needed > have || (reclaimGLMemory && have >= 4 * needed)) {
             //MCPatcherUtils.log("resizing gl buffer from 0x%x to 0x%x", have, needed);
             buffer = GLAllocation.createDirectByteBuffer(needed);
         }

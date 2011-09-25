@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCPatcher;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.ModConfigPanel;
 
@@ -16,6 +17,7 @@ public class HDTextureConfig extends ModConfigPanel {
     private JComboBox fireCombo;
     private JComboBox portalCombo;
     private JCheckBox textureCacheCheckBox;
+    private JCheckBox shrinkGLMemoryCheckBox;
 
     private AnimationComboListener[] comboListeners;
 
@@ -34,6 +36,12 @@ public class HDTextureConfig extends ModConfigPanel {
         textureCacheCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "useTextureCache", textureCacheCheckBox.isSelected());
+            }
+        });
+
+        shrinkGLMemoryCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", shrinkGLMemoryCheckBox.isSelected());
             }
         });
     }
@@ -62,6 +70,7 @@ public class HDTextureConfig extends ModConfigPanel {
         } catch (Throwable e) {
         }
         textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", is64bit));
+        shrinkGLMemoryCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false));
     }
 
     @Override
