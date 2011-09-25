@@ -33,6 +33,9 @@ release: $(MCPATCHER)
 run: $(MCPATCHER)
 	java -jar $(MCPATCHER)
 
+runexp: $(MCPATCHER)
+	java -jar $(MCPATCHER) -experimental
+
 test: $(MCPATCHER)
 	time java -jar $(MCPATCHER) $(TEST_OPTS) > $(TEST_LOG) 2>&1
 	diff -c $(GOOD_LOG) $(TEST_LOG)
@@ -56,8 +59,11 @@ control: $(TEST_LOG)
 profile: $(MCPATCHER) $(PROFILER4J)
 	java -Xmx512M -javaagent:$(PROFILER4J)=waitconn=true,verbosity=1 -jar $(MCPATCHER)
 
-clean:
-	rm -rf $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1 $(MCPATCHER) $(DOC_OUT) $(MODJAR) out $(LAUNCH4J_XML).tmp mcpatcher-*.jar mcpatcher-*.exe
+testclean:
+	rm -f $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1
+
+clean: testclean
+	rm -rf $(MCPATCHER) $(DOC_OUT) $(MODJAR) out $(LAUNCH4J_XML).tmp mcpatcher-*.jar mcpatcher-*.exe
 
 modjar: $(MCPATCHER)
 	rm -rf $(TMPDIR)
