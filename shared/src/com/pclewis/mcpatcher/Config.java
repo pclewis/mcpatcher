@@ -30,7 +30,7 @@ class Config {
     *         <last-version>2.0.1</last-version>
     *         <beta-warning-shown>false</beta-warning-shown>
     *     </config>
-    *     <mods>
+    *     <mods profile="Minecraft 1.8.1">
     *         <mod>
     *             <name>HD Textures</name>
     *             <type>builtin</type>
@@ -46,6 +46,9 @@ class Config {
     *             <prefix />
     *             <enabled>true</enabled>
     *         </mod>
+    *     </mods>
+    *     <mods profile="Minecraft 1.9">
+    *         ...
     *     </mods>
     * </mcpatcher-profile>
     */
@@ -206,7 +209,7 @@ class Config {
         Element root = getRoot();
         NodeList list = root.getElementsByTagName(TAG_MODS);
         String name = getConfigValue(TAG_SELECTED_PROFILE);
-        if (name == null) {
+        if (name == null || name.equals("")) {
             setConfigValue(TAG_SELECTED_PROFILE, profileName);
         }
         Element element;
@@ -386,10 +389,12 @@ class Config {
         if (xml != null) {
             getRoot();
             getConfig();
-            getMods();
-            setText(getMod(MCPatcherUtils.HD_TEXTURES), TAG_ENABLED, "true");
-            setText(getMod(MCPatcherUtils.HD_FONT), TAG_ENABLED, "true");
-            setText(getMod(MCPatcherUtils.BETTER_GRASS), TAG_ENABLED, "true");
+            if (selectedProfile != null) {
+                getMods();
+                setText(getMod(MCPatcherUtils.HD_TEXTURES), TAG_ENABLED, "true");
+                setText(getMod(MCPatcherUtils.HD_FONT), TAG_ENABLED, "true");
+                setText(getMod(MCPatcherUtils.BETTER_GRASS), TAG_ENABLED, "false");
+            }
         }
     }
 

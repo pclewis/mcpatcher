@@ -58,6 +58,8 @@ final public class MCPatcher {
     private static boolean enableAllMods = false;
     static boolean experimentalMods = false;
 
+    private static boolean newVersion = false;
+
     private static UserInterface ui;
 
     private MCPatcher() {
@@ -127,11 +129,11 @@ final public class MCPatcher {
         Util.logOSInfo();
 
         if (!MCPatcherUtils.getString(Config.TAG_LAST_VERSION, "").equals(VERSION_STRING)) {
+            newVersion = true;
             MCPatcherUtils.set(Config.TAG_LAST_VERSION, VERSION_STRING);
             MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, false);
             MCPatcherUtils.set(Config.TAG_DEBUG, BETA_VERSION > 0);
             MCPatcherUtils.set(Config.TAG_JAVA_HEAP_SIZE, Util.bits >= 64 ? 1024 : 768);
-            MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "useTextureCache", Util.bits >= 64);
         }
         if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean(Config.TAG_BETA_WARNING_SHOWN, false)) {
             ui.showBetaWarning();
@@ -150,6 +152,10 @@ final public class MCPatcher {
 
     static void saveProperties() {
         if (!ignoreSavedMods && modList != null && MCPatcherUtils.config.selectedProfile != null) {
+            if (newVersion) {
+                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "useTextureCache", Util.bits >= 64);
+                newVersion = false;
+            }
             modList.updateProperties();
             MCPatcherUtils.config.saveProperties();
         }
@@ -170,9 +176,14 @@ final public class MCPatcher {
                 minecraft.createBackup();
             }
             minecraft.logVersion();
-            String profileName = Config.getDefaultProfileName(minecraft.getVersion());
-            MCPatcherUtils.config.setDefaultProfileName(profileName);
-            MCPatcherUtils.config.selectProfile(profileName);
+            String defaultProfile = Config.getDefaultProfileName(minecraft.getVersion());
+            MCPatcherUtils.config.setDefaultProfileName(defaultProfile);
+            String selectedProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
+            if (Config.isDefaultProfile(selectedProfile)) {
+                MCPatcherUtils.config.selectProfile(defaultProfile);
+            } else {
+                MCPatcherUtils.config.selectProfile();
+            }
             getAllMods();
         } catch (IOException e) {
             minecraft = null;
