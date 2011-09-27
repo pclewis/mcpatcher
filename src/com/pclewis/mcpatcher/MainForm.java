@@ -36,8 +36,10 @@ class MainForm {
         "</html>";
 
     private JPanel mainPanel;
-    private JFrame frame;
+    JFrame frame;
     private int frameWidth = 518;
+
+    private MainMenu mainMenu;
 
     private JTextField origField;
     private JButton origBrowseButton;
@@ -116,6 +118,9 @@ class MainForm {
         });
         frame.setMinimumSize(new Dimension(470, 488));
         frame.pack();
+
+        mainMenu = new MainMenu(this);
+        frame.setJMenuBar(mainMenu.menuBar);
 
         origBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -528,6 +533,7 @@ class MainForm {
         tabbedPane.setEnabled(!busy);
 
         updateActiveTab();
+        mainMenu.update(busy);
     }
 
     private void updateActiveTab() {
