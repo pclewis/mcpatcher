@@ -338,13 +338,7 @@ class Config {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                if (os != null) {
-                    try {
-                        os.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                MCPatcherUtils.close(os);
             }
         }
         return saved;
