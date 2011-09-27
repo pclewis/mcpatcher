@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.ArrayList;
 
 class MainMenu {
@@ -146,12 +147,23 @@ class MainMenu {
         if (!busy && MCPatcherUtils.config != null) {
             ArrayList<String> profiles = MCPatcherUtils.config.getProfiles();
             ButtonGroup buttonGroup = new ButtonGroup();
-            String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
+            final String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
             for (final String profile : profiles) {
                 JRadioButtonMenuItem item = new JRadioButtonMenuItem(profile, profile.equals(currentProfile));
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         MCPatcherUtils.config.selectProfile(profile);
+                        if (Config.isDefaultProfile(currentProfile) && Config.isDefaultProfile(profile)) {
+                            String version = profile.replaceFirst("^Minecraft ", "");
+                            File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
+                            if (jar.exists()) {
+                                try {
+                                    MCPatcher.setMinecraft(jar, false);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                }
+                            }
+                        }
                         MCPatcher.getAllMods();
                         mainForm.updateModList();
                     }
