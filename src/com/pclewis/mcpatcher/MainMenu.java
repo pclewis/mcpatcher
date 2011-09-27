@@ -109,9 +109,12 @@ class MainMenu {
                         null,
                         profileName
                     );
-                    boolean delete = false;
                     if (result != null && result instanceof String && !result.equals("")) {
                         profileName = (String) result;
+                        String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
+                        if (profileName.equals(currentProfile)) {
+                            return;
+                        }
                         if (MCPatcherUtils.config.findProfileByName(profileName, false) != null) {
                             int confirm = JOptionPane.showConfirmDialog(
                                 mainForm.frame,
@@ -119,16 +122,12 @@ class MainMenu {
                                 "Confirm overwrite",
                                 JOptionPane.YES_NO_OPTION
                             );
-                            if (confirm == JOptionPane.YES_OPTION) {
-                                delete = true;
-                            } else {
+                            if (confirm != JOptionPane.YES_OPTION) {
                                 return;
                             }
-                        }
-                        MCPatcher.modList.updateProperties();
-                        if (delete) {
                             MCPatcherUtils.config.deleteProfile(profileName);
                         }
+                        MCPatcher.modList.updateProperties();
                         MCPatcherUtils.config.selectProfile(profileName);
                         mainForm.updateControls();
                     }
