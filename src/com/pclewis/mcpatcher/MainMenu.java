@@ -11,31 +11,51 @@ class MainMenu {
 
     JMenuBar menuBar;
 
-    JMenu fileMenu;
+    JMenu file;
     JMenuItem origFile;
     JMenuItem outputFile;
     JMenuItem exit;
+
+    JMenu mods;
+    JMenuItem addMod;
+    JMenuItem removeMod;
+    JMenuItem moveUp;
+    JMenuItem moveDown;
+
+    JMenu game;
+    JMenuItem patch;
+    JMenuItem unpatch;
+    JMenuItem test;
+
+    JMenu about;
 
     MainMenu(MainForm mainForm1) {
         mainForm = mainForm1;
 
         menuBar = new JMenuBar();
 
-        fileMenu = new JMenu("File");
+        file = new JMenu("File");
+        file.setMnemonic('F');
+        menuBar.add(file);
 
-        origFile = new JMenuItem("Select input file");
+        origFile = new JMenuItem("Select input file...");
         origFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         });
+        file.add(origFile);
 
-        outputFile = new JMenuItem("Select output file");
+        outputFile = new JMenuItem("Select output file...");
         outputFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         });
+        file.add(outputFile);
+
+        file.addSeparator();
 
         exit = new JMenuItem("Exit");
+        exit.setMnemonic('x');
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(
@@ -43,13 +63,76 @@ class MainMenu {
                 );
             }
         });
+        file.add(exit);
 
-        menuBar.add(fileMenu);
+        mods = new JMenu("Mods");
+        mods.setMnemonic('M');
+        menuBar.add(mods);
 
-        fileMenu.add(origFile);
-        fileMenu.add(outputFile);
-        fileMenu.addSeparator();
-        fileMenu.add(exit);
+        addMod = new JMenuItem("Add...");
+        addMod.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        mods.add(addMod);
+
+        removeMod = new JMenuItem("Remove");
+        removeMod.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        mods.add(removeMod);
+
+        mods.addSeparator();
+
+        moveUp = new JMenuItem("Move up");
+        moveUp.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        mods.add(moveUp);
+
+        moveDown = new JMenuItem("Move down");
+        moveDown.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        mods.add(moveDown);
+
+        game = new JMenu("Game");
+        game.setMnemonic('G');
+        menuBar.add(game);
+
+        patch = new JMenuItem("Patch");
+        patch.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        game.add(patch);
+
+        unpatch = new JMenuItem("Unpatch");
+        unpatch.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        game.add(unpatch);
+
+        test = new JMenuItem("Test Minecraft");
+        test.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        game.add(test);
+
+        menuBar.add(Box.createHorizontalGlue());
+
+        about = new JMenu("About");
+        about.setMnemonic('A');
+        about.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        menuBar.add(about);
     }
 
     void update(boolean busy) {
