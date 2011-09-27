@@ -25,6 +25,7 @@ class MainMenu {
     JMenuItem moveDown;
     JMenuItem save;
     JMenuItem load;
+    JMenuItem delete;
 
     JMenu game;
     JMenuItem patch;
@@ -95,6 +96,9 @@ class MainMenu {
         load = new JMenu("Select profile");
         mods.add(load);
 
+        delete = new JMenu("Delete profile");
+        mods.add(delete);
+
         game = new JMenu("Game");
         game.setMnemonic('G');
         menuBar.add(game);
@@ -144,6 +148,7 @@ class MainMenu {
         test.setEnabled(mainForm.testButton.isEnabled());
 
         load.removeAll();
+        delete.removeAll();
         if (!busy && MCPatcherUtils.config != null) {
             ArrayList<String> profiles = MCPatcherUtils.config.getProfiles();
             ButtonGroup buttonGroup = new ButtonGroup();
@@ -170,6 +175,18 @@ class MainMenu {
                 });
                 buttonGroup.add(item);
                 load.add(item);
+
+                JMenuItem item1 = new JMenuItem(profile);
+                item1.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        if (JOptionPane.showConfirmDialog(mainForm.frame, "Delete profile " + profile + "?", "Confirm profile delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                            MCPatcherUtils.config.deleteProfile(profile);
+                            mainForm.updateControls();
+                        }
+                    }
+                });
+                item1.setEnabled(!profile.equals(currentProfile));
+                delete.add(item1);
             }
         }
         if (load.getSubElements().length == 0) {
@@ -178,6 +195,13 @@ class MainMenu {
             load.add(item);
         } else {
             load.setEnabled(true);
+        }
+        if (delete.getSubElements().length == 0) {
+            JMenuItem item = new JMenuItem("(none)");
+            item.setEnabled(false);
+            delete.add(item);
+        } else {
+            delete.setEnabled(true);
         }
     }
 }
