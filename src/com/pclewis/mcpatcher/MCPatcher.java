@@ -58,8 +58,6 @@ final public class MCPatcher {
     private static boolean enableAllMods = false;
     static boolean experimentalMods = false;
 
-    private static boolean newVersion = false;
-
     private static UserInterface ui;
 
     private MCPatcher() {
@@ -129,7 +127,6 @@ final public class MCPatcher {
         Util.logOSInfo();
 
         if (!MCPatcherUtils.getString(Config.TAG_LAST_VERSION, "").equals(VERSION_STRING)) {
-            newVersion = true;
             MCPatcherUtils.set(Config.TAG_LAST_VERSION, VERSION_STRING);
             MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, false);
             MCPatcherUtils.set(Config.TAG_DEBUG, BETA_VERSION > 0);
@@ -152,10 +149,6 @@ final public class MCPatcher {
 
     static void saveProperties() {
         if (!ignoreSavedMods && modList != null && MCPatcherUtils.config.selectedProfile != null) {
-            if (newVersion) {
-                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "useTextureCache", Util.bits >= 64);
-                newVersion = false;
-            }
             modList.updateProperties();
             MCPatcherUtils.config.saveProperties();
         }
