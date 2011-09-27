@@ -20,8 +20,7 @@ import java.util.Collections;
 class Config {
     private File xmlFile = null;
     Document xml;
-    Element profile;
-    private String mcVersion;
+    Element selectedProfile;
 
     /*
     * <mcpatcher-profile>
@@ -195,6 +194,14 @@ class Config {
         }
     }
 
+    static String getDefaultProfileName(String mcVersion) {
+        return "Minecraft " + mcVersion;
+    }
+
+    static boolean isDefaultProfile(String profileName) {
+        return profileName.startsWith("Minecraft ");
+    }
+
     void setDefaultProfileName(String profileName) {
         Element root = getRoot();
         NodeList list = root.getElementsByTagName(TAG_MODS);
@@ -221,9 +228,8 @@ class Config {
         }
     }
 
-    void selectProfile(String profileName) {
-        Element oldProfile = profile;
-        profile = null;
+    Element findProfileByName(String profileName, boolean create) {
+        Element profile = null;
         Element root = getRoot();
         NodeList list = root.getElementsByTagName(TAG_MODS);
         for (int i = 0; i < list.getLength(); i++) {
@@ -232,27 +238,50 @@ class Config {
                 Element element = (Element) node;
                 String name = element.getAttribute(ATTR_PROFILE);
                 if (profileName.equals(name)) {
-                    profile = element;
-                    return;
+                    return profile;
                 }
             }
         }
-        profile = xml.createElement(TAG_MODS);
-        if (oldProfile != null) {
-            list = oldProfile.getElementsByTagName(TAG_MOD);
-            for (int i = 0; i < list.getLength(); i++) {
-                Node node = list.item(i);
-                if (node instanceof Element) {
-                    Element element = (Element) node;
-                    String name = getText(element, TAG_TYPE);
-                    if (VAL_BUILTIN.equals(name)) {
-                        profile.appendChild(node.cloneNode(true));
+        if (create) {
+            profile = xml.createElement(TAG_MODS);
+            if (this.selectedProfile != null) {
+                list = this.selectedProfile.getElementsByTagName(TAG_MOD);
+                for (int i = 0; i < list.getLength(); i++) {
+                    Node node = list.item(i);
+                    if (node instanceof Element) {
+                        Element element = (Element) node;
+                        String name = getText(element, TAG_TYPE);
+                        if (VAL_BUILTIN.equals(name)) {
+                            profile.appendChild(node.cloneNode(true));
+                        }
                     }
                 }
             }
+            profile.setAttribute(ATTR_PROFILE, profileName);
+            root.appendChild(profile);
+            getMods();
         }
-        profile.setAttribute(ATTR_PROFILE, profileName);
-        root.appendChild(profile);
+        return profile;
+    }
+
+    void selectProfile() {
+        selectProfile(getConfigValue(TAG_SELECTED_PROFILE));
+    }
+
+    void selectProfile(String profileName) {
+        selectedProfile = findProfileByName(profileName, true);
+        setConfigValue(TAG_SELECTED_PROFILE, profileName);
+    }
+
+    void deleteProfile(String profileName) {
+        Element root = getRoot();
+        Element profile = findProfileByName(profileName, false);
+        if (profile != null) {
+            if (profile == selectedProfile) {
+                selectedProfile = null;
+            }
+            root.removeChild(profile);
+        }
         getMods();
     }
 
@@ -275,10 +304,10 @@ class Config {
     }
 
     Element getMods() {
-        if (profile == null) {
-            selectProfile(getConfigValue(TAG_SELECTED_PROFILE));
+        if (selectedProfile == null) {
+            selectProfile();
         }
-        return profile;
+        return selectedProfile;
     }
 
     boolean hasMod(String mod) {
