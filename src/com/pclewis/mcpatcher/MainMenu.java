@@ -89,6 +89,34 @@ class MainMenu {
         save = new JMenuItem("Save profile...");
         save.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                try {
+                    String profileName;
+                    for (int i = 0; ; i++) {
+                        profileName = "Custom Profile";
+                        if (i > 0) {
+                            profileName += " " + i;
+                        }
+                        if (MCPatcherUtils.config.findProfileByName(profileName, false) == null) {
+                            break;
+                        }
+                    }
+                    Object result = JOptionPane.showInputDialog(
+                        mainForm.frame,
+                        "Enter a name for this profile:",
+                        "Profile name",
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        null,
+                        profileName
+                    );
+                    if (result != null && !result.equals("")) {
+                        MCPatcher.modList.updateProperties();
+                        MCPatcherUtils.config.selectProfile(result.toString());
+                        mainForm.updateControls();
+                    }
+                } catch (Throwable e1) {
+                    e1.printStackTrace();
+                }
             }
         });
         mods.add(save);
@@ -157,15 +185,20 @@ class MainMenu {
                 JRadioButtonMenuItem item = new JRadioButtonMenuItem(profile, profile.equals(currentProfile));
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
+                        if (profile.equals(currentProfile)) {
+                            return;
+                        }
                         MCPatcherUtils.config.selectProfile(profile);
                         if (Config.isDefaultProfile(currentProfile) && Config.isDefaultProfile(profile)) {
                             String version = profile.replaceFirst("^Minecraft ", "");
-                            File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
-                            if (jar.exists()) {
-                                try {
-                                    MCPatcher.setMinecraft(jar, false);
-                                } catch (Exception e1) {
-                                    e1.printStackTrace();
+                            if (!version.equals(MCPatcher.minecraft.getVersion())) {
+                                File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
+                                if (jar.exists()) {
+                                    try {
+                                        MCPatcher.setMinecraft(jar, false);
+                                    } catch (Exception e1) {
+                                        e1.printStackTrace();
+                                    }
                                 }
                             }
                         }
