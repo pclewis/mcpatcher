@@ -17,6 +17,8 @@ import java.util.Properties;
 class Config {
     private File xmlFile = null;
     Document xml;
+    Element profile;
+    private String mcVersion;
 
     /*
     * <mcpatcher-profile>
@@ -47,11 +49,13 @@ class Config {
     */
     static final String TAG_ROOT = "mcpatcherProfile";
     static final String TAG_CONFIG1 = "config";
+    static final String TAG_SELECTED_PROFILE = "selectedProfile";
     static final String TAG_DEBUG = "debug";
     static final String TAG_JAVA_HEAP_SIZE = "javaHeapSize";
     static final String TAG_LAST_VERSION = "lastVersion";
     static final String TAG_BETA_WARNING_SHOWN = "betaWarningShown";
     static final String TAG_MODS = "mods";
+    static final String ATTR_PROFILE = "profile";
     static final String TAG_MOD = "mod";
     static final String TAG_NAME = "name";
     static final String TAG_TYPE = "type";
@@ -85,45 +89,8 @@ class Config {
             save = true;
         }
 
-        File propFile = new File(minecraftDir, "mcpatcher.properties");
-        if (propFile.exists()) {
-            FileInputStream is = null;
-            try {
-                is = new FileInputStream(propFile);
-                convertPropertiesToXML(is);
-                save = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                propFile.delete();
-            }
-        }
         if (save) {
             saveProperties();
-        }
-    }
-
-    private void convertPropertiesToXML(InputStream input) throws IOException {
-        Properties properties = new Properties();
-        properties.load(input);
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            String tag = entry.getKey().toString();
-            String value = entry.getValue().toString();
-            if (tag.equals(TAG_DEBUG) || tag.equals(TAG_LAST_VERSION) || tag.equals(TAG_BETA_WARNING_SHOWN) || tag.equals(TAG_JAVA_HEAP_SIZE)) {
-                MCPatcherUtils.set(tag, value);
-            } else if (tag.startsWith("HDTexture.")) {
-                tag = tag.substring(10);
-                if (!tag.equals("enabled")) {
-                    MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, tag, value);
-                }
-            }
         }
     }
 
@@ -225,8 +192,60 @@ class Config {
         }
     }
 
+    void setDefaultProfileName(String profileName) {
+        Element root = getRoot();
+        NodeList list = root.getElementsByTagName(TAG_MODS);
+        String name = getConfigValue(TAG_SELECTED_PROFILE);
+        if (name == null) {
+            setConfigValue(TAG_SELECTED_PROFILE, profileName);
+        }
+        Element element;
+        boolean found = false;
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node instanceof  Element) {
+                element = (Element) node;
+                name = element.getAttribute(ATTR_PROFILE);
+                if (name == null) {
+                    if (found) {
+                        root.removeChild(element);
+                    } else {
+                        element.setAttribute(ATTR_PROFILE, profileName);
+                        found = true;
+                    }
+                }
+            }
+        }
+    }
+
+    void selectProfile(String profileName) {
+        profile = null;
+        Element root = getRoot();
+        NodeList list = root.getElementsByTagName(TAG_MODS);
+        Element element;
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node instanceof  Element) {
+                element = (Element) node;
+                String name = element.getAttribute(ATTR_PROFILE);
+                if (profileName.equals(name)) {
+                    profile = element;
+                    break;
+                }
+            }
+        }
+        if (profile == null) {
+            element = xml.createElement(TAG_MODS);
+            element.setAttribute(ATTR_PROFILE, profileName);
+            root.appendChild(element);
+        }
+    }
+
     Element getMods() {
-        return getElement(getRoot(), TAG_MODS);
+        if (profile == null) {
+            selectProfile(getConfigValue(TAG_SELECTED_PROFILE));
+        }
+        return profile;
     }
 
     boolean hasMod(String mod) {

@@ -150,7 +150,7 @@ final public class MCPatcher {
     }
 
     static void saveProperties() {
-        if (!ignoreSavedMods && modList != null) {
+        if (!ignoreSavedMods && modList != null && MCPatcherUtils.config.profile != null) {
             modList.updateProperties();
         }
         MCPatcherUtils.config.saveProperties();
@@ -171,6 +171,8 @@ final public class MCPatcher {
                 minecraft.createBackup();
             }
             minecraft.logVersion();
+            String profileName = "Minecraft " + minecraft.getVersion();
+            MCPatcherUtils.config.setDefaultProfileName(profileName);
         } catch (IOException e) {
             minecraft = null;
             Logger.log(e);
