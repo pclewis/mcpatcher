@@ -10,9 +10,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.util.Map;
-import java.util.Properties;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 class Config {
     private File xmlFile = null;
@@ -203,7 +205,7 @@ class Config {
         boolean found = false;
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
-            if (node instanceof  Element) {
+            if (node instanceof Element) {
                 element = (Element) node;
                 name = element.getAttribute(ATTR_PROFILE);
                 if (name == null || name.equals("")) {
@@ -224,7 +226,7 @@ class Config {
         NodeList list = root.getElementsByTagName(TAG_MODS);
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
-            if (node instanceof  Element) {
+            if (node instanceof Element) {
                 Element element = (Element) node;
                 String name = element.getAttribute(ATTR_PROFILE);
                 if (profileName.equals(name)) {
@@ -239,6 +241,23 @@ class Config {
             root.appendChild(profile);
             buildNewProperties();
         }
+    }
+
+    ArrayList<String> getProfiles() {
+        ArrayList<String> profiles = new ArrayList<String>();
+        Element root = getRoot();
+        NodeList list = root.getElementsByTagName(TAG_MODS);
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node instanceof Element) {
+                Element element = (Element) node;
+                String name = element.getAttribute(ATTR_PROFILE);
+                if (name != null && !name.equals("")) {
+                    profiles.add(name);
+                }
+            }
+        }
+        return profiles;
     }
 
     Element getMods() {
