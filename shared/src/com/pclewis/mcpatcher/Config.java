@@ -241,7 +241,7 @@ class Config {
                 Element element = (Element) node;
                 String name = element.getAttribute(ATTR_PROFILE);
                 if (profileName.equals(name)) {
-                    return profile;
+                    return element;
                 }
             }
         }
