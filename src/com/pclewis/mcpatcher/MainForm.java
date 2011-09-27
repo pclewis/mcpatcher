@@ -61,10 +61,10 @@ class MainForm {
     private JButton copyPatchResultsButton;
     private JScrollPane modTableScrollPane;
     private JPanel optionsPanel;
-    private JButton upButton;
-    private JButton addButton;
-    private JButton downButton;
-    private JButton removeButton;
+    JButton upButton;
+    JButton addButton;
+    JButton downButton;
+    JButton removeButton;
 
     private AddModDialog addModDialog;
 
@@ -118,9 +118,6 @@ class MainForm {
         });
         frame.setMinimumSize(new Dimension(470, 488));
         frame.pack();
-
-        mainMenu = new MainMenu(this);
-        frame.setJMenuBar(mainMenu.menuBar);
 
         origBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -403,6 +400,9 @@ class MainForm {
 
         ((DefaultCaret) patchResults.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         copyPatchResultsButton.addActionListener(new CopyToClipboardListener(patchResults));
+
+        mainMenu = new MainMenu(this);
+        frame.setJMenuBar(mainMenu.menuBar);
     }
 
     public void show() {

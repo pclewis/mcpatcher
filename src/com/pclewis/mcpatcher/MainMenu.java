@@ -39,17 +39,11 @@ class MainMenu {
         menuBar.add(file);
 
         origFile = new JMenuItem("Select input file...");
-        origFile.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(origFile, mainForm.origBrowseButton);
         file.add(origFile);
 
         outputFile = new JMenuItem("Select output file...");
-        outputFile.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(outputFile, mainForm.outputBrowseButton);
         file.add(outputFile);
 
         file.addSeparator();
@@ -70,33 +64,21 @@ class MainMenu {
         menuBar.add(mods);
 
         addMod = new JMenuItem("Add...");
-        addMod.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(addMod, mainForm.addButton);
         mods.add(addMod);
 
         removeMod = new JMenuItem("Remove");
-        removeMod.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(removeMod, mainForm.removeButton);
         mods.add(removeMod);
 
         mods.addSeparator();
 
         moveUp = new JMenuItem("Move up");
-        moveUp.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(moveUp, mainForm.upButton);
         mods.add(moveUp);
 
         moveDown = new JMenuItem("Move down");
-        moveDown.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(moveDown, mainForm.downButton);
         mods.add(moveDown);
 
         mods.addSeparator();
@@ -120,25 +102,30 @@ class MainMenu {
         menuBar.add(game);
 
         patch = new JMenuItem("Patch");
-        patch.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(patch, mainForm.patchButton);
         game.add(patch);
 
         unpatch = new JMenuItem("Unpatch");
-        unpatch.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        copyActionListener(unpatch, mainForm.undoButton);
         game.add(unpatch);
 
+        game.addSeparator();
+
         test = new JMenuItem("Test Minecraft");
-        test.addActionListener(new ActionListener() {
+        copyActionListener(test, mainForm.testButton);
+        game.add(test);
+    }
+
+    private static void copyActionListener(JMenuItem item, final JButton button) {
+        item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if (button.isEnabled()) {
+                    for (ActionListener listener : button.getActionListeners()) {
+                        listener.actionPerformed(e);
+                    }
+                }
             }
         });
-        game.add(test);
     }
 
     void updateControls(boolean busy) {
@@ -148,6 +135,10 @@ class MainMenu {
 
         origFile.setEnabled(mainForm.origBrowseButton.isEnabled());
         outputFile.setEnabled(mainForm.outputBrowseButton.isEnabled());
+        addMod.setEnabled(mainForm.addButton.isEnabled());
+        removeMod.setEnabled(mainForm.removeButton.isEnabled());
+        moveUp.setEnabled(mainForm.upButton.isEnabled());
+        moveDown.setEnabled(mainForm.downButton.isEnabled());
         patch.setEnabled(mainForm.patchButton.isEnabled());
         unpatch.setEnabled(mainForm.undoButton.isEnabled());
         test.setEnabled(mainForm.testButton.isEnabled());
