@@ -36,16 +36,18 @@ class MainForm {
         "</html>";
 
     private JPanel mainPanel;
-    private JFrame frame;
+    JFrame frame;
     private int frameWidth = 518;
 
+    private MainMenu mainMenu;
+
     private JTextField origField;
-    private JButton origBrowseButton;
+    JButton origBrowseButton;
     private JTextField outputField;
-    private JButton outputBrowseButton;
-    private JButton testButton;
-    private JButton patchButton;
-    private JButton undoButton;
+    JButton outputBrowseButton;
+    JButton testButton;
+    JButton patchButton;
+    JButton undoButton;
     private JTable modTable;
     private JLabel statusText;
     private JButton refreshButton;
@@ -59,10 +61,10 @@ class MainForm {
     private JButton copyPatchResultsButton;
     private JScrollPane modTableScrollPane;
     private JPanel optionsPanel;
-    private JButton upButton;
-    private JButton addButton;
-    private JButton downButton;
-    private JButton removeButton;
+    JButton upButton;
+    JButton addButton;
+    JButton downButton;
+    JButton removeButton;
 
     private AddModDialog addModDialog;
 
@@ -398,6 +400,9 @@ class MainForm {
 
         ((DefaultCaret) patchResults.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         copyPatchResultsButton.addActionListener(new CopyToClipboardListener(patchResults));
+
+        mainMenu = new MainMenu(this);
+        frame.setJMenuBar(mainMenu.menuBar);
     }
 
     public void show() {
@@ -528,6 +533,7 @@ class MainForm {
         tabbedPane.setEnabled(!busy);
 
         updateActiveTab();
+        mainMenu.updateControls(busy);
     }
 
     private void updateActiveTab() {
