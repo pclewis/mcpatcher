@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 class MainMenu {
     private MainForm mainForm;
@@ -90,11 +91,7 @@ class MainMenu {
         });
         mods.add(save);
 
-        load = new JMenuItem("Load profile...");
-        load.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
+        load = new JMenu("Select profile");
         mods.add(load);
 
         game = new JMenu("Game");
@@ -114,6 +111,8 @@ class MainMenu {
         test = new JMenuItem("Test Minecraft");
         copyActionListener(test, mainForm.testButton);
         game.add(test);
+
+        updateControls(true);
     }
 
     private static void copyActionListener(JMenuItem item, final JButton button) {
@@ -142,5 +141,31 @@ class MainMenu {
         patch.setEnabled(mainForm.patchButton.isEnabled());
         unpatch.setEnabled(mainForm.undoButton.isEnabled());
         test.setEnabled(mainForm.testButton.isEnabled());
+
+        load.removeAll();
+        if (!busy && MCPatcherUtils.config != null) {
+            ArrayList<String> profiles = MCPatcherUtils.config.getProfiles();
+            ButtonGroup buttonGroup = new ButtonGroup();
+            String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
+            for (final String profile : profiles) {
+                JRadioButtonMenuItem item = new JRadioButtonMenuItem(profile, profile.equals(currentProfile));
+                item.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        MCPatcherUtils.config.selectProfile(profile);
+                        MCPatcher.getAllMods();
+                        mainForm.updateModList();
+                    }
+                });
+                buttonGroup.add(item);
+                load.add(item);
+            }
+        }
+        if (load.getSubElements().length == 0) {
+            JMenuItem item = new JMenuItem("(none)");
+            item.setEnabled(false);
+            load.add(item);
+        } else {
+            load.setEnabled(true);
+        }
     }
 }
