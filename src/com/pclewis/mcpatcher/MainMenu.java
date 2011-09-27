@@ -21,13 +21,13 @@ class MainMenu {
     JMenuItem removeMod;
     JMenuItem moveUp;
     JMenuItem moveDown;
+    JMenuItem save;
+    JMenuItem load;
 
     JMenu game;
     JMenuItem patch;
     JMenuItem unpatch;
     JMenuItem test;
-
-    JMenu about;
 
     MainMenu(MainForm mainForm1) {
         mainForm = mainForm1;
@@ -99,6 +99,22 @@ class MainMenu {
         });
         mods.add(moveDown);
 
+        mods.addSeparator();
+
+        save = new JMenuItem("Save profile...");
+        save.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        mods.add(save);
+
+        load = new JMenuItem("Load profile...");
+        load.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        mods.add(load);
+
         game = new JMenu("Game");
         game.setMnemonic('G');
         menuBar.add(game);
@@ -123,19 +139,17 @@ class MainMenu {
             }
         });
         game.add(test);
-
-        menuBar.add(Box.createHorizontalGlue());
-
-        about = new JMenu("About");
-        about.setMnemonic('A');
-        about.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
-        menuBar.add(about);
     }
 
-    void update(boolean busy) {
-        menuBar.setEnabled(!busy);
+    void updateControls(boolean busy) {
+        file.setEnabled(!busy);
+        mods.setEnabled(!busy);
+        game.setEnabled(!busy);
+
+        origFile.setEnabled(mainForm.origBrowseButton.isEnabled());
+        outputFile.setEnabled(mainForm.outputBrowseButton.isEnabled());
+        patch.setEnabled(mainForm.patchButton.isEnabled());
+        unpatch.setEnabled(mainForm.undoButton.isEnabled());
+        test.setEnabled(mainForm.testButton.isEnabled());
     }
 }

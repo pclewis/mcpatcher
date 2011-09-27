@@ -42,12 +42,12 @@ class MainForm {
     private MainMenu mainMenu;
 
     private JTextField origField;
-    private JButton origBrowseButton;
+    JButton origBrowseButton;
     private JTextField outputField;
-    private JButton outputBrowseButton;
-    private JButton testButton;
-    private JButton patchButton;
-    private JButton undoButton;
+    JButton outputBrowseButton;
+    JButton testButton;
+    JButton patchButton;
+    JButton undoButton;
     private JTable modTable;
     private JLabel statusText;
     private JButton refreshButton;
@@ -533,7 +533,7 @@ class MainForm {
         tabbedPane.setEnabled(!busy);
 
         updateActiveTab();
-        mainMenu.update(busy);
+        mainMenu.updateControls(busy);
     }
 
     private void updateActiveTab() {
