@@ -89,50 +89,46 @@ class MainMenu {
         save = new JMenuItem("Save profile...");
         save.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
-                    String profileName;
-                    for (int i = 0; ; i++) {
-                        profileName = "Custom Profile";
-                        if (i > 0) {
-                            profileName += " " + i;
-                        }
-                        if (MCPatcherUtils.config.findProfileByName(profileName, false) == null) {
-                            break;
-                        }
+                String profileName;
+                for (int i = 0; ; i++) {
+                    profileName = "Custom Profile";
+                    if (i > 0) {
+                        profileName += " " + i;
                     }
-                    Object result = JOptionPane.showInputDialog(
-                        mainForm.frame,
-                        "Enter a name for this profile:",
-                        "Profile name",
-                        JOptionPane.QUESTION_MESSAGE,
-                        null,
-                        null,
-                        profileName
-                    );
-                    if (result != null && result instanceof String && !result.equals("")) {
-                        profileName = (String) result;
-                        String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
-                        if (profileName.equals(currentProfile)) {
+                    if (MCPatcherUtils.config.findProfileByName(profileName, false) == null) {
+                        break;
+                    }
+                }
+                Object result = JOptionPane.showInputDialog(
+                    mainForm.frame,
+                    "Enter a name for this profile:",
+                    "Profile name",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    null,
+                    profileName
+                );
+                if (result != null && result instanceof String && !result.equals("")) {
+                    profileName = (String) result;
+                    String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
+                    if (profileName.equals(currentProfile)) {
+                        return;
+                    }
+                    if (MCPatcherUtils.config.findProfileByName(profileName, false) != null) {
+                        int confirm = JOptionPane.showConfirmDialog(
+                            mainForm.frame,
+                            String.format("Profile \"%s\" exists.  Overwrite?", profileName),
+                            "Confirm overwrite",
+                            JOptionPane.YES_NO_OPTION
+                        );
+                        if (confirm != JOptionPane.YES_OPTION) {
                             return;
                         }
-                        if (MCPatcherUtils.config.findProfileByName(profileName, false) != null) {
-                            int confirm = JOptionPane.showConfirmDialog(
-                                mainForm.frame,
-                                String.format("Profile \"%s\" exists.  Overwrite?", profileName),
-                                "Confirm overwrite",
-                                JOptionPane.YES_NO_OPTION
-                            );
-                            if (confirm != JOptionPane.YES_OPTION) {
-                                return;
-                            }
-                            MCPatcherUtils.config.deleteProfile(profileName);
-                        }
-                        MCPatcher.modList.updateProperties();
-                        MCPatcherUtils.config.selectProfile(profileName);
-                        mainForm.updateControls();
+                        MCPatcherUtils.config.deleteProfile(profileName);
                     }
-                } catch (Throwable e1) {
-                    e1.printStackTrace();
+                    MCPatcher.modList.updateProperties();
+                    MCPatcherUtils.config.selectProfile(profileName);
+                    mainForm.updateControls();
                 }
             }
         });
