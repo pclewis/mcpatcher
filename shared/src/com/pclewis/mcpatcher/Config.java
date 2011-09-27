@@ -206,7 +206,7 @@ class Config {
             if (node instanceof  Element) {
                 element = (Element) node;
                 name = element.getAttribute(ATTR_PROFILE);
-                if (name == null) {
+                if (name == null || name.equals("")) {
                     if (found) {
                         root.removeChild(element);
                     } else {
@@ -222,11 +222,10 @@ class Config {
         profile = null;
         Element root = getRoot();
         NodeList list = root.getElementsByTagName(TAG_MODS);
-        Element element;
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
             if (node instanceof  Element) {
-                element = (Element) node;
+                Element element = (Element) node;
                 String name = element.getAttribute(ATTR_PROFILE);
                 if (profileName.equals(name)) {
                     profile = element;
@@ -235,9 +234,10 @@ class Config {
             }
         }
         if (profile == null) {
-            element = xml.createElement(TAG_MODS);
-            element.setAttribute(ATTR_PROFILE, profileName);
-            root.appendChild(element);
+            profile = xml.createElement(TAG_MODS);
+            profile.setAttribute(ATTR_PROFILE, profileName);
+            root.appendChild(profile);
+            buildNewProperties();
         }
     }
 

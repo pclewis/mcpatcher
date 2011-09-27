@@ -138,7 +138,6 @@ final public class MCPatcher {
             MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, true);
         }
 
-        getAllMods();
         if (ui.go()) {
             exitStatus = 0;
         }
@@ -152,8 +151,8 @@ final public class MCPatcher {
     static void saveProperties() {
         if (!ignoreSavedMods && modList != null && MCPatcherUtils.config.profile != null) {
             modList.updateProperties();
+            MCPatcherUtils.config.saveProperties();
         }
-        MCPatcherUtils.config.saveProperties();
     }
 
     static void checkInterrupt() throws InterruptedException {
@@ -173,6 +172,8 @@ final public class MCPatcher {
             minecraft.logVersion();
             String profileName = "Minecraft " + minecraft.getVersion();
             MCPatcherUtils.config.setDefaultProfileName(profileName);
+            MCPatcherUtils.config.selectProfile(profileName);
+            getAllMods();
         } catch (IOException e) {
             minecraft = null;
             Logger.log(e);
