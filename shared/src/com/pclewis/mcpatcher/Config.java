@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 
 class Config {
     private File xmlFile = null;
@@ -221,6 +222,7 @@ class Config {
     }
 
     void selectProfile(String profileName) {
+        Element oldProfile = profile;
         profile = null;
         Element root = getRoot();
         NodeList list = root.getElementsByTagName(TAG_MODS);
@@ -231,16 +233,27 @@ class Config {
                 String name = element.getAttribute(ATTR_PROFILE);
                 if (profileName.equals(name)) {
                     profile = element;
-                    break;
+                    return;
                 }
             }
         }
-        if (profile == null) {
-            profile = xml.createElement(TAG_MODS);
-            profile.setAttribute(ATTR_PROFILE, profileName);
-            root.appendChild(profile);
-            buildNewProperties();
+        profile = xml.createElement(TAG_MODS);
+        if (oldProfile != null) {
+            list = oldProfile.getElementsByTagName(TAG_MOD);
+            for (int i = 0; i < list.getLength(); i++) {
+                Node node = list.item(i);
+                if (node instanceof Element) {
+                    Element element = (Element) node;
+                    String name = getText(element, TAG_TYPE);
+                    if (VAL_BUILTIN.equals(name)) {
+                        profile.appendChild(node.cloneNode(true));
+                    }
+                }
+            }
         }
+        profile.setAttribute(ATTR_PROFILE, profileName);
+        root.appendChild(profile);
+        getMods();
     }
 
     ArrayList<String> getProfiles() {
@@ -257,6 +270,7 @@ class Config {
                 }
             }
         }
+        Collections.sort(profiles);
         return profiles;
     }
 
