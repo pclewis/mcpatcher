@@ -109,9 +109,27 @@ class MainMenu {
                         null,
                         profileName
                     );
-                    if (result != null && !result.equals("")) {
+                    boolean delete = false;
+                    if (result != null && result instanceof String && !result.equals("")) {
+                        profileName = (String) result;
+                        if (MCPatcherUtils.config.findProfileByName(profileName, false) != null) {
+                            int confirm = JOptionPane.showConfirmDialog(
+                                mainForm.frame,
+                                String.format("Profile \"%s\" exists.  Overwrite?", profileName),
+                                "Confirm overwrite",
+                                JOptionPane.YES_NO_OPTION
+                            );
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                delete = true;
+                            } else {
+                                return;
+                            }
+                        }
                         MCPatcher.modList.updateProperties();
-                        MCPatcherUtils.config.selectProfile(result.toString());
+                        if (delete) {
+                            MCPatcherUtils.config.deleteProfile(profileName);
+                        }
+                        MCPatcherUtils.config.selectProfile(profileName);
                         mainForm.updateControls();
                     }
                 } catch (Throwable e1) {
@@ -188,6 +206,7 @@ class MainMenu {
                         if (profile.equals(currentProfile)) {
                             return;
                         }
+                        MCPatcher.modList.updateProperties();
                         MCPatcherUtils.config.selectProfile(profile);
                         if (Config.isDefaultProfile(currentProfile) && Config.isDefaultProfile(profile)) {
                             String version = profile.replaceFirst("^Minecraft ", "");
@@ -212,7 +231,16 @@ class MainMenu {
                 JMenuItem item1 = new JMenuItem(profile);
                 item1.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        if (JOptionPane.showConfirmDialog(mainForm.frame, "Delete profile " + profile + "?", "Confirm profile delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                        if (profile.equals(currentProfile)) {
+                            return;
+                        }
+                        int result = JOptionPane.showConfirmDialog(
+                            mainForm.frame,
+                            String.format("Delete saved profile \"%s\"?", profile),
+                            "Confirm profile delete",
+                            JOptionPane.YES_NO_OPTION
+                        );
+                        if (result == JOptionPane.YES_OPTION) {
                             MCPatcherUtils.config.deleteProfile(profile);
                             mainForm.updateControls();
                         }
