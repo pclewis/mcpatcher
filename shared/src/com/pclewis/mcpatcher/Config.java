@@ -408,23 +408,23 @@ class Config {
         if (xml != null && xmlFile != null) {
             FileOutputStream os = null;
             try {
-                os = new FileOutputStream(xmlFile);
                 TransformerFactory factory = TransformerFactory.newInstance();
+                /*
+                try {
+                    factory.setAttribute("indent-number", 4);
+                } catch (Throwable e) {
+                }
+                */
                 Transformer trans = factory.newTransformer();
                 trans.setOutputProperty(OutputKeys.INDENT, "yes");
                 DOMSource source = new DOMSource(xml);
+                os = new FileOutputStream(xmlFile);
                 trans.transform(source, new StreamResult(new OutputStreamWriter(os, "UTF-8")));
                 saved = true;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                if (os != null) {
-                    try {
-                        os.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                MCPatcherUtils.close(os);
             }
         }
         return saved;

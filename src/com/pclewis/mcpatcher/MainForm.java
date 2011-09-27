@@ -72,6 +72,33 @@ class MainForm {
     private Thread workerThread = null;
 
     public MainForm() {
+        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueue() {
+            private boolean reenter;
+
+            protected void dispatchEvent(AWTEvent event) {
+                try {
+                    super.dispatchEvent(event);
+                } catch (Throwable e) {
+                    Logger.log(Logger.LOG_MAIN);
+                    Logger.log(Logger.LOG_MAIN, "Unexpected error while handling UI event %s", event.toString());
+                    e.printStackTrace();
+                    if (!reenter) {
+                        reenter = true;
+                        try {
+                            setBusy(false);
+                            tabbedPane.setSelectedIndex(TAB_LOG);
+                            updateActiveTab();
+                            cancelWorker();
+                        } catch (Throwable e1) {
+                            e.printStackTrace();
+                        } finally {
+                            reenter = false;
+                        }
+                    }
+                }
+            }
+        });
+
         frame = new JFrame("Minecraft Patcher " + MCPatcher.VERSION_STRING);
         frame.setResizable(true);
         frame.setContentPane(mainPanel);
