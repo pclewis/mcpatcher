@@ -141,6 +141,7 @@ class MainForm {
                 });
                 if (fd.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
                     if (MCPatcher.setMinecraft(fd.getSelectedFile(), false)) {
+                        AddModDialog.modDir = null;
                         MCPatcher.saveProperties();
                         MCPatcher.getAllMods();
                         updateModList();

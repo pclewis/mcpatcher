@@ -12,7 +12,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class AddModDialog extends JDialog {
-    static private File modDir = null;
+    static File modDir = null;
 
     private JPanel contentPane;
     private JButton buttonOK;
