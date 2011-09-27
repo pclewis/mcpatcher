@@ -324,6 +324,12 @@ class Config {
             try {
                 os = new FileOutputStream(xmlFile);
                 TransformerFactory factory = TransformerFactory.newInstance();
+                /*
+                try {
+                    factory.setAttribute("indent-number", 4);
+                } catch (Throwable e) {
+                }
+                */
                 Transformer trans = factory.newTransformer();
                 trans.setOutputProperty(OutputKeys.INDENT, "yes");
                 DOMSource source = new DOMSource(xml);
