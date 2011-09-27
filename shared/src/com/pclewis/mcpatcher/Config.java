@@ -322,7 +322,6 @@ class Config {
         if (xml != null && xmlFile != null) {
             FileOutputStream os = null;
             try {
-                os = new FileOutputStream(xmlFile);
                 TransformerFactory factory = TransformerFactory.newInstance();
                 /*
                 try {
@@ -333,6 +332,7 @@ class Config {
                 Transformer trans = factory.newTransformer();
                 trans.setOutputProperty(OutputKeys.INDENT, "yes");
                 DOMSource source = new DOMSource(xml);
+                os = new FileOutputStream(xmlFile);
                 trans.transform(source, new StreamResult(new OutputStreamWriter(os, "UTF-8")));
                 saved = true;
             } catch (Exception e) {
