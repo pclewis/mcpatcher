@@ -143,7 +143,7 @@ public class AddModDialog extends JDialog {
         fd.setFileHidingEnabled(false);
         fd.setDialogTitle("Select mod zip file");
         if (modDir == null || !modDir.isDirectory()) {
-            String version = MCPatcher.minecraft.getVersion();
+            String version = MCPatcher.minecraft.getVersion().toString();
             modDir = MCPatcherUtils.getMinecraftPath("mods", version);
             if (!modDir.isDirectory()) {
                 modDir = MCPatcherUtils.getMinecraftPath("mods");

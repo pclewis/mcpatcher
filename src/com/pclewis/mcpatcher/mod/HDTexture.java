@@ -67,8 +67,8 @@ public class HDTexture extends Mod {
     }
 
     @Override
-    public void preSetup(int[] minecraftVersionNumbers) {
-        boolean pre16 = compareVersionNumbers(minecraftVersionNumbers, new int[] {2 /* beta */, 1, 6}) < 0;
+    public void preSetup(MinecraftVersion minecraftVersion) {
+        boolean pre16 = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) < 0;
         if (pre16) {
             classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
             classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));

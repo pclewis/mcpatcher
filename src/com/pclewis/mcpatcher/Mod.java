@@ -127,9 +127,9 @@ public abstract class Mod {
     /**
      * Hook for doing any minecraft version-specific mod setup.
      *
-     * @param minecraftVersionNumbers array of minecraft version numbers, e.g., 1.6.5 -> {1, 6, 5}
+     * @param minecraftVersion minecraft version number
      */
-    public void preSetup(int[] minecraftVersionNumbers) {
+    public void preSetup(MinecraftVersion minecraftVersion) {
     }
 
     void setRefs() {
