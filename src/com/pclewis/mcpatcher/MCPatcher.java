@@ -169,7 +169,7 @@ final public class MCPatcher {
                 minecraft.createBackup();
             }
             minecraft.logVersion();
-            String defaultProfile = Config.getDefaultProfileName(minecraft.getVersion());
+            String defaultProfile = Config.getDefaultProfileName(minecraft.getVersion().toString());
             MCPatcherUtils.config.setDefaultProfileName(defaultProfile);
             String selectedProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
             if (Config.isDefaultProfile(selectedProfile)) {
