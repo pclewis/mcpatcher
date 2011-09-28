@@ -39,28 +39,29 @@ final public class MinecraftVersion {
         } else {
             versionNumbers[0] = 3;
         }
-        int i = 0;
+        int i;
         for (i = 0; i < tokens.length; i++) {
             try {
                 versionNumbers[i + 1] = Integer.parseInt(tokens[i]);
             } catch (NumberFormatException e) {
             }
         }
+        int prerelease;
         if (elements[2] == null || elements[2].equals("")) {
-            versionNumbers[i] = 0;
+            prerelease = 0;
         } else if (elements[3] == null || elements[3].equals("")) {
-            versionNumbers[i] = 1;
+            prerelease = 1;
         } else {
             try {
-                versionNumbers[i] = Integer.parseInt(elements[3]);
+                prerelease = Integer.parseInt(elements[3]);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
-                versionNumbers[i] = 1;
+                prerelease = 1;
             }
         }
-        if (versionNumbers[i] > 0) {
-            versionString += "pre" + versionNumbers[i];
-            versionNumbers[i] *= -1;
+        if (prerelease > 0) {
+            versionNumbers[i + 1] = -prerelease;
+            versionString += "pre" + prerelease;
         }
     }
 
