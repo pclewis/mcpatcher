@@ -2,7 +2,6 @@ package com.pclewis.mcpatcher;
 
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
-import javassist.bytecode.MethodInfo;
 
 import java.io.*;
 import java.util.Collections;
@@ -10,8 +9,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -65,7 +62,7 @@ class MinecraftJar {
     }
 
     public boolean isModded() {
-        return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5) && !version.isPreview();
+        return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5) && !version.isPrerelease();
     }
 
     public void logVersion() {

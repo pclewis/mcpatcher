@@ -3,6 +3,9 @@ package com.pclewis.mcpatcher;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Class representing a Minecraft version number, e.g., 1.8.1 or 1.9pre1.
+ */
 final public class MinecraftVersion {
     public static final int ALPHA = 1;
     public static final int BETA = 2;
@@ -16,6 +19,12 @@ final public class MinecraftVersion {
     private String versionString;
     private int[] versionNumbers;
 
+    /**
+     * Attempt to parse a string into a minecraft version.
+     *
+     * @param versionString original version string as it appears in-game, e.g., "Minecraft Beta 1.9 Prerelease"
+     * @return MinecraftVersion object or null
+     */
     public static MinecraftVersion parseVersion(String versionString) {
         Matcher matcher = pattern.matcher(versionString);
         if (matcher.find()) {
@@ -68,18 +77,39 @@ final public class MinecraftVersion {
         }
     }
 
+    /**
+     * Get release type.
+     *
+     * @return ALPHA, BETA, or FINAL
+     */
     public int getReleaseType() {
         return versionNumbers[0];
     }
 
-    public boolean isPreview() {
+    /**
+     * Returns true if version in a prerelease/preview.
+     *
+     * @return true if prerelease
+     */
+    public boolean isPrerelease() {
         return versionNumbers[versionNumbers.length - 1] < 0;
     }
 
+    /**
+     * Get version as a string, e.g, 1.8.1 or 1.9pre1
+     *
+     * @return version string
+     */
     public String toString() {
         return versionString;
     }
 
+    /**
+     * Compare two MinecraftVersions
+     *
+     * @param that version to compare with
+     * @return 0, &lt; 0, or &gt; 0
+     */
     public int compareTo(MinecraftVersion that) {
         int[] a = this.versionNumbers;
         int[] b = that.versionNumbers;
