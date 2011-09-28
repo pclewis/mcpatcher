@@ -35,12 +35,16 @@ final public class MinecraftVersion {
     }
 
     private MinecraftVersion(Matcher matcher) {
-        String[] elements = new String[]{
-            matcher.group(1).toLowerCase(),
-            matcher.group(2),
-            matcher.group(3),
-            matcher.group(4)
-        };
+        String[] elements = new String[]{ "", "", "", "" };
+        for (int i = 0; i < elements.length; i++) {
+            if (i < matcher.groupCount()) {
+                String value = matcher.group(i + 1);
+                if (value != null) {
+                    elements[i] = value;
+                }
+            }
+        }
+        elements[0] = elements[0].toLowerCase();
         versionString = elements[1];
         String[] tokens = versionString.split("[^0-9a-zA-Z]+");
         versionNumbers = new int[tokens.length + 2];
