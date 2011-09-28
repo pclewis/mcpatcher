@@ -1,10 +1,13 @@
 package com.pclewis.mcpatcher;
 
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 final public class MinecraftVersion {
+    public static final int ALPHA = 1;
+    public static final int BETA = 2;
+    public static final int FINAL = 3;
+
     private static final Pattern pattern = Pattern.compile(
         "Minecraft\\s+(Alpha|Beta)?\\s*v?([0-9][-_.0-9a-zA-Z]+)\\s*((?:Pre\\S*|Beta)\\s*(\\d+)?)?",
         Pattern.CASE_INSENSITIVE
@@ -33,11 +36,11 @@ final public class MinecraftVersion {
         String[] tokens = versionString.split("[^0-9a-zA-Z]+");
         versionNumbers = new int[tokens.length + 2];
         if ("alpha".equals(elements[0])) {
-            versionNumbers[0] = 1;
+            versionNumbers[0] = ALPHA;
         } else if ("beta".equals(elements[0])) {
-            versionNumbers[0] = 2;
+            versionNumbers[0] = BETA;
         } else {
-            versionNumbers[0] = 3;
+            versionNumbers[0] = FINAL;
         }
         int i;
         for (i = 0; i < tokens.length; i++) {
@@ -63,6 +66,10 @@ final public class MinecraftVersion {
             versionNumbers[i + 1] = -prerelease;
             versionString += "pre" + prerelease;
         }
+    }
+
+    public int getReleaseType() {
+        return versionNumbers[0];
     }
 
     public boolean isPreview() {
