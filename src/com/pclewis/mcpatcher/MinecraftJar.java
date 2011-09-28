@@ -126,10 +126,6 @@ class MinecraftJar {
             }
             is = jar.getInputStream(mc);
             ClassFile cf = new ClassFile(new DataInputStream(is));
-            Pattern p = Pattern.compile(
-                "Minecraft\\s+(Alpha|Beta)?\\s*v?([0-9][-_.0-9a-zA-Z]+)\\s*((?:Pre\\S*|Beta)\\s*(\\d+)?)?",
-                Pattern.CASE_INSENSITIVE
-            );
             ConstPool cp = cf.getConstPool();
             for (int i = 1; i < cp.getSize(); i++) {
                 if (cp.getTag(i) == ConstPool.CONST_String) {
