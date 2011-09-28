@@ -201,19 +201,22 @@ public abstract class Mod {
      * @see #filesToAdd
      */
     public InputStream openFile(String name) throws IOException {
+        InputStream inputStream = null;
         URL url = getClass().getResource(name);
-        if (url == null) {
-            return null;
+        if (url != null) {
+            url = new URL(url.toString().replaceAll("!(?=.*!)", "%21"));
+            inputStream = url.openStream();
         }
-        url = new URL(url.toString().replaceAll("!(?=.*!)", "%21"));
-        InputStream inputStream = url.openStream();
         if (inputStream == null) {
-            Logger.log(Logger.LOG_MAIN, "DEBUG: openStream failed, retrying with getContextClassLoader");
+            Logger.log(Logger.LOG_MAIN, "WARNING: openStream failed, retrying with getResourceAsStream");
+            inputStream = getClass().getResourceAsStream(name);
+        }
+        if (inputStream == null) {
+            Logger.log(Logger.LOG_MAIN, "WARNING: getResourceAsStream failed, retrying with getContextClassLoader");
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
-            if (inputStream == null) {
-                Logger.log(Logger.LOG_MAIN, "DEBUG: failed again, giving up");
-                return null;
-            }
+        }
+        if (inputStream == null) {
+            Logger.log(Logger.LOG_MAIN, "WARNING: getContextClassLoader failed, giving up");
         }
         return inputStream;
     }
