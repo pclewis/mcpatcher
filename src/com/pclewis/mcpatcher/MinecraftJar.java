@@ -2,7 +2,6 @@ package com.pclewis.mcpatcher;
 
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
-import javassist.bytecode.MethodInfo;
 
 import java.io.*;
 import java.util.Collections;
@@ -10,8 +9,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -19,9 +16,7 @@ import java.util.zip.ZipFile;
 class MinecraftJar {
     private File origFile;
     private File outputFile;
-    private int alphaBeta;
-    private int preview;
-    private String version;
+    private MinecraftVersion version;
     private String md5;
     private String origMD5;
     private JarFile origJar;
@@ -59,28 +54,15 @@ class MinecraftJar {
             throw new IOException("Could not compute md5 sum of " + file.getPath());
         }
 
-        origMD5 = getOrigMD5(version, md5);
+        origMD5 = getOrigMD5();
     }
 
-    public int[] getVersionNumbers() {
-        String[] tokens = getVersion().split("[^0-9]+");
-        int[] versionNumbers = new int[tokens.length + 1];
-        versionNumbers[0] = alphaBeta;
-        for (int i = 0; i < tokens.length; i++) {
-            try {
-                versionNumbers[i + 1] = Integer.parseInt(tokens[i]);
-            } catch (NumberFormatException e) {
-            }
-        }
-        return versionNumbers;
-    }
-
-    public String getVersion() {
+    public MinecraftVersion getVersion() {
         return version;
     }
 
     public boolean isModded() {
-        return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5) && preview == 0;
+        return md5 != null && origMD5 != null && !origMD5.equalsIgnoreCase(md5) && !version.isPrerelease();
     }
 
     public void logVersion() {
@@ -125,7 +107,7 @@ class MinecraftJar {
         }
     }
 
-    private String extractVersion(File file) {
+    private MinecraftVersion extractVersion(File file) {
         if (!file.exists()) {
             return null;
         }
@@ -141,39 +123,12 @@ class MinecraftJar {
             }
             is = jar.getInputStream(mc);
             ClassFile cf = new ClassFile(new DataInputStream(is));
-            Pattern p = Pattern.compile(
-                "Minecraft\\s+(Alpha|Beta)?\\s*v?([0-9][-_.0-9a-zA-Z]+)\\s*(Pre\\S*\\s*(\\d+)?)?",
-                Pattern.CASE_INSENSITIVE
-            );
             ConstPool cp = cf.getConstPool();
             for (int i = 1; i < cp.getSize(); i++) {
                 if (cp.getTag(i) == ConstPool.CONST_String) {
                     String value = cp.getStringInfo(i);
-                    Matcher m = p.matcher(value);
-                    if (m.find()) {
-                        if (m.group(1).toLowerCase().startsWith("alpha")) {
-                            alphaBeta = 1;
-                        } else if (m.group(1).toLowerCase().startsWith("beta")) {
-                            alphaBeta = 2;
-                        } else {
-                            alphaBeta = 3;
-                        }
-                        version = m.group(2);
-                        if (m.group(3) == null || m.group(3).equals("")) {
-                            preview = 0;
-                        } else if (m.group(4) == null || m.group(4).equals("")) {
-                            preview = 1;
-                        } else {
-                            try {
-                                preview = Integer.parseInt(m.group(4));
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                                preview = 1;
-                            }
-                        }
-                        if (preview > 0) {
-                            version = version + "pre" + preview;
-                        }
+                    version = MinecraftVersion.parseVersion(value);
+                    if (version != null) {
                         break;
                     }
                 }
@@ -187,7 +142,7 @@ class MinecraftJar {
         return version;
     }
 
-    private static String getOrigMD5(String version, String md5) {
+    private static String getOrigMD5() {
         File md5File = MCPatcherUtils.getMinecraftPath("bin", "md5s");
         if (md5File.exists()) {
             FileInputStream is = null;
