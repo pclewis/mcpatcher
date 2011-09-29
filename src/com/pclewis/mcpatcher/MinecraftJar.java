@@ -30,6 +30,7 @@ class MinecraftJar {
         fixPreviewJarName("1.8", "pre1", "7ce3238b148bb67a3b84cf59b7516f55");
         fixPreviewJarName("1.8", "pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
         fixPreviewJarName("1.9", "pre1", "b4d9681a1118949d7753e19c35c61ec7");
+        fixPreviewJarName("1.9", "pre2", "962d79abeca031b44cf8dac8d4fcabe9");
 
         extractVersion(file);
         if (version == null) {
