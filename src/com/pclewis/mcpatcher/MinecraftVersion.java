@@ -11,6 +11,8 @@ final public class MinecraftVersion {
     public static final int BETA = 2;
     public static final int FINAL = 3;
 
+    private static final int NOT_PRERELEASE = 9999;
+
     private static final Pattern pattern = Pattern.compile(
         "Minecraft\\s+(Alpha|Beta)?\\s*v?([0-9][-_.0-9a-zA-Z]+)\\s*((?:Pre\\S*|Beta)\\s*(\\d+)?)?",
         Pattern.CASE_INSENSITIVE
@@ -76,8 +78,10 @@ final public class MinecraftVersion {
             }
         }
         if (prerelease > 0) {
-            versionNumbers[i + 1] = -prerelease;
+            versionNumbers[i + 1] = prerelease;
             versionString += "pre" + prerelease;
+        } else {
+            versionNumbers[i + 1] = NOT_PRERELEASE;
         }
     }
 
@@ -96,7 +100,7 @@ final public class MinecraftVersion {
      * @return true if prerelease
      */
     public boolean isPrerelease() {
-        return versionNumbers[versionNumbers.length - 1] < 0;
+        return versionNumbers[versionNumbers.length - 1] != NOT_PRERELEASE;
     }
 
     /**
