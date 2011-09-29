@@ -24,9 +24,16 @@ public class BetterGrass extends Mod {
 
         classMods.add(new MaterialMod());
         classMods.add(new BlockMod());
-        classMods.add(new BlockGrassMod());
+        classMods.add(new BlockGrassMod("Grass", 2, 3, 0));
         classMods.add(new IBlockAccessMod());
         classMods.add(new RenderBlocksMod());
+    }
+
+    @Override
+    public void preSetup(MinecraftVersion minecraftVersion) {
+        if (minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 1")) >= 0) {
+            classMods.add(new BlockGrassMod("Mycelium", 110, 77, 78));
+        }
     }
 
     private static class MaterialMod extends ClassMod {
@@ -88,20 +95,28 @@ public class BetterGrass extends Mod {
 
     private class BlockGrassMod extends ClassMod {
         private byte[] material;
+        private String blockName;
 
-        public BlockGrassMod() {
-            classSignatures.add(new FixedBytecodeSignature(
-                ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                BytecodeMatcher.captureReference(GETSTATIC),
-                IF_ACMPEQ, BinaryRegex.any(2),
-                ALOAD, BinaryRegex.backReference(1),
-                BytecodeMatcher.captureReference(GETSTATIC),
-                IF_ACMPNE, BinaryRegex.any(2),
-                BIPUSH, 68,
-                IRETURN,
-                ICONST_3,
-                IRETURN
-            ) {
+        public BlockGrassMod(final String blockName, final int blockID, final int halfTextureID, final int fullTextureID) {
+            this.blockName = blockName;
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        BytecodeMatcher.captureReference(GETSTATIC),
+                        IF_ACMPEQ, BinaryRegex.any(2),
+                        ALOAD, BinaryRegex.backReference(1),
+                        BytecodeMatcher.captureReference(GETSTATIC),
+                        IF_ACMPNE, BinaryRegex.any(2),
+                        BIPUSH, 68,
+                        IRETURN,
+                        push(methodInfo, halfTextureID),
+                        IRETURN
+                    );
+                }
+
                 @Override
                 public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
                     material = matcher.getCaptureGroup(1);
@@ -142,7 +157,7 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    FieldRef array = new FieldRef("BlockGrass", field_MATRIX, fieldtype_MATRIX);
+                    FieldRef array = new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX);
                     byte[] getArray = reference(methodInfo, GETSTATIC, array);
                     byte[] putArray = reference(methodInfo, PUTSTATIC, array);
                     return buildCode(
@@ -213,7 +228,7 @@ public class BetterGrass extends Mod {
                         IF_ACMPNE, BinaryRegex.any(2),
                         BIPUSH, 68,
                         IRETURN,
-                        ICONST_3,
+                        push(methodInfo, halfTextureID),
                         IRETURN
                     );
                 }
@@ -239,7 +254,7 @@ public class BetterGrass extends Mod {
                         builtSnow,
                         IF_ACMPEQ, branch("A"),
 
-                        // if (iblockaccess.getBlockId(i+a[l][0], j-1, k+a[l][1]) == 3)
+                        // if (iblockaccess.getBlockId(i+a[l][0], j-1, k+a[l][1]) == 2)
                         ALOAD, 1,
                         ILOAD, 2,
                         matrix,
@@ -259,16 +274,16 @@ public class BetterGrass extends Mod {
                         IALOAD,
                         IADD,
                         getBlockID,
-                        ICONST_2,
+                        push(methodInfo, blockID),
                         IF_ICMPEQ, branch("B"),
 
                         // return 3;
-                        ICONST_3,
+                        push(methodInfo, halfTextureID),
                         IRETURN,
 
                         // return 0;
                         label("B"),
-                        ICONST_0,
+                        push(methodInfo, fullTextureID),
                         IRETURN,
 
                         // material = iblockaccess.getBlockMaterial(i+a[l][0], j, k+a[l][1]);
@@ -313,6 +328,11 @@ public class BetterGrass extends Mod {
                     );
                 }
             });
+        }
+
+        @Override
+        public String getDeobfClass() {
+            return "Block" + blockName;
         }
     }
 
