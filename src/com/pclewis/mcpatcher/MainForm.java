@@ -319,7 +319,6 @@ class MainForm {
                 Mod mod = (Mod) modTable.getModel().getValueAt(row, 0);
                 if (mod instanceof ExternalMod) {
                     MCPatcher.modList.remove(mod);
-                    ((ExternalMod) mod).closeZip();
                     modTable.clearSelection();
                     AbstractTableModel model = (AbstractTableModel) modTable.getModel();
                     model.fireTableRowsDeleted(row, row);

@@ -187,6 +187,9 @@ final public class MCPatcher {
     }
 
     static void getAllMods() {
+        if (modList != null) {
+            modList.close();
+        }
         modList = new ModList();
         if (!ignoreSavedMods) {
             modList.loadSavedMods();

@@ -32,13 +32,14 @@ class ExternalMod extends Mod {
         }
     }
 
-    void closeZip() {
+    @Override
+    public void close() {
         MCPatcherUtils.close(zipFile);
     }
 
     @Override
     protected void finalize() throws Throwable {
-        closeZip();
+        close();
         super.finalize();
     }
 }

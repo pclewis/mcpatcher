@@ -39,6 +39,12 @@ class ModList {
         addNoReplace(baseMod);
     }
 
+    protected void close() {
+        for (Mod mod : modsByIndex) {
+            mod.close();
+        }
+    }
+
     public void loadBuiltInMods() {
         for (BuiltInMod builtInMod : builtInMods) {
             if (!modsByName.containsKey(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
@@ -174,6 +180,7 @@ class ModList {
                 modsByName.remove(name);
             }
         }
+        mod.close();
     }
 
     public int addFirst(Mod mod) {

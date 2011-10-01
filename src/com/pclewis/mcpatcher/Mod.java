@@ -118,6 +118,12 @@ public abstract class Mod {
     }
 
     /**
+     * Hook for doing any cleanup (closing files, etc.) when a Mod is deleted.
+     */
+    public void close() {
+    }
+
+    /**
      * @return mapping between readable class, method, and field names and obfuscated names
      */
     public ClassMap getClassMap() {
