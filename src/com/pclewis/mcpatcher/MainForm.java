@@ -532,6 +532,12 @@ class MainForm {
     }
 
     public void updateControls() {
+        String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
+        if (currentProfile == null || currentProfile.equals("")) {
+            frame.setTitle("MCPatcher " + MCPatcher.VERSION_STRING);
+        } else {
+            frame.setTitle("MCPatcher " + MCPatcher.VERSION_STRING + " [" + currentProfile + "]");
+        }
         if (MCPatcher.minecraft == null) {
             origField.setText("");
             outputField.setText("");
