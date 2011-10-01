@@ -58,6 +58,12 @@ class MinecraftJar {
         origMD5 = getOrigMD5();
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        closeStreams();
+        super.finalize();
+    }
+
     public MinecraftVersion getVersion() {
         return version;
     }

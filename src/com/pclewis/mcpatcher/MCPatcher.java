@@ -159,6 +159,9 @@ final public class MCPatcher {
     }
 
     static boolean setMinecraft(File file, boolean createBackup) {
+        if (minecraft != null) {
+            minecraft.closeStreams();
+        }
         if (file == null) {
             minecraft = null;
             return false;
