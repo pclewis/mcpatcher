@@ -213,35 +213,35 @@ class ModList {
         return indexOfVisible(mod);
     }
 
-    public int moveUp(int index) {
-        return move(index, -1);
+    public int moveUp(int index, boolean toTop) {
+        return move(index, -1, toTop);
     }
 
-    public int moveDown(int index) {
-        return move(index, 1);
+    public int moveDown(int index, boolean toBottom) {
+        return move(index, 1, toBottom);
     }
 
-    private int move(int index, int offset) {
-        int newIndex = index + offset;
+    private int move(int index, int direction, boolean allTheWay) {
         Vector<Mod> visibleMods = getVisible();
-        if (index >= 0 && index < visibleMods.size() && newIndex >= 0 && newIndex < visibleMods.size()) {
-            Mod mod1 = visibleMods.get(index);
-            Mod mod2 = visibleMods.get(newIndex);
-            int i = -1;
-            int j = -1;
-            for (int k = 0; k < modsByIndex.size(); k++) {
-                if (mod1 == modsByIndex.get(k)) {
-                    i = k;
-                }
-                if (mod2 == modsByIndex.get(k)) {
-                    j = k;
+        int newIndex;
+        if (!allTheWay) {
+            newIndex = index + direction;
+        } else if (direction < 0) {
+            newIndex = 0;
+        } else {
+            newIndex = visibleMods.size() - 1;
+        }
+        if (index >= 0 && index < visibleMods.size() && newIndex >= 0 && newIndex < visibleMods.size() && newIndex != index) {
+            List<Mod> mods = visibleMods.subList(Math.min(index, newIndex), Math.max(index, newIndex) + 1);
+            for (int i = 0; i < modsByIndex.size(); i++) {
+                for (int j = 0; j < mods.size(); j++) {
+                    if (modsByIndex.get(i) == mods.get(j)) {
+                        modsByIndex.set(i, mods.get((j + direction + mods.size()) % mods.size()));
+                        break;
+                    }
                 }
             }
-            if (i > 0 && j > 0) {
-                modsByIndex.set(i, mod2);
-                modsByIndex.set(j, mod1);
-                index = newIndex;
-            }
+            index = newIndex;
         }
         return index;
     }

@@ -68,6 +68,8 @@ class MainForm {
 
     private AddModDialog addModDialog;
 
+    private boolean shift;
+
     private boolean busy = true;
     private Thread workerThread = null;
 
@@ -77,6 +79,12 @@ class MainForm {
 
             protected void dispatchEvent(AWTEvent event) {
                 try {
+                    if (event instanceof KeyEvent && (event.getID() == KeyEvent.KEY_PRESSED || event.getID() == KeyEvent.KEY_RELEASED)) {
+                        KeyEvent keyEvent = (KeyEvent) event;
+                        if (keyEvent.getKeyCode() == KeyEvent.VK_SHIFT) {
+                            shift = (event.getID() == KeyEvent.KEY_PRESSED);
+                        }
+                    }
                     super.dispatchEvent(event);
                 } catch (Throwable e) {
                     Logger.log(Logger.LOG_MAIN);
@@ -251,7 +259,7 @@ class MainForm {
             public void actionPerformed(ActionEvent e) {
                 int row = modTable.getSelectedRow();
                 if (row >= 0) {
-                    int newRow = MCPatcher.modList.moveUp(row);
+                    int newRow = MCPatcher.modList.moveUp(row, shift);
                     modTable.clearSelection();
                     AbstractTableModel model = (AbstractTableModel) modTable.getModel();
                     model.fireTableRowsUpdated(Math.min(row, newRow), Math.max(row, newRow));
@@ -266,7 +274,7 @@ class MainForm {
             public void actionPerformed(ActionEvent e) {
                 int row = modTable.getSelectedRow();
                 if (row >= 0) {
-                    int newRow = MCPatcher.modList.moveDown(row);
+                    int newRow = MCPatcher.modList.moveDown(row, shift);
                     modTable.clearSelection();
                     AbstractTableModel model = (AbstractTableModel) modTable.getModel();
                     model.fireTableRowsUpdated(Math.min(row, newRow), Math.max(row, newRow));

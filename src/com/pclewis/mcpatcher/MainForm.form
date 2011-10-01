@@ -217,7 +217,7 @@
                             <properties>
                               <enabled value="false"/>
                               <icon value="resources/uparrow.png"/>
-                              <toolTipText value="Move selected item up the list"/>
+                              <toolTipText value="&lt;html&gt;Move selected item up the list&lt;br&gt;(Shift-click: Move to top)&lt;/html&gt;"/>
                             </properties>
                           </component>
                           <component id="fa55e" class="javax.swing.JButton" binding="addButton">
@@ -237,7 +237,7 @@
                             <properties>
                               <enabled value="false"/>
                               <icon value="resources/downarrow.png"/>
-                              <toolTipText value="Move selected item down the list"/>
+                              <toolTipText value="&lt;html&gt;Move selected item down the list&lt;br&gt;(Shift-click: Move to bottom)&lt;/html&gt;"/>
                             </properties>
                           </component>
                           <component id="bee6e" class="javax.swing.JButton" binding="removeButton">
