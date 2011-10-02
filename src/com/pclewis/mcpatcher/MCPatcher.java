@@ -480,8 +480,8 @@ final public class MCPatcher {
             String name = entry.getName();
             boolean patched = false;
 
-            if (name.startsWith("META-INF") || name.startsWith("__MACOSX")) {
-                continue; // leave out manifest
+            if (MinecraftJar.isGarbageFile(name)) {
+                continue;
             }
             if (entry.isDirectory()) {
                 outputJar.putNextEntry(new ZipEntry(name));

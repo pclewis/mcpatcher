@@ -167,8 +167,12 @@ class MinecraftJar {
         return null;
     }
 
+    static boolean isGarbageFile(String filename) {
+        return filename.startsWith("META-INF") || filename.startsWith("__MACOSX") || filename.endsWith(".DS_Store");
+    }
+
     static boolean isClassFile(String filename) {
-        return filename.endsWith(".class") && !filename.startsWith("__MACOSX");
+        return filename.endsWith(".class") && !isGarbageFile(filename);
     }
 
     static void setDefaultTexturePack() {
