@@ -346,9 +346,7 @@ class MainForm {
                     HashMap<String, ArrayList<Mod>> conflicts = MCPatcher.getConflicts();
                     if (conflicts.size() > 0) {
                         ConflictDialog dialog = new ConflictDialog(conflicts);
-                        int result = JOptionPane.showConfirmDialog(
-                            frame, dialog.getContentPane(), "Mod conflict detected", JOptionPane.YES_NO_OPTION
-                        );
+                        int result = dialog.getResult();
                         if (result != JOptionPane.YES_OPTION) {
                             patchOk = false;
                         }

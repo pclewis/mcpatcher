@@ -6,14 +6,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-class ConflictDialog extends JDialog {
+class ConflictDialog {
     private JPanel contentPane;
     private JTextArea conflictsText;
 
     ConflictDialog(HashMap<String, ArrayList<Mod>> conflicts) {
-        setContentPane(contentPane);
-        setModal(true);
-        setResizable(true);
         HashMap<ArrayList<Mod>, ArrayList<String>> c = new HashMap<ArrayList<Mod>, ArrayList<String>>();
         for (Map.Entry<String, ArrayList<Mod>> entry : conflicts.entrySet()) {
             String filename = entry.getKey();
@@ -38,6 +35,18 @@ class ConflictDialog extends JDialog {
             }
             message.append('\n');
         }
-        conflictsText.setText(message.toString().trim());
+        String text = message.toString().trim();
+        conflictsText.setRows(Math.max(6, Math.min(24, text.split("\n").length)));
+        conflictsText.setText(text);
+    }
+
+    int getResult() {
+        JOptionPane pane = new JOptionPane(contentPane, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION);
+        JDialog dialog = pane.createDialog("Mod conflict detected");
+        dialog.setModal(true);
+        dialog.setResizable(true);
+        dialog.setVisible(true);
+        Object result = pane.getValue();
+        return result instanceof Integer ? (Integer) result : JOptionPane.NO_OPTION;
     }
 }
