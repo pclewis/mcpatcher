@@ -413,23 +413,27 @@ final public class MCPatcher {
         }
     }
 
-    static ArrayList<String> getConflicts() {
-        ArrayList<String> conflicts = new ArrayList<String>();
+    static HashMap<String, ArrayList<Mod>> getConflicts() {
+        HashMap<String, ArrayList<Mod>> conflicts = new HashMap<String, ArrayList<Mod>>();
         ArrayList<Mod> mods = modList.getSelected();
-        int n = mods.size();
-        for (int i = 0; i < n; i++) {
-            Mod mod1 = mods.get(i);
-            for (int j = i + 1; j < n; j++) {
-                Mod mod2 = mods.get(j);
-                for (String s : mod2.filesToAdd) {
-                    if (mod1.filesToAdd.contains(s)) {
-                        conflicts.add(String.format(
-                            "%s from %s conflicts with %s",
-                            s, mod2.getName(), mod1.getName()
-                        ));
-                    }
+        for (Mod mod : mods) {
+            for (String filename : mod.filesToAdd) {
+                ArrayList<Mod> modArray = conflicts.get(filename);
+                if (modArray == null) {
+                    modArray = new ArrayList<Mod>();
+                    conflicts.put(filename, modArray);
                 }
+                modArray.add(mod);
             }
+        }
+        ArrayList<String> entriesToRemove = new ArrayList<String>();
+        for (Map.Entry<String, ArrayList<Mod>> entry : conflicts.entrySet()) {
+            if (entry.getValue().size() <= 1) {
+                entriesToRemove.add(entry.getKey());
+            }
+        }
+        for (String filename : entriesToRemove) {
+            conflicts.remove(filename);
         }
         return conflicts;
     }

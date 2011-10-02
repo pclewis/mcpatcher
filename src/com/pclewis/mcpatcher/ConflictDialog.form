@@ -39,14 +39,14 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="731a6" class="javax.swing.JTextArea" binding="conflicts">
+              <component id="731a6" class="javax.swing.JTextArea" binding="conflictsText">
                 <constraints/>
                 <properties>
                   <background color="-2697514"/>
-                  <columns value="40"/>
+                  <columns value="32"/>
                   <editable value="false"/>
                   <lineWrap value="true"/>
-                  <rows value="10"/>
+                  <rows value="20"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>

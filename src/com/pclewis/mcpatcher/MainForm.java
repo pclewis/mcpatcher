@@ -343,13 +343,9 @@ class MainForm {
             class PatchThread implements Runnable {
                 public void run() {
                     boolean patchOk = true;
-                    ArrayList<String> conflicts = MCPatcher.getConflicts();
+                    HashMap<String, ArrayList<Mod>> conflicts = MCPatcher.getConflicts();
                     if (conflicts.size() > 0) {
-                        StringBuilder message = new StringBuilder();
-                        for (String s : conflicts) {
-                            message.append(s).append('\n');
-                        }
-                        ConflictDialog dialog = new ConflictDialog(message.toString());
+                        ConflictDialog dialog = new ConflictDialog(conflicts);
                         int result = JOptionPane.showConfirmDialog(
                             frame, dialog.getContentPane(), "Mod conflict detected", JOptionPane.YES_NO_OPTION
                         );
