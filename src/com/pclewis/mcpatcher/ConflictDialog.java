@@ -46,7 +46,7 @@ class ConflictDialog {
             for (String filename : filenames) {
                 message.append("    ").append(filename).append('\n');
             }
-            message.append('\n');
+            message.append("Only the files from ").append(mods.get(mods.size() - 1).getName()).append(" will be used.\n\n");
         }
         return message.toString().trim();
     }
