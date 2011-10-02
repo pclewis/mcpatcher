@@ -7,7 +7,7 @@ class ConflictDialog {
     private JPanel contentPane;
     private JTextArea conflictsText;
 
-    ConflictDialog(HashMap<String, ArrayList<Mod>> conflicts) {
+    static String getText(HashMap<String, ArrayList<Mod>> conflicts) {
         HashMap<ArrayList<Mod>, ArrayList<String>> conflictGroups = new HashMap<ArrayList<Mod>, ArrayList<String>>();
         for (Map.Entry<String, ArrayList<Mod>> entry : conflicts.entrySet()) {
             String filename = entry.getKey();
@@ -48,7 +48,11 @@ class ConflictDialog {
             }
             message.append('\n');
         }
-        String text = message.toString().trim();
+        return message.toString().trim();
+    }
+
+    ConflictDialog(HashMap<String, ArrayList<Mod>> conflicts) {
+        String text = getText(conflicts);
         conflictsText.setRows(Math.max(6, Math.min(24, text.split("\n").length)));
         conflictsText.setText(text);
     }
