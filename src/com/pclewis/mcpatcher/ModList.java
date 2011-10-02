@@ -390,7 +390,7 @@ class ModList {
                 invalidEntries.add(element);
             } else if (type.equals(Config.VAL_BUILTIN)) {
                 for (BuiltInMod builtInMod : builtInMods) {
-                    if (name.equals(builtInMod.name) && (MCPatcher.experimentalMods || ! builtInMod.experimental)) {
+                    if (name.equals(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
                         try {
                             mod = builtInMod.modClass.newInstance();
                         } catch (Exception e) {

@@ -69,10 +69,10 @@ public class AddModDialog extends JDialog {
         });
 
         contentPane.registerKeyboardAction(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    onCancel();
-                }
-            }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+            public void actionPerformed(ActionEvent e) {
+                onCancel();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         browseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

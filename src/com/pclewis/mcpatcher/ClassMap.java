@@ -147,6 +147,7 @@ public class ClassMap {
     /**
      * Add class/field/method mappings.
      * <p/>
+     *
      * @param from descriptive reference
      * @param to   obfuscated reference
      */
@@ -167,6 +168,7 @@ public class ClassMap {
     /**
      * Add class mappings based on a pair of type descriptors, e.g., (LClassA;I)LClassB; -> (Lab;I)Lbc;
      * <p/>
+     *
      * @param fromType type descriptor using descriptive names
      * @param toType   type descriptor using obfuscated names
      * @throws IllegalArgumentException if descriptors do not match

@@ -37,7 +37,7 @@ final public class MinecraftVersion {
     }
 
     private MinecraftVersion(Matcher matcher) {
-        String[] elements = new String[]{ "", "", "", "" };
+        String[] elements = new String[]{"", "", "", ""};
         for (int i = 0; i < elements.length; i++) {
             if (i < matcher.groupCount()) {
                 String value = matcher.group(i + 1);
