@@ -209,7 +209,6 @@ class MainMenu {
                                 File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
                                 if (jar.exists()) {
                                     try {
-                                        AddModDialog.modDir = null;
                                         MCPatcher.setMinecraft(jar, false);
                                     } catch (Exception e1) {
                                         e1.printStackTrace();

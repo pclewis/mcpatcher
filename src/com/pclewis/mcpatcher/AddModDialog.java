@@ -12,8 +12,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class AddModDialog extends JDialog {
-    static File modDir = null;
-
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -142,18 +140,20 @@ public class AddModDialog extends JDialog {
         fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fd.setFileHidingEnabled(false);
         fd.setDialogTitle("Select mod zip file");
-        if (modDir == null || !modDir.isDirectory()) {
+        File defaultModDir = null;
+        try {
+            String modDirString = MCPatcherUtils.getString(Config.TAG_LAST_MOD_DIRECTORY, "");
+            File lastModDir = new File(modDirString);
             String version = MCPatcher.minecraft.getVersion().toString();
-            modDir = MCPatcherUtils.getMinecraftPath("mods", version);
-            if (!modDir.isDirectory()) {
-                modDir = MCPatcherUtils.getMinecraftPath("mods");
-                if (!modDir.isDirectory()) {
-                    modDir = MCPatcherUtils.getMinecraftPath();
-                }
+            defaultModDir = MCPatcherUtils.getMinecraftPath("mods", version);
+            if (modDirString.equals("")) {
+                defaultModDir.mkdirs();
+                fd.setCurrentDirectory(defaultModDir);
+            } else if (lastModDir.isDirectory()) {
+                fd.setCurrentDirectory(lastModDir);
             }
-        }
-        if (modDir != null && modDir.isDirectory()) {
-            fd.setCurrentDirectory(modDir);
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
         fd.setAcceptAllFileFilterUsed(false);
         fd.setFileFilter(new FileFilter() {
@@ -171,7 +171,12 @@ public class AddModDialog extends JDialog {
         if (fd.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
             File file = fd.getSelectedFile();
             inputField.setText(file.getPath());
-            modDir = file.getParentFile();
+            File lastModDir = file.getParentFile();
+            if (lastModDir.equals(defaultModDir)) {
+                MCPatcherUtils.set(Config.TAG_LAST_MOD_DIRECTORY, "");
+            } else {
+                MCPatcherUtils.set(Config.TAG_LAST_MOD_DIRECTORY, lastModDir.getAbsolutePath());
+            }
             fileMap.clear();
             MCPatcherUtils.close(zipFile);
             zipFile = null;

@@ -55,6 +55,7 @@ class Config {
     static final String TAG_ROOT = "mcpatcherProfile";
     static final String TAG_CONFIG1 = "config";
     static final String TAG_SELECTED_PROFILE = "selectedProfile";
+    static final String TAG_LAST_MOD_DIRECTORY = "lastModDirectory";
     static final String TAG_DEBUG = "debug";
     static final String TAG_JAVA_HEAP_SIZE = "javaHeapSize";
     static final String TAG_LAST_VERSION = "lastVersion";
