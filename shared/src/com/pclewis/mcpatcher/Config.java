@@ -10,9 +10,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -75,6 +77,18 @@ class Config {
     static final String VAL_BUILTIN = "builtIn";
     static final String VAL_EXTERNAL_ZIP = "externalZip";
     static final String VAL_EXTERNAL_JAR = "externalJar";
+
+    private static final int XML_INDENT_AMOUNT = 2;
+    private static final String XSLT_REFORMAT =
+        "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">" +
+            "<xsl:output method=\"xml\" omit-xml-declaration=\"no\"/>" +
+            "<xsl:strip-space elements=\"*\"/>" +
+            "<xsl:template match=\"@*|node()\">" +
+            "<xsl:copy>" +
+            "<xsl:apply-templates select=\"@*|node()\"/>" +
+            "</xsl:copy>" +
+            "</xsl:template>" +
+            "</xsl:stylesheet>";
 
     Config(File minecraftDir) throws ParserConfigurationException {
         xmlFile = new File(minecraftDir, "mcpatcher.xml");
@@ -409,14 +423,15 @@ class Config {
             FileOutputStream os = null;
             try {
                 TransformerFactory factory = TransformerFactory.newInstance();
-                /*
+                Transformer trans;
                 try {
-                    factory.setAttribute("indent-number", 4);
+                    factory.setAttribute("indent-number", XML_INDENT_AMOUNT);
+                    trans = factory.newTransformer(new StreamSource(new StringReader(XSLT_REFORMAT)));
+                    trans.setOutputProperty(OutputKeys.INDENT, "yes");
+                    trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "" + XML_INDENT_AMOUNT);
                 } catch (Throwable e) {
+                    trans = factory.newTransformer();
                 }
-                */
-                Transformer trans = factory.newTransformer();
-                trans.setOutputProperty(OutputKeys.INDENT, "yes");
                 DOMSource source = new DOMSource(xml);
                 os = new FileOutputStream(xmlFile);
                 trans.transform(source, new StreamResult(new OutputStreamWriter(os, "UTF-8")));
