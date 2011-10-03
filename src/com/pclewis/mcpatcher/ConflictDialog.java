@@ -53,7 +53,7 @@ class ConflictDialog {
 
     ConflictDialog(HashMap<String, ArrayList<Mod>> conflicts) {
         String text = getText(conflicts);
-        conflictsText.setRows(Math.max(6, Math.min(24, text.split("\n").length)));
+        conflictsText.setRows(Math.max(6, Math.min(24, text.split("\n").length + 1)));
         conflictsText.setText(text);
     }
 

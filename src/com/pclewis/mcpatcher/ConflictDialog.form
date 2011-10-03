@@ -43,7 +43,7 @@
                 <constraints/>
                 <properties>
                   <background color="-2697514"/>
-                  <columns value="32"/>
+                  <columns value="36"/>
                   <editable value="false"/>
                   <lineWrap value="true"/>
                   <rows value="20"/>
