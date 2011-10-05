@@ -13,13 +13,16 @@ class ExternalMod extends Mod {
 
     public ExternalMod(ZipFile zipFile, HashMap<String, String> fileMap) {
         this.zipFile = zipFile;
-        this.fileMap = new HashMap<String, String>();
-        this.fileMap.putAll(fileMap);
-
+        setFileMap(fileMap);
         name = new File(zipFile.getName()).getName().replaceFirst("\\.[^.]+$", "");
-        description = String.format("%d files to add or replace.", this.fileMap.size());
+    }
 
-        filesToAdd.addAll(this.fileMap.keySet());
+    void setFileMap(HashMap<String, String> newFileMap) {
+        fileMap = new HashMap<String, String>();
+        fileMap.putAll(newFileMap);
+        filesToAdd.clear();
+        filesToAdd.addAll(fileMap.keySet());
+        description = String.format("%d files to add or replace.", this.fileMap.size());
     }
 
     @Override
