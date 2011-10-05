@@ -251,6 +251,7 @@ class ModList {
         if (index >= 0 && oldMod.getName().equals(newMod.getName())) {
             modsByIndex.set(index, newMod);
             modsByName.put(newMod.getName(), newMod);
+            oldMod.close();
             return indexOfVisible(newMod);
         } else {
             remove(oldMod);

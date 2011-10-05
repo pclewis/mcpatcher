@@ -233,12 +233,14 @@ class MainForm {
                     }
                     if (e.getClickCount() == 2) {
                         if (mod instanceof ExternalMod) {
+                            ExternalMod extMod = (ExternalMod) mod;
                             boolean oldEnabled = mod.isEnabled();
-                            addModDialog = new AddModDialog((ExternalMod) mod);
+                            addModDialog = new AddModDialog(extMod);
                             addModDialog.setLocationRelativeTo(frame);
                             addModDialog.setVisible(true);
                             Mod newMod = addModDialog.getMod();
                             if (newMod != null) {
+                                extMod.zipFile = null;
                                 newMod.setEnabled(oldEnabled);
                                 int newRow = MCPatcher.modList.replace(mod, newMod);
                                 modTable.addRowSelectionInterval(newRow, newRow);
