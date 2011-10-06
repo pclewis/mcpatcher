@@ -22,7 +22,8 @@ class ExternalMod extends Mod {
         fileMap.putAll(newFileMap);
         filesToAdd.clear();
         filesToAdd.addAll(fileMap.keySet());
-        description = String.format("%d files to add or replace.", this.fileMap.size());
+        int numFiles = this.fileMap.size();
+        description = String.format("%d file%s to add or replace.", numFiles, numFiles == 1 ? "" : "s");
     }
 
     @Override
