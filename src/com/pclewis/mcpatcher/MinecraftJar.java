@@ -32,7 +32,7 @@ class MinecraftJar {
         fixPreviewJarName("1.9", "pre1", "b4d9681a1118949d7753e19c35c61ec7");
         fixPreviewJarName("1.9", "pre2", "962d79abeca031b44cf8dac8d4fcabe9");
 
-        extractVersion(file);
+        version = extractVersion(file);
         if (version == null) {
             throw new IOException("Could not determine version of " + file.getPath());
         }
@@ -114,12 +114,12 @@ class MinecraftJar {
         }
     }
 
-    private MinecraftVersion extractVersion(File file) {
+    static private MinecraftVersion extractVersion(File file) {
         if (!file.exists()) {
             return null;
         }
 
-        version = null;
+        MinecraftVersion version = null;
         JarFile jar = null;
         InputStream is = null;
         try {
