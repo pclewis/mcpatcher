@@ -83,6 +83,9 @@ public class TextureUtils {
     public static void setFontRenderer() {
         MCPatcherUtils.log("setFontRenderer()");
         minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
+        if (minecraft.alternateFontRenderer != minecraft.fontRenderer) {
+            minecraft.alternateFontRenderer.initialize(minecraft.gameSettings, "/font/alternate.png", minecraft.renderEngine);
+        }
     }
 
     public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {

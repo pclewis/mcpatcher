@@ -16,8 +16,10 @@ public class HDTexture extends Mod {
     static final String class_CustomAnimation = "com.pclewis.mcpatcher.mod.CustomAnimation";
 
     private boolean haveColorizerWater;
+    private boolean haveAlternateFont;
 
     RenderEngineMod renderEngineMod;
+    MinecraftMod minecraftMod;
 
     public HDTexture() {
         name = MCPatcherUtils.HD_TEXTURES;
@@ -37,7 +39,7 @@ public class HDTexture extends Mod {
         classMods.add(new ItemRendererMod());
         classMods.add(new WatchMod());
         classMods.add(new PortalMod());
-        classMods.add(new MinecraftMod());
+        classMods.add(minecraftMod = new MinecraftMod());
         classMods.add(new GLAllocationMod());
         classMods.add(new TexturePackListMod());
         classMods.add(new TexturePackBaseMod());
@@ -63,7 +65,9 @@ public class HDTexture extends Mod {
             classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
             classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
         }
+        haveAlternateFont = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 3")) >= 0;
         renderEngineMod.preSetup();
+        minecraftMod.preSetup();
     }
 
     private class RenderEngineMod extends ClassMod {
@@ -592,14 +596,13 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class MinecraftMod extends ClassMod {
+    private class MinecraftMod extends ClassMod {
         public MinecraftMod() {
             classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
 
             memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
-            memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -681,6 +684,15 @@ public class HDTexture extends Mod {
                     return new byte[0];
                 }
             });
+        }
+
+        void preSetup() {
+            if (haveAlternateFont) {
+                memberMappers.add(new FieldMapper(new String[]{"fontRenderer", "alternateFontRenderer"}, "LFontRenderer;"));
+            } else {
+                memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
+                memberMappers.add(new FieldMapper("alternateFontRenderer", "LFontRenderer;"));
+            }
         }
     }
 
