@@ -15,6 +15,8 @@ public class HDTexture extends Mod {
     static final String class_TextureUtils = "com.pclewis.mcpatcher.mod.TextureUtils";
     static final String class_CustomAnimation = "com.pclewis.mcpatcher.mod.CustomAnimation";
 
+    private boolean haveColorizerWater;
+
     RenderEngineMod renderEngineMod;
 
     public HDTexture() {
@@ -49,36 +51,19 @@ public class HDTexture extends Mod {
         filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
     }
 
-    private static int compareVersionNumbers(int[] a, int[] b) {
-        for (int i = 0; i < a.length && i < b.length; i++) {
-            if (a[i] < b[i]) {
-                return -1;
-            } else if (a[i] > b[i]) {
-                return 1;
-            }
-        }
-        if (a.length < b.length) {
-            return -1;
-        } else if (a.length > b.length) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
     @Override
     public void preSetup(MinecraftVersion minecraftVersion) {
-        boolean pre16 = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) < 0;
-        if (pre16) {
-            classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
-            classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
-            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
-        } else {
+        haveColorizerWater = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) >= 0;
+        if (haveColorizerWater) {
             classMods.add(new ColorizerMod("ColorizerWater", false, false));
             classMods.add(new ColorizerMod("ColorizerGrass", true, false));
             classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
+        } else {
+            classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
+            classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
+            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
         }
-        renderEngineMod.preSetup(pre16);
+        renderEngineMod.preSetup();
     }
 
     private class RenderEngineMod extends ClassMod {
@@ -393,8 +378,8 @@ public class HDTexture extends Mod {
             });
         }
 
-        void preSetup(boolean pre16) {
-            if (!pre16) {
+        void preSetup() {
+            if (haveColorizerWater) {
                 memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
             }
         }
