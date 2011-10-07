@@ -12,8 +12,8 @@ class BaseMod extends Mod {
         version = "1.0";
         configPanel = new ConfigPanel();
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.UTILS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.CONFIG_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CONFIG_CLASS));
     }
 
     class ConfigPanel extends ModConfigPanel {

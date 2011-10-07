@@ -43,12 +43,6 @@ final public class MCPatcher {
             (PATCH_VERSION > 0 ? String.format("_%02d", PATCH_VERSION) : "") +
             (BETA_VERSION > 0 ? "-beta" + BETA_VERSION : "");
 
-    /**
-     * Name of utility class always injected into output minecraft.jar
-     */
-    public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
-    public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
-
     static MinecraftJar minecraft = null;
     static ModList modList;
 
