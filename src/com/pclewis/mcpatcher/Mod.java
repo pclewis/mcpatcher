@@ -130,14 +130,6 @@ public abstract class Mod {
         return classMap;
     }
 
-    /**
-     * Hook for doing any minecraft version-specific mod setup.
-     *
-     * @param minecraftVersion minecraft version number
-     */
-    public void preSetup(MinecraftVersion minecraftVersion) {
-    }
-
     void setRefs() {
         for (ClassMod classMod : getClassMods()) {
             classMod.mod = this;

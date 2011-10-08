@@ -14,17 +14,17 @@ public class HDTexture extends Mod {
     private boolean haveColorizerWater;
     private boolean haveAlternateFont;
 
-    RenderEngineMod renderEngineMod;
-    MinecraftMod minecraftMod;
-
-    public HDTexture() {
+    public HDTexture(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for texture packs of size 32x32 and higher.";
         version = "1.0";
         configPanel = new HDTextureConfig();
 
-        classMods.add(renderEngineMod = new RenderEngineMod());
+        haveColorizerWater = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) >= 0;
+        haveAlternateFont = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 3")) >= 0;
+
+        classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
         classMods.add(new CompassMod());
         classMods.add(new FireMod());
@@ -35,7 +35,7 @@ public class HDTexture extends Mod {
         classMods.add(new ItemRendererMod());
         classMods.add(new WatchMod());
         classMods.add(new PortalMod());
-        classMods.add(minecraftMod = new MinecraftMod());
+        classMods.add(new MinecraftMod());
         classMods.add(new GLAllocationMod());
         classMods.add(new TexturePackListMod());
         classMods.add(new TexturePackBaseMod());
@@ -43,15 +43,6 @@ public class HDTexture extends Mod {
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
-
-        filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
-    }
-
-    @Override
-    public void preSetup(MinecraftVersion minecraftVersion) {
-        haveColorizerWater = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) >= 0;
         if (haveColorizerWater) {
             classMods.add(new ColorizerMod("ColorizerWater", false, false));
             classMods.add(new ColorizerMod("ColorizerGrass", true, false));
@@ -61,9 +52,10 @@ public class HDTexture extends Mod {
             classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
             classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
         }
-        haveAlternateFont = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 3")) >= 0;
-        renderEngineMod.preSetup();
-        minecraftMod.preSetup();
+
+        filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
     }
 
     private class RenderEngineMod extends ClassMod {
@@ -88,6 +80,9 @@ public class HDTexture extends Mod {
             memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
+            if (haveColorizerWater) {
+                memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
+            }
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -377,12 +372,6 @@ public class HDTexture extends Mod {
                 }
             });
         }
-
-        void preSetup() {
-            if (haveColorizerWater) {
-                memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
-            }
-        }
     }
 
     private static class TextureFXMod extends ClassMod {
@@ -599,6 +588,12 @@ public class HDTexture extends Mod {
             memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
+            if (haveAlternateFont) {
+                memberMappers.add(new FieldMapper(new String[]{"fontRenderer", "alternateFontRenderer"}, "LFontRenderer;"));
+            } else {
+                memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
+                memberMappers.add(new FieldMapper("alternateFontRenderer", "LFontRenderer;"));
+            }
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -680,15 +675,6 @@ public class HDTexture extends Mod {
                     return new byte[0];
                 }
             });
-        }
-
-        void preSetup() {
-            if (haveAlternateFont) {
-                memberMappers.add(new FieldMapper(new String[]{"fontRenderer", "alternateFontRenderer"}, "LFontRenderer;"));
-            } else {
-                memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
-                memberMappers.add(new FieldMapper("alternateFontRenderer", "LFontRenderer;"));
-            }
         }
     }
 

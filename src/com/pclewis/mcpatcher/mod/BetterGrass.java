@@ -15,7 +15,7 @@ public class BetterGrass extends Mod {
     private static final String field_MATRIX = "grassMatrix";
     private static final String fieldtype_MATRIX = "[[I";
 
-    public BetterGrass() {
+    public BetterGrass(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.BETTER_GRASS;
         author = "MCPatcher";
         description = "Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.";
@@ -25,15 +25,11 @@ public class BetterGrass extends Mod {
         classMods.add(new MaterialMod());
         classMods.add(new BlockMod());
         classMods.add(new BlockGrassMod("Grass", 2, 3, 0));
-        classMods.add(new IBlockAccessMod());
-        classMods.add(new RenderBlocksMod());
-    }
-
-    @Override
-    public void preSetup(MinecraftVersion minecraftVersion) {
         if (minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 1")) >= 0) {
             classMods.add(new BlockGrassMod("Mycelium", 110, 77, 78));
         }
+        classMods.add(new IBlockAccessMod());
+        classMods.add(new RenderBlocksMod());
     }
 
     private static class MaterialMod extends ClassMod {
