@@ -389,11 +389,7 @@ class ModList {
             } else if (type.equals(Config.VAL_BUILTIN)) {
                 for (BuiltInMod builtInMod : builtInMods) {
                     if (name.equals(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
-                        try {
-                            mod = builtInMod.modClass.newInstance();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        mod = newModInstance(builtInMod.modClass);
                     }
                 }
                 if (mod == null) {
