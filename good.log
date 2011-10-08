@@ -1,4 +1,4 @@
-MCPatcher version is 2.1.2
+MCPatcher version is 2.1.2_01
 OS: Linux 2.6.35.14-96.fc14.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_27 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
@@ -70,6 +70,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.8.1.jar (second pass)
    field p matches renderEngine
    field z matches gameSettings
    field q matches fontRenderer
+   field q matches alternateFontRenderer
   GLAllocation (dl.class)
   TexturePackList (er.class)
    field a matches selectedTexturePack
@@ -122,6 +123,7 @@ HD Textures
     class GameSettings (fv.class)
     class ItemRenderer (jo.class)
     class Minecraft (net/minecraft/client/Minecraft.class)
+        field alternateFontRenderer -> q
         field fontRenderer -> q
         field gameSettings -> z
         field renderEngine -> p
@@ -1828,129 +1830,141 @@ Patching...
    method signature (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> (Lg;Ljava/lang/String;)Z
    field signature Lnet/minecraft/src/TexturePackBase; -> Lg;
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lg; setTileSize()Z@8
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8e
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x93
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lg; refreshTextureFX(Ljava/util/List;)V@104
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8e
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x93
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lg; getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8e
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x93
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lg; getResourceAsBufferedImage(Ljava/lang/String;)Ljava/awt/image/BufferedImage;@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8e
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x93
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lg; getTileSize()I@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8e
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x93
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.getSelectedTexturePack ()Lg; hasResource(Ljava/lang/String;)Z@0
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x8e
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x02 0x93
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lg;)Ljava/lang/String; setTileSize()Z@11
-     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x90
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x95
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lnet/minecraft/src/TexturePackBase;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.TextureUtils.getTexturePackName (Lg;)Ljava/lang/String; getResourceAsBufferedImage(Lg;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@200
-     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x90
+     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x02 0x95
     field ref net.minecraft.client.Minecraft.fontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.q Lkh; setFontRenderer()V@12
-     GETFIELD 0x00 0x0f        GETFIELD 0x02 0x94
+     GETFIELD 0x00 0x0f        GETFIELD 0x02 0x99
+    field ref net.minecraft.client.Minecraft.fontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.q Lkh; setFontRenderer()V@41
+     GETFIELD 0x00 0x0f        GETFIELD 0x02 0x99
     field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.z Lfv; setFontRenderer()V@18
-     GETFIELD 0x00 0x10        GETFIELD 0x02 0x98
+     GETFIELD 0x00 0x10        GETFIELD 0x02 0x9d
+    field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.z Lfv; setFontRenderer()V@56
+     GETFIELD 0x00 0x10        GETFIELD 0x02 0x9d
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Lur; setFontRenderer()V@26
-     GETFIELD 0x00 0x12        GETFIELD 0x02 0x9b
+     GETFIELD 0x00 0x12        GETFIELD 0x02 0xa0
+    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Lur; setFontRenderer()V@64
+     GETFIELD 0x00 0x12        GETFIELD 0x02 0xa0
     method ref net.minecraft.src.FontRenderer.initialize (Lnet/minecraft/src/GameSettings;Ljava/lang/String;Lnet/minecraft/src/RenderEngine;)V -> kh.initialize (Lfv;Ljava/lang/String;Lur;)V setFontRenderer()V@29
-     INVOKEVIRTUAL 0x00 0x13   INVOKEVIRTUAL 0x02 0xa0
+     INVOKEVIRTUAL 0x00 0x13   INVOKEVIRTUAL 0x02 0xa5
+    method ref net.minecraft.src.FontRenderer.initialize (Lnet/minecraft/src/GameSettings;Ljava/lang/String;Lnet/minecraft/src/RenderEngine;)V -> kh.initialize (Lfv;Ljava/lang/String;Lur;)V setFontRenderer()V@67
+     INVOKEVIRTUAL 0x00 0x13   INVOKEVIRTUAL 0x02 0xa5
+    field ref net.minecraft.client.Minecraft.alternateFontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.q Lkh; setFontRenderer()V@35
+     GETFIELD 0x00 0x14        GETFIELD 0x02 0x99
+    field ref net.minecraft.client.Minecraft.alternateFontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.q Lkh; setFontRenderer()V@50
+     GETFIELD 0x00 0x14        GETFIELD 0x02 0x99
     method ref com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lnet/minecraft/src/TextureFX;)Lnet/minecraft/src/TextureFX; -> com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lpg;)Lpg; registerTextureFX(Ljava/util/List;Lpg;)V@1
-     INVOKESTATIC 0x00 0x14    INVOKESTATIC 0x02 0xa2
+     INVOKESTATIC 0x00 0x16    INVOKESTATIC 0x02 0xa7
     method ref com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lnet/minecraft/src/TextureFX;)Lnet/minecraft/src/TextureFX; -> com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lpg;)Lpg; refreshTextureFX(Ljava/util/List;)V@44
-     INVOKESTATIC 0x00 0x14    INVOKESTATIC 0x02 0xa2
+     INVOKESTATIC 0x00 0x16    INVOKESTATIC 0x02 0xa7
     method ref net.minecraft.src.TextureFX.onTick ()V -> pg.a ()V registerTextureFX(Ljava/util/List;Lpg;)V@37
-     INVOKEVIRTUAL 0x00 0x19   INVOKEVIRTUAL 0x02 0xa7
+     INVOKEVIRTUAL 0x00 0x1b   INVOKEVIRTUAL 0x02 0xac
     method ref net.minecraft.src.TextureFX.onTick ()V -> pg.a ()V refreshTextureFX(Ljava/util/List;)V@556
-     INVOKEVIRTUAL 0x00 0x19   INVOKEVIRTUAL 0x02 0xa7
+     INVOKEVIRTUAL 0x00 0x1b   INVOKEVIRTUAL 0x02 0xac
     field ref net.minecraft.src.TextureFX.imageData [B -> pg.f [B refreshTextureFX(Lpg;)Lpg;@233
-     GETFIELD 0x00 0x2d        GETFIELD 0x02 0xaa
+     GETFIELD 0x00 0x2f        GETFIELD 0x02 0xaf
     field ref net.minecraft.src.TextureFX.imageData [B -> pg.f [B refreshTextureFX(Lpg;)Lpg;@259
-     GETFIELD 0x00 0x2d        GETFIELD 0x02 0xaa
+     GETFIELD 0x00 0x2f        GETFIELD 0x02 0xaf
     field ref net.minecraft.src.TextureFX.imageData [B -> pg.f [B refreshTextureFX(Lpg;)Lpg;@285
-     PUTFIELD 0x00 0x2d        PUTFIELD 0x02 0xaa
+     PUTFIELD 0x00 0x2f        PUTFIELD 0x02 0xaf
     method ref net.minecraft.src.Compass.<init> (Lnet/minecraft/client/Minecraft;)V -> ph.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@78
-     INVOKESPECIAL 0x00 0x38   INVOKESPECIAL 0x02 0xae
+     INVOKESPECIAL 0x00 0x3a   INVOKESPECIAL 0x02 0xb3
     method ref net.minecraft.src.Watch.<init> (Lnet/minecraft/client/Minecraft;)V -> fu.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@95
-     INVOKESPECIAL 0x00 0x39   INVOKESPECIAL 0x02 0xb2
+     INVOKESPECIAL 0x00 0x3b   INVOKESPECIAL 0x02 0xb6
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@149
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
+     INVOKESPECIAL 0x00 0x3f   INVOKESPECIAL 0x00 0x3f
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@173
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
+     INVOKESPECIAL 0x00 0x3f   INVOKESPECIAL 0x00 0x3f
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@243
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
+     INVOKESPECIAL 0x00 0x3f   INVOKESPECIAL 0x00 0x3f
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@266
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
+     INVOKESPECIAL 0x00 0x3f   INVOKESPECIAL 0x00 0x3f
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@351
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
+     INVOKESPECIAL 0x00 0x3f   INVOKESPECIAL 0x00 0x3f
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@373
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
+     INVOKESPECIAL 0x00 0x3f   INVOKESPECIAL 0x00 0x3f
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (IIILjava/lang/String;II)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (IIILjava/lang/String;II)V refreshTextureFX(Ljava/util/List;)V@452
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x00 0x3d
+     INVOKESPECIAL 0x00 0x3f   INVOKESPECIAL 0x00 0x3f
     method ref net.minecraft.src.StillLava.<init> ()V -> bb.<init> ()V refreshTextureFX(Ljava/util/List;)V@196
-     INVOKESPECIAL 0x00 0x40   INVOKESPECIAL 0x02 0xb6
+     INVOKESPECIAL 0x00 0x42   INVOKESPECIAL 0x02 0xba
     method ref net.minecraft.src.FlowLava.<init> ()V -> eo.<init> ()V refreshTextureFX(Ljava/util/List;)V@210
-     INVOKESPECIAL 0x00 0x41   INVOKESPECIAL 0x02 0xb9
+     INVOKESPECIAL 0x00 0x43   INVOKESPECIAL 0x02 0xbd
     method ref net.minecraft.src.StillWater.<init> ()V -> mk.<init> ()V refreshTextureFX(Ljava/util/List;)V@289
-     INVOKESPECIAL 0x00 0x46   INVOKESPECIAL 0x02 0xbc
+     INVOKESPECIAL 0x00 0x48   INVOKESPECIAL 0x02 0xc1
     method ref net.minecraft.src.FlowWater.<init> ()V -> xn.<init> ()V refreshTextureFX(Ljava/util/List;)V@303
-     INVOKESPECIAL 0x00 0x47   INVOKESPECIAL 0x02 0xbf
+     INVOKESPECIAL 0x00 0x49   INVOKESPECIAL 0x02 0xc4
     method ref net.minecraft.src.Fire.<init> (I)V -> ke.<init> (I)V refreshTextureFX(Ljava/util/List;)V@397
-     INVOKESPECIAL 0x00 0x4f   INVOKESPECIAL 0x02 0xc3
+     INVOKESPECIAL 0x00 0x51   INVOKESPECIAL 0x02 0xc8
     method ref net.minecraft.src.Fire.<init> (I)V -> ke.<init> (I)V refreshTextureFX(Ljava/util/List;)V@412
-     INVOKESPECIAL 0x00 0x4f   INVOKESPECIAL 0x02 0xc3
+     INVOKESPECIAL 0x00 0x51   INVOKESPECIAL 0x02 0xc8
     method ref net.minecraft.src.Portal.<init> ()V -> tp.<init> ()V refreshTextureFX(Ljava/util/List;)V@475
-     INVOKESPECIAL 0x00 0x54   INVOKESPECIAL 0x02 0xc6
+     INVOKESPECIAL 0x00 0x56   INVOKESPECIAL 0x02 0xcb
     field ref net.minecraft.src.ColorizerWater.colorBuffer [I -> tt.a [I refreshTextureFX(Ljava/util/List;)V@562
-     GETSTATIC 0x00 0x56       GETSTATIC 0x02 0xca
+     GETSTATIC 0x00 0x58       GETSTATIC 0x02 0xcf
     field ref net.minecraft.src.ColorizerWater.colorBuffer [I -> tt.a [I refreshTextureFX(Ljava/util/List;)V@571
-     GETSTATIC 0x00 0x56       GETSTATIC 0x02 0xca
+     GETSTATIC 0x00 0x58       GETSTATIC 0x02 0xcf
     field ref net.minecraft.src.ColorizerFoliage.colorBuffer [I -> fc.a [I refreshTextureFX(Ljava/util/List;)V@565
-     GETSTATIC 0x00 0x57       GETSTATIC 0x02 0xcd
+     GETSTATIC 0x00 0x59       GETSTATIC 0x02 0xd2
     field ref net.minecraft.src.ColorizerFoliage.colorBuffer [I -> fc.a [I refreshTextureFX(Ljava/util/List;)V@587
-     GETSTATIC 0x00 0x57       GETSTATIC 0x02 0xcd
+     GETSTATIC 0x00 0x59       GETSTATIC 0x02 0xd2
     field ref net.minecraft.src.ColorizerGrass.colorBuffer [I -> tv.a [I refreshTextureFX(Ljava/util/List;)V@579
-     GETSTATIC 0x00 0x5a       GETSTATIC 0x02 0xd0
+     GETSTATIC 0x00 0x5c       GETSTATIC 0x02 0xd5
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.D Ler; getSelectedTexturePack()Lg;@13
-     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xd4
+     GETFIELD 0x00 0x60        GETFIELD 0x02 0xd9
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.D Ler; getSelectedTexturePack()Lg;@26
-     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xd4
+     GETFIELD 0x00 0x60        GETFIELD 0x02 0xd9
     field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> er.a Lg; getSelectedTexturePack()Lg;@29
-     GETFIELD 0x00 0x5f        GETFIELD 0x02 0xd8
+     GETFIELD 0x00 0x61        GETFIELD 0x02 0xdd
     field ref net.minecraft.src.TexturePackBase.texturePackFileName Ljava/lang/String; -> g.a Ljava/lang/String; getTexturePackName(Lg;)Ljava/lang/String;@10
-     GETFIELD 0x00 0x61        GETFIELD 0x02 0xdc
+     GETFIELD 0x00 0x63        GETFIELD 0x02 0xe1
     method ref net.minecraft.src.GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> dl.c (I)Ljava/nio/ByteBuffer; getByteBuffer(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;@32
-     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x02 0xe1
+     INVOKESTATIC 0x00 0x67    INVOKESTATIC 0x02 0xe6
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> g.a (Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream(Lg;Ljava/lang/String;)Ljava/io/InputStream;@8
-     INVOKEVIRTUAL 0x00 0x6f   INVOKEVIRTUAL 0x02 0xe3
+     INVOKEVIRTUAL 0x00 0x71   INVOKEVIRTUAL 0x02 0xe8
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lg;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;@4
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xe5
+     INVOKESTATIC 0x00 0x7c    INVOKESTATIC 0x02 0xea
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lg;Ljava/lang/String;)Ljava/io/InputStream; getResourceAsBufferedImage(Lg;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@40
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xe5
+     INVOKESTATIC 0x00 0x7c    INVOKESTATIC 0x02 0xea
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lg;Ljava/lang/String;)Ljava/io/InputStream; getTileSize(Lg;)I@46
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xe5
+     INVOKESTATIC 0x00 0x7c    INVOKESTATIC 0x02 0xea
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/io/InputStream; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsStream (Lg;Ljava/lang/String;)Ljava/io/InputStream; hasResource(Lg;Ljava/lang/String;)Z@2
-     INVOKESTATIC 0x00 0x7a    INVOKESTATIC 0x02 0xe5
+     INVOKESTATIC 0x00 0x7c    INVOKESTATIC 0x02 0xea
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lg; getResourceAsBufferedImage(Lg;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@11
-     GETSTATIC 0x00 0x7c       GETSTATIC 0x02 0xe7
+     GETSTATIC 0x00 0x7e       GETSTATIC 0x02 0xec
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lg; getResourceAsBufferedImage(Lg;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@125
-     GETSTATIC 0x00 0x7c       GETSTATIC 0x02 0xe7
+     GETSTATIC 0x00 0x7e       GETSTATIC 0x02 0xec
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lg; getResourceAsBufferedImage(Lg;Ljava/lang/String;)Ljava/awt/image/BufferedImage;@265
-     PUTSTATIC 0x00 0x7c       PUTSTATIC 0x02 0xe7
+     PUTSTATIC 0x00 0x7e       PUTSTATIC 0x02 0xec
     field ref com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.TextureUtils.lastTexturePack Lg; <clinit>()V@11
-     PUTSTATIC 0x00 0x7c       PUTSTATIC 0x02 0xe7
+     PUTSTATIC 0x00 0x7e       PUTSTATIC 0x02 0xec
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Ljava/awt/image/BufferedImage; -> com.pclewis.mcpatcher.mod.TextureUtils.getResourceAsBufferedImage (Lg;Ljava/lang/String;)Ljava/awt/image/BufferedImage; getResourceAsBufferedImage(Ljava/lang/String;)Ljava/awt/image/BufferedImage;@4
-     INVOKESTATIC 0x00 0x9b    INVOKESTATIC 0x02 0xe9
+     INVOKESTATIC 0x00 0x9d    INVOKESTATIC 0x02 0xee
     method ref com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Lnet/minecraft/src/TexturePackBase;)I -> com.pclewis.mcpatcher.mod.TextureUtils.getTileSize (Lg;)I getTileSize()I@3
-     INVOKESTATIC 0x00 0xa5    INVOKESTATIC 0x02 0xeb
+     INVOKESTATIC 0x00 0xa7    INVOKESTATIC 0x02 0xf0
     method ref com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Lnet/minecraft/src/TexturePackBase;Ljava/lang/String;)Z -> com.pclewis.mcpatcher.mod.TextureUtils.hasResource (Lg;Ljava/lang/String;)Z hasResource(Ljava/lang/String;)Z@4
-     INVOKESTATIC 0x00 0xa6    INVOKESTATIC 0x02 0xed
-   string replace net/minecraft/src/StillWater -> mk @2088
-   string replace net/minecraft/src/TexturePackDefault -> io @3184
-   string replace net/minecraft/src/Watch -> fu @1994
-   string replace net/minecraft/src/Compass -> ph @1963
-   string replace net/minecraft/src/Portal -> tp @2113
-   string replace net/minecraft/src/FlowWater -> xn @2052
-   string replace net/minecraft/src/StillLava -> bb @1979
-   string replace net/minecraft/src/TextureFX -> pg @2342
-   string replace net/minecraft/src/FlowLava -> eo @1987
-   string replace net/minecraft/src/Fire -> ke @2011
+     INVOKESTATIC 0x00 0xa8    INVOKESTATIC 0x02 0xf2
+   string replace net/minecraft/src/StillWater -> mk @2133
+   string replace net/minecraft/src/TexturePackDefault -> io @3219
+   string replace net/minecraft/src/Watch -> fu @2039
+   string replace net/minecraft/src/Compass -> ph @2008
+   string replace net/minecraft/src/Portal -> tp @2158
+   string replace net/minecraft/src/FlowWater -> xn @2097
+   string replace net/minecraft/src/StillLava -> bb @2024
+   string replace net/minecraft/src/TextureFX -> pg @2387
+   string replace net/minecraft/src/FlowLava -> eo @2032
+   string replace net/minecraft/src/Fire -> ke @2056
   adding com/pclewis/mcpatcher/mod/CustomAnimation.class for HD Textures
    method onTick -> a
     method ref net.minecraft.src.TextureFX.<init> (I)V -> pg.<init> (I)V <init>(IIILjava/lang/String;II)V@2
