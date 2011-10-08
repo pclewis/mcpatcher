@@ -238,7 +238,7 @@ public class TextureUtils {
             !resource.equals("/terrain_nh.png") &&
             !resource.equals("/terrain_s.png") &&
             !resource.endsWith("_widths.txt")
-        ;
+            ;
     }
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
