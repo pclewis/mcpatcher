@@ -21,7 +21,7 @@ public class HDFont extends Mod {
         classMods.add(new FontRendererMod());
     }
 
-    private static class FontRendererMod extends ClassMod {
+    private class FontRendererMod extends ClassMod {
         public FontRendererMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 DCONST_0,
@@ -86,19 +86,19 @@ public class HDFont extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo mi) {
+                public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         BinaryRegex.lookBehind(BinaryRegex.subset(new byte[]{(byte) IREM, (byte) IDIV}, true), false),
-                        push(mi, 8),
+                        push(methodInfo, 8),
                         BinaryRegex.lookAhead(BinaryRegex.subset(new byte[]{(byte) IMUL, (byte) IF_ICMPGE}, true), true)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo mi) throws IOException {
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        ILOAD, ((HDFont) getMod()).imageWidthRegister,
-                        push(mi, 16),
+                        ILOAD, imageWidthRegister,
+                        push(methodInfo, 16),
                         IDIV
                     );
                 }
@@ -111,7 +111,7 @@ public class HDFont extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo mi) {
+                public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         ICONST_2,
                         ISTORE
@@ -119,10 +119,10 @@ public class HDFont extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo mi) throws IOException {
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        ILOAD, ((HDFont) getMod()).imageWidthRegister,
-                        push(mi, 64),
+                        ILOAD, imageWidthRegister,
+                        push(methodInfo, 64),
                         IDIV,
                         ISTORE
                     );
@@ -136,7 +136,7 @@ public class HDFont extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo mi) {
+                public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         ILOAD, BinaryRegex.capture(BinaryRegex.any()),
                         ICONST_2,
@@ -146,14 +146,14 @@ public class HDFont extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo mi) throws IOException {
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        push(mi, 128),
+                        push(methodInfo, 128),
                         ILOAD, getCaptureGroup(1),
                         IMUL,
-                        push(mi, 256),
+                        push(methodInfo, 256),
                         IADD,
-                        ILOAD, ((HDFont) getMod()).imageWidthRegister,
+                        ILOAD, imageWidthRegister,
                         IDIV,
                         IASTORE
                     );
