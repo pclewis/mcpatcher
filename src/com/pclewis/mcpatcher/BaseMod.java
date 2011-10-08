@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 class BaseMod extends Mod {
-    public BaseMod() {
+    public BaseMod(MinecraftVersion minecraftVersion) {
         name = "__Base";
         author = "MCPatcher";
         description = "Internal mod required by the patcher.";

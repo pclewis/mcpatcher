@@ -15,7 +15,7 @@ import static javassist.bytecode.Opcode.*;
 public class HDFont extends Mod {
     public static final String FONT_UTILS_CLASS = "com.pclewis.mcpatcher.mod.FontUtils";
 
-    public HDFont() {
+    public HDFont(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_FONT;
         author = "MCPatcher";
         description = "Provides support for higher resolution fonts.";

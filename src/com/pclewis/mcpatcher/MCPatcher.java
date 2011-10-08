@@ -203,7 +203,6 @@ final public class MCPatcher {
     static void getApplicableMods() throws IOException, InterruptedException {
         JarFile origJar = minecraft.getInputJar();
         for (Mod mod : modList.getAll()) {
-            mod.preSetup(minecraft.getVersion());
             mod.setRefs();
         }
 
