@@ -35,7 +35,7 @@ class ModList {
     Mod baseMod;
 
     public ModList() {
-        baseMod = new BaseMod();
+        baseMod = new BaseMod(MCPatcher.minecraft.getVersion());
         baseMod.internal = true;
         addNoReplace(baseMod);
     }
