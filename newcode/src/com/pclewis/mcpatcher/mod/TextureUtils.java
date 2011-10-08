@@ -234,7 +234,11 @@ public class TextureUtils {
     }
 
     public static boolean isRequiredResource(String resource) {
-        return !resource.startsWith("/custom_") && !resource.equals("/terrain_nh.png") && !resource.equals("/terrain_s.png");
+        return !resource.startsWith("/custom_") &&
+            !resource.equals("/terrain_nh.png") &&
+            !resource.equals("/terrain_s.png") &&
+            !resource.endsWith("_widths.txt")
+        ;
     }
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
