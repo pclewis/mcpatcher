@@ -203,20 +203,23 @@ class MainMenu {
                         }
                         MCPatcher.modList.updateProperties();
                         MCPatcherUtils.config.selectProfile(profile);
+                        boolean modsOk = false;
                         if (Config.isDefaultProfile(profile)) {
                             String version = profile.split("\\s+")[1];
                             if (!version.equals(MCPatcher.minecraft.getVersion().toString())) {
                                 File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
                                 if (jar.exists()) {
                                     try {
-                                        MCPatcher.setMinecraft(jar, false);
+                                        modsOk = MCPatcher.setMinecraft(jar, false);
                                     } catch (Exception e1) {
                                         e1.printStackTrace();
                                     }
                                 }
                             }
                         }
-                        MCPatcher.getAllMods();
+                        if (!modsOk) {
+                            MCPatcher.getAllMods();
+                        }
                         mainForm.updateModList();
                     }
                 });

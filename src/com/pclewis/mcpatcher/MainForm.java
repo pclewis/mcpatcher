@@ -177,7 +177,6 @@ class MainForm {
                 if (fd.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
                     if (MCPatcher.setMinecraft(fd.getSelectedFile(), false)) {
                         MCPatcher.saveProperties();
-                        MCPatcher.getAllMods();
                         updateModList();
                     } else {
                         showCorruptJarError();
