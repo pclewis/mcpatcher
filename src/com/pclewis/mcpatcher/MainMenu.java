@@ -205,7 +205,7 @@ class MainMenu {
                         MCPatcherUtils.config.selectProfile(profile);
                         if (Config.isDefaultProfile(profile)) {
                             String version = profile.split("\\s+")[1];
-                            if (!version.equals(MCPatcher.minecraft.getVersion())) {
+                            if (!version.equals(MCPatcher.minecraft.getVersion().toString())) {
                                 File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
                                 if (jar.exists()) {
                                     try {
