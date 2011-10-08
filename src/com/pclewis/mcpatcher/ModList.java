@@ -105,7 +105,7 @@ class ModList {
         if (cl != null && !cl.isInterface() && Mod.class.isAssignableFrom(cl)) {
             int flags = cl.getModifiers();
             if (!Modifier.isAbstract(flags) && Modifier.isPublic(flags)) {
-                return newModInstance((Class<Mod>) cl);
+                return newModInstance(cl.asSubclass(Mod.class));
             }
         }
         return null;
