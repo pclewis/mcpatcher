@@ -9,7 +9,7 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class RandomMobs extends Mod {
-    public RandomMobs() {
+    public RandomMobs(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.RANDOM_MOBS;
         author = "Balthichou";
         description = "Randomize mob skins. Based on Balthichou's mod.";
