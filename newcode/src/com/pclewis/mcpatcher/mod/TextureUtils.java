@@ -244,6 +244,7 @@ public class TextureUtils {
         return !resource.startsWith("/custom_") &&
             !resource.equals("/terrain_nh.png") &&
             !resource.equals("/terrain_s.png") &&
+            !resource.endsWith("_widths.txt") &&
             !resource.matches("^/mob/.*\\d+.png$")
         ;
     }
