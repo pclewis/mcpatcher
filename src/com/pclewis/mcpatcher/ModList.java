@@ -11,6 +11,7 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -34,7 +35,7 @@ class ModList {
     Mod baseMod;
 
     public ModList() {
-        baseMod = new BaseMod();
+        baseMod = new BaseMod(MCPatcher.minecraft.getVersion());
         baseMod.internal = true;
         addNoReplace(baseMod);
     }
@@ -48,11 +49,7 @@ class ModList {
     public void loadBuiltInMods() {
         for (BuiltInMod builtInMod : builtInMods) {
             if (!modsByName.containsKey(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
-                try {
-                    addNoReplace(builtInMod.modClass.newInstance());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                addNoReplace(newModInstance(builtInMod.modClass));
             }
         }
     }
@@ -81,7 +78,7 @@ class ModList {
         for (JarEntry entry : Collections.list(jar.entries())) {
             if (!entry.isDirectory() && MinecraftJar.isClassFile(entry.getName())) {
                 Mod mod = loadCustomMod(loader, ClassMap.filenameToClassName(entry.getName()));
-                if (mod != null && addNoReplace(mod)) {
+                if (addNoReplace(mod)) {
                     Logger.log(Logger.LOG_MOD, "new %s()", mod.getClass().getName());
                 }
             }
@@ -108,7 +105,7 @@ class ModList {
         if (cl != null && !cl.isInterface() && Mod.class.isAssignableFrom(cl)) {
             int flags = cl.getModifiers();
             if (!Modifier.isAbstract(flags) && Modifier.isPublic(flags)) {
-                return (Mod) cl.newInstance();
+                return newModInstance(cl.asSubclass(Mod.class));
             }
         }
         return null;
@@ -251,6 +248,7 @@ class ModList {
         if (index >= 0 && oldMod.getName().equals(newMod.getName())) {
             modsByIndex.set(index, newMod);
             modsByName.put(newMod.getName(), newMod);
+            oldMod.close();
             return indexOfVisible(newMod);
         } else {
             remove(oldMod);
@@ -391,11 +389,7 @@ class ModList {
             } else if (type.equals(Config.VAL_BUILTIN)) {
                 for (BuiltInMod builtInMod : builtInMods) {
                     if (name.equals(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
-                        try {
-                            mod = builtInMod.modClass.newInstance();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        mod = newModInstance(builtInMod.modClass);
                     }
                 }
                 if (mod == null) {
@@ -535,6 +529,20 @@ class ModList {
             }
         }
         return false;
+    }
+
+    public static Mod newModInstance(Class<? extends Mod> modClass) {
+        Mod mod = null;
+        try {
+            mod = modClass.getConstructor(MinecraftVersion.class).newInstance(MCPatcher.minecraft.getVersion());
+        } catch (Exception e) {
+            try {
+                mod = modClass.newInstance();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+        return mod;
     }
 
     private static class BuiltInMod {

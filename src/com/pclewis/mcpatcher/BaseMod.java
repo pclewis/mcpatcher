@@ -5,15 +5,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 class BaseMod extends Mod {
-    public BaseMod() {
+    public BaseMod(MinecraftVersion minecraftVersion) {
         name = "__Base";
         author = "MCPatcher";
         description = "Internal mod required by the patcher.";
         version = "1.0";
         configPanel = new ConfigPanel();
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.UTILS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcher.CONFIG_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CONFIG_CLASS));
     }
 
     class ConfigPanel extends ModConfigPanel {

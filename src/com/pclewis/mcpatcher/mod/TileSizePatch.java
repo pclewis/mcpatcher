@@ -1,9 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
-import com.pclewis.mcpatcher.BinaryRegex;
-import com.pclewis.mcpatcher.BytecodeMatcher;
-import com.pclewis.mcpatcher.BytecodePatch;
-import com.pclewis.mcpatcher.FieldRef;
+import com.pclewis.mcpatcher.*;
 import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
@@ -56,7 +53,7 @@ class TileSizePatch extends BytecodePatch {
     public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
         return buildCode(
             getCaptureGroup(1),
-            reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, field, type)),
+            reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, field, type)),
             getCaptureGroup(2)
         );
     }
@@ -199,7 +196,7 @@ class TileSizePatch extends BytecodePatch {
 
         @Override
         public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-            byte[] getField = reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "int_size", "I"));
+            byte[] getField = reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I"));
             return buildCode(
                 getField,
                 getField,
@@ -236,17 +233,17 @@ class TileSizePatch extends BytecodePatch {
         public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
             byte[] offset = getCaptureGroup(2);
             if (offset[0] != FCONST_0) {
-                offset = reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "float_sizeMinus0_01", "F"));
+                offset = reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_sizeMinus0_01", "F"));
             }
             return buildCode(
                 push(methodInfo, 16),
                 getCaptureGroup(1),
-                reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "int_size", "I")),
+                reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
                 IMUL,
                 I2F,
                 offset,
                 FADD,
-                reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "float_size16", "F"))
+                reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_size16", "F"))
             );
         }
     }
@@ -277,7 +274,7 @@ class TileSizePatch extends BytecodePatch {
         public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
             return buildCode(
                 getCaptureGroup(1),
-                reference(methodInfo, GETSTATIC, new FieldRef(HDTexture.class_TileSize, "float_reciprocal", "F")),
+                reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_reciprocal", "F")),
                 getCaptureGroup(2)
             );
         }

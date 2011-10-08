@@ -9,6 +9,7 @@ public class Minecraft {
     public RenderEngine renderEngine;
     public GameSettings gameSettings;
     public FontRenderer fontRenderer;
+    public FontRenderer alternateFontRenderer;
     public World theWorld;
     public EntityPlayerSP thePlayer;
     public int displayWidth;

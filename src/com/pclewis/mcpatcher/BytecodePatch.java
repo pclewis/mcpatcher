@@ -14,6 +14,12 @@ import java.util.ArrayList;
  */
 abstract public class BytecodePatch extends ClassPatch {
     BytecodeMatcher matcher;
+    MethodRef targetMethod;
+
+    public BytecodePatch targetMethod(MethodRef targetMethod) {
+        this.targetMethod = targetMethod;
+        return this;
+    }
 
     /**
      * Can be overridden to skip certain methods during patching.
@@ -22,7 +28,12 @@ abstract public class BytecodePatch extends ClassPatch {
      * @return true if method should be considered for patching
      */
     public boolean filterMethod(MethodInfo methodInfo) {
-        return true;
+        if (targetMethod == null) {
+            return true;
+        } else {
+            JavaRef ref = map(targetMethod);
+            return methodInfo.getDescriptor().equals(ref.getType()) && methodInfo.getName().equals(ref.getName());
+        }
     }
 
     /**

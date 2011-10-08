@@ -25,7 +25,7 @@ public class AddModDialog extends JDialog {
     private ZipFile zipFile;
     private ZipTreeDialog zipDialog;
     private HashMap<String, String> fileMap;
-    private Mod mod;
+    private ExternalMod mod;
     private boolean editMode;
 
     public AddModDialog() {
@@ -35,6 +35,7 @@ public class AddModDialog extends JDialog {
     public AddModDialog(ExternalMod mod) {
         this.fileMap = new HashMap<String, String>();
         if (mod != null) {
+            this.mod = mod;
             editMode = true;
             zipFile = mod.zipFile;
             inputField.setText(zipFile.getName());
@@ -118,7 +119,11 @@ public class AddModDialog extends JDialog {
             onCancel();
             return;
         }
-        mod = new ExternalMod(zipFile, fileMap);
+        if (mod == null) {
+            mod = new ExternalMod(zipFile, fileMap);
+        } else {
+            mod.setFileMap(fileMap);
+        }
         zipFile = null;
         dispose();
     }
@@ -241,7 +246,7 @@ public class AddModDialog extends JDialog {
         }
     }
 
-    Mod getMod() {
+    ExternalMod getMod() {
         return mod;
     }
 

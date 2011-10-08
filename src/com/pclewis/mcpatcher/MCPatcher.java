@@ -30,7 +30,7 @@ final public class MCPatcher {
     /**
      * MCPatcher patch level
      */
-    public static final int PATCH_VERSION = 0;
+    public static final int PATCH_VERSION = 1;
     /**
      * MCPatcher beta version if > 0
      */
@@ -42,12 +42,6 @@ final public class MCPatcher {
         String.format("%d.%d.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION) +
             (PATCH_VERSION > 0 ? String.format("_%02d", PATCH_VERSION) : "") +
             (BETA_VERSION > 0 ? "-beta" + BETA_VERSION : "");
-
-    /**
-     * Name of utility class always injected into output minecraft.jar
-     */
-    public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
-    public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
 
     static MinecraftJar minecraft = null;
     static ModList modList;
@@ -209,7 +203,6 @@ final public class MCPatcher {
     static void getApplicableMods() throws IOException, InterruptedException {
         JarFile origJar = minecraft.getInputJar();
         for (Mod mod : modList.getAll()) {
-            mod.preSetup(minecraft.getVersion());
             mod.setRefs();
         }
 

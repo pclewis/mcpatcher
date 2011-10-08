@@ -11,20 +11,20 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class HDTexture extends Mod {
-    static final String class_TileSize = "com.pclewis.mcpatcher.mod.TileSize";
-    static final String class_TextureUtils = "com.pclewis.mcpatcher.mod.TextureUtils";
-    static final String class_CustomAnimation = "com.pclewis.mcpatcher.mod.CustomAnimation";
+    private boolean haveColorizerWater;
+    private boolean haveAlternateFont;
 
-    RenderEngineMod renderEngineMod;
-
-    public HDTexture() {
+    public HDTexture(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for texture packs of size 32x32 and higher.";
         version = "1.0";
         configPanel = new HDTextureConfig();
 
-        classMods.add(renderEngineMod = new RenderEngineMod());
+        haveColorizerWater = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) >= 0;
+        haveAlternateFont = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 3")) >= 0;
+
+        classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
         classMods.add(new CompassMod());
         classMods.add(new FireMod());
@@ -43,42 +43,19 @@ public class HDTexture extends Mod {
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
+        if (haveColorizerWater) {
+            classMods.add(new ColorizerMod("ColorizerWater", false, false));
+            classMods.add(new ColorizerMod("ColorizerGrass", true, false));
+            classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
+        } else {
+            classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
+            classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
+            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
+        }
 
         filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
-    }
-
-    private static int compareVersionNumbers(int[] a, int[] b) {
-        for (int i = 0; i < a.length && i < b.length; i++) {
-            if (a[i] < b[i]) {
-                return -1;
-            } else if (a[i] > b[i]) {
-                return 1;
-            }
-        }
-        if (a.length < b.length) {
-            return -1;
-        } else if (a.length > b.length) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public void preSetup(MinecraftVersion minecraftVersion) {
-        boolean pre16 = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) < 0;
-        if (pre16) {
-            classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
-            classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
-            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
-        } else {
-            classMods.add(new ColorizerMod("ColorizerWater", false, false));
-            classMods.add(new ColorizerMod("ColorizerGrass", true, false));
-            classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
-        }
-        renderEngineMod.preSetup(pre16);
     }
 
     private class RenderEngineMod extends ClassMod {
@@ -103,6 +80,9 @@ public class HDTexture extends Mod {
             memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
+            if (haveColorizerWater) {
+                memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
+            }
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -129,10 +109,10 @@ public class HDTexture extends Mod {
                     return buildCode(
                         push(methodInfo, 16),
                         getCaptureGroup(1),
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "int_size", "I")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
                         IMUL,
                         getCaptureGroup(2),
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "int_size", "I")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
                         IMUL
                     );
                 }
@@ -157,8 +137,8 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "int_size", "I")),
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "int_size", "I")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
                         SIPUSH, 0x19, 0x08,
                         SIPUSH, 0x14, 0x01
                     );
@@ -182,7 +162,7 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "getResourceAsBufferedImage", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
                     );
                 }
             });
@@ -220,7 +200,7 @@ public class HDTexture extends Mod {
                     return buildCode(
                         ALOAD_0,
                         ALOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
                     );
                 }
             });
@@ -270,7 +250,7 @@ public class HDTexture extends Mod {
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, imageData),
                         getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "getByteBuffer", "(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getByteBuffer", "(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;")),
                         reference(methodInfo, PUTFIELD, imageData)
                     );
                 }
@@ -301,7 +281,7 @@ public class HDTexture extends Mod {
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef("RenderEngine", "textureList", "Ljava/util/List;")),
                         ALOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "registerTextureFX", "(Ljava/util/List;LTextureFX;)V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "registerTextureFX", "(Ljava/util/List;LTextureFX;)V")),
                         RETURN
                     );
                 }
@@ -374,7 +354,7 @@ public class HDTexture extends Mod {
                     return buildCode(
                         // imageData = GLAllocation.createDirectByteBuffer(TileSize.int_glBufferSize);
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_TileSize, "int_glBufferSize", "I")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_glBufferSize", "I")),
                         reference(methodInfo, INVOKESTATIC, new MethodRef("GLAllocation", "createDirectByteBuffer", "(I)Ljava/nio/ByteBuffer;")),
                         reference(methodInfo, PUTFIELD, new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;")),
 
@@ -385,18 +365,12 @@ public class HDTexture extends Mod {
                         // TextureUtils.refreshTextureFX(textureList);
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef("RenderEngine", "textureList", "Ljava/util/List;")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "refreshTextureFX", "(Ljava/util/List;)V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "refreshTextureFX", "(Ljava/util/List;)V")),
 
                         RETURN
                     );
                 }
             });
-        }
-
-        void preSetup(boolean pre16) {
-            if (!pre16) {
-                memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
-            }
         }
     }
 
@@ -421,7 +395,7 @@ public class HDTexture extends Mod {
 
         @Override
         public void prePatch(String filename, ClassFile classFile) {
-            mod.getClassMap().addInheritance(getDeobfClass(), class_CustomAnimation);
+            mod.getClassMap().addInheritance(getDeobfClass(), MCPatcherUtils.CUSTOM_ANIMATION_CLASS);
         }
     }
 
@@ -607,14 +581,19 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class MinecraftMod extends ClassMod {
+    private class MinecraftMod extends ClassMod {
         public MinecraftMod() {
             classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
 
             memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
-            memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
+            if (haveAlternateFont) {
+                memberMappers.add(new FieldMapper(new String[]{"fontRenderer", "alternateFontRenderer"}, "LFontRenderer;"));
+            } else {
+                memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
+                memberMappers.add(new FieldMapper("alternateFontRenderer", "LFontRenderer;"));
+            }
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -637,7 +616,7 @@ public class HDTexture extends Mod {
                     return buildCode(
                         getCaptureGroup(1),
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "setMinecraft", "(Lnet/minecraft/client/Minecraft;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setMinecraft", "(Lnet/minecraft/client/Minecraft;)V"))
                     );
                 }
             });
@@ -662,7 +641,7 @@ public class HDTexture extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "setTileSize", "()Z")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setTileSize", "()Z")),
                         POP,
                         ALOAD_0,
                         GETFIELD, getCaptureGroup(2),
@@ -752,7 +731,7 @@ public class HDTexture extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "setTileSize", "()Z")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setTileSize", "()Z")),
                         POP,
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef("TexturePackList", "minecraft", "LMinecraft;")),
@@ -760,7 +739,7 @@ public class HDTexture extends Mod {
                         reference(methodInfo, GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
                         SWAP,
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "setFontRenderer", "()V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setFontRenderer", "()V")),
                         getCaptureGroup(2)
                     );
                 }
@@ -881,7 +860,7 @@ public class HDTexture extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_TextureUtils, "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
                     );
                 }
             });

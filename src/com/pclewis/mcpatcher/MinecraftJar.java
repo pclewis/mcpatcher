@@ -27,12 +27,9 @@ class MinecraftJar {
             throw new FileNotFoundException(file.getPath() + " does not exist");
         }
 
-        fixPreviewJarName("1.8", "pre1", "7ce3238b148bb67a3b84cf59b7516f55");
-        fixPreviewJarName("1.8", "pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
-        fixPreviewJarName("1.9", "pre1", "b4d9681a1118949d7753e19c35c61ec7");
-        fixPreviewJarName("1.9", "pre2", "962d79abeca031b44cf8dac8d4fcabe9");
+        fixJarNames();
 
-        extractVersion(file);
+        version = extractVersion(file);
         if (version == null) {
             throw new IOException("Could not determine version of " + file.getPath());
         }
@@ -81,19 +78,25 @@ class MinecraftJar {
         }
     }
 
-    private static void fixPreviewJarName(String version, String pre, String md5) {
-        try {
-            File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
-            File jarPre = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + pre + ".jar");
-            if (jar.exists() && !jarPre.exists()) {
-                String jarMD5 = Util.computeMD5(jar);
-                if (md5.equals(jarMD5)) {
-                    Logger.log(Logger.LOG_JAR, "Renaming %s to %s", jar.getName(), jarPre.getName());
-                    jar.renameTo(jarPre);
-                }
+    private static void fixJarNames() {
+        File binDir = MCPatcherUtils.getMinecraftPath("bin");
+        for (String filename : binDir.list(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.matches("^minecraft-[0-9][-_.0-9a-zA-Z]+(pre\\d+)?\\.jar$");
             }
-        } catch (Throwable e) {
-            e.printStackTrace();
+        })) {
+            try {
+                File oldFile = new File(filename);
+                MinecraftVersion version = extractVersion(oldFile);
+                if (version != null) {
+                    File newFile = new File(binDir, "minecraft-" + version.toString() + ".jar");
+                    if (!newFile.exists()) {
+                        Logger.log(Logger.LOG_JAR, "Renaming %s to %s", oldFile.getName(), newFile.getName());
+                        oldFile.renameTo(newFile);
+                    }
+                }
+            } catch (Throwable e) {
+            }
         }
     }
 
@@ -114,12 +117,12 @@ class MinecraftJar {
         }
     }
 
-    private MinecraftVersion extractVersion(File file) {
+    static private MinecraftVersion extractVersion(File file) {
         if (!file.exists()) {
             return null;
         }
 
-        version = null;
+        MinecraftVersion version = null;
         JarFile jar = null;
         InputStream is = null;
         try {

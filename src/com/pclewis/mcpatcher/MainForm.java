@@ -177,7 +177,6 @@ class MainForm {
                 if (fd.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
                     if (MCPatcher.setMinecraft(fd.getSelectedFile(), false)) {
                         MCPatcher.saveProperties();
-                        MCPatcher.getAllMods();
                         updateModList();
                     } else {
                         showCorruptJarError();
@@ -231,22 +230,17 @@ class MainForm {
                         MCPatcher.modList.selectMod(mod, !mod.isEnabled());
                         modTable.repaint();
                     }
-                    if (e.getClickCount() == 2) {
-                        if (mod instanceof ExternalMod) {
-                            boolean oldEnabled = mod.isEnabled();
-                            addModDialog = new AddModDialog((ExternalMod) mod);
-                            addModDialog.setLocationRelativeTo(frame);
-                            addModDialog.setVisible(true);
-                            Mod newMod = addModDialog.getMod();
-                            if (newMod != null) {
-                                newMod.setEnabled(oldEnabled);
-                                int newRow = MCPatcher.modList.replace(mod, newMod);
-                                modTable.addRowSelectionInterval(newRow, newRow);
-                                AbstractTableModel model = (AbstractTableModel) modTable.getModel();
-                                ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
-                                renderer.resetRowHeights();
-                                model.fireTableDataChanged();
-                            }
+                    if (e.getClickCount() == 2 && mod instanceof ExternalMod) {
+                        ExternalMod extMod = (ExternalMod) mod;
+                        addModDialog = new AddModDialog(extMod);
+                        addModDialog.setLocationRelativeTo(frame);
+                        addModDialog.setVisible(true);
+                        if (addModDialog.getMod() == extMod) {
+                            modTable.addRowSelectionInterval(row, row);
+                            AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+                            ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
+                            renderer.resetRowHeights();
+                            model.fireTableDataChanged();
                         }
                     }
                 }

@@ -20,6 +20,16 @@ public class MCPatcherUtils {
     public static final String BETTER_GRASS = "Better Grass";
     public static final String GLSL_SHADERS = "GLSL Shaders";
 
+    /**
+     * Name of utility class always injected into output minecraft.jar
+     */
+    public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
+    public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
+
+    public static final String TILE_SIZE_CLASS = "com.pclewis.mcpatcher.mod.TileSize";
+    public static final String TEXTURE_UTILS_CLASS = "com.pclewis.mcpatcher.mod.TextureUtils";
+    public static final String CUSTOM_ANIMATION_CLASS = "com.pclewis.mcpatcher.mod.CustomAnimation";
+
     private MCPatcherUtils() {
     }
 
