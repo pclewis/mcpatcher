@@ -1,9 +1,6 @@
 package com.pclewis.mcpatcher;
 
-import com.pclewis.mcpatcher.mod.BetterGrass;
-import com.pclewis.mcpatcher.mod.GLSLShader;
-import com.pclewis.mcpatcher.mod.HDFont;
-import com.pclewis.mcpatcher.mod.HDTexture;
+import com.pclewis.mcpatcher.mod.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -29,6 +26,7 @@ class ModList {
         new BuiltInMod(MCPatcherUtils.HD_FONT, HDFont.class, false),
         new BuiltInMod(MCPatcherUtils.BETTER_GRASS, BetterGrass.class, false),
         new BuiltInMod(MCPatcherUtils.GLSL_SHADERS, GLSLShader.class, true),
+        new BuiltInMod(MCPatcherUtils.RANDOM_MOBS, RandomMobs.class, true),
     };
 
     Mod baseMod;

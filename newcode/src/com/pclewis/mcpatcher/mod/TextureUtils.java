@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,6 +70,12 @@ public class TextureUtils {
 
     public static boolean setTileSize() {
         MCPatcherUtils.log("\nchanging skin to %s", getTexturePackName(getSelectedTexturePack()));
+        try {
+            Class<?> randomMobs = Class.forName(MCPatcherUtils.RANDOM_MOBS_CLASS);
+            Method reset = randomMobs.getDeclaredMethod("reset");
+            reset.invoke(null);
+        } catch (Throwable e) {
+        }
         int size = getTileSize();
         if (size == TileSize.int_size) {
             MCPatcherUtils.log("tile size %d unchanged", size);
@@ -234,7 +241,11 @@ public class TextureUtils {
     }
 
     public static boolean isRequiredResource(String resource) {
-        return !resource.startsWith("/custom_") && !resource.equals("/terrain_nh.png") && !resource.equals("/terrain_s.png");
+        return !resource.startsWith("/custom_") &&
+            !resource.equals("/terrain_nh.png") &&
+            !resource.equals("/terrain_s.png") &&
+            !resource.matches("^/mob/.*\\d+.png$")
+        ;
     }
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
