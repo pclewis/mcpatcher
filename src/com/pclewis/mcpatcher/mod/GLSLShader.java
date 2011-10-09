@@ -441,6 +441,23 @@ public class GLSLShader extends Mod {
                 .addXref(2, new FieldRef("EntityRenderer", "fogColor1", "F"))
             );
 
+            if (haveLightmaps) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression(MethodInfo methodInfo) {
+                        return buildExpression(
+                            FCONST_1,
+                            INVOKEVIRTUAL, BinaryRegex.any(2),
+                            push(methodInfo, 0.95f),
+                            FMUL,
+                            push(methodInfo, 0.05f),
+                            FADD,
+                            BytecodeMatcher.anyFSTORE
+                        );
+                    }
+                }.setMethodName("updateLightmap"));
+            }
+
             memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
 
             memberMappers.add(new MethodMapper(
@@ -458,7 +475,7 @@ public class GLSLShader extends Mod {
                         "enableLightmap"
                     },
                     "(D)V"
-                ));
+                ).accessFlag(AccessFlag.PUBLIC, true));
             }
 
             patches.add(new BytecodePatch.InsertAfter() {
