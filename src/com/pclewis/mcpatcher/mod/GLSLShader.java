@@ -380,7 +380,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.util.Random", "nextGaussian", "()D"))
                     );
                 }
-            }.setMethodName("renderWorld1"));
+            }.setMethodName("renderRainSnow"));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -389,7 +389,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glColorMask", "(ZZZZ)V"))
                     );
                 }
-            }.setMethodName("renderWorld2"));
+            }.setMethodName("renderWorld"));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -470,8 +470,8 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(BinaryRegex.or(
-                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld1", "(F)V"))),
-                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld2", "(FJ)V")))
+                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderRainSnow", "(F)V"))),
+                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld", "(FJ)V")))
                     ));
                 }
 
