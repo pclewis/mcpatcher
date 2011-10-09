@@ -15,6 +15,21 @@ public class FontUtils {
 
     private static final boolean showLines = false;
 
+    private static Method getResource;
+
+    static {
+        Class<?> utils;
+        try {
+            utils = Class.forName(MCPatcherUtils.TEXTURE_UTILS_CLASS);
+            try {
+                getResource = utils.getDeclaredMethod("getResourceAsStream", String.class);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
+        }
+    }
+
     public static float[] computeCharWidths(String filename, BufferedImage image, int[] rgb, int[] charWidth) {
         MCPatcherUtils.log("computeCharWidths(%s)", filename);
         float[] charWidthf = new float[charWidth.length];
@@ -79,16 +94,12 @@ public class FontUtils {
     }
 
     private static void getCharWidthOverrides(String font, float[] charWidthf) {
-        String textFile = font.replace(".png", "_widths.txt");
-        Class<?> utils;
-        try {
-            utils = Class.forName(MCPatcherUtils.TEXTURE_UTILS_CLASS);
-        } catch (ClassNotFoundException e) {
+        if (getResource == null) {
             return;
         }
+        String textFile = font.replace(".png", "_widths.txt");
         InputStream is;
         try {
-            Method getResource = utils.getDeclaredMethod("getResourceAsStream", String.class);
             Object o = getResource.invoke(null, textFile);
             if (!(o instanceof InputStream)) {
                 return;
