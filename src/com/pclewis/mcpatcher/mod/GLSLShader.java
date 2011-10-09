@@ -19,12 +19,16 @@ public class GLSLShader extends Mod {
     private static final String class_Display = "org.lwjgl.opengl.Display";
     private static final String class_GL11 = "org.lwjgl.opengl.GL11";
 
+    private boolean haveLightmaps;
+
     public GLSLShader(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.GLSL_SHADERS;
         description = "Adds graphical shaders to the game.  Based on daxnitro's mod.";
         version = "1.0";
         website = "http://nitrous.daxnitro.com/repo/";
         defaultEnabled = false;
+
+        haveLightmaps = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.8 Prerelease 1")) >= 0;
 
         classMods.add(new MinecraftMod());
         classMods.add(new GLViewportMod());
@@ -446,6 +450,16 @@ public class GLSLShader extends Mod {
                 },
                 "(FI)V"
             ));
+
+            if (haveLightmaps) {
+                memberMappers.add(new MethodMapper(
+                    new String[]{
+                        "disableLightmap",
+                        "enableLightmap"
+                    },
+                    "(D)V"
+                ));
+            }
 
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
