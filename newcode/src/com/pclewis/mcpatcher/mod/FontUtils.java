@@ -13,6 +13,8 @@ public class FontUtils {
     private static final int ROWS = 16;
     private static final int COLS = 16;
 
+    public static final int[] SPACERS = new int[]{0x02028bfe, 0x02808080, 0x0dffffff};
+
     private static final boolean showLines = false;
 
     private static Method getResource;
@@ -86,6 +88,11 @@ public class FontUtils {
     }
 
     private static boolean isOpaque(int pixel) {
+        for (int i : SPACERS) {
+            if (pixel == i) {
+                return false;
+            }
+        }
         return (pixel & 0xff) > 0;
     }
 
