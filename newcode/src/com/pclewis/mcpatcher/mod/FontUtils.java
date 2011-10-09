@@ -97,7 +97,7 @@ public class FontUtils {
         if (getResource == null) {
             return;
         }
-        String textFile = font.replace(".png", "_widths.txt");
+        String textFile = font.replace(".png", ".properties");
         InputStream is;
         try {
             Object o = getResource.invoke(null, textFile);
