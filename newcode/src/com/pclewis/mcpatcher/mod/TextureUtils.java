@@ -236,9 +236,9 @@ public class TextureUtils {
     public static boolean isRequiredResource(String resource) {
         return !(
             resource.startsWith("/custom_") ||
-            resource.equals("/terrain_nh.png") ||
-            resource.equals("/terrain_s.png") ||
-            resource.matches("^/font/.*\\.properties$")
+                resource.equals("/terrain_nh.png") ||
+                resource.equals("/terrain_s.png") ||
+                resource.matches("^/font/.*\\.properties$")
         );
     }
 
@@ -313,7 +313,7 @@ public class TextureUtils {
                 lastTexturePack = texturePack;
                 cache.put(resource, image);
             }
-            if (resource.contains("_eyes.")) {
+            if (resource.endsWith("_eyes.png")) {
                 int p = 0;
                 for (int x = 0; x < image.getWidth(); x++) {
                     for (int y = 0; y < image.getHeight(); y++) {
@@ -324,7 +324,9 @@ public class TextureUtils {
                         }
                     }
                 }
-                MCPatcherUtils.log("  fixed %d transparent pixels", p, resource);
+                if (p > 0) {
+                    MCPatcherUtils.log("  fixed %d transparent pixels", p, resource);
+                }
             }
         }
 
