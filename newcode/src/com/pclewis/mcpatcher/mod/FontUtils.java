@@ -117,9 +117,9 @@ public class FontUtils {
             for (Map.Entry entry : props.entrySet()) {
                 String key = entry.getKey().toString().trim();
                 String value = entry.getValue().toString().trim();
-                if (!value.equals("")) {
+                if (key.matches("^width\\.\\d+$") && !value.equals("")) {
                     try {
-                        int ch = Integer.parseInt(key);
+                        int ch = Integer.parseInt(key.substring(6));
                         float width = Float.parseFloat(value);
                         if (ch >= 0 && ch < charWidthf.length) {
                             MCPatcherUtils.log("    setting charWidthf[%d] to %f", ch, width);
