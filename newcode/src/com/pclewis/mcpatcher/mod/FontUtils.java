@@ -13,6 +13,7 @@ public class FontUtils {
     private static final int ROWS = 16;
     private static final int COLS = 16;
 
+    public static final char[] AVERAGE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123467890".toCharArray();
     public static final int[] SPACERS = new int[]{0x02028bfe, 0x02808080, 0x0dffffff};
 
     private static final boolean showLines = false;
@@ -66,9 +67,21 @@ public class FontUtils {
                     }
                 }
             }
-            if (ch == 32) {
-                charWidthf[ch] = 4.0f;
+        }
+        float sum = 0.0f;
+        int n = 0;
+        for (char ch : AVERAGE_CHARS) {
+            if (charWidthf[ch] > 0.0f) {
+                sum += charWidthf[ch];
+                n++;
             }
+        }
+        if (n > 0) {
+            charWidthf[32] = sum / (float) n * 0.5f;
+        } else {
+            charWidthf[32] = 4.0f;
+        }
+        for (int ch = 0; ch < charWidthf.length; ch++) {
             if (charWidthf[ch] <= 0.0f) {
                 charWidthf[ch] = 2.0f;
             }
@@ -97,7 +110,7 @@ public class FontUtils {
     }
 
     private static boolean printThis(int ch) {
-        return (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
+        return (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f') || ch == ' ';
     }
 
     private static void getCharWidthOverrides(String font, float[] charWidthf) {
