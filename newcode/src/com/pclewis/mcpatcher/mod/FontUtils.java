@@ -48,9 +48,9 @@ public class FontUtils {
                     int pixel = rgb[x + y * width];
                     if (isOpaque(pixel)) {
                         if (printThis(ch)) {
-                            MCPatcherUtils.log("'%c' pixel (%d, %d) = %08x", (char) ch, x, y, pixel);
+                            MCPatcherUtils.log("'%c' pixel (%d, %d) = %08x, colIdx = %d", (char) ch, x, y, pixel, colIdx);
                         }
-                        charWidthf[ch] = (128.0f * (float) colIdx + 256.0f) / (float) width;
+                        charWidthf[ch] = (128.0f * (float) (colIdx + 1)) / (float) width + 1.0f;
                         if (showLines) {
                             for (int i = 0; i < rowHeight; i++) {
                                 y = row * rowHeight + i;
