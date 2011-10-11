@@ -8,7 +8,6 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -387,11 +386,7 @@ class ModList {
             } else if (type.equals(Config.VAL_BUILTIN)) {
                 for (BuiltInMod builtInMod : builtInMods) {
                     if (name.equals(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
-                        try {
-                            mod = builtInMod.modClass.newInstance();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        mod = newModInstance(builtInMod.modClass);
                     }
                 }
                 if (mod == null) {

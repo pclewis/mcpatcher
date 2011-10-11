@@ -19,12 +19,16 @@ public class GLSLShader extends Mod {
     private static final String class_Display = "org.lwjgl.opengl.Display";
     private static final String class_GL11 = "org.lwjgl.opengl.GL11";
 
+    private boolean haveLightmaps;
+
     public GLSLShader(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.GLSL_SHADERS;
         description = "Adds graphical shaders to the game.  Based on daxnitro's mod.";
         version = "1.0";
         website = "http://nitrous.daxnitro.com/repo/";
         defaultEnabled = false;
+
+        haveLightmaps = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.8 Prerelease 1")) >= 0;
 
         classMods.add(new MinecraftMod());
         classMods.add(new GLViewportMod());
@@ -376,7 +380,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.util.Random", "nextGaussian", "()D"))
                     );
                 }
-            }.setMethodName("renderWorld1"));
+            }.setMethodName("renderRainSnow"));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -385,7 +389,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glColorMask", "(ZZZZ)V"))
                     );
                 }
-            }.setMethodName("renderWorld2"));
+            }.setMethodName("renderWorld"));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -437,6 +441,23 @@ public class GLSLShader extends Mod {
                 .addXref(2, new FieldRef("EntityRenderer", "fogColor1", "F"))
             );
 
+            if (haveLightmaps) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression(MethodInfo methodInfo) {
+                        return buildExpression(
+                            FCONST_1,
+                            INVOKEVIRTUAL, BinaryRegex.any(2),
+                            push(methodInfo, 0.95f),
+                            FMUL,
+                            push(methodInfo, 0.05f),
+                            FADD,
+                            BytecodeMatcher.anyFSTORE
+                        );
+                    }
+                }.setMethodName("updateLightmap"));
+            }
+
             memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
 
             memberMappers.add(new MethodMapper(
@@ -447,6 +468,16 @@ public class GLSLShader extends Mod {
                 "(FI)V"
             ));
 
+            if (haveLightmaps) {
+                memberMappers.add(new MethodMapper(
+                    new String[]{
+                        "disableLightmap",
+                        "enableLightmap"
+                    },
+                    "(D)V"
+                ).accessFlag(AccessFlag.PUBLIC, true));
+            }
+
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -456,8 +487,8 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(BinaryRegex.or(
-                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld1", "(F)V"))),
-                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld2", "(FJ)V")))
+                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderRainSnow", "(F)V"))),
+                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld", "(FJ)V")))
                     ));
                 }
 

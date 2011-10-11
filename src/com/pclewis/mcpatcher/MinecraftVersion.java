@@ -20,6 +20,7 @@ final public class MinecraftVersion {
 
     private String versionString;
     private int[] versionNumbers;
+    private int preRelease;
 
     /**
      * Attempt to parse a string into a minecraft version.
@@ -49,7 +50,7 @@ final public class MinecraftVersion {
         elements[0] = elements[0].toLowerCase();
         versionString = elements[1];
         String[] tokens = versionString.split("[^0-9a-zA-Z]+");
-        versionNumbers = new int[tokens.length + 2];
+        versionNumbers = new int[tokens.length + 1];
         if ("alpha".equals(elements[0])) {
             versionNumbers[0] = ALPHA;
         } else if ("beta".equals(elements[0])) {
@@ -64,24 +65,20 @@ final public class MinecraftVersion {
             } catch (NumberFormatException e) {
             }
         }
-        int prerelease;
         if (elements[2] == null || elements[2].equals("")) {
-            prerelease = 0;
+            preRelease = NOT_PRERELEASE;
         } else if (elements[3] == null || elements[3].equals("")) {
-            prerelease = 1;
+            preRelease = 1;
         } else {
             try {
-                prerelease = Integer.parseInt(elements[3]);
+                preRelease = Integer.parseInt(elements[3]);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
-                prerelease = 1;
+                preRelease = 1;
             }
         }
-        if (prerelease > 0) {
-            versionNumbers[i + 1] = prerelease;
-            versionString += "pre" + prerelease;
-        } else {
-            versionNumbers[i + 1] = NOT_PRERELEASE;
+        if (preRelease != NOT_PRERELEASE) {
+            versionString += "pre" + preRelease;
         }
     }
 
@@ -133,6 +130,6 @@ final public class MinecraftVersion {
         if (i < b.length) {
             return -b[i];
         }
-        return 0;
+        return this.preRelease - that.preRelease;
     }
 }

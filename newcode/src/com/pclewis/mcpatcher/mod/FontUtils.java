@@ -13,7 +13,25 @@ public class FontUtils {
     private static final int ROWS = 16;
     private static final int COLS = 16;
 
+    public static final char[] AVERAGE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123467890".toCharArray();
+    public static final int[] SPACERS = new int[]{0x02028bfe, 0x02808080, 0x0dffffff};
+
     private static final boolean showLines = false;
+
+    private static Method getResource;
+
+    static {
+        Class<?> utils;
+        try {
+            utils = Class.forName(MCPatcherUtils.TEXTURE_UTILS_CLASS);
+            try {
+                getResource = utils.getDeclaredMethod("getResourceAsStream", String.class);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
+        }
+    }
 
     public static float[] computeCharWidths(String filename, BufferedImage image, int[] rgb, int[] charWidth) {
         MCPatcherUtils.log("computeCharWidths(%s)", filename);
@@ -33,9 +51,9 @@ public class FontUtils {
                     int pixel = rgb[x + y * width];
                     if (isOpaque(pixel)) {
                         if (printThis(ch)) {
-                            MCPatcherUtils.log("'%c' pixel (%d, %d) = %08x", (char) ch, x, y, pixel);
+                            MCPatcherUtils.log("'%c' pixel (%d, %d) = %08x, colIdx = %d", (char) ch, x, y, pixel, colIdx);
                         }
-                        charWidthf[ch] = (128.0f * (float) colIdx + 256.0f) / (float) width;
+                        charWidthf[ch] = (128.0f * (float) (colIdx + 1)) / (float) width + 1.0f;
                         if (showLines) {
                             for (int i = 0; i < rowHeight; i++) {
                                 y = row * rowHeight + i;
@@ -49,9 +67,21 @@ public class FontUtils {
                     }
                 }
             }
-            if (ch == 32) {
-                charWidthf[ch] = 4.0f;
+        }
+        float sum = 0.0f;
+        int n = 0;
+        for (char ch : AVERAGE_CHARS) {
+            if (charWidthf[ch] > 0.0f) {
+                sum += charWidthf[ch];
+                n++;
             }
+        }
+        if (n > 0) {
+            charWidthf[32] = sum / (float) n * 0.5f;
+        } else {
+            charWidthf[32] = 4.0f;
+        }
+        for (int ch = 0; ch < charWidthf.length; ch++) {
             if (charWidthf[ch] <= 0.0f) {
                 charWidthf[ch] = 2.0f;
             }
@@ -71,24 +101,25 @@ public class FontUtils {
     }
 
     private static boolean isOpaque(int pixel) {
+        for (int i : SPACERS) {
+            if (pixel == i) {
+                return false;
+            }
+        }
         return (pixel & 0xff) > 0;
     }
 
     private static boolean printThis(int ch) {
-        return (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
+        return (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f') || ch == ' ';
     }
 
     private static void getCharWidthOverrides(String font, float[] charWidthf) {
-        String textFile = font.replace(".png", "_widths.txt");
-        Class<?> utils;
-        try {
-            utils = Class.forName(MCPatcherUtils.TEXTURE_UTILS_CLASS);
-        } catch (ClassNotFoundException e) {
+        if (getResource == null) {
             return;
         }
+        String textFile = font.replace(".png", ".properties");
         InputStream is;
         try {
-            Method getResource = utils.getDeclaredMethod("getResourceAsStream", String.class);
             Object o = getResource.invoke(null, textFile);
             if (!(o instanceof InputStream)) {
                 return;
@@ -106,9 +137,9 @@ public class FontUtils {
             for (Map.Entry entry : props.entrySet()) {
                 String key = entry.getKey().toString().trim();
                 String value = entry.getValue().toString().trim();
-                if (!value.equals("")) {
+                if (key.matches("^width\\.\\d+$") && !value.equals("")) {
                     try {
-                        int ch = Integer.parseInt(key);
+                        int ch = Integer.parseInt(key.substring(6));
                         float width = Float.parseFloat(value);
                         if (ch >= 0 && ch < charWidthf.length) {
                             MCPatcherUtils.log("    setting charWidthf[%d] to %f", ch, width);
