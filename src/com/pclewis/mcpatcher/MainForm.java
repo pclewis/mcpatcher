@@ -689,12 +689,14 @@ class MainForm {
                     MCPatcher.getApplicableMods();
                     if (MCPatcher.minecraft.isModded()) {
                         JOptionPane.showMessageDialog(frame,
-                            "Your minecraft.jar appears to be an older or preview version\n" +
-                                "or is already modded.  This may work fine, but if the game\n" +
-                                "crashes or you have problems patching:\n" +
-                                " - Re-download the game by using Force Update in the launcher.\n" +
-                                " - Delete the backup minecraft-" + MCPatcher.minecraft.getVersion() + ".jar\n" +
-                                " - If you are using other mods, try applying them after running MCPatcher.",
+                            "Your minecraft.jar appears to be an older version or is already modded.\n" +
+                                "If you are using other mods, it is highly recommended that you install them via\n" +
+                                "MCPatcher instead.\n" +
+                                " - Close MCPatcher.\n" +
+                                " - Delete both minecraft.jar and minecraft-" + MCPatcher.minecraft.getVersion() + ".jar.\n" +
+                                " - Re-download the game using the launcher.\n" +
+                                " - Run MCPatcher and select mods to add using the Add (+) button in the main window.\n" +
+                                "Doing this will prevent most conflicts between MCPatcher and other mods.",
                             "Warning", JOptionPane.WARNING_MESSAGE
                         );
                     }
