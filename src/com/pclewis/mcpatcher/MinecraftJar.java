@@ -36,9 +36,16 @@ class MinecraftJar {
 
         checkForDuplicateZipEntries(file);
 
+        origMD5 = getOrigMD5();
+
         if (file.getName().equals("minecraft.jar")) {
+            String tmpmd5 = Util.computeMD5(file);
             origFile = new File(file.getParent(), "minecraft-" + version + ".jar");
             outputFile = file;
+            if (origFile.exists() && origMD5 != null && tmpmd5 != null && origMD5.equals(tmpmd5)) {
+                Logger.log(Logger.LOG_JAR, "copying unmodded %s over %s", outputFile.getName(), origFile.getName());
+                origFile.delete();
+            }
             if (!origFile.exists()) {
                 createBackup();
             }
@@ -51,8 +58,6 @@ class MinecraftJar {
         if (md5 == null) {
             throw new IOException("Could not compute md5 sum of " + file.getPath());
         }
-
-        origMD5 = getOrigMD5();
     }
 
     @Override
