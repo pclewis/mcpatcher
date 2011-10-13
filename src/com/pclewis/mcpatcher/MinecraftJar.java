@@ -89,7 +89,7 @@ class MinecraftJar {
             }
         })) {
             try {
-                File oldFile = new File(filename);
+                File oldFile = new File(binDir, filename);
                 MinecraftVersion version = Info.extractVersion(oldFile);
                 if (version != null) {
                     File newFile = new File(binDir, "minecraft-" + version.toString() + ".jar");
