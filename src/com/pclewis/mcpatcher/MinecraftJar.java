@@ -49,7 +49,9 @@ class MinecraftJar {
             if (!origFile.exists()) {
                 createBackup();
             }
-            info = origInfo;
+            if (origInfo.isOk()) {
+                info = origInfo;
+            }
         } else {
             origFile = file;
             outputFile = new File(file.getParent(), "minecraft.jar");
