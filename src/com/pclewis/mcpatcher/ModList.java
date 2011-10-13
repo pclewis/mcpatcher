@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -532,7 +533,13 @@ class ModList {
         Mod mod = null;
         try {
             mod = modClass.getConstructor(MinecraftVersion.class).newInstance(MCPatcher.minecraft.getVersion());
-        } catch (Exception e) {
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
             try {
                 mod = modClass.newInstance();
             } catch (Exception e1) {
