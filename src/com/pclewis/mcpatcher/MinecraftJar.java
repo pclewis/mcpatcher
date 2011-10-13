@@ -5,6 +5,7 @@ import javassist.bytecode.ConstPool;
 
 import java.io.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.jar.JarFile;
@@ -22,6 +23,18 @@ class MinecraftJar {
     private JarFile origJar;
     private JarOutputStream outputJar;
 
+    private static HashMap<String, String> knownPrereleases = new HashMap<String, String>() {
+        {
+            put("1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
+            put("1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
+
+            put("1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
+            put("1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
+            put("1.9pre3", "334827dbe9183af6d650b39321a99e21");
+            put("1.9pre4", "cae41f3746d3c4c440b2d63a403770e7");
+        }
+    };
+
     public MinecraftJar(File file) throws IOException {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getPath() + " does not exist");
@@ -36,7 +49,7 @@ class MinecraftJar {
 
         checkForDuplicateZipEntries(file);
 
-        origMD5 = getOrigMD5();
+        origMD5 = getOrigMD5(version);
 
         if (file.getName().equals("minecraft.jar")) {
             String tmpmd5 = Util.computeMD5(file);
@@ -157,7 +170,10 @@ class MinecraftJar {
         return version;
     }
 
-    private static String getOrigMD5() {
+    private static String getOrigMD5(MinecraftVersion version) {
+        if (version.isPrerelease()) {
+            return knownPrereleases.get(version.toString());
+        }
         File md5File = MCPatcherUtils.getMinecraftPath("bin", "md5s");
         if (md5File.exists()) {
             FileInputStream is = null;
