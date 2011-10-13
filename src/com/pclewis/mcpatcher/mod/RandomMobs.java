@@ -12,7 +12,7 @@ public class RandomMobs extends Mod {
     public RandomMobs(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.RANDOM_MOBS;
         author = "Balthichou";
-        description = "Randomize mob skins. Based on Balthichou's mod.";
+        description = "Randomize mob skins if texture pack supports it. Based on Balthichou's mod.";
         version = "1.0";
         defaultEnabled = false;
 
