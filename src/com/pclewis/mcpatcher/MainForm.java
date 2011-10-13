@@ -561,11 +561,11 @@ class MainForm {
         origBrowseButton.setEnabled(!busy);
         outputBrowseButton.setEnabled(!busy);
         modTable.setEnabled(!busy && origOk && outputSet);
-        upButton.setEnabled(!busy);
-        downButton.setEnabled(!busy);
-        addButton.setEnabled(!busy);
-        removeButton.setEnabled(!busy);
-        refreshButton.setEnabled(!busy);
+        upButton.setEnabled(!busy && origOk);
+        downButton.setEnabled(!busy && origOk);
+        addButton.setEnabled(!busy && origOk);
+        removeButton.setEnabled(!busy && origOk);
+        refreshButton.setEnabled(!busy && origOk);
         testButton.setEnabled(!busy && outputOk && MCPatcherUtils.getMinecraftPath().equals(MCPatcherUtils.getDefaultGameDir()));
         patchButton.setEnabled(!busy && origOk && !output.equals(orig));
         undoButton.setEnabled(!busy && origOk && !output.equals(orig));
