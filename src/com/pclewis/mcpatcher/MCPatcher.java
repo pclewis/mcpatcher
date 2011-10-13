@@ -116,6 +116,7 @@ final public class MCPatcher {
             System.exit(exitStatus);
         }
 
+        MinecraftJar.fixJarNames();
         ui.show();
 
         Util.logOSInfo();

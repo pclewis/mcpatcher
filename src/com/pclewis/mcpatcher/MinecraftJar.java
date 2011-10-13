@@ -38,8 +38,6 @@ class MinecraftJar {
             throw info.exception;
         }
 
-        fixJarNames();
-
         if (file.getName().equals("minecraft.jar")) {
             origFile = new File(file.getParent(), "minecraft-" + info.version.toString() + ".jar");
             outputFile = file;
@@ -81,7 +79,7 @@ class MinecraftJar {
         }
     }
 
-    private static void fixJarNames() {
+    static void fixJarNames() {
         File binDir = MCPatcherUtils.getMinecraftPath("bin");
         for (String filename : binDir.list(new FilenameFilter() {
             public boolean accept(File dir, String name) {
