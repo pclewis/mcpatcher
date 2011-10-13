@@ -47,6 +47,16 @@ public class ClassMap {
         return className.replace('.', '/') + ".class";
     }
 
+    /**
+     * Convert a Java descriptor to a class name, e.g., [Ljava/lang/String; -> java.lang.String
+     *
+     * @param descriptor type descriptor
+     * @return dotted name of package/class
+     */
+    public static String descriptorToClassName(String descriptor) {
+        return descriptor.replaceFirst("^\\[*L(.*);$", "$1").replace('/',  '.');
+    }
+
     private ClassMapEntry getEntry(String descName) {
         descName = descName.replace('.', '/');
         ClassMapEntry entry = classMap.get(descName);

@@ -5,6 +5,7 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,10 +13,7 @@ import java.util.Map;
  * ClassSignature that matches a particular bytecode sequence.
  */
 abstract public class BytecodeSignature extends ClassSignature {
-    /**
-     * Optional method name.
-     */
-    protected String methodName = null;
+    MethodRef methodRef;
     /**
      * Matcher object.
      *
@@ -45,10 +43,24 @@ abstract public class BytecodeSignature extends ClassSignature {
             MethodInfo methodInfo = (MethodInfo) o;
             CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
             if (codeAttribute != null && match(methodInfo)) {
-                if (methodName != null) {
+                if (methodRef != null) {
                     String deobfName = classMod.getDeobfClass();
+                    methodRef.className = deobfName;
                     tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
-                    tempClassMap.addMethodMap(deobfName, methodName, methodInfo.getName());
+                    tempClassMap.addMethodMap(deobfName, methodRef.getName(), methodInfo.getName());
+                    if (!methodRef.getType().equals("")) {
+                        ArrayList<String> descTypes = ConstPoolUtils.parseDescriptor(methodRef.getType());
+                        ArrayList<String> obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
+                        if (descTypes.size() == obfTypes.size()) {
+                            for (int i = 0; i < descTypes.size(); i++) {
+                                String desc = ClassMap.descriptorToClassName(descTypes.get(i));
+                                String obf = ClassMap.descriptorToClassName(obfTypes.get(i));
+                                if (!obf.equals(desc)) {
+                                    tempClassMap.addClassMap(desc, obf);
+                                }
+                            }
+                        }
+                    }
                 }
                 ConstPool constPool = methodInfo.getConstPool();
                 for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
@@ -75,7 +87,18 @@ abstract public class BytecodeSignature extends ClassSignature {
      * @return this
      */
     public BytecodeSignature setMethodName(String methodName) {
-        this.methodName = methodName;
+        return setMethod(new MethodRef("", methodName, ""));
+    }
+
+    /**
+     * Assigns a name to a signature.  On matching, the target class and method will be added.
+     * to the class map.
+     *
+     * @param methodRef descriptive name/type of method
+     * @return this
+     */
+    public BytecodeSignature setMethod(MethodRef methodRef) {
+        this.methodRef = new MethodRef("", methodRef.getName(), methodRef.getType());
         return this;
     }
 
