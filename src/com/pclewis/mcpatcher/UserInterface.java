@@ -45,14 +45,14 @@ abstract class UserInterface {
     boolean go() {
         File defaultMinecraft = MCPatcherUtils.getMinecraftPath("bin", "minecraft.jar");
         if (!defaultMinecraft.exists()) {
+            showCorruptJarError(defaultMinecraft);
             setBusy(false);
             return false;
         } else if (MCPatcher.setMinecraft(defaultMinecraft, true)) {
             updateModList();
             return true;
         } else {
-            Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
-            showCorruptJarError();
+            showCorruptJarError(defaultMinecraft);
             setBusy(false);
             return false;
         }
@@ -73,7 +73,8 @@ abstract class UserInterface {
     void showBetaWarning() {
     }
 
-    void showCorruptJarError() {
+    void showCorruptJarError(File defaultMinecraft) {
+        Logger.log(Logger.LOG_MAIN, "ERROR: %s missing or corrupt", defaultMinecraft.getPath());
     }
 
     static class GUI extends UserInterface {
@@ -120,8 +121,9 @@ abstract class UserInterface {
         }
 
         @Override
-        void showCorruptJarError() {
-            mainForm.showCorruptJarError();
+        void showCorruptJarError(File defaultMinecraft) {
+            super.showCorruptJarError(defaultMinecraft);
+            mainForm.showCorruptJarError(defaultMinecraft);
         }
     }
 

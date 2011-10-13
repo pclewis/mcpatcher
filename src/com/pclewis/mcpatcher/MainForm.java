@@ -179,7 +179,7 @@ class MainForm {
                         MCPatcher.saveProperties();
                         updateModList();
                     } else {
-                        showCorruptJarError();
+                        showCorruptJarError(fd.getSelectedFile());
                     }
                 }
                 updateControls();
@@ -462,21 +462,32 @@ class MainForm {
         );
     }
 
-    public void showCorruptJarError() {
-        tabbedPane.setSelectedIndex(TAB_LOG);
-        JOptionPane.showMessageDialog(frame,
-            "There was an error opening minecraft.jar. This may be because:\n" +
-                " - You selected the launcher jar and not the main minecraft.jar in the bin folder.\n" +
-                " - You selected a texture pack and not minecraft.jar.\n" +
-                " - The file has already been patched.\n" +
-                " - There was an update that this patcher cannot handle.\n" +
-                " - There is another, conflicting mod applied.\n" +
-                " - The jar file is invalid or corrupt.\n" +
-                "\n" +
-                "You can re-download the original minecraft.jar by using the Force Update\n" +
-                "button in the Minecraft Launcher.\n",
-            "Invalid or Corrupt jar", JOptionPane.ERROR_MESSAGE
-        );
+    public void showCorruptJarError(File defaultMinecraft) {
+        if (defaultMinecraft.exists()) {
+            tabbedPane.setSelectedIndex(TAB_LOG);
+            JOptionPane.showMessageDialog(frame,
+                "There was an error opening minecraft.jar. This may be because:\n" +
+                    " - You selected the launcher jar and not the main minecraft.jar in the bin folder.\n" +
+                    " - You selected a texture pack and not minecraft.jar.\n" +
+                    " - The file has already been patched.\n" +
+                    " - There was an update that this patcher cannot handle.\n" +
+                    " - There is another, conflicting mod applied.\n" +
+                    " - The jar file is invalid or corrupt.\n" +
+                    "\n" +
+                    "You can re-download the original minecraft.jar by using the Force Update\n" +
+                    "button in the Minecraft Launcher.\n",
+                "Invalid or Corrupt minecraft.jar", JOptionPane.ERROR_MESSAGE
+            );
+        } else {
+            JOptionPane.showMessageDialog(frame,
+                "Could not find minecraft.jar in\n" +
+                    defaultMinecraft.getParentFile().getPath() + "\n" +
+                    "\n" +
+                    "Use the Browse button to select a different\n" +
+                    "input file before patching.",
+                "Missing minecraft.jar", JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     private void cancelWorker() {
@@ -587,12 +598,14 @@ class MainForm {
     }
 
     private void saveOptions() {
-        for (Mod mod : MCPatcher.modList.getAll()) {
-            if (mod.configPanel != null) {
-                try {
-                    mod.configPanel.save();
-                } catch (Throwable e) {
-                    Logger.log(e);
+        if (MCPatcher.modList != null) {
+            for (Mod mod : MCPatcher.modList.getAll()) {
+                if (mod.configPanel != null) {
+                    try {
+                        mod.configPanel.save();
+                    } catch (Throwable e) {
+                        Logger.log(e);
+                    }
                 }
             }
         }
@@ -602,28 +615,30 @@ class MainForm {
     private void loadOptions() {
         optionsPanel.removeAll();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-        for (Mod mod : MCPatcher.modList.getAll()) {
-            try {
-                if (mod.configPanel == null) {
-                    continue;
+        if (MCPatcher.modList != null) {
+            for (Mod mod : MCPatcher.modList.getAll()) {
+                try {
+                    if (mod.configPanel == null) {
+                        continue;
+                    }
+                    mod.loadOptions();
+                    JPanel panel = mod.configPanel.getPanel();
+                    if (panel == null) {
+                        continue;
+                    }
+                    String name = mod.configPanel.getPanelName();
+                    if (name == null) {
+                        name = mod.getName();
+                    }
+                    if (panel.getParent() != null) {
+                        panel.getParent().remove(panel);
+                    }
+                    panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), name));
+                    optionsPanel.add(panel);
+                    optionsPanel.add(Box.createRigidArea(new Dimension(1, 16)));
+                } catch (Throwable e) {
+                    Logger.log(e);
                 }
-                mod.loadOptions();
-                JPanel panel = mod.configPanel.getPanel();
-                if (panel == null) {
-                    continue;
-                }
-                String name = mod.configPanel.getPanelName();
-                if (name == null) {
-                    name = mod.getName();
-                }
-                if (panel.getParent() != null) {
-                    panel.getParent().remove(panel);
-                }
-                panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), name));
-                optionsPanel.add(panel);
-                optionsPanel.add(Box.createRigidArea(new Dimension(1, 16)));
-            } catch (Throwable e) {
-                Logger.log(e);
             }
         }
         optionsPanel.validate();
@@ -703,7 +718,7 @@ class MainForm {
                 } catch (InterruptedException e) {
                 } catch (IOException e) {
                     Logger.log(e);
-                    showCorruptJarError();
+                    showCorruptJarError(MCPatcher.minecraft.getInputFile());
                 }
                 redrawModList();
                 setBusy(false);
