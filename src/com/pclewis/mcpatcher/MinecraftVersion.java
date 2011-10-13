@@ -97,7 +97,7 @@ final public class MinecraftVersion {
      * @return true if prerelease
      */
     public boolean isPrerelease() {
-        return versionNumbers[versionNumbers.length - 1] != NOT_PRERELEASE;
+        return preRelease != NOT_PRERELEASE;
     }
 
     /**
