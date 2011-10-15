@@ -27,6 +27,7 @@ public class TextureUtils {
     private static boolean customLava;
     private static boolean customWater;
     private static boolean customPortal;
+    private static boolean customOther = true;
 
     public static final int LAVA_STILL_TEXTURE_INDEX = 14 * 16 + 13;  // Block.lavaStill.blockIndexInTexture
     public static final int LAVA_FLOWING_TEXTURE_INDEX = LAVA_STILL_TEXTURE_INDEX + 1; // Block.lavaMoving.blockIndexInTexture
@@ -197,6 +198,18 @@ public class TextureUtils {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
         } else if (animatedPortal) {
             textureList.add(new Portal());
+        }
+
+        if (customOther) {
+            for (int tileImage = 0; tileImage < 2; tileImage++) {
+                String imageName = (tileImage == 0 ? "terrain" : "item");
+                for (int tileNum = 0; tileNum < 256; tileNum++) {
+                    String resource = "/custom_" + imageName + "_" + tileNum + ".png";
+                    if (hasResource(resource)) {
+                        textureList.add(new CustomAnimation(tileNum, tileImage, 1, imageName + "_" + tileNum, 2, 4));
+                    }
+                }
+            }
         }
 
         for (TextureFX t : savedTextureFX) {
