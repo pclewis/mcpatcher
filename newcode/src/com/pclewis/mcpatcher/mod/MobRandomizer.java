@@ -5,9 +5,11 @@ import net.minecraft.src.Entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class MobRandomizer {
-    private static HashMap<String, ArrayList<String>> mobHash = new HashMap<String, ArrayList<String>>();
+    private static final Random random = new Random();
+    private static final HashMap<String, ArrayList<String>> mobHash = new HashMap<String, ArrayList<String>>();
 
     public static void reset() {
         MCPatcherUtils.log("reset random mobs list");
@@ -33,6 +35,15 @@ public class MobRandomizer {
             }
             mobHash.put(texture, variations);
         }
-        return variations.get(entity.entityId % variations.size());
+        return variations.get(getVariant(entity.entityId, variations.size()));
+    }
+
+    private static int getVariant(int entityId, int max) {
+        if (max < 2) {
+            return 0;
+        } else {
+            random.setSeed(entityId);
+            return random.nextInt(max);
+        }
     }
 }

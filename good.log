@@ -2282,9 +2282,9 @@ Patching...
   adding com/pclewis/mcpatcher/mod/MobRandomizer.class for Random Mobs
    method signature (Lnet/minecraft/src/Entity;)Ljava/lang/String; -> (Lkj;)Ljava/lang/String;
     method ref net.minecraft.src.Entity.getEntityTexture ()Ljava/lang/String; -> kj.E ()Ljava/lang/String; randomTexture(Lkj;)Ljava/lang/String;@1
-     INVOKEVIRTUAL 0x00 0x07   INVOKEVIRTUAL 0x00 0x7c
+     INVOKEVIRTUAL 0x00 0x07   INVOKEVIRTUAL 0x00 0x90
     field ref net.minecraft.src.Entity.entityId I -> kj.f I randomTexture(Lkj;)Ljava/lang/String;@120
-     GETFIELD 0x00 0x19        GETFIELD 0x00 0x7f
+     GETFIELD 0x00 0x19        GETFIELD 0x00 0x93
 
 Done!
 
