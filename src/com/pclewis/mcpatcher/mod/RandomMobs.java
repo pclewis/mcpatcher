@@ -14,7 +14,6 @@ public class RandomMobs extends Mod {
         author = "Balthichou";
         description = "Randomize mob skins if texture pack supports it. Based on Balthichou's mod.";
         version = "1.0";
-        defaultEnabled = false;
 
         addDependency(MCPatcherUtils.HD_TEXTURES);
 

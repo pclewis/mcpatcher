@@ -26,8 +26,8 @@ class ModList {
         new BuiltInMod(MCPatcherUtils.HD_TEXTURES, HDTexture.class, false),
         new BuiltInMod(MCPatcherUtils.HD_FONT, HDFont.class, false),
         new BuiltInMod(MCPatcherUtils.BETTER_GRASS, BetterGrass.class, false),
+        new BuiltInMod(MCPatcherUtils.RANDOM_MOBS, RandomMobs.class, false),
         new BuiltInMod(MCPatcherUtils.GLSL_SHADERS, GLSLShader.class, true),
-        new BuiltInMod(MCPatcherUtils.RANDOM_MOBS, RandomMobs.class, true),
     };
 
     Mod baseMod;
