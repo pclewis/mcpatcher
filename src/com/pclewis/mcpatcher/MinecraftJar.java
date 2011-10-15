@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.jar.JarException;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -53,8 +54,7 @@ class MinecraftJar {
             }
             if (!origFile.exists()) {
                 createBackup();
-            }
-            if (origInfo.isOk()) {
+            } else if (origInfo.isOk()) {
                 info = origInfo;
             }
         } else {
@@ -274,7 +274,6 @@ class MinecraftJar {
         static final int MODDED_OR_UNMODDED_JAR = 4;
         static final int UNMODDED_JAR = 5;
 
-        File file;
         MinecraftVersion version;
         String md5;
         String origMD5;
@@ -289,7 +288,6 @@ class MinecraftJar {
         }
 
         private int initialize(File minecraftJar) {
-            file = minecraftJar;
             if (!minecraftJar.exists()) {
                 exception = new FileNotFoundException(minecraftJar.getPath() + " does not exist");
                 return MISSING_JAR;
@@ -329,7 +327,7 @@ class MinecraftJar {
             }
 
             if (version == null) {
-                exception = new IOException("Could not determine version of " + minecraftJar.getPath());
+                exception = new JarException("Could not determine version of " + minecraftJar.getPath());
                 return CORRUPT_JAR;
             }
             origMD5 = getOrigMD5(minecraftJar.getParentFile(), version);
