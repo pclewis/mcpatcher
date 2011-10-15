@@ -8,14 +8,7 @@ import java.io.IOException;
 import java.util.Random;
 
 public class CustomAnimation extends TextureFX {
-    private int frame;
-    private int numFrames;
-    private byte[] src;
-    private byte[] temp;
-    private int minScrollDelay = -1;
-    private int maxScrollDelay = -1;
-    private int timer = -1;
-    private boolean isScrolling;
+    private Delegate delegate;
 
     static private Random rand = new Random();
 
@@ -25,12 +18,9 @@ public class CustomAnimation extends TextureFX {
         this.tileNumber = tileNumber;
         this.tileImage = tileImage;
         this.tileSize = tileSize;
-        this.minScrollDelay = minScrollDelay;
-        this.maxScrollDelay = maxScrollDelay;
-        this.isScrolling = (minScrollDelay >= 0);
 
         BufferedImage custom = null;
-        String imageName = tileImage == 0 ? "/terrain.png" : "/gui/items.png";
+        String imageName = (tileImage == 0 ? "/terrain.png" : "/gui/items.png");
         try {
             String customSrc = "/custom_" + name + ".png";
             custom = TextureUtils.getResourceAsBufferedImage(customSrc);
@@ -44,28 +34,9 @@ public class CustomAnimation extends TextureFX {
         );
 
         if (custom == null) {
-            BufferedImage tiles;
-            try {
-                tiles = TextureUtils.getResourceAsBufferedImage(imageName);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-
-            int tileX = (tileNumber % 16) * TileSize.int_size;
-            int tileY = (tileNumber / 16) * TileSize.int_size;
-            int imageBuf[] = new int[TileSize.int_numPixels];
-            tiles.getRGB(tileX, tileY, TileSize.int_size, TileSize.int_size, imageBuf, 0, TileSize.int_size);
-            ARGBtoRGBA(imageBuf, imageData);
-            if (isScrolling) {
-                temp = new byte[TileSize.int_size * 4];
-            }
+            delegate = new Tile(imageName, tileNumber, minScrollDelay, maxScrollDelay);
         } else {
-            numFrames = custom.getHeight() / custom.getWidth();
-            int imageBuf[] = new int[custom.getWidth() * custom.getHeight()];
-            custom.getRGB(0, 0, custom.getWidth(), custom.getHeight(), imageBuf, 0, TileSize.int_size);
-            src = new byte[imageBuf.length * 4];
-            ARGBtoRGBA(imageBuf, src);
+            delegate = new Strip(custom);
         }
     }
 
@@ -81,20 +52,83 @@ public class CustomAnimation extends TextureFX {
 
     @Override
     public void onTick() {
-        if (src != null) {
-            if (++frame >= numFrames) {
-                frame = 0;
+        delegate.onTick();
+    }
+
+    private interface Delegate {
+        public void onTick();
+    }
+
+    private class Tile implements Delegate {
+        private final int allButOneRow;
+        private final int oneRow;
+        private final int minScrollDelay;
+        private final int maxScrollDelay;
+        private final boolean isScrolling;
+        private final byte[] temp;
+
+        private int timer;
+
+        Tile(String imageName, int tileNumber, int minScrollDelay, int maxScrollDelay) {
+            oneRow = TileSize.int_size * 4;
+            allButOneRow = (TileSize.int_size - 1) * oneRow;
+            this.minScrollDelay = minScrollDelay;
+            this.maxScrollDelay = maxScrollDelay;
+            isScrolling = (this.minScrollDelay >= 0);
+            if (isScrolling) {
+                temp = new byte[oneRow];
+            } else {
+                temp = null;
             }
-            System.arraycopy(src, (frame * (TileSize.int_size * TileSize.int_size * 4)), imageData, 0, TileSize.int_size * TileSize.int_size * 4);
-        } else if (isScrolling) {
-            if (maxScrollDelay <= 0 || --this.timer <= 0) {
+
+            BufferedImage tiles;
+            try {
+                tiles = TextureUtils.getResourceAsBufferedImage(imageName);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            int tileX = (tileNumber % 16) * TileSize.int_size;
+            int tileY = (tileNumber / 16) * TileSize.int_size;
+            int imageBuf[] = new int[TileSize.int_numPixels];
+            tiles.getRGB(tileX, tileY, TileSize.int_size, TileSize.int_size, imageBuf, 0, TileSize.int_size);
+            ARGBtoRGBA(imageBuf, imageData);
+        }
+
+        public void onTick() {
+            if (isScrolling && (maxScrollDelay <= 0 || --timer <= 0)) {
                 if (maxScrollDelay > 0) {
                     timer = rand.nextInt(maxScrollDelay - minScrollDelay + 1) + minScrollDelay;
                 }
-                System.arraycopy(imageData, (TileSize.int_size - 1) * TileSize.int_size * 4, temp, 0, TileSize.int_size * 4);
-                System.arraycopy(imageData, 0, imageData, TileSize.int_size * 4, TileSize.int_size * (TileSize.int_size - 1) * 4);
-                System.arraycopy(temp, 0, imageData, 0, TileSize.int_size * 4);
+                System.arraycopy(imageData, allButOneRow, temp, 0, oneRow);
+                System.arraycopy(imageData, 0, imageData, oneRow, allButOneRow);
+                System.arraycopy(temp, 0, imageData, 0, oneRow);
             }
+        }
+    }
+
+    private class Strip implements Delegate {
+        private final int oneFrame;
+        private final byte[] src;
+        private final int numFrames;
+
+        private int currentFrame;
+
+        Strip(BufferedImage custom) {
+            oneFrame = TileSize.int_size * TileSize.int_size * 4;
+            numFrames = custom.getHeight() / custom.getWidth();
+            int imageBuf[] = new int[custom.getWidth() * custom.getHeight()];
+            custom.getRGB(0, 0, custom.getWidth(), custom.getHeight(), imageBuf, 0, TileSize.int_size);
+            src = new byte[imageBuf.length * 4];
+            ARGBtoRGBA(imageBuf, src);
+        }
+
+        public void onTick() {
+            if (++currentFrame >= numFrames) {
+                currentFrame = 0;
+            }
+            System.arraycopy(src, currentFrame * oneFrame, imageData, 0, oneFrame);
         }
     }
 }

@@ -56,6 +56,9 @@ public class HDTexture extends Mod {
         filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
         filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation$Delegate.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation$Tile.class");
+        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation$Strip.class");
     }
 
     private class RenderEngineMod extends ClassMod {
