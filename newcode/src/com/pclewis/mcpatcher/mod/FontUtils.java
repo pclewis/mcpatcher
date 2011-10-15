@@ -68,28 +68,19 @@ public class FontUtils {
                 }
             }
         }
-        float sum = 0.0f;
-        int n = 0;
-        for (char ch : AVERAGE_CHARS) {
-            if (charWidthf[ch] > 0.0f) {
-                sum += charWidthf[ch];
-                n++;
-            }
-        }
-        if (n > 0) {
-            charWidthf[32] = sum / (float) n * 0.5f;
-        } else {
-            charWidthf[32] = 4.0f;
-        }
         for (int ch = 0; ch < charWidthf.length; ch++) {
             if (charWidthf[ch] <= 0.0f) {
                 charWidthf[ch] = 2.0f;
             }
         }
+        boolean[] isOverride = new boolean[charWidth.length];
         try {
-            getCharWidthOverrides(filename, charWidthf);
+            getCharWidthOverrides(filename, charWidthf, isOverride);
         } catch (Throwable e) {
             e.printStackTrace();
+        }
+        if (!isOverride[32]) {
+            charWidthf[32] = defaultSpaceWidth(charWidthf);
         }
         for (int ch = 0; ch < charWidth.length; ch++) {
             charWidth[ch] = Math.round(charWidthf[ch]);
@@ -110,10 +101,26 @@ public class FontUtils {
     }
 
     private static boolean printThis(int ch) {
-        return (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f') || ch == ' ';
+        return "ABCDEF abcdef".indexOf(ch) >= 0;
     }
 
-    private static void getCharWidthOverrides(String font, float[] charWidthf) {
+    private static float defaultSpaceWidth(float[] charWidthf) {
+        float sum = 0.0f;
+        int n = 0;
+        for (char ch : AVERAGE_CHARS) {
+            if (charWidthf[ch] > 0.0f) {
+                sum += charWidthf[ch];
+                n++;
+            }
+        }
+        if (n > 0) {
+            return sum / (float) n * 0.5f;
+        } else {
+            return 4.0f;
+        }
+    }
+
+    private static void getCharWidthOverrides(String font, float[] charWidthf, boolean[] isOverride) {
         if (getResource == null) {
             return;
         }
@@ -144,6 +151,7 @@ public class FontUtils {
                         if (ch >= 0 && ch < charWidthf.length) {
                             MCPatcherUtils.log("    setting charWidthf[%d] to %f", ch, width);
                             charWidthf[ch] = width;
+                            isOverride[ch] = true;
                         }
                     } catch (NumberFormatException e) {
                     }
