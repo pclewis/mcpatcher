@@ -17,6 +17,7 @@ public class HDTextureConfig extends ModConfigPanel {
     private JComboBox portalCombo;
     private JCheckBox textureCacheCheckBox;
     private JCheckBox shrinkGLMemoryCheckBox;
+    private JComboBox otherCombo;
 
     private AnimationComboListener[] comboListeners;
 
@@ -31,6 +32,27 @@ public class HDTextureConfig extends ModConfigPanel {
         lavaCombo.addItemListener(comboListeners[1]);
         fireCombo.addItemListener(comboListeners[2]);
         portalCombo.addItemListener(comboListeners[3]);
+
+        otherCombo.addItem("Not Animated");
+        otherCombo.addItem("Custom Animated");
+        otherCombo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    switch (otherCombo.getSelectedIndex()) {
+                        case 0:
+                            MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "customOther", false);
+                            break;
+
+                        case 1:
+                            MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "customOther", true);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
 
         textureCacheCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -55,6 +77,7 @@ public class HDTextureConfig extends ModConfigPanel {
         for (AnimationComboListener listener : comboListeners) {
             listener.load();
         }
+        otherCombo.setSelectedIndex(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customOther", true) ? 1 : 0);
         boolean is64bit = false;
         try {
             String datamodel = System.getProperty("sun.arch.data.model"); // sun-specific, but gets the arch of the jvm
