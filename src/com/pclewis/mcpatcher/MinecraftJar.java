@@ -20,10 +20,15 @@ class MinecraftJar {
     private JarFile origJar;
     private JarOutputStream outputJar;
 
-    private static HashMap<String, String> knownPrereleases = new HashMap<String, String>() {
+    private static HashMap<String, String> knownMD5s = new HashMap<String, String>() {
         {
+            put("1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
+
+            put("1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
+
             put("1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
             put("1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
+            put("1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
 
             put("1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
             put("1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
@@ -385,8 +390,9 @@ class MinecraftJar {
         }
 
         private static String getOrigMD5(File binDir, MinecraftVersion version) {
-            if (version.isPrerelease()) {
-                return knownPrereleases.get(version.toString());
+            String md5 = knownMD5s.get(version.toString());
+            if (md5 != null) {
+                return md5;
             }
             File md5File = new File(binDir, "md5s");
             if (md5File.exists()) {
