@@ -118,6 +118,7 @@ public class TextureUtils {
             textureFX instanceof CustomAnimation) {
             return null;
         }
+        System.out.printf("attempting to refresh unknown animation %s\n", textureFX.getClass().getName());
         Class<? extends TextureFX> textureFXClass = textureFX.getClass();
         for (int i = 0; i < 3; i++) {
             Constructor<? extends TextureFX> constructor;
