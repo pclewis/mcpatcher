@@ -325,7 +325,12 @@ public class TextureUtils {
             resource, image.getWidth(), image.getHeight(), (cached ? "cache" : getTexturePackName(texturePack))
         );
         if (!cached) {
-            Integer i = expectedColumns.get(resource);
+            Integer i;
+            if (resource.matches("^/custom_\\w+_\\d+\\.png$")) {
+                i = 1;
+            } else {
+                i = expectedColumns.get(resource);
+            }
             if (i != null && image.getWidth() != i * TileSize.int_size) {
                 image = resizeImage(image, i * TileSize.int_size);
             }
