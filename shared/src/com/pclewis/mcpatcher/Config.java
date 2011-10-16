@@ -254,15 +254,15 @@ class Config {
             if (node instanceof Element) {
                 Element element = (Element) node;
                 String name = element.getAttribute(ATTR_PROFILE);
-                if (profileName.equals(name)) {
+                if (profileName == null || profileName.equals(name)) {
                     return element;
                 }
             }
         }
         if (create) {
             profile = xml.createElement(TAG_MODS);
-            if (this.selectedProfile != null) {
-                list = this.selectedProfile.getElementsByTagName(TAG_MOD);
+            if (selectedProfile != null) {
+                list = selectedProfile.getElementsByTagName(TAG_MOD);
                 for (int i = 0; i < list.getLength(); i++) {
                     Node node = list.item(i);
                     if (node instanceof Element) {
@@ -276,7 +276,6 @@ class Config {
             }
             profile.setAttribute(ATTR_PROFILE, profileName);
             root.appendChild(profile);
-            getMods();
         }
         return profile;
     }
