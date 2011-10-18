@@ -1,8 +1,13 @@
 package com.pclewis.mcpatcher;
 
+import javassist.bytecode.MethodInfo;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+
+import static javassist.bytecode.Opcode.*;
 
 class BaseMod extends Mod {
     public BaseMod(MinecraftVersion minecraftVersion) {
@@ -11,6 +16,8 @@ class BaseMod extends Mod {
         description = "Internal mod required by the patcher.";
         version = "1.0";
         configPanel = new ConfigPanel();
+
+        classMods.add(new MinecraftMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CONFIG_CLASS));
@@ -51,6 +58,40 @@ class BaseMod extends Mod {
                 MCPatcherUtils.set(com.pclewis.mcpatcher.Config.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
             } catch (Exception e) {
             }
+        }
+    }
+
+    private class MinecraftMod extends ClassMod {
+        MinecraftMod() {
+            classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
+
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "MCPatcherUtils.setMinecraft(this)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getName().equals("<init>")) {
+                        return buildExpression(
+                            BinaryRegex.begin(),
+                            ALOAD_0,
+                            reference(methodInfo, INVOKESPECIAL, new MethodRef("java.lang.Object", "<init>", "()V"))
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "setMinecraft", "(LMinecraft;)V"))
+                    );
+                }
+            });
         }
     }
 }

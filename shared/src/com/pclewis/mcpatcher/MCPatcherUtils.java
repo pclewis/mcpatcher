@@ -1,5 +1,7 @@
 package com.pclewis.mcpatcher;
 
+import net.minecraft.client.Minecraft;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +16,8 @@ public class MCPatcherUtils {
     private static boolean debug = false;
     private static boolean isGame;
     static Config config = null;
+
+    private static Minecraft minecraft;
 
     public static final String HD_TEXTURES = "HD Textures";
     public static final String HD_FONT = "HD Font";
@@ -339,5 +343,13 @@ public class MCPatcherUtils {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void setMinecraft(Minecraft minecraft) {
+        MCPatcherUtils.minecraft = minecraft;
+    }
+
+    public static Minecraft getMinecraft() {
+        return minecraft;
     }
 }
