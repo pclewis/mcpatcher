@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TextureUtils {
-    public static Minecraft minecraft;
-
     private static boolean animatedFire;
     private static boolean animatedLava;
     private static boolean animatedWater;
@@ -85,6 +83,7 @@ public class TextureUtils {
 
     public static void setFontRenderer() {
         MCPatcherUtils.log("setFontRenderer()");
+        Minecraft minecraft = MCPatcherUtils.getMinecraft();
         minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
         if (minecraft.alternateFontRenderer != minecraft.fontRenderer) {
             minecraft.alternateFontRenderer.initialize(minecraft.gameSettings, "/font/alternate.png", minecraft.renderEngine);
@@ -113,6 +112,7 @@ public class TextureUtils {
             return null;
         }
         System.out.printf("attempting to refresh unknown animation %s\n", textureFX.getClass().getName());
+        Minecraft minecraft = MCPatcherUtils.getMinecraft();
         Class<? extends TextureFX> textureFXClass = textureFX.getClass();
         for (int i = 0; i < 3; i++) {
             Constructor<? extends TextureFX> constructor;
@@ -160,6 +160,7 @@ public class TextureUtils {
         }
         textureList.clear();
 
+        Minecraft minecraft = MCPatcherUtils.getMinecraft();
         textureList.add(new Compass(minecraft));
         textureList.add(new Watch(minecraft));
 
@@ -226,6 +227,7 @@ public class TextureUtils {
     }
 
     public static TexturePackBase getSelectedTexturePack() {
+        Minecraft minecraft = MCPatcherUtils.getMinecraft();
         return minecraft == null ? null :
             minecraft.texturePackList == null ? null :
                 minecraft.texturePackList.selectedTexturePack;
@@ -416,13 +418,5 @@ public class TextureUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void setMinecraft(Minecraft minecraft) {
-        TextureUtils.minecraft = minecraft;
-    }
-
-    public static Minecraft getMinecraft() {
-        return minecraft;
     }
 }

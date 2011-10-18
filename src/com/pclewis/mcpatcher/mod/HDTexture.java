@@ -601,32 +601,6 @@ public class HDTexture extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "TextureUtils.setMinecraft(this) on startup";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return BinaryRegex.capture(buildExpression(
-                        ALOAD_0,
-                        reference(methodInfo, NEW, new ClassRef("TexturePackList")),
-                        BinaryRegex.any(0, 18),
-                        PUTFIELD, BinaryRegex.any(), BinaryRegex.any()
-                    ));
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        getCaptureGroup(1),
-                        ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setMinecraft", "(Lnet/minecraft/client/Minecraft;)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
                     return "TextureUtils.setTileSize(), renderEngine.setTileSize() on startup";
                 }
 
