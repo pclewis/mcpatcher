@@ -2,7 +2,10 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.Entity;
+import net.minecraft.src.TexturePackBase;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -10,6 +13,7 @@ import java.util.Random;
 public class MobRandomizer {
     private static final Random random = new Random();
     private static final HashMap<String, ArrayList<String>> mobHash = new HashMap<String, ArrayList<String>>();
+    private static TexturePackBase lastTexturePack;
 
     public static void reset() {
         MCPatcherUtils.log("reset random mobs list");
@@ -17,8 +21,13 @@ public class MobRandomizer {
     }
 
     public static String randomTexture(Entity entity) {
+        TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
+        if (lastTexturePack != selectedTexturePack) {
+            lastTexturePack = selectedTexturePack;
+            reset();
+        }
         String texture = entity.getEntityTexture();
-        if (!texture.startsWith("/mob/") || !texture.endsWith(".png")) {
+        if (lastTexturePack == null || !texture.startsWith("/mob/") || !texture.endsWith(".png")) {
             return texture;
         }
         ArrayList<String> variations = mobHash.get(texture);
@@ -27,7 +36,18 @@ public class MobRandomizer {
             variations.add(texture);
             for (int i = 2; ; i++) {
                 String s = texture.replace(".png", "" + i + ".png");
-                if (TextureUtils.hasResource(s)) {
+                boolean hasResource = false;
+                InputStream inputStream = null;
+                try {
+                    inputStream = lastTexturePack.getInputStream(s);
+                    if (inputStream != null) {
+                        hasResource = true;
+                    }
+                } catch (Throwable e) {
+                } finally {
+                    MCPatcherUtils.close(inputStream);
+                }
+                if (hasResource) {
                     variations.add(s);
                 } else {
                     break;

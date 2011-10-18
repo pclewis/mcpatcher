@@ -13,13 +13,14 @@ public class RandomMobs extends Mod {
         name = MCPatcherUtils.RANDOM_MOBS;
         author = "Balthichou";
         description = "Randomize mob skins if texture pack supports it. Based on Balthichou's mod.";
-        version = "1.0";
-
-        addDependency(MCPatcherUtils.HD_TEXTURES);
+        version = "1.1";
 
         classMods.add(new RenderLivingMod());
         classMods.add(new EntityMod());
         classMods.add(new EntityLivingMod());
+        classMods.add(new MinecraftMod());
+        classMods.add(new HDTexture.TexturePackListMod(false));
+        classMods.add(new HDTexture.TexturePackBaseMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
     }
@@ -87,6 +88,14 @@ public class RandomMobs extends Mod {
 
             classSignatures.add(new ConstSignature("/mob/char.png"));
             classSignatures.add(new ConstSignature("Health"));
+        }
+    }
+
+    private class MinecraftMod extends ClassMod {
+        MinecraftMod() {
+            classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
+
+            memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
         }
     }
 }

@@ -37,7 +37,7 @@ public class HDTexture extends Mod {
         classMods.add(new PortalMod());
         classMods.add(new MinecraftMod());
         classMods.add(new GLAllocationMod());
-        classMods.add(new TexturePackListMod());
+        classMods.add(new TexturePackListMod(false));
         classMods.add(new TexturePackBaseMod());
         classMods.add(new TexturePackDefaultMod());
         classMods.add(new FontRendererMod());
@@ -700,14 +700,18 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class TexturePackListMod extends ClassMod {
-        public TexturePackListMod() {
+    static class TexturePackListMod extends ClassMod {
+        public TexturePackListMod(boolean mapOnly) {
             classSignatures.add(new ConstSignature(".zip"));
             classSignatures.add(new ConstSignature("texturepacks"));
 
             memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
             memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
             memberMappers.add(new FieldMapper("minecraft", "LMinecraft;"));
+
+            if (mapOnly) {
+                return;
+            }
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -750,7 +754,7 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class TexturePackBaseMod extends ClassMod {
+    static class TexturePackBaseMod extends ClassMod {
         public TexturePackBaseMod() {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
 
