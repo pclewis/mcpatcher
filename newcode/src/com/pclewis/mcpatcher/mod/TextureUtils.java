@@ -72,12 +72,6 @@ public class TextureUtils {
 
     public static boolean setTileSize() {
         MCPatcherUtils.log("\nchanging skin to %s", getTexturePackName(getSelectedTexturePack()));
-        try {
-            Class<?> randomMobs = Class.forName(MCPatcherUtils.RANDOM_MOBS_CLASS);
-            Method reset = randomMobs.getDeclaredMethod("reset");
-            reset.invoke(null);
-        } catch (Throwable e) {
-        }
         int size = getTileSize();
         if (size == TileSize.int_size) {
             MCPatcherUtils.log("tile size %d unchanged", size);
