@@ -18,6 +18,8 @@ public class MCPatcherUtils {
     static Config config = null;
 
     private static Minecraft minecraft;
+    private static String minecraftVersion;
+    private static String patcherVersion;
 
     public static final String HD_TEXTURES = "HD Textures";
     public static final String HD_FONT = "HD Font";
@@ -345,11 +347,36 @@ public class MCPatcherUtils {
         }
     }
 
-    public static void setMinecraft(Minecraft minecraft) {
+    public static void setMinecraft(Minecraft minecraft, String minecraftVersion, String patcherVersion) {
         MCPatcherUtils.minecraft = minecraft;
+        MCPatcherUtils.minecraftVersion = minecraftVersion;
+        MCPatcherUtils.patcherVersion = patcherVersion;
     }
 
+    /**
+     * Get minecraft object.
+     *
+     * @return minecraft
+     */
     public static Minecraft getMinecraft() {
         return minecraft;
+    }
+
+    /**
+     * Get shortened version of currently running Minecraft, e.g., 1.9pre4.
+     *
+     * @return string
+     */
+    public static String getMinecraftVersion() {
+        return minecraftVersion;
+    }
+
+    /**
+     * Get version of MCPatcher.
+     *
+     * @return string
+     */
+    public static String getPatcherVersion() {
+        return patcherVersion;
     }
 }
