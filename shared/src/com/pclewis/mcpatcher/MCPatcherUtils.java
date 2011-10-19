@@ -347,8 +347,11 @@ public class MCPatcherUtils {
         }
     }
 
-    public static void setMinecraft(Minecraft minecraft, String minecraftVersion, String patcherVersion) {
+    public static void setMinecraft(Minecraft minecraft) {
         MCPatcherUtils.minecraft = minecraft;
+    }
+
+    public static void setVersions(String minecraftVersion, String patcherVersion) {
         MCPatcherUtils.minecraftVersion = minecraftVersion;
         MCPatcherUtils.patcherVersion = patcherVersion;
     }
