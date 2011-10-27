@@ -22,6 +22,7 @@ public class RandomMobs extends Mod {
         }
         classMods.add(new EntityMod());
         classMods.add(new EntityLivingMod());
+        classMods.add(new NBTTagCompoundMod());
         classMods.add(new MinecraftMod());
         classMods.add(new HDTexture.TexturePackListMod(false));
         classMods.add(new HDTexture.TexturePackBaseMod());
@@ -99,9 +100,8 @@ public class RandomMobs extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ALOAD_1,
-                        reference(methodInfo, GETFIELD, new FieldRef("Entity", "entityId", "I")),
                         push(methodInfo, eyeTexture),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(ILjava/lang/String;)Ljava/lang/String;"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntity;Ljava/lang/String;)Ljava/lang/String;"))
                     );
                 }
             });
@@ -123,7 +123,74 @@ public class RandomMobs extends Mod {
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
+            memberMappers.add(new FieldMapper("nextEntityID", "I")
+                .accessFlag(AccessFlag.PRIVATE, true)
+                .accessFlag(AccessFlag.STATIC, true)
+            );
             memberMappers.add(new MethodMapper("getEntityTexture", "()Ljava/lang/String;"));
+            memberMappers.add(new MethodMapper(new String[]{"writeToNBT", "readFromNBT"}, "(LNBTTagCompound;)V")
+                .accessFlag(AccessFlag.PUBLIC, true)
+            );
+
+            patches.add(new AddFieldPatch("skin", "J"));
+            patches.add(new AddFieldPatch("skinSet", "Z"));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "write skin to nbt";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // nbttagcompound.setLong(skin);
+                        ALOAD_1,
+                        push(methodInfo, "skin"),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("Entity", "skin", "J")),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V"))
+                    );
+                }
+            }.targetMethod(new MethodRef("Entity", "writeToNBT", "(LNBTTagCompound;)V")));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "read skin from nbt";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // skin = nbttagcompound.getLong("skin");
+                        ALOAD_0,
+                        ALOAD_1,
+                        push(methodInfo, "skin"),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J")),
+                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", "skin", "J")),
+
+                        // skinSet = true;
+                        ALOAD_0,
+                        ICONST_1,
+                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", "skinSet", "Z"))
+                    );
+                }
+            }.targetMethod(new MethodRef("Entity", "readFromNBT", "(LNBTTagCompound;)V")));
         }
     }
 
@@ -133,6 +200,16 @@ public class RandomMobs extends Mod {
 
             classSignatures.add(new ConstSignature("/mob/char.png"));
             classSignatures.add(new ConstSignature("Health"));
+        }
+    }
+
+    private class NBTTagCompoundMod extends ClassMod {
+        NBTTagCompoundMod() {
+            classSignatures.add(new ConstSignature(new ClassRef("java.util.HashMap")));
+            classSignatures.add(new ConstSignature(" entries"));
+
+            memberMappers.add(new MethodMapper("getLong", "(Ljava/lang/String;)J"));
+            memberMappers.add(new MethodMapper("setLong", "(Ljava/lang/String;J)V"));
         }
     }
 

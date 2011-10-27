@@ -4,16 +4,17 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.Entity;
 import net.minecraft.src.TexturePackBase;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 public class MobRandomizer {
-    private static final Random random = new Random();
     private static final HashMap<String, ArrayList<String>> mobHash = new HashMap<String, ArrayList<String>>();
     private static TexturePackBase lastTexturePack;
+
+    private static final long MULTIPLIER = 0x5deece66dL;
+    private static final long ADDEND = 0xbL;
+    private static final long MASK = (1L << 48) - 1;
 
     public static void reset() {
         MCPatcherUtils.log("reset random mobs list");
@@ -21,10 +22,10 @@ public class MobRandomizer {
     }
 
     public static String randomTexture(Entity entity) {
-        return randomTexture(entity.entityId, entity.getEntityTexture());
+        return randomTexture(entity, entity.getEntityTexture());
     }
 
-    public static String randomTexture(int entityId, String texture) {
+    public static String randomTexture(Entity entity, String texture) {
         TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
         if (lastTexturePack != selectedTexturePack) {
             lastTexturePack = selectedTexturePack;
@@ -56,17 +57,22 @@ public class MobRandomizer {
                     break;
                 }
             }
+            if (variations.size() > 1) {
+                MCPatcherUtils.log("found %d variations for %s", variations.size(), texture);
+            }
             mobHash.put(texture, variations);
         }
-        return variations.get(getVariant(entityId, variations.size()));
+        if (!entity.skinSet) {
+            entity.skin = getSkinId(entity.entityId);
+            entity.skinSet = true;
+        }
+        return variations.get((int) (entity.skin % variations.size()));
     }
 
-    private static int getVariant(int entityId, int max) {
-        if (max < 2) {
-            return 0;
-        } else {
-            random.setSeed(entityId);
-            return random.nextInt(max);
-        }
+    private static long getSkinId(int entityId) {
+        long n = entityId;
+        n = n ^ (n << 16) ^ (n << 32) ^ (n << 48);
+        n = (MULTIPLIER * n + ADDEND) & MASK;
+        return (n >> 32) ^ n;
     }
 }
