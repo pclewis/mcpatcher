@@ -16,6 +16,10 @@ public class RandomMobs extends Mod {
         version = "1.1";
 
         classMods.add(new RenderLivingMod());
+        classMods.add(new RenderEyesMod("Spider"));
+        if (minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.8 Prerelease 1")) >= 0) {
+            classMods.add(new RenderEyesMod("Enderman"));
+        }
         classMods.add(new EntityMod());
         classMods.add(new EntityLivingMod());
         classMods.add(new MinecraftMod());
@@ -65,6 +69,47 @@ public class RandomMobs extends Mod {
                     );
                 }
             });
+        }
+    }
+
+    private class RenderEyesMod extends ClassMod {
+        private String mobName;
+        private String eyeTexture;
+
+        public RenderEyesMod(String mob) {
+            mobName = mob;
+            eyeTexture = "/mob/" + mobName.toLowerCase() + "_eyes.png";
+
+            classSignatures.add(new ConstSignature(eyeTexture));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override " + mobName.toLowerCase() + " eye texture";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, eyeTexture)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_1,
+                        reference(methodInfo, GETFIELD, new FieldRef("Entity", "entityId", "I")),
+                        push(methodInfo, eyeTexture),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(ILjava/lang/String;)Ljava/lang/String;"))
+                    );
+                }
+            });
+        }
+
+        @Override
+        public String getDeobfClass() {
+            return "Render" + mobName;
         }
     }
 

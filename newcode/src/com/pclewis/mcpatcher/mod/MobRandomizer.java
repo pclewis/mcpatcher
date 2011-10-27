@@ -21,12 +21,15 @@ public class MobRandomizer {
     }
 
     public static String randomTexture(Entity entity) {
+        return randomTexture(entity.entityId, entity.getEntityTexture());
+    }
+
+    public static String randomTexture(int entityId, String texture) {
         TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
         if (lastTexturePack != selectedTexturePack) {
             lastTexturePack = selectedTexturePack;
             reset();
         }
-        String texture = entity.getEntityTexture();
         if (lastTexturePack == null || !texture.startsWith("/mob/") || !texture.endsWith(".png")) {
             return texture;
         }
@@ -55,7 +58,7 @@ public class MobRandomizer {
             }
             mobHash.put(texture, variations);
         }
-        return variations.get(getVariant(entity.entityId, variations.size()));
+        return variations.get(getVariant(entityId, variations.size()));
     }
 
     private static int getVariant(int entityId, int max) {
