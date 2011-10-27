@@ -393,7 +393,7 @@ class MinecraftJar {
                 return md5;
             }
             File md5File = new File(binDir, "md5s");
-            if (md5File.exists()) {
+            if (!version.isPrerelease() && md5File.exists()) {
                 FileInputStream inputStream = null;
                 try {
                     Properties properties = new Properties();
