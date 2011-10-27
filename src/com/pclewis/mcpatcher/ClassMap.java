@@ -243,6 +243,10 @@ public class ClassMap {
         }
     }
 
+    public boolean isEmpty() {
+        return classMap.isEmpty();
+    }
+
     /**
      * Get the mapping between descriptive and obfuscated class names.
      *

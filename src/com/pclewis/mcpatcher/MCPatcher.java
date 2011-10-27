@@ -571,11 +571,12 @@ final public class MCPatcher {
 
         try {
             outputJar.putNextEntry(new ZipEntry(filename));
-            if (MinecraftJar.isClassFile(filename)) {
+            ClassMap classMap = mod.classMap;
+            if (MinecraftJar.isClassFile(filename) && !classMap.isEmpty()) {
                 ClassFile classFile = new ClassFile(new DataInputStream(inputStream));
-                mod.classMap.apply(classFile);
+                classMap.apply(classFile);
                 classFile.compact();
-                mod.classMap.stringReplace(classFile, outputJar);
+                classMap.stringReplace(classFile, outputJar);
             } else {
                 Util.copyStream(inputStream, outputJar);
             }
