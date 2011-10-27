@@ -345,7 +345,7 @@ class ConstPoolUtils {
         for (int i = 0; i < len; i = j + 1) {
             for (j = i; j < len; j++) {
                 char c = desc.charAt(j);
-                if ("SIFDZV".indexOf(c) >= 0) {
+                if ("SIJFDZV".indexOf(c) >= 0) {
                     break;
                 } else if (c == 'L') {
                     while (desc.charAt(j) != ';') {
