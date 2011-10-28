@@ -16,6 +16,7 @@ public class RandomMobs extends Mod {
         name = MCPatcherUtils.RANDOM_MOBS;
         author = "Balthichou";
         description = "Randomize mob skins if texture pack supports it. Based on Balthichou's mod.";
+        website = "http://www.minecraftforum.net/topic/244172-";
         version = "1.1";
 
         classMods.add(new RenderLivingMod());
