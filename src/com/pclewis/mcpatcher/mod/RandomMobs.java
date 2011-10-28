@@ -184,10 +184,20 @@ public class RandomMobs extends Mod {
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J")),
                         reference(methodInfo, PUTFIELD, new FieldRef("Entity", "skin", "J")),
 
+                        // if (skin != 0L) {
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("Entity", "skin", "J")),
+                        LCONST_0,
+                        LCMP,
+                        IFEQ, branch("A"),
+
                         // skinSet = true;
                         ALOAD_0,
                         ICONST_1,
-                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", "skinSet", "Z"))
+                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", "skinSet", "Z")),
+
+                        // }
+                        label("A")
                     );
                 }
             }.targetMethod(new MethodRef("Entity", "readFromNBT", "(LNBTTagCompound;)V")));
