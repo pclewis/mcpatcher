@@ -66,13 +66,19 @@ public class MobRandomizer {
             entity.randomMobsSkin = getSkinId(entity.entityId);
             entity.randomMobsSkinSet = true;
         }
-        return variations.get((int) (entity.randomMobsSkin % variations.size()));
+        int index = (int) (entity.randomMobsSkin % variations.size());
+        if (index < 0) {
+            index += variations.size();
+        }
+        return variations.get(index);
     }
 
     private static long getSkinId(int entityId) {
         long n = entityId;
         n = n ^ (n << 16) ^ (n << 32) ^ (n << 48);
-        n = (MULTIPLIER * n + ADDEND) & MASK;
+        n = MULTIPLIER * n + ADDEND;
+        n = MULTIPLIER * n + ADDEND;
+        n &= MASK;
         return (n >> 32) ^ n;
     }
 }
