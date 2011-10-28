@@ -62,11 +62,11 @@ public class MobRandomizer {
             }
             mobHash.put(texture, variations);
         }
-        if (!entity.skinSet) {
-            entity.skin = getSkinId(entity.entityId);
-            entity.skinSet = true;
+        if (!entity.randomMobsSkinSet) {
+            entity.randomMobsSkin = getSkinId(entity.entityId);
+            entity.randomMobsSkinSet = true;
         }
-        return variations.get((int) (entity.skin % variations.size()));
+        return variations.get((int) (entity.randomMobsSkin % variations.size()));
     }
 
     private static long getSkinId(int entityId) {

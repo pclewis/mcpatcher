@@ -9,6 +9,9 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class RandomMobs extends Mod {
+    private static final String ENTITY_SKIN_FIELD = "randomMobsSkin";
+    private static final String ENTITY_SKIN_SET_FIELD = "randomMobsSkinSet";
+
     public RandomMobs(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.RANDOM_MOBS;
         author = "Balthichou";
@@ -132,8 +135,8 @@ public class RandomMobs extends Mod {
                 .accessFlag(AccessFlag.PUBLIC, true)
             );
 
-            patches.add(new AddFieldPatch("skin", "J"));
-            patches.add(new AddFieldPatch("skinSet", "Z"));
+            patches.add(new AddFieldPatch(ENTITY_SKIN_FIELD, "J"));
+            patches.add(new AddFieldPatch(ENTITY_SKIN_SET_FIELD, "Z"));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -153,9 +156,9 @@ public class RandomMobs extends Mod {
                     return buildCode(
                         // nbttagcompound.setLong(skin);
                         ALOAD_1,
-                        push(methodInfo, "skin"),
+                        push(methodInfo, ENTITY_SKIN_FIELD),
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Entity", "skin", "J")),
+                        reference(methodInfo, GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V"))
                     );
                 }
@@ -180,13 +183,13 @@ public class RandomMobs extends Mod {
                         // skin = nbttagcompound.getLong("skin");
                         ALOAD_0,
                         ALOAD_1,
-                        push(methodInfo, "skin"),
+                        push(methodInfo, ENTITY_SKIN_FIELD),
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J")),
-                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", "skin", "J")),
+                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
 
                         // if (skin != 0L) {
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Entity", "skin", "J")),
+                        reference(methodInfo, GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
                         LCONST_0,
                         LCMP,
                         IFEQ, branch("A"),
@@ -194,7 +197,7 @@ public class RandomMobs extends Mod {
                         // skinSet = true;
                         ALOAD_0,
                         ICONST_1,
-                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", "skinSet", "Z")),
+                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_SET_FIELD, "Z")),
 
                         // }
                         label("A")
