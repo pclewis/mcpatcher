@@ -24,7 +24,7 @@ public class RandomMobs extends Mod {
         classMods.add(new EntityLivingMod());
         classMods.add(new NBTTagCompoundMod());
         classMods.add(new MinecraftMod());
-        classMods.add(new HDTexture.TexturePackListMod(false));
+        classMods.add(new HDTexture.TexturePackListMod(true));
         classMods.add(new HDTexture.TexturePackBaseMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
