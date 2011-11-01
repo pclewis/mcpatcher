@@ -150,9 +150,9 @@ class ConstPoolUtils {
                 default:
                     break;
             }
-            if (i <= Byte.MAX_VALUE) {
+            if (i >= Byte.MIN_VALUE && i <= Byte.MAX_VALUE) {
                 return new byte[]{BIPUSH, (byte) i};
-            } else if (i <= Short.MAX_VALUE) {
+            } else if (i >= Short.MIN_VALUE && i <= Short.MAX_VALUE) {
                 return new byte[]{SIPUSH, Util.b(i, 1), Util.b(i, 0)};
             }
         } else if (value instanceof Long) {
