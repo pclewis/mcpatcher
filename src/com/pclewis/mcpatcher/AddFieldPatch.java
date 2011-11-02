@@ -41,7 +41,7 @@ public class AddFieldPatch extends ClassPatch {
 
     @Override
     boolean apply(ClassFile classFile) throws BadBytecode, DuplicateMemberException {
-        FieldInfo fieldInfo = new FieldInfo(classFile.getConstPool(), name, type);
+        FieldInfo fieldInfo = new FieldInfo(classFile.getConstPool(), name, classMod.getClassMap().mapTypeString(type));
         fieldInfo.setAccessFlags(accessFlags);
         recordPatch();
         classFile.addField(fieldInfo);
