@@ -336,7 +336,7 @@ public class TextureUtils {
                 lastTexturePack = texturePack;
                 cache.put(resource, image);
             }
-            if (resource.matches("_eyes\\d*\\.png$")) {
+            if (resource.matches("^/mob/.*_eyes\\d*\\.png$")) {
                 int p = 0;
                 for (int x = 0; x < image.getWidth(); x++) {
                     for (int y = 0; y < image.getHeight(); y++) {
