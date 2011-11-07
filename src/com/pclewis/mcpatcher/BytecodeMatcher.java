@@ -81,6 +81,30 @@ public class BytecodeMatcher extends BinaryMatcher {
     );
 
     /**
+     * Fixed regex that matches any DLOAD ... instruction.
+     */
+    public static final String anyDLOAD = BinaryRegex.or(
+        BinaryRegex.build(DLOAD_0),
+        BinaryRegex.build(DLOAD_1),
+        BinaryRegex.build(DLOAD_2),
+        BinaryRegex.build(DLOAD_3),
+        BinaryRegex.build(DLOAD, BinaryRegex.any()),
+        BinaryRegex.build(WIDE, DLOAD, BinaryRegex.any(2))
+    );
+
+    /**
+     * Fixed regex that matches any DSTORE ... instruction.
+     */
+    public static final String anyDSTORE = BinaryRegex.or(
+        BinaryRegex.build(DSTORE_0),
+        BinaryRegex.build(DSTORE_1),
+        BinaryRegex.build(DSTORE_2),
+        BinaryRegex.build(DSTORE_3),
+        BinaryRegex.build(DSTORE, BinaryRegex.any()),
+        BinaryRegex.build(WIDE, DSTORE, BinaryRegex.any(2))
+    );
+
+    /**
      * Fixed regex that matches any LDC/LDC_W ... instruction.
      */
     public static final String anyLDC = BinaryRegex.or(
