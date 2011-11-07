@@ -658,25 +658,33 @@ public class ClassMap {
         byte[] data = baos.toByteArray();
 
         for (Entry<String, ClassMapEntry> e : classMap.entrySet()) {
-            if (e.getKey().equals(e.getValue().getObfName())) {
-                continue;
-            }
-            byte[] oldName = Util.marshalString(e.getKey());
-            byte[] newName = Util.marshalString(e.getValue().getObfName().replace('.', '/'));
-            BinaryMatcher bm = new BinaryMatcher(BinaryRegex.build(oldName));
-            int offset = 0;
-            while (bm.match(data, offset)) {
-                Logger.log(Logger.LOG_METHOD, "string replace %s -> %s @%d", e.getKey(), e.getValue().getObfName(), bm.getStart());
-                ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-                baos2.write(data, 0, bm.getStart());
-                baos2.write(newName);
-                baos2.write(data, bm.getEnd(), data.length - bm.getEnd());
-                offset = bm.getStart() + newName.length;
-                data = baos2.toByteArray();
-            }
+            String oldClass = e.getKey();
+            String newClass = e.getValue().getObfName().replace('.', '/');
+            data = stringReplace(data, oldClass, newClass);
+            data = stringReplace(data, "L" + oldClass + ";", "L" + newClass + ";");
         }
 
         jar.write(data);
+    }
+
+    private byte[] stringReplace(byte[] data, String oldString, String newString) throws IOException {
+        if (oldString.equals(newString)) {
+            return data;
+        }
+        byte[] oldData = Util.marshalString(oldString);
+        byte[] newData = Util.marshalString(newString);
+        BinaryMatcher bm = new BinaryMatcher(BinaryRegex.build(oldData));
+        int offset = 0;
+        while (bm.match(data, offset)) {
+            Logger.log(Logger.LOG_METHOD, "string replace %s -> %s @%d", oldString, newString, bm.getStart());
+            ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+            baos2.write(data, 0, bm.getStart());
+            baos2.write(newData);
+            baos2.write(data, bm.getEnd(), data.length - bm.getEnd());
+            offset = bm.getStart() + newData.length;
+            data = baos2.toByteArray();
+        }
+        return data;
     }
 
     void merge(ClassMap from) {
