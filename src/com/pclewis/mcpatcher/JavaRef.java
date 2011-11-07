@@ -18,6 +18,9 @@ abstract public class JavaRef {
         this.className = (className == null ? null : className.replaceAll("/", "."));
         this.name = name;
         this.type = type;
+        if (type != null) {
+            ConstPoolUtils.checkTypeDescriptorSyntax(type);
+        }
     }
 
     public String getClassName() {

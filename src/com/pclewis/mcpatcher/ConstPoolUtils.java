@@ -14,6 +14,9 @@ class ConstPoolUtils {
     public static final byte[] METHODREF_OPCODES = new byte[]{(byte) INVOKEVIRTUAL, (byte) INVOKESTATIC, (byte) INVOKESPECIAL};
     public static final byte[] INTERFACEMETHODREF_OPCODES = new byte[]{(byte) INVOKEINTERFACE};
 
+    public static final String DESCRIPTOR_TYPES = "VZBSIJFD";
+    public static final String DESCRIPTOR_CHARS = DESCRIPTOR_TYPES + "()<>[";
+
     private static final byte[] NOT_FOUND = null;
 
     public static int getTag(Object o) {
@@ -310,24 +313,41 @@ class ConstPoolUtils {
         return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0)};
     }
 
-    public static ArrayList<String> parseDescriptor(String desc) {
+    public static void checkTypeDescriptorSyntax(String descriptor) {
+        for (int i = 0; i < descriptor.length(); i++) {
+            char c = descriptor.charAt(i);
+            if (DESCRIPTOR_CHARS.indexOf(c) >= 0) {
+            } else if (c == 'L') {
+                int j = descriptor.indexOf(';', i);
+                if (j < 0) {
+                    throw new IllegalArgumentException("invalid type descriptor \"" + descriptor + "\": missing semicolon @" + i);
+                }
+                i = j;
+            } else {
+                throw new IllegalArgumentException("invalid type descriptor \"" + descriptor + "\": bad type @" + i);
+            }
+        }
+    }
+
+    public static ArrayList<String> parseDescriptor(String descriptor) {
+        checkTypeDescriptorSyntax(descriptor);
         ArrayList<String> types = new ArrayList<String>();
-        desc = desc.replaceAll("[()]", "");
-        int len = desc.length();
+        descriptor = descriptor.replaceAll("[()]", "");
+        int len = descriptor.length();
         int j;
         for (int i = 0; i < len; i = j + 1) {
             for (j = i; j < len; j++) {
-                char c = desc.charAt(j);
-                if ("SIJFDZV".indexOf(c) >= 0) {
+                char c = descriptor.charAt(j);
+                if (DESCRIPTOR_TYPES.indexOf(c) >= 0) {
                     break;
                 } else if (c == 'L') {
-                    while (desc.charAt(j) != ';') {
+                    while (descriptor.charAt(j) != ';') {
                         j++;
                     }
                     break;
                 }
             }
-            types.add(desc.substring(i, j + 1));
+            types.add(descriptor.substring(i, j + 1));
         }
         return types;
     }
