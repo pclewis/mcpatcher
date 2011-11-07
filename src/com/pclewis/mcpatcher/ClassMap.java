@@ -381,6 +381,12 @@ public class ClassMap {
             String oldType;
 
             switch (tag) {
+                case ConstPool.CONST_Class:
+                    oldClass = cp.getClassInfo(i);
+                    oldName = null;
+                    oldType = null;
+                    break;
+
                 case ConstPool.CONST_Fieldref:
                     oldClass = cp.getFieldrefClassName(i);
                     oldName = cp.getFieldrefName(i);
@@ -405,7 +411,7 @@ public class ClassMap {
 
             String newClass = oldClass;
             String newName = oldName;
-            String newType;
+            String newType = null;
             ClassMapEntry entry = getEntry(oldClass);
             if (entry != null) {
                 newClass = entry.getObfName();
@@ -414,9 +420,13 @@ public class ClassMap {
                     newName = map.get(oldName);
                 }
             }
-            newType = mapTypeString(oldType);
+            if (oldType != null) {
+                newType = mapTypeString(oldType);
+            }
 
-            if (oldClass.equals(newClass) && oldName.equals(newName) && oldType.equals(newType)) {
+            if (oldClass.equals(newClass) &&
+                (oldName == null || oldName.equals(newName)) &&
+                (oldType == null || oldType.equals(newType))) {
                 continue;
             }
 
@@ -440,6 +450,13 @@ public class ClassMap {
 
                 {
                     switch (tag) {
+                        case ConstPool.CONST_Class:
+                            typeStr = "class";
+                            opcodes = new byte[]{(byte) NEW, (byte) ANEWARRAY, (byte) CHECKCAST, (byte) INSTANCEOF, (byte) MULTIANEWARRAY, (byte) NEW};
+                            oldRef = new ClassRef(oldClass2);
+                            newRef = new ClassRef(newClass2);
+                            break;
+
                         case ConstPool.CONST_Fieldref:
                             typeStr = "field";
                             opcodes = new byte[]{(byte) GETFIELD, (byte) GETSTATIC, (byte) PUTFIELD, (byte) PUTSTATIC};
@@ -468,11 +485,17 @@ public class ClassMap {
 
                 @Override
                 public String getDescription() {
-                    return String.format("%s ref %s.%s %s -> %s.%s %s",
-                        typeStr,
-                        oldClass2, oldName2, oldType2,
-                        newClass2, newName2, newType2
-                    );
+                    if (tag == ConstPool.CONST_Class) {
+                        return String.format("%s ref %s -> %s",
+                            typeStr, oldClass2, newClass2
+                        );
+                    } else {
+                        return String.format("%s ref %s.%s %s -> %s.%s %s",
+                            typeStr,
+                            oldClass2, oldName2, oldType2,
+                            newClass2, newName2, newType2
+                        );
+                    }
                 }
 
                 @Override
