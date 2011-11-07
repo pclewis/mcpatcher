@@ -65,6 +65,16 @@ class Util {
         }
     }
 
+    static boolean contains(byte[] array, int item) {
+        byte itemb = (byte) item;
+        for (byte b : array) {
+            if (itemb == b) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static String computeMD5(File file) {
         String md5 = null;
         FileInputStream input = null;

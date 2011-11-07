@@ -452,28 +452,28 @@ public class ClassMap {
                     switch (tag) {
                         case ConstPool.CONST_Class:
                             typeStr = "class";
-                            opcodes = new byte[]{(byte) NEW, (byte) ANEWARRAY, (byte) CHECKCAST, (byte) INSTANCEOF, (byte) MULTIANEWARRAY, (byte) NEW};
+                            opcodes = ConstPoolUtils.CLASSREF_OPCODES;
                             oldRef = new ClassRef(oldClass2);
                             newRef = new ClassRef(newClass2);
                             break;
 
                         case ConstPool.CONST_Fieldref:
                             typeStr = "field";
-                            opcodes = new byte[]{(byte) GETFIELD, (byte) GETSTATIC, (byte) PUTFIELD, (byte) PUTSTATIC};
+                            opcodes = ConstPoolUtils.FIELDREF_OPCODES;
                             oldRef = new FieldRef(oldClass2, oldName2, oldType2);
                             newRef = new FieldRef(newClass2, newName2, newType2);
                             break;
 
                         case ConstPool.CONST_Methodref:
                             typeStr = "method";
-                            opcodes = new byte[]{(byte) INVOKEVIRTUAL, (byte) INVOKESTATIC, (byte) INVOKESPECIAL};
+                            opcodes = ConstPoolUtils.METHODREF_OPCODES;
                             oldRef = new MethodRef(oldClass2, oldName2, oldType2);
                             newRef = new MethodRef(newClass2, newName2, newType2);
                             break;
 
                         case ConstPool.CONST_InterfaceMethodref:
                             typeStr = "interface method";
-                            opcodes = new byte[]{(byte) INVOKEINTERFACE};
+                            opcodes = ConstPoolUtils.INTERFACEMETHODREF_OPCODES;
                             oldRef = new InterfaceMethodRef(oldClass2, oldName2, oldType2);
                             newRef = new InterfaceMethodRef(newClass2, newName2, newType2);
                             break;

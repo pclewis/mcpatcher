@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import static javassist.bytecode.Opcode.*;
 
 class ConstPoolUtils {
+    public static final byte[] CONSTANT_OPCODES = new byte[]{(byte) LDC, (byte) LDC_W, (byte) LDC2_W};
+    public static final byte[] CLASSREF_OPCODES = new byte[]{(byte) NEW, (byte) ANEWARRAY, (byte) CHECKCAST, (byte) INSTANCEOF, (byte) MULTIANEWARRAY};
+    public static final byte[] FIELDREF_OPCODES = new byte[]{(byte) GETFIELD, (byte) GETSTATIC, (byte) PUTFIELD, (byte) PUTSTATIC};
+    public static final byte[] METHODREF_OPCODES = new byte[]{(byte) INVOKEVIRTUAL, (byte) INVOKESTATIC, (byte) INVOKESPECIAL};
+    public static final byte[] INTERFACEMETHODREF_OPCODES = new byte[]{(byte) INVOKEINTERFACE};
+
     private static final byte[] NOT_FOUND = null;
 
     public static int getTag(Object o) {
@@ -202,47 +208,23 @@ class ConstPoolUtils {
 
     public static void matchOpcodeToRefType(int opcode, Object value) {
         opcode &= 0xff;
-        switch (opcode) {
-            case LDC:
-            case LDC_W:
-            case LDC2_W:
-                break;
-
-            case GETFIELD:
-            case GETSTATIC:
-            case PUTFIELD:
-            case PUTSTATIC:
-                if (!(value instanceof FieldRef)) {
-                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a FieldRef object");
-                }
-                break;
-
-            case INVOKEVIRTUAL:
-            case INVOKESTATIC:
-            case INVOKESPECIAL:
-                if (!(value instanceof MethodRef)) {
-                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a MethodRef object");
-                }
-                break;
-
-            case INVOKEINTERFACE:
-                if (!(value instanceof InterfaceMethodRef)) {
-                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires an InterfaceMethodRef object");
-                }
-                break;
-
-            case INSTANCEOF:
-            case CHECKCAST:
-            case MULTIANEWARRAY:
-            case ANEWARRAY:
-            case NEW:
-                if (!(value instanceof ClassRef)) {
-                    throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a ClassRef object");
-                }
-                break;
-
-            default:
-                break;
+        if (Util.contains(CONSTANT_OPCODES, opcode)) {
+        } else if (Util.contains(FIELDREF_OPCODES, opcode)) {
+            if (!(value instanceof FieldRef)) {
+                throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a FieldRef object");
+            }
+        } else if (Util.contains(CLASSREF_OPCODES, opcode)) {
+            if (!(value instanceof ClassRef)) {
+                throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a ClassRef object");
+            }
+        } else if (Util.contains(METHODREF_OPCODES, opcode)) {
+            if (!(value instanceof MethodRef)) {
+                throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires a MethodRef object");
+            }
+        } else if (Util.contains(INTERFACEMETHODREF_OPCODES, opcode)) {
+            if (!(value instanceof InterfaceMethodRef)) {
+                throw new IllegalArgumentException(Mnemonic.OPCODE[opcode] + " requires an InterfaceMethodRef object");
+            }
         }
     }
 
@@ -317,22 +299,13 @@ class ConstPoolUtils {
             return NOT_FOUND;
         }
         matchOpcodeToRefType(opcode, value);
-        opcode &= 0xff;
-        switch (opcode) {
-            case LDC:
-            case LDC_W:
-            case LDC2_W:
-                return getLoad(opcode, index);
-
-            case INVOKEINTERFACE:
-                if (value instanceof InterfaceMethodRef) {
-                    int numArgs = parseDescriptor(((InterfaceMethodRef) value).getType()).size();
-                    return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0), (byte) numArgs, 0};
-                }
-                break;
-
-            default:
-                break;
+        if (Util.contains(CONSTANT_OPCODES, opcode)) {
+            return getLoad(opcode, index);
+        } else if (Util.contains(INTERFACEMETHODREF_OPCODES, opcode)) {
+            if (value instanceof InterfaceMethodRef) {
+                int numArgs = parseDescriptor(((InterfaceMethodRef) value).getType()).size();
+                return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0), (byte) numArgs, 0};
+            }
         }
         return new byte[]{(byte) opcode, Util.b(index, 1), Util.b(index, 0)};
     }
