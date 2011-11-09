@@ -365,28 +365,67 @@ public class BetterGrass extends Mod {
         private int blueMultiplier;
 
         public RenderBlocksMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 0xf000f),
+                        INVOKEVIRTUAL, BinaryRegex.any(2),
+                        ALOAD_0,
+                        GETSTATIC, BinaryRegex.any(2),
+                        ALOAD_0
+                    );
+                }
+            }.setMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z")));
+
             classSignatures.add(new FixedBytecodeSignature(
                 ICONST_0,
-                DUP,
-                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
-                DUP,
-                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
-                DUP,
-                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
-                DUP,
-                ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                BinaryRegex.or(
+                    BinaryRegex.build(
+                        // vanilla minecraft
+                        DUP,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // southFace
+                        DUP,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // northFace
+                        DUP,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // westFace
+                        DUP,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any())  // eastFace
+                    ),
+                    BinaryRegex.build(
+                        // ModLoader
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // southFace
+                        ICONST_0,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // northFace
+                        ICONST_0,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // westFace
+                        ICONST_0,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // eastFace
+                        ICONST_0
+                    )
+                ),
                 BytecodeMatcher.anyISTORE
             ) {
                 public void afterMatch(ClassFile classFile) {
-                    southFace = matcher.getCaptureGroup(1)[0] & 0xff;
-                    northFace = matcher.getCaptureGroup(2)[0] & 0xff;
-                    westFace = matcher.getCaptureGroup(3)[0] & 0xff;
-                    eastFace = matcher.getCaptureGroup(4)[0] & 0xff;
+                    byte[][] m = new byte[][]{
+                        matcher.getCaptureGroup(1),
+                        matcher.getCaptureGroup(2),
+                        matcher.getCaptureGroup(3),
+                        matcher.getCaptureGroup(4),
+                        matcher.getCaptureGroup(5),
+                        matcher.getCaptureGroup(6),
+                        matcher.getCaptureGroup(7),
+                        matcher.getCaptureGroup(8),
+                    };
+                    southFace = m[(m[0] == null ? 4 : 0)][0] & 0xff;
+                    northFace = m[(m[1] == null ? 5 : 1)][0] & 0xff;
+                    westFace = m[(m[2] == null ? 6 : 2)][0] & 0xff;
+                    eastFace = m[(m[3] == null ? 7 : 3)][0] & 0xff;
                     Logger.log(Logger.LOG_CONST, "AO faces (N S E W) = (%d %d %d %d)",
                         northFace, southFace, eastFace, westFace
                     );
                 }
-            }.setMethodName("renderStandardBlockWithAmbientOcclusion"));
+            });
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -540,7 +579,7 @@ public class BetterGrass extends Mod {
                         label("south")
                     );
                 }
-            });
+            }.targetMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z")));
 
             patches.add(new BytecodePatch() {
                 @Override
