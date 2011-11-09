@@ -388,16 +388,44 @@ final public class MCPatcher {
                         }
                         out.print(")");
                     }
+                    out.println();
                     ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<Map.Entry<String, Integer>>();
-                    for (ClassPatch classPatch : classMod.patches) {
-                        sortedList.addAll(classPatch.numMatches.entrySet());
+                    for (int i = 0; i < classMod.patches.size(); i++) {
+                        ClassPatch classPatch = classMod.patches.get(i);
+                        if (classPatch.numMatches.isEmpty()) {
+                            String desc = null;
+                            Throwable e = null;
+                            try {
+                                desc = classPatch.getDescription();
+                            } catch (Throwable e1) {
+                                e = e1;
+                            }
+                            if (desc == null) {
+                                desc = String.format("patch %d (%s)", i, e == null ? "no description" : e.getMessage());
+                            }
+                            final String desc2 = desc;
+                            sortedList.add(new Map.Entry<String, Integer>() {
+                                public String getKey() {
+                                    return desc2;
+                                }
+
+                                public Integer getValue() {
+                                    return 0;
+                                }
+
+                                public Integer setValue(Integer value) {
+                                    return value;
+                                }
+                            });
+                        } else {
+                            sortedList.addAll(classPatch.numMatches.entrySet());
+                        }
                     }
                     Collections.sort(sortedList, new Comparator<Map.Entry<String, Integer>>() {
                         public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
                             return o1.getKey().compareTo(o2.getKey());
                         }
                     });
-                    out.println();
                     for (Map.Entry<String, Integer> e : sortedList) {
                         out.printf("        [%d] %s\n", e.getValue(), e.getKey());
                     }
