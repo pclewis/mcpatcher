@@ -16,6 +16,7 @@ abstract public class AddMethodPatch extends ClassPatch {
      * Java type descriptor of method; may use deobfuscated names.
      */
     protected String type;
+    private int accessFlags;
     /**
      * May be set to specify a different max stack size for the method.
      *
@@ -42,8 +43,20 @@ abstract public class AddMethodPatch extends ClassPatch {
      * @param type Java type descriptor of method; may use deobfuscated names
      */
     public AddMethodPatch(String name, String type) {
+        this(name, type, AccessFlag.PUBLIC);
+    }
+
+    /**
+     * Create an AddMethodPatch with given name and type.
+     *
+     * @param name name of method
+     * @param type Java type descriptor of method; may use deobfuscated names
+     * @param accessFlags method access flags
+     */
+    public AddMethodPatch(String name, String type, int accessFlags) {
         this.name = name;
         this.type = type;
+        this.accessFlags = accessFlags;
         maxStackSize = 10;
         numLocals = 10;
     }
