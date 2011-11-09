@@ -134,7 +134,7 @@ public class BinaryMatcher {
      * @return byte array
      */
     public byte[] getCaptureGroup(int group) {
-        return BinaryRegex.strToBin(matcher.group(group));
+        return matcher.start(group) >= 0 ? BinaryRegex.strToBin(matcher.group(group)) : null;
     }
 
     private void handleMatch() {
@@ -152,6 +152,9 @@ public class BinaryMatcher {
             Logger.log(Logger.LOG_REGEX, " suffix = [%s]", inputStr.substring(matcher.end()));
         }
         for (int i = 1; i <= matcher.groupCount(); i++) {
+            if (matcher.start(i) < 0) {
+                continue;
+            }
             if (matcher.start(i) % BinaryRegex.BYTE_LEN != 0) {
                 throw new RuntimeException(String.format("group %d start %d is not divisible by %d", i, matcher.start(i), BinaryRegex.BYTE_LEN));
             }
