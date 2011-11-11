@@ -1,11 +1,11 @@
 package com.pclewis.mcpatcher;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.jar.JarFile;
 
 /**
  * Base class for all mods.
@@ -51,7 +51,7 @@ public abstract class Mod {
     private ArrayList<String> errors = new ArrayList<String>();
     private boolean enabled = false;
     boolean internal = false;
-    JarFile customJar = null;
+    File customJar = null;
     ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
     HashMap<String, String> filesAdded = new HashMap<String, String>();
 

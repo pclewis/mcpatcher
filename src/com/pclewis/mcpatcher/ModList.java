@@ -78,6 +78,7 @@ class ModList {
                 Mod mod = loadCustomMod(loader, ClassMap.filenameToClassName(entry.getName()));
                 if (addNoReplace(mod)) {
                     Logger.log(Logger.LOG_MOD, "new %s()", mod.getClass().getName());
+                    mod.customJar = file;
                 }
             }
         }
@@ -425,6 +426,9 @@ class ModList {
                     File file = new File(path);
                     if (file.exists()) {
                         mod = loadCustomMod(file, className);
+                        if (mod != null) {
+                            mod.customJar = file;
+                        }
                     }
                 } else {
                     invalidEntries.add(element);
@@ -469,7 +473,7 @@ class ModList {
             config.setText(element, Config.TAG_TYPE, Config.VAL_BUILTIN);
         } else {
             config.setText(element, Config.TAG_TYPE, Config.VAL_EXTERNAL_JAR);
-            config.setText(element, Config.TAG_PATH, mod.customJar.getName());
+            config.setText(element, Config.TAG_PATH, mod.customJar.getPath());
             config.setText(element, Config.TAG_CLASS, mod.getClass().getCanonicalName());
         }
     }
