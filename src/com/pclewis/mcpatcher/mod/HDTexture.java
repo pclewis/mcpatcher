@@ -82,6 +82,7 @@ public class HDTexture extends Mod {
             memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
+            memberMappers.add(new MethodMapper("getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I"));
             if (haveColorizerWater) {
                 memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
             }
@@ -266,15 +267,11 @@ public class HDTexture extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals(getClassMap().mapTypeString("(LTextureFX;)V"))) {
-                        return buildExpression(
-                            BinaryRegex.begin(),
-                            BinaryRegex.any(0, 50),
-                            BinaryRegex.end()
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        BinaryRegex.any(0, 50),
+                        BinaryRegex.end()
+                    );
                 }
 
                 @Override
@@ -287,7 +284,7 @@ public class HDTexture extends Mod {
                         RETURN
                     );
                 }
-            });
+            }.targetMethod(new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -297,13 +294,9 @@ public class HDTexture extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals("(Ljava/awt/image/BufferedImage;I)V")) {
-                        return buildExpression(
-                            BinaryRegex.begin()
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
                 }
 
                 @Override
@@ -315,7 +308,7 @@ public class HDTexture extends Mod {
                         label("A")
                     );
                 }
-            });
+            }.targetMethod(new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -325,13 +318,9 @@ public class HDTexture extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals("(Ljava/awt/image/BufferedImage;[I)[I")) {
-                        return buildExpression(
-                            BinaryRegex.begin()
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
                 }
 
                 @Override
@@ -344,7 +333,7 @@ public class HDTexture extends Mod {
                         label("A")
                     );
                 }
-            });
+            }.targetMethod(new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I")));
 
             patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
 
@@ -454,7 +443,7 @@ public class HDTexture extends Mod {
             patches.add(new TileSizePatch.MultiplyPatch(16, "int_size") {
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
-                    return !methodInfo.getName().equals("<init>");
+                    return !methodInfo.isConstructor();
                 }
             });
         }
@@ -551,7 +540,7 @@ public class HDTexture extends Mod {
             patches.add(new TileSizePatch.ModPatch(16, "int_size") {
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
-                    return !methodInfo.getName().equals("<init>");
+                    return !methodInfo.isConstructor();
                 }
             });
         }
@@ -810,7 +799,7 @@ public class HDTexture extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getName().equals("<clinit>")) {
+                    if (methodInfo.isStaticInitializer()) {
                         return buildExpression(
                             BinaryRegex.begin(),
                             push(methodInfo, 65536),

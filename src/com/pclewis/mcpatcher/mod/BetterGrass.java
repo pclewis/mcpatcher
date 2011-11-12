@@ -588,12 +588,6 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public boolean filterMethod(MethodInfo methodInfo) {
-                    MethodRef m = (MethodRef) map(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z"));
-                    return m.getName().equals(methodInfo.getName()) && m.getType().equals(methodInfo.getDescriptor());
-                }
-
-                @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
@@ -653,18 +647,12 @@ public class BetterGrass extends Mod {
                         label("B")
                     );
                 }
-            });
+            }.targetMethod(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
 
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8)";
-                }
-
-                @Override
-                public boolean filterMethod(MethodInfo methodInfo) {
-                    MethodRef m = (MethodRef) map(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z"));
-                    return m.getName().equals(methodInfo.getName()) && m.getType().equals(methodInfo.getDescriptor());
                 }
 
                 @Override
@@ -728,7 +716,7 @@ public class BetterGrass extends Mod {
                         getCaptureGroup(4)
                     );
                 }
-            });
+            }.targetMethod(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
         }
     }
 }

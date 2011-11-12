@@ -6,7 +6,6 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
-import javassist.bytecode.ClassFile;
 import javassist.bytecode.FieldInfo;
 import javassist.bytecode.MethodInfo;
 
@@ -15,8 +14,8 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class GLSLShader extends Mod {
-    private static final String class_Display = "org.lwjgl.opengl.Display";
-    private static final String class_GL11 = "org.lwjgl.opengl.GL11";
+    private static final String DISPLAY_CLASS = "org.lwjgl.opengl.Display";
+    private static final String GL11_CLASS = "org.lwjgl.opengl.GL11";
 
     private boolean haveLightmaps;
 
@@ -93,8 +92,8 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return BinaryRegex.or(
-                        BinaryRegex.build(reference(methodInfo, INVOKESTATIC, new MethodRef(class_Display, "create", "()V"))),
-                        BinaryRegex.build(reference(methodInfo, INVOKESTATIC, new MethodRef(class_Display, "create", "(Lorg/lwjgl/opengl/PixelFormat;)V")))
+                        BinaryRegex.build(reference(methodInfo, INVOKESTATIC, new MethodRef(DISPLAY_CLASS, "create", "()V"))),
+                        BinaryRegex.build(reference(methodInfo, INVOKESTATIC, new MethodRef(DISPLAY_CLASS, "create", "(Lorg/lwjgl/opengl/PixelFormat;)V")))
                     );
                 }
 
@@ -116,7 +115,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Display, "update", "()V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(DISPLAY_CLASS, "update", "()V"))
                     );
                 }
 
@@ -161,7 +160,7 @@ public class GLSLShader extends Mod {
         GLViewportMod() {
             global = true;
 
-            classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glViewport", "(IIII)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glViewport", "(IIII)V")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -172,7 +171,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glViewport", "(IIII)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glViewport", "(IIII)V"))
                     );
                 }
 
@@ -188,7 +187,7 @@ public class GLSLShader extends Mod {
 
     private class RenderEngineMod extends ClassMod {
         RenderEngineMod() {
-            classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
@@ -219,18 +218,18 @@ public class GLSLShader extends Mod {
                 }
             }.addXref(1, new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
 
-            memberMappers.add(new MethodMapper("refreshTextures", "()V") {
+            classSignatures.add(new BytecodeSignature() {
                 @Override
-                public boolean match(MethodInfo methodInfo) {
-                    if (!super.match(methodInfo) || methodInfo.getName().startsWith("<")) {
-                        return false;
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getDescriptor().equals("()V") && !methodInfo.isConstructor()) {
+                        return buildExpression(
+                            push(methodInfo, "%clamp%")
+                        );
+                    } else {
+                        return null;
                     }
-                    BytecodeMatcher bm = new BytecodeMatcher(
-                        push(methodInfo, "%clamp%")
-                    );
-                    return bm.match(methodInfo);
                 }
-            });
+            }.setMethodName("refreshTextures"));
 
             memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I"));
 
@@ -244,15 +243,9 @@ public class GLSLShader extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    JavaRef refreshTextures = map(new MethodRef("RenderEngine", "refreshTextures", "()V"));
-                    if (methodInfo.getDescriptor().equals(refreshTextures.getType()) &&
-                        methodInfo.getName().equals(refreshTextures.getName())) {
-                        return buildExpression(
-                            RETURN
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN
+                    );
                 }
 
                 @Override
@@ -261,7 +254,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "refreshTextures", "()V"))
                     );
                 }
-            });
+            }.targetMethod(new MethodRef("RenderEngine", "refreshTextures", "()V")));
         }
     }
 
@@ -313,7 +306,7 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         push(methodInfo, 514),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDepthFunc", "(I)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
                     );
                 }
             });
@@ -328,7 +321,7 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         push(methodInfo, 514),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDepthFunc", "(I)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
                     );
                 }
 
@@ -351,7 +344,7 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         push(methodInfo, 515),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDepthFunc", "(I)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
                     );
                 }
 
@@ -383,7 +376,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glColorMask", "(ZZZZ)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glColorMask", "(ZZZZ)V"))
                     );
                 }
             }.setMethodName("renderWorld"));
@@ -402,7 +395,7 @@ public class GLSLShader extends Mod {
                         BytecodeMatcher.captureReference(GETFIELD),
                         FCONST_1,
                         BytecodeMatcher.anyReference(INVOKESPECIAL),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glFog", "(ILjava/nio/FloatBuffer;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glFog", "(ILjava/nio/FloatBuffer;)V"))
                     );
                 }
             }
@@ -842,16 +835,10 @@ public class GLSLShader extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    JavaRef initGui = classMap.map(new MethodRef("GuiVideoSettings", "initGui", "()V"));
-                    if (methodInfo.getName().equals(initGui.getName()) &&
-                        methodInfo.getDescriptor().equals(initGui.getType())) {
-                        return buildExpression(
-                            RETURN,
-                            BinaryRegex.end()
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN,
+                        BinaryRegex.end()
+                    );
                 }
 
                 @Override
@@ -869,7 +856,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "addVideoSettings", "(Ljava/util/List;III)V"))
                     );
                 }
-            });
+            }.targetMethod(new MethodRef("GuiVideoSettings", "initGui", "()V")));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -879,16 +866,10 @@ public class GLSLShader extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    JavaRef actionPerformed = classMap.map(new MethodRef("GuiVideoSettings", "actionPerformed", "(LGuiButton;)V"));
-                    if (methodInfo.getName().equals(actionPerformed.getName()) &&
-                        methodInfo.getDescriptor().equals(actionPerformed.getType())) {
-                        return buildExpression(
-                            RETURN,
-                            BinaryRegex.end()
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN,
+                        BinaryRegex.end()
+                    );
                 }
 
                 @Override
@@ -899,7 +880,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "actionPerformed", "(LGuiButton;)V"))
                     );
                 }
-            });
+            }.targetMethod(new MethodRef("GuiVideoSettings", "actionPerformed", "(LGuiButton;)V")));
         }
     }
 
@@ -936,23 +917,9 @@ public class GLSLShader extends Mod {
                         BytecodeMatcher.anyISTORE
                     );
                 }
+            }.setMethodName("setNormal"));
 
-                @Override
-                public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
-                    String deobfClass = getDeobfClass();
-                    classMap.addClassMap(deobfClass, classFile.getName());
-                    classMap.addMethodMap(deobfClass, "setNormal", methodInfo.getName());
-                    for (Object o : classFile.getFields()) {
-                        FieldInfo fieldInfo = (FieldInfo) o;
-                        if ((fieldInfo.getAccessFlags() & AccessFlag.STATIC) != 0 &&
-                            fieldInfo.getDescriptor().equals("L" + classFile.getName() + ";")) {
-                            classMap.addFieldMap(deobfClass, "instance", fieldInfo.getName());
-                            break;
-                        }
-                    }
-                }
-            });
-
+            memberMappers.add(new FieldMapper("instance", "LTessellator;").accessFlag(AccessFlag.STATIC, true));
             memberMappers.add(new FieldMapper("byteBuffer", "Ljava/nio/ByteBuffer;"));
 
             memberMappers.add(new FieldMapper("rawBuffer", "[I")
@@ -1000,7 +967,7 @@ public class GLSLShader extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getName().equals("<init>")) {
+                    if (methodInfo.isConstructor()) {
                         return buildExpression(
                             RETURN
                         );
@@ -1082,7 +1049,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_GL11, "glDrawArrays", "(III)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDrawArrays", "(III)V"))
                     );
                 }
 
@@ -1125,61 +1092,52 @@ public class GLSLShader extends Mod {
     }
 
     private class RenderBlocksMod extends ClassMod {
+        String[] faceMethods = new String[6];
+
         RenderBlocksMod() {
             classSignatures.add(new ConstSignature(0.1875D));
             classSignatures.add(new ConstSignature(0.01D));
 
-            final String[] faceMethods = {
-                "renderBottomFace",
-                "renderTopFace",
-                "renderEastFace",
-                "renderWestFace",
-                "renderNorthFace",
-                "renderSouthFace"
-            };
+            setupBlockFace(0, "Bottom", 0, -1, 0);
+            setupBlockFace(1, "Top", 0, 1, 0);
+            setupBlockFace(2, "East", 0, 0, -1);
+            setupBlockFace(3, "West", 0, 0, 1);
+            setupBlockFace(4, "North", -1, 0, 0);
+            setupBlockFace(5, "South", 1, 0, 0);
 
             memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
             memberMappers.add(new MethodMapper("renderBlockByRenderType", "(LBlock;III)Z"));
+        }
 
+        private void setupBlockFace(int index, final String direction, final int x, final int y, final int z) {
+            String methodName = "render" + direction + "Face";
+            faceMethods[index] = methodName;
             patches.add(new BytecodePatch.InsertAfter() {
-                private final float[] x = new float[]{0, 0, 0, 0, -1, 1};
-                private final float[] y = new float[]{-1, 1, 0, 0, 0, 0};
-                private final float[] z = new float[]{0, 0, -1, 1, 0, 0};
-
                 @Override
                 public String getDescription() {
-                    return "set normal when rendering block face";
+                    return "set normal when rendering block " + direction.toLowerCase() + " face";
                 }
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals(classMap.mapTypeString("(LBlock;DDDI)V"))) {
-                        return buildExpression(
-                            BinaryRegex.begin(),
-                            reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
-                            ASTORE, BinaryRegex.capture(BinaryRegex.any())
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
+                        ASTORE, BinaryRegex.capture(BinaryRegex.any())
+                    );
                 }
 
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    for (int match = 0; match < faceMethods.length; match++) {
-                        if (methodInfo.getName().equals(classMap.map(new MethodRef("RenderBlocks", faceMethods[match], "(LBlock;DDDI)V")).getName())) {
-                            return buildCode(
-                                ALOAD, getCaptureGroup(1),
-                                push(methodInfo, x[match]),
-                                push(methodInfo, y[match]),
-                                push(methodInfo, z[match]),
-                                reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setNormal", "(FFF)V"))
-                            );
-                        }
-                    }
-                    return null;
+                    return buildCode(
+                        ALOAD, getCaptureGroup(1),
+                        push(methodInfo, x),
+                        push(methodInfo, y),
+                        push(methodInfo, z),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setNormal", "(FFF)V"))
+                    );
                 }
-            });
+            }.targetMethod(new MethodRef("RenderBlocks", methodName, "(LBlock;DDDI)V")));
         }
     }
 
@@ -1284,7 +1242,7 @@ public class GLSLShader extends Mod {
 
     private class WorldRendererMod extends ClassMod {
         WorldRendererMod() {
-            classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glNewList", "(II)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glNewList", "(II)V")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -1352,16 +1310,10 @@ public class GLSLShader extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    JavaRef updateRenderer = classMap.map(new MethodRef("WorldRenderer", "updateRenderer", "()V"));
-                    if (methodInfo.getDescriptor().equals(updateRenderer.getType()) &&
-                        methodInfo.getName().equals(updateRenderer.getName())) {
-                        return buildExpression(
-                            RETURN,
-                            BinaryRegex.end()
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN,
+                        BinaryRegex.end()
+                    );
                 }
 
                 @Override
@@ -1374,7 +1326,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
                     );
                 }
-            });
+            }.targetMethod(new MethodRef("WorldRenderer", "updateRenderer", "()V")));
         }
     }
 }
