@@ -32,8 +32,8 @@ public class BetterGrass extends Mod {
         classMods.add(new RenderBlocksMod());
     }
 
-    private static class MaterialMod extends ClassMod {
-        public MaterialMod() {
+    private class MaterialMod extends ClassMod {
+        MaterialMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 BinaryRegex.begin(),
                 ALOAD_0,
@@ -81,8 +81,8 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private static class BlockMod extends ClassMod {
-        public BlockMod() {
+    private class BlockMod extends ClassMod {
+        BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
 
             memberMappers.add(new MethodMapper("getBlockTexture", "(LIBlockAccess;IIII)I"));
@@ -93,7 +93,7 @@ public class BetterGrass extends Mod {
         private byte[] material;
         private String blockName;
 
-        public BlockGrassMod(final String blockName, final int blockID, final int halfTextureID, final int fullTextureID) {
+        BlockGrassMod(final String blockName, final int blockID, final int halfTextureID, final int fullTextureID) {
             this.blockName = blockName;
 
             classSignatures.add(new BytecodeSignature() {
@@ -332,8 +332,8 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private static class IBlockAccessMod extends ClassMod {
-        public IBlockAccessMod() {
+    private class IBlockAccessMod extends ClassMod {
+        IBlockAccessMod() {
             classSignatures.add(new ClassSignature() {
                 @Override
                 public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
@@ -354,7 +354,7 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private static class RenderBlocksMod extends ClassMod {
+    private class RenderBlocksMod extends ClassMod {
         private int eastFace;
         private int westFace;
         private int northFace;
@@ -364,7 +364,7 @@ public class BetterGrass extends Mod {
         private int greenMultiplier;
         private int blueMultiplier;
 
-        public RenderBlocksMod() {
+        RenderBlocksMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {

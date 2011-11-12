@@ -81,7 +81,7 @@ public class RandomMobs extends Mod {
         private String mobName;
         private String eyeTexture;
 
-        public RenderEyesMod(String mob) {
+        RenderEyesMod(String mob) {
             mobName = mob;
             eyeTexture = "/mob/" + mobName.toLowerCase() + "_eyes.png";
 

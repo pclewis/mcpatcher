@@ -62,7 +62,7 @@ public class HDTexture extends Mod {
     }
 
     private class RenderEngineMod extends ClassMod {
-        public RenderEngineMod() {
+        RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
             classSignatures.add(new BytecodeSignature() {
@@ -377,8 +377,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class TextureFXMod extends ClassMod {
-        public TextureFXMod() {
+    private class TextureFXMod extends ClassMod {
+        TextureFXMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 SIPUSH, 0x04, 0x00, // 1024
                 NEWARRAY, T_BYTE
@@ -402,8 +402,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class CompassMod extends ClassMod {
-        public CompassMod() {
+    private class CompassMod extends ClassMod {
+        CompassMod() {
             classSignatures.add(new ConstSignature("/gui/items.png"));
             classSignatures.add(new ConstSignature("/misc/dial.png").negate(true));
             classSignatures.add(new ConstSignature(new MethodRef("java.lang.Math", "sin", "(D)D")));
@@ -429,8 +429,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class FireMod extends ClassMod {
-        public FireMod() {
+    private class FireMod extends ClassMod {
+        FireMod() {
             classSignatures.add(new ConstSignature(new MethodRef("java.lang.Math", "random", "()D")));
 
             classSignatures.add(new FixedBytecodeSignature(
@@ -461,10 +461,10 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class FluidMod extends ClassMod {
+    private class FluidMod extends ClassMod {
         private String name;
 
-        public FluidMod(String name) {
+        FluidMod(String name) {
             this.name = name;
             boolean lava = name.contains("Lava");
             boolean flow = name.contains("Flow");
@@ -522,8 +522,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class ItemRendererMod extends ClassMod {
-        public ItemRendererMod() {
+    private class ItemRendererMod extends ClassMod {
+        ItemRendererMod() {
             classSignatures.add(new ConstSignature(-0.9375F));
             classSignatures.add(new ConstSignature(0.0625F));
             classSignatures.add(new ConstSignature(0.001953125F));
@@ -536,7 +536,7 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class WatchMod extends ClassMod {
+    private class WatchMod extends ClassMod {
         public WatchMod() {
             classSignatures.add(new ConstSignature("/misc/dial.png"));
 
@@ -558,8 +558,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class PortalMod extends ClassMod {
-        public PortalMod() {
+    private class PortalMod extends ClassMod {
+        PortalMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -584,11 +584,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private class MinecraftMod extends ClassMod {
-        public MinecraftMod() {
-            classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
-
-            memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
+    private class MinecraftMod extends BaseMod._MinecraftMod {
+        MinecraftMod() {
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
             if (haveAlternateFont) {
@@ -698,8 +695,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class FontRendererMod extends ClassMod {
-        public FontRendererMod() {
+    private class FontRendererMod extends ClassMod {
+        FontRendererMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 DCONST_0,
                 DCONST_0,
@@ -739,14 +736,14 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class GameSettingsMod extends ClassMod {
-        public GameSettingsMod() {
+    private class GameSettingsMod extends ClassMod {
+        GameSettingsMod() {
             classSignatures.add(new ConstSignature("key.forward"));
         }
     }
 
-    private static class GetResourceMod extends ClassMod {
-        public GetResourceMod() {
+    private class GetResourceMod extends ClassMod {
+        GetResourceMod() {
             global = true;
 
             classSignatures.add(new ConstSignature(new ClassRef("java.lang.Class")));
@@ -790,7 +787,7 @@ public class HDTexture extends Mod {
         }
     }
 
-    private static class ColorizerMod extends ClassMod {
+    private class ColorizerMod extends ClassMod {
         private String name;
 
         private ColorizerMod(String name) {
@@ -801,13 +798,13 @@ public class HDTexture extends Mod {
             patches.add(new MakeMemberPublicPatch(new FieldRef(name, "colorBuffer", "[I")));
         }
 
-        public ColorizerMod(String name, String resource) {
+        ColorizerMod(String name, String resource) {
             this(name);
 
             classSignatures.add(new ConstSignature(resource));
         }
 
-        public ColorizerMod(String name, boolean has255, boolean has6396257) {
+        ColorizerMod(String name, boolean has255, boolean has6396257) {
             this(name);
 
             classSignatures.add(new BytecodeSignature() {

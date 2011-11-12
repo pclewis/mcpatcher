@@ -15,7 +15,6 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class GLSLShader extends Mod {
-    private static final String class_Shaders = "com.pclewis.mcpatcher.mod.Shaders";
     private static final String class_Display = "org.lwjgl.opengl.Display";
     private static final String class_GL11 = "org.lwjgl.opengl.GL11";
 
@@ -64,10 +63,9 @@ public class GLSLShader extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS + "$Option"));
     }
 
-    private class MinecraftMod extends ClassMod {
-        public MinecraftMod() {
-            classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
-
+    private class MinecraftMod extends BaseMod._MinecraftMod {
+        MinecraftMod() {
+            memberMappers.clear();
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
             memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
@@ -105,7 +103,7 @@ public class GLSLShader extends Mod {
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setUpBuffers", "(LMinecraft;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setUpBuffers", "(LMinecraft;)V"))
                     );
                 }
             });
@@ -127,7 +125,7 @@ public class GLSLShader extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "updateDisplay", "(LMinecraft;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "updateDisplay", "(LMinecraft;)V"))
                     );
                 }
             });
@@ -153,7 +151,7 @@ public class GLSLShader extends Mod {
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setUpBuffers", "(LMinecraft;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setUpBuffers", "(LMinecraft;)V"))
                     );
                 }
             });
@@ -161,7 +159,7 @@ public class GLSLShader extends Mod {
     }
 
     private class GLViewportMod extends ClassMod {
-        public GLViewportMod() {
+        GLViewportMod() {
             global = true;
 
             classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glViewport", "(IIII)V")));
@@ -182,7 +180,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "viewport", "(IIII)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "viewport", "(IIII)V"))
                     );
                 }
             });
@@ -190,7 +188,7 @@ public class GLSLShader extends Mod {
     }
 
     private class RenderEngineMod extends ClassMod {
-        public RenderEngineMod() {
+        RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
             classSignatures.add(new FixedBytecodeSignature(
@@ -261,7 +259,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "refreshTextures", "()V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "refreshTextures", "()V"))
                     );
                 }
             });
@@ -269,7 +267,7 @@ public class GLSLShader extends Mod {
     }
 
     private class RenderGlobalMod extends ClassMod {
-        public RenderGlobalMod() {
+        RenderGlobalMod() {
             classSignatures.add(new ConstSignature("smoke"));
 
             classSignatures.add(new BytecodeSignature() {
@@ -300,7 +298,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setCelestialPosition", "()V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setCelestialPosition", "()V"))
                     );
                 }
             });
@@ -308,7 +306,7 @@ public class GLSLShader extends Mod {
     }
 
     private class RenderLivingMod extends ClassMod {
-        public RenderLivingMod() {
+        RenderLivingMod() {
             classSignatures.add(new ConstSignature("deadmau5"));
 
             classSignatures.add(new BytecodeSignature() {
@@ -338,8 +336,8 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "baseProgramNoT2D", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V"))
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgramNoT2D", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
                     );
                 }
             });
@@ -361,8 +359,8 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "baseProgram", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V"))
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgram", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
                     );
                 }
             });
@@ -370,7 +368,7 @@ public class GLSLShader extends Mod {
     }
 
     private class EntityRendererMod extends ClassMod {
-        public EntityRendererMod() {
+        EntityRendererMod() {
             classSignatures.add(new ConstSignature("ambient.weather.rain"));
 
             classSignatures.add(new BytecodeSignature() {
@@ -501,7 +499,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorGreen", "F")),
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorBlue", "F")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "processScene", "(FFF)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "processScene", "(FFF)V"))
                     );
                 }
             });
@@ -525,8 +523,8 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "baseProgram", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V"))
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgram", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
                     );
                 }
             });
@@ -553,25 +551,25 @@ public class GLSLShader extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         // Shaders.bindTerrainMaps();
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "bindTerrainMaps", "()V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "bindTerrainMaps", "()V")),
 
                         // Shaders.setRenderType(1);
                         ICONST_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setRenderType", "(I)V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setRenderType", "(I)V")),
 
                         // Shaders.useProgram(Shaders.baseProgramBM);
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "baseProgramBM", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgramBM", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V")),
 
                         getCaptureGroup(1),
 
                         // Shaders.setRenderType(0);
                         ICONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setRenderType", "(I)V")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setRenderType", "(I)V")),
 
                         // Shaders.useProgram(Shaders.baseProgram);
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "baseProgram", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V"))
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgram", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
                     );
                 }
             });
@@ -593,8 +591,8 @@ public class GLSLShader extends Mod {
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         // Shaders.copyDepthTexture(Shaders.depthTextureId);
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "depthTextureId", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "copyDepthTexture", "(I)V"))
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "depthTextureId", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "copyDepthTexture", "(I)V"))
                     );
                 }
             });
@@ -616,12 +614,12 @@ public class GLSLShader extends Mod {
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         // Shaders.copyDepthTexture(Shaders.depthTexture2Id);
-                        reference(methodInfo, GETSTATIC, new FieldRef(class_Shaders, "depthTexture2Id", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "copyDepthTexture", "(I)V")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "depthTexture2Id", "I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "copyDepthTexture", "(I)V")),
 
                         // Shaders.useProgram(0);
                         ICONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "useProgram", "(I)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
                     );
                 }
             });
@@ -629,14 +627,14 @@ public class GLSLShader extends Mod {
     }
 
     private class EntityLivingMod extends ClassMod {
-        public EntityLivingMod() {
+        EntityLivingMod() {
             classSignatures.add(new ConstSignature("/mob/char.png"));
             classSignatures.add(new ConstSignature("bubble"));
         }
     }
 
     private class ItemMod extends ClassMod {
-        public ItemMod() {
+        ItemMod() {
             classSignatures.add(new ConstSignature("CONFLICT @ "));
 
             memberMappers.add(new FieldMapper("itemsList", "[LItem;") {
@@ -654,7 +652,7 @@ public class GLSLShader extends Mod {
     }
 
     private class BlockMod extends ClassMod {
-        public BlockMod() {
+        BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
 
             memberMappers.add(new FieldMapper("blocksList", "[LBlock;") {
@@ -687,7 +685,7 @@ public class GLSLShader extends Mod {
     }
 
     private class GameSettingsMod extends ClassMod {
-        public GameSettingsMod() {
+        GameSettingsMod() {
             classSignatures.add(new ConstSignature("key.forward"));
 
             memberMappers.add(new FieldMapper(new String[]{
@@ -711,7 +709,7 @@ public class GLSLShader extends Mod {
     }
 
     private class FrustrumMod extends ClassMod {
-        public FrustrumMod() {
+        FrustrumMod() {
             interfaces = new String[]{"ICamera"};
 
             classSignatures.add(new FixedBytecodeSignature(
@@ -756,13 +754,13 @@ public class GLSLShader extends Mod {
     }
 
     private class EnumOptionsMod extends ClassMod {
-        public EnumOptionsMod() {
+        EnumOptionsMod() {
             classSignatures.add(new ConstSignature("INVERT_MOUSE"));
         }
     }
 
     private class GuiButtonMod extends ClassMod {
-        public GuiButtonMod() {
+        GuiButtonMod() {
             classSignatures.add(new ConstSignature("/gui/gui.png"));
             classSignatures.add(new ConstSignature(0xffa0a0a0));
 
@@ -781,7 +779,7 @@ public class GLSLShader extends Mod {
     }
 
     private class GuiSmallButtonMod extends ClassMod {
-        public GuiSmallButtonMod() {
+        GuiSmallButtonMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 SIPUSH, 0, 150,
                 BIPUSH, 20,
@@ -808,7 +806,7 @@ public class GLSLShader extends Mod {
     }
 
     private class GuiScreenMod extends ClassMod {
-        public GuiScreenMod() {
+        GuiScreenMod() {
             classSignatures.add(new ConstSignature("/gui/background.png"));
             classSignatures.add(new ConstSignature("random.click"));
 
@@ -825,7 +823,7 @@ public class GLSLShader extends Mod {
     }
 
     private class GuiVideoSettingsMod extends ClassMod {
-        public GuiVideoSettingsMod() {
+        GuiVideoSettingsMod() {
             classSignatures.add(new ConstSignature("options.videoTitle"));
             classSignatures.add(new ConstSignature("gui.done"));
 
@@ -869,7 +867,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, GETFIELD, new FieldRef("GuiScreen", "height", "I")),
                         reference(methodInfo, GETSTATIC, new FieldRef("GuiVideoSettings", "options", "[LEnumOptions;")),
                         ARRAYLENGTH,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "addVideoSettings", "(Ljava/util/List;III)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "addVideoSettings", "(Ljava/util/List;III)V"))
                     );
                 }
             });
@@ -899,7 +897,7 @@ public class GLSLShader extends Mod {
                     return buildCode(
                         // Shaders.actionPerformed(guibutton);
                         ALOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "actionPerformed", "(LGuiButton;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "actionPerformed", "(LGuiButton;)V"))
                     );
                 }
             });
@@ -907,7 +905,7 @@ public class GLSLShader extends Mod {
     }
 
     private class TessellatorMod extends ClassMod {
-        public TessellatorMod() {
+        TessellatorMod() {
             classSignatures.add(new ConstSignature("Not tesselating!"));
 
             classSignatures.add(new BytecodeSignature() {
@@ -1017,7 +1015,7 @@ public class GLSLShader extends Mod {
                     return buildCode(
                         // Shaders.initBuffer(i);
                         ILOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "initBuffer", "(I)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "initBuffer", "(I)V"))
                     );
                 }
             });
@@ -1040,7 +1038,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "clearBuffer", "()V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "clearBuffer", "()V"))
                     );
                 }
             });
@@ -1092,7 +1090,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "drawGLArrays", "(III)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "drawGLArrays", "(III)V"))
                     );
                 }
             });
@@ -1120,7 +1118,7 @@ public class GLSLShader extends Mod {
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "addVertex", "(LTessellator;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "addVertex", "(LTessellator;)V"))
                     );
                 }
             });
@@ -1128,7 +1126,7 @@ public class GLSLShader extends Mod {
     }
 
     private class RenderBlocksMod extends ClassMod {
-        public RenderBlocksMod() {
+        RenderBlocksMod() {
             classSignatures.add(new ConstSignature(0.1875D));
             classSignatures.add(new ConstSignature(0.01D));
 
@@ -1187,7 +1185,7 @@ public class GLSLShader extends Mod {
     }
 
     private class EntityPlayerMod extends ClassMod {
-        public EntityPlayerMod() {
+        EntityPlayerMod() {
             classSignatures.add(new ConstSignature("humanoid"));
             classSignatures.add(new ConstSignature("/mob/char.png"));
 
@@ -1196,7 +1194,7 @@ public class GLSLShader extends Mod {
     }
 
     private class EntityPlayerSPMod extends ClassMod {
-        public EntityPlayerSPMod() {
+        EntityPlayerSPMod() {
             parentClass = "EntityPlayer";
 
             classSignatures.add(new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"));
@@ -1205,7 +1203,7 @@ public class GLSLShader extends Mod {
     }
 
     private class InventoryPlayerMod extends ClassMod {
-        public InventoryPlayerMod() {
+        InventoryPlayerMod() {
             classSignatures.add(new ConstSignature("Inventory"));
             classSignatures.add(new ConstSignature("Slot"));
 
@@ -1214,7 +1212,7 @@ public class GLSLShader extends Mod {
     }
 
     private class ItemStackMod extends ClassMod {
-        public ItemStackMod() {
+        ItemStackMod() {
             classSignatures.add(new ConstSignature("id"));
             classSignatures.add(new ConstSignature("Count"));
             classSignatures.add(new ConstSignature("Damage"));
@@ -1230,7 +1228,7 @@ public class GLSLShader extends Mod {
     }
 
     private class WorldMod extends ClassMod {
-        public WorldMod() {
+        WorldMod() {
             classSignatures.add(new ConstSignature("ambient.cave.cave"));
             classSignatures.add(new ConstSignature("Saving level"));
             classSignatures.add(new ConstSignature("Saving chunks"));
@@ -1274,7 +1272,7 @@ public class GLSLShader extends Mod {
     }
 
     private class WorldInfoMod extends ClassMod {
-        public WorldInfoMod() {
+        WorldInfoMod() {
             classSignatures.add(new ConstSignature("RandomSeed"));
             classSignatures.add(new ConstSignature("SpawnX"));
 
@@ -1286,7 +1284,7 @@ public class GLSLShader extends Mod {
     }
 
     private class WorldRendererMod extends ClassMod {
-        public WorldRendererMod() {
+        WorldRendererMod() {
             classSignatures.add(new ConstSignature(new MethodRef(class_GL11, "glNewList", "(II)V")));
 
             classSignatures.add(new BytecodeSignature() {
@@ -1342,7 +1340,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
                         IALOAD,
 
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setEntity", "(III)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
                     );
                 }
             });
@@ -1374,7 +1372,7 @@ public class GLSLShader extends Mod {
                         ICONST_M1,
                         ICONST_0,
                         ICONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(class_Shaders, "setEntity", "(III)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
                     );
                 }
             });

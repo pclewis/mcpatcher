@@ -13,7 +13,7 @@ class TileSizePatch extends BytecodePatch {
     protected String type;
     protected String extra = "";
 
-    public TileSizePatch(Object value, String field) {
+    TileSizePatch(Object value, String field) {
         this.value = value;
         this.field = field;
         if (field.startsWith("float_")) {
@@ -27,11 +27,11 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    public String prefix(MethodInfo methodInfo) {
+    String prefix(MethodInfo methodInfo) {
         return "";
     }
 
-    public String suffix(MethodInfo methodInfo) {
+    String suffix(MethodInfo methodInfo) {
         return "";
     }
 
@@ -58,7 +58,7 @@ class TileSizePatch extends BytecodePatch {
         );
     }
 
-    protected static class WhilePatch extends TileSizePatch {
+    static class WhilePatch extends TileSizePatch {
         public WhilePatch(Object value, String field) {
             super(value, field);
             this.extra = "while i < ";
@@ -70,7 +70,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class IfGreaterPatch extends TileSizePatch {
+    static class IfGreaterPatch extends TileSizePatch {
         public IfGreaterPatch(Object value, String field) {
             super(value, field);
             this.extra = "if i > ";
@@ -82,7 +82,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class IfLessPatch extends TileSizePatch {
+    static class IfLessPatch extends TileSizePatch {
         public IfLessPatch(Object value, String field) {
             super(value, field);
             this.extra = "if i < ";
@@ -94,7 +94,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class BitMaskPatch extends TileSizePatch {
+    static class BitMaskPatch extends TileSizePatch {
         public BitMaskPatch(Object value, String field) {
             super(value, field);
             this.extra = "& ";
@@ -106,7 +106,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class MultiplyPatch extends TileSizePatch {
+    static class MultiplyPatch extends TileSizePatch {
         public MultiplyPatch(Object value, String field) {
             super(value, field);
             this.extra = "* ";
@@ -118,7 +118,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class ModPatch extends TileSizePatch {
+    static class ModPatch extends TileSizePatch {
         public ModPatch(Object value, String field) {
             super(value, field);
             this.extra = "% ";
@@ -130,7 +130,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class DivPatch extends TileSizePatch {
+    static class DivPatch extends TileSizePatch {
         public DivPatch(Object value, String field) {
             super(value, field);
             this.extra = "/ ";
@@ -142,7 +142,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class ArraySizePatch extends TileSizePatch {
+    static class ArraySizePatch extends TileSizePatch {
         public ArraySizePatch(Object value, String field) {
             super(value, field);
             this.extra = "array size ";
@@ -154,7 +154,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class ArraySize2DPatch extends TileSizePatch {
+    static class ArraySize2DPatch extends TileSizePatch {
         private int dimension;
 
         public ArraySize2DPatch(Object value, String field, int dimension) {
@@ -174,7 +174,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class GetRGBPatch extends BytecodePatch {
+    static class GetRGBPatch extends BytecodePatch {
         @Override
         public String getDescription() {
             return "getRGB(...16,16,...16) -> getRGB(...int_size,int_size,...int_size)";
@@ -206,7 +206,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class ToolTexPatch extends BytecodePatch {
+    static class ToolTexPatch extends BytecodePatch {
         @Override
         public String getDescription() {
             return "tool tex calculation";
@@ -248,7 +248,7 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    protected static class ToolPixelTopPatch extends BytecodePatch {
+    static class ToolPixelTopPatch extends BytecodePatch {
         @Override
         public String getDescription() {
             return "tool pixel top";

@@ -26,7 +26,7 @@ public class HDFont extends Mod {
         private FieldRef charWidthf = new FieldRef("FontRenderer", "charWidthf", "[F");
         private MethodRef getStringWidth = new MethodRef("FontRenderer", "getStringWidth", "(Ljava/lang/String;)I");
 
-        public FontRendererMod() {
+        FontRendererMod() {
             classSignatures.add(new FixedBytecodeSignature(
                 ALOAD_0,
                 SIPUSH, 0x01, 0x00,
