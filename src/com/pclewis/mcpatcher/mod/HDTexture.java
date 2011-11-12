@@ -36,7 +36,7 @@ public class HDTexture extends Mod {
         classMods.add(new WatchMod());
         classMods.add(new PortalMod());
         classMods.add(new MinecraftMod());
-        classMods.add(new GLAllocationMod());
+        classMods.add(new BaseMod._GLAllocationMod());
         classMods.add(new TexturePackListMod());
         classMods.add(new BaseMod._TexturePackBaseMod());
         classMods.add(new BaseMod._TexturePackDefaultMod());
@@ -652,25 +652,6 @@ public class HDTexture extends Mod {
                     return new byte[0];
                 }
             });
-        }
-    }
-
-    public static class GLAllocationMod extends ClassMod {
-        public GLAllocationMod() {
-            classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glDeleteLists", "(II)V")));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals("(I)Ljava/nio/ByteBuffer;")) {
-                        return buildExpression(
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("java.nio.ByteBuffer", "allocateDirect", "(I)Ljava/nio/ByteBuffer;"))
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            }.setMethodName("createDirectByteBuffer"));
         }
     }
 

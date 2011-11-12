@@ -32,7 +32,7 @@ public class GLSLShader extends Mod {
 
         classMods.add(new MinecraftMod());
         classMods.add(new GLViewportMod());
-        classMods.add(new HDTexture.GLAllocationMod());
+        classMods.add(new BaseMod._GLAllocationMod());
         classMods.add(new RenderEngineMod());
         classMods.add(new RenderGlobalMod());
         classMods.add(new RenderLivingMod());
