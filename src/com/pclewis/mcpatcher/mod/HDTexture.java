@@ -53,12 +53,12 @@ public class HDTexture extends Mod {
             classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
         }
 
-        filesToAdd.add("com/pclewis/mcpatcher/mod/TileSize.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/TextureUtils.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation$Delegate.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation$Tile.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/CustomAnimation$Strip.class");
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_SIZE_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Delegate"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Tile"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Strip"));
     }
 
     private class RenderEngineMod extends ClassMod {

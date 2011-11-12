@@ -24,12 +24,9 @@ public class MCPatcherUtils {
     public static final String HD_TEXTURES = "HD Textures";
     public static final String HD_FONT = "HD Font";
     public static final String BETTER_GRASS = "Better Grass";
-    public static final String GLSL_SHADERS = "GLSL Shaders";
     public static final String RANDOM_MOBS = "Random Mobs";
+    public static final String GLSL_SHADERS = "GLSL Shaders";
 
-    /**
-     * Name of utility class always injected into output minecraft.jar
-     */
     public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
     public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
 
@@ -37,6 +34,7 @@ public class MCPatcherUtils {
     public static final String TEXTURE_UTILS_CLASS = "com.pclewis.mcpatcher.mod.TextureUtils";
     public static final String CUSTOM_ANIMATION_CLASS = "com.pclewis.mcpatcher.mod.CustomAnimation";
     public static final String RANDOM_MOBS_CLASS = "com.pclewis.mcpatcher.mod.MobRandomizer";
+    public static final String SHADERS_CLASS = "com.pclewis.mcpatcher.mod.Shaders";
 
     private MCPatcherUtils() {
     }

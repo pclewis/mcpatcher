@@ -57,11 +57,11 @@ public class GLSLShader extends Mod {
         classMods.add(new WorldInfoMod());
         classMods.add(new WorldRendererMod());
 
-        filesToAdd.add("com/pclewis/mcpatcher/mod/Shaders.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/Shaders$1.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/Shaders$2.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/Shaders$LightSource.class");
-        filesToAdd.add("com/pclewis/mcpatcher/mod/Shaders$Option.class");
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS + "$1"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS + "$2"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS + "$LightSource"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS + "$Option"));
     }
 
     private class MinecraftMod extends ClassMod {
