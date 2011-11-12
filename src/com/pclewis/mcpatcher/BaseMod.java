@@ -25,7 +25,7 @@ public final class BaseMod extends Mod {
         version = "1.0";
         configPanel = new ConfigPanel();
 
-        classMods.add(new MinecraftMod());
+        classMods.add(new XMinecraftMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CONFIG_CLASS));
@@ -69,10 +69,8 @@ public final class BaseMod extends Mod {
         }
     }
 
-    private class MinecraftMod extends _MinecraftMod {
-        MinecraftMod() {
-            memberMappers.clear();
-
+    private class XMinecraftMod extends MinecraftMod {
+        XMinecraftMod() {
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -104,38 +102,53 @@ public final class BaseMod extends Mod {
                 }
             });
         }
+
+        @Override
+        public String getDeobfClass() {
+            return "Minecraft";
+        }
     }
 
     /**
      * Matches Minecraft class and maps the texturePackList field.
      *
-     * Including _MinecraftMod, _TexturePackListMod, and _TexturePackBaseMod will allow you to
-     * detect when a different texture pack has been selected:
-     * <code>
+     * Including
+     * <pre>
+     *     classMods.add(new BaseMod.MinecraftMod().mapTexturePackList();
+     *     classMods.add(new BaseMod.TexturePackListMod());
+     *     classMods.add(new BaseMod.TexturePackBaseMod());
+     * </pre>
+     * will allow you to detect when a different texture pack has been selected:
+     * <pre>
      *     private TexturePackBase lastTexturePack;
      *     ...
-     *     TexturePackBase currentTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
-     *     if (currentTexturePack == lastTexturePack) {
-     *         // texture pack has not changed
-     *     } else {
-     *         // texture pack has changed
-     *         lastTexturePack = currentTexturePack;
+     *     {
+     *         TexturePackBase currentTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
+     *         if (currentTexturePack == lastTexturePack) {
+     *             // texture pack has not changed
+     *         } else {
+     *             // texture pack has changed
+     *             lastTexturePack = currentTexturePack;
+     *         }
      *     }
-     * </code>
+     * </pre>
      */
-    public static class _MinecraftMod extends ClassMod {
-        public _MinecraftMod() {
+    public static class MinecraftMod extends ClassMod {
+        public MinecraftMod() {
             classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
+        }
 
+        public MinecraftMod mapTexturePackList() {
             memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
+            return this;
         }
     }
 
     /**
      * Matches TexturePackList class and maps selected and default texture pack fields.
      */
-    public static class _TexturePackListMod extends ClassMod {
-        public _TexturePackListMod() {
+    public static class TexturePackListMod extends ClassMod {
+        public TexturePackListMod() {
             classSignatures.add(new ConstSignature(".zip"));
             classSignatures.add(new ConstSignature("texturepacks"));
 
@@ -148,8 +161,8 @@ public final class BaseMod extends Mod {
     /**
      * Matches TexturePackBase class and maps getInputStream method.
      */
-    public static class _TexturePackBaseMod extends ClassMod {
-        public _TexturePackBaseMod() {
+    public static class TexturePackBaseMod extends ClassMod {
+        public TexturePackBaseMod() {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
 
             classSignatures.add(new ConstSignature(getResourceAsStream));
@@ -173,8 +186,8 @@ public final class BaseMod extends Mod {
     /**
      * Matches TexturePackDefault class.
      */
-    public static class _TexturePackDefaultMod extends ClassMod {
-        public _TexturePackDefaultMod() {
+    public static class TexturePackDefaultMod extends ClassMod {
+        public TexturePackDefaultMod() {
             classSignatures.add(new ConstSignature("The default look of Minecraft"));
         }
     }
@@ -182,8 +195,8 @@ public final class BaseMod extends Mod {
     /**
      * Matches GLAllocation class and maps createDirectByteBuffer method.
      */
-    public static class _GLAllocationMod extends ClassMod {
-        public _GLAllocationMod() {
+    public static class GLAllocationMod extends ClassMod {
+        public GLAllocationMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glDeleteLists", "(II)V")));
 
             classSignatures.add(new BytecodeSignature() {

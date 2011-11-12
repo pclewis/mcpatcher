@@ -1,7 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.AccessFlag;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.MethodInfo;
@@ -36,10 +35,10 @@ public class HDTexture extends Mod {
         classMods.add(new WatchMod());
         classMods.add(new PortalMod());
         classMods.add(new MinecraftMod());
-        classMods.add(new BaseMod._GLAllocationMod());
+        classMods.add(new BaseMod.GLAllocationMod());
         classMods.add(new TexturePackListMod());
-        classMods.add(new BaseMod._TexturePackBaseMod());
-        classMods.add(new BaseMod._TexturePackDefaultMod());
+        classMods.add(new BaseMod.TexturePackBaseMod());
+        classMods.add(new BaseMod.TexturePackDefaultMod());
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
@@ -584,8 +583,9 @@ public class HDTexture extends Mod {
         }
     }
 
-    private class MinecraftMod extends BaseMod._MinecraftMod {
+    private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
+            mapTexturePackList();
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
             if (haveAlternateFont) {
@@ -652,7 +652,7 @@ public class HDTexture extends Mod {
         }
     }
 
-    private class TexturePackListMod extends BaseMod._TexturePackListMod {
+    private class TexturePackListMod extends BaseMod.TexturePackListMod {
         TexturePackListMod() {
             patches.add(new BytecodePatch() {
                 @Override

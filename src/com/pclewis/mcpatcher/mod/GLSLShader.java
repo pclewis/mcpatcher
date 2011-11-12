@@ -31,7 +31,7 @@ public class GLSLShader extends Mod {
 
         classMods.add(new MinecraftMod());
         classMods.add(new GLViewportMod());
-        classMods.add(new BaseMod._GLAllocationMod());
+        classMods.add(new BaseMod.GLAllocationMod());
         classMods.add(new RenderEngineMod());
         classMods.add(new RenderGlobalMod());
         classMods.add(new RenderLivingMod());
@@ -63,9 +63,8 @@ public class GLSLShader extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS + "$Option"));
     }
 
-    private class MinecraftMod extends BaseMod._MinecraftMod {
+    private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
-            memberMappers.clear();
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
             memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
