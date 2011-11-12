@@ -254,7 +254,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "refreshTextures", "()V"))
                     );
                 }
-            }.targetMethod(new MethodRef("RenderEngine", "refreshTextures", "()V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "refreshTextures", "()V")));
         }
     }
 
@@ -856,7 +856,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "addVideoSettings", "(Ljava/util/List;III)V"))
                     );
                 }
-            }.targetMethod(new MethodRef("GuiVideoSettings", "initGui", "()V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "initGui", "()V")));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -880,7 +880,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "actionPerformed", "(LGuiButton;)V"))
                     );
                 }
-            }.targetMethod(new MethodRef("GuiVideoSettings", "actionPerformed", "(LGuiButton;)V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "actionPerformed", "(LGuiButton;)V")));
         }
     }
 
@@ -1137,7 +1137,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setNormal", "(FFF)V"))
                     );
                 }
-            }.targetMethod(new MethodRef("RenderBlocks", methodName, "(LBlock;DDDI)V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), methodName, "(LBlock;DDDI)V")));
         }
     }
 
@@ -1326,7 +1326,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
                     );
                 }
-            }.targetMethod(new MethodRef("WorldRenderer", "updateRenderer", "()V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "updateRenderer", "()V")));
         }
     }
 }

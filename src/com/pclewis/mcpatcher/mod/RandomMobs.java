@@ -163,7 +163,7 @@ public class RandomMobs extends Mod {
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V"))
                     );
                 }
-            }.targetMethod(new MethodRef("Entity", "writeToNBT", "(LNBTTagCompound;)V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -204,7 +204,7 @@ public class RandomMobs extends Mod {
                         label("A")
                     );
                 }
-            }.targetMethod(new MethodRef("Entity", "readFromNBT", "(LNBTTagCompound;)V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V")));
         }
     }
 

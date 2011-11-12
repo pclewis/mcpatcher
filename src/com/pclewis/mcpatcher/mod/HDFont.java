@@ -22,9 +22,9 @@ public class HDFont extends Mod {
     }
 
     private class FontRendererMod extends ClassMod {
-        private FieldRef charWidth = new FieldRef("FontRenderer", "charWidth", "[I");
-        private FieldRef charWidthf = new FieldRef("FontRenderer", "charWidthf", "[F");
-        private MethodRef getStringWidth = new MethodRef("FontRenderer", "getStringWidth", "(Ljava/lang/String;)I");
+        private FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
+        private FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
+        private MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
 
         FontRendererMod() {
             classSignatures.add(new FixedBytecodeSignature(

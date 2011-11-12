@@ -647,7 +647,7 @@ public class BetterGrass extends Mod {
                         label("B")
                     );
                 }
-            }.targetMethod(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -716,7 +716,7 @@ public class BetterGrass extends Mod {
                         getCaptureGroup(4)
                     );
                 }
-            }.targetMethod(new MethodRef("RenderBlocks", "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
         }
     }
 }
