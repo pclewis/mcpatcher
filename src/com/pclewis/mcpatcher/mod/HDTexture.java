@@ -37,9 +37,9 @@ public class HDTexture extends Mod {
         classMods.add(new PortalMod());
         classMods.add(new MinecraftMod());
         classMods.add(new GLAllocationMod());
-        classMods.add(new TexturePackListMod(false));
-        classMods.add(new TexturePackBaseMod());
-        classMods.add(new TexturePackDefaultMod());
+        classMods.add(new TexturePackListMod());
+        classMods.add(new BaseMod._TexturePackBaseMod());
+        classMods.add(new BaseMod._TexturePackDefaultMod());
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
@@ -674,19 +674,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    static class TexturePackListMod extends ClassMod {
-        public TexturePackListMod(boolean mapOnly) {
-            classSignatures.add(new ConstSignature(".zip"));
-            classSignatures.add(new ConstSignature("texturepacks"));
-
-            memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
-            memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
-            memberMappers.add(new FieldMapper("minecraft", "LMinecraft;"));
-
-            if (mapOnly) {
-                return;
-            }
-
+    private class TexturePackListMod extends BaseMod._TexturePackListMod {
+        TexturePackListMod() {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -725,34 +714,6 @@ public class HDTexture extends Mod {
                     );
                 }
             });
-        }
-    }
-
-    static class TexturePackBaseMod extends ClassMod {
-        public TexturePackBaseMod() {
-            final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
-
-            classSignatures.add(new ConstSignature(getResourceAsStream));
-            classSignatures.add(new ConstSignature("pack.txt").negate(true));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        ALOAD_1,
-                        reference(methodInfo, INVOKEVIRTUAL, getResourceAsStream),
-                        ARETURN
-                    );
-                }
-            }.setMethodName("getInputStream"));
-
-            memberMappers.add(new FieldMapper("texturePackFileName", "Ljava/lang/String;"));
-        }
-    }
-
-    private static class TexturePackDefaultMod extends ClassMod {
-        public TexturePackDefaultMod() {
-            classSignatures.add(new ConstSignature("The default look of Minecraft"));
         }
     }
 

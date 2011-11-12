@@ -27,9 +27,9 @@ public class RandomMobs extends Mod {
         classMods.add(new EntityMod());
         classMods.add(new EntityLivingMod());
         classMods.add(new NBTTagCompoundMod());
-        classMods.add(new MinecraftMod());
-        classMods.add(new HDTexture.TexturePackListMod(true));
-        classMods.add(new HDTexture.TexturePackBaseMod());
+        classMods.add(new BaseMod._MinecraftMod());
+        classMods.add(new BaseMod._TexturePackListMod());
+        classMods.add(new BaseMod._TexturePackBaseMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
     }
@@ -224,14 +224,6 @@ public class RandomMobs extends Mod {
 
             memberMappers.add(new MethodMapper("getLong", "(Ljava/lang/String;)J"));
             memberMappers.add(new MethodMapper("setLong", "(Ljava/lang/String;J)V"));
-        }
-    }
-
-    private class MinecraftMod extends ClassMod {
-        MinecraftMod() {
-            classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
-
-            memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
         }
     }
 }
