@@ -27,12 +27,12 @@ class MainForm {
 
     private static final Color MOD_BUSY_COLOR = new Color(192, 192, 192);
     private static final String MOD_DESC_FORMAT1 = "<html>" +
-        "<table border=\"0\" cellspacing=\"0\" cellpadding=\"1\" style=\"padding-top: 2px; padding-bottom: 2px;\" width=\"%1$d\"><tr>" +
-        "<td align=\"left\"><font size=\"5\">%2$s</font></td>" +
-        "<td align=\"right\">%3$s</td>" +
+        "<table border=\"0\" cellspacing=\"0\" cellpadding=\"1\" style=\"padding-top: 2px; padding-bottom: 2px; font-weight: normal;\" width=\"%1$d\"><tr>" +
+        "<td align=\"left\">%2$s<font size=\"5\"><b>%3$s</b></font></td>" +
+        "<td align=\"right\"><b>%4$s</b></td>" +
         "</tr>";
     private static final String MOD_DESC_FORMAT2 =
-        "<tr><td colspan=\"2\" style=\"font-weight: normal; font-style: italic;\">%1$s%2$s</td></tr>";
+        "<tr><td colspan=\"2\"><i>%1$s</i></td></tr>";
     private static final String MOD_DESC_FORMAT3 =
         "</table>" +
         "</html>";
@@ -785,15 +785,13 @@ class MainForm {
 
             sb.append(String.format(MOD_DESC_FORMAT1,
                 Math.max(frameWidth - 75, 350),
+                (ModList.isExperimental(mod.getName()) ? "<font color=\"red\" size=\"3\">(Experimental)</font> " : ""),
                 htmlEscape(mod.getName()),
                 htmlEscape(mod.getVersion())
             ));
             if (rowSelected) {
                 rowSize = rowSizeShort;
-                sb.append(String.format(MOD_DESC_FORMAT2,
-                    (ModList.isExperimental(mod.getName()) ? "<font color=\"red\">(Experimental)</font> " : ""),
-                    htmlEscape(mod.getDescription())
-                ));
+                sb.append(String.format(MOD_DESC_FORMAT2, htmlEscape(mod.getDescription())));
             }
             sb.append(MOD_DESC_FORMAT3);
             setText(sb.toString());
