@@ -26,12 +26,14 @@ class MainForm {
     private static final int TAB_PATCH_SUMMARY = 4;
 
     private static final Color MOD_BUSY_COLOR = new Color(192, 192, 192);
-    private static final String MOD_DESC_FORMAT = "<html>" +
+    private static final String MOD_DESC_FORMAT1 = "<html>" +
         "<table border=\"0\" cellspacing=\"0\" cellpadding=\"1\" style=\"padding-top: 2px; padding-bottom: 2px;\" width=\"%1$d\"><tr>" +
         "<td align=\"left\"><font size=\"5\">%2$s</font></td>" +
         "<td align=\"right\">%3$s</td>" +
-        "</tr>" +
-        "<tr><td colspan=\"2\" style=\"font-weight: normal; font-style: italic;\">%4$s%5$s</td></tr>" +
+        "</tr>";
+    private static final String MOD_DESC_FORMAT2 =
+        "<tr><td colspan=\"2\" style=\"font-weight: normal; font-style: italic;\">%1$s%2$s</td></tr>";
+    private static final String MOD_DESC_FORMAT3 =
         "</table>" +
         "</html>";
 
@@ -225,7 +227,9 @@ class MainForm {
                 if (modTable.isEnabled()) {
                     int row = modTable.getSelectedRow();
                     int col = modTable.getSelectedColumn();
-                    Mod mod = (Mod) modTable.getModel().getValueAt(row, col);
+                    AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+                    Mod mod = (Mod) model.getValueAt(row, col);
+                    model.fireTableRowsUpdated(0, model.getRowCount());
                     if (col == 0 && mod != null && mod.okToApply()) {
                         MCPatcher.modList.selectMod(mod, !mod.isEnabled());
                         modTable.repaint();
@@ -237,7 +241,6 @@ class MainForm {
                         addModDialog.setVisible(true);
                         if (addModDialog.getMod() == extMod) {
                             modTable.addRowSelectionInterval(row, row);
-                            AbstractTableModel model = (AbstractTableModel) modTable.getModel();
                             ModTextRenderer renderer = (ModTextRenderer) modTable.getColumnModel().getColumn(1).getCellRenderer();
                             renderer.resetRowHeights();
                             model.fireTableDataChanged();
@@ -763,30 +766,43 @@ class MainForm {
     }
 
     private class ModTextRenderer extends JLabel implements TableCellRenderer {
-        private HashMap<Integer, Integer> rowSize = new HashMap<Integer, Integer>();
+        private HashMap<Integer, Integer> rowSizeFull = new HashMap<Integer, Integer>();
+        private HashMap<Integer, Integer> rowSizeShort = new HashMap<Integer, Integer>();
 
         private String htmlEscape(String s) {
             return s == null ? "" : s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
         }
 
         public void resetRowHeights() {
-            rowSize.clear();
+            rowSizeFull.clear();
+            rowSizeShort.clear();
         }
 
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             Mod mod = (Mod) value;
+            HashMap<Integer, Integer> rowSize = rowSizeFull;
+            boolean rowSelected = (row == table.getSelectedRow());
+            StringBuilder sb = new StringBuilder();
 
-            setText(String.format(MOD_DESC_FORMAT,
+            sb.append(String.format(MOD_DESC_FORMAT1,
                 Math.max(frameWidth - 75, 350),
                 htmlEscape(mod.getName()),
-                htmlEscape(mod.getVersion()),
-                (ModList.isExperimental(mod.getName()) ? "<font color=\"red\">(Experimental)</font> " : ""),
-                htmlEscape(mod.getDescription())
+                htmlEscape(mod.getVersion())
             ));
+            if (rowSelected) {
+                rowSize = rowSizeShort;
+                sb.append(String.format(MOD_DESC_FORMAT2,
+                    (ModList.isExperimental(mod.getName()) ? "<font color=\"red\">(Experimental)</font> " : ""),
+                    htmlEscape(mod.getDescription())
+                ));
+            }
+            sb.append(MOD_DESC_FORMAT3);
+            setText(sb.toString());
+
             if (!table.isEnabled() || !mod.okToApply()) {
                 setBackground(table.getBackground());
                 setForeground(MOD_BUSY_COLOR);
-            } else if (row == table.getSelectedRow()) {
+            } else if (rowSelected) {
                 setBackground(table.getSelectionBackground());
                 setForeground(table.getSelectionForeground());
             } else {
@@ -794,14 +810,20 @@ class MainForm {
                 setForeground(table.getForeground());
             }
             setEnabled(table.isEnabled() && mod.okToApply());
-            if (!rowSize.containsKey(row)) {
-                int h = (int) getPreferredSize().getHeight();
+
+            int h;
+            if (rowSize.containsKey(row)) {
+                h = rowSize.get(row);
+            } else {
+                h = (int) getPreferredSize().getHeight();
                 rowSize.put(row, h);
+            }
+            if (h != table.getRowHeight(row)) {
                 table.setRowHeight(row, h);
             }
 
             ArrayList<String> errors = mod.getErrors();
-            StringBuilder sb = new StringBuilder();
+            sb = new StringBuilder();
             if (!table.isEnabled()) {
             } else if (errors.size() == 0) {
                 String author = htmlEscape(mod.getAuthor());
