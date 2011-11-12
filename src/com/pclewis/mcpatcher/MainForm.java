@@ -229,11 +229,10 @@ class MainForm {
                     int col = modTable.getSelectedColumn();
                     AbstractTableModel model = (AbstractTableModel) modTable.getModel();
                     Mod mod = (Mod) model.getValueAt(row, col);
-                    model.fireTableRowsUpdated(0, model.getRowCount());
                     if (col == 0 && mod != null && mod.okToApply()) {
                         MCPatcher.modList.selectMod(mod, !mod.isEnabled());
-                        modTable.repaint();
                     }
+                    model.fireTableRowsUpdated(0, model.getRowCount());
                     if (e.getClickCount() == 2 && mod instanceof ExternalMod) {
                         ExternalMod extMod = (ExternalMod) mod;
                         addModDialog = new AddModDialog(extMod);
