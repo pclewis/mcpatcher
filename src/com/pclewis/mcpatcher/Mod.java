@@ -159,7 +159,13 @@ public abstract class Mod {
         return errors.size() == 0 && getErrors().size() == 0;
     }
 
-    void addError(String error) {
+    /**
+     * Add an error message for display to the user.  Any errors will cause the mod to
+     * be greyed out in the UI and the message to be displayed as part of the tooltip.
+     *
+     * @param error descriptive error message
+     */
+    protected final void addError(String error) {
         errors.add(error);
     }
 
