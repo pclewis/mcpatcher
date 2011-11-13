@@ -9,12 +9,13 @@ import java.util.regex.Pattern;
 final public class MinecraftVersion {
     public static final int ALPHA = 1;
     public static final int BETA = 2;
-    public static final int FINAL = 3;
+    public static final int RC = 3;
+    public static final int FINAL = 4;
 
     private static final int NOT_PRERELEASE = 9999;
 
     private static final Pattern pattern = Pattern.compile(
-        "Minecraft\\s+(Alpha|Beta)?\\s*v?([0-9][-_.0-9a-zA-Z]+)\\s*((?:Pre\\S*|Beta)\\s*(\\d+)?)?",
+        "Minecraft\\s+(Alpha|Beta|RC)?\\s*v?([0-9][-_.0-9a-zA-Z]*)\\s*((?:Pre\\S*|Beta)\\s*(\\d+)?)?",
         Pattern.CASE_INSENSITIVE
     );
 
@@ -29,6 +30,9 @@ final public class MinecraftVersion {
      * @return MinecraftVersion object or null
      */
     public static MinecraftVersion parseVersion(String versionString) {
+        if (versionString.startsWith("Minecraft ") && versionString.contains("RC")) {
+            System.out.printf("attempting to parse version string [%s]\n", versionString);
+        }
         Matcher matcher = pattern.matcher(versionString);
         if (matcher.find()) {
             return new MinecraftVersion(matcher);
@@ -55,6 +59,8 @@ final public class MinecraftVersion {
             versionNumbers[0] = ALPHA;
         } else if ("beta".equals(elements[0])) {
             versionNumbers[0] = BETA;
+        } else if ("rc".equals(elements[0])) {
+            versionNumbers[0] = RC;
         } else {
             versionNumbers[0] = FINAL;
         }
@@ -77,6 +83,9 @@ final public class MinecraftVersion {
                 preRelease = 1;
             }
         }
+        if (versionNumbers[0] == RC) {
+            versionString = "rc" + versionString;
+        }
         if (preRelease != NOT_PRERELEASE) {
             versionString += "pre" + preRelease;
         }
@@ -97,7 +106,7 @@ final public class MinecraftVersion {
      * @return true if prerelease
      */
     public boolean isPrerelease() {
-        return preRelease != NOT_PRERELEASE;
+        return preRelease != NOT_PRERELEASE || versionString.startsWith("rc");
     }
 
     /**
