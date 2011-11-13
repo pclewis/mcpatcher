@@ -39,6 +39,7 @@ class MinecraftJar {
             put("1.9pre6", "2468205154374afe5f9caaba2ffbf5f8");
 
             put("rc1", "22d708f84dc44fba200c2a5e4261959c");
+            put("rc2", "bd569d20dd3dd898ff4371af9bbe14e1");
         }
     };
 
@@ -320,6 +321,9 @@ class MinecraftJar {
                     entries.add(name);
                 }
                 version = extractVersion(jar);
+                if (version.toString().equals("rc1") && md5.equals("e8e264bcff34aecbc7ef7f850858c1d6")) {
+                    version = MinecraftVersion.parseVersion("Minecraft RC2 Prerelease 1");
+                }
             } catch (ZipException e) {
                 exception = e;
                 return CORRUPT_JAR;
