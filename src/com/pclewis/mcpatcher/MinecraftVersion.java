@@ -30,9 +30,6 @@ final public class MinecraftVersion {
      * @return MinecraftVersion object or null
      */
     public static MinecraftVersion parseVersion(String versionString) {
-        if (versionString.startsWith("Minecraft ") && versionString.contains("RC")) {
-            System.out.printf("attempting to parse version string [%s]\n", versionString);
-        }
         Matcher matcher = pattern.matcher(versionString);
         if (matcher.find()) {
             return new MinecraftVersion(matcher);
