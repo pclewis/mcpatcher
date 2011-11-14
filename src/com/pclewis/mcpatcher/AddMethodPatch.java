@@ -57,8 +57,6 @@ abstract public class AddMethodPatch extends ClassPatch {
         this.name = name;
         this.type = type;
         this.accessFlags = accessFlags;
-        maxStackSize = 10;
-        numLocals = 10;
     }
 
     @Override
@@ -83,8 +81,12 @@ abstract public class AddMethodPatch extends ClassPatch {
             byte[] code = generateMethod(classFile, methodInfo);
             if (code != null) {
                 classMod.resolveLabels(code, 0);
-                methodInfo.setCodeAttribute(new CodeAttribute(constPool, maxStackSize, numLocals, code, exceptionTable));
-                recordPatch(String.format("stack size %d, local vars %d", maxStackSize, numLocals));
+                CodeAttribute codeAttribute = new CodeAttribute(constPool, maxStackSize, numLocals, code, exceptionTable);
+                methodInfo.setCodeAttribute(codeAttribute);
+                int newMaxLocals = Math.max(BytecodePatch.computeMaxLocals(codeAttribute), numLocals);
+                codeAttribute.setMaxLocals(newMaxLocals);
+                int newStackSize = Math.max(codeAttribute.computeMaxStack(), maxStackSize);
+                recordPatch(String.format("stack size %d, local vars %d", newStackSize, newMaxLocals));
                 classFile.addMethod(methodInfo);
                 patched = true;
             }

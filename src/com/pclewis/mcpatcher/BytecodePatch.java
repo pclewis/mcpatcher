@@ -132,7 +132,7 @@ abstract public class BytecodePatch extends ClassPatch {
         return patched;
     }
 
-    private int computeMaxLocals(CodeAttribute ca) throws BadBytecode {
+    static int computeMaxLocals(CodeAttribute ca) throws BadBytecode {
         CodeIterator ci = ca.iterator();
         int maxLocals = 0;
         while (ci.hasNext()) {
