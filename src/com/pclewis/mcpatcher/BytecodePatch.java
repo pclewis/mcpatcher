@@ -5,6 +5,8 @@ import javassist.bytecode.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static javassist.bytecode.Opcode.*;
+
 /**
  * ClassPatch that matches a replaces and specific bytecode sequence.  The full power of Java
  * regular expressions is available.  Wildcards, capturing, and backreferences can be used via
@@ -66,6 +68,7 @@ abstract public class BytecodePatch extends ClassPatch {
         matcher = new BytecodeMatcher(getMatchExpression(mi));
         CodeIterator ci = ca.iterator();
         int oldStackSize = ca.computeMaxStack();
+        int oldMaxLocals = ca.getMaxLocals();
         int offset = 0;
         ArrayList<String> txtBefore = null;
 
@@ -113,13 +116,120 @@ abstract public class BytecodePatch extends ClassPatch {
             ci.move(offset);
         }
 
-        int newStackSize = ca.computeMaxStack();
-        if (oldStackSize < newStackSize) {
-            Logger.log(Logger.LOG_METHOD, "increasing stack size from %d to %d", oldStackSize, newStackSize);
-            ca.setMaxStack(newStackSize);
+        if (patched) {
+            int newStackSize = ca.computeMaxStack();
+            if (oldStackSize < newStackSize) {
+                Logger.log(Logger.LOG_METHOD, "increasing stack size from %d to %d", oldStackSize, newStackSize);
+                ca.setMaxStack(newStackSize);
+            }
+            int newMaxLocals = computeMaxLocals(ca);
+            if (oldMaxLocals < newMaxLocals) {
+                Logger.log(Logger.LOG_METHOD, "increasing max locals from %d to %d", oldMaxLocals, newMaxLocals);
+                ca.setMaxLocals(newMaxLocals);
+            }
         }
 
         return patched;
+    }
+
+    private int computeMaxLocals(CodeAttribute ca) throws BadBytecode {
+        CodeIterator ci = ca.iterator();
+        int maxLocals = 0;
+        while (ci.hasNext()) {
+            int offset = ci.next();
+            int local;
+            switch (ci.byteAt(offset)) {
+                case ALOAD_0:
+                case ILOAD_0:
+                case LLOAD_0:
+                case FLOAD_0:
+                case DLOAD_0:
+                case ASTORE_0:
+                case ISTORE_0:
+                case LSTORE_0:
+                case FSTORE_0:
+                case DSTORE_0:
+                    local = 0;
+                    break;
+
+                case ALOAD_1:
+                case ILOAD_1:
+                case LLOAD_1:
+                case FLOAD_1:
+                case DLOAD_1:
+                case ASTORE_1:
+                case ISTORE_1:
+                case LSTORE_1:
+                case FSTORE_1:
+                case DSTORE_1:
+                    local = 1;
+                    break;
+
+                case ALOAD_2:
+                case ILOAD_2:
+                case LLOAD_2:
+                case FLOAD_2:
+                case DLOAD_2:
+                case ASTORE_2:
+                case ISTORE_2:
+                case LSTORE_2:
+                case FSTORE_2:
+                case DSTORE_2:
+                    local = 2;
+                    break;
+
+                case ALOAD_3:
+                case ILOAD_3:
+                case LLOAD_3:
+                case FLOAD_3:
+                case DLOAD_3:
+                case ASTORE_3:
+                case ISTORE_3:
+                case LSTORE_3:
+                case FSTORE_3:
+                case DSTORE_3:
+                    local = 3;
+                    break;
+
+                case ALOAD:
+                case ILOAD:
+                case LLOAD:
+                case FLOAD:
+                case DLOAD:
+                case ASTORE:
+                case ISTORE:
+                case LSTORE:
+                case FSTORE:
+                case DSTORE:
+                    local = ci.byteAt(offset + 1) & 0xff;
+                    break;
+
+                case WIDE:
+                    switch (ci.byteAt(++offset)) {
+                        case ALOAD:
+                        case ILOAD:
+                        case LLOAD:
+                        case FLOAD:
+                        case DLOAD:
+                        case ASTORE:
+                        case ISTORE:
+                        case LSTORE:
+                        case FSTORE:
+                        case DSTORE:
+                            local = Util.demarshal(new byte[]{(byte) ci.byteAt(offset + 1), (byte) ci.byteAt(offset + 2)});
+                            break;
+
+                        default:
+                            continue;
+                    }
+                    break;
+
+                default:
+                    continue;
+            }
+            maxLocals = Math.max(maxLocals, local + 1);
+        }
+        return maxLocals;
     }
 
     @Override
