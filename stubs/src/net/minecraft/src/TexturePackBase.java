@@ -2,8 +2,16 @@ package net.minecraft.src;
 
 import java.io.InputStream;
 
-abstract public class TexturePackBase {
+public class TexturePackBase {
     public String texturePackFileName;
 
-    abstract public InputStream getInputStream(String s);
+    public void openTexturePackFile() {
+    }
+
+    public void closeTexturePackFile() {
+    }
+
+    public InputStream getInputStream(String s) {
+        return null;
+    }
 }

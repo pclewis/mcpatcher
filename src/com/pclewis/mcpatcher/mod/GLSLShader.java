@@ -1185,12 +1185,8 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class WorldMod extends ClassMod {
+    private class WorldMod extends BaseMod.WorldMod {
         WorldMod() {
-            classSignatures.add(new ConstSignature("ambient.cave.cave"));
-            classSignatures.add(new ConstSignature("Saving level"));
-            classSignatures.add(new ConstSignature("Saving chunks"));
-
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {

@@ -213,4 +213,15 @@ public final class BaseMod extends Mod {
             }.setMethodName("createDirectByteBuffer"));
         }
     }
+
+    /**
+     * Matches World class.
+     */
+    public static class WorldMod extends ClassMod {
+        public WorldMod() {
+            classSignatures.add(new ConstSignature("ambient.cave.cave"));
+            classSignatures.add(new ConstSignature("Saving level"));
+            classSignatures.add(new ConstSignature("Saving chunks"));
+        }
+    }
 }

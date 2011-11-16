@@ -7,14 +7,14 @@ import net.minecraft.src.*;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 public class TextureUtils {
     private static boolean animatedFire;
@@ -39,8 +39,11 @@ public class TextureUtils {
 
     private static boolean useTextureCache;
     private static boolean reclaimGLMemory;
+    private static boolean autoRefreshTextures;
     private static TexturePackBase lastTexturePack = null;
     private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
+
+    private static int textureRefreshCount;
 
     static {
         animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
@@ -55,6 +58,7 @@ public class TextureUtils {
 
         useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", false);
         reclaimGLMemory = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false);
+        autoRefreshTextures = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "autoRefreshTextures", false);
 
         expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);
@@ -418,5 +422,98 @@ public class TextureUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void openTexturePackFile(TexturePackCustom pack) {
+        if (!autoRefreshTextures || pack.zipFile == null) {
+            return;
+        }
+        InputStream input = null;
+        OutputStream output = null;
+        ZipFile newZipFile = null;
+        try {
+            pack.lastModified = pack.file.lastModified();
+            pack.tmpFile = File.createTempFile("tmpmc", ".zip");
+            pack.tmpFile.deleteOnExit();
+            MCPatcherUtils.close(pack.zipFile);
+            input = new FileInputStream(pack.file);
+            output = new FileOutputStream(pack.tmpFile);
+            byte[] buffer = new byte[65536];
+            while (true) {
+                int nread = input.read(buffer);
+                if (nread <= 0) {
+                    break;
+                }
+                output.write(buffer, 0, nread);
+            }
+            MCPatcherUtils.close(input);
+            MCPatcherUtils.close(output);
+            newZipFile = new ZipFile(pack.tmpFile);
+            pack.origZip = pack.zipFile;
+            pack.zipFile = newZipFile;
+            newZipFile = null;
+            MCPatcherUtils.log("copied %s to %s, lastModified = %d", pack.file.getPath(), pack.tmpFile.getPath(), pack.lastModified);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            MCPatcherUtils.close(input);
+            MCPatcherUtils.close(output);
+            MCPatcherUtils.close(newZipFile);
+        }
+    }
+
+    public static void closeTexturePackFile(TexturePackCustom pack) {
+        if (pack.origZip != null) {
+            MCPatcherUtils.close(pack.zipFile);
+            pack.zipFile = pack.origZip;
+            pack.origZip = null;
+            pack.tmpFile.delete();
+            MCPatcherUtils.log("deleted %s", pack.tmpFile.getPath());
+            pack.tmpFile = null;
+        }
+    }
+
+    public static void checkTexturePackChange(Minecraft minecraft) {
+        if (!autoRefreshTextures || ++textureRefreshCount < 16) {
+            return;
+        }
+        textureRefreshCount = 0;
+        TexturePackList list = minecraft.texturePackList;
+        if (!(list.selectedTexturePack instanceof TexturePackCustom)) {
+            return;
+        }
+        TexturePackCustom pack = (TexturePackCustom) list.selectedTexturePack;
+        long lastModified = pack.file.lastModified();
+        if (lastModified == pack.lastModified || lastModified == 0 || pack.lastModified == 0) {
+            return;
+        }
+        MCPatcherUtils.log("%s lastModified changed from %d to %d", pack.file.getPath(), pack.lastModified, lastModified);
+        ZipFile zipFile = null;
+        try {
+            zipFile = new ZipFile(pack.file);
+        } catch (IOException e) {
+            // file is still being written
+            return;
+        } finally {
+            MCPatcherUtils.close(zipFile);
+        }
+        pack.closeTexturePackFile();
+        list.updateAvailableTexturePacks();
+        for (TexturePackBase tp : list.availableTexturePacks()) {
+            if (!(tp instanceof TexturePackCustom)) {
+                continue;
+            }
+            TexturePackCustom tpc = (TexturePackCustom) tp;
+            if (tpc.file.equals(pack.file)) {
+                MCPatcherUtils.log("setting new texture pack");
+                list.selectedTexturePack = list.defaultTexturePack;
+                list.setTexturePack(tpc);
+                minecraft.renderEngine.setTileSize(minecraft);
+                return;
+            }
+        }
+        MCPatcherUtils.log("selected texture pack not found after refresh, switching to default");
+        list.setTexturePack(list.defaultTexturePack);
+        minecraft.renderEngine.setTileSize(minecraft);
     }
 }

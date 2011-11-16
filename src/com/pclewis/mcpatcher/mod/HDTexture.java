@@ -37,7 +37,8 @@ public class HDTexture extends Mod {
         classMods.add(new MinecraftMod());
         classMods.add(new BaseMod.GLAllocationMod());
         classMods.add(new TexturePackListMod());
-        classMods.add(new BaseMod.TexturePackBaseMod());
+        classMods.add(new TexturePackBaseMod());
+        classMods.add(new TexturePackCustomMod());
         classMods.add(new BaseMod.TexturePackDefaultMod());
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
@@ -575,6 +576,16 @@ public class HDTexture extends Mod {
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
             mapTexturePackList();
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, "/terrain.png")
+                    );
+                }
+            }.setMethodName("runTick"));
+
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
             if (haveAlternateFont) {
@@ -638,11 +649,39 @@ public class HDTexture extends Mod {
                     return new byte[0];
                 }
             });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "check for texture pack change on each tick";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "checkTexturePackChange", "(LMinecraft;)V"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "runTick", "()V")));
         }
     }
 
     private class TexturePackListMod extends BaseMod.TexturePackListMod {
         TexturePackListMod() {
+            memberMappers.add(new MethodMapper("updateAvailableTexturePacks", "()V"));
+            memberMappers.add(new MethodMapper("setTexturePack", "(LTexturePackBase;)Z"));
+            memberMappers.add(new MethodMapper("availableTexturePacks", "()Ljava/util/List;"));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;")));
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -681,6 +720,76 @@ public class HDTexture extends Mod {
                     );
                 }
             });
+        }
+    }
+
+    private class TexturePackBaseMod extends BaseMod.TexturePackBaseMod {
+        TexturePackBaseMod() {
+            memberMappers.add(new MethodMapper(new String[]{null, "openTexturePackFile", "closeTexturePackFile"}, "()V"));
+        }
+    }
+
+    private class TexturePackCustomMod extends ClassMod {
+        TexturePackCustomMod() {
+            parentClass = "TexturePackBase";
+
+            classSignatures.add(new ConstSignature("pack.txt"));
+            classSignatures.add(new ConstSignature("pack.png"));
+
+            memberMappers.add(new FieldMapper("zipFile", "Ljava/util/zip/ZipFile;"));
+            memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "zipFile", "Ljava/util/zip/ZipFile;")));
+            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
+
+            patches.add(new AddFieldPatch("origZip", "Ljava/util/zip/ZipFile;"));
+            patches.add(new AddFieldPatch("tmpFile", "Ljava/io/File;"));
+            patches.add(new AddFieldPatch("lastModified", "J"));
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "openTexturePackFile(this)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        RETURN,
+                        BinaryRegex.end()
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "openTexturePackFile", "(LTexturePackCustom;)V"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "openTexturePackFile", "()V")));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "closeTexturePackFile(this)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "closeTexturePackFile", "(LTexturePackCustom;)V"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "closeTexturePackFile", "()V")));
         }
     }
 
