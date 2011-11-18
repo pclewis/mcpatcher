@@ -1,4 +1,4 @@
-MCVER = 1.8.1
+MCVER = 1.0.0
 MCJAR = ../bin/minecraft.jar
 MCJARV = ../bin/minecraft-$(MCVER).jar
 MODJAR = ../mcpatcher-mods/mcpatcher-builtin.jar
