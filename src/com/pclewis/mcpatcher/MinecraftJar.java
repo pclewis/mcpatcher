@@ -121,7 +121,7 @@ class MinecraftJar {
                         File newModDir = MCPatcherUtils.getMinecraftPath("mods", newVersion);
                         if (oldModDir.isDirectory() && !newModDir.exists()) {
                             oldModDir.renameTo(newModDir);
-                            config.rewriteModPaths(profile, oldModDir, newModDir);
+                            config.rewriteModPaths(oldModDir, newModDir);
                         }
                     }
                 }

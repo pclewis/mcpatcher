@@ -312,13 +312,27 @@ class Config {
         }
     }
 
+    void rewriteModPaths(File oldDir, File newDir) {
+        NodeList profiles = getRoot().getElementsByTagName(TAG_MODS);
+        for (int i = 0; i < profiles.getLength(); i++) {
+            Element profile = (Element) profiles.item(i);
+            rewriteModPaths(profile, oldDir, newDir);
+        }
+    }
+
     void rewriteModPaths(Element profile, File oldDir, File newDir) {
         NodeList mods = profile.getElementsByTagName(TAG_MOD);
         for (int i = 0; i < mods.getLength(); i++) {
             Element mod = (Element) mods.item(i);
-            File oldPath = new File(getText(mod, TAG_PATH));
-            if (oldDir.equals(oldPath.getParentFile())) {
-                setText(mod, TAG_PATH, new File(newDir, oldPath.getName()).getPath());
+            String type = getText(mod, TAG_TYPE);
+            if (VAL_EXTERNAL_ZIP.equals(type)) {
+                String currentPath = getText(mod, TAG_PATH);
+                if (currentPath != null && !currentPath.equals("")) {
+                    File currentFile = new File(currentPath);
+                    if (oldDir.equals(currentFile.getParentFile())) {
+                        setText(mod, TAG_PATH, new File(newDir, currentFile.getName()).getPath());
+                    }
+                }
             }
         }
     }
