@@ -293,10 +293,15 @@ abstract public class BytecodePatch extends ClassPatch {
     abstract public static class InsertAfter extends BytecodePatch {
         @Override
         final public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-            return buildCode(
-                matcher.getMatch(),
-                getInsertBytes(methodInfo)
-            );
+            byte[] insertBytes = getInsertBytes(methodInfo);
+            if (insertBytes == null) {
+                return null;
+            } else {
+                return buildCode(
+                    matcher.getMatch(),
+                    insertBytes
+                );
+            }
         }
 
         abstract public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException;
@@ -308,10 +313,15 @@ abstract public class BytecodePatch extends ClassPatch {
     abstract public static class InsertBefore extends BytecodePatch {
         @Override
         final public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-            return buildCode(
-                getInsertBytes(methodInfo),
-                matcher.getMatch()
-            );
+            byte[] insertBytes = getInsertBytes(methodInfo);
+            if (insertBytes == null) {
+                return null;
+            } else {
+                return buildCode(
+                    insertBytes,
+                    matcher.getMatch()
+                );
+            }
         }
 
         abstract public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException;
