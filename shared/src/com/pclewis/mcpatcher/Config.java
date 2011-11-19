@@ -301,6 +301,28 @@ class Config {
         getMods();
     }
 
+    void renameProfile(String oldName, String newName) {
+        Element profile = findProfileByName(oldName, false);
+        if (profile != null) {
+            profile.setAttribute(ATTR_PROFILE, newName);
+            String selectedProfile = getConfigValue(TAG_SELECTED_PROFILE);
+            if (oldName.equals(selectedProfile)) {
+                setConfigValue(TAG_SELECTED_PROFILE, newName);
+            }
+        }
+    }
+
+    void rewriteModPaths(Element profile, File oldDir, File newDir) {
+        NodeList mods = profile.getElementsByTagName(TAG_MOD);
+        for (int i = 0; i < mods.getLength(); i++) {
+            Element mod = (Element) mods.item(i);
+            File oldPath = new File(getText(mod, TAG_PATH));
+            if (oldDir.equals(oldPath.getParentFile())) {
+                setText(mod, TAG_PATH, new File(newDir, oldPath.getName()).getPath());
+            }
+        }
+    }
+
     ArrayList<String> getProfiles() {
         ArrayList<String> profiles = new ArrayList<String>();
         Element root = getRoot();

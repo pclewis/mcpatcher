@@ -95,7 +95,7 @@ public final class BaseMod extends Mod {
                     return buildCode(
                         ALOAD_0,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "setMinecraft", "(LMinecraft;)V")),
-                        push(methodInfo, MCPatcher.minecraft.getVersion().toString()),
+                        push(methodInfo, MCPatcher.minecraft.getVersion().getVersionString()),
                         push(methodInfo, MCPatcher.VERSION_STRING),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "setVersions", "(Ljava/lang/String;Ljava/lang/String;)V"))
                     );

@@ -2,6 +2,7 @@ package com.pclewis.mcpatcher;
 
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
+import org.w3c.dom.Element;
 
 import java.io.*;
 import java.util.Collections;
@@ -23,20 +24,20 @@ class MinecraftJar {
 
     private static HashMap<String, String> knownMD5s = new HashMap<String, String>() {
         {
-            put("1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
+            put("beta-1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
 
-            put("1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
+            put("beta-1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
 
-            put("1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
-            put("1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
-            put("1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
+            put("beta-1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
+            put("beta-1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
+            put("beta-1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
 
-            put("1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
-            put("1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
-            put("1.9pre3", "334827dbe9183af6d650b39321a99e21");
-            put("1.9pre4", "cae41f3746d3c4c440b2d63a403770e7");
-            put("1.9pre5", "6258c4f293b939117efe640eda76dca4");
-            put("1.9pre6", "2468205154374afe5f9caaba2ffbf5f8");
+            put("beta-1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
+            put("beta-1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
+            put("beta-1.9pre3", "334827dbe9183af6d650b39321a99e21");
+            put("beta-1.9pre4", "cae41f3746d3c4c440b2d63a403770e7");
+            put("beta-1.9pre5", "6258c4f293b939117efe640eda76dca4");
+            put("beta-1.9pre6", "2468205154374afe5f9caaba2ffbf5f8");
 
             put("rc1", "22d708f84dc44fba200c2a5e4261959c");
             put("rc2pre1", "e8e264bcff34aecbc7ef7f850858c1d6");
@@ -51,7 +52,7 @@ class MinecraftJar {
         }
 
         if (file.getName().equals("minecraft.jar")) {
-            origFile = new File(file.getParent(), "minecraft-" + info.version.toString() + ".jar");
+            origFile = new File(file.getParent(), "minecraft-" + info.version.getVersionString() + ".jar");
             outputFile = file;
             Info origInfo = new Info(origFile);
             if (origInfo.result == Info.MODDED_JAR && info.result == Info.UNMODDED_JAR) {
@@ -96,17 +97,32 @@ class MinecraftJar {
         File binDir = MCPatcherUtils.getMinecraftPath("bin");
         for (String filename : binDir.list(new FilenameFilter() {
             public boolean accept(File dir, String name) {
-                return name.matches("^minecraft-[0-9][-_.0-9a-zA-Z]+(pre\\d+)?\\.jar$");
+                return name.matches("^minecraft-(rc)?[0-9][-_.0-9a-zA-Z]+(pre\\d+)?\\.jar$");
             }
         })) {
             try {
                 File oldFile = new File(binDir, filename);
                 MinecraftVersion version = Info.extractVersion(oldFile);
                 if (version != null) {
-                    File newFile = new File(binDir, "minecraft-" + version.toString() + ".jar");
+                    String newVersion = version.getVersionString();
+                    File newFile = new File(binDir, "minecraft-" + newVersion + ".jar");
                     if (!newFile.exists()) {
                         Logger.log(Logger.LOG_JAR, "Renaming %s to %s", oldFile.getName(), newFile.getName());
                         oldFile.renameTo(newFile);
+                        String oldVersion = version.getOldVersionString();
+                        Config config = MCPatcherUtils.config;
+                        String oldProfile = "Minecraft " + oldVersion;
+                        Element profile = config.findProfileByName(oldProfile, false);
+                        if (profile != null) {
+                            String newProfile = "Minecraft " + version.getProfileString();
+                            config.renameProfile(oldProfile, newProfile);
+                        }
+                        File oldModDir = MCPatcherUtils.getMinecraftPath("mods", oldVersion);
+                        File newModDir = MCPatcherUtils.getMinecraftPath("mods", newVersion);
+                        if (oldModDir.isDirectory() && !newModDir.exists()) {
+                            oldModDir.renameTo(newModDir);
+                            config.rewriteModPaths(profile, oldModDir, newModDir);
+                        }
                     }
                 }
             } catch (Throwable e) {
@@ -322,7 +338,7 @@ class MinecraftJar {
                     entries.add(name);
                 }
                 version = extractVersion(jar);
-                if (version.toString().equals("rc1") && md5.equals("e8e264bcff34aecbc7ef7f850858c1d6")) {
+                if (version.getVersionString().equals("rc1") && md5.equals("e8e264bcff34aecbc7ef7f850858c1d6")) {
                     version = MinecraftVersion.parseVersion("Minecraft RC2 Prerelease 1");
                 }
             } catch (ZipException e) {
@@ -397,7 +413,7 @@ class MinecraftJar {
         }
 
         private static String getOrigMD5(File binDir, MinecraftVersion version) {
-            String md5 = knownMD5s.get(version.toString());
+            String md5 = knownMD5s.get(version.getVersionString());
             if (md5 != null) {
                 return md5;
             }

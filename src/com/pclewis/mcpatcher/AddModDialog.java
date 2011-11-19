@@ -149,7 +149,7 @@ public class AddModDialog extends JDialog {
         try {
             String modDirString = MCPatcherUtils.getString(Config.TAG_LAST_MOD_DIRECTORY, "");
             File lastModDir = new File(modDirString);
-            String version = MCPatcher.minecraft.getVersion().toString();
+            String version = MCPatcher.minecraft.getVersion().getVersionString();
             defaultModDir = MCPatcherUtils.getMinecraftPath("mods", version);
             if (modDirString.equals("")) {
                 defaultModDir.mkdirs();

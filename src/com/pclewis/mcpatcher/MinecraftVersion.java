@@ -19,8 +19,10 @@ final public class MinecraftVersion {
         Pattern.CASE_INSENSITIVE
     );
 
+    private String versionNumberOnly;
     private String versionString;
-    private int[] versionNumbers;
+    private String profileString;
+    private int[] parsedVersion;
     private int preRelease;
 
     /**
@@ -49,22 +51,22 @@ final public class MinecraftVersion {
             }
         }
         elements[0] = elements[0].toLowerCase();
-        versionString = elements[1];
-        String[] tokens = versionString.split("[^0-9a-zA-Z]+");
-        versionNumbers = new int[tokens.length + 1];
+        versionNumberOnly = elements[1];
+        String[] tokens = versionNumberOnly.split("[^0-9a-zA-Z]+");
+        parsedVersion = new int[tokens.length + 1];
         if ("alpha".equals(elements[0])) {
-            versionNumbers[0] = ALPHA;
+            parsedVersion[0] = ALPHA;
         } else if ("beta".equals(elements[0])) {
-            versionNumbers[0] = BETA;
+            parsedVersion[0] = BETA;
         } else if ("rc".equals(elements[0])) {
-            versionNumbers[0] = RC;
+            parsedVersion[0] = RC;
         } else {
-            versionNumbers[0] = FINAL;
+            parsedVersion[0] = FINAL;
         }
         int i;
         for (i = 0; i < tokens.length; i++) {
             try {
-                versionNumbers[i + 1] = Integer.parseInt(tokens[i]);
+                parsedVersion[i + 1] = Integer.parseInt(tokens[i]);
             } catch (NumberFormatException e) {
             }
         }
@@ -80,12 +82,31 @@ final public class MinecraftVersion {
                 preRelease = 1;
             }
         }
-        if (versionNumbers[0] == RC) {
-            versionString = "rc" + versionString;
-        }
         if (preRelease != NOT_PRERELEASE) {
-            versionString += "pre" + preRelease;
+            versionNumberOnly += "pre" + preRelease;
         }
+        switch (parsedVersion[0]) {
+            case ALPHA:
+                versionString = "alpha-";
+                profileString = "Alpha ";
+                break;
+
+            case BETA:
+                versionString = "beta-";
+                profileString = "Beta ";
+                break;
+
+            case RC:
+                versionString = "rc";
+                profileString = "RC";
+                break;
+
+            default:
+                versionString = "";
+                profileString = "";
+        }
+        versionString += versionNumberOnly;
+        profileString += versionNumberOnly;
     }
 
     /**
@@ -94,7 +115,7 @@ final public class MinecraftVersion {
      * @return ALPHA, BETA, or FINAL
      */
     public int getReleaseType() {
-        return versionNumbers[0];
+        return parsedVersion[0];
     }
 
     /**
@@ -107,12 +128,32 @@ final public class MinecraftVersion {
     }
 
     /**
-     * Get version as a string, e.g, 1.8.1 or 1.9pre1
+     * Gets version as a string, e.g., beta-1.8.1 or 1.0.0.
      *
      * @return version string
      */
-    public String toString() {
+    public String getVersionString() {
         return versionString;
+    }
+
+    /**
+     * Gets default profile name associated with this version, e.g., Beta 1.8.1 or 1.0.0.
+     *
+     * @return profile name
+     */
+    public String getProfileString() {
+        return profileString;
+    }
+
+    String getOldVersionString() {
+        return versionNumberOnly;
+    }
+
+    /**
+     * @see #getVersionString()
+     */
+    public String toString() {
+        return getVersionString();
     }
 
     /**
@@ -122,8 +163,8 @@ final public class MinecraftVersion {
      * @return 0, &lt; 0, or &gt; 0
      */
     public int compareTo(MinecraftVersion that) {
-        int[] a = this.versionNumbers;
-        int[] b = that.versionNumbers;
+        int[] a = this.parsedVersion;
+        int[] b = that.parsedVersion;
         int i;
         for (i = 0; i < a.length && i < b.length; i++) {
             if (a[i] != b[i]) {

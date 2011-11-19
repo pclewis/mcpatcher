@@ -205,9 +205,10 @@ class MainMenu {
                         MCPatcherUtils.config.selectProfile(profile);
                         boolean modsOk = false;
                         if (Config.isDefaultProfile(profile)) {
-                            String version = profile.split("\\s+")[1];
-                            if (!version.equals(MCPatcher.minecraft.getVersion().toString())) {
-                                File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + version + ".jar");
+                            String version = profile.replaceFirst("^Minecraft\\s+", "");
+                            if (!version.equals(MCPatcher.minecraft.getVersion().getProfileString())) {
+                                String s = version.toLowerCase().replaceFirst("\\s+", "-");
+                                File jar = MCPatcherUtils.getMinecraftPath("bin", "minecraft-" + s + ".jar");
                                 if (jar.exists()) {
                                     try {
                                         modsOk = MCPatcher.setMinecraft(jar, false);
