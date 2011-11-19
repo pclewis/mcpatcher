@@ -87,26 +87,23 @@ final public class MinecraftVersion {
         }
         switch (parsedVersion[0]) {
             case ALPHA:
-                versionString = "alpha-";
                 profileString = "Alpha ";
                 break;
 
             case BETA:
-                versionString = "beta-";
                 profileString = "Beta ";
                 break;
 
             case RC:
-                versionString = "rc";
                 profileString = "RC";
                 break;
 
             default:
-                versionString = "";
                 profileString = "";
+                break;
         }
-        versionString += versionNumberOnly;
         profileString += versionNumberOnly;
+        versionString = profileStringToVersionString(profileString);
     }
 
     /**
@@ -147,6 +144,13 @@ final public class MinecraftVersion {
 
     String getOldVersionString() {
         return versionNumberOnly;
+    }
+
+    static String profileStringToVersionString(String profileString) {
+        return profileString
+            .replaceFirst("^Alpha ", "alpha-")
+            .replaceFirst("^Beta ", "beta-")
+            .replaceFirst("^RC ", "rc");
     }
 
     /**
