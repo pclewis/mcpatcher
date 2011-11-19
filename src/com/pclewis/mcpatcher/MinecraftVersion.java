@@ -104,6 +104,9 @@ final public class MinecraftVersion {
         }
         profileString += versionNumberOnly;
         versionString = profileStringToVersionString(profileString);
+        if (parsedVersion[0] == RC) {
+            versionNumberOnly = versionString;
+        }
     }
 
     /**
@@ -121,7 +124,7 @@ final public class MinecraftVersion {
      * @return true if prerelease
      */
     public boolean isPrerelease() {
-        return preRelease != NOT_PRERELEASE || versionString.startsWith("rc");
+        return preRelease != NOT_PRERELEASE || parsedVersion[0] == RC;
     }
 
     /**
@@ -151,6 +154,13 @@ final public class MinecraftVersion {
             .replaceFirst("^Alpha ", "alpha-")
             .replaceFirst("^Beta ", "beta-")
             .replaceFirst("^RC", "rc");
+    }
+
+    static String versionStringToProfileString(String versionString) {
+        return versionString
+            .replaceFirst("^alpha-", "Alpha ")
+            .replaceFirst("^beta-", "Beta ")
+            .replaceFirst("^rc", "RC");
     }
 
     /**

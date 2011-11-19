@@ -97,26 +97,29 @@ class MinecraftJar {
         File binDir = MCPatcherUtils.getMinecraftPath("bin");
         for (String filename : binDir.list(new FilenameFilter() {
             public boolean accept(File dir, String name) {
-                return name.matches("^minecraft-(rc)?[0-9][-_.0-9a-zA-Z]+(pre\\d+)?\\.jar$");
+                return name.matches("^minecraft-(rc)?[0-9][-_.0-9a-zA-Z]*(pre\\d+)?\\.jar$");
             }
         })) {
             try {
                 File oldFile = new File(binDir, filename);
                 MinecraftVersion version = Info.extractVersion(oldFile);
                 if (version != null) {
+                    String oldVersion = version.getOldVersionString();
                     String newVersion = version.getVersionString();
                     File newFile = new File(binDir, "minecraft-" + newVersion + ".jar");
+                    boolean renameProfile = false;
                     if (!newFile.exists()) {
                         Logger.log(Logger.LOG_JAR, "Renaming %s to %s", oldFile.getName(), newFile.getName());
                         oldFile.renameTo(newFile);
-                        String oldVersion = version.getOldVersionString();
+                        renameProfile = true;
+                    } else if (oldVersion.startsWith("rc")) {
+                        renameProfile = true;
+                    }
+                    if (renameProfile) {
                         Config config = MCPatcherUtils.config;
                         String oldProfile = "Minecraft " + oldVersion;
-                        Element profile = config.findProfileByName(oldProfile, false);
-                        if (profile != null) {
-                            String newProfile = "Minecraft " + version.getProfileString();
-                            config.renameProfile(oldProfile, newProfile);
-                        }
+                        String newProfile = "Minecraft " + version.getProfileString();
+                        config.renameProfile(oldProfile, newProfile);
                         File oldModDir = MCPatcherUtils.getMinecraftPath("mods", oldVersion);
                         File newModDir = MCPatcherUtils.getMinecraftPath("mods", newVersion);
                         if (oldModDir.isDirectory() && !newModDir.exists()) {
@@ -337,10 +340,7 @@ class MinecraftJar {
                     }
                     entries.add(name);
                 }
-                version = extractVersion(jar);
-                if (version.getVersionString().equals("rc1") && md5.equals("e8e264bcff34aecbc7ef7f850858c1d6")) {
-                    version = MinecraftVersion.parseVersion("Minecraft RC2 Prerelease 1");
-                }
+                version = extractVersion(jar, md5);
             } catch (ZipException e) {
                 exception = e;
                 return CORRUPT_JAR;
@@ -369,13 +369,17 @@ class MinecraftJar {
         }
 
         static MinecraftVersion extractVersion(File file) {
+            return extractVersion(file, Util.computeMD5(file));
+        }
+
+        static MinecraftVersion extractVersion(File file, String md5) {
             if (!file.exists()) {
                 return null;
             }
             JarFile jar = null;
             try {
                 jar = new JarFile(file);
-                return extractVersion(jar);
+                return extractVersion(jar, md5);
             } catch (Exception e) {
                 Logger.log(e);
             } finally {
@@ -384,7 +388,7 @@ class MinecraftJar {
             return null;
         }
 
-        private static MinecraftVersion extractVersion(JarFile jar) {
+        private static MinecraftVersion extractVersion(JarFile jar, String md5) {
             MinecraftVersion version = null;
             InputStream inputStream = null;
             try {
@@ -400,6 +404,9 @@ class MinecraftJar {
                         String value = constPool.getStringInfo(i);
                         version = MinecraftVersion.parseVersion(value);
                         if (version != null) {
+                            if (version.getVersionString().equals("rc1") && md5.equals("e8e264bcff34aecbc7ef7f850858c1d6")) {
+                                version = MinecraftVersion.parseVersion("Minecraft RC2 Prerelease 1");
+                            }
                             break;
                         }
                     }

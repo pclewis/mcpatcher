@@ -302,12 +302,14 @@ class Config {
     }
 
     void renameProfile(String oldName, String newName) {
-        Element profile = findProfileByName(oldName, false);
-        if (profile != null) {
-            profile.setAttribute(ATTR_PROFILE, newName);
-            String selectedProfile = getConfigValue(TAG_SELECTED_PROFILE);
-            if (oldName.equals(selectedProfile)) {
-                setConfigValue(TAG_SELECTED_PROFILE, newName);
+        if (!oldName.equals(newName)) {
+            Element profile = findProfileByName(oldName, false);
+            if (profile != null) {
+                profile.setAttribute(ATTR_PROFILE, newName);
+                String selectedProfile = getConfigValue(TAG_SELECTED_PROFILE);
+                if (oldName.equals(selectedProfile)) {
+                    setConfigValue(TAG_SELECTED_PROFILE, newName);
+                }
             }
         }
     }
