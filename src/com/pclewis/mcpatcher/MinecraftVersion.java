@@ -150,7 +150,7 @@ final public class MinecraftVersion {
         return profileString
             .replaceFirst("^Alpha ", "alpha-")
             .replaceFirst("^Beta ", "beta-")
-            .replaceFirst("^RC ", "rc");
+            .replaceFirst("^RC", "rc");
     }
 
     /**
