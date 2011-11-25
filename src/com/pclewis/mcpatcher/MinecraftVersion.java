@@ -24,6 +24,7 @@ final public class MinecraftVersion {
     private String profileString;
     private int[] parsedVersion;
     private int preRelease;
+    private boolean weeklyBuild;
 
     /**
      * Attempt to parse a string into a minecraft version.
@@ -107,6 +108,9 @@ final public class MinecraftVersion {
         if (parsedVersion[0] == RC) {
             versionNumberOnly = versionString;
         }
+        if (parsedVersion[0] == FINAL && versionNumberOnly.length() > 1 && !versionNumberOnly.contains(".")) {
+            weeklyBuild = true;
+        }
     }
 
     /**
@@ -124,7 +128,7 @@ final public class MinecraftVersion {
      * @return true if prerelease
      */
     public boolean isPrerelease() {
-        return preRelease != NOT_PRERELEASE || parsedVersion[0] == RC;
+        return preRelease != NOT_PRERELEASE || parsedVersion[0] == RC || weeklyBuild;
     }
 
     /**
