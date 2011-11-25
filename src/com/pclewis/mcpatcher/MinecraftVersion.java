@@ -110,6 +110,7 @@ final public class MinecraftVersion {
         }
         if (parsedVersion[0] == FINAL && versionNumberOnly.length() > 1 && !versionNumberOnly.contains(".")) {
             weeklyBuild = true;
+            parsedVersion = new int[]{1, 0, 0};
         }
     }
 
