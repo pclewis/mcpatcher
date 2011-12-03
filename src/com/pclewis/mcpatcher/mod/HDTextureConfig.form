@@ -111,8 +111,8 @@
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Reload textures when .zip file changes"/>
-          <toolTipText value="Allows texture pack authors to test changes quickly, but may slightly affect performance."/>
+          <text value="Detect texture pack changes"/>
+          <toolTipText value="Automatically reload textures when .zip file changes (may affect performance)."/>
         </properties>
       </component>
     </children>
