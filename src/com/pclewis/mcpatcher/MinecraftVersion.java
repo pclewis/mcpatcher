@@ -110,7 +110,16 @@ final public class MinecraftVersion {
         }
         if (parsedVersion[0] == FINAL && versionNumberOnly.length() > 1 && !versionNumberOnly.contains(".")) {
             weeklyBuild = true;
-            parsedVersion = new int[]{FINAL, 1, 0, 0, 1};
+            Pattern p = Pattern.compile("^(\\d+)w(\\d+)(.)$");
+            Matcher m = p.matcher(versionNumberOnly);
+            if (m.matches()) {
+                int a = Integer.parseInt(m.group(1));
+                int b = Integer.parseInt(m.group(2));
+                int c = m.group(3).charAt(0) & 0xff;
+                parsedVersion = new int[]{FINAL, 1, 0, 0, a, b, c};
+            } else {
+                parsedVersion = new int[]{FINAL, 1, 0, 0, 1};
+            }
         }
     }
 
