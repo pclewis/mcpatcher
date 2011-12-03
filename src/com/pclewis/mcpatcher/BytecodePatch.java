@@ -17,6 +17,7 @@ import static javassist.bytecode.Opcode.*;
 abstract public class BytecodePatch extends ClassPatch {
     BytecodeMatcher matcher;
     MethodRef targetMethod;
+    int labelOffset;
 
     public BytecodePatch targetMethod(MethodRef targetMethod) {
         this.targetMethod = targetMethod;
@@ -79,6 +80,7 @@ abstract public class BytecodePatch extends ClassPatch {
             try {
                 classMod.addToConstPool = true;
                 classMod.resetLabels();
+                labelOffset = 0;
                 repl = getReplacementBytes(mi);
             } catch (IOException e) {
                 Logger.log(e);
@@ -105,7 +107,7 @@ abstract public class BytecodePatch extends ClassPatch {
             for (int i = 0; i < skip; i++) {
                 ci.writeByte(Opcode.NOP, matcher.getStart() + i);
             }
-            classMod.resolveLabels(repl, matcher.getStart() + skip);
+            classMod.resolveLabels(repl, matcher.getStart() + skip, labelOffset);
             ci.write(repl, matcher.getStart() + skip);
             offset = matcher.getStart() + repl.length + skip;
             if (Logger.isLogLevel(Logger.LOG_BYTECODE)) {
@@ -317,6 +319,7 @@ abstract public class BytecodePatch extends ClassPatch {
             if (insertBytes == null) {
                 return null;
             } else {
+                labelOffset = matcher.getMatchLength();
                 return buildCode(
                     insertBytes,
                     matcher.getMatch()

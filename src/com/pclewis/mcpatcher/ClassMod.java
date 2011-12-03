@@ -243,7 +243,7 @@ abstract public class ClassMod implements PatchComponent {
         labelPositions.clear();
     }
 
-    void resolveLabels(byte[] code, int start) {
+    void resolveLabels(byte[] code, int start, int labelOffset) {
         for (Map.Entry<String, Integer> e : labelPositions.entrySet()) {
             Logger.log(Logger.LOG_BYTECODE, "label %s -> instruction %d", e.getKey(), start + e.getValue());
         }
@@ -253,7 +253,7 @@ abstract public class ClassMod implements PatchComponent {
             }
             int to = labelPositions.get(label.name);
             int diff = to - label.from + 1;
-            int codepos = label.from;
+            int codepos = label.from + labelOffset;
             Logger.log(Logger.LOG_BYTECODE, "branch offset %s %s -> %+d @%d",
                 Mnemonic.OPCODE[code[codepos - 1] & 0xff].toUpperCase(), label.name, diff, label.from - 1 + start
             );

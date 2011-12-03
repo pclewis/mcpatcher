@@ -80,7 +80,7 @@ abstract public class AddMethodPatch extends ClassPatch {
             classMod.resetLabels();
             byte[] code = generateMethod(classFile, methodInfo);
             if (code != null) {
-                classMod.resolveLabels(code, 0);
+                classMod.resolveLabels(code, 0, 0);
                 CodeAttribute codeAttribute = new CodeAttribute(constPool, maxStackSize, numLocals, code, exceptionTable);
                 methodInfo.setCodeAttribute(codeAttribute);
                 int newMaxLocals = Math.max(BytecodePatch.computeMaxLocals(codeAttribute), numLocals);
