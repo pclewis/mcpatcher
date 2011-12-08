@@ -25,7 +25,7 @@ public class BetterGrass extends Mod {
         classMods.add(new MaterialMod());
         classMods.add(new BlockMod());
         classMods.add(new BlockGrassMod("Grass", 2, 3, 0));
-        if (minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 1")) >= 0) {
+        if (minecraftVersion.compareTo("Beta 1.9 Prerelease 1") >= 0) {
             classMods.add(new BlockGrassMod("Mycelium", 110, 77, 78));
         }
         classMods.add(new IBlockAccessMod());

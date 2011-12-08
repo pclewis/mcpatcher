@@ -21,7 +21,7 @@ public class RandomMobs extends Mod {
 
         classMods.add(new RenderLivingMod());
         classMods.add(new RenderEyesMod("Spider"));
-        if (minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.8 Prerelease 1")) >= 0) {
+        if (minecraftVersion.compareTo("Beta 1.8 Prerelease 1") >= 0) {
             classMods.add(new RenderEyesMod("Enderman"));
         }
         classMods.add(new EntityMod());

@@ -27,7 +27,7 @@ public class GLSLShader extends Mod {
         website = "http://nitrous.daxnitro.com/repo/";
         defaultEnabled = false;
 
-        haveLightmaps = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.8 Prerelease 1")) >= 0;
+        haveLightmaps = minecraftVersion.compareTo("Beta 1.8 Prerelease 1") >= 0;
 
         classMods.add(new MinecraftMod());
         classMods.add(new GLViewportMod());

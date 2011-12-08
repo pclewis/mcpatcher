@@ -215,6 +215,9 @@ final public class MinecraftVersion {
      * @return 0, &lt; 0, or &gt; 0
      */
     public int compareTo(String versionString) {
+        if (!versionString.startsWith("Minecraft")) {
+            versionString = "Minecraft " + versionString;
+        }
         return compareTo(parseVersion(versionString));
     }
 }

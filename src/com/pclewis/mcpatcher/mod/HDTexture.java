@@ -21,9 +21,9 @@ public class HDTexture extends Mod {
         version = "1.0";
         configPanel = new HDTextureConfig();
 
-        haveColorizerWater = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) >= 0;
-        haveAlternateFont = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 3")) >= 0;
-        haveUnicode = minecraftVersion.compareTo("Minecraft 11w49a") >= 0 || minecraftVersion.compareTo("Minecraft 1.0.1") >= 0;
+        haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
+        haveAlternateFont = minecraftVersion.compareTo("Beta 1.9 Prerelease 3") >= 0;
+        haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
 
         classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
