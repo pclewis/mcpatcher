@@ -12,6 +12,7 @@ import static javassist.bytecode.Opcode.*;
 public class HDTexture extends Mod {
     private boolean haveColorizerWater;
     private boolean haveAlternateFont;
+    private boolean haveUnicode;
 
     public HDTexture(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_TEXTURES;
@@ -22,6 +23,7 @@ public class HDTexture extends Mod {
 
         haveColorizerWater = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.6")) >= 0;
         haveAlternateFont = minecraftVersion.compareTo(MinecraftVersion.parseVersion("Minecraft Beta 1.9 Prerelease 3")) >= 0;
+        haveUnicode = minecraftVersion.compareTo("Minecraft 11w49a") >= 0 || minecraftVersion.compareTo("Minecraft 1.0.1") >= 0;
 
         classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
@@ -800,14 +802,20 @@ public class HDTexture extends Mod {
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) {
                     MethodInfo constructor = classFile.getMethod("<init>");
                     CodeAttribute ca = constructor.getCodeAttribute();
-                    methodInfo.setDescriptor(constructor.getDescriptor());
+                    methodInfo.setDescriptor(constructor.getDescriptor().replace("Z)", ")"));
                     maxStackSize = ca.getMaxStack();
                     numLocals = ca.getMaxLocals();
                     exceptionTable = ca.getExceptionTable();
                     byte[] code = ca.getCode().clone();
-                    code[0] = NOP;  // remove java.lang.Object<init> call
-                    code[1] = NOP;
-                    code[2] = NOP;
+                    if (haveUnicode) {  // remove java.lang.Object<init> call
+                        code[0] = ICONST_0;
+                        code[1] = ISTORE;
+                        code[2] = 4;
+                    } else {
+                        code[0] = NOP;
+                        code[1] = NOP;
+                        code[2] = NOP;
+                    }
                     code[3] = NOP;
                     return code;
                 }
