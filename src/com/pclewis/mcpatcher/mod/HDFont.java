@@ -129,7 +129,7 @@ public class HDFont extends Mod {
                         ILOAD_2,
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, charWidth),
-                        ILOAD, 4,
+                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
                         BIPUSH, 32,
                         IADD,
                         IALOAD,
@@ -144,7 +144,7 @@ public class HDFont extends Mod {
                         FLOAD_2,
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, charWidthf),
-                        ILOAD, 4,
+                        getCaptureGroup(1),
                         BIPUSH, 32,
                         IADD,
                         FALOAD,
@@ -175,6 +175,35 @@ public class HDFont extends Mod {
                         FLOAD_2,
                         reference(methodInfo, INVOKESTATIC, new MethodRef("java.lang.Math", "round", "(F)I")),
                         IRETURN
+                    );
+                }
+            }.targetMethod(getStringWidth));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "getStringWidth int -> float";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // k += (k1 - j1) / 2 + 1;
+                        ILOAD_2,
+                        BinaryRegex.capture(BinaryRegex.any(0, 20)),
+                        IADD,
+                        ISTORE_2
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        FLOAD_2,
+                        getCaptureGroup(1),
+                        I2F,
+                        FADD,
+                        FSTORE_2
                     );
                 }
             }.targetMethod(getStringWidth));
