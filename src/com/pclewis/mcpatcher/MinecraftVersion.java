@@ -185,7 +185,7 @@ final public class MinecraftVersion {
     }
 
     /**
-     * Compare two MinecraftVersions
+     * Compare two MinecraftVersions.
      *
      * @param that version to compare with
      * @return 0, &lt; 0, or &gt; 0
@@ -206,5 +206,15 @@ final public class MinecraftVersion {
             return -b[i];
         }
         return this.preRelease - that.preRelease;
+    }
+
+    /**
+     * Compare to version string.
+     *
+     * @param versionString version to compare with
+     * @return 0, &lt; 0, or &gt; 0
+     */
+    public int compareTo(String versionString) {
+        return compareTo(parseVersion(versionString));
     }
 }
