@@ -21,51 +21,12 @@ public class HDFont extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(FONT_UTILS_CLASS));
     }
 
-    private class FontRendererMod extends ClassMod {
+    private class FontRendererMod extends BaseMod.FontRendererMod {
         private FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
         private FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
         private MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
 
         FontRendererMod() {
-            classSignatures.add(new FixedBytecodeSignature(
-                ALOAD_0,
-                SIPUSH, 0x01, 0x00,
-                NEWARRAY, T_INT,
-                PUTFIELD, BinaryRegex.any(2),
-                ALOAD_0,
-                ICONST_0,
-                PUTFIELD, BinaryRegex.any(2)
-            ));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
-                        return buildExpression(
-                            push(methodInfo, 4864 /* GL_COMPILE */),
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glNewList", "(II)V")),
-                            BytecodeMatcher.anyILOAD,
-                            I2F,
-                            push(methodInfo, 255.0f),
-                            FDIV,
-                            BytecodeMatcher.anyILOAD,
-                            I2F,
-                            push(methodInfo, 255.0f),
-                            FDIV,
-                            BytecodeMatcher.anyILOAD,
-                            I2F,
-                            push(methodInfo, 255.0f),
-                            FDIV,
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glColor3f", "(FFF)V")),
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glEndList", "()V"))
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            });
-
-            memberMappers.add(new FieldMapper("charWidth", "[I"));
             memberMappers.add(new MethodMapper("getStringWidth", "(Ljava/lang/String;)I"));
 
             patches.add(new AddFieldPatch("charWidthf", "[F"));

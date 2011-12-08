@@ -793,27 +793,8 @@ public class HDTexture extends Mod {
         }
     }
 
-    private class FontRendererMod extends ClassMod {
+    private class FontRendererMod extends BaseMod.FontRendererMod {
         FontRendererMod() {
-            classSignatures.add(new FixedBytecodeSignature(
-                DCONST_0,
-                DCONST_0,
-                DCONST_0,
-                ILOAD
-            ));
-
-            classSignatures.add(new FixedBytecodeSignature(
-                ALOAD, BinaryRegex.any(),
-                ICONST_0,
-                ICONST_0,
-                ILOAD, BinaryRegex.any(),
-                ILOAD, BinaryRegex.any(),
-                ALOAD, BinaryRegex.any(),
-                ICONST_0,
-                ILOAD, BinaryRegex.any(),
-                INVOKEVIRTUAL
-            ));
-
             patches.add(new AddMethodPatch("initialize", "()V") {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) {

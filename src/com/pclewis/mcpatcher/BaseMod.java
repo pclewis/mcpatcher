@@ -224,4 +224,37 @@ public final class BaseMod extends Mod {
             classSignatures.add(new ConstSignature("Saving chunks"));
         }
     }
+
+    /**
+     * Matches FontRenderer class and maps charWidth, fontTextureName, and spaceWidth fields.
+     */
+    public static class FontRendererMod extends ClassMod {
+        public FontRendererMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            push(methodInfo, 256),
+                            NEWARRAY, T_INT,
+                            BytecodeMatcher.captureReference(PUTFIELD),
+                            ALOAD_0,
+                            ICONST_0,
+                            BytecodeMatcher.captureReference(PUTFIELD),
+                            ALOAD_0,
+                            push(methodInfo, 8),
+                            BytecodeMatcher.captureReference(PUTFIELD)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }
+                .addXref(1, new FieldRef(getDeobfClass(), "charWidth", "[I"))
+                .addXref(2, new FieldRef(getDeobfClass(), "fontTextureName", "I"))
+                .addXref(3, new FieldRef(getDeobfClass(), "spaceWidth", "I"))
+            );
+        }
+    }
 }
