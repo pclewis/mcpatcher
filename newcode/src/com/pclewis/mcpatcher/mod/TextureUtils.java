@@ -85,12 +85,18 @@ public class TextureUtils {
         }
     }
 
+    private static void setFontRenderer(Minecraft minecraft, FontRenderer fontRenderer, String filename) {
+        boolean saveUnicode = fontRenderer.isUnicode;
+        fontRenderer.initialize(minecraft.gameSettings, filename, minecraft.renderEngine);
+        fontRenderer.isUnicode = saveUnicode;
+    }
+
     public static void setFontRenderer() {
         MCPatcherUtils.log("setFontRenderer()");
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
-        minecraft.fontRenderer.initialize(minecraft.gameSettings, "/font/default.png", minecraft.renderEngine);
+        setFontRenderer(minecraft, minecraft.fontRenderer, "/font/default.png");
         if (minecraft.alternateFontRenderer != minecraft.fontRenderer) {
-            minecraft.alternateFontRenderer.initialize(minecraft.gameSettings, "/font/alternate.png", minecraft.renderEngine);
+            setFontRenderer(minecraft, minecraft.alternateFontRenderer, "/font/alternate.png");
         }
     }
 

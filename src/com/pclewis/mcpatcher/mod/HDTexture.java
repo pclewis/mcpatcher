@@ -18,7 +18,7 @@ public class HDTexture extends Mod {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for texture packs of size 32x32 and higher.";
-        version = "1.0";
+        version = "1.1";
         configPanel = new HDTextureConfig();
 
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
@@ -797,6 +797,29 @@ public class HDTexture extends Mod {
 
     private class FontRendererMod extends BaseMod.FontRendererMod {
         FontRendererMod() {
+            if (haveUnicode) {
+                FieldRef isUnicode = new FieldRef(getDeobfClass(), "isUnicode", "Z");
+
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression(MethodInfo methodInfo) {
+                        if (methodInfo.isConstructor()) {
+                            return buildExpression(
+                                ALOAD_0,
+                                ILOAD, 4,
+                                BytecodeMatcher.captureReference(PUTFIELD)
+                            );
+                        } else {
+                            return null;
+                        }
+                    }
+                }.addXref(1, isUnicode));
+
+                patches.add(new MakeMemberPublicPatch(isUnicode));
+            } else {
+                patches.add(new AddFieldPatch("isUnicode", "Z"));
+            }
+
             patches.add(new AddMethodPatch("initialize", "()V") {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) {
