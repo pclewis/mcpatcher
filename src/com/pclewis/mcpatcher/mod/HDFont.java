@@ -14,7 +14,7 @@ public class HDFont extends Mod {
         name = MCPatcherUtils.HD_FONT;
         author = "MCPatcher";
         description = "Provides support for higher resolution fonts.";
-        version = "1.1";
+        version = "1.2";
 
         classMods.add(new FontRendererMod());
 
@@ -41,23 +41,24 @@ public class HDFont extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
                         ICONST_0,
-                        ISTORE, 8,
-                        ILOAD, 8,
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        ILOAD, BinaryRegex.backReference(1),
                         push(methodInfo, 256),
                         IF_ICMPGE, BinaryRegex.any(2),
                         BinaryRegex.any(1, 180),
-                        IINC, 8, 1,
+                        IINC, BinaryRegex.backReference(1), 1,
                         GOTO, BinaryRegex.any(2)
                     );
                 }
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    int registerOffset = getCaptureGroup(1)[0] - 8;
                     return buildCode(
                         ALOAD_0,
                         ALOAD_2,
-                        ALOAD, 4,
-                        ALOAD, 7,
+                        ALOAD, 4 + registerOffset,
+                        ALOAD, 7 + registerOffset,
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, charWidth),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F")),
