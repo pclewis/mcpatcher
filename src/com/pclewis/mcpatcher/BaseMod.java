@@ -235,15 +235,15 @@ public final class BaseMod extends Mod {
                 public String getMatchExpression(MethodInfo methodInfo) {
                     if (methodInfo.isConstructor()) {
                         return buildExpression(
+                            BinaryRegex.begin(),
+                            ALOAD_0,
+                            BytecodeMatcher.anyReference(INVOKESPECIAL),
                             ALOAD_0,
                             push(methodInfo, 256),
                             NEWARRAY, T_INT,
                             BytecodeMatcher.captureReference(PUTFIELD),
                             ALOAD_0,
                             ICONST_0,
-                            BytecodeMatcher.captureReference(PUTFIELD),
-                            ALOAD_0,
-                            push(methodInfo, 8),
                             BytecodeMatcher.captureReference(PUTFIELD)
                         );
                     } else {
@@ -253,8 +253,12 @@ public final class BaseMod extends Mod {
             }
                 .addXref(1, new FieldRef(getDeobfClass(), "charWidth", "[I"))
                 .addXref(2, new FieldRef(getDeobfClass(), "fontTextureName", "I"))
-                .addXref(3, new FieldRef(getDeobfClass(), "spaceWidth", "I"))
             );
+            
+            classSignatures.add(new OrSignature(
+                new ConstSignature("0123456789abcdef"),
+                new ConstSignature("0123456789abcdefk")
+            ));
         }
     }
 }
