@@ -5,75 +5,75 @@ Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.0.0 (md5 3820d222b95d0b8c520d9596a756a6e6)
 
 Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (1130 files)
-  aae.class matches RenderEnderman.class
-  abe.class matches FontRenderer.class
-  abe.class matches FontRenderer.class
-  abw.class matches RenderSpider.class
-  acq.class matches RenderLiving.class
-   a matches doRenderLiving
-  acr.class matches RenderBlocks.class
-   a matches renderStandardBlockWithAmbientOcclusion
-   b matches renderStandardBlockWithColorMultiplier
-   AO faces (N S E W) = (17 18 15 16)
+  RenderEnderman matches aae.class
+  FontRenderer matches abe.class
+  FontRenderer matches abe.class
+  RenderSpider matches abw.class
+  RenderLiving matches acq.class
+   doRenderLiving matches a (Lnq;DDDFF)V
+  RenderBlocks matches acr.class
+   renderStandardBlockWithAmbientOcclusion matches a (Lyy;IIIFFF)Z
+   renderStandardBlockWithColorMultiplier matches b (Lyy;IIIFFF)Z
    non-AO multipliers (R G B) = (14 15 16)
-  adk.class matches TexturePackList.class
-  adk.class matches TexturePackList.class
-  adw.class matches TexturePackCustom.class
-  afs.class matches TexturePackBase.class
-   a matches getInputStream
-  afs.class matches TexturePackBase.class
-   a matches getInputStream
-  agp.class matches Fire.class
-  aih.class matches Compass.class
-  at.class matches Watch.class
-  ax.class matches TexturePackDefault.class
-  bt.class matches GLAllocation.class
-   c matches createDirectByteBuffer
-  db.class matches ColorizerFoliage.class
-  dt.class matches TextureFX.class
-   a matches onTick
-  ez.class matches BlockMycelium.class
-   a matches getBlockTexture
-  gk.class matches StillWater.class
-  ha.class matches ColorizerGrass.class
-  ia.class matches Entity.class
-  ik.class matches NBTTagCompound.class
-  jb.class matches BlockGrass.class
-   a matches getBlockTexture
-  ki.class matches GameSettings.class
-  kq.class matches IBlockAccess.class
-   e matches getBlockMaterial
-  n.class matches ItemRenderer.class
-  nq.class matches EntityLiving.class
-  p.class matches Material.class
-  ss.class matches FlowLava.class
-  va.class matches FlowWater.class
-  vr.class matches Portal.class
-  ya.class matches ColorizerWater.class
-  yu.class matches StillLava.class
-  yy.class matches Block.class
-  zh.class matches RenderEngine.class
-   b matches refreshTextures
-  net/minecraft/client/Minecraft.class matches Minecraft.class
-  net/minecraft/client/Minecraft.class matches Minecraft.class
-   k matches runTick
-  net/minecraft/client/Minecraft.class matches Minecraft.class
+   AO faces (N S E W) = (17 18 15 16)
+  TexturePackList matches adk.class
+  TexturePackList matches adk.class
+  TexturePackCustom matches adw.class
+  TexturePackBase matches afs.class
+   getInputStream matches a (Ljava/lang/String;)Ljava/io/InputStream;
+  TexturePackBase matches afs.class
+   getInputStream matches a (Ljava/lang/String;)Ljava/io/InputStream;
+  Fire matches agp.class
+  Compass matches aih.class
+  Watch matches at.class
+  TexturePackDefault matches ax.class
+  GLAllocation matches bt.class
+   createDirectByteBuffer matches c (I)Ljava/nio/ByteBuffer;
+  ColorizerFoliage matches db.class
+  TextureFX matches dt.class
+   onTick matches a ()V
+  BlockMycelium matches ez.class
+   getBlockTexture matches a (Lkq;IIII)I
+  StillWater matches gk.class
+  ColorizerGrass matches ha.class
+  Entity matches ia.class
+  NBTTagCompound matches ik.class
+  BlockGrass matches jb.class
+   getBlockTexture matches a (Lkq;IIII)I
+  GameSettings matches ki.class
+  IBlockAccess matches kq.class
+   getBlockMaterial matches e (III)Lp;
+  ItemRenderer matches n.class
+  EntityLiving matches nq.class
+  Material matches p.class
+  FlowLava matches ss.class
+  FlowWater matches va.class
+  Portal matches vr.class
+  ColorizerWater matches ya.class
+  StillLava matches yu.class
+  Block matches yy.class
+  RenderEngine matches zh.class
+   refreshTextures matches b ()V
+  Minecraft matches net/minecraft/client/Minecraft.class
+  Minecraft matches net/minecraft/client/Minecraft.class
+   runTick matches k ()V
+  Minecraft matches net/minecraft/client/Minecraft.class
 
 Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (second pass)
   Minecraft (net/minecraft/client/Minecraft.class)
   RenderEngine (zh.class)
-   field h matches imageData
-   field i matches textureList
-   method a matches registerTextureFX
-   method a matches readTextureImage
-   method a matches setupTexture
-   method a matches getImageRGB
-   method a matches readTextureImageData
+   field imageData matches h Ljava/nio/ByteBuffer;
+   field textureList matches i Ljava/util/List;
+   method registerTextureFX matches a (Ldt;)V
+   method readTextureImage matches a (Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;
+   method setupTexture matches a (Ljava/awt/image/BufferedImage;I)V
+   method getImageRGB matches a (Ljava/awt/image/BufferedImage;[I)[I
+   method readTextureImageData matches a (Ljava/lang/String;)[I
   TextureFX (dt.class)
-   field a matches imageData
-   field b matches tileNumber
-   field e matches tileSize
-   field f matches tileImage
+   field imageData matches a [B
+   field tileNumber matches b I
+   field tileSize matches e I
+   field tileImage matches f I
   Compass (aih.class)
   Fire (agp.class)
   StillLava (yu.class)
@@ -84,70 +84,70 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (second pass)
   Watch (at.class)
   Portal (vr.class)
   Minecraft (net/minecraft/client/Minecraft.class)
-   field E matches texturePackList
-   field p matches renderEngine
-   field A matches gameSettings
-   field q matches fontRenderer
-   field r matches alternateFontRenderer
+   field texturePackList matches E Ladk;
+   field renderEngine matches p Lzh;
+   field gameSettings matches A Lki;
+   field fontRenderer matches q Labe;
+   field alternateFontRenderer matches r Labe;
   GLAllocation (bt.class)
   TexturePackList (adk.class)
-   field a matches selectedTexturePack
-   field c matches defaultTexturePack
-   field e matches minecraft
-   method a matches updateAvailableTexturePacks
-   method a matches setTexturePack
-   method b matches availableTexturePacks
+   field selectedTexturePack matches a Lafs;
+   field defaultTexturePack matches c Lafs;
+   field minecraft matches e Lnet/minecraft/client/Minecraft;
+   method updateAvailableTexturePacks matches a ()V
+   method setTexturePack matches a (Lafs;)Z
+   method availableTexturePacks matches b ()Ljava/util/List;
   TexturePackBase (afs.class)
-   field a matches texturePackFileName
-   method a matches openTexturePackFile
-   method b matches closeTexturePackFile
+   field texturePackFileName matches a Ljava/lang/String;
+   method openTexturePackFile matches a ()V
+   method closeTexturePackFile matches b ()V
   TexturePackCustom (adw.class)
-   field e matches zipFile
-   field h matches file
+   field zipFile matches e Ljava/util/zip/ZipFile;
+   field file matches h Ljava/io/File;
   TexturePackDefault (ax.class)
   FontRenderer (abe.class)
   GameSettings (ki.class)
   ColorizerWater (ya.class)
-   field a matches colorBuffer
+   field colorBuffer matches a [I
   ColorizerGrass (ha.class)
-   field a matches colorBuffer
+   field colorBuffer matches a [I
   ColorizerFoliage (db.class)
-   field a matches colorBuffer
+   field colorBuffer matches a [I
   FontRenderer (abe.class)
-   method a matches getStringWidth
+   method getStringWidth matches a (Ljava/lang/String;)I
   Material (p.class)
-   field b matches ground
+   field ground matches b Lp;
   Block (yy.class)
-   method a matches getBlockTexture
+   method getBlockTexture matches a (Lkq;IIII)I
   BlockGrass (jb.class)
   BlockMycelium (ez.class)
   IBlockAccess (kq.class)
-   method e matches getBlockMaterial
-   method a matches getBlockId
-   method d matches getBlockMetadata
+   method getBlockMaterial matches e (III)Lp;
+   method getBlockId matches a (III)I
+   method getBlockMetadata matches d (III)I
   RenderBlocks (acr.class)
-   field a matches blockAccess
+   field blockAccess matches a Lkq;
   RenderLiving (acq.class)
   RenderSpider (abw.class)
   RenderEnderman (aae.class)
   Entity (ia.class)
-   field j matches entityId
-   field a matches nextEntityID
-   method I matches getEntityTexture
-   method d matches writeToNBT
-   method e matches readFromNBT
+   field entityId matches j I
+   field nextEntityID matches a I
+   method getEntityTexture matches I ()Ljava/lang/String;
+   method writeToNBT matches d (Lik;)V
+   method readFromNBT matches e (Lik;)V
   EntityLiving (nq.class)
   NBTTagCompound (ik.class)
-   method f matches getLong
-   method a matches setLong
+   method getLong matches f (Ljava/lang/String;)J
+   method setLong matches a (Ljava/lang/String;J)V
   Minecraft (net/minecraft/client/Minecraft.class)
-   field E matches texturePackList
+   field texturePackList matches E Ladk;
   TexturePackList (adk.class)
-   field a matches selectedTexturePack
-   field c matches defaultTexturePack
-   field e matches minecraft
+   field selectedTexturePack matches a Lafs;
+   field defaultTexturePack matches c Lafs;
+   field minecraft matches e Lnet/minecraft/client/Minecraft;
   TexturePackBase (afs.class)
-   field a matches texturePackFileName
+   field texturePackFileName matches a Ljava/lang/String;
 
 4 available mods:
 [YES] HD Textures 1.1 - Provides support for texture packs of size 32x32 and higher.
@@ -158,68 +158,67 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (second pass)
 #### Class map:
 HD Textures
     class ColorizerFoliage (db.class)
-        field colorBuffer -> a
+        field colorBuffer -> a [I
     class ColorizerGrass (ha.class)
-        field colorBuffer -> a
+        field colorBuffer -> a [I
     class ColorizerWater (ya.class)
-        field colorBuffer -> a
+        field colorBuffer -> a [I
     class Compass (aih.class)
     class Fire (agp.class)
     class FlowLava (ss.class)
     class FlowWater (va.class)
     class FontRenderer (abe.class)
-        field charWidth -> d
-        field fontTextureName -> a
-        field spaceWidth -> b
+        field charWidth -> d [I
+        field fontTextureName -> a I
     class GLAllocation (bt.class)
-        method createDirectByteBuffer -> c
+        method createDirectByteBuffer -> c (I)Ljava/nio/ByteBuffer;
     class GameSettings (ki.class)
     class ItemRenderer (n.class)
     class Minecraft (net/minecraft/client/Minecraft.class)
-        method runTick -> k
-        field alternateFontRenderer -> r
-        field fontRenderer -> q
-        field gameSettings -> A
-        field renderEngine -> p
-        field texturePackList -> E
+        method runTick -> k ()V
+        field alternateFontRenderer -> r Labe;
+        field fontRenderer -> q Labe;
+        field gameSettings -> A Lki;
+        field renderEngine -> p Lzh;
+        field texturePackList -> E Ladk;
     class Portal (vr.class)
     class RenderEngine (zh.class)
-        method getImageRGB -> a
-        method readTextureImage -> a
-        method readTextureImageData -> a
-        method refreshTextures -> b
-        method registerTextureFX -> a
-        method setupTexture -> a
-        field imageData -> h
-        field textureList -> i
+        method getImageRGB -> a (Ljava/awt/image/BufferedImage;[I)[I
+        method readTextureImage -> a (Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;
+        method readTextureImageData -> a (Ljava/lang/String;)[I
+        method refreshTextures -> b ()V
+        method registerTextureFX -> a (Ldt;)V
+        method setupTexture -> a (Ljava/awt/image/BufferedImage;I)V
+        field imageData -> h Ljava/nio/ByteBuffer;
+        field textureList -> i Ljava/util/List;
     class StillLava (yu.class)
     class StillWater (gk.class)
     class TextureFX (dt.class)
-        method onTick -> a
-        field imageData -> a
-        field tileImage -> f
-        field tileNumber -> b
-        field tileSize -> e
+        method onTick -> a ()V
+        field imageData -> a [B
+        field tileImage -> f I
+        field tileNumber -> b I
+        field tileSize -> e I
     class TexturePackBase (afs.class)
-        method closeTexturePackFile -> b
-        method getInputStream -> a
-        method openTexturePackFile -> a
-        field texturePackFileName -> a
+        method closeTexturePackFile -> b ()V
+        method getInputStream -> a (Ljava/lang/String;)Ljava/io/InputStream;
+        method openTexturePackFile -> a ()V
+        field texturePackFileName -> a Ljava/lang/String;
     class TexturePackCustom (adw.class) extends TexturePackBase
-        method closeTexturePackFile -> b
-        method getInputStream -> a
-        method openTexturePackFile -> a
-        field file -> h
-        field texturePackFileName -> a
-        field zipFile -> e
+        method closeTexturePackFile -> b ()V
+        method getInputStream -> a (Ljava/lang/String;)Ljava/io/InputStream;
+        method openTexturePackFile -> a ()V
+        field file -> h Ljava/io/File;
+        field texturePackFileName -> a Ljava/lang/String;
+        field zipFile -> e Ljava/util/zip/ZipFile;
     class TexturePackDefault (ax.class)
     class TexturePackList (adk.class)
-        method availableTexturePacks -> b
-        method setTexturePack -> a
-        method updateAvailableTexturePacks -> a
-        field defaultTexturePack -> c
-        field minecraft -> e
-        field selectedTexturePack -> a
+        method availableTexturePacks -> b ()Ljava/util/List;
+        method setTexturePack -> a (Lafs;)Z
+        method updateAvailableTexturePacks -> a ()V
+        field defaultTexturePack -> c Lafs;
+        field minecraft -> e Lnet/minecraft/client/Minecraft;
+        field selectedTexturePack -> a Lafs;
     class Watch (at.class)
     class net.minecraft.client.Minecraft alias for Minecraft
     class net.minecraft.src.ColorizerFoliage alias for ColorizerFoliage
@@ -246,31 +245,30 @@ HD Textures
 
 HD Font
     class FontRenderer (abe.class)
-        method getStringWidth -> a
-        field charWidth -> d
-        field fontTextureName -> a
-        field spaceWidth -> b
+        method getStringWidth -> a (Ljava/lang/String;)I
+        field charWidth -> d [I
+        field fontTextureName -> a I
     class net.minecraft.src.FontRenderer alias for FontRenderer
 
 Better Grass
     class Block (yy.class)
-        method getBlockTexture -> a
+        method getBlockTexture -> a (Lkq;IIII)I
     class BlockGrass (jb.class)
-        method getBlockTexture -> a
+        method getBlockTexture -> a (Lkq;IIII)I
     class BlockMycelium (ez.class)
-        method getBlockTexture -> a
+        method getBlockTexture -> a (Lkq;IIII)I
     class IBlockAccess (kq.class)
-        method getBlockId -> a
-        method getBlockMaterial -> e
-        method getBlockMetadata -> d
+        method getBlockId -> a (III)I
+        method getBlockMaterial -> e (III)Lp;
+        method getBlockMetadata -> d (III)I
     class Material (p.class)
-        field builtSnow -> v
-        field ground -> b
-        field snow -> u
+        field builtSnow -> v Lp;
+        field ground -> b Lp;
+        field snow -> u Lp;
     class RenderBlocks (acr.class)
-        method renderStandardBlockWithAmbientOcclusion -> a
-        method renderStandardBlockWithColorMultiplier -> b
-        field blockAccess -> a
+        method renderStandardBlockWithAmbientOcclusion -> a (Lyy;IIIFFF)Z
+        method renderStandardBlockWithColorMultiplier -> b (Lyy;IIIFFF)Z
+        field blockAccess -> a Lkq;
     class net.minecraft.src.Block alias for Block
     class net.minecraft.src.BlockGrass alias for BlockGrass
     class net.minecraft.src.BlockMycelium alias for BlockMycelium
@@ -280,33 +278,33 @@ Better Grass
 
 Random Mobs
     class Entity (ia.class)
-        method getEntityTexture -> I
-        method readFromNBT -> e
-        method writeToNBT -> d
-        field entityId -> j
-        field nextEntityID -> a
+        method getEntityTexture -> I ()Ljava/lang/String;
+        method readFromNBT -> e (Lik;)V
+        method writeToNBT -> d (Lik;)V
+        field entityId -> j I
+        field nextEntityID -> a I
     class EntityLiving (nq.class) extends Entity
-        method getEntityTexture -> I
-        method readFromNBT -> e
-        method writeToNBT -> d
-        field entityId -> j
-        field nextEntityID -> a
+        method getEntityTexture -> I ()Ljava/lang/String;
+        method readFromNBT -> e (Lik;)V
+        method writeToNBT -> d (Lik;)V
+        field entityId -> j I
+        field nextEntityID -> a I
     class Minecraft (net/minecraft/client/Minecraft.class)
-        field texturePackList -> E
+        field texturePackList -> E Ladk;
     class NBTTagCompound (ik.class)
-        method getLong -> f
-        method setLong -> a
+        method getLong -> f (Ljava/lang/String;)J
+        method setLong -> a (Ljava/lang/String;J)V
     class RenderEnderman (aae.class)
     class RenderLiving (acq.class)
-        method doRenderLiving -> a
+        method doRenderLiving -> a (Lnq;DDDFF)V
     class RenderSpider (abw.class)
     class TexturePackBase (afs.class)
-        method getInputStream -> a
-        field texturePackFileName -> a
+        method getInputStream -> a (Ljava/lang/String;)Ljava/io/InputStream;
+        field texturePackFileName -> a Ljava/lang/String;
     class TexturePackList (adk.class)
-        field defaultTexturePack -> c
-        field minecraft -> e
-        field selectedTexturePack -> a
+        field defaultTexturePack -> c Lafs;
+        field minecraft -> e Lnet/minecraft/client/Minecraft;
+        field selectedTexturePack -> a Lafs;
     class net.minecraft.client.Minecraft alias for Minecraft
     class net.minecraft.src.Entity alias for Entity
     class net.minecraft.src.EntityLiving alias for EntityLiving
@@ -658,132 +656,6 @@ Patching...
      ALOAD_1                   ALOAD_1
      INVOKEVIRTUAL 0x00 0x5f   INVOKESTATIC 0x01 0x27
  applying RenderBlocks patch to acr.class for mod Better Grass
-    if (getBlockTexture == 0) useBiomeColor = true (AO) a(Lyy;IIIFFF)Z@682
-     label south -> instruction 773
-     label north -> instruction 754
-     label east -> instruction 716
-     label west -> instruction 735
-     branch offset IFNE east -> +6 @710
-     branch offset IFNE west -> +6 @729
-     branch offset IFNE north -> +6 @748
-     branch offset IFNE south -> +6 @767
-     ICONST_0                  ICONST_0
-     DUP                       DUP
-     ISTORE 0x12               ISTORE 0x12
-     DUP                       DUP
-     ISTORE 0x11               ISTORE 0x11
-     DUP                       DUP
-     ISTORE 0x10               ISTORE 0x10
-     DUP                       DUP
-     ISTORE 0x0f               ISTORE 0x0f
-     ISTORE 0x0d               ISTORE 0x0d
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_2
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x0f
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_3
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x10
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_4
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x11
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_5
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x12
-    if (getBlockTexture == 0) useBiomeColor = true (AO) a(Lyy;IIIFFF)Z@780
-     label south -> instruction 871
-     label north -> instruction 852
-     label east -> instruction 814
-     label west -> instruction 833
-     branch offset IFNE east -> +6 @808
-     branch offset IFNE west -> +6 @827
-     branch offset IFNE north -> +6 @846
-     branch offset IFNE south -> +6 @865
-     ICONST_0                  ICONST_0
-     DUP                       DUP
-     ISTORE 0x12               ISTORE 0x12
-     DUP                       DUP
-     ISTORE 0x11               ISTORE 0x11
-     DUP                       DUP
-     ISTORE 0x10               ISTORE 0x10
-     DUP                       DUP
-     ISTORE 0x0f               ISTORE 0x0f
-     ISTORE 0x0d               ISTORE 0x0d
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_2
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x0f
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_3
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x10
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_4
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x11
-                               ALOAD_1
-                               ALOAD_0
-                               GETFIELD 0x00 0xc9
-                               ILOAD_2
-                               ILOAD_3
-                               ILOAD 0x04
-                               ICONST_5
-                               INVOKEVIRTUAL 0x01 0x95
-                               IFNE 0x00 0x06
-                               ICONST_1
-                               ISTORE 0x12
     if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8) b(Lyy;IIIFFF)Z@432
      label A -> instruction 472
      branch offset IFNE A -> +23 @449
@@ -1000,6 +872,132 @@ Patching...
                                FLOAD 0x07
                                FMUL
                                INVOKEVIRTUAL 0x01 0x68
+    if (getBlockTexture == 0) useBiomeColor = true (AO) a(Lyy;IIIFFF)Z@682
+     label south -> instruction 773
+     label north -> instruction 754
+     label east -> instruction 716
+     label west -> instruction 735
+     branch offset IFNE east -> +6 @710
+     branch offset IFNE west -> +6 @729
+     branch offset IFNE north -> +6 @748
+     branch offset IFNE south -> +6 @767
+     ICONST_0                  ICONST_0
+     DUP                       DUP
+     ISTORE 0x12               ISTORE 0x12
+     DUP                       DUP
+     ISTORE 0x11               ISTORE 0x11
+     DUP                       DUP
+     ISTORE 0x10               ISTORE 0x10
+     DUP                       DUP
+     ISTORE 0x0f               ISTORE 0x0f
+     ISTORE 0x0d               ISTORE 0x0d
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_2
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x0f
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_3
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x10
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_4
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x11
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_5
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x12
+    if (getBlockTexture == 0) useBiomeColor = true (AO) a(Lyy;IIIFFF)Z@780
+     label south -> instruction 871
+     label north -> instruction 852
+     label east -> instruction 814
+     label west -> instruction 833
+     branch offset IFNE east -> +6 @808
+     branch offset IFNE west -> +6 @827
+     branch offset IFNE north -> +6 @846
+     branch offset IFNE south -> +6 @865
+     ICONST_0                  ICONST_0
+     DUP                       DUP
+     ISTORE 0x12               ISTORE 0x12
+     DUP                       DUP
+     ISTORE 0x11               ISTORE 0x11
+     DUP                       DUP
+     ISTORE 0x10               ISTORE 0x10
+     DUP                       DUP
+     ISTORE 0x0f               ISTORE 0x0f
+     ISTORE 0x0d               ISTORE 0x0d
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_2
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x0f
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_3
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x10
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_4
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x11
+                               ALOAD_1
+                               ALOAD_0
+                               GETFIELD 0x00 0xc9
+                               ILOAD_2
+                               ILOAD_3
+                               ILOAD 0x04
+                               ICONST_5
+                               INVOKEVIRTUAL 0x01 0x95
+                               IFNE 0x00 0x06
+                               ICONST_1
+                               ISTORE 0x12
  applying TexturePackList patch to adk.class for mod HD Textures
     make field defaultTexturePack public
     TexturePackList.setTileSize(selectedTexturePack) on texture pack change a(Lafs;)Z@54

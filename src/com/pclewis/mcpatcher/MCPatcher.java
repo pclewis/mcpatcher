@@ -234,9 +234,9 @@ final public class MCPatcher {
                             if (classMod.matchClassFile(name, classFile)) {
                                 checkInterrupt();
                                 if (!classMod.global) {
-                                    Logger.log(Logger.LOG_CLASS, "%s matches %s.class", name, classMod.getDeobfClass());
-                                    for (Map.Entry<String, String> e : mod.classMap.getMethodMap(classMod.getDeobfClass()).entrySet()) {
-                                        Logger.log(Logger.LOG_METHOD, "%s matches %s", e.getValue(), e.getKey());
+                                    Logger.log(Logger.LOG_CLASS, "%s matches %s", classMod.getDeobfClass(), name);
+                                    for (Map.Entry<String, ClassMap.MemberEntry> e : mod.classMap.getMethodMap(classMod.getDeobfClass()).entrySet()) {
+                                        Logger.log(Logger.LOG_METHOD, "%s matches %s %s", e.getKey(), e.getValue().name, e.getValue().type);
                                     }
                                 }
                                 for (ClassSignature cs : classMod.classSignatures) {

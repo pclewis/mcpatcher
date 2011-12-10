@@ -105,9 +105,10 @@ public class ClassMap {
      * @param classDescName descriptive class name
      * @param descName      descriptive method name
      * @param obfName       obfuscated method name
+     * @param obfType       obfuscated method descriptor                     
      * @throws RuntimeException if class mapping does not exist yet.
      */
-    public void addMethodMap(String classDescName, String descName, String obfName) {
+    public void addMethodMap(String classDescName, String descName, String obfName, String obfType) {
         ClassMapEntry entry = getEntry(classDescName);
         if (entry == null) {
             throw new RuntimeException(String.format(
@@ -122,7 +123,7 @@ public class ClassMap {
                 classDescName, descName, obfName, oldName
             ));
         }
-        entry.addMethod(descName, obfName);
+        entry.addMethod(descName, obfName, obfType);
     }
 
     /**
@@ -134,9 +135,10 @@ public class ClassMap {
      * @param classDescName descriptive class name
      * @param descName      descriptive field name
      * @param obfName       obfuscated field name
+     * @param obfType       obfuscated field descriptor                     
      * @throws RuntimeException if class mapping does not exist yet.
      */
-    public void addFieldMap(String classDescName, String descName, String obfName) {
+    public void addFieldMap(String classDescName, String descName, String obfName, String obfType) {
         ClassMapEntry entry = getEntry(classDescName);
         if (entry == null) {
             throw new RuntimeException(String.format(
@@ -151,7 +153,7 @@ public class ClassMap {
                 classDescName, descName, obfName, oldName
             ));
         }
-        entry.addField(descName, obfName);
+        entry.addField(descName, obfName, obfType);
     }
 
     /**
@@ -167,10 +169,10 @@ public class ClassMap {
         }
         addClassMap(from.getClassName(), to.getClassName());
         if (from instanceof MethodRef || from instanceof InterfaceMethodRef) {
-            addMethodMap(from.getClassName(), from.getName(), to.getName());
+            addMethodMap(from.getClassName(), from.getName(), to.getName(), to.getType());
             addTypeDescriptorMap(from.getType(), to.getType());
         } else if (from instanceof FieldRef) {
-            addFieldMap(from.getClassName(), from.getName(), to.getName());
+            addFieldMap(from.getClassName(), from.getName(), to.getName(), to.getType());
             addTypeDescriptorMap(from.getType(), to.getType());
         }
     }
@@ -264,22 +266,22 @@ public class ClassMap {
      * Get the mapping between descriptive and obfuscated method names for a class.
      *
      * @param classDescName descriptive class name
-     * @return HashMap of descriptive name -> obfuscated name
+     * @return HashMap of descriptive name -> obfuscated name/type
      */
-    public HashMap<String, String> getMethodMap(String classDescName) {
+    public HashMap<String, MemberEntry> getMethodMap(String classDescName) {
         ClassMapEntry entry = getEntry(classDescName);
-        return entry == null ? new HashMap<String, String>() : entry.getMethodMap();
+        return entry == null ? new HashMap<String, MemberEntry>() : entry.getMethodMap();
     }
 
     /**
      * Get the mapping between descriptive and obfuscated field names for a class.
      *
      * @param classDescName descriptive class name
-     * @return HashMap of descriptive name -> obfuscated name
+     * @return HashMap of descriptive name -> obfuscated name/type
      */
-    public HashMap<String, String> getFieldMap(String classDescName) {
+    public HashMap<String, MemberEntry> getFieldMap(String classDescName) {
         ClassMapEntry entry = getEntry(classDescName);
-        return entry == null ? new HashMap<String, String>() : entry.getFieldMap();
+        return entry == null ? new HashMap<String, MemberEntry>() : entry.getFieldMap();
     }
 
     void print(final PrintStream out, final String indent) {
@@ -301,26 +303,26 @@ public class ClassMap {
                 continue;
             }
 
-            ArrayList<Entry<String, String>> sortedMembers;
+            ArrayList<Entry<String, MemberEntry>> sortedMembers;
 
-            sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().getMethodMap().entrySet());
-            Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
-                public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+            sortedMembers = new ArrayList<Entry<String, MemberEntry>>(e.getValue().getMethodMap().entrySet());
+            Collections.sort(sortedMembers, new Comparator<Entry<String, MemberEntry>>() {
+                public int compare(Entry<String, MemberEntry> o1, Entry<String, MemberEntry> o2) {
                     return o1.getKey().compareTo(o2.getKey());
                 }
             });
-            for (Entry<String, String> e1 : sortedMembers) {
-                out.printf("%1$s%1$smethod %2$s -> %3$s\n", indent, e1.getKey(), e1.getValue());
+            for (Entry<String, MemberEntry> e1 : sortedMembers) {
+                out.printf("%1$s%1$smethod %2$s -> %3$s %4$s\n", indent, e1.getKey(), e1.getValue().name, e1.getValue().type);
             }
 
-            sortedMembers = new ArrayList<Entry<String, String>>(e.getValue().getFieldMap().entrySet());
-            Collections.sort(sortedMembers, new Comparator<Entry<String, String>>() {
-                public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+            sortedMembers = new ArrayList<Entry<String, MemberEntry>>(e.getValue().getFieldMap().entrySet());
+            Collections.sort(sortedMembers, new Comparator<Entry<String, MemberEntry>>() {
+                public int compare(Entry<String, MemberEntry> o1, Entry<String, MemberEntry> o2) {
                     return o1.getKey().compareTo(o2.getKey());
                 }
             });
-            for (Entry<String, String> e1 : sortedMembers) {
-                out.printf("%1$s%1$sfield %2$s -> %3$s\n", indent, e1.getKey(), e1.getValue());
+            for (Entry<String, MemberEntry> e1 : sortedMembers) {
+                out.printf("%1$s%1$sfield %2$s -> %3$s %4$s\n", indent, e1.getKey(), e1.getValue().name, e1.getValue().type);
             }
         }
     }
@@ -345,11 +347,11 @@ public class ClassMap {
             }
 
             if (classEntry != null) {
-                for (Entry<String, String> e : classEntry.getMethodMap().entrySet()) {
-                    if (e.getKey().equals(mi.getName())) {
-                        Logger.log(Logger.LOG_METHOD, "method %s -> %s", mi.getName(), e.getValue());
-                        mi.setName(e.getValue());
-                    }
+                HashMap<String, MemberEntry> map = classEntry.getMethodMap();
+                if (map.containsKey(mi.getName())) {
+                    String newName = map.get(mi.getName()).name;
+                    Logger.log(Logger.LOG_METHOD, "method %s -> %s", mi.getName(), newName);
+                    mi.setName(newName);
                 }
             }
         }
@@ -365,11 +367,11 @@ public class ClassMap {
             }
 
             if (classEntry != null) {
-                for (Entry<String, String> e : classEntry.getFieldMap().entrySet()) {
-                    if (e.getKey().equals(fi.getName())) {
-                        Logger.log(Logger.LOG_METHOD, "field %s -> %s", fi.getName(), e.getValue());
-                        fi.setName(e.getValue());
-                    }
+                HashMap<String, MemberEntry> map = classEntry.getFieldMap();
+                if (map.containsKey(fi.getName())) {
+                    String newName = map.get(fi.getName()).name;
+                    Logger.log(Logger.LOG_METHOD, "field %s -> %s", fi.getName(), newName);
+                    fi.setName(newName);
                 }
             }
         }
@@ -415,9 +417,9 @@ public class ClassMap {
             ClassMapEntry entry = getEntry(oldClass);
             if (entry != null) {
                 newClass = entry.getObfName();
-                HashMap<String, String> map = (tag == ConstPool.CONST_Fieldref ? entry.getFieldMap() : entry.getMethodMap());
+                HashMap<String, MemberEntry> map = (tag == ConstPool.CONST_Fieldref ? entry.getFieldMap() : entry.getMethodMap());
                 if (map.containsKey(oldName)) {
-                    newName = map.get(oldName);
+                    newName = map.get(oldName).name;
                 }
             }
             if (oldType != null) {
@@ -558,9 +560,9 @@ public class ClassMap {
         ClassMapEntry entry = getEntry(oldClass);
         if (entry != null) {
             newClass = entry.getObfName();
-            HashMap<String, String> map = entry.getMethodMap();
+            HashMap<String, MemberEntry> map = entry.getMethodMap();
             if (map.containsKey(oldName)) {
-                newName = map.get(oldName);
+                newName = map.get(oldName).name;
             }
         }
 
@@ -578,9 +580,9 @@ public class ClassMap {
         ClassMapEntry entry = getEntry(oldClass);
         if (entry != null) {
             newClass = entry.getObfName();
-            HashMap<String, String> map = entry.getMethodMap();
+            HashMap<String, MemberEntry> map = entry.getMethodMap();
             if (map.containsKey(oldName)) {
-                newName = map.get(oldName);
+                newName = map.get(oldName).name;
             }
         }
 
@@ -598,9 +600,9 @@ public class ClassMap {
         ClassMapEntry entry = getEntry(oldClass);
         if (entry != null) {
             newClass = entry.getObfName();
-            HashMap<String, String> map = entry.getFieldMap();
+            HashMap<String, MemberEntry> map = entry.getFieldMap();
             if (map.containsKey(oldName)) {
-                newName = map.get(oldName);
+                newName = map.get(oldName).name;
             }
         }
 
@@ -711,12 +713,31 @@ public class ClassMap {
         putEntry(newEntry);
         return newEntry;
     }
+    
+    static class MemberEntry {
+        String name;
+        String type;
+        
+        MemberEntry(String name, String type) {
+            this.name = name;
+            this.type = type;
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || !(o instanceof MemberEntry)) {
+                return false;
+            }
+            MemberEntry that = (MemberEntry) o;
+            return this.name.equals(that.name) && this.type.equals(that.type);
+        }
+    }
 
     private static class ClassMapEntry {
         private String descName = null;
         private String obfName = null;
-        private HashMap<String, String> methodMap = new HashMap<String, String>();
-        private HashMap<String, String> fieldMap = new HashMap<String, String>();
+        private HashMap<String, MemberEntry> methodMap = new HashMap<String, MemberEntry>();
+        private HashMap<String, MemberEntry> fieldMap = new HashMap<String, MemberEntry>();
         private ClassMapEntry parent = null;
         private ArrayList<ClassMapEntry> interfaces = new ArrayList<ClassMapEntry>();
         private ClassMapEntry aliasFor = null;
@@ -725,52 +746,53 @@ public class ClassMap {
             this.descName = descName.replace('.', '/');
         }
 
-        public ClassMapEntry(String descName, String obfName) {
+        ClassMapEntry(String descName, String obfName) {
             this(descName);
             this.obfName = obfName.replace('.', '/');
         }
 
-        public ClassMapEntry(String descName, ClassMapEntry aliasFor) {
+        ClassMapEntry(String descName, ClassMapEntry aliasFor) {
             this(descName);
             this.aliasFor = aliasFor;
         }
 
-        public ClassMapEntry(String descName, String obfName, ClassMapEntry parent) {
+        ClassMapEntry(String descName, String obfName, ClassMapEntry parent) {
             this(descName, obfName);
             this.parent = parent;
         }
 
-        public void setParent(ClassMapEntry parent) {
+        void setParent(ClassMapEntry parent) {
             this.parent = parent;
         }
 
-        public void addInterface(ClassMapEntry iface) {
+        void addInterface(ClassMapEntry iface) {
             interfaces.add(iface);
         }
 
-        public void addMethod(String descName, String obfName) {
-            methodMap.put(descName, obfName);
+        void addMethod(String descName, String obfName, String obfType) {
+            methodMap.put(descName, new MemberEntry(obfName, obfType));
         }
 
-        public void addField(String descName, String obfName) {
-            fieldMap.put(descName, obfName);
+        void addField(String descName, String obfName, String obfType) {
+            fieldMap.put(descName, new MemberEntry(obfName, obfType));
         }
 
-        public ClassMapEntry getEntry() {
+        ClassMapEntry getEntry() {
             return aliasFor == null ? this : aliasFor.getEntry();
         }
 
-        public String getObfName() {
+        String getObfName() {
             return getEntry().obfName;
         }
 
-        public String getMethod(String descName) {
+        String getMethod(String descName) {
+            MemberEntry member;
             String obfName;
             if (aliasFor != null && (obfName = aliasFor.getMethod(descName)) != null) {
                 return obfName;
             }
-            if ((obfName = methodMap.get(descName)) != null) {
-                return obfName;
+            if ((member = methodMap.get(descName)) != null) {
+                return member.name;
             }
             if (parent != null && (obfName = parent.getMethod(descName)) != null) {
                 return obfName;
@@ -783,13 +805,14 @@ public class ClassMap {
             return null;
         }
 
-        public String getField(String descName) {
+        String getField(String descName) {
+            MemberEntry member;
             String obfName;
             if (aliasFor != null && (obfName = aliasFor.getField(descName)) != null) {
                 return obfName;
             }
-            if ((obfName = fieldMap.get(descName)) != null) {
-                return obfName;
+            if ((member = fieldMap.get(descName)) != null) {
+                return member.name;
             }
             if (parent != null && (obfName = parent.getField(descName)) != null) {
                 return obfName;
@@ -823,16 +846,16 @@ public class ClassMap {
             return sb.toString();
         }
 
-        public HashMap<String, String> getMethodMap() {
+        HashMap<String, MemberEntry> getMethodMap() {
             if (aliasFor != null) {
                 return aliasFor.getMethodMap();
             }
-            HashMap<String, String> map = new HashMap<String, String>();
+            HashMap<String, MemberEntry> map = new HashMap<String, MemberEntry>();
             addMethodMap(map);
             return map;
         }
 
-        private void addMethodMap(HashMap<String, String> map) {
+        private void addMethodMap(HashMap<String, MemberEntry> map) {
             for (ClassMapEntry entry : interfaces) {
                 entry.addMethodMap(map);
             }
@@ -842,16 +865,16 @@ public class ClassMap {
             map.putAll(methodMap);
         }
 
-        public HashMap<String, String> getFieldMap() {
+        HashMap<String, MemberEntry> getFieldMap() {
             if (aliasFor != null) {
                 return aliasFor.getFieldMap();
             }
-            HashMap<String, String> map = new HashMap<String, String>();
+            HashMap<String, MemberEntry> map = new HashMap<String, MemberEntry>();
             addFieldMap(map);
             return map;
         }
 
-        private void addFieldMap(HashMap<String, String> map) {
+        void addFieldMap(HashMap<String, MemberEntry> map) {
             if (parent != null) {
                 parent.addFieldMap(map);
             }

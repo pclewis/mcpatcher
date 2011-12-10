@@ -47,7 +47,7 @@ abstract public class BytecodeSignature extends ClassSignature {
                     String deobfName = classMod.getDeobfClass();
                     methodRef.className = deobfName;
                     tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
-                    tempClassMap.addMethodMap(deobfName, methodRef.getName(), methodInfo.getName());
+                    tempClassMap.addMethodMap(deobfName, methodRef.getName(), methodInfo.getName(), methodInfo.getDescriptor());
                     if (!methodRef.getType().equals("")) {
                         ArrayList<String> descTypes = ConstPoolUtils.parseDescriptor(methodRef.getType());
                         ArrayList<String> obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());

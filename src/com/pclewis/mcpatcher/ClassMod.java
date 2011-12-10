@@ -165,8 +165,8 @@ abstract public class ClassMod implements PatchComponent {
                     if (fm.match(fi)) {
                         String name = fm.getName();
                         if (name != null) {
-                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s", mapperType, fi.getName(), name);
-                            mod.getClassMap().addFieldMap(getDeobfClass(), name, fi.getName());
+                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s %s", mapperType, name, fi.getName(), fi.getDescriptor());
+                            mod.getClassMap().addFieldMap(getDeobfClass(), name, fi.getName(), fi.getDescriptor());
                         }
                         fm.afterMatch();
                     }
@@ -178,8 +178,8 @@ abstract public class ClassMod implements PatchComponent {
                     if (mm.match(mi)) {
                         String name = mm.getName();
                         if (name != null) {
-                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s", mapperType, mi.getName(), name);
-                            mod.getClassMap().addMethodMap(getDeobfClass(), name, mi.getName());
+                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s %s", mapperType, name, mi.getName(), mi.getDescriptor());
+                            mod.getClassMap().addMethodMap(getDeobfClass(), name, mi.getName(), mi.getDescriptor());
                         }
                         mm.afterMatch();
                     }
