@@ -13,6 +13,7 @@ public class HDTexture extends Mod {
     private boolean haveColorizerWater;
     private boolean haveAlternateFont;
     private boolean haveUnicode;
+    private boolean haveGetImageRGB;
 
     public HDTexture(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_TEXTURES;
@@ -24,6 +25,7 @@ public class HDTexture extends Mod {
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
         haveAlternateFont = minecraftVersion.compareTo("Beta 1.9 Prerelease 3") >= 0;
         haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
+        haveGetImageRGB = minecraftVersion.compareTo("Beta 1.6") >= 0;
 
         classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
@@ -85,7 +87,9 @@ public class HDTexture extends Mod {
             memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
-            memberMappers.add(new MethodMapper("getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I"));
+            if (haveGetImageRGB) {
+                memberMappers.add(new MethodMapper("getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I"));
+            }
             if (haveColorizerWater) {
                 memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
             }
