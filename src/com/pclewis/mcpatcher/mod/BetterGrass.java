@@ -15,12 +15,16 @@ public class BetterGrass extends Mod {
     private static final String field_MATRIX = "grassMatrix";
     private static final String fieldtype_MATRIX = "[[I";
 
+    private boolean haveAO;
+
     public BetterGrass(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.BETTER_GRASS;
         author = "MCPatcher";
         description = "Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.";
         version = "1.0";
         defaultEnabled = false;
+
+        haveAO = minecraftVersion.compareTo("Beta 1.6") >= 0;
 
         classMods.add(new MaterialMod());
         classMods.add(new BlockMod());
@@ -365,18 +369,206 @@ public class BetterGrass extends Mod {
         private int blueMultiplier;
 
         RenderBlocksMod() {
+            classSignatures.add(new ConstSignature(0.02734375));
+            classSignatures.add(new ConstSignature(0.0234375));
+            classSignatures.add(new ConstSignature(0.03515625));
+            classSignatures.add(new ConstSignature(0.03125));
+
+            MethodRef renderStandardBlockWithColorMultiplier = new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z");
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 0xf000f),
-                        INVOKEVIRTUAL, BinaryRegex.any(2),
-                        ALOAD_0,
-                        GETSTATIC, BinaryRegex.any(2),
-                        ALOAD_0
+                    if (methodInfo.getDescriptor().matches("^\\(L[^;]+;IIIFFF\\)Z$")) {
+                        return buildExpression(
+                            push(methodInfo, 0.5f),
+                            FSTORE, BinaryRegex.any(),
+                            push(methodInfo, 1.0f),
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                            push(methodInfo, 0.8f),
+                            FSTORE, BinaryRegex.any(),
+                            push(methodInfo, 0.6f),
+                            FSTORE, BinaryRegex.any(),
+
+                            BinaryRegex.any(0, 20),
+
+                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, 5,
+                            FMUL,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, 6,
+                            FMUL,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, 7,
+                            FMUL,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any())
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public void afterMatch(ClassFile classFile) {
+                    redMultiplier = matcher.getCaptureGroup(2)[0] & 0xff;
+                    greenMultiplier = matcher.getCaptureGroup(3)[0] & 0xff;
+                    blueMultiplier = matcher.getCaptureGroup(4)[0] & 0xff;
+                    Logger.log(Logger.LOG_CONST, "non-AO multipliers (R G B) = (%d %d %d)",
+                        redMultiplier, greenMultiplier, blueMultiplier
                     );
                 }
-            }.setMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z")));
+            }.setMethod(renderStandardBlockWithColorMultiplier));
+
+            memberMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO pre-1.8)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.backReference(3),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.backReference(3),
+                            FMUL,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        )),
+
+                        // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD_1,
+                            ALOAD_0,
+                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                            ILOAD_2,
+                            ILOAD_3,
+                            ILOAD, 4,
+                            BinaryRegex.any(1, 2),
+                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
+                        )),
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(5),
+                        DUP,
+                        ISTORE, getCaptureGroup(6),
+
+                        IFNE, branch("A"),
+                        ALOAD, getCaptureGroup(2),
+                        FLOAD, redMultiplier,
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        FLOAD, greenMultiplier,
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        FLOAD, blueMultiplier,
+                        FLOAD, getCaptureGroup(3),
+                        FMUL,
+                        getCaptureGroup(4),
+                        GOTO, branch("B"),
+
+                        label("A"),
+                        getCaptureGroup(1),
+
+                        label("B")
+                    );
+                }
+            }.targetMethod(renderStandardBlockWithColorMultiplier));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD_1,
+                            ALOAD_0,
+                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                            ILOAD_2,
+                            ILOAD_3,
+                            ILOAD, 4,
+                            BinaryRegex.any(1, 2),
+                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
+                        )),
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                        BinaryRegex.capture(BinaryRegex.any(20, 40)),
+
+                        // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.anyFLOAD,
+                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            FMUL,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        ))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        ISTORE, getCaptureGroup(2),
+
+                        // Tessellator.setColorOpaque_F(f * f18, f1 * f21, f2 * f24);
+                        ILOAD, getCaptureGroup(2),
+                        IFNE, branch("A"),
+                        ALOAD, getCaptureGroup(5),
+                        FLOAD, 5,
+                        FLOAD, getCaptureGroup(6),
+                        FMUL,
+                        FLOAD, 6,
+                        FLOAD, getCaptureGroup(7),
+                        FMUL,
+                        FLOAD, 7,
+                        FLOAD, getCaptureGroup(8),
+                        FMUL,
+                        getCaptureGroup(9),
+
+                        label("A"),
+                        getCaptureGroup(3),
+                        getCaptureGroup(4)
+                    );
+                }
+            }.targetMethod(renderStandardBlockWithColorMultiplier));
+
+            if (haveAO) {
+                setupAO();
+            }
+        }
+
+        private void setupAO() {
+            MethodRef renderStandardBlockWithAmbientOcclusion = new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z");
 
             classSignatures.add(new FixedBytecodeSignature(
                 ICONST_0,
@@ -425,56 +617,7 @@ public class BetterGrass extends Mod {
                         northFace, southFace, eastFace, westFace
                     );
                 }
-            });
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().matches("^\\(L[^;]+;IIIFFF\\)Z$")) {
-                        return buildExpression(
-                            push(methodInfo, 0.5f),
-                            FSTORE, BinaryRegex.any(),
-                            push(methodInfo, 1.0f),
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
-                            push(methodInfo, 0.8f),
-                            FSTORE, BinaryRegex.any(),
-                            push(methodInfo, 0.6f),
-                            FSTORE, BinaryRegex.any(),
-
-                            BinaryRegex.any(0, 20),
-
-                            FLOAD, BinaryRegex.backReference(1),
-                            FLOAD, 5,
-                            FMUL,
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
-
-                            FLOAD, BinaryRegex.backReference(1),
-                            FLOAD, 6,
-                            FMUL,
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
-
-                            FLOAD, BinaryRegex.backReference(1),
-                            FLOAD, 7,
-                            FMUL,
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any())
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-
-                @Override
-                public void afterMatch(ClassFile classFile) {
-                    redMultiplier = matcher.getCaptureGroup(2)[0] & 0xff;
-                    greenMultiplier = matcher.getCaptureGroup(3)[0] & 0xff;
-                    blueMultiplier = matcher.getCaptureGroup(4)[0] & 0xff;
-                    Logger.log(Logger.LOG_CONST, "non-AO multipliers (R G B) = (%d %d %d)",
-                        redMultiplier, greenMultiplier, blueMultiplier
-                    );
-                }
-            }.setMethodName("renderStandardBlockWithColorMultiplier"));
-
-            memberMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
+            }.setMethod(renderStandardBlockWithAmbientOcclusion));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -579,144 +722,7 @@ public class BetterGrass extends Mod {
                         label("south")
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z")));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO pre-1.8)";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.backReference(3),
-                            FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.backReference(3),
-                            FMUL,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
-                        )),
-
-                        // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD_1,
-                            ALOAD_0,
-                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
-                            ILOAD_2,
-                            ILOAD_3,
-                            ILOAD, 4,
-                            BinaryRegex.any(1, 2),
-                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
-                        )),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any())
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        getCaptureGroup(5),
-                        DUP,
-                        ISTORE, getCaptureGroup(6),
-
-                        IFNE, branch("A"),
-                        ALOAD, getCaptureGroup(2),
-                        FLOAD, redMultiplier,
-                        FLOAD, getCaptureGroup(3),
-                        FMUL,
-                        FLOAD, greenMultiplier,
-                        FLOAD, getCaptureGroup(3),
-                        FMUL,
-                        FLOAD, blueMultiplier,
-                        FLOAD, getCaptureGroup(3),
-                        FMUL,
-                        getCaptureGroup(4),
-                        GOTO, branch("B"),
-
-                        label("A"),
-                        getCaptureGroup(1),
-
-                        label("B")
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8)";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD_1,
-                            ALOAD_0,
-                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
-                            ILOAD_2,
-                            ILOAD_3,
-                            ILOAD, 4,
-                            BinaryRegex.any(1, 2),
-                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
-                        )),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
-
-                        BinaryRegex.capture(BinaryRegex.any(20, 40)),
-
-                        // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            FMUL,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
-                        ))
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        getCaptureGroup(1),
-                        ISTORE, getCaptureGroup(2),
-
-                        // Tessellator.setColorOpaque_F(f * f18, f1 * f21, f2 * f24);
-                        ILOAD, getCaptureGroup(2),
-                        IFNE, branch("A"),
-                        ALOAD, getCaptureGroup(5),
-                        FLOAD, 5,
-                        FLOAD, getCaptureGroup(6),
-                        FMUL,
-                        FLOAD, 6,
-                        FLOAD, getCaptureGroup(7),
-                        FMUL,
-                        FLOAD, 7,
-                        FLOAD, getCaptureGroup(8),
-                        FMUL,
-                        getCaptureGroup(9),
-
-                        label("A"),
-                        getCaptureGroup(3),
-                        getCaptureGroup(4)
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z")));
+            }.targetMethod(renderStandardBlockWithAmbientOcclusion));
         }
     }
 }
