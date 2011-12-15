@@ -46,6 +46,7 @@ class MinecraftJar {
             put("11w47a", "2ad75c809570663ec561ca707983a45b");
             put("11w48a", "cd86517284d62a0854234ae12abd019c");
             put("11w49a", "a1f7969b6b546c492fecabfcb8e8525a");
+            put("11w50a", "8763eb2747d57e2958295bbd06e764b1");
         }
     };
 
@@ -410,6 +411,8 @@ class MinecraftJar {
                         if (version != null) {
                             if (version.getVersionString().equals("rc1") && md5.equals("e8e264bcff34aecbc7ef7f850858c1d6")) {
                                 version = MinecraftVersion.parseVersion("Minecraft RC2 Prerelease 1");
+                            } else if (version.getVersionString().equals("11w49a") && md5.equals("8763eb2747d57e2958295bbd06e764b1")) {
+                                version = MinecraftVersion.parseVersion("Minecraft 11w50a");
                             }
                             break;
                         }
