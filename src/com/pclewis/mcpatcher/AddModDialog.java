@@ -109,7 +109,9 @@ public class AddModDialog extends JDialog {
 
     public void dispose() {
         hideZipDialog();
-        MCPatcherUtils.close(zipFile);
+        if (!editMode) {
+            MCPatcherUtils.close(zipFile);
+        }
         zipFile = null;
         super.dispose();
     }
