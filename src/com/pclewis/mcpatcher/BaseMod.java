@@ -1,12 +1,14 @@
 package com.pclewis.mcpatcher;
 
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.List;
 
 import static javassist.bytecode.Opcode.*;
 
@@ -215,6 +217,44 @@ public final class BaseMod extends Mod {
     }
 
     /**
+     * Matches IBlockAccess interface and maps getBlockId, getBlockMetadata methods.
+     */
+    public static class IBlockAccessMod extends ClassMod {
+        public IBlockAccessMod() {
+            classSignatures.add(new ClassSignature() {
+                @Override
+                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+                    return classFile.isAbstract();
+                }
+            });
+
+            classSignatures.add(new ClassSignature() {
+                @Override
+                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+                    List list = classFile.getMethods();
+                    return list.size() >= 1 && ((MethodInfo) list.get(0)).getDescriptor().equals("(III)I");
+                }
+            });
+
+            memberMappers.add(new MethodMapper(new String[]{"getBlockId", "getBlockMetadata"}, "(III)I"));
+        }
+
+        public IBlockAccessMod mapMaterial() {
+            memberMappers.add(new MethodMapper("getBlockMaterial", "(III)LMaterial;"));
+            return this;
+        }
+    }
+
+    /**
+     * Matches Block class.
+     */
+    public static class BlockMod extends ClassMod {
+        public BlockMod() {
+            classSignatures.add(new ConstSignature(" is already occupied by "));
+        }
+    }
+
+    /**
      * Matches World class.
      */
     public static class WorldMod extends ClassMod {
@@ -225,7 +265,7 @@ public final class BaseMod extends Mod {
         }
     }
 
-    /**
+    /*
      * Matches FontRenderer class and maps charWidth, fontTextureName, and spaceWidth fields.
      */
     public static class FontRendererMod extends ClassMod {
@@ -259,6 +299,16 @@ public final class BaseMod extends Mod {
                 new ConstSignature("0123456789abcdef"),
                 new ConstSignature("0123456789abcdefk")
             ));
+        }
+    }
+
+    /**
+     * Matches RenderBlocks class.
+     */
+    public static class RenderBlocksMod extends ClassMod {
+        public RenderBlocksMod() {
+            classSignatures.add(new ConstSignature(0.1875));
+            classSignatures.add(new ConstSignature(0.01));
         }
     }
 }

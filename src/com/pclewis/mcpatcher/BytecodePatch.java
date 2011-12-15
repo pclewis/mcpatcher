@@ -290,6 +290,15 @@ abstract public class BytecodePatch extends ClassPatch {
     }
 
     /**
+     * Get matching bytecode string after a match.  Can only be called in getReplacementBytes.
+     *
+     * @return byte array
+     */
+    final protected byte[] getMatch() {
+        return matcher.getMatch();
+    }
+
+    /**
      * BytecodePatch that inserts code after a match.
      */
     abstract public static class InsertAfter extends BytecodePatch {

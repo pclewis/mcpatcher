@@ -2,9 +2,12 @@ package com.pclewis.mcpatcher;
 
 import net.minecraft.client.Minecraft;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.ZipFile;
 
 /**
@@ -25,6 +28,7 @@ public class MCPatcherUtils {
     public static final String HD_FONT = "HD Font";
     public static final String BETTER_GRASS = "Better Grass";
     public static final String RANDOM_MOBS = "Random Mobs";
+    public static final String CUSTOM_COLORS = "Custom Colors";
     public static final String GLSL_SHADERS = "GLSL Shaders";
 
     public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
@@ -34,6 +38,7 @@ public class MCPatcherUtils {
     public static final String TEXTURE_UTILS_CLASS = "com.pclewis.mcpatcher.mod.TextureUtils";
     public static final String CUSTOM_ANIMATION_CLASS = "com.pclewis.mcpatcher.mod.CustomAnimation";
     public static final String RANDOM_MOBS_CLASS = "com.pclewis.mcpatcher.mod.MobRandomizer";
+    public static final String COLORIZER_CLASS = "com.pclewis.mcpatcher.mod.Colorizer";
     public static final String SHADERS_CLASS = "com.pclewis.mcpatcher.mod.Shaders";
 
     private MCPatcherUtils() {
@@ -379,5 +384,43 @@ public class MCPatcherUtils {
      */
     public static String getPatcherVersion() {
         return patcherVersion;
+    }
+
+    /**
+     * Attempts to read image.  Closes input stream regardless of success or failure.
+     *
+     * @param input open input stream
+     * @return image or null
+     */
+    public static BufferedImage readImage(InputStream input) {
+        BufferedImage image = null;
+        if (input != null) {
+            try {
+                image = ImageIO.read(input);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                close(input);
+            }
+        }
+        return image;
+    }
+
+    /**
+     * Get array of rgb values from image.
+     *
+     * @param image input image
+     * @return rgb array
+     */
+    public static int[] getImageRGB(BufferedImage image) {
+        if (image == null) {
+            return null;
+        } else {
+            int width = image.getWidth();
+            int height = image.getHeight();
+            int[] rgb = new int[width * height];
+            image.getRGB(0, 0, width, height, rgb, 0, width);
+            return rgb;
+        }
     }
 }

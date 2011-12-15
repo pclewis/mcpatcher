@@ -32,7 +32,7 @@ public class BetterGrass extends Mod {
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 1") >= 0) {
             classMods.add(new BlockGrassMod("Mycelium", 110, 77, 78));
         }
-        classMods.add(new IBlockAccessMod());
+        classMods.add(new BaseMod.IBlockAccessMod().mapMaterial());
         classMods.add(new RenderBlocksMod());
     }
 
@@ -85,10 +85,8 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class BlockMod extends ClassMod {
+    private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
-            classSignatures.add(new ConstSignature(" is already occupied by "));
-
             memberMappers.add(new MethodMapper("getBlockTexture", "(LIBlockAccess;IIII)I"));
         }
     }
@@ -333,28 +331,6 @@ public class BetterGrass extends Mod {
         @Override
         public String getDeobfClass() {
             return "Block" + blockName;
-        }
-    }
-
-    private class IBlockAccessMod extends ClassMod {
-        IBlockAccessMod() {
-            classSignatures.add(new ClassSignature() {
-                @Override
-                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
-                    return classFile.isAbstract();
-                }
-            });
-
-            classSignatures.add(new ClassSignature() {
-                @Override
-                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
-                    List list = classFile.getMethods();
-                    return list.size() >= 1 && ((MethodInfo) list.get(0)).getDescriptor().equals("(III)I");
-                }
-            });
-
-            memberMappers.add(new MethodMapper("getBlockMaterial", "(III)LMaterial;"));
-            memberMappers.add(new MethodMapper(new String[]{"getBlockId", "getBlockMetadata"}, "(III)I"));
         }
     }
 

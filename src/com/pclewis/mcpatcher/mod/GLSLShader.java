@@ -1092,13 +1092,10 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class RenderBlocksMod extends ClassMod {
+    private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
         String[] faceMethods = new String[6];
 
         RenderBlocksMod() {
-            classSignatures.add(new ConstSignature(0.1875D));
-            classSignatures.add(new ConstSignature(0.01D));
-
             setupBlockFace(0, "Bottom", 0, -1, 0);
             setupBlockFace(1, "Top", 0, 1, 0);
             setupBlockFace(2, "East", 0, 0, -1);

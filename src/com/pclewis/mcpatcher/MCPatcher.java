@@ -22,11 +22,11 @@ final public class MCPatcher {
     /**
      * Minor MCPatcher version number
      */
-    public static final int MINOR_VERSION = 2;
+    public static final int MINOR_VERSION = 3;
     /**
      * MCPatcher release number
      */
-    public static final int RELEASE_VERSION = 3;
+    public static final int RELEASE_VERSION = 0;
     /**
      * MCPatcher patch level
      */
