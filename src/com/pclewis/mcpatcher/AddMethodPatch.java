@@ -72,7 +72,8 @@ abstract public class AddMethodPatch extends ClassPatch {
         boolean patched = false;
         prePatch(classFile);
         ConstPool constPool = classFile.getConstPool();
-        MethodInfo methodInfo = new MethodInfo(constPool, name, classMod.getClassMap().mapTypeString(type));
+        MethodRef methodRef = (MethodRef) classMod.getClassMap().map(new MethodRef(classMod.getDeobfClass(), name, type));
+        MethodInfo methodInfo = new MethodInfo(constPool, methodRef.getName(), methodRef.getType());
         methodInfo.setAccessFlags(accessFlags);
         exceptionTable = new ExceptionTable(constPool);
         try {
