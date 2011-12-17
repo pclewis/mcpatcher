@@ -39,6 +39,7 @@ public class CustomColors extends Mod {
         classMods.add(new BiomeGenBaseMod());
         classMods.add(new BiomeGenSwampMod());
         classMods.add(new BlockFluidMod());
+        classMods.add(new BlockCauldronMod());
 
         classMods.add(new PotionMod());
         classMods.add(new PotionHelperMod());
@@ -442,6 +443,25 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(colorMultiplier));
+        }
+    }
+    
+    private class BlockCauldronMod extends ClassMod {
+        BlockCauldronMod() {
+            parentClass = "Block";
+            
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.lookBehind(BinaryRegex.build(push(methodInfo, 138), BinaryRegex.any(0, 20)), true),
+                        BinaryRegex.lookBehind(BinaryRegex.build(push(methodInfo, 154), BinaryRegex.any(0, 20)), true),
+                        BinaryRegex.lookBehind(BinaryRegex.build(push(methodInfo, 155), BinaryRegex.any(0, 20)), true),
+                        IRETURN,
+                        BinaryRegex.end()
+                    );
+                }
+            });
         }
     }
 
