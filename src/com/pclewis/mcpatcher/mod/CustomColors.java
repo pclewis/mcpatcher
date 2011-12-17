@@ -42,7 +42,7 @@ public class CustomColors extends Mod {
         classMods.add(new BiomeGenSwampMod());
         classMods.add(new BlockFluidMod());
         classMods.add(new BlockCauldronMod());
-        classMods.add(new ItemMod());
+        classMods.add(new BaseMod.ItemMod());
         classMods.add(new ItemBlockMod());
 
         classMods.add(new PotionMod());
@@ -466,29 +466,6 @@ public class CustomColors extends Mod {
                     );
                 }
             });
-        }
-    }
-
-    private class ItemMod extends ClassMod {
-        ItemMod() {
-            classSignatures.add(new ConstSignature("CONFLICT @ "));
-            classSignatures.add(new ConstSignature("coal"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals("(I)I")) {
-                        return buildExpression(
-                            BinaryRegex.begin(),
-                            push(methodInfo, 0xffffff),
-                            IRETURN,
-                            BinaryRegex.end()
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            }.setMethodName("getColorFromDamage"));
         }
     }
 

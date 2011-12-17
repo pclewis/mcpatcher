@@ -255,6 +255,32 @@ public final class BaseMod extends Mod {
     }
 
     /**
+     * Matches Item class and maps getColorFromDamage method.
+     */
+    public static class ItemMod extends ClassMod {
+        public ItemMod() {
+            classSignatures.add(new ConstSignature("CONFLICT @ "));
+            classSignatures.add(new ConstSignature("coal"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getDescriptor().equals("(I)I")) {
+                        return buildExpression(
+                            BinaryRegex.begin(),
+                            push(methodInfo, 0xffffff),
+                            IRETURN,
+                            BinaryRegex.end()
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }.setMethodName("getColorFromDamage"));
+        }
+    }
+
+    /**
      * Matches World class.
      */
     public static class WorldMod extends ClassMod {
