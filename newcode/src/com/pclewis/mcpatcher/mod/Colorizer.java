@@ -327,7 +327,7 @@ public class Colorizer {
             lightMethod = Integer.parseInt(properties.getProperty("light.method"));
         } catch (Throwable e) {
         }
-        System.out.printf("light.method=%d\n", lightMethod);
+        MCPatcherUtils.log("light.method=%d", lightMethod);
 
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true)) {
             loadColorMap(5);
