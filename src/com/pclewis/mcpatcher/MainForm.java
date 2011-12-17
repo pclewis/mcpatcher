@@ -739,6 +739,12 @@ class MainForm {
         private boolean widthSet = false;
 
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (!(value instanceof Mod)) {
+                Logger.log(Logger.LOG_GUI, "table cell %d,%d is of wrong type %s",
+                    row, column, value == null ? "(null)" : value.getClass().getName()
+                );
+                return this;
+            }
             Mod mod = (Mod) value;
             if (!table.isEnabled() || !mod.okToApply()) {
                 setBackground(table.getBackground());
