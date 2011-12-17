@@ -1583,6 +1583,9 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature(0.1875));
             classSignatures.add(new ConstSignature(0.01));
 
+            MethodRef renderBlockFallingSand = new MethodRef(getDeobfClass(), "renderBlockFallingSand", "(LBlock;LWorld;III)V");
+            final MethodRef setColorOpaque_F = new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V");
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -1603,8 +1606,6 @@ public class CustomColors extends Mod {
                 .addXref(2, new MethodRef("Block", "colorMultiplier", "(LIBlockAccess;III)I"))
             );
 
-            final MethodRef setColorOpaque_F = new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V");
-
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -1623,6 +1624,24 @@ public class CustomColors extends Mod {
                     );
                 }
             }.addXref(1, setColorOpaque_F));
+
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        push(methodInfo, 0.5f),
+                        FSTORE, 6,
+                        FCONST_1,
+                        FSTORE, 7,
+                        push(methodInfo, 0.8f),
+                        FSTORE, 8,
+                        push(methodInfo, 0.6f),
+                        FSTORE, 9
+                    );
+                }
+            }.setMethod(renderBlockFallingSand));
 
             memberMappers.add(new MethodMapper("renderBlockCauldron", "(LBlockCauldron;III)Z"));
 
@@ -1661,6 +1680,76 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockCauldron", "(LBlockCauldron;III)Z")));
+            
+            patches.add(new BytecodePatch() {
+                private boolean done;
+                
+                @Override
+                public String getDescription() {
+                    return "colorize falling sand and gravel";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // tessellator.setColorOpaque_F($1 * f5, $1 * f5, $1 * f5);
+                        ALOAD, 10,
+                        BinaryRegex.capture(BytecodeMatcher.anyFLOAD),
+                        FLOAD, 12,
+                        FMUL,
+                        BinaryRegex.backReference(1),
+                        FLOAD, 12,
+                        FMUL,
+                        BinaryRegex.backReference(1),
+                        FLOAD, 12,
+                        FMUL,
+                        reference(methodInfo, INVOKEVIRTUAL, setColorOpaque_F)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    byte[] extraCode;
+                    if (done) {
+                        extraCode = new byte[0];
+                    } else {
+                        done = true;
+                        extraCode = buildCode(
+                            // setColorF(Colorizer.colorizeBlock(block, world.getWorldChunkManager(), i, j, k));
+                            ALOAD_1,
+                            ALOAD_2,
+                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
+                            ILOAD_3,
+                            ILOAD, 4,
+                            ILOAD, 5,
+                            reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;III)I")),
+                            reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V"))
+                        );
+                    }
+                    return buildCode(
+                        extraCode,
+
+                        // tessellator.setColorOpaque_F(Colorizer.setColor[0] * f5, Colorizer.setColor[1] * f5, Colorizer.setColor[2] * f5);
+                        ALOAD, 10,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        FLOAD, 12,
+                        FMUL,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        FLOAD, 12,
+                        FMUL,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        FLOAD, 12,
+                        FMUL,
+                        reference(methodInfo, INVOKEVIRTUAL, setColorOpaque_F)
+                    );
+                }
+            }.targetMethod(renderBlockFallingSand));
         }
     }
 

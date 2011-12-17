@@ -65,6 +65,8 @@ public class Colorizer {
     public static float lavaDropRed;
     public static float lavaDropGreen;
     public static float lavaDropBlue;
+    
+    public static final float[] setColor = new float[3];
 
     public static int colorizeBiome(int origColor, int index, double temperature, double rainfall) {
         checkUpdate();
@@ -122,6 +124,10 @@ public class Colorizer {
             }
         }
         return value == null ? origColor : value;
+    }
+
+    public static void setColorF(int color) {
+        intToFloat3(color, setColor);
     }
 
     public static int getWaterBottleColor() {
