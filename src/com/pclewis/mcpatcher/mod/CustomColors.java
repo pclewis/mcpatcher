@@ -44,6 +44,7 @@ public class CustomColors extends Mod {
         classMods.add(new BlockCauldronMod());
         classMods.add(new BaseMod.ItemMod());
         classMods.add(new ItemBlockMod());
+        classMods.add(new ItemRendererMod());
 
         classMods.add(new PotionMod());
         classMods.add(new PotionHelperMod());
@@ -504,6 +505,53 @@ public class CustomColors extends Mod {
                         ILOAD_1,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getItemColorFromDamage", "(III)I")),
                         IRETURN
+                    );
+                }
+            });
+        }
+    }
+    
+    private class ItemRendererMod extends ClassMod {
+        ItemRendererMod() {
+            classSignatures.add(new ConstSignature("/terrain.png"));
+            classSignatures.add(new ConstSignature("/gui/items.png"));
+            classSignatures.add(new ConstSignature("%blur%/misc/glint.png"));
+            classSignatures.add(new ConstSignature("/misc/mapbg.png"));
+            
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "override water block color in third person";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.lookBehind(BinaryRegex.build(
+                            // if (itemstack.itemID > 256) {
+                            ALOAD_2,
+                            BytecodeMatcher.captureReference(GETFIELD),
+                            push(methodInfo, 256),
+                            IF_ICMPGE, BinaryRegex.any(2),
+
+                            // ...
+                            BinaryRegex.any(0, 300)
+                        ), true),
+
+                        // GL11.glTranslatef(-0.9375f, -0.0625f, 0.0f);
+                        push(methodInfo, -0.9375f),
+                        push(methodInfo, -0.0625f),
+                        FCONST_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glTranslatef", "(FFF)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_2,
+                        getCaptureGroup(1),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWaterBlockGL", "(I)V"))
                     );
                 }
             });

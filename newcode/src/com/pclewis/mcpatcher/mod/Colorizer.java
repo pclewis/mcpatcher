@@ -2,6 +2,7 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.*;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -258,6 +259,13 @@ public class Colorizer {
         checkUpdate();
         int rgb = colorizeBiome(0xffffff, 5);
         intToFloat3(rgb, waterColor);
+    }
+    
+    public static void colorizeWaterBlockGL(int blockID) {
+        if (blockID == 8 || blockID == 9) {
+            computeWaterColor();
+            GL11.glColor4f(waterColor[0], waterColor[1], waterColor[2], 1.0f);
+        }
     }
 
     public static boolean computeLavaDropColor(int age) {
