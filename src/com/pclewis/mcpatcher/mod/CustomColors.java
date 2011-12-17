@@ -1509,6 +1509,65 @@ public class CustomColors extends Mod {
                 .addXref(1, new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;"))
                 .addXref(2, new MethodRef("Block", "colorMultiplier", "(LIBlockAccess;III)I"))
             );
+
+            final MethodRef setColorOpaque_F = new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD, 5,
+                        FLOAD, 6,
+                        FLOAD, 8,
+                        FMUL,
+                        FLOAD, 6,
+                        FLOAD, 9,
+                        FMUL,
+                        FLOAD, 6,
+                        FLOAD, 10,
+                        FMUL,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                    ); 
+                }
+            }.addXref(1, setColorOpaque_F));
+            
+            memberMappers.add(new MethodMapper("renderBlockCauldron", "(LBlockCauldron;III)Z"));
+            
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "colorize cauldron water color";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 205),
+                        ISTORE, BinaryRegex.any()
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Colorizer.computerWaterDropColor();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterDropColor", "()V")),
+
+                        // tessellator.setColorOpaque(Colorizer.waterDropColor[0], Colorizer.waterDropColor[1], Colorizer.waterDropColor[2]);
+                        ALOAD, 5,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        reference(methodInfo, INVOKEVIRTUAL, setColorOpaque_F)
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockCauldron", "(LBlockCauldron;III)Z")));
         }
     }
 

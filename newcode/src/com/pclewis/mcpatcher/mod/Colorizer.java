@@ -246,6 +246,12 @@ public class Colorizer {
         }
     }
     
+    public static void computeWaterDropColor() {
+        checkUpdate();
+        int rgb = colorizeBiome(0xffffff, 5);
+        intToFloat3(rgb, waterDropColor);
+    }
+    
     public static boolean computeLavaDropColor(int age) {
         checkUpdate();
         if (lavaDropColor == null) {
