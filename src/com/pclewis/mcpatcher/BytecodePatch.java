@@ -308,6 +308,7 @@ abstract public class BytecodePatch extends ClassPatch {
             if (insertBytes == null) {
                 return null;
             } else {
+                labelOffset = matcher.getMatchLength();
                 return buildCode(
                     matcher.getMatch(),
                     insertBytes
@@ -328,7 +329,6 @@ abstract public class BytecodePatch extends ClassPatch {
             if (insertBytes == null) {
                 return null;
             } else {
-                labelOffset = matcher.getMatchLength();
                 return buildCode(
                     insertBytes,
                     matcher.getMatch()
