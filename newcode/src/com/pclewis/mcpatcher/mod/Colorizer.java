@@ -31,7 +31,7 @@ public class Colorizer {
     private static int[][] colorMaps; // bitmaps from COLOR_MAPS
     private static int[] colorMapDefault; // default value (x=127, y=127) from each color map
     private static int[] lilypadColor; // lilypad
-    private static float[] waterDropBaseColor; // drop.water
+    private static float[] waterBaseColor; // drop.water
     private static float[] lavaDropColor; // /misc/lavadropcolor.png
     private static int[] waterBottleColor; // potion.water
     private static float[][] redstoneColor; // /misc/redstonecolor.png
@@ -51,7 +51,7 @@ public class Colorizer {
     private static int lightMethod;
 
     private static final boolean useDropColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "drop", true);
-    public static float[] waterDropColor;
+    public static float[] waterColor;
 
     private static final boolean useEggColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true);
     private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>(); 
@@ -231,14 +231,14 @@ public class Colorizer {
         }
     }
 
-    public static boolean computeWaterDropColor(WorldChunkManager chunkManager, double x, double y, double z) {
+    public static boolean computeWaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
         checkUpdate();
         if (useDropColors) {
             int rgb = colorizeBiome(0xffffff, 5, chunkManager, (int) x, (int) y, (int) z);
             float[] multiplier = new float[3];
             intToFloat3(rgb, multiplier);
             for (int i = 0; i < 3; i++) {
-                waterDropColor[i] = multiplier[i] * waterDropBaseColor[i];
+                waterColor[i] = multiplier[i] * waterBaseColor[i];
             }
             return true;
         } else {
@@ -246,10 +246,10 @@ public class Colorizer {
         }
     }
     
-    public static void computeWaterDropColor() {
+    public static void computeWaterColor() {
         checkUpdate();
         int rgb = colorizeBiome(0xffffff, 5);
-        intToFloat3(rgb, waterDropColor);
+        intToFloat3(rgb, waterColor);
     }
     
     public static boolean computeLavaDropColor(int age) {
@@ -298,8 +298,8 @@ public class Colorizer {
             colorMapDefault[colorIndex] = 0xffffff;
         }
         lilypadColor = new int[]{0x208030};
-        waterDropBaseColor = new float[]{0.2f, 0.3f, 1.0f};
-        waterDropColor = new float[]{0.2f, 0.3f, 1.0f};
+        waterBaseColor = new float[]{0.2f, 0.3f, 1.0f};
+        waterColor = new float[]{0.2f, 0.3f, 1.0f};
         lavaDropColor = null;
         waterBottleColor = new int[]{0x385dc6};
         redstoneColor = null;
@@ -376,7 +376,7 @@ public class Colorizer {
             }
         }
         if (useDropColors) {
-            loadFloatColor("drop.water", waterDropBaseColor);
+            loadFloatColor("drop.water", waterBaseColor);
             int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(LAVA_DROP_COLORS)));
             if (rgb != null) {
                 lavaDropColor = new float[3 * rgb.length];

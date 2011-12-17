@@ -948,7 +948,7 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // if (Colorizer.computeWaterDropColor(worldObj.getWorldChunkManager(), i, j, k)) {
+                        // if (Colorizer.computeWaterColor(worldObj.getWorldChunkManager(), i, j, k)) {
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "worldObj", "LWorld;")),
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
@@ -958,26 +958,26 @@ public class CustomColors extends Mod {
                         reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "posY", "D")),
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "posZ", "D")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterDropColor", "(LWorldChunkManager;DDD)Z")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "(LWorldChunkManager;DDD)Z")),
                         IFEQ, branch("A"),
 
-                        // particleRed = Colorizer.waterDropColor[0];
+                        // particleRed = Colorizer.waterColor[0];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_0,
                         FALOAD,
                         reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
-                        // particleGreen = Colorizer.waterDropColor[1];
+                        // particleGreen = Colorizer.waterColor[1];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_1,
                         FALOAD,
                         reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
-                        // particleBlue = Colorizer.waterDropColor[2];
+                        // particleBlue = Colorizer.waterColor[2];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
@@ -1550,18 +1550,18 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // Colorizer.computerWaterDropColor();
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterDropColor", "()V")),
+                        // Colorizer.computerWaterColor();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "()V")),
 
-                        // tessellator.setColorOpaque(Colorizer.waterDropColor[0], Colorizer.waterDropColor[1], Colorizer.waterDropColor[2]);
+                        // tessellator.setColorOpaque(Colorizer.waterColor[0], Colorizer.waterColor[1], Colorizer.waterColor[2]);
                         ALOAD, 5,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_0,
                         FALOAD,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_1,
                         FALOAD,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterDropColor", "[F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         reference(methodInfo, INVOKEVIRTUAL, setColorOpaque_F)
