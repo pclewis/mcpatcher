@@ -21,6 +21,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (1130 files)
    AO faces (N S E W) = (17 18 15 16)
   RenderBlocks matches acr.class
    renderBlockRedstoneWire matches g (Lyy;III)Z
+   renderBlockFallingSand matches a (Lyy;Lry;III)V
    renderBlockFluids matches n (Lyy;III)Z
   Item matches acy.class
    getColorFromDamage matches c (I)I
@@ -253,7 +254,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (second pass)
 [YES] HD Font 1.2 - Provides support for higher resolution fonts.
 [YES] Better Grass 1.0 - Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.
 [YES] Random Mobs 1.1 - Randomize mob skins if texture pack supports it. Based on Balthichou's mod.
-[YES] Custom Colors 1.0 - Gives texture packs control over hardcoded colors in the game.
+[YES] Custom Colors 1.1 - Gives texture packs control over hardcoded colors in the game.
 
 #### Class map:
 HD Textures
@@ -554,6 +555,7 @@ Custom Colors
     class PotionHelper (pk.class)
     class RenderBlocks (acr.class)
         method renderBlockCauldron -> a (Lic;III)Z
+        method renderBlockFallingSand -> a (Lyy;Lry;III)V
         method renderBlockFluids -> n (Lyy;III)Z
         method renderBlockRedstoneWire -> g (Lyy;III)Z
         field blockAccess -> a Lkq;
@@ -1383,6 +1385,122 @@ Patching...
                                GETSTATIC 0x03 0x6a
                                ICONST_2
                                FALOAD
+                               INVOKEVIRTUAL 0x01 0x68
+    colorize falling sand and gravel a(Lyy;Lry;III)V@58
+     ALOAD 0x0a                ALOAD_1
+     FLOAD 0x06                ALOAD_2
+     FLOAD 0x0c                INVOKEVIRTUAL 0x03 0x6f
+     FMUL                      ILOAD_3
+     FLOAD 0x06                ILOAD 0x04
+     FLOAD 0x0c                ILOAD 0x05
+     FMUL                      INVOKESTATIC 0x03 0x73
+     FLOAD 0x06                INVOKESTATIC 0x03 0x76
+     FLOAD 0x0c                ALOAD 0x0a
+     FMUL                      GETSTATIC 0x03 0x79
+     INVOKEVIRTUAL 0x01 0x68   ICONST_0
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
+                               GETSTATIC 0x03 0x79
+                               ICONST_1
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
+                               GETSTATIC 0x03 0x79
+                               ICONST_2
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x68
+    colorize falling sand and gravel a(Lyy;Lry;III)V@137
+     ALOAD 0x0a                ALOAD 0x0a
+     FLOAD 0x07                GETSTATIC 0x03 0x79
+     FLOAD 0x0c                ICONST_0
+     FMUL                      FALOAD
+     FLOAD 0x07                FLOAD 0x0c
+     FLOAD 0x0c                FMUL
+     FMUL                      GETSTATIC 0x03 0x79
+     FLOAD 0x07                ICONST_1
+     FLOAD 0x0c                FALOAD
+     FMUL                      FLOAD 0x0c
+     INVOKEVIRTUAL 0x01 0x68   FMUL
+                               GETSTATIC 0x03 0x79
+                               ICONST_2
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x68
+    colorize falling sand and gravel a(Lyy;Lry;III)V@200
+     ALOAD 0x0a                ALOAD 0x0a
+     FLOAD 0x08                GETSTATIC 0x03 0x79
+     FLOAD 0x0c                ICONST_0
+     FMUL                      FALOAD
+     FLOAD 0x08                FLOAD 0x0c
+     FLOAD 0x0c                FMUL
+     FMUL                      GETSTATIC 0x03 0x79
+     FLOAD 0x08                ICONST_1
+     FLOAD 0x0c                FALOAD
+     FMUL                      FLOAD 0x0c
+     INVOKEVIRTUAL 0x01 0x68   FMUL
+                               GETSTATIC 0x03 0x79
+                               ICONST_2
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x68
+    colorize falling sand and gravel a(Lyy;Lry;III)V@263
+     ALOAD 0x0a                ALOAD 0x0a
+     FLOAD 0x08                GETSTATIC 0x03 0x79
+     FLOAD 0x0c                ICONST_0
+     FMUL                      FALOAD
+     FLOAD 0x08                FLOAD 0x0c
+     FLOAD 0x0c                FMUL
+     FMUL                      GETSTATIC 0x03 0x79
+     FLOAD 0x08                ICONST_1
+     FLOAD 0x0c                FALOAD
+     FMUL                      FLOAD 0x0c
+     INVOKEVIRTUAL 0x01 0x68   FMUL
+                               GETSTATIC 0x03 0x79
+                               ICONST_2
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x68
+    colorize falling sand and gravel a(Lyy;Lry;III)V@326
+     ALOAD 0x0a                ALOAD 0x0a
+     FLOAD 0x09                GETSTATIC 0x03 0x79
+     FLOAD 0x0c                ICONST_0
+     FMUL                      FALOAD
+     FLOAD 0x09                FLOAD 0x0c
+     FLOAD 0x0c                FMUL
+     FMUL                      GETSTATIC 0x03 0x79
+     FLOAD 0x09                ICONST_1
+     FLOAD 0x0c                FALOAD
+     FMUL                      FLOAD 0x0c
+     INVOKEVIRTUAL 0x01 0x68   FMUL
+                               GETSTATIC 0x03 0x79
+                               ICONST_2
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x68
+    colorize falling sand and gravel a(Lyy;Lry;III)V@389
+     ALOAD 0x0a                ALOAD 0x0a
+     FLOAD 0x09                GETSTATIC 0x03 0x79
+     FLOAD 0x0c                ICONST_0
+     FMUL                      FALOAD
+     FLOAD 0x09                FLOAD 0x0c
+     FLOAD 0x0c                FMUL
+     FMUL                      GETSTATIC 0x03 0x79
+     FLOAD 0x09                ICONST_1
+     FLOAD 0x0c                FALOAD
+     FMUL                      FLOAD 0x0c
+     INVOKEVIRTUAL 0x01 0x68   FMUL
+                               GETSTATIC 0x03 0x79
+                               ICONST_2
+                               FALOAD
+                               FLOAD 0x0c
+                               FMUL
                                INVOKEVIRTUAL 0x01 0x68
  applying EntitySplashFX patch to adi.class for mod Custom Colors
     override splash drop color <init>(Lry;DDDDDD)V@69
@@ -2410,6 +2528,48 @@ Patching...
                                NOP
                                LDC 0x01
                                INVOKESTATIC 0x00 0x4b
+ applying EntityRainFX patch to ub.class for mod Custom Colors
+    override rain drop color <init>(Lry;DDD)V@52
+     label A -> instruction 107
+     label B -> instruction 125
+     branch offset IFEQ A -> +33 @74
+     branch offset GOTO B -> +21 @104
+     ALOAD_0                   ALOAD_0
+     FCONST_1                  GETFIELD 0x00 0x22
+     PUTFIELD 0x00 0x20        INVOKEVIRTUAL 0x00 0x90
+     ALOAD_0                   ALOAD_0
+     FCONST_1                  GETFIELD 0x00 0x26
+     PUTFIELD 0x00 0x21        ALOAD_0
+     ALOAD_0                   GETFIELD 0x00 0x27
+     FCONST_1                  ALOAD_0
+     PUTFIELD 0x00 0x1d        GETFIELD 0x00 0x28
+                               INVOKESTATIC 0x00 0x96
+                               IFEQ 0x00 0x21
+                               ALOAD_0
+                               GETSTATIC 0x00 0x9a
+                               ICONST_0
+                               FALOAD
+                               PUTFIELD 0x00 0x20
+                               ALOAD_0
+                               GETSTATIC 0x00 0x9a
+                               ICONST_1
+                               FALOAD
+                               PUTFIELD 0x00 0x21
+                               ALOAD_0
+                               GETSTATIC 0x00 0x9a
+                               ICONST_2
+                               FALOAD
+                               PUTFIELD 0x00 0x1d
+                               GOTO 0x00 0x15
+                               ALOAD_0
+                               LDC 0x04
+                               PUTFIELD 0x00 0x20
+                               ALOAD_0
+                               LDC_W 0x00 0x9b
+                               PUTFIELD 0x00 0x21
+                               ALOAD_0
+                               FCONST_1
+                               PUTFIELD 0x00 0x1d
  applying ItemBlock patch to uw.class for mod Custom Colors
     insert method getColorFromDamage (I)I stack size 3, local vars 2
  applying FlowWater patch to va.class for mod HD Textures
@@ -3425,101 +3585,101 @@ Patching...
    method signature (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> (Ljava/lang/String;Labg;)V
    field signature Lnet/minecraft/src/TexturePackBase; -> Lafs;
     method ref net.minecraft.src.WorldChunkManager.getTemperature (III)F -> vh.a (III)F colorizeBiome(IILvh;III)I@11
-     INVOKEVIRTUAL 0x00 0x07   INVOKEVIRTUAL 0x02 0xbd
+     INVOKEVIRTUAL 0x00 0x07   INVOKEVIRTUAL 0x02 0xc1
     method ref net.minecraft.src.WorldChunkManager.getRainfall (II)F -> vh.b (II)F colorizeBiome(IILvh;III)I@19
-     INVOKEVIRTUAL 0x00 0x08   INVOKEVIRTUAL 0x02 0xbf
+     INVOKEVIRTUAL 0x00 0x08   INVOKEVIRTUAL 0x02 0xc3
     field ref net.minecraft.src.Block.blockID I -> yy.bM I colorizeBlock(Lyy;Lvh;III)I@7
-     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xc4
+     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xc8
     field ref net.minecraft.src.Block.blockID I -> yy.bM I colorizeBlock(Lyy;)I@7
-     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xc4
+     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xc8
     method ref com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILnet/minecraft/src/WorldChunkManager;III)I -> com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILvh;III)I colorizeBlock(Lyy;Lvh;III)I@16
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xc6
+     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xca
     method ref com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILnet/minecraft/src/WorldChunkManager;III)I -> com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILvh;III)I computeWaterColor(Lvh;DDD)Z@20
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xc6
+     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xca
     field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> ry.y Lk; computeLightmap(Ladt;Lry;)Z@16
-     GETFIELD 0x00 0x23        GETFIELD 0x02 0xcb
+     GETFIELD 0x00 0x25        GETFIELD 0x02 0xcf
     field ref net.minecraft.src.WorldProvider.worldType I -> k.g I computeLightmap(Ladt;Lry;)Z@19
-     GETFIELD 0x00 0x24        GETFIELD 0x02 0xcf
+     GETFIELD 0x00 0x26        GETFIELD 0x02 0xd3
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; computeLightmap(Ladt;Lry;)Z@71
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x2c       GETSTATIC 0x02 0xd5
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@0
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x2c       GETSTATIC 0x02 0xd5
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@25
-     PUTSTATIC 0x00 0x2a       PUTSTATIC 0x02 0xd1
+     PUTSTATIC 0x00 0x2c       PUTSTATIC 0x02 0xd5
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@276
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x2c       GETSTATIC 0x02 0xd5
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@777
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x2c       GETSTATIC 0x02 0xd5
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@842
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x2c       GETSTATIC 0x02 0xd5
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@921
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x2c       GETSTATIC 0x02 0xd5
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; loadColorMap(Ljava/lang/String;)[I@0
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+     GETSTATIC 0x00 0x2c       GETSTATIC 0x02 0xd5
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; computeLightmap(Ladt;Lry;)Z@75
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+     INVOKEVIRTUAL 0x00 0x2d   INVOKEVIRTUAL 0x02 0xd9
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@281
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+     INVOKEVIRTUAL 0x00 0x2d   INVOKEVIRTUAL 0x02 0xd9
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@782
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+     INVOKEVIRTUAL 0x00 0x2d   INVOKEVIRTUAL 0x02 0xd9
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@847
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+     INVOKEVIRTUAL 0x00 0x2d   INVOKEVIRTUAL 0x02 0xd9
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@926
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+     INVOKEVIRTUAL 0x00 0x2d   INVOKEVIRTUAL 0x02 0xd9
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; loadColorMap(Ljava/lang/String;)[I@4
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+     INVOKEVIRTUAL 0x00 0x2d   INVOKEVIRTUAL 0x02 0xd9
     field ref net.minecraft.src.World.lightningFlash I -> ry.s I computeLightmap(Ladt;Lry;)Z@234
-     GETFIELD 0x00 0x36        GETFIELD 0x02 0xd7
+     GETFIELD 0x00 0x38        GETFIELD 0x02 0xdb
     method ref net.minecraft.src.World.getSunAngle (F)F -> ry.b (F)F computeLightmap(Ladt;Lry;)Z@248
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x02 0xd9
+     INVOKEVIRTUAL 0x00 0x3a   INVOKEVIRTUAL 0x02 0xdd
     field ref net.minecraft.src.EntityRenderer.torchFlickerX F -> adt.e F computeLightmap(Ladt;Lry;)Z@267
-     GETFIELD 0x00 0x3b        GETFIELD 0x02 0xdd
+     GETFIELD 0x00 0x3d        GETFIELD 0x02 0xe1
     field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.A Lki; computeLightmap(Ladt;Lry;)Z@287
-     GETFIELD 0x00 0x3e        GETFIELD 0x02 0xe1
+     GETFIELD 0x00 0x40        GETFIELD 0x02 0xe5
     field ref net.minecraft.src.GameSettings.gammaSetting F -> ki.N F computeLightmap(Ladt;Lry;)Z@290
-     GETFIELD 0x00 0x3f        GETFIELD 0x02 0xe6
+     GETFIELD 0x00 0x41        GETFIELD 0x02 0xea
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Lzh; computeLightmap(Ladt;Lry;)Z@648
-     GETFIELD 0x00 0x47        GETFIELD 0x02 0xea
+     GETFIELD 0x00 0x49        GETFIELD 0x02 0xee
     field ref net.minecraft.src.EntityRenderer.lightmapTexture I -> adt.d I computeLightmap(Ladt;Lry;)Z@658
-     GETFIELD 0x00 0x48        GETFIELD 0x02 0xed
+     GETFIELD 0x00 0x4a        GETFIELD 0x02 0xf1
     method ref net.minecraft.src.RenderEngine.createTextureFromBytes ([IIII)V -> zh.a ([IIII)V computeLightmap(Ladt;Lry;)Z@661
-     INVOKEVIRTUAL 0x00 0x49   INVOKEVIRTUAL 0x02 0xf1
+     INVOKEVIRTUAL 0x00 0x4b   INVOKEVIRTUAL 0x02 0xf5
     field ref net.minecraft.src.Potion.id I -> abg.H I setupPotion(Labg;)V@9
-     GETFIELD 0x00 0x5b        GETFIELD 0x02 0xf6
+     GETFIELD 0x00 0x5c        GETFIELD 0x02 0xfa
     field ref net.minecraft.src.Potion.name Ljava/lang/String; -> abg.I Ljava/lang/String; setupPotion(Labg;)V@19
-     GETFIELD 0x00 0x5c        GETFIELD 0x02 0xf8
+     GETFIELD 0x00 0x5d        GETFIELD 0x02 0xfc
     field ref net.minecraft.src.Potion.name Ljava/lang/String; -> abg.I Ljava/lang/String; checkUpdate()V@425
-     GETFIELD 0x00 0x5c        GETFIELD 0x02 0xf8
+     GETFIELD 0x00 0x5d        GETFIELD 0x02 0xfc
     field ref net.minecraft.src.Potion.color I -> abg.N I setupPotion(Labg;)V@26
-     GETFIELD 0x00 0x5d        GETFIELD 0x02 0xfa
+     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xfe
     field ref net.minecraft.src.Potion.color I -> abg.N I setupPotion(Labg;)V@38
-     GETFIELD 0x00 0x5d        GETFIELD 0x02 0xfa
+     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xfe
     field ref net.minecraft.src.Potion.color I -> abg.N I checkUpdate()V@268
-     PUTFIELD 0x00 0x5d        PUTFIELD 0x02 0xfa
+     PUTFIELD 0x00 0x5e        PUTFIELD 0x02 0xfe
     field ref net.minecraft.src.Potion.color I -> abg.N I loadIntColor(Ljava/lang/String;Labg;)V@26
-     PUTFIELD 0x00 0x5d        PUTFIELD 0x02 0xfa
+     PUTFIELD 0x00 0x5e        PUTFIELD 0x02 0xfe
     field ref net.minecraft.src.Potion.origColor I -> abg.origColor I setupPotion(Labg;)V@41
-     PUTFIELD 0x00 0x5e        PUTFIELD 0x02 0xfc
+     PUTFIELD 0x00 0x5f        PUTFIELD 0x03 0x00
     field ref net.minecraft.src.Potion.origColor I -> abg.origColor I checkUpdate()V@265
-     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xfc
+     GETFIELD 0x00 0x5f        GETFIELD 0x03 0x00
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Ladk; checkUpdate()V@6
-     GETFIELD 0x00 0x65        GETFIELD 0x03 0x00
+     GETFIELD 0x00 0x66        GETFIELD 0x03 0x04
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Ladk; checkUpdate()V@19
-     GETFIELD 0x00 0x65        GETFIELD 0x03 0x00
+     GETFIELD 0x00 0x66        GETFIELD 0x03 0x04
     field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> adk.a Lafs; checkUpdate()V@9
-     GETFIELD 0x00 0x66        GETFIELD 0x03 0x04
+     GETFIELD 0x00 0x67        GETFIELD 0x03 0x08
     field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> adk.a Lafs; checkUpdate()V@22
-     GETFIELD 0x00 0x66        GETFIELD 0x03 0x04
+     GETFIELD 0x00 0x67        GETFIELD 0x03 0x08
     class ref net.minecraft.src.Potion -> abg checkUpdate()V@259
-     CHECKCAST 0x00 0x77       CHECKCAST 0x02 0xf3
+     CHECKCAST 0x00 0x78       CHECKCAST 0x02 0xf7
     class ref net.minecraft.src.Potion -> abg checkUpdate()V@420
-     CHECKCAST 0x00 0x77       CHECKCAST 0x02 0xf3
+     CHECKCAST 0x00 0x78       CHECKCAST 0x02 0xf7
     method ref com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Labg;)V checkUpdate()V@429
-     INVOKESTATIC 0x00 0x88    INVOKESTATIC 0x03 0x06
+     INVOKESTATIC 0x00 0x89    INVOKESTATIC 0x03 0x0a
    string replace Lnet/minecraft/src/Block; -> Lyy; @656
-   string replace Lnet/minecraft/src/EntityRenderer; -> Ladt; @1825
-   string replace Lnet/minecraft/src/World; -> Lry; @1841
-   string replace Lnet/minecraft/src/Potion; -> Labg; @4072
+   string replace Lnet/minecraft/src/EntityRenderer; -> Ladt; @1911
+   string replace Lnet/minecraft/src/World; -> Lry; @1927
+   string replace Lnet/minecraft/src/Potion; -> Labg; @4088
    string replace Lnet/minecraft/src/WorldChunkManager; -> Lvh; @426
 
 Done!
@@ -3742,6 +3902,7 @@ Custom Colors
     Entity (ia.class)
     EntityFX (wc.class)
     EntityRainFX (ub.class)
+        [1] override rain drop color
     EntityDropParticleFX (st.class)
         [1] override lava drop color
         [1] override water drop color
@@ -3759,6 +3920,7 @@ Custom Colors
         [1] override redstone wire particle color
     RenderBlocks (acr.class)
         [1] colorize cauldron water color
+        [6] colorize falling sand and gravel
         [1] override redstone wire color
     EntityReddustFX (aao.class)
         [1] override redstone particle color
