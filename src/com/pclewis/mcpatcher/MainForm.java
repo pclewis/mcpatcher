@@ -35,7 +35,7 @@ class MainForm {
         "<tr><td colspan=\"2\"><i>%1$s</i></td></tr>";
     private static final String MOD_DESC_FORMAT3 =
         "</table>" +
-        "</html>";
+            "</html>";
 
     private JPanel mainPanel;
     JFrame frame;

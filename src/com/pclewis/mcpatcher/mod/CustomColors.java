@@ -66,7 +66,7 @@ public class CustomColors extends Mod {
         classMods.add(new EntityReddustFXMod());
 
         classMods.add(new BlockStemMod());
-        
+
         if (haveSpawnerEggs) {
             classMods.add(new EntityListMod());
             classMods.add(new ItemSpawnerEggMod());
@@ -178,7 +178,7 @@ public class CustomColors extends Mod {
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
             final MethodRef getRenderColor = new MethodRef(getDeobfClass(), "getRenderColor", "(I)I");
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -194,7 +194,7 @@ public class CustomColors extends Mod {
                     }
                 }
             }.setMethod(getRenderColor));
-            
+
             memberMappers.add(new FieldMapper("blockID", "I")
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
@@ -228,7 +228,7 @@ public class CustomColors extends Mod {
                 }
 
             }.targetMethod(new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I")));
-            
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -446,11 +446,11 @@ public class CustomColors extends Mod {
             }.targetMethod(colorMultiplier));
         }
     }
-    
+
     private class BlockCauldronMod extends ClassMod {
         BlockCauldronMod() {
             parentClass = "Block";
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -472,7 +472,7 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature("/gui/items.png"));
 
             MethodRef doRenderItem = new MethodRef(getDeobfClass(), "doRenderItem", "(LEntityItem;DDDFF)V");
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -485,7 +485,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.setMethod(doRenderItem));
-            
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -900,11 +900,11 @@ public class CustomColors extends Mod {
             );
         }
     }
-    
+
     private class EntityRainFXMod extends ClassMod {
         EntityRainFXMod() {
             parentClass = "EntityFX";
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -1032,21 +1032,21 @@ public class CustomColors extends Mod {
                             ALOAD_0,
                             push(methodInfo, newColors[0]),
                             reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
-    
+
                             // particleGreen = g;
                             ALOAD_0,
                             push(methodInfo, newColors[1]),
                             reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
-    
+
                             // particleBlue = b;
                             ALOAD_0,
                             push(methodInfo, newColors[2]),
                             reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                         ),
-                        
+
                         // }
                         label("B"),
-                        (origColors == null ? new byte[]{(byte)RETURN} : new byte[]{})
+                        (origColors == null ? new byte[]{(byte) RETURN} : new byte[]{})
                     );
                 }
             });
@@ -1165,7 +1165,7 @@ public class CustomColors extends Mod {
                         ISUB,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLavaDropColor", "(I)Z")),
                         IFEQ, branch("A"),
-                        
+
                         // particleRed = Colorizer.lavaDropRed;
                         ALOAD_0,
                         reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "lavaDropRed", "F")),
@@ -1183,11 +1183,11 @@ public class CustomColors extends Mod {
 
                         // } else {
                         GOTO, branch("B"),
-                        
+
                         // ... original code ...
                         label("A"),
                         getMatch(),
-                        
+
                         // }
                         label("B")
                     );
@@ -1195,14 +1195,14 @@ public class CustomColors extends Mod {
             }.targetMethod(onUpdate));
         }
     }
-    
+
     private class EntitySplashFXMod extends WaterFXMod {
         EntitySplashFXMod() {
             parentClass = "EntityRainFX";
 
             classSignatures.add(new ConstSignature(0.04f));
             classSignatures.add(new ConstSignature(0.10000000000000001));
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -1568,12 +1568,12 @@ public class CustomColors extends Mod {
                         FLOAD, 10,
                         FMUL,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL)
-                    ); 
+                    );
                 }
             }.addXref(1, setColorOpaque_F));
-            
+
             memberMappers.add(new MethodMapper("renderBlockCauldron", "(LBlockCauldron;III)Z"));
-            
+
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -1746,15 +1746,15 @@ public class CustomColors extends Mod {
             }.targetMethod(getRenderColor));
         }
     }
-    
+
     private class EntityListMod extends ClassMod {
         EntityListMod() {
             classSignatures.add(new ConstSignature("Skipping Entity with id "));
-            
+
             memberMappers.add(new MethodMapper("addMapping", "(Ljava/lang/Class;Ljava/lang/String;IZ)V")
                 .accessFlag(AccessFlag.STATIC, true)
             );
-            
+
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -1783,11 +1783,11 @@ public class CustomColors extends Mod {
             }.targetMethod(new MethodRef(getDeobfClass(), "addMapping", "(Ljava/lang/Class;Ljava/lang/String;IZ)V")));
         }
     }
-    
+
     private class ItemSpawnerEggMod extends ClassMod {
         ItemSpawnerEggMod() {
             parentClass = "Item";
-            
+
             classSignatures.add(new ConstSignature(".name"));
             classSignatures.add(new ConstSignature("entity."));
 
@@ -1827,7 +1827,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.setMethod(colorMultiplier));
-            
+
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {

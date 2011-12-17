@@ -54,7 +54,7 @@ public class Colorizer {
     public static float[] waterColor;
 
     private static final boolean useEggColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true);
-    private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>(); 
+    private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>();
     private static final HashMap<Integer, Integer> spawnerEggColors = new HashMap<Integer, Integer>(); // egg.*
 
     public static float redstoneWireRed;
@@ -98,11 +98,11 @@ public class Colorizer {
     public static int colorizeBlock(Block block, WorldChunkManager chunkManager, int i, int j, int k) {
         return colorizeBiome(0xffffff, COLOR_MAPS.length + block.blockID, chunkManager, i, j, k);
     }
-    
+
     public static int colorizeBlock(Block block) {
         return colorizeBiome(0xffffff, COLOR_MAPS.length + block.blockID);
     }
-    
+
     public static int colorizeSpawnerEgg(int origColor, int entityID) {
         if (!useEggColors) {
             return origColor;
@@ -193,7 +193,7 @@ public class Colorizer {
                         case 3:
                             result = (a * b) / (a + b + 0.00001f);
                             break;
-                        
+
                         case 4:
                             result = (float) Math.sqrt(a * a + b * b);
                             break;
@@ -245,13 +245,13 @@ public class Colorizer {
             return false;
         }
     }
-    
+
     public static void computeWaterColor() {
         checkUpdate();
         int rgb = colorizeBiome(0xffffff, 5);
         intToFloat3(rgb, waterColor);
     }
-    
+
     public static boolean computeLavaDropColor(int age) {
         checkUpdate();
         if (lavaDropColor == null) {
@@ -270,7 +270,7 @@ public class Colorizer {
         potion.origColor = potion.color;
         potions.add(potion);
     }
-    
+
     public static void setupSpawnerEgg(int entityID, String entityName) {
         int defaultColor = ((64 + (entityID * 0x24faef & 0xc0)) << 16 | (64 + (entityID * 0x3692f & 0xc0)) << 8 | (64 + (entityID * 0x3b367 & 0xc0))) & 0xffffff;
         //System.out.printf("egg.%s=%06x\n", entityName, defaultColor);
@@ -294,7 +294,7 @@ public class Colorizer {
         colorMapDefault[colorIndex++] = 0x80a755;
         colorMapDefault[colorIndex++] = 0x48b518;
         colorMapDefault[colorIndex++] = 0xffffff;
-        for ( ; colorIndex < colorMapDefault.length; colorIndex++) {
+        for (; colorIndex < colorMapDefault.length; colorIndex++) {
             colorMapDefault[colorIndex] = 0xffffff;
         }
         lilypadColor = new int[]{0x208030};

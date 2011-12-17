@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.jar.JarOutputStream;
 
-import static javassist.bytecode.Opcode.*;
-
 /**
  * Contains mapping from descriptive class, method, and field names to their obfuscated
  * names in minecraft.jar.  Each Mod has its own ClassMap that is maintained by MCPatcher.
@@ -54,7 +52,7 @@ public class ClassMap {
      * @return dotted name of package/class
      */
     public static String descriptorToClassName(String descriptor) {
-        return descriptor.replaceFirst("^\\[*L(.*);$", "$1").replace('/',  '.');
+        return descriptor.replaceFirst("^\\[*L(.*);$", "$1").replace('/', '.');
     }
 
     private ClassMapEntry getEntry(String descName) {
@@ -105,7 +103,7 @@ public class ClassMap {
      * @param classDescName descriptive class name
      * @param descName      descriptive method name
      * @param obfName       obfuscated method name
-     * @param obfType       obfuscated method descriptor                     
+     * @param obfType       obfuscated method descriptor
      * @throws RuntimeException if class mapping does not exist yet.
      */
     public void addMethodMap(String classDescName, String descName, String obfName, String obfType) {
@@ -135,7 +133,7 @@ public class ClassMap {
      * @param classDescName descriptive class name
      * @param descName      descriptive field name
      * @param obfName       obfuscated field name
-     * @param obfType       obfuscated field descriptor                     
+     * @param obfType       obfuscated field descriptor
      * @throws RuntimeException if class mapping does not exist yet.
      */
     public void addFieldMap(String classDescName, String descName, String obfName, String obfType) {
@@ -713,16 +711,16 @@ public class ClassMap {
         putEntry(newEntry);
         return newEntry;
     }
-    
+
     static class MemberEntry {
         String name;
         String type;
-        
+
         MemberEntry(String name, String type) {
             this.name = name;
             this.type = type;
         }
-        
+
         @Override
         public boolean equals(Object o) {
             if (o == null || !(o instanceof MemberEntry)) {

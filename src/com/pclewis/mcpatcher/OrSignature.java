@@ -20,7 +20,7 @@ public class OrSignature extends ClassSignature {
         }
         return false;
     }
-    
+
     @Override
     public void afterMatch(ClassFile classFile) {
         if (matchedSignature != null) {

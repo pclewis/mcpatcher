@@ -7,7 +7,6 @@ import javassist.bytecode.FieldInfo;
 import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
-import java.util.List;
 
 import static javassist.bytecode.Opcode.*;
 

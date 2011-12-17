@@ -2,7 +2,6 @@ package com.pclewis.mcpatcher;
 
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
-import org.w3c.dom.Element;
 
 import java.io.*;
 import java.util.Collections;

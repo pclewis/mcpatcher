@@ -49,8 +49,8 @@ abstract public class AddMethodPatch extends ClassPatch {
     /**
      * Create an AddMethodPatch with given name and type.
      *
-     * @param name name of method
-     * @param type Java type descriptor of method; may use deobfuscated names
+     * @param name        name of method
+     * @param type        Java type descriptor of method; may use deobfuscated names
      * @param accessFlags method access flags
      */
     public AddMethodPatch(String name, String type, int accessFlags) {

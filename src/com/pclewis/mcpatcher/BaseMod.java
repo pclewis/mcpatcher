@@ -15,7 +15,7 @@ import static javassist.bytecode.Opcode.*;
 /**
  * Internal mod required by the patcher.  Responsible for injecting MCPatcherUtils classes
  * into minecraft.jar.
- *
+ * <p/>
  * Also provides a collection of commonly used ClassMods as public static inner classes that
  * can be instantiated or extended as needed.
  */
@@ -113,7 +113,7 @@ public final class BaseMod extends Mod {
 
     /**
      * Matches Minecraft class and maps the texturePackList field.
-     *
+     * <p/>
      * Including
      * <pre>
      *     classMods.add(new BaseMod.MinecraftMod().mapTexturePackList();
@@ -294,7 +294,7 @@ public final class BaseMod extends Mod {
                 .addXref(1, new FieldRef(getDeobfClass(), "charWidth", "[I"))
                 .addXref(2, new FieldRef(getDeobfClass(), "fontTextureName", "I"))
             );
-            
+
             classSignatures.add(new OrSignature(
                 new ConstSignature("0123456789abcdef"),
                 new ConstSignature("0123456789abcdefk")
