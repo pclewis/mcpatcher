@@ -1,5 +1,5 @@
-MCPatcher version is 2.3.0
-OS: Linux 3.1.5-1.fc16.x86_64 amd64
+MCPatcher version is 2.3.0_01
+OS: Linux 3.1.5-2.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_29 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.0.0 (md5 3820d222b95d0b8c520d9596a756a6e6)
@@ -22,6 +22,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (1130 files)
   RenderBlocks matches acr.class
    renderBlockRedstoneWire matches g (Lyy;III)Z
    renderBlockFluids matches n (Lyy;III)Z
+  Item matches acy.class
+   getColorFromDamage matches c (I)I
   EntitySplashFX matches adi.class
   TexturePackList matches adk.class
   TexturePackList matches adk.class
@@ -54,6 +56,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (1130 files)
   Entity matches ia.class
   Entity matches ia.class
    setPositionAndRotation matches b (DDDFF)V
+  BlockCauldron matches ic.class
+   colorMultiplier matches a (Lkq;III)I
   NBTTagCompound matches ik.class
   BlockGrass matches jb.class
    getBlockTexture matches a (Lkq;IIII)I
@@ -64,6 +68,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (1130 files)
   BlockRedstoneWire matches kw.class
    randomDisplayTick matches b (Lry;IIILjava/util/Random;)V
   BiomeGenSwamp matches mk.class
+  ItemRenderer matches n.class
   ItemRenderer matches n.class
   EntityLiving matches nq.class
   Material matches p.class
@@ -83,6 +88,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (1130 files)
   EntityDropParticleFX matches st.class
    onUpdate matches a ()V
   EntityRainFX matches ub.class
+  ItemBlock matches uw.class
+   getColorFromDamage matches c (I)I
   FlowWater matches va.class
   WorldChunkManager matches vh.class
    getBiomeGenAt matches a (II)Lsr;
@@ -213,6 +220,11 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (second pass)
    field color matches s I
   BiomeGenSwamp (mk.class)
   BlockFluid (agw.class)
+  BlockCauldron (ic.class)
+  Item (acy.class)
+  ItemBlock (uw.class)
+   field blockID matches a I
+  ItemRenderer (n.class)
   Potion (abg.class)
   PotionHelper (pk.class)
   ColorizerFoliage (db.class)
@@ -232,6 +244,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.0.0.jar (second pass)
   BlockLilyPad (qi.class)
   BlockRedstoneWire (kw.class)
   RenderBlocks (acr.class)
+   method renderBlockCauldron matches a (Lic;III)Z
   EntityReddustFX (aao.class)
   BlockStem (pu.class)
 
@@ -423,6 +436,10 @@ Custom Colors
         method colorMultiplier -> a (Lkq;III)I
         method getRenderColor -> c (I)I
         field blockID -> bM I
+    class BlockCauldron (ic.class) extends Block
+        method colorMultiplier -> a (Lkq;III)I
+        method getRenderColor -> c (I)I
+        field blockID -> bM I
     class BlockFluid (agw.class)
         method colorMultiplier -> a (Lkq;III)I
     class BlockLeaves (qo.class)
@@ -519,6 +536,12 @@ Custom Colors
         method getBlockId -> a (III)I
         method getBlockMetadata -> d (III)I
         method getWorldChunkManager -> a ()Lvh;
+    class Item (acy.class)
+        method getColorFromDamage -> c (I)I
+    class ItemBlock (uw.class) extends Item
+        method getColorFromDamage -> c (I)I
+        field blockID -> a I
+    class ItemRenderer (n.class)
     class Minecraft (net/minecraft/client/Minecraft.class)
         field gameSettings -> A Lki;
         field renderEngine -> p Lzh;
@@ -530,11 +553,14 @@ Custom Colors
         field name -> I Ljava/lang/String;
     class PotionHelper (pk.class)
     class RenderBlocks (acr.class)
+        method renderBlockCauldron -> a (Lic;III)Z
         method renderBlockFluids -> n (Lyy;III)Z
         method renderBlockRedstoneWire -> g (Lyy;III)Z
         field blockAccess -> a Lkq;
     class RenderEngine (zh.class)
         method createTextureFromBytes -> a ([IIII)V
+    class Tessellator (cv.class)
+        method setColorOpaque_F -> a (FFF)V
     class TexturePackBase (afs.class)
         method getInputStream -> a (Ljava/lang/String;)Ljava/io/InputStream;
         field texturePackFileName -> a Ljava/lang/String;
@@ -558,6 +584,7 @@ Custom Colors
     class net.minecraft.src.BiomeGenBase alias for BiomeGenBase
     class net.minecraft.src.BiomeGenSwamp alias for BiomeGenSwamp
     class net.minecraft.src.Block alias for Block
+    class net.minecraft.src.BlockCauldron alias for BlockCauldron
     class net.minecraft.src.BlockFluid alias for BlockFluid
     class net.minecraft.src.BlockLeaves alias for BlockLeaves
     class net.minecraft.src.BlockLilyPad alias for BlockLilyPad
@@ -574,10 +601,14 @@ Custom Colors
     class net.minecraft.src.EntitySplashFX alias for EntitySplashFX
     class net.minecraft.src.GameSettings alias for GameSettings
     class net.minecraft.src.IBlockAccess alias for IBlockAccess
+    class net.minecraft.src.Item alias for Item
+    class net.minecraft.src.ItemBlock alias for ItemBlock
+    class net.minecraft.src.ItemRenderer alias for ItemRenderer
     class net.minecraft.src.Potion alias for Potion
     class net.minecraft.src.PotionHelper alias for PotionHelper
     class net.minecraft.src.RenderBlocks alias for RenderBlocks
     class net.minecraft.src.RenderEngine alias for RenderEngine
+    class net.minecraft.src.Tessellator alias for Tessellator
     class net.minecraft.src.TexturePackBase alias for TexturePackBase
     class net.minecraft.src.TexturePackList alias for TexturePackList
     class net.minecraft.src.World alias for World
@@ -1338,6 +1369,21 @@ Patching...
                                LDC 0x20
                                FSUB
                                FSTORE 0x0c
+    colorize cauldron water color a(Lic;III)Z@337
+     SIPUSH 0x00 0xcd          SIPUSH 0x00 0xcd
+     ISTORE 0x0f               ISTORE 0x0f
+                               INVOKESTATIC 0x03 0x66
+                               ALOAD 0x05
+                               GETSTATIC 0x03 0x6a
+                               ICONST_0
+                               FALOAD
+                               GETSTATIC 0x03 0x6a
+                               ICONST_1
+                               FALOAD
+                               GETSTATIC 0x03 0x6a
+                               ICONST_2
+                               FALOAD
+                               INVOKEVIRTUAL 0x01 0x68
  applying EntitySplashFX patch to adi.class for mod Custom Colors
     override splash drop color <init>(Lry;DDDDDD)V@69
      label A -> instruction 124
@@ -2069,6 +2115,15 @@ Patching...
      LDC 0x16                  GETSTATIC 0x01 0xef
     0.001953125F -> float_texNudge a(Lcv;FFFF)V@606
      LDC 0x16                  GETSTATIC 0x01 0xef
+ applying ItemRenderer patch to n.class for mod Custom Colors
+    override water block color in third person a(Lnq;Ldk;I)V@260
+     LDC 0x0d                  LDC 0x0d
+     LDC 0x14                  LDC 0x14
+     FCONST_0                  FCONST_0
+     INVOKESTATIC 0x00 0xd1    INVOKESTATIC 0x00 0xd1
+                               ALOAD_2
+                               GETFIELD 0x00 0x83
+                               INVOKESTATIC 0x01 0xf4
  applying PotionHelper patch to pk.class for mod Custom Colors
     override water bottle color a(Ljava/util/Collection;)I@0
      LDC 0x01                  INVOKESTATIC 0x01 0x47
@@ -2355,6 +2410,8 @@ Patching...
                                NOP
                                LDC 0x01
                                INVOKESTATIC 0x00 0x4b
+ applying ItemBlock patch to uw.class for mod Custom Colors
+    insert method getColorFromDamage (I)I stack size 3, local vars 2
  applying FlowWater patch to va.class for mod HD Textures
     array size 256 -> int_numPixels <init>()V@13
      SIPUSH 0x01 0x00          GETSTATIC 0x00 0x47
@@ -3368,101 +3425,101 @@ Patching...
    method signature (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> (Ljava/lang/String;Labg;)V
    field signature Lnet/minecraft/src/TexturePackBase; -> Lafs;
     method ref net.minecraft.src.WorldChunkManager.getTemperature (III)F -> vh.a (III)F colorizeBiome(IILvh;III)I@11
-     INVOKEVIRTUAL 0x00 0x07   INVOKEVIRTUAL 0x02 0xb1
+     INVOKEVIRTUAL 0x00 0x07   INVOKEVIRTUAL 0x02 0xbd
     method ref net.minecraft.src.WorldChunkManager.getRainfall (II)F -> vh.b (II)F colorizeBiome(IILvh;III)I@19
-     INVOKEVIRTUAL 0x00 0x08   INVOKEVIRTUAL 0x02 0xb3
+     INVOKEVIRTUAL 0x00 0x08   INVOKEVIRTUAL 0x02 0xbf
     field ref net.minecraft.src.Block.blockID I -> yy.bM I colorizeBlock(Lyy;Lvh;III)I@7
-     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xb8
+     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xc4
     field ref net.minecraft.src.Block.blockID I -> yy.bM I colorizeBlock(Lyy;)I@7
-     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xb8
+     GETFIELD 0x00 0x0d        GETFIELD 0x02 0xc4
     method ref com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILnet/minecraft/src/WorldChunkManager;III)I -> com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILvh;III)I colorizeBlock(Lyy;Lvh;III)I@16
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xba
-    method ref com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILnet/minecraft/src/WorldChunkManager;III)I -> com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILvh;III)I computeWaterDropColor(Lvh;DDD)Z@20
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xba
+     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xc6
+    method ref com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILnet/minecraft/src/WorldChunkManager;III)I -> com.pclewis.mcpatcher.mod.Colorizer.colorizeBiome (IILvh;III)I computeWaterColor(Lvh;DDD)Z@20
+     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x02 0xc6
     field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> ry.y Lk; computeLightmap(Ladt;Lry;)Z@16
-     GETFIELD 0x00 0x23        GETFIELD 0x02 0xbf
+     GETFIELD 0x00 0x23        GETFIELD 0x02 0xcb
     field ref net.minecraft.src.WorldProvider.worldType I -> k.g I computeLightmap(Ladt;Lry;)Z@19
-     GETFIELD 0x00 0x24        GETFIELD 0x02 0xc3
+     GETFIELD 0x00 0x24        GETFIELD 0x02 0xcf
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; computeLightmap(Ladt;Lry;)Z@71
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xc5
+     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@0
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xc5
+     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@25
-     PUTSTATIC 0x00 0x2a       PUTSTATIC 0x02 0xc5
+     PUTSTATIC 0x00 0x2a       PUTSTATIC 0x02 0xd1
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@276
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xc5
-    field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@781
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xc5
-    field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@846
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xc5
-    field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@925
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xc5
+     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+    field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@777
+     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+    field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@842
+     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
+    field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; checkUpdate()V@921
+     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lafs; loadColorMap(Ljava/lang/String;)[I@0
-     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xc5
+     GETSTATIC 0x00 0x2a       GETSTATIC 0x02 0xd1
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; computeLightmap(Ladt;Lry;)Z@75
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xc9
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@281
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xc9
-    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@786
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xc9
-    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@851
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xc9
-    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@930
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xc9
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@782
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@847
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; checkUpdate()V@926
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> afs.a (Ljava/lang/String;)Ljava/io/InputStream; loadColorMap(Ljava/lang/String;)[I@4
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xc9
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x02 0xd5
     field ref net.minecraft.src.World.lightningFlash I -> ry.s I computeLightmap(Ladt;Lry;)Z@234
-     GETFIELD 0x00 0x36        GETFIELD 0x02 0xcb
+     GETFIELD 0x00 0x36        GETFIELD 0x02 0xd7
     method ref net.minecraft.src.World.getSunAngle (F)F -> ry.b (F)F computeLightmap(Ladt;Lry;)Z@248
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x02 0xcd
+     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x02 0xd9
     field ref net.minecraft.src.EntityRenderer.torchFlickerX F -> adt.e F computeLightmap(Ladt;Lry;)Z@267
-     GETFIELD 0x00 0x3b        GETFIELD 0x02 0xd1
+     GETFIELD 0x00 0x3b        GETFIELD 0x02 0xdd
     field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.A Lki; computeLightmap(Ladt;Lry;)Z@287
-     GETFIELD 0x00 0x3e        GETFIELD 0x02 0xd5
+     GETFIELD 0x00 0x3e        GETFIELD 0x02 0xe1
     field ref net.minecraft.src.GameSettings.gammaSetting F -> ki.N F computeLightmap(Ladt;Lry;)Z@290
-     GETFIELD 0x00 0x3f        GETFIELD 0x02 0xda
+     GETFIELD 0x00 0x3f        GETFIELD 0x02 0xe6
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Lzh; computeLightmap(Ladt;Lry;)Z@648
-     GETFIELD 0x00 0x47        GETFIELD 0x02 0xde
+     GETFIELD 0x00 0x47        GETFIELD 0x02 0xea
     field ref net.minecraft.src.EntityRenderer.lightmapTexture I -> adt.d I computeLightmap(Ladt;Lry;)Z@658
-     GETFIELD 0x00 0x48        GETFIELD 0x02 0xe1
+     GETFIELD 0x00 0x48        GETFIELD 0x02 0xed
     method ref net.minecraft.src.RenderEngine.createTextureFromBytes ([IIII)V -> zh.a ([IIII)V computeLightmap(Ladt;Lry;)Z@661
-     INVOKEVIRTUAL 0x00 0x49   INVOKEVIRTUAL 0x02 0xe5
+     INVOKEVIRTUAL 0x00 0x49   INVOKEVIRTUAL 0x02 0xf1
     field ref net.minecraft.src.Potion.id I -> abg.H I setupPotion(Labg;)V@9
-     GETFIELD 0x00 0x59        GETFIELD 0x02 0xea
+     GETFIELD 0x00 0x5b        GETFIELD 0x02 0xf6
     field ref net.minecraft.src.Potion.name Ljava/lang/String; -> abg.I Ljava/lang/String; setupPotion(Labg;)V@19
-     GETFIELD 0x00 0x5a        GETFIELD 0x02 0xec
-    field ref net.minecraft.src.Potion.name Ljava/lang/String; -> abg.I Ljava/lang/String; checkUpdate()V@429
-     GETFIELD 0x00 0x5a        GETFIELD 0x02 0xec
+     GETFIELD 0x00 0x5c        GETFIELD 0x02 0xf8
+    field ref net.minecraft.src.Potion.name Ljava/lang/String; -> abg.I Ljava/lang/String; checkUpdate()V@425
+     GETFIELD 0x00 0x5c        GETFIELD 0x02 0xf8
     field ref net.minecraft.src.Potion.color I -> abg.N I setupPotion(Labg;)V@26
-     GETFIELD 0x00 0x5b        GETFIELD 0x02 0xee
+     GETFIELD 0x00 0x5d        GETFIELD 0x02 0xfa
     field ref net.minecraft.src.Potion.color I -> abg.N I setupPotion(Labg;)V@38
-     GETFIELD 0x00 0x5b        GETFIELD 0x02 0xee
+     GETFIELD 0x00 0x5d        GETFIELD 0x02 0xfa
     field ref net.minecraft.src.Potion.color I -> abg.N I checkUpdate()V@268
-     PUTFIELD 0x00 0x5b        PUTFIELD 0x02 0xee
+     PUTFIELD 0x00 0x5d        PUTFIELD 0x02 0xfa
     field ref net.minecraft.src.Potion.color I -> abg.N I loadIntColor(Ljava/lang/String;Labg;)V@26
-     PUTFIELD 0x00 0x5b        PUTFIELD 0x02 0xee
+     PUTFIELD 0x00 0x5d        PUTFIELD 0x02 0xfa
     field ref net.minecraft.src.Potion.origColor I -> abg.origColor I setupPotion(Labg;)V@41
-     PUTFIELD 0x00 0x5c        PUTFIELD 0x02 0xf0
+     PUTFIELD 0x00 0x5e        PUTFIELD 0x02 0xfc
     field ref net.minecraft.src.Potion.origColor I -> abg.origColor I checkUpdate()V@265
-     GETFIELD 0x00 0x5c        GETFIELD 0x02 0xf0
+     GETFIELD 0x00 0x5e        GETFIELD 0x02 0xfc
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Ladk; checkUpdate()V@6
-     GETFIELD 0x00 0x63        GETFIELD 0x02 0xf4
+     GETFIELD 0x00 0x65        GETFIELD 0x03 0x00
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Ladk; checkUpdate()V@19
-     GETFIELD 0x00 0x63        GETFIELD 0x02 0xf4
+     GETFIELD 0x00 0x65        GETFIELD 0x03 0x00
     field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> adk.a Lafs; checkUpdate()V@9
-     GETFIELD 0x00 0x64        GETFIELD 0x02 0xf8
+     GETFIELD 0x00 0x66        GETFIELD 0x03 0x04
     field ref net.minecraft.src.TexturePackList.selectedTexturePack Lnet/minecraft/src/TexturePackBase; -> adk.a Lafs; checkUpdate()V@22
-     GETFIELD 0x00 0x64        GETFIELD 0x02 0xf8
+     GETFIELD 0x00 0x66        GETFIELD 0x03 0x04
     class ref net.minecraft.src.Potion -> abg checkUpdate()V@259
-     CHECKCAST 0x00 0x75       CHECKCAST 0x02 0xe7
-    class ref net.minecraft.src.Potion -> abg checkUpdate()V@424
-     CHECKCAST 0x00 0x75       CHECKCAST 0x02 0xe7
-    method ref com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Labg;)V checkUpdate()V@433
-     INVOKESTATIC 0x00 0x86    INVOKESTATIC 0x02 0xfa
+     CHECKCAST 0x00 0x77       CHECKCAST 0x02 0xf3
+    class ref net.minecraft.src.Potion -> abg checkUpdate()V@420
+     CHECKCAST 0x00 0x77       CHECKCAST 0x02 0xf3
+    method ref com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Labg;)V checkUpdate()V@429
+     INVOKESTATIC 0x00 0x88    INVOKESTATIC 0x03 0x06
    string replace Lnet/minecraft/src/Block; -> Lyy; @656
-   string replace Lnet/minecraft/src/EntityRenderer; -> Ladt; @1762
-   string replace Lnet/minecraft/src/World; -> Lry; @1778
-   string replace Lnet/minecraft/src/Potion; -> Labg; @3852
+   string replace Lnet/minecraft/src/EntityRenderer; -> Ladt; @1825
+   string replace Lnet/minecraft/src/World; -> Lry; @1841
+   string replace Lnet/minecraft/src/Potion; -> Labg; @4072
    string replace Lnet/minecraft/src/WorldChunkManager; -> Lvh; @426
 
 Done!
@@ -3660,6 +3717,12 @@ Custom Colors
         [1] override swamp grass color
     BlockFluid (agw.class)
         [1] override water color
+    BlockCauldron (ic.class)
+    Item (acy.class)
+    ItemBlock (uw.class)
+        [1] insert method getColorFromDamage (I)I
+    ItemRenderer (n.class)
+        [1] override water block color in third person
     Potion (abg.class)
         [1] insert field origColor I
         [1] make field color public
@@ -3695,6 +3758,7 @@ Custom Colors
     BlockRedstoneWire (kw.class)
         [1] override redstone wire particle color
     RenderBlocks (acr.class)
+        [1] colorize cauldron water color
         [1] override redstone wire color
     EntityReddustFX (aao.class)
         [1] override redstone particle color
