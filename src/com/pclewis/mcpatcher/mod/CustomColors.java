@@ -40,6 +40,7 @@ public class CustomColors extends Mod {
         classMods.add(new BiomeGenSwampMod());
         classMods.add(new BlockFluidMod());
         classMods.add(new BlockCauldronMod());
+        classMods.add(new RenderItemMod());
 
         classMods.add(new PotionMod());
         classMods.add(new PotionHelperMod());
@@ -462,6 +463,46 @@ public class CustomColors extends Mod {
                     );
                 }
             });
+        }
+    }
+
+    private class RenderItemMod extends ClassMod {
+        RenderItemMod() {
+            classSignatures.add(new ConstSignature("/terrain.png"));
+            classSignatures.add(new ConstSignature("/gui/items.png"));
+
+            MethodRef doRenderItem = new MethodRef(getDeobfClass(), "doRenderItem", "(LEntityItem;DDDFF)V");
+            
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        push(methodInfo, 187L),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/util/Random", "setSeed", "(J)V"))
+                    );
+                }
+            }.setMethod(doRenderItem));
+            
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "colorize water blocks in inventory";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return null;
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                    );
+                }
+            }.targetMethod(doRenderItem));
         }
     }
 
