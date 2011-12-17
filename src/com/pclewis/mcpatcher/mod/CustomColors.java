@@ -2,6 +2,8 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.BadBytecode;
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
@@ -40,7 +42,8 @@ public class CustomColors extends Mod {
         classMods.add(new BiomeGenSwampMod());
         classMods.add(new BlockFluidMod());
         classMods.add(new BlockCauldronMod());
-        classMods.add(new RenderItemMod());
+        classMods.add(new ItemMod());
+        classMods.add(new ItemBlockMod());
 
         classMods.add(new PotionMod());
         classMods.add(new PotionHelperMod());
@@ -466,43 +469,67 @@ public class CustomColors extends Mod {
         }
     }
 
-    private class RenderItemMod extends ClassMod {
-        RenderItemMod() {
-            classSignatures.add(new ConstSignature("/terrain.png"));
-            classSignatures.add(new ConstSignature("/gui/items.png"));
-
-            MethodRef doRenderItem = new MethodRef(getDeobfClass(), "doRenderItem", "(LEntityItem;DDDFF)V");
+    private class ItemMod extends ClassMod {
+        ItemMod() {
+            classSignatures.add(new ConstSignature("CONFLICT @ "));
+            classSignatures.add(new ConstSignature("coal"));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
-                        push(methodInfo, 187L),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/util/Random", "setSeed", "(J)V"))
-                    );
+                    if (methodInfo.getDescriptor().equals("(I)I")) {
+                        return buildExpression(
+                            BinaryRegex.begin(),
+                            push(methodInfo, 0xffffff),
+                            IRETURN,
+                            BinaryRegex.end()
+                        );
+                    } else {
+                        return null;
+                    }
                 }
-            }.setMethod(doRenderItem));
+            }.setMethodName("getColorFromDamage"));
+        }
+    }
 
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "colorize water blocks in inventory";
-                }
+    private class ItemBlockMod extends ClassMod {
+        ItemBlockMod() {
+            parentClass = "Item";
 
+            classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    return null;
+                    if (methodInfo.isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            ILOAD_1,
+                            push(methodInfo, 256),
+                            IADD,
+                            BytecodeMatcher.anyReference(PUTFIELD)
+                        );
+                    } else {
+                        return null;
+                    }
                 }
+            });
 
+            memberMappers.add(new FieldMapper("blockID", "I").accessFlag(AccessFlag.PRIVATE, true));
+
+            patches.add(new AddMethodPatch("getColorFromDamage", "(I)I") {
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
                     return buildCode(
+                        ALOAD_0,
+                        ILOAD_1,
+                        reference(methodInfo, INVOKESPECIAL, new MethodRef("Item", "getColorFromDamage", "(I)I")),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "blockID", "I")),
+                        ILOAD_1,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getItemColorFromDamage", "(III)I")),
+                        IRETURN
                     );
                 }
-            }.targetMethod(doRenderItem));
+            });
         }
     }
 

@@ -133,6 +133,14 @@ public class Colorizer {
         return lilypadColor[0];
     }
 
+    public static int getItemColorFromDamage(int origColor, int blockID, int damage) {
+        if (blockID == 8 || blockID == 9) {
+            return colorizeBiome(origColor, 5);
+        } else {
+            return origColor;
+        }
+    }
+
     public static boolean computeLightmap(EntityRenderer renderer, World world) {
         if (world == null || !useLightmaps) {
             return false;
