@@ -953,51 +953,6 @@ public class CustomColors extends Mod {
         }
     }
 
-    private class EntityRainFXMod extends ClassMod {
-        EntityRainFXMod() {
-            parentClass = "EntityFX";
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
-                        return buildExpression(
-                            // 0.2f * (float) Math.random() + 0.1f
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
-                            D2F,
-                            push(methodInfo, 0.2f),
-                            FMUL,
-                            push(methodInfo, 0.1f),
-                            FADD,
-                            F2D
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            });
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
-                        return buildExpression(
-                            // 19 + rand.nextInt(4)
-                            push(methodInfo, 19),
-                            ALOAD_0,
-                            BytecodeMatcher.anyReference(GETFIELD),
-                            ICONST_4,
-                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/util/Random", "nextInt", "(I)I")),
-                            IADD
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            });
-        }
-    }
-
     abstract private class WaterFXMod extends ClassMod {
         void addWaterColorPatch(final String name, final float[] particleColors) {
             addWaterColorPatch(name, particleColors, particleColors);
@@ -1102,6 +1057,53 @@ public class CustomColors extends Mod {
                     );
                 }
             });
+        }
+    }
+
+    private class EntityRainFXMod extends WaterFXMod {
+        EntityRainFXMod() {
+            parentClass = "EntityFX";
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.isConstructor()) {
+                        return buildExpression(
+                            // 0.2f * (float) Math.random() + 0.1f
+                            reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
+                            D2F,
+                            push(methodInfo, 0.2f),
+                            FMUL,
+                            push(methodInfo, 0.1f),
+                            FADD,
+                            F2D
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.isConstructor()) {
+                        return buildExpression(
+                            // 19 + rand.nextInt(4)
+                            push(methodInfo, 19),
+                            ALOAD_0,
+                            BytecodeMatcher.anyReference(GETFIELD),
+                            ICONST_4,
+                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/util/Random", "nextInt", "(I)I")),
+                            IADD
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            addWaterColorPatch("rain", new float[]{1.0f, 1.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
         }
     }
 
@@ -1247,7 +1249,7 @@ public class CustomColors extends Mod {
             }.targetMethod(onUpdate));
         }
     }
-
+    
     private class EntitySplashFXMod extends WaterFXMod {
         EntitySplashFXMod() {
             parentClass = "EntityRainFX";
