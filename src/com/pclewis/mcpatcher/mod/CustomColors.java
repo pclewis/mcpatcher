@@ -1752,6 +1752,55 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderBlockFallingSand));
+            
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "colorize bottom of water block";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // tessellator.setColorOpaque_F(f3 * f7, f3 * f7, f3 * f7);
+                        ALOAD, 5,
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FMUL,
+                        FLOAD, BinaryRegex.backReference(1),
+                        FLOAD, BinaryRegex.backReference(2),
+                        FMUL,
+                        FLOAD, BinaryRegex.backReference(1),
+                        FLOAD, BinaryRegex.backReference(2),
+                        FMUL,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // tessellator.setColorOpaque_F(f3 * f7 * f, f3 * f7 * f1, f3 * f7 * f2);
+                        ALOAD, 5,
+                        FLOAD, getCaptureGroup(1),
+                        FLOAD, getCaptureGroup(2),
+                        FMUL,
+                        FLOAD, 7,
+                        FMUL,
+                        FLOAD, getCaptureGroup(1),
+                        FLOAD, getCaptureGroup(2),
+                        FMUL,
+                        FLOAD, 8,
+                        FMUL,
+                        FLOAD, getCaptureGroup(1),
+                        FLOAD, getCaptureGroup(2),
+                        FMUL,
+                        FLOAD, 8,
+                        FMUL,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
+                   );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockFluids", "(LBlock;III)Z")));
         }
     }
 
