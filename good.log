@@ -1,5 +1,5 @@
 MCPatcher version is 2.3.0_01
-OS: Linux 3.1.5-2.fc16.x86_64 amd64
+OS: Linux 3.1.5-6.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_29 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.0.0 (md5 3820d222b95d0b8c520d9596a756a6e6)
@@ -1500,6 +1500,24 @@ Patching...
                                ICONST_2
                                FALOAD
                                FLOAD 0x0c
+                               FMUL
+                               INVOKEVIRTUAL 0x01 0x68
+    colorize bottom of water block n(Lyy;III)Z@745
+     ALOAD 0x05                ALOAD 0x05
+     FLOAD 0x0e                FLOAD 0x0e
+     FLOAD 0x22                FLOAD 0x22
+     FMUL                      FMUL
+     FLOAD 0x0e                FLOAD 0x07
+     FLOAD 0x22                FMUL
+     FMUL                      FLOAD 0x0e
+     FLOAD 0x0e                FLOAD 0x22
+     FLOAD 0x22                FMUL
+     FMUL                      FLOAD 0x08
+     INVOKEVIRTUAL 0x01 0x68   FMUL
+                               FLOAD 0x0e
+                               FLOAD 0x22
+                               FMUL
+                               FLOAD 0x08
                                FMUL
                                INVOKEVIRTUAL 0x01 0x68
  applying EntitySplashFX patch to adi.class for mod Custom Colors
@@ -3919,6 +3937,7 @@ Custom Colors
     BlockRedstoneWire (kw.class)
         [1] override redstone wire particle color
     RenderBlocks (acr.class)
+        [1] colorize bottom of water block
         [1] colorize cauldron water color
         [6] colorize falling sand and gravel
         [1] override redstone wire color
