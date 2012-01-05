@@ -8,15 +8,10 @@ import java.io.IOException;
  * ClassPatch that adds a new method to a class file.  The added method is made public by default.
  */
 abstract public class AddMethodPatch extends ClassPatch {
-    /**
-     * Name of method.
-     */
-    protected String name;
-    /**
-     * Java type descriptor of method; may use deobfuscated names.
-     */
-    protected String type;
+    private String name;
+    private String type;
     private int accessFlags;
+
     /**
      * May be set to specify a different max stack size for the method.
      *
@@ -47,11 +42,13 @@ abstract public class AddMethodPatch extends ClassPatch {
     }
 
     /**
-     * Create an AddMethodPatch with given name and type.
+     * Create an AddMethodPatch with given name, type, and access flags.
      *
      * @param name        name of method
      * @param type        Java type descriptor of method; may use deobfuscated names
      * @param accessFlags method access flags
+     *
+     * @see javassist.bytecode.AccessFlag
      */
     public AddMethodPatch(String name, String type, int accessFlags) {
         this.name = name;
@@ -59,9 +56,32 @@ abstract public class AddMethodPatch extends ClassPatch {
         this.accessFlags = accessFlags;
     }
 
+    /**
+     * Create an AddMethodPatch with given name.
+     * NOTE: getDescriptor must be overridden if you are using this constructor.
+     *
+     * @param name name of method
+     */
+    public AddMethodPatch(String name) {
+        this(name, null);
+    }
+
+    /**
+     * Create an AddMethodPatch with given name and access flags.
+     * NOTE: getDescriptor must be overridden if you are using this constructor.
+     *
+     * @param name name of method
+     * @param accessFlags method access flags
+     *
+     * @see javassist.bytecode.AccessFlag
+     */
+    public AddMethodPatch(String name, int accessFlags) {
+        this(name, null, accessFlags);
+    }
+
     @Override
     final public String getDescription() {
-        return String.format("insert method %s %s", name, type);
+        return String.format("insert method %s %s", name, getDescriptor());
     }
 
     protected void prePatch(ClassFile classFile) throws BadBytecode, IOException {
@@ -72,7 +92,7 @@ abstract public class AddMethodPatch extends ClassPatch {
         boolean patched = false;
         prePatch(classFile);
         ConstPool constPool = classFile.getConstPool();
-        MethodRef methodRef = (MethodRef) classMod.getClassMap().map(new MethodRef(classMod.getDeobfClass(), name, type));
+        MethodRef methodRef = (MethodRef) classMod.getClassMap().map(new MethodRef(classMod.getDeobfClass(), name, getDescriptor()));
         MethodInfo methodInfo = new MethodInfo(constPool, methodRef.getName(), methodRef.getType());
         methodInfo.setAccessFlags(accessFlags);
         exceptionTable = new ExceptionTable(constPool);
@@ -95,6 +115,16 @@ abstract public class AddMethodPatch extends ClassPatch {
             classMod.addToConstPool = false;
         }
         return patched;
+    }
+
+    /**
+     * Called to get the descriptor for the new method.  Use this instead of setting the descriptor in the constructor
+     * to have the method type set at patch time.
+     *  
+     * @return descriptor
+     */
+    public String getDescriptor() {
+        return type;
     }
 
     /**

@@ -16,12 +16,21 @@ import static javassist.bytecode.Opcode.*;
  */
 abstract public class BytecodePatch extends ClassPatch {
     BytecodeMatcher matcher;
-    MethodRef targetMethod;
+    private MethodRef targetMethod;
     int labelOffset;
 
     public BytecodePatch targetMethod(MethodRef targetMethod) {
         this.targetMethod = targetMethod;
         return this;
+    }
+
+    /**
+     * Can be overridden in lieu of calling targetMethod() to set the target method at patch time.
+     *
+     * @return target method ref
+     */
+    public MethodRef getTargetMethod() {
+        return targetMethod;
     }
 
     /**
@@ -31,6 +40,7 @@ abstract public class BytecodePatch extends ClassPatch {
      * @return true if method should be considered for patching
      */
     public boolean filterMethod(MethodInfo methodInfo) {
+        MethodRef targetMethod = getTargetMethod();
         if (targetMethod == null) {
             return true;
         } else {

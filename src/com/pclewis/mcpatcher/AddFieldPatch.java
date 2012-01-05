@@ -26,6 +26,7 @@ public class AddFieldPatch extends ClassPatch {
      * @param name        field name
      * @param type        field type descriptor
      * @param accessFlags Java access flags (public, private, etc.).
+     *
      * @see javassist.bytecode.AccessFlag
      */
     public AddFieldPatch(String name, String type, int accessFlags) {
@@ -34,14 +35,47 @@ public class AddFieldPatch extends ClassPatch {
         this.accessFlags = accessFlags;
     }
 
+    /**
+     * Add a new public, non-static field.
+     * NOTE: getDescriptor must be overridden if you are using this constructor.
+     *
+     * @param name field name
+     */
+    public AddFieldPatch(String name) {
+        this(name, null, AccessFlag.PUBLIC);
+    }
+
+    /**
+     * Add a new field.
+     * NOTE: getDescriptor must be overridden if you are using this constructor.
+     *
+     * @param name        field name
+     * @param accessFlags Java access flags (public, private, etc.).
+     *
+     * @see javassist.bytecode.AccessFlag
+     */
+    public AddFieldPatch(String name, int accessFlags) {
+        this(name, null, accessFlags);
+    }
+
+    /**
+     * Called to get the descriptor for the new field.  Use this instead of setting the descriptor in the constructor
+     * to have the field type set at patch time.
+     *
+     * @return descriptor
+     */
+    public String getDescriptor() {
+        return type;
+    }
+
     @Override
     public String getDescription() {
-        return String.format("insert field %s %s", name, type);
+        return String.format("insert field %s %s", name, getDescriptor());
     }
 
     @Override
     boolean apply(ClassFile classFile) throws BadBytecode, DuplicateMemberException {
-        FieldInfo fieldInfo = new FieldInfo(classFile.getConstPool(), name, classMod.getClassMap().mapTypeString(type));
+        FieldInfo fieldInfo = new FieldInfo(classFile.getConstPool(), name, classMod.getClassMap().mapTypeString(getDescriptor()));
         fieldInfo.setAccessFlags(accessFlags);
         recordPatch();
         classFile.addField(fieldInfo);
