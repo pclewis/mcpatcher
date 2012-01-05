@@ -632,6 +632,7 @@ final public class MCPatcher {
                     Logger.log(Logger.LOG_MOD, "applying %s patch to %s for mod %s", cm.getDeobfClass(), filename, cm.mod.getName());
                 }
                 for (ClassPatch cp : cm.patches) {
+                    cp.classMod = cm;
                     if (cp.apply(classFile)) {
                         patched = true;
                     }

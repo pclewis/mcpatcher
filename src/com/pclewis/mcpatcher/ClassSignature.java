@@ -36,7 +36,7 @@ abstract public class ClassSignature implements PatchComponent {
     protected void afterMatch(ClassFile classFile) {
     }
 
-    final void setClassMod(ClassMod classMod) {
+    void setClassMod(ClassMod classMod) {
         this.classMod = classMod;
     }
 
