@@ -15,12 +15,14 @@ import static javassist.bytecode.Opcode.*;
 
 public class CustomColors extends Mod {
     private boolean haveSpawnerEggs;
+    private String getColorFromDamageDescriptor;
+    private int getColorFromDamageParams;
 
     public CustomColors(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.CUSTOM_COLORS;
         author = "MCPatcher";
         description = "Gives texture packs control over hardcoded colors in the game.";
-        version = "1.1";
+        version = "1.2";
 
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") < 0) {
             addError("Requires Minecraft Beta 1.9 or newer.");
@@ -42,7 +44,7 @@ public class CustomColors extends Mod {
         classMods.add(new BiomeGenSwampMod());
         classMods.add(new BlockFluidMod());
         classMods.add(new BlockCauldronMod());
-        classMods.add(new BaseMod.ItemMod());
+        classMods.add(new ItemMod());
         classMods.add(new ItemBlockMod());
         classMods.add(new ItemRendererMod());
 
@@ -352,14 +354,18 @@ public class CustomColors extends Mod {
     private class BiomeGenSwampMod extends ClassMod {
         private static final int MAGIC1 = 0xfefefe;
         private static final int MAGIC2 = 0x4e0e4e;
-        private static final int MAGIC3 = 0xe0ff70;
+        private static final int MAGIC3_A = 0xe0ff70;
+        private static final int MAGIC3_B = 0xe0ffae;
 
         BiomeGenSwampMod() {
             parentClass = "BiomeGenBase";
 
             classSignatures.add(new ConstSignature(MAGIC1));
             classSignatures.add(new ConstSignature(MAGIC2));
-            classSignatures.add(new ConstSignature(MAGIC3));
+            classSignatures.add(new OrSignature(
+                new ConstSignature(MAGIC3_A),
+                new ConstSignature(MAGIC3_B)
+            ));
 
             addSwampColorPatch(0, "Grass");
             addSwampColorPatch(1, "Foliage");
@@ -411,17 +417,20 @@ public class CustomColors extends Mod {
                         ALOAD_1,
                         BytecodeMatcher.anyReference(INVOKEINTERFACE),
                         ILOAD_2,
+                        BinaryRegex.any(0, 3),
                         ILOAD, 4,
+                        BinaryRegex.any(0, 3),
                         BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                        ASTORE, 5,
-                        ALOAD, 5,
-                        BytecodeMatcher.anyReference(GETFIELD),
-                        IRETURN
+                        BinaryRegex.optional(BinaryRegex.build(
+                            ASTORE, 5,
+                            ALOAD, 5
+                        )),
+                        BytecodeMatcher.anyReference(GETFIELD)
                     );
                 }
             }.setMethod(colorMultiplier));
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "override water color";
@@ -430,21 +439,16 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        ALOAD, 5,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;")),
+                        BinaryRegex.any(0, 4),
                         reference(methodInfo, GETFIELD, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        push(methodInfo, 5),
-                        ALOAD_1,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
-                        ILOAD_2,
-                        ILOAD_3,
-                        ILOAD, 4,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IILWorldChunkManager;III)I"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LWorldChunkManager;II)I"))
                     );
                 }
             }.targetMethod(colorMultiplier));
@@ -467,6 +471,37 @@ public class CustomColors extends Mod {
                     );
                 }
             });
+        }
+    }
+    
+    private class ItemMod extends BaseMod.ItemMod {
+        private String lastDescriptor; 
+            
+        ItemMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    String descriptor = methodInfo.getDescriptor();
+                    if (descriptor.equals("(I)I") || descriptor.equals("(II)I")) {
+                        lastDescriptor = descriptor;
+                        return buildExpression(
+                            BinaryRegex.begin(),
+                            push(methodInfo, 0xffffff),
+                            IRETURN,
+                            BinaryRegex.end()
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public void afterMatch(ClassFile classFile) {
+                    getColorFromDamageParams = lastDescriptor.length() - 3;
+                    getColorFromDamageDescriptor = lastDescriptor;
+                    Logger.log(Logger.LOG_CONST, "getColorFromDamage%s has %d params", getColorFromDamageDescriptor, getColorFromDamageParams);
+                }
+            }.setMethodName("getColorFromDamage"));
         }
     }
 
@@ -493,19 +528,25 @@ public class CustomColors extends Mod {
 
             memberMappers.add(new FieldMapper("blockID", "I").accessFlag(AccessFlag.PRIVATE, true));
 
-            patches.add(new AddMethodPatch("getColorFromDamage", "(I)I") {
+            patches.add(new AddMethodPatch("getColorFromDamage") {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
                     return buildCode(
                         ALOAD_0,
                         ILOAD_1,
-                        reference(methodInfo, INVOKESPECIAL, new MethodRef("Item", "getColorFromDamage", "(I)I")),
+                        (getColorFromDamageParams >= 2 ? new byte[]{ILOAD_2} : new byte[0]),
+                        reference(methodInfo, INVOKESPECIAL, new MethodRef("Item", "getColorFromDamage", getColorFromDamageDescriptor)),
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "blockID", "I")),
                         ILOAD_1,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getItemColorFromDamage", "(III)I")),
                         IRETURN
                     );
+                }
+                
+                @Override
+                public String getDescriptor() {
+                    return getColorFromDamageDescriptor;
                 }
             });
         }
@@ -755,19 +796,23 @@ public class CustomColors extends Mod {
 
                         BytecodeMatcher.captureReference(INVOKESTATIC),
                         IRETURN,
+                        
+                        BinaryRegex.any(0, 50),
 
                         ALOAD_1,
                         BytecodeMatcher.captureReference(INVOKEINTERFACE),
                         ILOAD_2,
+                        BinaryRegex.any(0, 3),
                         ILOAD, 4,
+                        BinaryRegex.any(0, 3),
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
                         ALOAD_1,
                         ILOAD_2,
+                        BinaryRegex.any(0, 3),
                         ILOAD_3,
                         ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        IRETURN,
-                        BinaryRegex.end()
+                        BinaryRegex.any(0, 3),
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL)
                     );
                 }
             }
@@ -1940,14 +1985,37 @@ public class CustomColors extends Mod {
     }
 
     private class EntityListMod extends ClassMod {
+        private String addMappingDescriptor;
+        
         EntityListMod() {
             classSignatures.add(new ConstSignature("Skipping Entity with id "));
 
-            memberMappers.add(new MethodMapper("addMapping", "(Ljava/lang/Class;Ljava/lang/String;IZ)V")
-                .accessFlag(AccessFlag.STATIC, true)
-            );
+            classSignatures.add(new BytecodeSignature() {
+                private String descriptor;
 
-            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    descriptor = methodInfo.getDescriptor();
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        BytecodeMatcher.anyReference(GETSTATIC),
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
+                    ); 
+                }
+                
+                @Override
+                public void afterMatch(ClassFile classFile) {
+                    addMappingDescriptor = descriptor;
+                    Logger.log(Logger.LOG_CONST, "addMapping%s", addMappingDescriptor);
+                }
+            }.setMethodName("addMapping"));
+        }
+
+        @Override
+        public void prePatch(String filename, ClassFile classFile) {
+            patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "set up mapping for spawnable entities";
@@ -1956,23 +2024,19 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        BytecodeMatcher.anyReference(GETSTATIC),
-                        ILOAD_2,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")),
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("java/util/List", "add", "(Ljava/lang/Object;)Z")),
-                        POP
+                        BinaryRegex.begin()
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ILOAD_2,
                         ALOAD_1,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupSpawnerEgg", "(ILjava/lang/String;)V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "addMapping", "(Ljava/lang/Class;Ljava/lang/String;IZ)V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "addMapping", addMappingDescriptor)));
         }
     }
 
@@ -1984,7 +2048,6 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature("entity."));
 
             MethodRef getItemNameIS = new MethodRef(getDeobfClass(), "getItemNameIS", "(LItemStack;)Ljava/lang/String;");
-            MethodRef colorMultiplier = new MethodRef(getDeobfClass(), "colorMultiplier", "(I)I");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -2004,23 +2067,37 @@ public class CustomColors extends Mod {
                 .addXref(2, new MethodRef("EntityList", "getEntityString", "(I)Ljava/lang/String;"))
             );
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        // 64 + (i * 0x24faef & 0xc0)
-                        BIPUSH, 64,
-                        ILOAD_1,
-                        push(methodInfo, 0x24faef),
-                        IMUL,
-                        push(methodInfo, 0xc0),
-                        IAND,
-                        IADD
-                    );
-                }
-            }.setMethod(colorMultiplier));
+            classSignatures.add(new OrSignature(
+                new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression(MethodInfo methodInfo) {
+                        return buildExpression(
+                            // 64 + (i * 0x24faef & 0xc0)
+                            BIPUSH, 64,
+                            ILOAD_1,
+                            push(methodInfo, 0x24faef),
+                            IMUL,
+                            push(methodInfo, 0xc0),
+                            IAND,
+                            IADD
+                        );
+                    }
+                }.setMethodName("getColorFromDamage"),
+
+                new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression(MethodInfo methodInfo) {
+                        return buildExpression(
+                            push(methodInfo, 0xffffff),
+                            IRETURN
+                        );
+                    }
+                }.setMethodName("getColorFromDamage")
+            ));
 
             patches.add(new BytecodePatch.InsertBefore() {
+                private MethodRef getColorFromDamage;
+
                 @Override
                 public String getDescription() {
                     return "override spawner egg color";
@@ -2037,10 +2114,19 @@ public class CustomColors extends Mod {
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ILOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSpawnerEgg", "(II)I"))
+                        (getColorFromDamageParams >= 2 ? ILOAD_2 : ICONST_0),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSpawnerEgg", "(III)I"))
                     );
                 }
-            }.targetMethod(colorMultiplier));
+
+                @Override
+                public MethodRef getTargetMethod() {
+                    if (getColorFromDamage == null) {
+                        getColorFromDamage = new MethodRef(getDeobfClass(), "getColorFromDamage", getColorFromDamageDescriptor);
+                    }
+                    return getColorFromDamage;
+                }
+            });
         }
     }
 }

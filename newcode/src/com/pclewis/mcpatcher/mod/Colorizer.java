@@ -56,7 +56,8 @@ public class Colorizer {
 
     private static final boolean useEggColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true);
     private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>();
-    private static final HashMap<Integer, Integer> spawnerEggColors = new HashMap<Integer, Integer>(); // egg.*
+    private static final HashMap<Integer, Integer> spawnerEggShellColors = new HashMap<Integer, Integer>(); // egg.shell.*
+    private static final HashMap<Integer, Integer> spawnerEggSpotColors = new HashMap<Integer, Integer>(); // egg.spots.*
 
     public static float redstoneWireRed;
     public static float redstoneWireGreen;
@@ -88,6 +89,10 @@ public class Colorizer {
         checkUpdate();
         return colorizeBiome(origColor, index, chunkManager.getTemperature(i, j, k), chunkManager.getRainfall(i, k));
     }
+    
+    public static int colorizeWater(WorldChunkManager chunkManager, int i, int k) {
+        return colorizeBiome(0xffffff, 5, chunkManager, i, 0, k);
+    }
 
     public static int colorizeStem(int origColor, int blockMetadata) {
         checkUpdate();
@@ -106,20 +111,21 @@ public class Colorizer {
         return colorizeBiome(0xffffff, COLOR_MAPS.length + block.blockID);
     }
 
-    public static int colorizeSpawnerEgg(int origColor, int entityID) {
+    public static int colorizeSpawnerEgg(int origColor, int entityID, int spots) {
         if (!useEggColors) {
             return origColor;
         }
         checkUpdate();
         Integer value = null;
-        if (spawnerEggColors.containsKey(entityID)) {
-            value = spawnerEggColors.get(entityID);
+        HashMap<Integer, Integer> eggMap = (spots == 0 ? spawnerEggShellColors : spawnerEggSpotColors);
+        if (eggMap.containsKey(entityID)) {
+            value = eggMap.get(entityID);
         } else if (entityNamesByID.containsKey(entityID)) {
             String name = entityNamesByID.get(entityID);
             if (name != null) {
                 int[] tmp = new int[]{origColor};
-                loadIntColor("egg." + name, tmp, 0);
-                spawnerEggColors.put(entityID, tmp[0]);
+                loadIntColor((spots == 0 ? "egg.shell." : "egg.spots.") + name, tmp, 0);
+                eggMap.put(entityID, tmp[0]);
                 value = tmp[0];
             }
         }
@@ -328,7 +334,8 @@ public class Colorizer {
         stemColors = null;
         lightmaps.clear();
         lightMethod = 0;
-        spawnerEggColors.clear();
+        spawnerEggShellColors.clear();
+        spawnerEggSpotColors.clear();
         for (Potion potion : potions) {
             potion.color = potion.origColor;
         }
