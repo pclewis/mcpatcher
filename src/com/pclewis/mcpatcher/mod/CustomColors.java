@@ -63,6 +63,7 @@ public class CustomColors extends Mod {
         classMods.add(new EntitySplashFXMod());
         classMods.add(new EntityBubbleFXMod());
 
+        classMods.add(new EntityLivingMod());
         classMods.add(new EntityRendererMod());
 
         classMods.add(new BlockLilyPadMod());
@@ -1383,6 +1384,16 @@ public class CustomColors extends Mod {
             });
         }
     }
+    
+    private class EntityLivingMod extends ClassMod {
+        EntityLivingMod() {
+            parentClass = "Entity";
+
+            classSignatures.add(new ConstSignature("/mob/char.png"));
+            classSignatures.add(new ConstSignature("bubble"));
+            classSignatures.add(new ConstSignature("explode"));
+        }
+    }
 
     private class EntityRendererMod extends ClassMod {
         EntityRendererMod() {
@@ -1520,6 +1531,70 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "updateLightmap", "()V")));
+            
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override underwater ambient color";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // fogColorRed = 0.02f;
+                        ALOAD_0,
+                        push(methodInfo, 0.02f),
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        // fogColorGreen = 0.02f;
+                        ALOAD_0,
+                        push(methodInfo, 0.02f),
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        // fogColorBlue = 0.2f;
+                        ALOAD_0,
+                        push(methodInfo, 0.2f),
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Colorizer.computeUnderwaterColor(world.getWorldChunkManager(), entityliving.posX, entityliving.posY, entityliving.posZ);
+                        ALOAD_2,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
+                        ALOAD_3,
+                        reference(methodInfo, GETFIELD, new FieldRef("EntityLiving", "posX", "D")),
+                        ALOAD_3,
+                        reference(methodInfo, GETFIELD, new FieldRef("EntityLiving", "posY", "D")),
+                        ALOAD_3,
+                        reference(methodInfo, GETFIELD, new FieldRef("EntityLiving", "posZ", "D")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeUnderwaterColor", "(LWorldChunkManager;DDD)V")),
+
+                        // fogColorRed = Colorizer.waterColor[0];
+                        ALOAD_0,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        getCaptureGroup(1),
+
+                        // fogColorGreen = Colorizer.waterColor[1];
+                        ALOAD_0,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        getCaptureGroup(2),
+
+                        // fogColorBlue = Colorizer.waterColor[2];
+                        ALOAD_0,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        getCaptureGroup(3)
+                    );
+                }
+            });
         }
     }
 

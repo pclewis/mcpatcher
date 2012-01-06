@@ -273,6 +273,11 @@ public class Colorizer {
         intToFloat3(rgb, waterColor);
     }
     
+    public static void computeUnderwaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
+        int rgb = colorizeBiome(0x050533, 5, chunkManager, (int) x, (int) y, (int) z);
+        intToFloat3(rgb, waterColor);
+    }
+    
     public static void colorizeWaterBlockGL(int blockID) {
         if (blockID == 8 || blockID == 9) {
             computeWaterColor();
