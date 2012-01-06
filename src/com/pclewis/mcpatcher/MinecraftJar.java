@@ -140,7 +140,7 @@ class MinecraftJar {
     }
 
     static boolean isGarbageFile(String filename) {
-        return filename.startsWith("META-INF") || filename.startsWith("__MACOSX") || filename.endsWith(".DS_Store");
+        return filename.startsWith("META-INF") || filename.startsWith("__MACOSX") || filename.endsWith(".DS_Store") || filename.equals("mod.properties");
     }
 
     static boolean isClassFile(String filename) {
