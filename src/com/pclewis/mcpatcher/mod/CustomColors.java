@@ -175,6 +175,7 @@ public class CustomColors extends Mod {
             eggCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true));
             otherBlockCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true));
             eggCheckBox.setVisible(haveSpawnerEggs);
+            MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "underwaterBlendRadius", 7);
         }
 
         @Override

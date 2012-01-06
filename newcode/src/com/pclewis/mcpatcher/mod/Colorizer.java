@@ -59,6 +59,8 @@ public class Colorizer {
     private static final HashMap<Integer, Integer> spawnerEggShellColors = new HashMap<Integer, Integer>(); // egg.shell.*
     private static final HashMap<Integer, Integer> spawnerEggSpotColors = new HashMap<Integer, Integer>(); // egg.spots.*
 
+    private static final int underwaterBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "underwaterBlendRadius", 7);
+
     public static float redstoneWireRed;
     public static float redstoneWireGreen;
     public static float redstoneWireBlue;
@@ -274,8 +276,21 @@ public class Colorizer {
     }
     
     public static void computeUnderwaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
-        int rgb = colorizeBiome(0x050533, 5, chunkManager, (int) x, (int) y, (int) z);
-        intToFloat3(rgb, waterColor);
+        int rgb;
+        float[] f = new float[3];
+        final float m = (2 * underwaterBlendRadius + 1) * (2 * underwaterBlendRadius + 1);
+        waterColor[0] = 0.0f;
+        waterColor[1] = 0.0f;
+        waterColor[2] = 0.0f;
+        for (int i = -underwaterBlendRadius; i <= underwaterBlendRadius; i++) {
+            for (int j = -underwaterBlendRadius; j <= underwaterBlendRadius; j++) {
+                rgb = colorizeBiome(0x050533, 5, chunkManager, (int) x + i, (int) y, (int) z + j);
+                intToFloat3(rgb, f);
+                waterColor[0] += f[0] / m;
+                waterColor[1] += f[1] / m;
+                waterColor[2] += f[2] / m;
+            }
+        }
     }
     
     public static void colorizeWaterBlockGL(int blockID) {
