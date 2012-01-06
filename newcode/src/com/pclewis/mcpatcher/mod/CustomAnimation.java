@@ -5,6 +5,8 @@ import net.minecraft.src.TextureFX;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.Random;
 
 public class CustomAnimation extends TextureFX {
@@ -21,8 +23,8 @@ public class CustomAnimation extends TextureFX {
 
         BufferedImage custom = null;
         String imageName = (tileImage == 0 ? "/terrain.png" : "/gui/items.png");
+        String customSrc = "/anim/custom_" + name + ".png";
         try {
-            String customSrc = "/custom_" + name + ".png";
             custom = TextureUtils.getResourceAsBufferedImage(customSrc);
             if (custom != null) {
                 imageName = customSrc;
@@ -36,7 +38,20 @@ public class CustomAnimation extends TextureFX {
         if (custom == null) {
             delegate = new Tile(imageName, tileNumber, minScrollDelay, maxScrollDelay);
         } else {
-            delegate = new Strip(custom);
+            Properties properties = null;
+            InputStream inputStream = null;
+            try {
+                inputStream = TextureUtils.getResourceAsStream(customSrc.replaceFirst("\\.png$", ".properties"));
+                if (inputStream != null) {
+                    properties = new Properties();
+                    properties.load(inputStream);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                MCPatcherUtils.close(inputStream);
+            }
+            delegate = new Strip(custom, properties);
         }
     }
 
@@ -109,26 +124,90 @@ public class CustomAnimation extends TextureFX {
     }
 
     private class Strip implements Delegate {
-        private final int oneFrame;
+        private final int oneTile;
         private final byte[] src;
-        private final int numFrames;
+        private final int numTiles;
 
+        private int[] tileOrder;
+        private int[] tileDelay;
+        private int numFrames;
         private int currentFrame;
+        private int currentDelay;
 
-        Strip(BufferedImage custom) {
-            oneFrame = TileSize.int_size * TileSize.int_size * 4;
-            numFrames = custom.getHeight() / custom.getWidth();
+        Strip(BufferedImage custom, Properties properties) {
+            oneTile = TileSize.int_size * TileSize.int_size * 4;
+            numFrames = numTiles = custom.getHeight() / custom.getWidth();
             int imageBuf[] = new int[custom.getWidth() * custom.getHeight()];
             custom.getRGB(0, 0, custom.getWidth(), custom.getHeight(), imageBuf, 0, TileSize.int_size);
             src = new byte[imageBuf.length * 4];
             ARGBtoRGBA(imageBuf, src);
+            loadProperties(properties);
+            currentFrame = -1;
+        }
+
+        private void loadProperties(Properties properties) {
+            loadTileOrder(properties);
+            if (tileOrder == null) {
+                tileOrder = new int[numFrames];
+                for (int i = 0; i < numFrames; i++) {
+                    tileOrder[i] = i % numTiles;
+                }
+            }
+            tileDelay = new int[numFrames];
+            for (int i = 0; i < numFrames; i++) {
+                tileDelay[i] = 1;
+            }
+            loadTileDelay(properties);
+        }
+
+        private void loadTileOrder(Properties properties) {
+            if (properties == null) {
+                return;
+            }
+            int i = 0;
+            for (; getIntValue(properties, "tile.", i) != null; i++) {
+            }
+            if (i > 0) {
+                numFrames = i;
+                tileOrder = new int[numFrames];
+                for (i = 0; i < numFrames; i++) {
+                    tileOrder[i] = Math.abs(getIntValue(properties, "tile.", i)) % numTiles;
+                }
+            }
+        }
+
+        private void loadTileDelay(Properties properties) {
+            if (properties == null) {
+                return;
+            }
+            for (int i = 0; i < numFrames; i++) {
+                Integer value = getIntValue(properties, "duration.", i);
+                if (value != null) {
+                    tileDelay[i] = Math.max(value, 1);
+                }
+            }
+        }
+
+        private Integer getIntValue(Properties properties, String prefix, int index) {
+            try {
+                String value = properties.getProperty(prefix + index);
+                if (value != null && value.matches("^\\d+$")) {
+                    return Integer.parseInt(value);
+                }
+            } catch (NumberFormatException e) {
+            }
+            return null;
         }
 
         public void onTick() {
+            if (--currentDelay > 0) {
+                return;
+            }
             if (++currentFrame >= numFrames) {
                 currentFrame = 0;
             }
-            System.arraycopy(src, currentFrame * oneFrame, imageData, 0, oneFrame);
+            System.arraycopy(src, tileOrder[currentFrame] * oneTile, imageData, 0, oneTile);
+            currentDelay = tileDelay[currentFrame];
         }
     }
 }

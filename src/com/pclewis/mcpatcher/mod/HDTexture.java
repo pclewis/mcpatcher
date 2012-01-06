@@ -19,7 +19,7 @@ public class HDTexture extends Mod {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for texture packs of size 32x32 and higher.";
-        version = "1.1";
+        version = "1.2";
         configPanel = new HDTextureConfig();
 
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;

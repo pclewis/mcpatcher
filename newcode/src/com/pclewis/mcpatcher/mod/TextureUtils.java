@@ -62,13 +62,6 @@ public class TextureUtils {
         expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);
         expectedColumns.put("/misc/dial.png", 1);
-        expectedColumns.put("/custom_lava_still.png", 1);
-        expectedColumns.put("/custom_lava_flowing.png", 1);
-        expectedColumns.put("/custom_water_still.png", 1);
-        expectedColumns.put("/custom_water_flowing.png", 1);
-        expectedColumns.put("/custom_fire_n_s.png", 1);
-        expectedColumns.put("/custom_fire_e_w.png", 1);
-        expectedColumns.put("/custom_portal.png", 1);
     }
 
     public static boolean setTileSize() {
@@ -192,7 +185,7 @@ public class TextureUtils {
             textureList.add(new FlowWater());
         }
 
-        if (!isDefault && customFire && hasResource("/custom_fire_e_w.png") && hasResource("/custom_fire_n_s.png")) {
+        if (!isDefault && customFire && hasResource("/anim/custom_fire_e_w.png") && hasResource("/anim/custom_fire_n_s.png")) {
             textureList.add(new CustomAnimation(FIRE_N_S_TEXTURE_INDEX, 0, 1, "fire_n_s", 2, 4));
             textureList.add(new CustomAnimation(FIRE_E_W_TEXTURE_INDEX, 0, 1, "fire_e_w", 2, 4));
         } else if (animatedFire) {
@@ -200,7 +193,7 @@ public class TextureUtils {
             textureList.add(new Fire(1));
         }
 
-        if (!isDefault && customPortal && hasResource("/custom_portal.png")) {
+        if (!isDefault && customPortal && hasResource("/anim/custom_portal.png")) {
             textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
         } else if (animatedPortal) {
             textureList.add(new Portal());
@@ -210,7 +203,7 @@ public class TextureUtils {
             for (int tileImage = 0; tileImage < 2; tileImage++) {
                 String imageName = (tileImage == 0 ? "terrain" : "item");
                 for (int tileNum = 0; tileNum < 256; tileNum++) {
-                    String resource = "/custom_" + imageName + "_" + tileNum + ".png";
+                    String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
                     if (hasResource(resource)) {
                         textureList.add(new CustomAnimation(tileNum, tileImage, 1, imageName + "_" + tileNum, 2, 4));
                     }
@@ -262,6 +255,7 @@ public class TextureUtils {
 
     public static boolean isRequiredResource(String resource) {
         return !(resource.startsWith("/custom_") ||
+            resource.startsWith("/anim/custom_") ||
             resource.equals("/terrain_nh.png") ||
             resource.equals("/terrain_s.png") ||
             resource.matches("^/font/.*\\.properties$") ||
@@ -280,6 +274,9 @@ public class TextureUtils {
         }
         if (is == null) {
             is = TextureUtils.class.getResourceAsStream(resource);
+        }
+        if (is == null && resource.startsWith("/anim/custom_")) {
+            is = getResourceAsStream(texturePack, resource.substring(5));
         }
         if (is == null && isRequiredResource(resource)) {
             is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
@@ -333,7 +330,7 @@ public class TextureUtils {
         );
         if (!cached) {
             Integer i;
-            if (resource.matches("^/custom_\\w+_\\d+\\.png$")) {
+            if (resource.matches("^(/anim)?/custom_.*\\.png$")) {
                 i = 1;
             } else {
                 i = expectedColumns.get(resource);
