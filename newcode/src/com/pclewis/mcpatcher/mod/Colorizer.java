@@ -24,7 +24,8 @@ public class Colorizer {
         "/misc/pinecolor.png",
         "/misc/birchcolor.png",
         "/misc/foliagecolor.png",
-        "/misc/watercolorX.png"
+        "/misc/watercolorX.png",
+        "/misc/underwatercolor.png",
     };
     public static final String PALETTE_BLOCK_KEY = "palette.block.";
 
@@ -276,6 +277,12 @@ public class Colorizer {
     }
     
     public static void computeUnderwaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
+        if (colorMaps[6] == null) {
+            waterColor[0] = 0.02f;
+            waterColor[1] = 0.02f;
+            waterColor[2] = 0.2f;
+            return;
+        }
         int rgb;
         float[] f = new float[3];
         final float m = (2 * underwaterBlendRadius + 1) * (2 * underwaterBlendRadius + 1);
@@ -284,7 +291,7 @@ public class Colorizer {
         waterColor[2] = 0.0f;
         for (int i = -underwaterBlendRadius; i <= underwaterBlendRadius; i++) {
             for (int j = -underwaterBlendRadius; j <= underwaterBlendRadius; j++) {
-                rgb = colorizeBiome(0x050533, 5, chunkManager, (int) x + i, (int) y, (int) z + j);
+                rgb = colorizeBiome(0x050533, 6, chunkManager, (int) x + i, (int) y, (int) z + j);
                 intToFloat3(rgb, f);
                 waterColor[0] += f[0] / m;
                 waterColor[1] += f[1] / m;
@@ -380,6 +387,7 @@ public class Colorizer {
 
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true)) {
             loadColorMap(5);
+            loadColorMap(6);
         }
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true)) {
             for (Potion potion : potions) {
