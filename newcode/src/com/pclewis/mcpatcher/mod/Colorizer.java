@@ -26,6 +26,8 @@ public class Colorizer {
         "/misc/foliagecolor.png",
         "/misc/watercolorX.png",
         "/misc/underwatercolor.png",
+        "/misc/fogcolor0.png",
+        "/misc/skycolor0.png",
     };
     public static final String PALETTE_BLOCK_KEY = "palette.block.";
 
@@ -60,7 +62,8 @@ public class Colorizer {
     private static final HashMap<Integer, Integer> spawnerEggShellColors = new HashMap<Integer, Integer>(); // egg.shell.*
     private static final HashMap<Integer, Integer> spawnerEggSpotColors = new HashMap<Integer, Integer>(); // egg.spots.*
 
-    private static final int underwaterBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "underwaterBlendRadius", 7);
+    private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
+    private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
 
     public static float redstoneWireRed;
     public static float redstoneWireGreen;
@@ -70,6 +73,8 @@ public class Colorizer {
     public static float lavaDropGreen;
     public static float lavaDropBlue;
     
+    private static Entity fogCamera;
+    private static WorldChunkManager fogChunkManager;
     public static final float[] setColor = new float[3];
 
     public static int colorizeBiome(int origColor, int index, double temperature, double rainfall) {
@@ -276,30 +281,6 @@ public class Colorizer {
         intToFloat3(rgb, waterColor);
     }
     
-    public static void computeUnderwaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
-        if (colorMaps[6] == null) {
-            waterColor[0] = 0.02f;
-            waterColor[1] = 0.02f;
-            waterColor[2] = 0.2f;
-            return;
-        }
-        int rgb;
-        float[] f = new float[3];
-        final float m = (2 * underwaterBlendRadius + 1) * (2 * underwaterBlendRadius + 1);
-        waterColor[0] = 0.0f;
-        waterColor[1] = 0.0f;
-        waterColor[2] = 0.0f;
-        for (int i = -underwaterBlendRadius; i <= underwaterBlendRadius; i++) {
-            for (int j = -underwaterBlendRadius; j <= underwaterBlendRadius; j++) {
-                rgb = colorizeBiome(0x050533, 6, chunkManager, (int) x + i, (int) y, (int) z + j);
-                intToFloat3(rgb, f);
-                waterColor[0] += f[0] / m;
-                waterColor[1] += f[1] / m;
-                waterColor[2] += f[2] / m;
-            }
-        }
-    }
-    
     public static void colorizeWaterBlockGL(int blockID) {
         if (blockID == 8 || blockID == 9) {
             computeWaterColor();
@@ -319,6 +300,39 @@ public class Colorizer {
             return true;
         }
     }
+    
+    public static void setupForFog(WorldChunkManager chunkManager, Entity entity) {
+        fogChunkManager = chunkManager;
+        fogCamera = entity;
+    }
+
+    public static boolean computeFogColor(int index) {
+        checkUpdate();
+        if (colorMaps[index] == null || fogChunkManager == null || fogCamera == null) {
+            return false;
+        }
+        float[] f = new float[3];
+        int x = (int) fogCamera.posX;
+        int y = (int) fogCamera.posY;
+        int z = (int) fogCamera.posZ;
+        setColor[0] = 0.0f;
+        setColor[1] = 0.0f;
+        setColor[2] = 0.0f;
+        for (int i = -fogBlendRadius; i <= fogBlendRadius; i++) {
+            for (int j = -fogBlendRadius; j <= fogBlendRadius; j++) {
+                int rgb = colorizeBiome(0xffffff, index, fogChunkManager, x + i, y, z + j);
+                intToFloat3(rgb, f);
+                setColor[0] += f[0] * fogBlendScale;
+                setColor[1] += f[1] * fogBlendScale;
+                setColor[2] += f[2] * fogBlendScale;
+            }
+        }
+        return true;
+    }
+    
+    public static boolean computeSkyColor(World world) {
+        return world.worldProvider.worldType == 0 && computeFogColor(8);
+    }
 
     public static void setupPotion(Potion potion) {
         MCPatcherUtils.log("setupPotion #%d \"%s\" %06x", potion.id, potion.name, potion.color);
@@ -326,10 +340,10 @@ public class Colorizer {
         potions.add(potion);
     }
 
-    public static void setupSpawnerEgg(int entityID, String entityName) {
-        int defaultColor = ((64 + (entityID * 0x24faef & 0xc0)) << 16 | (64 + (entityID * 0x3692f & 0xc0)) << 8 | (64 + (entityID * 0x3b367 & 0xc0))) & 0xffffff;
-        //System.out.printf("egg.%s=%06x\n", entityName, defaultColor);
-        MCPatcherUtils.log("setupSpawnerEgg #%d \"%s\" %06x", entityID, entityName, defaultColor);
+    public static void setupSpawnerEgg(String entityName, int entityID, int defaultShellColor, int defaultSpotColor) {
+        //System.out.printf("egg.shell.%s=%06x\n", entityName, defaultShellColor);
+        //System.out.printf("egg.spots.%s=%06x\n", entityName, defaultSpotColor);
+        MCPatcherUtils.log("setupSpawnerEgg #%d \"%s\" %06x %06x", entityID, entityName, defaultShellColor, defaultSpotColor);
         entityNamesByID.put(entityID, entityName);
     }
 
@@ -388,6 +402,10 @@ public class Colorizer {
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true)) {
             loadColorMap(5);
             loadColorMap(6);
+        }
+        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true)) {
+            loadColorMap(7);
+            loadColorMap(8);
         }
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true)) {
             for (Potion potion : potions) {
