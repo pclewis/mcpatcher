@@ -93,7 +93,7 @@ public class Colorizer {
     }
     
     public static int colorizeWater(WorldChunkManager chunkManager, int i, int k) {
-        return colorizeBiome(0xffffff, 5, chunkManager, i, 0, k);
+        return colorizeBiome(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, 5, chunkManager, i, 0, k);
     }
 
     public static int colorizeStem(int origColor, int blockMetadata) {
