@@ -76,6 +76,7 @@ public class Colorizer {
     private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
 
     private static final ArrayList<BiomeGenBase> biomes = new ArrayList<BiomeGenBase>();
+    private static boolean biomesLogged;
 
     public static float redstoneWireRed;
     public static float redstoneWireGreen;
@@ -296,6 +297,14 @@ public class Colorizer {
     public static void setupForFog(WorldChunkManager chunkManager, Entity entity) {
         fogChunkManager = chunkManager;
         fogCamera = entity;
+        if (!biomesLogged) {
+            biomesLogged = true;
+            for (BiomeGenBase biome : biomes) {
+                int x = (int) (COLORMAP_SCALE * (1.0 - biome.temperature));
+                int y = (int) (COLORMAP_SCALE * (1.0 - biome.rainfall * biome.temperature));
+                MCPatcherUtils.log("setupBiome #%d \"%s\" %06x (%d,%d)", biome.biomeID, biome.biomeName, biome.waterColorMultiplier, x, y);
+            }
+        }
     }
 
     public static boolean computeFogColor(int index) {
@@ -327,7 +336,6 @@ public class Colorizer {
     }
 
     public static void setupBiome(BiomeGenBase biome) {
-        MCPatcherUtils.log("setupBiome #%d \"%s\" %06x", biome.biomeID, biome.biomeName, biome.waterColorMultiplier);
         biomes.add(biome);
     }
 
