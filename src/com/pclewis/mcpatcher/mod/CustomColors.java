@@ -212,12 +212,6 @@ public class CustomColors extends Mod {
                 }
             }.setMethod(getRenderColor));
 
-            memberMappers.add(new FieldMapper("blockID", "I")
-                .accessFlag(AccessFlag.PUBLIC, true)
-                .accessFlag(AccessFlag.STATIC, false)
-                .accessFlag(AccessFlag.FINAL, true)
-            );
-
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {

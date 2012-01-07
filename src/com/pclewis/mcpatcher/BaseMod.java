@@ -246,11 +246,23 @@ public final class BaseMod extends Mod {
     }
 
     /**
-     * Matches Block class.
+     * Matches Block class and maps blockID and blockList fields.
      */
     public static class BlockMod extends ClassMod {
         public BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
+
+            memberMappers.add(new FieldMapper("blockID", "I")
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, false)
+                .accessFlag(AccessFlag.FINAL, true)
+            );
+
+            memberMappers.add(new FieldMapper("blocksList", "[LBlock;")
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, true)
+                .accessFlag(AccessFlag.FINAL, true)
+            );
         }
     }
 
