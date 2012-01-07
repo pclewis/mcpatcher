@@ -4,9 +4,9 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,6 +74,8 @@ public class Colorizer {
 
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
     private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
+
+    private static final ArrayList<BiomeGenBase> biomes = new ArrayList<BiomeGenBase>();
 
     public static float redstoneWireRed;
     public static float redstoneWireGreen;
@@ -322,6 +324,11 @@ public class Colorizer {
     
     public static boolean computeSkyColor(World world) {
         return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0);
+    }
+
+    public static void setupBiome(BiomeGenBase biome) {
+        MCPatcherUtils.log("setupBiome #%d \"%s\" %06x", biome.biomeID, biome.biomeName, biome.waterColorMultiplier);
+        biomes.add(biome);
     }
 
     public static void setupPotion(Potion potion) {

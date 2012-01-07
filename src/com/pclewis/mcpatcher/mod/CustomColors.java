@@ -353,6 +353,30 @@ public class CustomColors extends Mod {
 
             memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "(LIBlockAccess;III)I"));
             memberMappers.add(new FieldMapper("color", "I").accessFlag(AccessFlag.PUBLIC, true));
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "map biomes by name";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_0,
+                        ARETURN,
+                        BinaryRegex.end()
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBiome", "(LBiomeGenBase;)V"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "setBiomeName", "(Ljava/lang/String;)LBiomeGenBase;")));
         }
     }
 
