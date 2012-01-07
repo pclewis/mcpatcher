@@ -4,9 +4,9 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class Colorizer {
     public static final int COLOR_MAP_UNDERWATER = 6;
     public static final int COLOR_MAP_FOG0 = 7;
     public static final int COLOR_MAP_SKY0 = 8;
-    
+
     private static final String[] COLOR_MAPS = new String[]{
         "/misc/swampgrasscolor.png",
         "/misc/swampfoliagecolor.png",
@@ -85,7 +85,7 @@ public class Colorizer {
     public static float lavaDropRed;
     public static float lavaDropGreen;
     public static float lavaDropBlue;
-    
+
     private static Entity fogCamera;
     private static WorldChunkManager fogChunkManager;
     public static final float[] setColor = new float[3];
@@ -114,7 +114,7 @@ public class Colorizer {
         checkUpdate();
         return colorizeBiome(origColor, index, chunkManager.getTemperature(i, j, k), chunkManager.getRainfall(i, k));
     }
-    
+
     public static int colorizeWater(WorldChunkManager chunkManager, int i, int k) {
         return colorizeBiome(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, COLOR_MAP_WATER, chunkManager, i, 64, k);
     }
@@ -273,7 +273,7 @@ public class Colorizer {
         int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER);
         intToFloat3(rgb, waterColor);
     }
-    
+
     public static void colorizeWaterBlockGL(int blockID) {
         if (blockID == 8 || blockID == 9) {
             computeWaterColor();
@@ -293,7 +293,7 @@ public class Colorizer {
             return true;
         }
     }
-    
+
     public static void setupForFog(WorldChunkManager chunkManager, Entity entity) {
         fogChunkManager = chunkManager;
         fogCamera = entity;
@@ -330,7 +330,7 @@ public class Colorizer {
         }
         return true;
     }
-    
+
     public static boolean computeSkyColor(World world) {
         return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0);
     }

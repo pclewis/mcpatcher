@@ -46,7 +46,7 @@ class MinecraftJar {
             put("11w48a", "cd86517284d62a0854234ae12abd019c");
             put("11w49a", "a1f7969b6b546c492fecabfcb8e8525a");
             put("11w50a", "8763eb2747d57e2958295bbd06e764b1");
-            
+
             put("12w01a", "468f1b4022eb81d5ca2f316e24a7ffe5");
         }
     };

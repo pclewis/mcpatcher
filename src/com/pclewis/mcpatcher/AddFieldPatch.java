@@ -26,7 +26,6 @@ public class AddFieldPatch extends ClassPatch {
      * @param name        field name
      * @param type        field type descriptor
      * @param accessFlags Java access flags (public, private, etc.).
-     *
      * @see javassist.bytecode.AccessFlag
      */
     public AddFieldPatch(String name, String type, int accessFlags) {
@@ -51,7 +50,6 @@ public class AddFieldPatch extends ClassPatch {
      *
      * @param name        field name
      * @param accessFlags Java access flags (public, private, etc.).
-     *
      * @see javassist.bytecode.AccessFlag
      */
     public AddFieldPatch(String name, int accessFlags) {

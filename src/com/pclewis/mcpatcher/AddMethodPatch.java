@@ -47,7 +47,6 @@ abstract public class AddMethodPatch extends ClassPatch {
      * @param name        name of method
      * @param type        Java type descriptor of method; may use deobfuscated names
      * @param accessFlags method access flags
-     *
      * @see javassist.bytecode.AccessFlag
      */
     public AddMethodPatch(String name, String type, int accessFlags) {
@@ -70,9 +69,8 @@ abstract public class AddMethodPatch extends ClassPatch {
      * Create an AddMethodPatch with given name and access flags.
      * NOTE: getDescriptor must be overridden if you are using this constructor.
      *
-     * @param name name of method
+     * @param name        name of method
      * @param accessFlags method access flags
-     *
      * @see javassist.bytecode.AccessFlag
      */
     public AddMethodPatch(String name, int accessFlags) {
@@ -120,7 +118,7 @@ abstract public class AddMethodPatch extends ClassPatch {
     /**
      * Called to get the descriptor for the new method.  Use this instead of setting the descriptor in the constructor
      * to have the method type set at patch time.
-     *  
+     *
      * @return descriptor
      */
     public String getDescriptor() {

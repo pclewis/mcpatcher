@@ -299,7 +299,7 @@ public class CustomColors extends Mod {
                     }
                 }
             }.addXref(1, new FieldRef(getDeobfClass(), "biomeID", "I")));
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -523,10 +523,10 @@ public class CustomColors extends Mod {
             });
         }
     }
-    
+
     private class ItemMod extends BaseMod.ItemMod {
-        private String lastDescriptor; 
-            
+        private String lastDescriptor;
+
         ItemMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -593,7 +593,7 @@ public class CustomColors extends Mod {
                         IRETURN
                     );
                 }
-                
+
                 @Override
                 public String getDescriptor() {
                     return getColorFromDamageDescriptor;
@@ -601,14 +601,14 @@ public class CustomColors extends Mod {
             });
         }
     }
-    
+
     private class ItemRendererMod extends ClassMod {
         ItemRendererMod() {
             classSignatures.add(new ConstSignature("/terrain.png"));
             classSignatures.add(new ConstSignature("/gui/items.png"));
             classSignatures.add(new ConstSignature("%blur%/misc/glint.png"));
             classSignatures.add(new ConstSignature("/misc/mapbg.png"));
-            
+
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -846,7 +846,7 @@ public class CustomColors extends Mod {
 
                         BytecodeMatcher.captureReference(INVOKESTATIC),
                         IRETURN,
-                        
+
                         BinaryRegex.any(0, 50),
 
                         ALOAD_1,
@@ -937,7 +937,7 @@ public class CustomColors extends Mod {
             }.setMethod(getSkyColor));
 
             memberMappers.add(new MethodMapper("getWorldChunkManager", "()LWorldChunkManager;"));
-            
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -993,7 +993,7 @@ public class CustomColors extends Mod {
                         ALOAD_0,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeSkyColor", "(LWorld;)Z")),
                         IFEQ, branch("A"),
-                        
+
                         // f4 = Colorizer.setColor[0];
                         reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
@@ -1026,7 +1026,7 @@ public class CustomColors extends Mod {
             }.targetMethod(getSkyColor));
         }
     }
-    
+
     private class WorldProviderMod extends ClassMod {
         WorldProviderMod() {
             classSignatures.add(new ConstSignature(0.06f));
@@ -1051,7 +1051,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.setMethod(getFogColor));
-            
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -1100,7 +1100,7 @@ public class CustomColors extends Mod {
                         ICONST_2,
                         FALOAD,
                         FSTORE, getCaptureGroup(3),
-                        
+
                         // } else {
                         GOTO, branch("B"),
                         label("A"),
@@ -1545,7 +1545,7 @@ public class CustomColors extends Mod {
             }.targetMethod(onUpdate));
         }
     }
-    
+
     private class EntitySplashFXMod extends WaterFXMod {
         EntitySplashFXMod() {
             parentClass = "EntityRainFX";
@@ -1634,7 +1634,7 @@ public class CustomColors extends Mod {
             });
         }
     }
-    
+
     private class EntityLivingMod extends ClassMod {
         EntityLivingMod() {
             parentClass = "Entity";
@@ -1813,7 +1813,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "updateLightmap", "()V")));
-            
+
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
@@ -1835,7 +1835,7 @@ public class CustomColors extends Mod {
 
                         // ...
                         BinaryRegex.any(0, 100),
-                        
+
                         // fogColorBlue = vec3d1.zCoord;
                         ALOAD_0,
                         BytecodeMatcher.anyALOAD,
@@ -1885,7 +1885,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(updateFogColor));
-            
+
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -2153,10 +2153,10 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockCauldron", "(LBlockCauldron;III)Z")));
-            
+
             patches.add(new BytecodePatch() {
                 private boolean done;
-                
+
                 @Override
                 public String getDescription() {
                     return "colorize falling sand and gravel";
@@ -2223,7 +2223,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderBlockFallingSand));
-            
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -2269,7 +2269,7 @@ public class CustomColors extends Mod {
                         FLOAD, 8,
                         FMUL,
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
-                   );
+                    );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockFluids", "(LBlock;III)Z")));
         }
@@ -2425,7 +2425,7 @@ public class CustomColors extends Mod {
                         ALOAD_1,
                         ALOAD_0,
                         reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
-                    ); 
+                    );
                 }
             }.setMethod(addMapping));
 

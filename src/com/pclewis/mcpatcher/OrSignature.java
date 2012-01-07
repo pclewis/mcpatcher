@@ -27,7 +27,7 @@ public class OrSignature extends ClassSignature {
             matchedSignature.afterMatch(classFile);
         }
     }
-    
+
     @Override
     void setClassMod(ClassMod classMod) {
         super.setClassMod(classMod);
