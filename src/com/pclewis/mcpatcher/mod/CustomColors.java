@@ -857,7 +857,7 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP" + index, "I")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
                         ALOAD_1,
                         reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ILOAD_2,
