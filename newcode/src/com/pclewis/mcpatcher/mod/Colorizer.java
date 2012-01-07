@@ -113,7 +113,7 @@ public class Colorizer {
     }
     
     public static int colorizeWater(WorldChunkManager chunkManager, int i, int k) {
-        return colorizeBiome(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, COLOR_MAP_WATER, chunkManager, i, 0, k);
+        return colorizeBiome(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, COLOR_MAP_WATER, chunkManager, i, 64, k);
     }
 
     public static int colorizeStem(int origColor, int blockMetadata) {
@@ -325,6 +325,7 @@ public class Colorizer {
     }
 
     public static void setupPotion(Potion potion) {
+        //System.out.printf("potion.%s=%06x\n", potion.name, potion.color);
         MCPatcherUtils.log("setupPotion #%d \"%s\" %06x", potion.id, potion.name, potion.color);
         potion.origColor = potion.color;
         potions.add(potion);
