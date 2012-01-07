@@ -75,6 +75,11 @@ public class Colorizer {
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
     private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
 
+    private static final int CLOUDS_DEFAULT = 0;
+    private static final int CLOUDS_FAST = 1;
+    private static final int CLOUDS_FANCY = 2;
+    private static int cloudType = CLOUDS_DEFAULT;
+
     private static final ArrayList<BiomeGenBase> biomes = new ArrayList<BiomeGenBase>();
     private static boolean biomesLogged;
 
@@ -353,6 +358,19 @@ public class Colorizer {
         entityNamesByID.put(entityID, entityName);
     }
 
+    public static boolean drawFancyClouds(boolean fancyGraphics) {
+        switch (cloudType) {
+            case CLOUDS_FAST:
+                return false;
+
+            case CLOUDS_FANCY:
+                return true;
+
+            default:
+                return fancyGraphics;
+        }
+    }
+
     public static void checkUpdate() {
         if (lastTexturePack == MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack) {
             return;
@@ -384,6 +402,7 @@ public class Colorizer {
         lightmaps.clear();
         spawnerEggShellColors.clear();
         spawnerEggSpotColors.clear();
+        cloudType = CLOUDS_DEFAULT;
         for (Potion potion : potions) {
             potion.color = potion.origColor;
         }
@@ -479,6 +498,15 @@ public class Colorizer {
             int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(STEM_COLORS)));
             if (rgb != null && rgb.length >= 8) {
                 stemColors = rgb;
+            }
+        }
+
+        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "clouds", true)) {
+            String value = properties.getProperty("clouds", "").trim().toLowerCase();
+            if (value.equals("fast")) {
+                cloudType = CLOUDS_FAST;
+            } else if (value.equals("fancy")) {
+                cloudType = CLOUDS_FANCY;
             }
         }
     }

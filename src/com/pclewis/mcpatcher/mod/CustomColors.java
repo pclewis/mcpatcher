@@ -72,6 +72,8 @@ public class CustomColors extends Mod {
         classMods.add(new BlockRedstoneWireMod());
         classMods.add(new RenderBlocksMod());
         classMods.add(new EntityReddustFXMod());
+        
+        classMods.add(new RenderGlobalMod());
 
         classMods.add(new BlockStemMod());
 
@@ -2407,6 +2409,63 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(getRenderColor));
+        }
+    }
+    
+    private class RenderGlobalMod extends ClassMod {
+        RenderGlobalMod() {
+            classSignatures.add(new ConstSignature("/environment/clouds.png"));
+
+            MethodRef renderClouds = new MethodRef(getDeobfClass(), "renderClouds", "(F)V");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 32),
+                        BytecodeMatcher.anyISTORE,
+                        push(methodInfo, 256),
+                        BytecodeMatcher.anyILOAD,
+                        IDIV,
+                        BytecodeMatcher.anyISTORE,
+                        BinaryRegex.any(1, 50),
+                        push(methodInfo, "/environment/clouds.png")
+                    );
+                }
+            }.setMethod(renderClouds));
+            
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override cloud type";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression( 
+                        BinaryRegex.capture(BinaryRegex.build(
+                            BinaryRegex.begin(),
+                            BinaryRegex.any(0, 20),
+                            ALOAD_0,
+                            BytecodeMatcher.anyReference(GETFIELD),
+                            BytecodeMatcher.anyReference(GETFIELD),
+                            BytecodeMatcher.anyReference(GETFIELD)
+                        )),
+                        BinaryRegex.capture(BinaryRegex.build(
+                            IFEQ, BinaryRegex.any(2)
+                        ))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "drawFancyClouds", "(Z)Z")),
+                        getCaptureGroup(2)
+                    );
+                }
+            }.targetMethod(renderClouds));
         }
     }
 
