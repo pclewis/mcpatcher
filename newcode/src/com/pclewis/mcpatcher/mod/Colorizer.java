@@ -18,6 +18,17 @@ public class Colorizer {
     private static final String REDSTONE_COLORS = "/misc/redstonecolor.png";
     private static final String STEM_COLORS = "/misc/stemcolor.png";
     private static final String LAVA_DROP_COLORS = "/misc/lavadropcolor.png";
+
+    public static final int COLOR_MAP_SWAMP_GRASS = 0;
+    public static final int COLOR_MAP_SWAMP_FOLIAGE = 1;
+    public static final int COLOR_MAP_PINE = 2;
+    public static final int COLOR_MAP_BIRCH = 3;
+    public static final int COLOR_MAP_FOLIAGE = 4;
+    public static final int COLOR_MAP_WATER = 5;
+    public static final int COLOR_MAP_UNDERWATER = 6;
+    public static final int COLOR_MAP_FOG0 = 7;
+    public static final int COLOR_MAP_SKY0 = 8;
+    
     private static final String[] COLOR_MAPS = new String[]{
         "/misc/swampgrasscolor.png",
         "/misc/swampfoliagecolor.png",
@@ -99,7 +110,7 @@ public class Colorizer {
     }
     
     public static int colorizeWater(WorldChunkManager chunkManager, int i, int k) {
-        return colorizeBiome(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, 5, chunkManager, i, 0, k);
+        return colorizeBiome(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, COLOR_MAP_WATER, chunkManager, i, 0, k);
     }
 
     public static int colorizeStem(int origColor, int blockMetadata) {
@@ -156,7 +167,7 @@ public class Colorizer {
 
     public static int getItemColorFromDamage(int origColor, int blockID, int damage) {
         if (blockID == 8 || blockID == 9) {
-            return colorizeBiome(origColor, 5);
+            return colorizeBiome(origColor, COLOR_MAP_WATER);
         } else {
             return origColor;
         }
@@ -263,7 +274,7 @@ public class Colorizer {
     public static boolean computeWaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
         checkUpdate();
         if (useDropColors) {
-            int rgb = colorizeBiome(0xffffff, 5, chunkManager, (int) x, (int) y, (int) z);
+            int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER, chunkManager, (int) x, (int) y, (int) z);
             float[] multiplier = new float[3];
             intToFloat3(rgb, multiplier);
             for (int i = 0; i < 3; i++) {
@@ -277,7 +288,7 @@ public class Colorizer {
 
     public static void computeWaterColor() {
         checkUpdate();
-        int rgb = colorizeBiome(0xffffff, 5);
+        int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER);
         intToFloat3(rgb, waterColor);
     }
     
@@ -331,7 +342,7 @@ public class Colorizer {
     }
     
     public static boolean computeSkyColor(World world) {
-        return world.worldProvider.worldType == 0 && computeFogColor(8);
+        return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0);
     }
 
     public static void setupPotion(Potion potion) {
@@ -356,15 +367,17 @@ public class Colorizer {
         properties = new Properties();
         colorMaps = new int[COLOR_MAPS.length + 256][];
         colorMapDefault = new int[colorMaps.length];
-        int colorIndex = 0;
-        colorMapDefault[colorIndex++] = 0x4e4e4e;
-        colorMapDefault[colorIndex++] = 0x4e4e4e;
-        colorMapDefault[colorIndex++] = 0x619961;
-        colorMapDefault[colorIndex++] = 0x80a755;
-        colorMapDefault[colorIndex++] = 0x48b518;
-        colorMapDefault[colorIndex++] = 0xffffff;
-        for (; colorIndex < colorMapDefault.length; colorIndex++) {
-            colorMapDefault[colorIndex] = 0xffffff;
+        colorMapDefault[COLOR_MAP_SWAMP_GRASS] = 0x4e4e4e;
+        colorMapDefault[COLOR_MAP_SWAMP_FOLIAGE] = 0x4e4e4e;
+        colorMapDefault[COLOR_MAP_PINE] = 0x619961;
+        colorMapDefault[COLOR_MAP_BIRCH] = 0x80a755;
+        colorMapDefault[COLOR_MAP_FOLIAGE] = 0x48b518;
+        colorMapDefault[COLOR_MAP_WATER] = 0xffffff;
+        colorMapDefault[COLOR_MAP_UNDERWATER] = 0x050533;
+        colorMapDefault[COLOR_MAP_FOG0] = 0xc0d8ff;
+        colorMapDefault[COLOR_MAP_SKY0] = 0xffffff;
+        for (int i = COLOR_MAPS.length; i < colorMapDefault.length; i++) {
+            colorMapDefault[i] = 0xffffff;
         }
         lilypadColor = new int[]{0x208030};
         waterBaseColor = new float[]{0.2f, 0.3f, 1.0f};
@@ -400,12 +413,12 @@ public class Colorizer {
         MCPatcherUtils.log("light.method=%d", lightMethod);
 
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true)) {
-            loadColorMap(5);
-            loadColorMap(6);
+            loadColorMap(COLOR_MAP_WATER);
+            loadColorMap(COLOR_MAP_UNDERWATER);
         }
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true)) {
-            loadColorMap(7);
-            loadColorMap(8);
+            loadColorMap(COLOR_MAP_FOG0);
+            loadColorMap(COLOR_MAP_SKY0);
         }
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true)) {
             for (Potion potion : potions) {
@@ -414,15 +427,15 @@ public class Colorizer {
             loadIntColor("potion.water", waterBottleColor, 0);
         }
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "swamp", true)) {
-            loadColorMap(0);
-            loadColorMap(1);
+            loadColorMap(COLOR_MAP_SWAMP_GRASS);
+            loadColorMap(COLOR_MAP_SWAMP_FOLIAGE);
             loadIntColor("lilypad", lilypadColor, 0);
         }
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "tree", true)) {
-            loadColorMap(2);
-            loadColorMap(3);
-            loadColorMap(4);
-            colorMaps[4] = null;
+            loadColorMap(COLOR_MAP_PINE);
+            loadColorMap(COLOR_MAP_BIRCH);
+            loadColorMap(COLOR_MAP_FOLIAGE);
+            colorMaps[COLOR_MAP_FOLIAGE] = null;
         }
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true)) {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {

@@ -378,11 +378,11 @@ public class CustomColors extends Mod {
                 new ConstSignature(MAGIC3_B)
             ));
 
-            addSwampColorPatch(0, "Grass");
-            addSwampColorPatch(1, "Foliage");
+            addSwampColorPatch("SWAMP_GRASS", "Grass");
+            addSwampColorPatch("SWAMP_FOLIAGE", "Foliage");
         }
 
-        private void addSwampColorPatch(final int index, final String name) {
+        private void addSwampColorPatch(final String index, final String name) {
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -404,7 +404,7 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        push(methodInfo, index),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
                         DLOAD, 5,
                         DLOAD, 7,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIDD)I"))
@@ -740,12 +740,12 @@ public class CustomColors extends Mod {
 
     private class ColorizerFoliageMod extends ClassMod {
         ColorizerFoliageMod() {
-            setupColor(2, 0x619961, "Pine");
-            setupColor(3, 0x80a755, "Birch");
-            setupColor(4, 0x48b518, "Basic");
+            setupColor("PINE", 0x619961, "Pine");
+            setupColor("BIRCH", 0x80a755, "Birch");
+            setupColor("FOLIAGE", 0x48b518, "Basic");
         }
 
-        private void setupColor(final int index, final int color, final String name) {
+        private void setupColor(final String index, final int color, final String name) {
             classSignatures.add(new ConstSignature(color));
 
             patches.add(new BytecodePatch() {
@@ -768,7 +768,7 @@ public class CustomColors extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         push(methodInfo, color),
-                        push(methodInfo, index),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(II)I")),
                         IRETURN
                     );
@@ -836,11 +836,11 @@ public class CustomColors extends Mod {
                 .addXref(6, new MethodRef("BiomeGenBase", "getFoliageColor", "(LIBlockAccess;III)I"))
             );
 
-            addFoliagePatch(2, "Pine");
-            addFoliagePatch(3, "Birch");
+            addFoliagePatch("PINE", "Pine");
+            addFoliagePatch("BIRCH", "Birch");
         }
 
-        private void addFoliagePatch(final int index, final String name) {
+        private void addFoliagePatch(final String index, final String name) {
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -857,7 +857,7 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        push(methodInfo, index),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP" + index, "I")),
                         ALOAD_1,
                         reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ILOAD_2,
@@ -1039,8 +1039,8 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // if (Colorizer.computeFogColor(7)) {
-                        push(methodInfo, 7),
+                        // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_FOG0)) {
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
                         IFEQ, branch("A"),
 
@@ -1815,8 +1815,8 @@ public class CustomColors extends Mod {
                         ALOAD_3,
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LWorldChunkManager;LEntity;)V")),
 
-                        // if (Colorizer.computeFogColor(7)) {
-                        push(methodInfo, 7),
+                        // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_FOG0)) {
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
                         IFEQ, branch("A"),
 
@@ -1876,8 +1876,8 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // if (Colorizer.computeFogColor(6)) {
-                        push(methodInfo, 6),
+                        // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_UNDERWATER)) {
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_UNDERWATER", "I")),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
                         IFEQ, branch("A"),
 
