@@ -88,9 +88,13 @@ public class Colorizer {
     private static WorldChunkManager fogChunkManager;
     public static final float[] setColor = new float[3];
 
+    private static boolean colorMapIndexValid(int index) {
+        return index >= 0 && index < colorMaps.length && colorMaps[index] != null;
+    }
+
     public static int colorizeBiome(int origColor, int index, double temperature, double rainfall) {
         checkUpdate();
-        if (colorMaps[index] == null) {
+        if (!colorMapIndexValid(index)) {
             return origColor;
         } else {
             int x = (int) (COLORMAP_SCALE * (1.0 - temperature));
@@ -319,7 +323,7 @@ public class Colorizer {
 
     public static boolean computeFogColor(int index) {
         checkUpdate();
-        if (colorMaps[index] == null || fogChunkManager == null || fogCamera == null) {
+        if (!colorMapIndexValid(index) || fogChunkManager == null || fogCamera == null) {
             return false;
         }
         float[] f = new float[3];
@@ -365,8 +369,11 @@ public class Colorizer {
         lastTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
 
         properties = new Properties();
-        colorMaps = new int[COLOR_MAPS.length + 256][];
+        colorMaps = new int[COLOR_MAPS.length + Block.blocksList.length][];
         colorMapDefault = new int[colorMaps.length];
+        for (int i = 0; i < colorMapDefault.length; i++) {
+            colorMapDefault[i] = 0xffffff;
+        }
         colorMapDefault[COLOR_MAP_SWAMP_GRASS] = 0x4e4e4e;
         colorMapDefault[COLOR_MAP_SWAMP_FOLIAGE] = 0x4e4e4e;
         colorMapDefault[COLOR_MAP_PINE] = 0x619961;
@@ -376,9 +383,6 @@ public class Colorizer {
         colorMapDefault[COLOR_MAP_UNDERWATER] = 0x050533;
         colorMapDefault[COLOR_MAP_FOG0] = 0xc0d8ff;
         colorMapDefault[COLOR_MAP_SKY0] = 0xffffff;
-        for (int i = COLOR_MAPS.length; i < colorMapDefault.length; i++) {
-            colorMapDefault[i] = 0xffffff;
-        }
         lilypadColor = new int[]{0x208030};
         waterBaseColor = new float[]{0.2f, 0.3f, 1.0f};
         waterColor = new float[]{0.2f, 0.3f, 1.0f};
@@ -449,7 +453,7 @@ public class Colorizer {
                             for (String idString : value.split("\\s+")) {
                                 try {
                                     int id = Integer.parseInt(idString);
-                                    if (id >= 0 && id < 256) {
+                                    if (id >= 0 && id < colorMaps.length - COLOR_MAPS.length) {
                                         int index = COLOR_MAPS.length + id;
                                         colorMaps[index] = rgb;
                                         colorMapDefault[index] = colorizeBiome(colorMapDefault[index], index, 0.5, 1.0);
