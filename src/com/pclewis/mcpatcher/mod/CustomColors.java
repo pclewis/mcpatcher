@@ -98,6 +98,7 @@ public class CustomColors extends Mod {
         private JCheckBox otherBlockCheckBox;
         private JCheckBox eggCheckBox;
         private JCheckBox fogCheckBox;
+        private JCheckBox cloudsCheckBox;
 
         ConfigPanel() {
             waterCheckBox.addActionListener(new ActionListener() {
@@ -142,6 +143,12 @@ public class CustomColors extends Mod {
                 }
             });
 
+            cloudsCheckBox.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "clouds", cloudsCheckBox.isSelected());
+                }
+            });
+
             redstoneCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "redstone", redstoneCheckBox.isSelected());
@@ -181,6 +188,7 @@ public class CustomColors extends Mod {
             dropCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "drop", true));
             lightmapCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true));
             fogCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true));
+            cloudsCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "clouds", true));
             redstoneCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "redstone", true));
             stemCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "stem", true));
             eggCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true));
