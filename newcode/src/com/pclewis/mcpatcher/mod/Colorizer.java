@@ -63,7 +63,6 @@ public class Colorizer {
 
     private static final boolean useLightmaps = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true);
     private static HashMap<Integer, BufferedImage> lightmaps = new HashMap<Integer, BufferedImage>();
-    private static int lightMethod;
 
     private static final boolean useDropColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "drop", true);
     public static float[] waterColor;
@@ -222,31 +221,7 @@ public class Colorizer {
         for (int s = 0; s < LIGHTMAP_SIZE; s++) {
             for (int t = 0; t < LIGHTMAP_SIZE; t++) {
                 for (int k = 0; k < 3; k++) {
-                    float a = sunrgb[3 * s + k];
-                    float b = torchrgb[3 * t + k];
-                    float result;
-                    switch (lightMethod) {
-                        case 1:
-                            result = Math.max(a, b);
-                            break;
-
-                        case 2:
-                            result = a + b - a * b;
-                            break;
-
-                        case 3:
-                            result = (a * b) / (a + b + 0.00001f);
-                            break;
-
-                        case 4:
-                            result = (float) Math.sqrt(a * a + b * b);
-                            break;
-
-                        default:
-                            result = a + b;
-                            break;
-                    }
-                    rgb[k] = clamp(result);
+                    rgb[k] = clamp(sunrgb[3 * s + k] + torchrgb[3 * t + k]);
                 }
                 if (gamma != 0.0f) {
                     for (int k = 0; k < 3; k++) {
@@ -391,7 +366,6 @@ public class Colorizer {
         redstoneColor = null;
         stemColors = null;
         lightmaps.clear();
-        lightMethod = 0;
         spawnerEggShellColors.clear();
         spawnerEggSpotColors.clear();
         for (Potion potion : potions) {
@@ -410,11 +384,6 @@ public class Colorizer {
         } finally {
             MCPatcherUtils.close(inputStream);
         }
-        try {
-            lightMethod = Integer.parseInt(properties.getProperty("light.method"));
-        } catch (Throwable e) {
-        }
-        MCPatcherUtils.log("light.method=%d", lightMethod);
 
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true)) {
             loadColorMap(COLOR_MAP_WATER);
