@@ -2481,7 +2481,7 @@ public class CustomColors extends Mod {
         EntityListMod() {
             classSignatures.add(new ConstSignature("Skipping Entity with id "));
 
-            MethodRef addMapping = new MethodRef(getDeobfClass(), "addMapping", "(Ljava/lang/Class;Ljava/lang/String;III)");
+            MethodRef addMapping = new MethodRef(getDeobfClass(), "addMapping", "(Ljava/lang/Class;Ljava/lang/String;III)V");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
