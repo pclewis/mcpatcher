@@ -72,7 +72,7 @@ public class CustomColors extends Mod {
         classMods.add(new BlockRedstoneWireMod());
         classMods.add(new RenderBlocksMod());
         classMods.add(new EntityReddustFXMod());
-        
+
         classMods.add(new RenderGlobalMod());
 
         classMods.add(new BlockStemMod());
@@ -519,18 +519,20 @@ public class CustomColors extends Mod {
         BlockCauldronMod() {
             parentClass = "Block";
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        BinaryRegex.lookBehind(BinaryRegex.build(push(methodInfo, 138), BinaryRegex.any(0, 20)), true),
-                        BinaryRegex.lookBehind(BinaryRegex.build(push(methodInfo, 154), BinaryRegex.any(0, 20)), true),
-                        BinaryRegex.lookBehind(BinaryRegex.build(push(methodInfo, 155), BinaryRegex.any(0, 20)), true),
-                        IRETURN,
-                        BinaryRegex.end()
-                    );
-                }
-            });
+            for (final int i : new int[]{138, 154, 155}) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression(MethodInfo methodInfo) {
+                        if (methodInfo.getDescriptor().equals("(II)I")) {
+                            return buildExpression(
+                                push(methodInfo, i)
+                            );
+                        } else {
+                            return null;
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -2419,7 +2421,7 @@ public class CustomColors extends Mod {
             }.targetMethod(getRenderColor));
         }
     }
-    
+
     private class RenderGlobalMod extends ClassMod {
         RenderGlobalMod() {
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
@@ -2441,7 +2443,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.setMethod(renderClouds));
-            
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -2450,7 +2452,7 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression( 
+                    return buildExpression(
                         BinaryRegex.capture(BinaryRegex.build(
                             BinaryRegex.begin(),
                             BinaryRegex.any(0, 20),
