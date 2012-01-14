@@ -41,6 +41,8 @@ class MinecraftJar {
             put("rc1", "22d708f84dc44fba200c2a5e4261959c");
             put("rc2pre1", "e8e264bcff34aecbc7ef7f850858c1d6");
             put("rc2", "bd569d20dd3dd898ff4371af9bbe14e1");
+            
+            put("1.0.0", "3820d222b95d0b8c520d9596a756a6e6");
 
             put("11w47a", "2ad75c809570663ec561ca707983a45b");
             put("11w48a", "cd86517284d62a0854234ae12abd019c");
@@ -48,6 +50,8 @@ class MinecraftJar {
             put("11w50a", "8763eb2747d57e2958295bbd06e764b1");
 
             put("12w01a", "468f1b4022eb81d5ca2f316e24a7ffe5");
+            
+            put("1.1", "e92302d2acdba7c97e0d8df1e10d2006");
         }
     };
 
