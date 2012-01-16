@@ -26,7 +26,7 @@ public class MakeMemberPublicPatch extends ClassPatch {
     }
 
     @Override
-    final public String getDescription() {
+    public String getDescription() {
         return String.format("make %s %s public", type, member.getName());
     }
 
