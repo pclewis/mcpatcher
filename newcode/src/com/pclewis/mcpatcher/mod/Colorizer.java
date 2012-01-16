@@ -406,6 +406,11 @@ public class Colorizer {
         for (Potion potion : potions) {
             potion.color = potion.origColor;
         }
+        for (MapColor mapColor : MapColor.mapColorArray) {
+            if (mapColor != null) {
+                mapColor.colorValue = mapColor.origColorValue;
+            }
+        }
 
         InputStream inputStream = null;
         try {
@@ -507,6 +512,15 @@ public class Colorizer {
                 cloudType = CLOUDS_FAST;
             } else if (value.equals("fancy")) {
                 cloudType = CLOUDS_FANCY;
+            }
+        }
+
+        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "map", true)) {
+            for (int i = 0; i < MapColor.mapColorArray.length; i++) {
+                if (MapColor.mapColorArray[i] != null) {
+                    int[] rgb = new int[]{MapColor.mapColorArray[i].origColorValue};
+                    loadIntColor("map." + i, rgb, 0);
+                }
             }
         }
     }

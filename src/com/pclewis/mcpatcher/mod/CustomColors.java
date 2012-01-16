@@ -76,6 +76,8 @@ public class CustomColors extends Mod {
         classMods.add(new RenderGlobalMod());
 
         classMods.add(new BlockStemMod());
+        
+        classMods.add(new MapColorMod());
 
         if (haveSpawnerEggs) {
             classMods.add(new EntityListMod());
@@ -2612,6 +2614,58 @@ public class CustomColors extends Mod {
                     return getColorFromDamage;
                 }
             });
+        }
+    }
+    
+    private class MapColorMod extends ClassMod {
+        MapColorMod() {
+            classSignatures.add(new ConstSignature(0x7fb238));
+            classSignatures.add(new ConstSignature(0xf7e9a3));
+            classSignatures.add(new ConstSignature(0xa7a7a7));
+            classSignatures.add(new ConstSignature(0xff0000));
+            classSignatures.add(new ConstSignature(0xa0a0ff));
+            
+            memberMappers.add(new FieldMapper("mapColorArray", "[LMapColor;").accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(new String[]{"colorValue", "colorIndex"}, "I").accessFlag(AccessFlag.STATIC, false));
+            
+            patches.add(new AddFieldPatch("origColorValue", "I"));
+            
+            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "colorValue", "I")) {
+                @Override
+                public String getDescription() {
+                    return "make colorValue I not final";
+                }
+
+                @Override
+                public int getNewFlags(int oldFlags) {
+                    return oldFlags & ~AccessFlag.FINAL;
+                }
+            });
+            
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "set map origColorValue";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_0,
+                        ILOAD_2,
+                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "colorValue", "I"))
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        ILOAD_2,
+                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "origColorValue", "I"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "<init>", "(II)V")));
         }
     }
 }
