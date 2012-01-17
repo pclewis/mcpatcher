@@ -96,7 +96,7 @@ public class CustomColors extends Mod {
         private JCheckBox swampCheckBox;
         private JCheckBox treeCheckBox;
         private JCheckBox potionCheckBox;
-        private JCheckBox dropCheckBox;
+        private JCheckBox particleCheckBox;
         private JPanel panel;
         private JCheckBox lightmapCheckBox;
         private JCheckBox redstoneCheckBox;
@@ -133,9 +133,9 @@ public class CustomColors extends Mod {
                 }
             });
 
-            dropCheckBox.addActionListener(new ActionListener() {
+            particleCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "drop", dropCheckBox.isSelected());
+                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "particle", particleCheckBox.isSelected());
                 }
             });
 
@@ -205,7 +205,7 @@ public class CustomColors extends Mod {
             swampCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "swamp", true));
             treeCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "tree", true));
             potionCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true));
-            dropCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "drop", true));
+            particleCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "particle", true));
             lightmapCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true));
             fogCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true));
             cloudsCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "clouds", true));

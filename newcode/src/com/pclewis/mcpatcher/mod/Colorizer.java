@@ -81,10 +81,13 @@ public class Colorizer {
     private static final boolean useLightmaps = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true);
     private static HashMap<Integer, BufferedImage> lightmaps = new HashMap<Integer, BufferedImage>();
 
-    private static final boolean useDropColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "drop", true);
+    private static final boolean useParticleColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "particle", true);
     public static float[] waterColor;
-
     public static float[] portalColor;
+
+    public static float lavaDropRed;
+    public static float lavaDropGreen;
+    public static float lavaDropBlue;
 
     private static final boolean useEggColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true);
     private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>();
@@ -105,10 +108,6 @@ public class Colorizer {
     public static float redstoneWireRed;
     public static float redstoneWireGreen;
     public static float redstoneWireBlue;
-
-    public static float lavaDropRed;
-    public static float lavaDropGreen;
-    public static float lavaDropBlue;
 
     private static Entity fogCamera;
     private static WorldChunkManager fogChunkManager;
@@ -279,7 +278,7 @@ public class Colorizer {
 
     public static boolean computeWaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
         checkUpdate();
-        if (useDropColors) {
+        if (useParticleColors) {
             int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER, chunkManager, (int) x, (int) y, (int) z);
             float[] multiplier = new float[3];
             intToFloat3(rgb, multiplier);
@@ -497,8 +496,9 @@ public class Colorizer {
                 }
             }
         }
-        if (useDropColors) {
+        if (useParticleColors) {
             loadFloatColor("drop.water", waterBaseColor);
+            loadFloatColor("particle.water", waterBaseColor);
             int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(LAVA_DROP_COLORS)));
             if (rgb != null) {
                 lavaDropColor = new float[3 * rgb.length];
