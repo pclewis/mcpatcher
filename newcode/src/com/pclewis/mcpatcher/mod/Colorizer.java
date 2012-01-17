@@ -411,6 +411,7 @@ public class Colorizer {
                 mapColor.colorValue = mapColor.origColorValue;
             }
         }
+        EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
 
         InputStream inputStream = null;
         try {
@@ -521,6 +522,12 @@ public class Colorizer {
                     int[] rgb = new int[]{MapColor.mapColorArray[i].origColorValue};
                     loadIntColor("map." + i, rgb, 0);
                 }
+            }
+        }
+
+        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true)) {
+            for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
+                loadFloatColor("sheep." + i, EntitySheep.fleeceColorTable[i]);
             }
         }
     }

@@ -78,6 +78,8 @@ public class CustomColors extends Mod {
         classMods.add(new BlockStemMod());
         
         classMods.add(new MapColorMod());
+        
+        classMods.add(new EntitySheepMod());
 
         if (haveSpawnerEggs) {
             classMods.add(new EntityListMod());
@@ -2641,7 +2643,7 @@ public class CustomColors extends Mod {
                     return oldFlags & ~AccessFlag.FINAL;
                 }
             });
-            
+
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -2666,6 +2668,53 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "<init>", "(II)V")));
+        }
+    }
+    
+    private class EntitySheepMod extends ClassMod {
+        EntitySheepMod() {
+            classSignatures.add(new ConstSignature("/mob/sheep.png"));
+            classSignatures.add(new ConstSignature("mob.sheep"));
+            
+            memberMappers.add(new FieldMapper("fleeceColorTable", "[[F").accessFlag(AccessFlag.STATIC, true));
+            
+            patches.add(new AddFieldPatch("origFleeceColorTable", "[[F", AccessFlag.PUBLIC | AccessFlag.STATIC));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")) {
+                @Override
+                public String getDescription() {
+                    return "make fleeceColorTable [[F not final";
+                }
+
+                @Override
+                public int getNewFlags(int oldFlags) {
+                    return oldFlags & ~AccessFlag.FINAL;
+                }
+            });
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "clone fleeceColorTable";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        RETURN
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, GETSTATIC, new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/lang/Object", "clone", "()Ljava/lang/Object;")),
+                        reference(methodInfo, CHECKCAST, new ClassRef("[[F")),
+                        reference(methodInfo, PUTSTATIC, new FieldRef(getDeobfClass(), "origFleeceColorTable", "[[F"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "<clinit>", "()V")));
         }
     }
 }
