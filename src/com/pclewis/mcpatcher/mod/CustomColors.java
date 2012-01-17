@@ -63,6 +63,7 @@ public class CustomColors extends Mod {
         classMods.add(new EntityDropParticleFXMod());
         classMods.add(new EntitySplashFXMod());
         classMods.add(new EntityBubbleFXMod());
+        classMods.add(new EntityPortalFXMod());
 
         classMods.add(new EntityLivingMod());
         classMods.add(new EntityRendererMod());
@@ -1635,6 +1636,72 @@ public class CustomColors extends Mod {
             });
 
             addWaterColorPatch("bubble", new float[]{1.0f, 1.0f, 1.0f});
+        }
+    }
+    
+    private class EntityPortalFXMod extends ClassMod {
+        EntityPortalFXMod() {
+            parentClass = "EntityFX";
+            
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.isConstructor()) {
+                        return buildExpression(
+                            // particleGreen *= 0.3f;
+                            ALOAD_0,
+                            DUP,
+                            GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
+                            push(methodInfo, 0.3f),
+                            FMUL,
+                            PUTFIELD, BinaryRegex.backReference(1),
+
+                            // particleBlue *= 0.9f;
+                            ALOAD_0,
+                            DUP,
+                            GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
+                            push(methodInfo, 0.9f),
+                            FMUL,
+                            PUTFIELD, BinaryRegex.backReference(2)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            addPortalPatch(1.0f, 0, "red");
+            addPortalPatch(0.3f, 1, "green");
+            addPortalPatch(0.9f, 2, "blue");
+        }
+        
+        private void addPortalPatch(final float origValue, final int index, final String color) {
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override portal particle color (" + color + ")";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.isConstructor()) {
+                        return buildExpression(
+                            push(methodInfo, origValue)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "portalColor", "[F")),
+                        push(methodInfo, index),
+                        FALOAD
+                    );
+                }
+            });
         }
     }
 

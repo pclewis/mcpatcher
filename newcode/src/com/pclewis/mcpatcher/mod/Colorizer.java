@@ -84,6 +84,8 @@ public class Colorizer {
     private static final boolean useDropColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "drop", true);
     public static float[] waterColor;
 
+    public static float[] portalColor;
+
     private static final boolean useEggColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true);
     private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>();
     private static final HashMap<Integer, Integer> spawnerEggShellColors = new HashMap<Integer, Integer>(); // egg.shell.*
@@ -412,6 +414,7 @@ public class Colorizer {
         lilypadColor = new int[]{0x208030};
         waterBaseColor = new float[]{0.2f, 0.3f, 1.0f};
         waterColor = new float[]{0.2f, 0.3f, 1.0f};
+        portalColor = new float[]{1.0f, 0.3f, 0.9f};
         lavaDropColor = null;
         waterBottleColor = new int[]{0x385dc6};
         redstoneColor = null;
@@ -503,6 +506,7 @@ public class Colorizer {
                     intToFloat3(rgb[i], lavaDropColor, 3 * i);
                 }
             }
+            loadFloatColor("particle.portal", portalColor);
         }
 
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "redstone", true)) {
