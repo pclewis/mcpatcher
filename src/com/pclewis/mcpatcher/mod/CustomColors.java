@@ -79,6 +79,7 @@ public class CustomColors extends Mod {
         
         classMods.add(new MapColorMod());
         
+        classMods.add(new ItemDyeMod());
         classMods.add(new EntitySheepMod());
 
         if (haveSpawnerEggs) {
@@ -2668,6 +2669,18 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "<init>", "(II)V")));
+        }
+    }
+    
+    private class ItemDyeMod extends ClassMod {
+        ItemDyeMod() {
+            parentClass = "Item";
+            
+            classSignatures.add(new ConstSignature("black"));
+            classSignatures.add(new ConstSignature("purple"));
+            classSignatures.add(new ConstSignature("cyan"));
+            
+            memberMappers.add(new FieldMapper("dyeColorNames", "[Ljava/lang/String;").accessFlag(AccessFlag.STATIC, true));
         }
     }
     

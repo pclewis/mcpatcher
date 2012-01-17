@@ -544,7 +544,7 @@ public class Colorizer {
 
         if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true)) {
             for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
-                loadFloatColor("sheep." + i, EntitySheep.fleeceColorTable[i]);
+                loadFloatColor("sheep." + getStringKey(ItemDye.dyeColorNames, i), EntitySheep.fleeceColorTable[i]);
             }
         }
     }
