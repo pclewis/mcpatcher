@@ -41,7 +41,24 @@ public class Colorizer {
         "/misc/skycolor0.png",
     };
     public static final String PALETTE_BLOCK_KEY = "palette.block.";
-
+    
+    private static final String[] MAP_MATERIALS = new String[]{
+        "air",
+        "grass",
+        "sand",
+        "cloth",
+        "tnt",
+        "ice",
+        "iron",
+        "foliage",
+        "snow",
+        "clay",
+        "dirt",
+        "stone",
+        "water",
+        "wood",
+    };
+    
     private static Properties properties;
     private static int[][] colorMaps; // bitmaps from COLOR_MAPS
     private static int[] colorMapDefault; // default value (x=127, y=127) from each color map
@@ -520,7 +537,7 @@ public class Colorizer {
             for (int i = 0; i < MapColor.mapColorArray.length; i++) {
                 if (MapColor.mapColorArray[i] != null) {
                     int[] rgb = new int[]{MapColor.mapColorArray[i].origColorValue};
-                    loadIntColor("map." + i, rgb, 0);
+                    loadIntColor("map." + getStringKey(MAP_MATERIALS, i), rgb, 0);
                 }
             }
         }
@@ -529,6 +546,14 @@ public class Colorizer {
             for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
                 loadFloatColor("sheep." + i, EntitySheep.fleeceColorTable[i]);
             }
+        }
+    }
+    
+    private static String getStringKey(String[] keys, int index) {
+        if (keys != null && index >= 0 && index < keys.length && keys[index] != null) {
+            return keys[index];
+        } else {
+            return "" + index;
         }
     }
 
