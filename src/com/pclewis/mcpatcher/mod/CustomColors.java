@@ -76,9 +76,9 @@ public class CustomColors extends Mod {
         classMods.add(new RenderGlobalMod());
 
         classMods.add(new BlockStemMod());
-        
+
         classMods.add(new MapColorMod());
-        
+
         classMods.add(new ItemDyeMod());
         classMods.add(new EntitySheepMod());
 
@@ -2619,7 +2619,7 @@ public class CustomColors extends Mod {
             });
         }
     }
-    
+
     private class MapColorMod extends ClassMod {
         MapColorMod() {
             classSignatures.add(new ConstSignature(0x7fb238));
@@ -2627,16 +2627,16 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature(0xa7a7a7));
             classSignatures.add(new ConstSignature(0xff0000));
             classSignatures.add(new ConstSignature(0xa0a0ff));
-            
+
             memberMappers.add(new FieldMapper("mapColorArray", "[LMapColor;").accessFlag(AccessFlag.STATIC, true));
             memberMappers.add(new FieldMapper(new String[]{"colorValue", "colorIndex"}, "I").accessFlag(AccessFlag.STATIC, false));
-            
+
             patches.add(new AddFieldPatch("origColorValue", "I"));
-            
+
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "colorValue", "I")) {
                 @Override
                 public String getDescription() {
-                    return "make colorValue I not final";
+                    return super.getDescription().replaceFirst("public$", "not final");
                 }
 
                 @Override
@@ -2671,32 +2671,32 @@ public class CustomColors extends Mod {
             }.targetMethod(new MethodRef(getDeobfClass(), "<init>", "(II)V")));
         }
     }
-    
+
     private class ItemDyeMod extends ClassMod {
         ItemDyeMod() {
             parentClass = "Item";
-            
+
             classSignatures.add(new ConstSignature("black"));
             classSignatures.add(new ConstSignature("purple"));
             classSignatures.add(new ConstSignature("cyan"));
-            
+
             memberMappers.add(new FieldMapper("dyeColorNames", "[Ljava/lang/String;").accessFlag(AccessFlag.STATIC, true));
         }
     }
-    
+
     private class EntitySheepMod extends ClassMod {
         EntitySheepMod() {
             classSignatures.add(new ConstSignature("/mob/sheep.png"));
             classSignatures.add(new ConstSignature("mob.sheep"));
-            
+
             memberMappers.add(new FieldMapper("fleeceColorTable", "[[F").accessFlag(AccessFlag.STATIC, true));
-            
+
             patches.add(new AddFieldPatch("origFleeceColorTable", "[[F", AccessFlag.PUBLIC | AccessFlag.STATIC));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")) {
                 @Override
                 public String getDescription() {
-                    return "make fleeceColorTable [[F not final";
+                    return super.getDescription().replaceFirst("public$", "not final");
                 }
 
                 @Override
