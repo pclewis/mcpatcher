@@ -2306,14 +2306,15 @@ public class CustomColors extends Mod {
                     } else {
                         done = true;
                         extraCode = buildCode(
-                            // setColorF(Colorizer.colorizeBlock(block, world.getWorldChunkManager(), i, j, k));
+                            // setColorF(Colorizer.colorizeBlock(block, world.getWorldChunkManager(), i, j, k, 0));
                             ALOAD_1,
                             ALOAD_2,
                             reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
                             ILOAD_3,
                             ILOAD, 4,
                             ILOAD, 5,
-                            reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;III)I")),
+                            ICONST_0,
+                            reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I")),
                             reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V"))
                         );
                     }
