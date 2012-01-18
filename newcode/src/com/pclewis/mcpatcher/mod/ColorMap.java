@@ -17,6 +17,10 @@ final class ColorMap {
     static int getY(double temperature, double rainfall) {
         return (int) (COLORMAP_SCALE * (1.0 - rainfall * temperature));
     }
+    
+    static float getBlockMetaKey(int blockID, int metadata) {
+        return blockID + (metadata & 0xff) / 256.0f;
+    }
 
     ColorMap(boolean useCustom, String filename, int defaultColor) {
         mapDefault = defaultColor;

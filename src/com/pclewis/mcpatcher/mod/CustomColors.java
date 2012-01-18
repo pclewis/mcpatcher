@@ -267,7 +267,12 @@ public class CustomColors extends Mod {
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;III)I"))
+                        ALOAD_1,
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I")),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I"))
                     );
                 }
 

@@ -51,7 +51,8 @@ public class Colorizer {
 
     private static Properties properties;
     private static final ColorMap[] fixedColorMaps = new ColorMap[NUM_FIXED_COLOR_MAPS]; // bitmaps from FIXED_COLOR_MAPS
-    private static final ColorMap[] blockColorMaps = new ColorMap[Block.blocksList.length]; // bitmaps from palette.block.* 
+    private static ColorMap[] blockColorMaps; // bitmaps from palette.block.*
+    private static final HashMap<Float, ColorMap> blockMetaColorMaps = new HashMap<Float, ColorMap>(); // bitmaps from palette.block.*
     private static int[] lilypadColor; // lilypad
     private static float[] waterBaseColor; // particle.water
     private static float[] lavaDropColor; // /misc/lavadropcolor.png
@@ -105,10 +106,6 @@ public class Colorizer {
     private static WorldChunkManager fogChunkManager;
     public static final float[] setColor = new float[3];
 
-    private static boolean colorMapIndexValid(int index) {
-        return index >= 0 && index < fixedColorMaps.length && fixedColorMaps[index] != null;
-    }
-
     public static int colorizeBiome(int origColor, int index, double temperature, double rainfall) {
         checkUpdate();
         return fixedColorMaps[index].colorize(origColor, temperature, rainfall);
@@ -129,9 +126,16 @@ public class Colorizer {
         return fixedColorMaps[COLOR_MAP_WATER].colorize(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, chunkManager, i, 64, k);
     }
 
-    public static int colorizeBlock(Block block, WorldChunkManager chunkManager, int i, int j, int k) {
+    public static int colorizeBlock(Block block, WorldChunkManager chunkManager, int i, int j, int k, int metadata) {
         checkUpdate();
-        ColorMap colorMap = blockColorMaps[block.blockID];
+        ColorMap colorMap = null;
+        if (!blockMetaColorMaps.isEmpty()) {
+            float key = ColorMap.getBlockMetaKey(block.blockID, metadata);
+            colorMap = blockMetaColorMaps.get(key);
+        }
+        if (colorMap == null) {
+            colorMap = blockColorMaps[block.blockID];
+        }
         if (colorMap == null) {
             return 0xffffff;
         } else {
@@ -331,7 +335,7 @@ public class Colorizer {
 
     public static boolean computeFogColor(int index) {
         checkUpdate();
-        if (!colorMapIndexValid(index) || fogChunkManager == null || fogCamera == null) {
+        if (index < 0 || index >= fixedColorMaps.length || fogChunkManager == null || fogCamera == null) {
             return false;
         }
         float[] f = new float[3];
@@ -405,6 +409,9 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(useWaterColors, "/misc/underwatercolor.png", 0x050533);
         fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(useFogColors, "/misc/fogcolor0.png", 0xc0d8ff);
         fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
+        
+        blockColorMaps = new ColorMap[Block.blocksList.length];
+        blockMetaColorMaps.clear();
 
         lilypadColor = new int[]{0x208030};
         waterBaseColor = new float[]{0.2f, 0.3f, 1.0f};
@@ -460,13 +467,24 @@ public class Colorizer {
                         ColorMap colorMap = new ColorMap(true, key, 0xffffff);
                         if (colorMap.isCustom()) {
                             for (String idString : value.split("\\s+")) {
-                                try {
-                                    int id = Integer.parseInt(idString);
-                                    if (id >= 0 && id < Block.blocksList.length) {
-                                        blockColorMaps[id] = colorMap;
-                                        MCPatcherUtils.log("using %s for block %d, default color %06x", key, id, colorMap.colorize());
+                                if (idString.matches("^\\d+:\\d+$")) {
+                                    String[] tokens = idString.split(":");
+                                    try {
+                                        int id = Integer.parseInt(tokens[0]);
+                                        int metadata = Integer.parseInt(tokens[1]);
+                                        blockMetaColorMaps.put(ColorMap.getBlockMetaKey(id, metadata), colorMap);
+                                        MCPatcherUtils.log("using %s for block %d:%d, default color %06x", key, id, metadata, colorMap.colorize());
+                                    } catch (NumberFormatException e) {
                                     }
-                                } catch (NumberFormatException e) {
+                                } else if (idString.matches("^\\d+$")) {
+                                    try {
+                                        int id = Integer.parseInt(idString);
+                                        if (id >= 0 && id < blockColorMaps.length) {
+                                            blockColorMaps[id] = colorMap;
+                                            MCPatcherUtils.log("using %s for block %d, default color %06x", key, id, colorMap.colorize());
+                                        }
+                                    } catch (NumberFormatException e) {
+                                    }
                                 }
                             }
                         }
