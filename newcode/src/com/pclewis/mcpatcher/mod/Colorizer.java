@@ -19,6 +19,8 @@ public class Colorizer {
     private static final String STEM_COLORS = "/misc/stemcolor.png";
     private static final String LAVA_DROP_COLORS = "/misc/lavadropcolor.png";
 
+    private static final String PALETTE_BLOCK_KEY = "palette.block.";
+
     public static final int COLOR_MAP_SWAMP_GRASS = 0;
     public static final int COLOR_MAP_SWAMP_FOLIAGE = 1;
     public static final int COLOR_MAP_PINE = 2;
@@ -29,8 +31,6 @@ public class Colorizer {
     public static final int COLOR_MAP_FOG0 = 7;
     public static final int COLOR_MAP_SKY0 = 8;
     public static final int NUM_FIXED_COLOR_MAPS = 9;
-
-    public static final String PALETTE_BLOCK_KEY = "palette.block.";
 
     private static final String[] MAP_MATERIALS = new String[]{
         "air",
@@ -59,12 +59,7 @@ public class Colorizer {
     private static int waterBottleColor; // potion.water
     private static float[][] redstoneColor; // /misc/redstonecolor.png
     private static int[] stemColors; // /misc/stemcolor.png
-
-    private static ArrayList<Potion> potions = new ArrayList<Potion>();
-    static TexturePackBase lastTexturePack;
-
-    private static final int LIGHTMAP_SIZE = 16;
-    private static final float LIGHTMAP_SCALE = LIGHTMAP_SIZE - 1;
+    private static ArrayList<Potion> potions = new ArrayList<Potion>(); // potion.*
 
     private static final boolean useWaterColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true);
     private static final boolean useSwampColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "swamp", true);
@@ -81,7 +76,12 @@ public class Colorizer {
     private static final boolean useSheepColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true);
     private static final boolean useBlockColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true);
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
+    private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
 
+    static TexturePackBase lastTexturePack;
+
+    private static final int LIGHTMAP_SIZE = 16;
+    private static final float LIGHTMAP_SCALE = LIGHTMAP_SIZE - 1;
     private static HashMap<Integer, BufferedImage> lightmaps = new HashMap<Integer, BufferedImage>();
 
     public static final float[] setColor = new float[3];
@@ -91,8 +91,6 @@ public class Colorizer {
     private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>();
     private static final HashMap<Integer, Integer> spawnerEggShellColors = new HashMap<Integer, Integer>(); // egg.shell.*
     private static final HashMap<Integer, Integer> spawnerEggSpotColors = new HashMap<Integer, Integer>(); // egg.spots.*
-
-    private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
 
     private static final int CLOUDS_DEFAULT = 0;
     private static final int CLOUDS_FAST = 1;
@@ -129,10 +127,9 @@ public class Colorizer {
         checkUpdate();
         ColorMap colorMap = null;
         if (!blockMetaColorMaps.isEmpty()) {
-            float key = ColorMap.getBlockMetaKey(block.blockID, metadata);
-            colorMap = blockMetaColorMaps.get(key);
+            colorMap = blockMetaColorMaps.get(ColorMap.getBlockMetaKey(block.blockID, metadata));
         }
-        if (colorMap == null) {
+        if (colorMap == null && block.blockID >= 0 && block.blockID < blockColorMaps.length) {
             colorMap = blockColorMaps[block.blockID];
         }
         if (colorMap == null) {
@@ -180,10 +177,6 @@ public class Colorizer {
             }
         }
         return value == null ? defaultColor : value;
-    }
-
-    public static void setColorF(int color) {
-        intToFloat3(color, setColor);
     }
 
     public static int getWaterBottleColor() {
@@ -276,8 +269,8 @@ public class Colorizer {
     }
 
     public static boolean computeWaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
-        checkUpdate();
         if (useParticleColors) {
+            checkUpdate();
             int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER, chunkManager, (int) x, (int) y, (int) z);
             float[] multiplier = new float[3];
             intToFloat3(rgb, multiplier);
@@ -343,16 +336,23 @@ public class Colorizer {
             for (int j = -fogBlendRadius; j <= fogBlendRadius; j++) {
                 int rgb = colorizeBiome(0xffffff, index, fogChunkManager, x + i, y, z + j);
                 intToFloat3(rgb, f);
-                setColor[0] += f[0] * fogBlendScale;
-                setColor[1] += f[1] * fogBlendScale;
-                setColor[2] += f[2] * fogBlendScale;
+                setColor[0] += f[0];
+                setColor[1] += f[1];
+                setColor[2] += f[2];
             }
         }
+        setColor[0] *= fogBlendScale;
+        setColor[1] *= fogBlendScale;
+        setColor[2] *= fogBlendScale;
         return true;
     }
 
     public static boolean computeSkyColor(World world) {
         return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0);
+    }
+
+    public static void setColorF(int color) {
+        intToFloat3(color, setColor);
     }
 
     public static void setupBiome(BiomeGenBase biome) {
@@ -386,7 +386,7 @@ public class Colorizer {
         }
     }
 
-    public static void checkUpdate() {
+    private static void checkUpdate() {
         if (lastTexturePack == MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack) {
             return;
         }
