@@ -56,8 +56,6 @@ final class ColorMap {
         if (map == null) {
             return defaultColor;
         } else {
-            int x = (int) (COLORMAP_SCALE * (1.0 - temperature));
-            int y = (int) (COLORMAP_SCALE * (1.0 - rainfall * temperature));
             return map[COLORMAP_SIZE * getY(temperature, rainfall) + getX(temperature, rainfall)];
         }
     }
