@@ -89,6 +89,7 @@ public class CustomColors extends Mod {
         }
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
     }
 
     private class ConfigPanel extends ModConfigPanel {
