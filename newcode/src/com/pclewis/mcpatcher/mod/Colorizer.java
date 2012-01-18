@@ -503,36 +503,42 @@ public class Colorizer {
     
     private static void reloadBlockColors() {
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
-                String key = (String) entry.getKey();
-                String value = (String) entry.getValue();
-                if (key.startsWith(PALETTE_BLOCK_KEY)) {
-                    key = key.substring(PALETTE_BLOCK_KEY.length()).trim();
-                    ColorMap colorMap = new ColorMap(true, key, 0xffffff);
-                    if (colorMap.isCustom()) {
-                        for (String idString : value.split("\\s+")) {
-                            if (idString.matches("^\\d+:\\d+$")) {
-                                String[] tokens = idString.split(":");
-                                try {
-                                    int id = Integer.parseInt(tokens[0]);
-                                    int metadata = Integer.parseInt(tokens[1]);
-                                    blockMetaColorMaps.put(ColorMap.getBlockMetaKey(id, metadata), colorMap);
-                                    MCPatcherUtils.log("using %s for block %d:%d, default color %06x", key, id, metadata, colorMap.colorize());
-                                } catch (NumberFormatException e) {
-                                }
-                            } else if (idString.matches("^\\d+$")) {
-                                try {
-                                    int id = Integer.parseInt(idString);
-                                    if (id >= 0 && id < blockColorMaps.length) {
-                                        blockColorMaps[id] = colorMap;
-                                        MCPatcherUtils.log("using %s for block %d, default color %06x", key, id, colorMap.colorize());
-                                    }
-                                } catch (NumberFormatException e) {
-                                }
-                            }
-                        }
+            if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                continue;
+            }
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
+            if (!key.startsWith(PALETTE_BLOCK_KEY)) {
+                continue;
+            }
+            key = key.substring(PALETTE_BLOCK_KEY.length()).trim();
+            ColorMap colorMap = new ColorMap(true, key, 0xffffff);
+            if (!colorMap.isCustom()) {
+                continue;
+            }
+            for (String idString : value.split("\\s+")) {
+                String[] tokens = idString.split(":");
+                int[] tokensInt = new int[tokens.length];
+                try {
+                    for (int i = 0; i < tokens.length; i++) {
+                        tokensInt[i] = Integer.parseInt(tokens[i]);
                     }
+                } catch (NumberFormatException e) {
+                    continue;
                 }
+                switch (tokensInt.length) {
+                    case 1:
+                        blockColorMaps[tokensInt[0]] = colorMap;
+                        break;
+
+                    case 2:
+                        blockMetaColorMaps.put(ColorMap.getBlockMetaKey(tokensInt[0], tokensInt[1]), colorMap);
+                        break;
+
+                    default:
+                        continue;
+                }
+                MCPatcherUtils.log("using %s for block %s, default color %06x", key, idString, colorMap.colorize());
             }
         }
     }
