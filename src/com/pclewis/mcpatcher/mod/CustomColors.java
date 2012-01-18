@@ -1556,19 +1556,25 @@ public class CustomColors extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLavaDropColor", "(I)Z")),
                         IFEQ, branch("A"),
 
-                        // particleRed = Colorizer.lavaDropRed;
+                        // particleRed = Colorizer.setColor[0];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "lavaDropRed", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
                         reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
-                        // particleGreen = Colorizer.lavaDropGreen;
+                        // particleGreen = Colorizer.setColor[1];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "lavaDropGreen", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
                         reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
-                        // particleBlue = Colorizer.lavaDropBlue;
+                        // particleBlue = Colorizer.setColor[2];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "lavaDropBlue", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
                         reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
 
                         // } else {
@@ -2130,11 +2136,17 @@ public class CustomColors extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeRedstoneWireColor", "(I)Z")),
                         IFEQ, branch("A"),
 
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "redstoneWireRed", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
                         FSTORE, getCaptureGroup(3),
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "redstoneWireGreen", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
                         FSTORE, getCaptureGroup(4),
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "redstoneWireBlue", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
                         FSTORE, getCaptureGroup(5),
                         GOTO, branch("B"),
 
@@ -2436,11 +2448,17 @@ public class CustomColors extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeRedstoneWireColor", "(I)Z")),
                         IFEQ, branch("A"),
 
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "redstoneWireRed", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
                         FSTORE, 9,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "redstoneWireGreen", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
                         FSTORE, 10,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "redstoneWireBlue", "F")),
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
                         FSTORE, 11,
 
                         label("A"),

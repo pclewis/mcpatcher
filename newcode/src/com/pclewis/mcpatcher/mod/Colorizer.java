@@ -53,10 +53,10 @@ public class Colorizer {
     private static final ColorMap[] fixedColorMaps = new ColorMap[NUM_FIXED_COLOR_MAPS]; // bitmaps from FIXED_COLOR_MAPS
     private static ColorMap[] blockColorMaps; // bitmaps from palette.block.*
     private static final HashMap<Float, ColorMap> blockMetaColorMaps = new HashMap<Float, ColorMap>(); // bitmaps from palette.block.*
-    private static int[] lilypadColor; // lilypad
+    private static int lilypadColor; // lilypad
     private static float[] waterBaseColor; // particle.water
-    private static float[] lavaDropColor; // /misc/lavadropcolor.png
-    private static int[] waterBottleColor; // potion.water
+    private static float[] lavaDropColors; // /misc/lavadropcolor.png
+    private static int waterBottleColor; // potion.water
     private static float[][] redstoneColor; // /misc/redstonecolor.png
     private static int[] stemColors; // /misc/stemcolor.png
 
@@ -84,12 +84,9 @@ public class Colorizer {
 
     private static HashMap<Integer, BufferedImage> lightmaps = new HashMap<Integer, BufferedImage>();
 
+    public static final float[] setColor = new float[3];
     public static float[] waterColor;
     public static float[] portalColor;
-
-    public static float lavaDropRed;
-    public static float lavaDropGreen;
-    public static float lavaDropBlue;
 
     private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>();
     private static final HashMap<Integer, Integer> spawnerEggShellColors = new HashMap<Integer, Integer>(); // egg.shell.*
@@ -105,27 +102,22 @@ public class Colorizer {
     private static final ArrayList<BiomeGenBase> biomes = new ArrayList<BiomeGenBase>();
     private static boolean biomesLogged;
 
-    public static float redstoneWireRed;
-    public static float redstoneWireGreen;
-    public static float redstoneWireBlue;
-
     private static Entity fogCamera;
     private static WorldChunkManager fogChunkManager;
-    public static final float[] setColor = new float[3];
 
-    public static int colorizeBiome(int origColor, int index, double temperature, double rainfall) {
+    public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         checkUpdate();
-        return fixedColorMaps[index].colorize(origColor, temperature, rainfall);
+        return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
     }
 
-    public static int colorizeBiome(int origColor, int index) {
+    public static int colorizeBiome(int defaultColor, int index) {
         checkUpdate();
-        return fixedColorMaps[index].colorize(origColor);
+        return fixedColorMaps[index].colorize(defaultColor);
     }
 
-    public static int colorizeBiome(int origColor, int index, WorldChunkManager chunkManager, int i, int j, int k) {
+    public static int colorizeBiome(int defaultColor, int index, WorldChunkManager chunkManager, int i, int j, int k) {
         checkUpdate();
-        return fixedColorMaps[index].colorize(origColor, chunkManager, i, j, k);
+        return fixedColorMaps[index].colorize(defaultColor, chunkManager, i, j, k);
     }
 
     public static int colorizeWater(WorldChunkManager chunkManager, int i, int k) {
@@ -160,18 +152,18 @@ public class Colorizer {
         }
     }
 
-    public static int colorizeStem(int origColor, int blockMetadata) {
+    public static int colorizeStem(int defaultColor, int blockMetadata) {
         checkUpdate();
         if (stemColors == null) {
-            return origColor;
+            return defaultColor;
         } else {
             return stemColors[blockMetadata & 0x7];
         }
     }
 
-    public static int colorizeSpawnerEgg(int origColor, int entityID, int spots) {
+    public static int colorizeSpawnerEgg(int defaultColor, int entityID, int spots) {
         if (!useEggColors) {
-            return origColor;
+            return defaultColor;
         }
         checkUpdate();
         Integer value = null;
@@ -181,13 +173,13 @@ public class Colorizer {
         } else if (entityNamesByID.containsKey(entityID)) {
             String name = entityNamesByID.get(entityID);
             if (name != null) {
-                int[] tmp = new int[]{origColor};
+                int[] tmp = new int[]{defaultColor};
                 loadIntColor((spots == 0 ? "egg.shell." : "egg.spots.") + name, tmp, 0);
                 eggMap.put(entityID, tmp[0]);
                 value = tmp[0];
             }
         }
-        return value == null ? origColor : value;
+        return value == null ? defaultColor : value;
     }
 
     public static void setColorF(int color) {
@@ -196,19 +188,19 @@ public class Colorizer {
 
     public static int getWaterBottleColor() {
         checkUpdate();
-        return waterBottleColor[0];
+        return waterBottleColor;
     }
 
     public static int getLilyPadColor() {
         checkUpdate();
-        return lilypadColor[0];
+        return lilypadColor;
     }
 
-    public static int getItemColorFromDamage(int origColor, int blockID, int damage) {
+    public static int getItemColorFromDamage(int defaultColor, int blockID, int damage) {
         if (blockID == 8 || blockID == 9) {
-            return colorizeBiome(origColor, COLOR_MAP_WATER);
+            return colorizeBiome(defaultColor, COLOR_MAP_WATER);
         } else {
-            return origColor;
+            return defaultColor;
         }
     }
 
@@ -278,10 +270,7 @@ public class Colorizer {
         if (redstoneColor == null) {
             return false;
         } else {
-            float[] f = redstoneColor[Math.max(Math.min(current, 15), 0)];
-            redstoneWireRed = f[0];
-            redstoneWireGreen = f[1];
-            redstoneWireBlue = f[2];
+            System.arraycopy(redstoneColor[Math.max(Math.min(current, 15), 0)], 0, setColor, 0, 3);
             return true;
         }
     }
@@ -316,13 +305,11 @@ public class Colorizer {
 
     public static boolean computeLavaDropColor(int age) {
         checkUpdate();
-        if (lavaDropColor == null) {
+        if (lavaDropColors == null) {
             return false;
         } else {
-            int offset = 3 * Math.max(Math.min(lavaDropColor.length / 3 - 1, age), 0);
-            lavaDropRed = lavaDropColor[offset];
-            lavaDropGreen = lavaDropColor[offset + 1];
-            lavaDropBlue = lavaDropColor[offset + 2];
+            int offset = 3 * Math.max(Math.min(lavaDropColors.length / 3 - 1, age), 0);
+            System.arraycopy(lavaDropColors, offset, setColor, 0, 3);
             return true;
         }
     }
@@ -452,12 +439,12 @@ public class Colorizer {
         blockColorMaps = new ColorMap[Block.blocksList.length];
         blockMetaColorMaps.clear();
 
-        lilypadColor = new int[]{0x208030};
+        lilypadColor = 0x208030;
         waterBaseColor = new float[]{0.2f, 0.3f, 1.0f};
         waterColor = new float[]{0.2f, 0.3f, 1.0f};
         portalColor = new float[]{1.0f, 0.3f, 0.9f};
-        lavaDropColor = null;
-        waterBottleColor = new int[]{0x385dc6};
+        lavaDropColors = null;
+        waterBottleColor = 0x385dc6;
         redstoneColor = null;
         stemColors = null;
         lightmaps.clear();
@@ -494,11 +481,15 @@ public class Colorizer {
         for (Potion potion : potions) {
             loadIntColor(potion.name, potion);
         }
-        loadIntColor("potion.water", waterBottleColor, 0);
+        int[] temp = new int[]{waterBottleColor};
+        loadIntColor("potion.water", temp, 0);
+        waterBottleColor = temp[0];
     }
     
     private static void reloadSwampColors() {
-        loadIntColor("lilypad", lilypadColor, 0);
+        int[] temp = new int[]{lilypadColor};
+        loadIntColor("lilypad", temp, 0);
+        lilypadColor = temp[0];
     }
     
     private static void reloadBlockColors() {
@@ -548,9 +539,9 @@ public class Colorizer {
         loadFloatColor("particle.water", waterBaseColor);
         int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(LAVA_DROP_COLORS)));
         if (rgb != null) {
-            lavaDropColor = new float[3 * rgb.length];
+            lavaDropColors = new float[3 * rgb.length];
             for (int i = 0; i < rgb.length; i++) {
-                intToFloat3(rgb[i], lavaDropColor, 3 * i);
+                intToFloat3(rgb[i], lavaDropColors, 3 * i);
             }
         }
         loadFloatColor("particle.portal", portalColor);
