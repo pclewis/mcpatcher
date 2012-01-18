@@ -66,13 +66,20 @@ public class Colorizer {
     private static final int LIGHTMAP_SIZE = 16;
     private static final float LIGHTMAP_SCALE = LIGHTMAP_SIZE - 1;
 
-    private static final boolean useLightmaps = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true);
+    private static final boolean useWaterColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true);
     private static final boolean useSwampColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "swamp", true);
     private static final boolean useTreeColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "tree", true);
-    private static final boolean useWaterColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true);
-    private static final boolean useFogColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true);
+    private static final boolean usePotionColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true);
     private static final boolean useParticleColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "particle", true);
+    private static final boolean useLightmaps = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true);
+    private static final boolean useFogColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true);
+    private static final boolean useCloudType = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "clouds", true);
+    private static final boolean useRedstoneColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "redstone", true);
+    private static final boolean useStemColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "stem", true);
     private static final boolean useEggColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true);
+    private static final boolean useMapColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "map", true);
+    private static final boolean useSheepColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true);
+    private static final boolean useBlockColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true);
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
 
     private static HashMap<Integer, BufferedImage> lightmaps = new HashMap<Integer, BufferedImage>();
@@ -397,7 +404,39 @@ public class Colorizer {
             return;
         }
         lastTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
+        
+        reset();
+        reloadColorProperties();
+        if (usePotionColors) {
+            reloadPotionColors();
+        }
+        if (useSwampColors) {
+            reloadSwampColors();
+        }
+        if (useBlockColors) {
+            reloadBlockColors();
+        }
+        if (useParticleColors) {
+            reloadParticleColors();
+        }
+        if (useRedstoneColors) {
+            reloadRedstoneColors();
+        }
+        if (useStemColors) {
+            reloadStemColors();
+        }
+        if (useCloudType) {
+            reloadCloudType();
+        }
+        if (useMapColors) {
+            reloadMapColors();
+        }
+        if (useSheepColors) {
+            reloadSheepColors();
+        }
+    }
 
+    private static void reset() {
         properties = new Properties();
 
         fixedColorMaps[COLOR_MAP_SWAMP_GRASS] = new ColorMap(useSwampColors, "/misc/swampgrasscolor.png", 0x4e4e4e);
@@ -434,7 +473,9 @@ public class Colorizer {
             }
         }
         EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
+    }
 
+    private static void reloadColorProperties() {
         InputStream inputStream = null;
         try {
             inputStream = lastTexturePack.getInputStream(COLOR_PROPERTIES);
@@ -447,44 +488,46 @@ public class Colorizer {
         } finally {
             MCPatcherUtils.close(inputStream);
         }
+    }
 
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true)) {
-            for (Potion potion : potions) {
-                loadIntColor(potion.name, potion);
-            }
-            loadIntColor("potion.water", waterBottleColor, 0);
+    private static void reloadPotionColors() {
+        for (Potion potion : potions) {
+            loadIntColor(potion.name, potion);
         }
-        if (useSwampColors) {
-            loadIntColor("lilypad", lilypadColor, 0);
-        }
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true)) {
-            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
-                    String key = (String) entry.getKey();
-                    String value = (String) entry.getValue();
-                    if (key.startsWith(PALETTE_BLOCK_KEY)) {
-                        key = key.substring(PALETTE_BLOCK_KEY.length()).trim();
-                        ColorMap colorMap = new ColorMap(true, key, 0xffffff);
-                        if (colorMap.isCustom()) {
-                            for (String idString : value.split("\\s+")) {
-                                if (idString.matches("^\\d+:\\d+$")) {
-                                    String[] tokens = idString.split(":");
-                                    try {
-                                        int id = Integer.parseInt(tokens[0]);
-                                        int metadata = Integer.parseInt(tokens[1]);
-                                        blockMetaColorMaps.put(ColorMap.getBlockMetaKey(id, metadata), colorMap);
-                                        MCPatcherUtils.log("using %s for block %d:%d, default color %06x", key, id, metadata, colorMap.colorize());
-                                    } catch (NumberFormatException e) {
+        loadIntColor("potion.water", waterBottleColor, 0);
+    }
+    
+    private static void reloadSwampColors() {
+        loadIntColor("lilypad", lilypadColor, 0);
+    }
+    
+    private static void reloadBlockColors() {
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+                if (key.startsWith(PALETTE_BLOCK_KEY)) {
+                    key = key.substring(PALETTE_BLOCK_KEY.length()).trim();
+                    ColorMap colorMap = new ColorMap(true, key, 0xffffff);
+                    if (colorMap.isCustom()) {
+                        for (String idString : value.split("\\s+")) {
+                            if (idString.matches("^\\d+:\\d+$")) {
+                                String[] tokens = idString.split(":");
+                                try {
+                                    int id = Integer.parseInt(tokens[0]);
+                                    int metadata = Integer.parseInt(tokens[1]);
+                                    blockMetaColorMaps.put(ColorMap.getBlockMetaKey(id, metadata), colorMap);
+                                    MCPatcherUtils.log("using %s for block %d:%d, default color %06x", key, id, metadata, colorMap.colorize());
+                                } catch (NumberFormatException e) {
+                                }
+                            } else if (idString.matches("^\\d+$")) {
+                                try {
+                                    int id = Integer.parseInt(idString);
+                                    if (id >= 0 && id < blockColorMaps.length) {
+                                        blockColorMaps[id] = colorMap;
+                                        MCPatcherUtils.log("using %s for block %d, default color %06x", key, id, colorMap.colorize());
                                     }
-                                } else if (idString.matches("^\\d+$")) {
-                                    try {
-                                        int id = Integer.parseInt(idString);
-                                        if (id >= 0 && id < blockColorMaps.length) {
-                                            blockColorMaps[id] = colorMap;
-                                            MCPatcherUtils.log("using %s for block %d, default color %06x", key, id, colorMap.colorize());
-                                        }
-                                    } catch (NumberFormatException e) {
-                                    }
+                                } catch (NumberFormatException e) {
                                 }
                             }
                         }
@@ -492,60 +535,61 @@ public class Colorizer {
                 }
             }
         }
-        if (useParticleColors) {
-            loadFloatColor("drop.water", waterBaseColor);
-            loadFloatColor("particle.water", waterBaseColor);
-            int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(LAVA_DROP_COLORS)));
-            if (rgb != null) {
-                lavaDropColor = new float[3 * rgb.length];
-                for (int i = 0; i < rgb.length; i++) {
-                    intToFloat3(rgb[i], lavaDropColor, 3 * i);
-                }
-            }
-            loadFloatColor("particle.portal", portalColor);
-        }
-
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "redstone", true)) {
-            int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(REDSTONE_COLORS)));
-            if (rgb != null && rgb.length >= 16) {
-                redstoneColor = new float[16][];
-                for (int i = 0; i < 16; i++) {
-                    float[] f = new float[3];
-                    intToFloat3(rgb[i], f);
-                    redstoneColor[i] = f;
-                }
+    }
+    
+    private static void reloadParticleColors() {
+        loadFloatColor("drop.water", waterBaseColor);
+        loadFloatColor("particle.water", waterBaseColor);
+        int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(LAVA_DROP_COLORS)));
+        if (rgb != null) {
+            lavaDropColor = new float[3 * rgb.length];
+            for (int i = 0; i < rgb.length; i++) {
+                intToFloat3(rgb[i], lavaDropColor, 3 * i);
             }
         }
-
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "stem", true)) {
-            int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(STEM_COLORS)));
-            if (rgb != null && rgb.length >= 8) {
-                stemColors = rgb;
+        loadFloatColor("particle.portal", portalColor);
+    }
+    
+    private static void reloadRedstoneColors() {
+        int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(REDSTONE_COLORS)));
+        if (rgb != null && rgb.length >= 16) {
+            redstoneColor = new float[16][];
+            for (int i = 0; i < 16; i++) {
+                float[] f = new float[3];
+                intToFloat3(rgb[i], f);
+                redstoneColor[i] = f;
             }
         }
+    }
 
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "clouds", true)) {
-            String value = properties.getProperty("clouds", "").trim().toLowerCase();
-            if (value.equals("fast")) {
-                cloudType = CLOUDS_FAST;
-            } else if (value.equals("fancy")) {
-                cloudType = CLOUDS_FANCY;
+    private static void reloadStemColors() {
+        int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(STEM_COLORS)));
+        if (rgb != null && rgb.length >= 8) {
+            stemColors = rgb;
+        }
+    }
+
+    private static void reloadCloudType() {
+        String value = properties.getProperty("clouds", "").trim().toLowerCase();
+        if (value.equals("fast")) {
+            cloudType = CLOUDS_FAST;
+        } else if (value.equals("fancy")) {
+            cloudType = CLOUDS_FANCY;
+        }
+    }
+
+    private static void reloadMapColors() {
+        for (int i = 0; i < MapColor.mapColorArray.length; i++) {
+            if (MapColor.mapColorArray[i] != null) {
+                int[] rgb = new int[]{MapColor.mapColorArray[i].origColorValue};
+                loadIntColor("map." + getStringKey(MAP_MATERIALS, i), rgb, 0);
             }
         }
+    }
 
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "map", true)) {
-            for (int i = 0; i < MapColor.mapColorArray.length; i++) {
-                if (MapColor.mapColorArray[i] != null) {
-                    int[] rgb = new int[]{MapColor.mapColorArray[i].origColorValue};
-                    loadIntColor("map." + getStringKey(MAP_MATERIALS, i), rgb, 0);
-                }
-            }
-        }
-
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true)) {
-            for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
-                loadFloatColor("sheep." + getStringKey(ItemDye.dyeColorNames, EntitySheep.fleeceColorTable.length - 1 - i), EntitySheep.fleeceColorTable[i]);
-            }
+    private static void reloadSheepColors() {
+        for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
+            loadFloatColor("sheep." + getStringKey(ItemDye.dyeColorNames, EntitySheep.fleeceColorTable.length - 1 - i), EntitySheep.fleeceColorTable[i]);
         }
     }
 
