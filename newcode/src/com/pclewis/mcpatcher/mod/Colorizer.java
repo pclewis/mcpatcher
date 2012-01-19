@@ -322,7 +322,7 @@ public class Colorizer {
 
     public static boolean computeFogColor(int index) {
         checkUpdate();
-        if (index < 0 || index >= fixedColorMaps.length || fogChunkManager == null || fogCamera == null) {
+        if (index < 0 || index >= fixedColorMaps.length || fogChunkManager == null || fogCamera == null || !fixedColorMaps[index].isCustom()) {
             return false;
         }
         float[] f = new float[3];
