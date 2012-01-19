@@ -86,7 +86,7 @@ public class Colorizer {
 
     public static final float[] setColor = new float[3];
     public static float[] waterColor;
-    public static float[] portalColor;
+    public static float[] portalColor = new float[]{1.0f, 0.3f, 0.9f};
 
     private static final HashMap<Integer, String> entityNamesByID = new HashMap<Integer, String>();
     private static final HashMap<Integer, Integer> spawnerEggShellColors = new HashMap<Integer, Integer>(); // egg.shell.*
@@ -537,6 +537,7 @@ public class Colorizer {
     private static void reloadParticleColors() {
         loadFloatColor("drop.water", waterBaseColor);
         loadFloatColor("particle.water", waterBaseColor);
+        loadFloatColor("particle.portal", portalColor);
         int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(LAVA_DROP_COLORS)));
         if (rgb != null) {
             lavaDropColors = new float[3 * rgb.length];
@@ -544,7 +545,6 @@ public class Colorizer {
                 intToFloat3(rgb[i], lavaDropColors, 3 * i);
             }
         }
-        loadFloatColor("particle.portal", portalColor);
     }
     
     private static void reloadRedstoneColors() {

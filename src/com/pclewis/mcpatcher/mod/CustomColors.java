@@ -1682,9 +1682,37 @@ public class CustomColors extends Mod {
                 }
             });
 
-            addPortalPatch(1.0f, 0, "red");
+            addPortalPatch(0.9f, 0, "red");
             addPortalPatch(0.3f, 1, "green");
-            addPortalPatch(0.9f, 2, "blue");
+            
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "override portal particle color (blue)";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.isConstructor()) {
+                        return buildExpression(
+                            RETURN
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "portalColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                    );
+                }
+            });
         }
         
         private void addPortalPatch(final float origValue, final int index, final String color) {
