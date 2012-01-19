@@ -871,7 +871,7 @@ public class CustomColors extends Mod {
                         ISTORE, 5,
 
                         ILOAD, 5,
-                        ICONST_1,
+                        BinaryRegex.subset(new byte[]{ICONST_1, ICONST_3}, true), // 1.1 uses (i & 1) == 1, 12w03a uses (i & 3) == 1
                         IAND,
                         ICONST_1,
                         IF_ICMPNE, BinaryRegex.any(2),
@@ -879,7 +879,7 @@ public class CustomColors extends Mod {
                         IRETURN,
 
                         ILOAD, 5,
-                        ICONST_2,
+                        BinaryRegex.subset(new byte[]{ICONST_2, ICONST_3}, true), // 1.1 uses (i & 2) == 2, 12w03a uses (i & 3) == 2
                         IAND,
                         ICONST_2,
                         IF_ICMPNE, BinaryRegex.any(2),
