@@ -22,7 +22,7 @@ public class CustomColors extends Mod {
         name = MCPatcherUtils.CUSTOM_COLORS;
         author = "MCPatcher";
         description = "Gives texture packs control over hardcoded colors in the game.";
-        version = "1.2";
+        version = "1.3";
 
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") < 0) {
             addError("Requires Minecraft Beta 1.9 or newer.");
