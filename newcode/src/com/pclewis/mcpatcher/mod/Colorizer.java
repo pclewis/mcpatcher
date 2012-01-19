@@ -580,6 +580,7 @@ public class Colorizer {
             if (MapColor.mapColorArray[i] != null) {
                 int[] rgb = new int[]{MapColor.mapColorArray[i].origColorValue};
                 loadIntColor("map." + getStringKey(MAP_MATERIALS, i), rgb, 0);
+                MapColor.mapColorArray[i].colorValue = rgb[0];
             }
         }
     }
