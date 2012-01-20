@@ -21,7 +21,7 @@ final public class MinecraftVersion {
         Pattern.CASE_INSENSITIVE
     );
     private static final Pattern SHORT_PATTERN = Pattern.compile(
-        "^(alpha-|beta-|rc)?([0-9][-_.0-9a-zA-Z]*)( pre(\\d+))?$",
+        "^(alpha-|beta-|rc)?([0-9][-_.0-9a-zA-Z]*)(pre(\\d+))?$",
         Pattern.CASE_INSENSITIVE
     );
 
@@ -70,13 +70,13 @@ final public class MinecraftVersion {
     }
     
     private static void addKnownVersion(String versionString, String md5) {
-        knownMD5s.put(versionString, md5);
         MinecraftVersion version = parseShortVersion(versionString);
-        if (version != null) {
-            versionOrdering.add(version);
-        } else {
-            throw new RuntimeException("Oh noes! " + version);
+        if (version == null) {
+            Logger.log(Logger.LOG_MAIN, "ERROR: bad known version %s", version);
+            return;
         }
+        versionOrdering.add(version);
+        knownMD5s.put(versionString, md5);
     }
 
     private static int findClosestKnownVersion(MinecraftVersion version) {
@@ -106,7 +106,7 @@ final public class MinecraftVersion {
     }
     
     public static MinecraftVersion parseShortVersion(String versionString) {
-        Matcher matcher = SHORT_PATTERN.matcher(versionString.replaceFirst("(pre\\d*)$", " $1"));
+        Matcher matcher = SHORT_PATTERN.matcher(versionString);
         if (matcher.find()) {
             return new MinecraftVersion(matcher);
         } else {
@@ -125,6 +125,14 @@ final public class MinecraftVersion {
             }
         }
         elements[0] = elements[0].toLowerCase();
+        if (elements[2].equals("")) {
+            Matcher m = Pattern.compile("(.*)(pre)(\\d*)").matcher(elements[1]);
+            if (m.matches()) {
+                elements[1] = m.group(1);
+                elements[2] = m.group(2);
+                elements[3] = m.group(3);
+            }
+        }
         versionNumberOnly = elements[1];
         String[] tokens = versionNumberOnly.split("[^0-9a-zA-Z]+");
         parsedVersion = new int[tokens.length + 1];
