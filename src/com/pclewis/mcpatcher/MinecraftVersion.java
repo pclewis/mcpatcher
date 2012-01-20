@@ -1,5 +1,7 @@
 package com.pclewis.mcpatcher;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,8 +16,12 @@ final public class MinecraftVersion {
 
     private static final int NOT_PRERELEASE = 9999;
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern LONG_PATTERN = Pattern.compile(
         "Minecraft\\s+(Alpha|Beta|RC)?\\s*v?([0-9][-_.0-9a-zA-Z]*)\\s*((?:Pre\\S*|Beta)\\s*(\\d+)?)?",
+        Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern SHORT_PATTERN = Pattern.compile(
+        "^(alpha-|beta-|rc)?([0-9][-_.0-9a-zA-Z]*)( pre(\\d+))?$",
         Pattern.CASE_INSENSITIVE
     );
 
@@ -25,6 +31,53 @@ final public class MinecraftVersion {
     private int[] parsedVersion;
     private int preRelease;
     private boolean weeklyBuild;
+    
+    static final HashMap<String, String> knownMD5s = new HashMap<String, String>();
+    private static final ArrayList<MinecraftVersion> versionOrdering = new ArrayList<MinecraftVersion>();
+
+    static {
+        addKnownVersion("beta-1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
+
+        addKnownVersion("beta-1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
+
+        addKnownVersion("beta-1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
+        addKnownVersion("beta-1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
+        addKnownVersion("beta-1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
+
+        addKnownVersion("beta-1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
+        addKnownVersion("beta-1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
+        addKnownVersion("beta-1.9pre3", "334827dbe9183af6d650b39321a99e21");
+        addKnownVersion("beta-1.9pre4", "cae41f3746d3c4c440b2d63a403770e7");
+        addKnownVersion("beta-1.9pre5", "6258c4f293b939117efe640eda76dca4");
+        addKnownVersion("beta-1.9pre6", "2468205154374afe5f9caaba2ffbf5f8");
+
+        addKnownVersion("rc1", "22d708f84dc44fba200c2a5e4261959c");
+        addKnownVersion("rc2pre1", "e8e264bcff34aecbc7ef7f850858c1d6");
+        addKnownVersion("rc2", "bd569d20dd3dd898ff4371af9bbe14e1");
+
+        addKnownVersion("1.0.0", "3820d222b95d0b8c520d9596a756a6e6");
+
+        addKnownVersion("11w47a", "2ad75c809570663ec561ca707983a45b");
+        addKnownVersion("11w48a", "cd86517284d62a0854234ae12abd019c");
+        addKnownVersion("11w49a", "a1f7969b6b546c492fecabfcb8e8525a");
+        addKnownVersion("11w50a", "8763eb2747d57e2958295bbd06e764b1");
+
+        addKnownVersion("12w01a", "468f1b4022eb81d5ca2f316e24a7ffe5");
+
+        addKnownVersion("1.1", "e92302d2acdba7c97e0d8df1e10d2006");
+
+        addKnownVersion("12w03a", "ea85d9c4058ba9e47d8130bd1bff8be9");
+    }
+    
+    private static void addKnownVersion(String versionString, String md5) {
+        knownMD5s.put(versionString, md5);
+        MinecraftVersion version = parseShortVersion(versionString);
+        if (version != null) {
+            versionOrdering.add(version);
+        } else {
+            throw new RuntimeException("Oh noes! " + version);
+        }
+    }
 
     /**
      * Attempt to parse a string into a minecraft version.
@@ -33,7 +86,16 @@ final public class MinecraftVersion {
      * @return MinecraftVersion object or null
      */
     public static MinecraftVersion parseVersion(String versionString) {
-        Matcher matcher = pattern.matcher(versionString);
+        Matcher matcher = LONG_PATTERN.matcher(versionString);
+        if (matcher.find()) {
+            return new MinecraftVersion(matcher);
+        } else {
+            return null;
+        }
+    }
+    
+    public static MinecraftVersion parseShortVersion(String versionString) {
+        Matcher matcher = SHORT_PATTERN.matcher(versionString.replaceFirst("(pre\\d*)$", " $1"));
         if (matcher.find()) {
             return new MinecraftVersion(matcher);
         } else {

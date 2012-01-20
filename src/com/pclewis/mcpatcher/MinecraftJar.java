@@ -21,42 +21,6 @@ class MinecraftJar {
     private JarFile origJar;
     private JarOutputStream outputJar;
 
-    private static HashMap<String, String> knownMD5s = new HashMap<String, String>() {
-        {
-            put("beta-1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
-
-            put("beta-1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
-
-            put("beta-1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
-            put("beta-1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
-            put("beta-1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
-
-            put("beta-1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
-            put("beta-1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
-            put("beta-1.9pre3", "334827dbe9183af6d650b39321a99e21");
-            put("beta-1.9pre4", "cae41f3746d3c4c440b2d63a403770e7");
-            put("beta-1.9pre5", "6258c4f293b939117efe640eda76dca4");
-            put("beta-1.9pre6", "2468205154374afe5f9caaba2ffbf5f8");
-
-            put("rc1", "22d708f84dc44fba200c2a5e4261959c");
-            put("rc2pre1", "e8e264bcff34aecbc7ef7f850858c1d6");
-            put("rc2", "bd569d20dd3dd898ff4371af9bbe14e1");
-            
-            put("1.0.0", "3820d222b95d0b8c520d9596a756a6e6");
-
-            put("11w47a", "2ad75c809570663ec561ca707983a45b");
-            put("11w48a", "cd86517284d62a0854234ae12abd019c");
-            put("11w49a", "a1f7969b6b546c492fecabfcb8e8525a");
-            put("11w50a", "8763eb2747d57e2958295bbd06e764b1");
-
-            put("12w01a", "468f1b4022eb81d5ca2f316e24a7ffe5");
-            
-            put("1.1", "e92302d2acdba7c97e0d8df1e10d2006");
-            
-            put("12w03a", "ea85d9c4058ba9e47d8130bd1bff8be9");
-        }
-    };
-
     public MinecraftJar(File file) throws IOException {
         info = new Info(file);
         if (!info.isOk()) {
@@ -434,7 +398,7 @@ class MinecraftJar {
         }
 
         private static String getOrigMD5(File binDir, MinecraftVersion version) {
-            String md5 = knownMD5s.get(version.getVersionString());
+            String md5 = MinecraftVersion.knownMD5s.get(version.getVersionString());
             if (md5 != null) {
                 return md5;
             }
