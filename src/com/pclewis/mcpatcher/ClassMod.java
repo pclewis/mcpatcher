@@ -37,6 +37,10 @@ abstract public class ClassMod implements PatchComponent {
      */
     protected Mod mod;
     /**
+     * List of classes that must be resolved via their ClassMods first.
+     */
+    protected ArrayList<String> prerequisiteClasses = new ArrayList<String>();
+    /**
      * List of signatures that identifies the class file(s) to which the ClassMod should be applied.
      */
     protected ArrayList<ClassSignature> classSignatures = new ArrayList<ClassSignature>();
