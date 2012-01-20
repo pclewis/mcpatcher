@@ -79,6 +79,17 @@ final public class MinecraftVersion {
         }
     }
 
+    private static int findClosestKnownVersion(MinecraftVersion version) {
+        int i;
+        for (i = 0; i < versionOrdering.size(); i++) {
+            Integer partialResult = version.comparePartial(versionOrdering.get(i));
+            if (partialResult != null && partialResult <= 0) {
+                break;
+            }
+        }
+        return i;
+    }
+
     /**
      * Attempt to parse a string into a minecraft version.
      *
@@ -117,11 +128,11 @@ final public class MinecraftVersion {
         versionNumberOnly = elements[1];
         String[] tokens = versionNumberOnly.split("[^0-9a-zA-Z]+");
         parsedVersion = new int[tokens.length + 1];
-        if ("alpha".equals(elements[0])) {
+        if (elements[0].startsWith("alpha")) {
             parsedVersion[0] = ALPHA;
-        } else if ("beta".equals(elements[0])) {
+        } else if (elements[0].startsWith("beta")) {
             parsedVersion[0] = BETA;
-        } else if ("rc".equals(elements[0])) {
+        } else if (elements[0].startsWith("rc")) {
             parsedVersion[0] = RC;
         } else {
             parsedVersion[0] = FINAL;
@@ -245,14 +256,11 @@ final public class MinecraftVersion {
     public String toString() {
         return getVersionString();
     }
-
-    /**
-     * Compare two MinecraftVersions.
-     *
-     * @param that version to compare with
-     * @return 0, &lt; 0, or &gt; 0
-     */
-    public int compareTo(MinecraftVersion that) {
+    
+    private Integer comparePartial(MinecraftVersion that) {
+        if (this.weeklyBuild != that.weeklyBuild) {
+            return null;
+        }
         int[] a = this.parsedVersion;
         int[] b = that.parsedVersion;
         int i;
@@ -268,6 +276,25 @@ final public class MinecraftVersion {
             return -b[i];
         }
         return this.preRelease - that.preRelease;
+    }
+    
+    /**
+     * Compare two MinecraftVersions.
+     *
+     * @param that version to compare with
+     * @return 0, &lt; 0, or &gt; 0
+     */
+    public int compareTo(MinecraftVersion that) {
+        Integer partialResult = comparePartial(that);
+        if (partialResult != null) {
+            return partialResult;
+        }
+        int i = findClosestKnownVersion(this);
+        int j = findClosestKnownVersion(that);
+        if (i != j) {
+            return i - j;
+        }
+        return this.getVersionString().compareTo(that.getVersionString());
     }
 
     /**
