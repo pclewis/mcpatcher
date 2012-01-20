@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 class MainMenu {
     private MainForm mainForm;
@@ -192,6 +194,27 @@ class MainMenu {
         delete.removeAll();
         if (!busy && MCPatcherUtils.config != null) {
             ArrayList<String> profiles = MCPatcherUtils.config.getProfiles();
+            Collections.sort(profiles, new Comparator<String>() {
+                public int compare(String o1, String o2) {
+                    MinecraftVersion v1 = null;
+                    MinecraftVersion v2 = null;
+                    if (Config.isDefaultProfile(o1)) {
+                        v1 = MinecraftVersion.parseVersion(o1);
+                    }
+                    if (Config.isDefaultProfile(o2)) {
+                        v2 = MinecraftVersion.parseVersion(o2);
+                    }
+                    if (v1 == null && v2 == null) {
+                        return o1.compareTo(o2);
+                    } else if (v1 == null) {
+                        return 1;
+                    } else if (v2 == null) {
+                        return -1;
+                    } else {
+                        return v1.compareTo(v2);
+                    }
+                }
+            });
             ButtonGroup buttonGroup = new ButtonGroup();
             final String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
             for (final String profile : profiles) {
