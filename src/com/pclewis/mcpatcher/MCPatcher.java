@@ -292,6 +292,9 @@ final public class MCPatcher {
                     candidateEntries.add(entry);
                 }
                 for (JarEntry entry : candidateEntries) {
+                    if (!MinecraftJar.isClassFile(entry.getName())) {
+                        continue;
+                    }
                     ClassFile classFile = new ClassFile(new DataInputStream(origJar.getInputStream(entry)));
                     try {
                         if (classMod.matchClassFile(entry.getName(), classFile)) {
