@@ -159,6 +159,14 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("/environment/snow.png"));
             classSignatures.add(new ConstSignature("ambient.weather.rain"));
 
+            final MethodRef setupCameraTransform = new MethodRef(getDeobfClass(), "setupCameraTransform", "(FI)V");
+            final MethodRef renderWorld = new MethodRef(getDeobfClass(), "renderWorld", "(FJ)V");
+            final MethodRef renderRainSnow = new MethodRef(getDeobfClass(), "renderRainSnow", "(F)V");
+            final MethodRef renderHand = new MethodRef(getDeobfClass(), "renderHand", "(FI)V");
+            final FieldRef fogColorRed = new FieldRef(getDeobfClass(), "fogColorRed", "F");
+            final FieldRef fogColorGreen = new FieldRef(getDeobfClass(), "fogColorGreen", "F");
+            final FieldRef fogColorBlue = new FieldRef(getDeobfClass(), "fogColorBlue", "F");
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -177,9 +185,9 @@ public class GLSLShader extends Mod {
                     );
                 }
             }
-                .addXref(1, new FieldRef(getDeobfClass(), "fogColorRed", "F"))
-                .addXref(2, new FieldRef(getDeobfClass(), "fogColorGreen", "F"))
-                .addXref(3, new FieldRef(getDeobfClass(), "fogColorBlue", "F"))
+                .addXref(1, fogColorRed)
+                .addXref(2, fogColorGreen)
+                .addXref(3, fogColorBlue)
             );
 
             classSignatures.add(new BytecodeSignature() {
@@ -191,7 +199,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glLoadIdentity", "()V"))
                     );
                 }
-            }.setMethod(new MethodRef(getDeobfClass(), "setupCameraTransform", "(FI)V")));
+            }.setMethod(setupCameraTransform));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -200,7 +208,7 @@ public class GLSLShader extends Mod {
                         push(methodInfo, "/environment/snow.png")
                     );
                 }
-            }.setMethod(new MethodRef(getDeobfClass(), "renderRainSnow", "(F)V")));
+            }.setMethod(renderRainSnow));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -214,11 +222,261 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glScalef", "(FFF)V"))
                     );
                 }
-            }.setMethod(new MethodRef(getDeobfClass(), "renderHand", "(FI)V")));
+            }.setMethod(renderHand));
 
             memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
             memberMappers.add(new MethodMapper("renderWorld", "(FJ)V"));
             memberMappers.add(new MethodMapper(new String[]{"disableLightmap", "enableLightmap"}, "(D)V"));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "call beginRender";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "mc", "LMinecraft;")),
+                        FLOAD_1,
+                        LLOAD_2,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginRender", "(LMinecraft;FJ)V"))
+                    );
+                }
+            }.targetMethod(renderWorld));
+            
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "call endRender";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        RETURN
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endRender", "()V"))
+                    );
+                }
+            }.targetMethod(renderWorld));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "call setClearColor / setCamera";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_0,
+                        FLOAD_1,
+                        BytecodeMatcher.anyILOAD,
+                        reference(methodInfo, INVOKESPECIAL, setupCameraTransform)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Shaders.setClearColor(fogColorRed, fogColorGreen, fogColorBlue);
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, fogColorRed),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, fogColorGreen),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, fogColorBlue),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setClearColor", "(FFF)V")),
+
+                        // ... original code ...
+                        getMatch(),
+
+                        // Shaders.setCamera(f);
+                        FLOAD_1,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setCamera", "(F)V"))
+                    );
+                }
+            }.targetMethod(renderWorld));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "wrap terrain and water rendering";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BytecodeMatcher.anyALOAD,
+                        BytecodeMatcher.anyALOAD,
+                        ICONST_0,
+                        FLOAD_1,
+                        F2D,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I")),
+                        POP
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // if (l == 0) {
+                        LLOAD_2,
+                        LCONST_0,
+                        LCMP,
+                        IFNE, branch("A"),
+
+                        // Shaders.beginTerrain(); ...; Shaders.endTerrain();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginTerrain", "()V")),
+                        getMatch(),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endTerrain", "()V")),
+                        GOTO, branch("C"),
+                        
+                        label("A"),
+                        // } else if (l == 1) {
+                        LLOAD_2,
+                        LCONST_1,
+                        LCMP,
+                        IFNE, branch("B"),
+                        
+                        // Shaders.beginWater(); ...; Shaders.endWater();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginWater", "()V")),
+                        getMatch(),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endWater", "()V")),
+                        GOTO, branch("C"),
+                        
+                        // } else {
+                        label("B"),
+
+                        // ...
+                        getMatch(),
+
+                        // }
+                        label("C")
+                    );
+                }
+            }.targetMethod(renderWorld));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "wrap water rendering";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BytecodeMatcher.anyALOAD,
+                        ICONST_1,
+                        FLOAD_1,
+                        F2D,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderGlobal", "renderAllRenderLists", "(ID)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Shaders.beginWater(); ...; Shaders.endWater();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginWater", "()V")),
+                        getMatch(),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endWater", "()V"))
+                    );
+                }
+            }.targetMethod(renderWorld));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "wrap weather rendering";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_0,
+                        FLOAD_1,
+                        reference(methodInfo, INVOKEVIRTUAL, renderRainSnow)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Shaders.beginWeather(); ...; Shaders.endWeather();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginWeather", "()V")),
+                        getMatch(),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endWeather", "()V"))
+                    );
+                }
+            }.targetMethod(renderWorld));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "wrap hand rendering";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_0,
+                        FLOAD_1,
+                        BytecodeMatcher.anyILOAD,
+                        reference(methodInfo, INVOKESPECIAL, renderHand)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Shaders.beginHand(); ...; Shaders.endHand();
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginHand", "()V")),
+                        getMatch(),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endHand", "()V"))
+                    );
+                }
+            }.targetMethod(renderWorld));
+
+            addLightmapPatch("enableLightmap");
+            addLightmapPatch("disableLightmap");
+        }
+        
+        private void addLightmapPatch(final String name) {
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "wrap " + name;
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        RETURN
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, name, "()V"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), name, "()V")));
         }
     }
 
@@ -631,28 +889,28 @@ public class GLSLShader extends Mod {
                 }
             });
 
-            addGLWrapper("Enable");
-            addGLWrapper("Disable");
+            addGLWrapper("glEnable");
+            addGLWrapper("glDisable");
         }
 
         private void addGLWrapper(final String name) {
-            patches.add(new BytecodePatch.InsertBefore() {
+            patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "wrap gl" + name;
+                    return "wrap " + name;
                 }
 
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "gl" + name, "(I)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, name, "(I)V"))
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "gl" + name + "Wrapper", "(I)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, name + "Wrapper", "(I)V"))
                     );
                 }
             });
