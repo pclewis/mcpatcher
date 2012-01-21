@@ -18,6 +18,8 @@ class ConstPoolUtils {
     public static final String DESCRIPTOR_CHARS = DESCRIPTOR_TYPES + "()<>[";
 
     private static final byte[] NOT_FOUND = null;
+    
+    private static final int MAX_LDC_INDEX = 255;
 
     public static int getTag(Object o) {
         if (o instanceof Float) {
@@ -112,7 +114,7 @@ class ConstPoolUtils {
 
     private static byte[] getLoad(int op, int i) {
         int mop = op;
-        if (i > Byte.MAX_VALUE && mop == LDC) {
+        if (i > MAX_LDC_INDEX && mop == LDC) {
             mop = LDC_W;
         }
         if (mop == LDC) {
@@ -124,7 +126,7 @@ class ConstPoolUtils {
 
     private static Object getLoadExpr(int op, int i) {
         int mop = op;
-        if (i > Byte.MAX_VALUE && mop == LDC) {
+        if (i > MAX_LDC_INDEX && mop == LDC) {
             mop = LDC_W;
         }
         if (mop == LDC) {

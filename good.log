@@ -2333,9 +2333,9 @@ Patching...
  applying EntityRainFX patch to qj.class for mod Custom Colors
     override rain drop color <init>(Lvq;DDD)V@52
      label A -> instruction 107
-     label B -> instruction 125
+     label B -> instruction 124
      branch offset IFEQ A -> +33 @74
-     branch offset GOTO B -> +21 @104
+     branch offset GOTO B -> +20 @104
      ALOAD_0                   ALOAD_0
      FCONST_1                  GETFIELD 0x00 0x21
      PUTFIELD 0x00 0x1d        INVOKEVIRTUAL 0x00 0x95
@@ -2362,12 +2362,12 @@ Patching...
                                ICONST_2
                                FALOAD
                                PUTFIELD 0x00 0x1f
-                               GOTO 0x00 0x15
+                               GOTO 0x00 0x14
                                ALOAD_0
                                LDC 0x04
                                PUTFIELD 0x00 0x1d
                                ALOAD_0
-                               LDC_W 0x00 0xa0
+                               LDC 0xa0
                                PUTFIELD 0x00 0x1e
                                ALOAD_0
                                FCONST_1
