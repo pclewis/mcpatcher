@@ -61,6 +61,10 @@ final class ColorMap {
     boolean isCustom() {
         return map != null;
     }
+    
+    void clear() {
+        map = null;
+    }
 
     int colorize() {
         return mapDefault;

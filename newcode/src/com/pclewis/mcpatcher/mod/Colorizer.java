@@ -430,7 +430,8 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_SWAMP_FOLIAGE] = new ColorMap(useSwampColors, "/misc/swampfoliagecolor.png", 0x4e4e4e);
         fixedColorMaps[COLOR_MAP_PINE] = new ColorMap(useTreeColors, "/misc/pinecolor.png", 0x619961);
         fixedColorMaps[COLOR_MAP_BIRCH] = new ColorMap(useTreeColors, "/misc/birchcolor.png", 0x80a755);
-        fixedColorMaps[COLOR_MAP_FOLIAGE] = new ColorMap(false, "/misc/foliagecolor.png", 0x48b518);
+        fixedColorMaps[COLOR_MAP_FOLIAGE] = new ColorMap(useTreeColors, "/misc/foliagecolor.png", 0x48b518);
+        fixedColorMaps[COLOR_MAP_FOLIAGE].clear();
         fixedColorMaps[COLOR_MAP_WATER] = new ColorMap(useWaterColors, "/misc/watercolorX.png", 0xffffff);
         fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(useWaterColors, "/misc/underwatercolor.png", 0x050533);
         fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(useFogColors, "/misc/fogcolor0.png", 0xc0d8ff);
