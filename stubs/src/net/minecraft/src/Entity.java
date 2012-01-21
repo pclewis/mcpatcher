@@ -7,6 +7,9 @@ public class Entity {
     public double posX;
     public double posY;
     public double posZ;
+    public double lastTickPosX;
+    public double lastTickPosY;
+    public double lastTickPosZ;
 
     public String getEntityTexture() {
         return null;

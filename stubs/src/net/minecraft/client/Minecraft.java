@@ -12,6 +12,8 @@ public class Minecraft {
     public FontRenderer alternateFontRenderer;
     public World theWorld;
     public EntityPlayerSP thePlayer;
+    public EntityLiving renderViewEntity;
+    public EntityRenderer entityRenderer;
     public int displayWidth;
     public int displayHeight;
 

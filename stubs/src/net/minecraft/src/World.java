@@ -8,4 +8,12 @@ public class World {
     public float getSunAngle(float f) {
         return 1.0f;
     }
+
+    public float getCelestialAngle(float f) {
+        return 1.0f;
+    }
+
+    public long getWorldTime() {
+        return 0L;
+    }
 }
