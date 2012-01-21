@@ -177,6 +177,22 @@ public class BinaryRegex {
     }
 
     /**
+     * Make a subexpression non-greedy: ...?
+     *
+     * @param regex subexpression
+     * @return String regex;
+     */
+    public static String nonGreedy(String regex) {
+        if (regex == null) {
+            return null;
+        } else if ("*+?}".contains(regex.substring(regex.length() - 1))) {
+            return regex + "?";
+        } else {
+            return regex;
+        }
+    }
+
+    /**
      * Matches a specified set of bytes: [...] or [^...]
      *
      * @param byteList array of bytes to match
