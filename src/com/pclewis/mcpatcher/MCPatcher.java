@@ -208,8 +208,7 @@ final public class MCPatcher {
         }
 
         mapModClasses(origJar);
-        for (int pass = 2; pass < 100 && mapModDependentClasses(origJar, pass); pass++) {
-        }
+        mapModDependentClasses(origJar);
         checkAllClassesMapped();
         mapModClassMembers(origJar);
         resolveModDependencies();
@@ -262,62 +261,86 @@ final public class MCPatcher {
         }
     }
 
-    private static boolean mapModDependentClasses(JarFile origJar, int pass) throws IOException, InterruptedException {
+    private static void mapModDependentClasses(JarFile origJar) throws IOException, InterruptedException {
+        ArrayList<ClassMod> todoList = new ArrayList<ClassMod>();
+        for (Mod mod : modList.getAll()) {
+            for (ClassMod classMod : mod.getClassMods()) {
+                if (classMod.okToApply() && !classMod.prerequisiteClasses.isEmpty()) {
+                    todoList.add(classMod);
+                }
+            }
+        }
+        int numTodo = todoList.size();
+        for (int pass = 2; pass < 100; pass++) {
+            if (todoList.isEmpty()) {
+                break;
+            }
+            ui.updateProgress(numTodo - todoList.size(), numTodo);
+            if (!mapModDependentClasses(origJar, todoList, pass)) {
+                break;
+            }
+        }
+    }
+
+    private static boolean mapModDependentClasses(JarFile origJar, ArrayList<ClassMod> todoList, int pass) throws IOException, InterruptedException {
         boolean progress = false;
         boolean done = true;
-        for (Mod mod : modList.getAll()) {
+        classMod:
+        for (ClassMod classMod : todoList) {
+            if (!classMod.okToApply()) {
+                continue;
+            }
+            Mod mod = classMod.mod;
             HashMap<String, String> classMap = mod.classMap.getClassMap();
-            classMod:
-            for (ClassMod classMod : mod.getClassMods()) {
-                if (!classMod.okToApply() || classMod.targetClasses.size() > 0 || classMod.prerequisiteClasses.isEmpty()) {
+            for (String reqClass : classMod.prerequisiteClasses) {
+                done = false;
+                if (classMap.get(reqClass) == null) {
+                    continue classMod;
+                }
+            }
+            List<JarEntry> candidateEntries;
+            String targetClass = classMap.get(classMod.getDeobfClass());
+            if (targetClass == null) {
+                candidateEntries = Collections.list(origJar.entries());
+            } else {
+                JarEntry entry = origJar.getJarEntry(ClassMap.classNameToFilename(targetClass));
+                if (entry == null) {
+                    classMod.addError("maps to non-existent class " + targetClass);
                     continue;
                 }
-                for (String reqClass : classMod.prerequisiteClasses) {
-                    done = false;
-                    if (classMap.get(reqClass) == null) {
-                        continue classMod;
-                    }
+                candidateEntries = new ArrayList<JarEntry>();
+                candidateEntries.add(entry);
+            }
+            for (JarEntry entry : candidateEntries) {
+                if (!MinecraftJar.isClassFile(entry.getName())) {
+                    continue;
                 }
-                List<JarEntry> candidateEntries;
-                String targetClass = classMap.get(classMod.getDeobfClass());
-                if (targetClass == null) {
-                    candidateEntries = Collections.list(origJar.entries());
-                } else {
-                    JarEntry entry = origJar.getJarEntry(ClassMap.classNameToFilename(targetClass));
-                    if (entry == null) {
-                        classMod.addError("maps to non-existent class " + targetClass);
-                        continue;
-                    }
-                    candidateEntries = new ArrayList<JarEntry>();
-                    candidateEntries.add(entry);
-                }
-                for (JarEntry entry : candidateEntries) {
-                    if (!MinecraftJar.isClassFile(entry.getName())) {
-                        continue;
-                    }
-                    ClassFile classFile = new ClassFile(new DataInputStream(origJar.getInputStream(entry)));
-                    try {
-                        if (classMod.matchClassFile(entry.getName(), classFile)) {
-                            checkInterrupt();
-                            if (!classMod.global) {
-                                Logger.log(Logger.LOG_CLASS, "%s matches %s (pass %d)", classMod.getDeobfClass(), entry.getName(), pass);
-                                for (Map.Entry<String, ClassMap.MemberEntry> e : mod.classMap.getMethodMap(classMod.getDeobfClass()).entrySet()) {
-                                    Logger.log(Logger.LOG_METHOD, "%s matches %s %s", e.getKey(), e.getValue().name, e.getValue().type);
-                                }
+                ClassFile classFile = new ClassFile(new DataInputStream(origJar.getInputStream(entry)));
+                try {
+                    if (classMod.matchClassFile(entry.getName(), classFile)) {
+                        checkInterrupt();
+                        if (!classMod.global) {
+                            Logger.log(Logger.LOG_CLASS, "%s matches %s (pass %d)", classMod.getDeobfClass(), entry.getName(), pass);
+                            for (Map.Entry<String, ClassMap.MemberEntry> e : mod.classMap.getMethodMap(classMod.getDeobfClass()).entrySet()) {
+                                Logger.log(Logger.LOG_METHOD, "%s matches %s %s", e.getKey(), e.getValue().name, e.getValue().type);
                             }
-                            for (ClassSignature cs : classMod.classSignatures) {
-                                classMod.addToConstPool = false;
-                                cs.afterMatch(classFile);
-                            }
-                            progress = true;
                         }
-                    } catch (InterruptedException e) {
-                        throw e;
-                    } catch (Throwable e) {
-                        classMod.addError(e.toString());
-                        Logger.log(e);
+                        for (ClassSignature cs : classMod.classSignatures) {
+                            classMod.addToConstPool = false;
+                            cs.afterMatch(classFile);
+                        }
+                        todoList.remove(classMod);
+                        progress = true;
                     }
+                } catch (InterruptedException e) {
+                    throw e;
+                } catch (Throwable e) {
+                    classMod.addError(e.toString());
+                    Logger.log(e);
                 }
+            }
+            if (progress) {
+                break;
             }
         }
         return progress && !done;
