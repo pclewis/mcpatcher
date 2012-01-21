@@ -8,7 +8,10 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static javassist.bytecode.Opcode.*;
 
@@ -249,6 +252,11 @@ public final class BaseMod extends Mod {
      * Matches Block class and maps blockID and blockList fields.
      */
     public static class BlockMod extends ClassMod {
+        private static final ArrayList<BlockSubclassEntry> subclasses = new ArrayList<BlockSubclassEntry>() {
+            {
+            }
+        };
+
         public BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
 
@@ -263,6 +271,73 @@ public final class BaseMod extends Mod {
                 .accessFlag(AccessFlag.STATIC, true)
                 .accessFlag(AccessFlag.FINAL, true)
             );
+        }
+
+        protected void addBlockSignatures() {
+            for (BlockSubclassEntry entry : subclasses) {
+                addBlockSignature(entry.blockID, entry.blockName, entry.className, entry.fieldName, entry.fieldClass);
+            }
+        }
+
+        protected void addBlockSignature(String name) {
+            for (BlockSubclassEntry entry : subclasses) {
+                if (entry.className.equals(name) || entry.blockName.equals(name) || entry.fieldName.equals(name)) {
+                    addBlockSignature(entry.blockID, entry.blockName, entry.className, entry.fieldName, entry.fieldClass);
+                    return;
+                }
+            }
+            throw new RuntimeException("unknown Block subclass: " + name);
+        }
+
+        protected void addBlockSignature(int blockID) {
+            for (BlockSubclassEntry entry : subclasses) {
+                if (entry.blockID == blockID) {
+                    addBlockSignature(entry.blockID, entry.blockName, entry.className, entry.fieldName, entry.fieldClass);
+                    return;
+                }
+            }
+            throw new RuntimeException("unknown Block subclass: block ID" + blockID);
+        }
+
+        protected void addBlockSignature(final int blockID, final String blockName, final String className, final String fieldName, final String fieldClass) {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.isStaticInitializer()) {
+                        return buildExpression(
+                            BytecodeMatcher.captureReference(NEW),
+                            DUP,
+                            push(methodInfo, blockID),
+                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 60)),
+                            push(methodInfo, blockName),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
+                            BytecodeMatcher.captureReference(PUTSTATIC)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }
+                .addXref(1, new ClassRef(className))
+                .addXref(2, new FieldRef(getDeobfClass(), fieldName, "L" + fieldClass + ";"))
+            );
+        }
+
+        private static class BlockSubclassEntry {
+            int blockID;
+            String className;
+            String blockName;
+            String fieldClass;
+            String fieldName;
+
+            BlockSubclassEntry(int blockID, String className, String blockName, String fieldClass, String fieldName) {
+                this.blockID = blockID;
+                this.className = className;
+                this.blockName = blockName;
+                this.fieldClass = fieldClass;
+                this.fieldName = fieldName;
+            }
         }
     }
 
