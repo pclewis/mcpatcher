@@ -271,13 +271,18 @@ final public class MCPatcher {
             }
         }
         int numTodo = todoList.size();
-        for (int pass = 2; pass < 100; pass++) {
-            if (todoList.isEmpty()) {
-                break;
+        if (numTodo > 0) {
+            Logger.log(Logger.LOG_JAR);
+            Logger.log(Logger.LOG_JAR, "Analyzing %s (%d dependent classes)", origJar.getName(), numTodo);
+            ui.setStatusText("Mapping remaining classes...");
+            ui.updateProgress(0, numTodo);
+            boolean keepGoing = true;
+            for (int pass = 2; keepGoing && !todoList.isEmpty() && pass < 100; pass++) {
+                keepGoing = mapModDependentClasses(origJar, todoList, pass);
+                ui.updateProgress(numTodo - todoList.size(), numTodo);
             }
-            ui.updateProgress(numTodo - todoList.size(), numTodo);
-            if (!mapModDependentClasses(origJar, todoList, pass)) {
-                break;
+            for (ClassMod classMod : todoList) {
+                classMod.addError("not all prerequisite classes matched");
             }
         }
     }
@@ -286,7 +291,8 @@ final public class MCPatcher {
         boolean progress = false;
         boolean done = true;
         classMod:
-        for (ClassMod classMod : todoList) {
+        for (Iterator<ClassMod> iterator = todoList.iterator(); iterator.hasNext(); ) {
+            ClassMod classMod = iterator.next();
             if (!classMod.okToApply()) {
                 continue;
             }
@@ -329,7 +335,7 @@ final public class MCPatcher {
                             classMod.addToConstPool = false;
                             cs.afterMatch(classFile);
                         }
-                        todoList.remove(classMod);
+                        iterator.remove();
                         progress = true;
                     }
                 } catch (InterruptedException e) {
@@ -338,9 +344,6 @@ final public class MCPatcher {
                     classMod.addError(e.toString());
                     Logger.log(e);
                 }
-            }
-            if (progress) {
-                break;
             }
         }
         return progress && !done;
@@ -370,7 +373,8 @@ final public class MCPatcher {
     
     private static void mapModClassMembers(JarFile origJar) throws IOException, InterruptedException {
         Logger.log(Logger.LOG_JAR);
-        Logger.log(Logger.LOG_JAR, "Analyzing %s (second pass)", origJar.getName());
+        Logger.log(Logger.LOG_JAR, "Analyzing %s (methods and fields)", origJar.getName());
+        ui.setStatusText("Mapping class members...");
         for (Mod mod : modList.getAll()) {
             for (ClassMod classMod : mod.getClassMods()) {
                 checkInterrupt();
