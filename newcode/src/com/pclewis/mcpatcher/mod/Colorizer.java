@@ -313,8 +313,8 @@ public class Colorizer {
         if (!biomesLogged) {
             biomesLogged = true;
             for (BiomeGenBase biome : biomes) {
-                int x = ColorMap.getXNoClamp(biome.temperature, biome.rainfall);
-                int y = ColorMap.getYNoClamp(biome.temperature, biome.rainfall);
+                int x = ColorMap.getX(biome.temperature, biome.rainfall);
+                int y = ColorMap.getY(biome.temperature, biome.rainfall);
                 MCPatcherUtils.log("setupBiome #%d \"%s\" %06x (%d,%d)", biome.biomeID, biome.biomeName, biome.waterColorMultiplier, x, y);
             }
         }

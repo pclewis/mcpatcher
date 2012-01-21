@@ -11,29 +11,11 @@ final class ColorMap {
     private int mapDefault;
     
     static int getX(double temperature, double rainfall) {
-        return getXNoClamp(clamp(temperature), clamp(rainfall));
-    }
-    
-    static int getY(double temperature, double rainfall) {
-        return getYNoClamp(clamp(temperature), clamp(rainfall));
-    }
-
-    static int getXNoClamp(double temperature, double rainfall) {
         return (int) (COLORMAP_SCALE * (1.0 - temperature));
     }
 
-    static int getYNoClamp(double temperature, double rainfall) {
+    static int getY(double temperature, double rainfall) {
         return (int) (COLORMAP_SCALE * (1.0 - rainfall * temperature));
-    }
-
-    private static double clamp(double d) {
-        if (d < 0.0) {
-            return 0.0;
-        } else if (d > 1.0) {
-            return 1.0;
-        } else {
-            return d;
-        }
     }
 
     static float getBlockMetaKey(int blockID, int metadata) {
