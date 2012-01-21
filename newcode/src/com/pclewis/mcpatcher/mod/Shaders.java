@@ -8,7 +8,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.src.Block;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.ItemStack;
+import net.minecraft.src.Tessellator;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ARBVertexProgram;
 import org.lwjgl.opengl.GL11;
 
 import java.io.BufferedReader;
@@ -18,6 +20,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import static org.lwjgl.opengl.ARBFragmentShader.GL_FRAGMENT_SHADER_ARB;
 import static org.lwjgl.opengl.ARBShaderObjects.*;
@@ -575,6 +578,17 @@ public class Shaders {
         sunPosition = sunPos;
         float[] moonPos = multiplyMat4xVec4(mv, new float[]{0.0F, -100.0F, 0.0F, 0.0F});
         moonPosition = moonPos;
+    }
+
+    public static void drawGLArrays(int mode, int first, int count, ShortBuffer shortBuffer) {
+        if (entityAttrib >= 0) {
+            ARBVertexProgram.glEnableVertexAttribArrayARB(entityAttrib);
+            ARBVertexProgram.glVertexAttribPointerARB(entityAttrib, 2, false, false, 4, (ShortBuffer) shortBuffer.position(0));
+        }
+        GL11.glDrawArrays(mode,  first, count);
+        if (entityAttrib >= 0) {
+            ARBVertexProgram.glDisableVertexAttribArrayARB(entityAttrib);
+        }
     }
 
     private static float[] multiplyMat4xVec4(float[] ta, float[] tb) {

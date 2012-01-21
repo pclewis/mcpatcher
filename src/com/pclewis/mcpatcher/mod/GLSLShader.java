@@ -6,6 +6,8 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.BadBytecode;
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
@@ -522,7 +524,7 @@ public class GLSLShader extends Mod {
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
-                    return "call Shaders.setCelestialPosition";
+                    return "call setCelestialPosition";
                 }
 
                 @Override
@@ -544,6 +546,17 @@ public class GLSLShader extends Mod {
 
     private class TessellatorMod extends ClassMod {
         TessellatorMod() {
+            final MethodRef reset = new MethodRef(getDeobfClass(), "reset", "()V");
+            final MethodRef draw = new MethodRef(getDeobfClass(), "draw", "()I");
+            final MethodRef addVertex = new MethodRef(getDeobfClass(), "addVertex", "(DDD)V");
+            final FieldRef drawMode = new FieldRef(getDeobfClass(), "drawMode", "I");
+            final FieldRef addedVertices = new FieldRef(getDeobfClass(), "addedVertices", "I");
+            final FieldRef rawBuffer = new FieldRef(getDeobfClass(), "rawBuffer", "[I");
+            final FieldRef rawBufferIndex = new FieldRef(getDeobfClass(), "rawBufferIndex", "I");
+            final FieldRef shadersBuffer = new FieldRef(getDeobfClass(), "shadersBuffer", "Ljava/nio/ByteBuffer;");
+            final FieldRef shadersShortBuffer = new FieldRef(getDeobfClass(), "shadersShortBuffer", "Ljava/nio/ShortBuffer;");
+            final FieldRef shadersData = new FieldRef(getDeobfClass(), "shadersData", "[S");
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -551,7 +564,7 @@ public class GLSLShader extends Mod {
                         push(methodInfo, "Not tesselating!")
                     );
                 }
-            }.setMethod(new MethodRef(getDeobfClass(), "draw", "()I")));
+            }.setMethod(draw));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -560,7 +573,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "clear", "()Ljava/nio/Buffer;"))
                     );
                 }
-            }.setMethod(new MethodRef(getDeobfClass(), "reset", "()V")));
+            }.setMethod(reset));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -627,9 +640,9 @@ public class GLSLShader extends Mod {
                     );
                 }
             }
-                .setMethod(new MethodRef(getDeobfClass(), "addVertex", "(DDD)V"))
-                .addXref(1, new FieldRef(getDeobfClass(), "addedVertices", "I"))
-                .addXref(2, new FieldRef(getDeobfClass(), "drawMode", "I"))
+                .setMethod(addVertex)
+                .addXref(1, addedVertices)
+                .addXref(2, drawMode)
             );
 
             classSignatures.add(new BytecodeSignature() {
@@ -645,8 +658,8 @@ public class GLSLShader extends Mod {
                     );
                 }
             }
-                .addXref(1, new FieldRef(getDeobfClass(), "rawBuffer", "[I"))
-                .addXref(2, new FieldRef(getDeobfClass(), "rawBufferIndex", "I"))
+                .addXref(1, rawBuffer)
+                .addXref(2, rawBufferIndex)
             );
 
             classSignatures.add(new BytecodeSignature() {
@@ -665,13 +678,10 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new FieldMapper("instance", "LTessellator;").accessFlag(AccessFlag.STATIC, true));
 
-            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "rawBuffer", "[I")));
-            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "convertQuadsToTriangles", "Z")));
-            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "hasNormals", "Z")));
-            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "rawBufferIndex", "I")));
-            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "addedVertices", "I")));
-            patches.add(new MakeMemberPublicPatch(new FieldRef("Tessellator", "drawMode", "I")));
-
+            patches.add(new AddFieldPatch("shadersBuffer", "java.nio.ByteBuffer"));
+            patches.add(new AddFieldPatch("shadersShortBuffer", "java.nio.ShortBuffer"));
+            patches.add(new AddFieldPatch("shadersData", "[S"));
+            
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
@@ -692,14 +702,52 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // Shaders.initBuffer(i);
+                        // shadersData = new short[]{-1, 0};
+                        ALOAD_0,
+                        ICONST_2,
+                        NEWARRAY, T_SHORT,
+                        DUP,
+                        ICONST_0,
+                        ICONST_M1,
+                        SASTORE,
+                        reference(methodInfo, PUTFIELD, shadersData),
+
+                        // shadersBuffer = GLAllocation.createDirectByteBuffer(i / 8 * 4);
+                        ALOAD_0,
                         ILOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "initBuffer", "(I)V"))
+                        push(methodInfo, 8),
+                        IDIV,
+                        ICONST_4,
+                        IMUL,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("GLAllocation", "createDirectByteBuffer", "(I)Ljava/nio/ByteBuffer;")),
+                        reference(methodInfo, PUTFIELD, shadersBuffer),
+
+                        // shadersShortBuffer = shadersBuffer.asShortBuffer();
+                        ALOAD_0,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, shadersBuffer),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "asShortBuffer", "()Ljava/nio/ShortBuffer;")),
+                        reference(methodInfo, PUTFIELD, shadersShortBuffer)
+                    );
+                }
+            });
+            
+            patches.add(new AddMethodPatch("setEntityId", "(I)V") {
+                @Override
+                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, shadersData),
+                        ICONST_0,
+                        ILOAD_1,
+                        I2S,
+                        SASTORE,
+                        RETURN
                     );
                 }
             });
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "clear shadersBuffer";
@@ -708,50 +756,20 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Tessellator", "byteBuffer", "Ljava/nio/ByteBuffer;")),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.nio.ByteBuffer", "clear", "()Ljava/nio/Buffer;"))
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "clearBuffer", "()V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "fix normal calculation";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        FLOAD_1,
-                        push(methodInfo, 128.0f),
-                        FMUL,
-                        F2I,
-                        I2B,
-                        ISTORE, 4
+                        BinaryRegex.begin()
                     );
                 }
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        FLOAD_1,
-                        push(methodInfo, 127.0f),
-                        FMUL,
-                        F2I,
-                        I2B,
-                        ISTORE, 4
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, shadersBuffer),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "clear", "()Ljava/nio/Buffer;")),
+                        POP
                     );
                 }
-            });
+            }.targetMethod(reset));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -769,12 +787,14 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "drawGLArrays", "(III)V"))
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, shadersShortBuffer),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "drawGLArrays", "(IIILjava/nio/ShortBuffer;)V"))
                     );
                 }
-            });
+            }.targetMethod(draw));
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "call Shaders.addVertex";
@@ -783,24 +803,18 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        DUP,
-                        GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
-                        ICONST_1,
-                        IADD,
-                        PUTFIELD, BinaryRegex.backReference(1)
+                        BinaryRegex.begin()
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "addVertex", "(LTessellator;)V"))
+                        reference(methodInfo, GETFIELD, drawMode)
                     );
                 }
-            });
+            }.targetMethod(addVertex));
         }
     }
 
