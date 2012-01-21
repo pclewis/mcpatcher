@@ -26,15 +26,18 @@ public class GLSLShader extends Mod {
 
         classMods.add(new MinecraftMod());
         classMods.add(new BaseMod.BlockMod());
+        classMods.add(new BaseMod.GLAllocationMod());
         classMods.add(new EntityRendererMod());
         classMods.add(new EntityLivingMod());
         classMods.add(new RenderGlobalMod());
         classMods.add(new TessellatorMod());
+        classMods.add(new RenderBlocksMod());
+        classMods.add(new WorldMod());
+        classMods.add(new RenderLivingMod());
+        classMods.add(new WorldRendererMod());
         /*
         classMods.add(new GLViewportMod());
-        classMods.add(new BaseMod.GLAllocationMod());
         classMods.add(new RenderEngineMod());
-        classMods.add(new RenderLivingMod());
         classMods.add(new EntityRendererMod());
         classMods.add(new ItemMod());
         classMods.add(new BlockMod());
@@ -45,14 +48,11 @@ public class GLSLShader extends Mod {
         classMods.add(new GuiSmallButtonMod());
         classMods.add(new GuiScreenMod());
         classMods.add(new GuiVideoSettingsMod());
-        classMods.add(new RenderBlocksMod());
         classMods.add(new EntityPlayerMod());
         classMods.add(new EntityPlayerSPMod());
         classMods.add(new InventoryPlayerMod());
         classMods.add(new ItemStackMod());
-        classMods.add(new WorldMod());
         classMods.add(new WorldInfoMod());
-        classMods.add(new WorldRendererMod());
         */
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS));
@@ -546,6 +546,209 @@ public class GLSLShader extends Mod {
         }
     }
 
+    private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
+        String[] faceMethods = new String[6];
+
+        RenderBlocksMod() {
+            setupBlockFace(0, "Bottom", 0, -1, 0);
+            setupBlockFace(1, "Top", 0, 1, 0);
+            setupBlockFace(2, "East", 0, 0, -1);
+            setupBlockFace(3, "West", 0, 0, 1);
+            setupBlockFace(4, "North", -1, 0, 0);
+            setupBlockFace(5, "South", 1, 0, 0);
+
+            memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
+            memberMappers.add(new MethodMapper("renderBlockByRenderType", "(LBlock;III)Z"));
+        }
+
+        private void setupBlockFace(int index, final String direction, final int x, final int y, final int z) {
+            String methodName = "render" + direction + "Face";
+            faceMethods[index] = methodName;
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "set normal when rendering block " + direction.toLowerCase() + " face";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
+                        ASTORE, BinaryRegex.capture(BinaryRegex.any())
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        ALOAD, getCaptureGroup(1),
+                        push(methodInfo, x),
+                        push(methodInfo, y),
+                        push(methodInfo, z),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setNormal", "(FFF)V"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), methodName, "(LBlock;DDDI)V")));
+        }
+    }
+
+    private class WorldMod extends BaseMod.WorldMod {
+        WorldMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        FCONST_1,
+                        BytecodeMatcher.anyFLOAD,
+                        push(methodInfo, (float) Math.PI),
+                        FMUL,
+                        FCONST_2,
+                        FMUL,
+                        BytecodeMatcher.anyReference(INVOKESTATIC),
+                        FCONST_2,
+                        FMUL,
+                        push(methodInfo, 0.75f),
+                        FADD,
+                        FSUB
+                    );
+                }
+            }.setMethod(new MethodRef(getDeobfClass(), "getStarBrightness", "(F)F")));
+        }
+    }
+
+    private class RenderLivingMod extends ClassMod {
+        RenderLivingMod() {
+            classSignatures.add(new ConstSignature("deadmau5"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 514),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
+                    );
+                }
+            });
+
+            addGLWrapper("Enable");
+            addGLWrapper("Disable");
+        }
+
+        private void addGLWrapper(final String name) {
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "wrap gl" + name;
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "gl" + name, "(I)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "gl" + name + "Wrapper", "(I)V"))
+                    );
+                }
+            });
+        }
+    }
+
+    private class WorldRendererMod extends ClassMod {
+        WorldRendererMod() {
+            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glNewList", "(II)V")));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 1.000001F)
+                    );
+                }
+            }.setMethod(new MethodRef(getDeobfClass(), "updateRenderer", "()V")));
+
+            memberMappers.add(new FieldMapper("worldObj", "LWorld;"));
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "call Shaders.setEntity";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ILOAD, 13,
+                        ALOAD, 10,
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD, 19
+                        )),
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ILOAD, 17,
+                            ILOAD, 15,
+                            ILOAD, 16
+                        )),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderBlocks", "renderBlockByRenderType", "(LBlock;III)Z")),
+                        IOR,
+                        ISTORE, 13
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Shaders.setEntity(block1.blockID, worldObj.getBlockLightValue(i4, l3, k3), Block.lightValue[block1.blockID]);
+                        getCaptureGroup(1), // block1
+                        reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
+
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("WorldRenderer", "worldObj", "LWorld;")),
+                        getCaptureGroup(2), // i4, l3, k3
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getBlockLightValue", "(III)I")),
+
+                        reference(methodInfo, GETSTATIC, new FieldRef("Block", "lightValue", "[I")),
+                        getCaptureGroup(1), // block1
+                        reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
+                        IALOAD,
+
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "clear Shaders.setEntity";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        RETURN,
+                        BinaryRegex.end()
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // Shaders.setEntity(-1, 0, 0);
+                        ICONST_M1,
+                        ICONST_0,
+                        ICONST_0,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "updateRenderer", "()V")));
+        }
+    }
+
     /*
     private class GLViewportMod extends ClassMod {
         GLViewportMod() {
@@ -646,68 +849,6 @@ public class GLSLShader extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "refreshTextures", "()V")));
-        }
-    }
-
-    private class RenderLivingMod extends ClassMod {
-        RenderLivingMod() {
-            classSignatures.add(new ConstSignature("deadmau5"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 514),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "apply baseProgramNoT2D";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 514),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgramNoT2D", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "apply baseProgram";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 515),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgram", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
-                    );
-                }
-            });
         }
     }
 
@@ -1229,53 +1370,6 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
-        String[] faceMethods = new String[6];
-
-        RenderBlocksMod() {
-            setupBlockFace(0, "Bottom", 0, -1, 0);
-            setupBlockFace(1, "Top", 0, 1, 0);
-            setupBlockFace(2, "East", 0, 0, -1);
-            setupBlockFace(3, "West", 0, 0, 1);
-            setupBlockFace(4, "North", -1, 0, 0);
-            setupBlockFace(5, "South", 1, 0, 0);
-
-            memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
-            memberMappers.add(new MethodMapper("renderBlockByRenderType", "(LBlock;III)Z"));
-        }
-
-        private void setupBlockFace(int index, final String direction, final int x, final int y, final int z) {
-            String methodName = "render" + direction + "Face";
-            faceMethods[index] = methodName;
-            patches.add(new BytecodePatch.InsertAfter() {
-                @Override
-                public String getDescription() {
-                    return "set normal when rendering block " + direction.toLowerCase() + " face";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        reference(methodInfo, GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
-                        ASTORE, BinaryRegex.capture(BinaryRegex.any())
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        ALOAD, getCaptureGroup(1),
-                        push(methodInfo, x),
-                        push(methodInfo, y),
-                        push(methodInfo, z),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setNormal", "(FFF)V"))
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), methodName, "(LBlock;DDDI)V")));
-        }
-    }
-
     private class EntityPlayerMod extends ClassMod {
         EntityPlayerMod() {
             classSignatures.add(new ConstSignature("humanoid"));
@@ -1319,46 +1413,6 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class WorldMod extends BaseMod.WorldMod {
-        WorldMod() {
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        FCONST_1,
-                        BytecodeMatcher.anyFLOAD,
-                        push(methodInfo, (float) Math.PI),
-                        FMUL,
-                        FCONST_2,
-                        FMUL,
-                        INVOKESTATIC, BinaryRegex.any(2),
-                        FCONST_2,
-                        FMUL,
-                        push(methodInfo, 0.75F),
-                        FADD,
-                        FSUB
-                    );
-                }
-            }.setMethodName("getStarBrightness"));
-
-            classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
-                ALOAD_0,
-                ILOAD_1,
-                ILOAD_2,
-                ILOAD_3,
-                ICONST_1,
-                INVOKEVIRTUAL, BinaryRegex.any(2),
-                IRETURN,
-                BinaryRegex.end()
-            ).setMethodName("getBlockLightValue"));
-
-            memberMappers.add(new FieldMapper("worldInfo", "LWorldInfo;"));
-
-            patches.add(new MakeMemberPublicPatch(new FieldRef("World", "worldInfo", "LWorldInfo;")));
-        }
-    }
-
     private class WorldInfoMod extends ClassMod {
         WorldInfoMod() {
             classSignatures.add(new ConstSignature("RandomSeed"));
@@ -1368,96 +1422,6 @@ public class GLSLShader extends Mod {
                 "getRandomSeed",
                 "getWorldTime"
             }, "()J"));
-        }
-    }
-
-    private class WorldRendererMod extends ClassMod {
-        WorldRendererMod() {
-            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glNewList", "(II)V")));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 1.000001F)
-                    );
-                }
-            }.setMethodName("updateRenderer"));
-
-            memberMappers.add(new FieldMapper("worldObj", "LWorld;"));
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "call Shaders.setEntity";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        ILOAD, 13,
-                        ALOAD, 10,
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD, 19
-                        )),
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ILOAD, 17,
-                            ILOAD, 15,
-                            ILOAD, 16
-                        )),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderBlocks", "renderBlockByRenderType", "(LBlock;III)Z")),
-                        IOR,
-                        ISTORE, 13
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        // Shaders.setEntity(block1.blockID, worldObj.getBlockLightValue(i4, l3, k3), Block.lightValue[block1.blockID]);
-                        getCaptureGroup(1), // block1
-                        reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
-
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("WorldRenderer", "worldObj", "LWorld;")),
-                        getCaptureGroup(2), // i4, l3, k3
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getBlockLightValue", "(III)I")),
-
-                        reference(methodInfo, GETSTATIC, new FieldRef("Block", "lightValue", "[I")),
-                        getCaptureGroup(1), // block1
-                        reference(methodInfo, GETFIELD, new FieldRef("Block", "blockID", "I")),
-                        IALOAD,
-
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "clear Shaders.setEntity";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        RETURN,
-                        BinaryRegex.end()
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        // Shaders.setEntity(-1, 0, 0);
-                        ICONST_M1,
-                        ICONST_0,
-                        ICONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setEntity", "(III)V"))
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "updateRenderer", "()V")));
         }
     }
     */
