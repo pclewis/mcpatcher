@@ -4,3 +4,7 @@ out
 Notes
 *.orig
 *.rej
+profile.txt
+profile.xml
+test.log
+*.log.1

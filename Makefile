@@ -3,7 +3,7 @@ MCJAR = ../bin/minecraft.jar
 MCJARV = ../bin/minecraft-$(MCVER).jar
 MODJAR = ../mcpatcher-mods/mcpatcher-builtin.jar
 MCPATCHER = out/artifacts/mcpatcher/mcpatcher.jar
-PROFILER4J = $(HOME)/profiler4j-1.0-beta2/agent.jar
+JIP = $(HOME)/jip-1.2/profile/profile.jar
 LAUNCH4J = $(HOME)/launch4j/launch4j
 LAUNCH4J_XML = launch4j.xml
 CLASSPATH = lib/javassist.jar
@@ -56,8 +56,8 @@ javadoc:
 control: $(TEST_LOG)
 	cp -f $(TEST_LOG) $(GOOD_LOG)
 
-profile: $(MCPATCHER) $(PROFILER4J)
-	java -Xmx512M -javaagent:$(PROFILER4J)=waitconn=true,verbosity=1 -jar $(MCPATCHER)
+profile: $(MCPATCHER) $(JIP)
+	java -Xmx512M -javaagent:$(JIP) -Dprofile.properties=profile.properties -jar $(MCPATCHER)
 
 testclean:
 	rm -f $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1
