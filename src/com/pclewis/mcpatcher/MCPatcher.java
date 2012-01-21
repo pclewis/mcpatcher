@@ -374,7 +374,17 @@ final public class MCPatcher {
     private static void mapModClassMembers(JarFile origJar) throws IOException, InterruptedException {
         Logger.log(Logger.LOG_JAR);
         Logger.log(Logger.LOG_JAR, "Analyzing %s (methods and fields)", origJar.getName());
+        int numMappings = 0;
+        int mappingProgress = 0;
+        for (Mod mod : modList.getAll()) {
+            for (ClassMod classMod : mod.classMods) {
+                if (!classMod.global && classMod.okToApply()) {
+                    numMappings += classMod.memberMappers.size();
+                }
+            }
+        }
         ui.setStatusText("Mapping class members...");
+        ui.updateProgress(mappingProgress, numMappings);
         for (Mod mod : modList.getAll()) {
             for (ClassMod classMod : mod.getClassMods()) {
                 checkInterrupt();
@@ -385,6 +395,8 @@ final public class MCPatcher {
                         ClassFile classFile = new ClassFile(new DataInputStream(origJar.getInputStream(new ZipEntry(name))));
                         classMod.addToConstPool = false;
                         classMod.mapClassMembers(name, classFile);
+                        mappingProgress += classMod.memberMappers.size();
+                        ui.updateProgress(mappingProgress, numMappings);
                     }
                 } catch (Throwable e) {
                     classMod.addError(e.toString());
