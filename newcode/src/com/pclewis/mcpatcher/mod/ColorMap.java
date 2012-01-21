@@ -11,11 +11,11 @@ final class ColorMap {
     private int mapDefault;
     
     static int getX(double temperature, double rainfall) {
-        return (int) (COLORMAP_SCALE * clamp(1.0 - temperature));
+        return getXNoClamp(clamp(temperature), clamp(rainfall));
     }
     
     static int getY(double temperature, double rainfall) {
-        return (int) (COLORMAP_SCALE * clamp(1.0 - rainfall * temperature));
+        return getYNoClamp(clamp(temperature), clamp(rainfall));
     }
 
     static int getXNoClamp(double temperature, double rainfall) {
