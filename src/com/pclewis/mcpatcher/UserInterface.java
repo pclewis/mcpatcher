@@ -66,6 +66,9 @@ abstract class UserInterface {
 
     void updateModList() {
     }
+    
+    void setStatusText(String format, Object... params) {
+    }
 
     void setBusy(boolean busy) {
     }
@@ -108,6 +111,11 @@ abstract class UserInterface {
         @Override
         void updateModList() {
             mainForm.updateModList();
+        }
+
+        @Override
+        void setStatusText(String format, Object... params) {
+            mainForm.setStatusText(format, params);
         }
 
         @Override
