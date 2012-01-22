@@ -26,22 +26,22 @@ public class GLSLShader extends Mod {
         defaultEnabled = false;
 
         classMods.add(new MinecraftMod());
-        classMods.add(new BlockMod());
         classMods.add(new BaseMod.GLAllocationMod());
+        classMods.add(new RenderEngineMod());
+        classMods.add(new RenderGlobalMod());
+        classMods.add(new RenderLivingMod());
         classMods.add(new EntityRendererMod());
         classMods.add(new EntityLivingMod());
-        classMods.add(new RenderGlobalMod());
+        classMods.add(new BlockMod());
+        classMods.add(new GameSettingsMod());
         classMods.add(new TessellatorMod());
         classMods.add(new RenderBlocksMod());
-        classMods.add(new WorldMod());
-        classMods.add(new RenderLivingMod());
-        classMods.add(new WorldRendererMod());
-        classMods.add(new RenderEngineMod());
-        classMods.add(new GameSettingsMod());
         classMods.add(new EntityPlayerMod());
         classMods.add(new EntityPlayerSPMod());
         classMods.add(new InventoryPlayerMod());
         classMods.add(new ItemStackMod());
+        classMods.add(new WorldMod());
+        classMods.add(new WorldRendererMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS));
     }
@@ -92,16 +92,150 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class BlockMod extends BaseMod.BlockMod {
-        BlockMod() {
-            memberMappers.add(new FieldMapper(new String[]{
-                "lightOpacity",
-                "lightValue"
-            }, "[I")
-                .accessFlag(AccessFlag.PUBLIC, true)
-                .accessFlag(AccessFlag.STATIC, true)
-                .accessFlag(AccessFlag.FINAL, true)
+    private class RenderEngineMod extends ClassMod {
+        RenderEngineMod() {
+            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
+
+            classSignatures.add(new FixedBytecodeSignature(
+                BinaryRegex.begin(),
+                ALOAD_0,
+                BytecodeMatcher.captureReference(GETFIELD),
+                BytecodeMatcher.captureReference(GETFIELD),
+                ASTORE_2,
+                ALOAD_0
+            )
+                .addXref(1, new FieldRef("RenderEngine", "texturePackList", "LTexturePackList;"))
+                .addXref(2, new FieldRef("TexturePackList", "selectedTexturePack", "LTexturePackBase;"))
             );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        ALOAD_0,
+                        ALOAD_0,
+                        ALOAD_2,
+                        ALOAD_1,
+                        BIPUSH, 7,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;")),
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        BytecodeMatcher.anyReference(INVOKESPECIAL),
+                        BytecodeMatcher.anyReference(INVOKESPECIAL)
+                    );
+                }
+            }.addXref(1, new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    if (methodInfo.getDescriptor().equals("()V") && !methodInfo.isConstructor()) {
+                        return buildExpression(
+                            push(methodInfo, "%clamp%")
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }.setMethodName("refreshTextures"));
+
+            memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I"));
+        }
+    }
+
+    private class RenderGlobalMod extends ClassMod {
+        RenderGlobalMod() {
+            classSignatures.add(new ConstSignature("smoke"));
+            classSignatures.add(new ConstSignature("/environment/clouds.png"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        BytecodeMatcher.anyFLOAD,
+                        push(methodInfo, 0.2f),
+                        FMUL,
+                        push(methodInfo, 0.04f),
+                        FADD,
+                        BytecodeMatcher.anyFLOAD,
+                        push(methodInfo, 0.2f),
+                        FMUL,
+                        push(methodInfo, 0.04f),
+                        FADD,
+                        BytecodeMatcher.anyFLOAD,
+                        push(methodInfo, 0.6f),
+                        FMUL,
+                        push(methodInfo, 0.1f),
+                        FADD,
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glColor3f", "(FFF)V"))
+                    );
+                }
+            }.setMethod(new MethodRef(getDeobfClass(), "renderSky", "(F)V")));
+
+            memberMappers.add(new MethodMapper("sortAndRender", "(LEntityLiving;ID)I"));
+            memberMappers.add(new MethodMapper("renderAllRenderLists", "(ID)V"));
+
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "call setCelestialPosition";
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F"))
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setCelestialPosition", "()V"))
+                    );
+                }
+            });
+        }
+    }
+
+    private class RenderLivingMod extends ClassMod {
+        RenderLivingMod() {
+            classSignatures.add(new ConstSignature("deadmau5"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        push(methodInfo, 514),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
+                    );
+                }
+            });
+
+            addGLWrapper("glEnable");
+            addGLWrapper("glDisable");
+        }
+
+        private void addGLWrapper(final String name) {
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "wrap " + name;
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, name, "(I)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, name + "Wrapper", "(I)V"))
+                    );
+                }
+            });
         }
     }
 
@@ -441,58 +575,22 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class RenderGlobalMod extends ClassMod {
-        RenderGlobalMod() {
-            classSignatures.add(new ConstSignature("smoke"));
-            classSignatures.add(new ConstSignature("/environment/clouds.png"));
+    private class BlockMod extends BaseMod.BlockMod {
+        BlockMod() {
+            memberMappers.add(new FieldMapper(new String[]{
+                "lightOpacity",
+                "lightValue"
+            }, "[I")
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, true)
+                .accessFlag(AccessFlag.FINAL, true)
+            );
+        }
+    }
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        BytecodeMatcher.anyFLOAD,
-                        push(methodInfo, 0.2f),
-                        FMUL,
-                        push(methodInfo, 0.04f),
-                        FADD,
-                        BytecodeMatcher.anyFLOAD,
-                        push(methodInfo, 0.2f),
-                        FMUL,
-                        push(methodInfo, 0.04f),
-                        FADD,
-                        BytecodeMatcher.anyFLOAD,
-                        push(methodInfo, 0.6f),
-                        FMUL,
-                        push(methodInfo, 0.1f),
-                        FADD,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glColor3f", "(FFF)V"))
-                    );
-                }
-            }.setMethod(new MethodRef(getDeobfClass(), "renderSky", "(F)V")));
-
-            memberMappers.add(new MethodMapper("sortAndRender", "(LEntityLiving;ID)I"));
-            memberMappers.add(new MethodMapper("renderAllRenderLists", "(ID)V"));
-
-            patches.add(new BytecodePatch.InsertAfter() {
-                @Override
-                public String getDescription() {
-                    return "call setCelestialPosition";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F"))
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setCelestialPosition", "()V"))
-                    );
-                }
-            });
+    private class GameSettingsMod extends BaseMod.GameSettingsMod {
+        GameSettingsMod() {
+            mapOption("viewDistance", "renderDistance", "I");
         }
     }
 
@@ -889,6 +987,49 @@ public class GLSLShader extends Mod {
         }
     }
 
+    private class EntityPlayerMod extends ClassMod {
+        EntityPlayerMod() {
+            classSignatures.add(new ConstSignature("humanoid"));
+            classSignatures.add(new ConstSignature("/mob/char.png"));
+
+            memberMappers.add(new FieldMapper("inventory", "LInventoryPlayer;"));
+        }
+    }
+
+    private class EntityPlayerSPMod extends ClassMod {
+        EntityPlayerSPMod() {
+            parentClass = "EntityPlayer";
+
+            classSignatures.add(new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"));
+            classSignatures.add(new ConstSignature("portal.trigger"));
+        }
+    }
+
+    private class InventoryPlayerMod extends ClassMod {
+        InventoryPlayerMod() {
+            classSignatures.add(new ConstSignature("Inventory"));
+            classSignatures.add(new ConstSignature("Slot"));
+
+            memberMappers.add(new MethodMapper("getCurrentItem", "()LItemStack;"));
+        }
+    }
+
+    private class ItemStackMod extends ClassMod {
+        ItemStackMod() {
+            classSignatures.add(new ConstSignature("id"));
+            classSignatures.add(new ConstSignature("Count"));
+            classSignatures.add(new ConstSignature("Damage"));
+
+            memberMappers.add(new FieldMapper(new String[]{
+                "stackSize",
+                "animationsToGo",
+                "itemID"
+            }, "I")
+                .accessFlag(AccessFlag.PUBLIC, true)
+            );
+        }
+    }
+
     private class WorldMod extends BaseMod.WorldMod {
         WorldMod() {
             classSignatures.add(new BytecodeSignature() {
@@ -985,48 +1126,6 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class RenderLivingMod extends ClassMod {
-        RenderLivingMod() {
-            classSignatures.add(new ConstSignature("deadmau5"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 514),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
-                    );
-                }
-            });
-
-            addGLWrapper("glEnable");
-            addGLWrapper("glDisable");
-        }
-
-        private void addGLWrapper(final String name) {
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "wrap " + name;
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, name, "(I)V"))
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, name + "Wrapper", "(I)V"))
-                    );
-                }
-            });
-        }
-    }
-
     private class WorldRendererMod extends ClassMod {
         WorldRendererMod() {
             final MethodRef updateRenderer = new MethodRef(getDeobfClass(), "updateRenderer", "()V");
@@ -1101,105 +1200,6 @@ public class GLSLShader extends Mod {
                     );
                 }
             }.targetMethod(updateRenderer));
-        }
-    }
-
-    private class RenderEngineMod extends ClassMod {
-        RenderEngineMod() {
-            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
-
-            classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
-                ALOAD_0,
-                BytecodeMatcher.captureReference(GETFIELD),
-                BytecodeMatcher.captureReference(GETFIELD),
-                ASTORE_2,
-                ALOAD_0
-            )
-                .addXref(1, new FieldRef("RenderEngine", "texturePackList", "LTexturePackList;"))
-                .addXref(2, new FieldRef("TexturePackList", "selectedTexturePack", "LTexturePackBase;"))
-            );
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        ALOAD_0,
-                        ALOAD_0,
-                        ALOAD_2,
-                        ALOAD_1,
-                        BIPUSH, 7,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;")),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        BytecodeMatcher.anyReference(INVOKESPECIAL),
-                        BytecodeMatcher.anyReference(INVOKESPECIAL)
-                    );
-                }
-            }.addXref(1, new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals("()V") && !methodInfo.isConstructor()) {
-                        return buildExpression(
-                            push(methodInfo, "%clamp%")
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            }.setMethodName("refreshTextures"));
-
-            memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I"));
-        }
-    }
-
-    private class GameSettingsMod extends BaseMod.GameSettingsMod {
-        GameSettingsMod() {
-            mapOption("viewDistance", "renderDistance", "I");
-        }
-    }
-
-    private class EntityPlayerMod extends ClassMod {
-        EntityPlayerMod() {
-            classSignatures.add(new ConstSignature("humanoid"));
-            classSignatures.add(new ConstSignature("/mob/char.png"));
-
-            memberMappers.add(new FieldMapper("inventory", "LInventoryPlayer;"));
-        }
-    }
-
-    private class EntityPlayerSPMod extends ClassMod {
-        EntityPlayerSPMod() {
-            parentClass = "EntityPlayer";
-
-            classSignatures.add(new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"));
-            classSignatures.add(new ConstSignature("portal.trigger"));
-        }
-    }
-
-    private class InventoryPlayerMod extends ClassMod {
-        InventoryPlayerMod() {
-            classSignatures.add(new ConstSignature("Inventory"));
-            classSignatures.add(new ConstSignature("Slot"));
-
-            memberMappers.add(new MethodMapper("getCurrentItem", "()LItemStack;"));
-        }
-    }
-
-    private class ItemStackMod extends ClassMod {
-        ItemStackMod() {
-            classSignatures.add(new ConstSignature("id"));
-            classSignatures.add(new ConstSignature("Count"));
-            classSignatures.add(new ConstSignature("Damage"));
-
-            memberMappers.add(new FieldMapper(new String[]{
-                "stackSize",
-                "animationsToGo",
-                "itemID"
-            }, "I")
-                .accessFlag(AccessFlag.PUBLIC, true)
-            );
         }
     }
 }
