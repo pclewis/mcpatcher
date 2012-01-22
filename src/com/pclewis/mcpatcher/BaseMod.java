@@ -528,4 +528,41 @@ public final class BaseMod extends Mod {
             classSignatures.add(new ConstSignature(0.01));
         }
     }
+
+    /**
+     * Maps GameSettings class.
+     */
+    public static class GameSettingsMod extends ClassMod {
+        public GameSettingsMod() {
+            classSignatures.add(new ConstSignature("key.forward"));
+        }
+
+        /**
+         * Map any GameSettings field stored in options.txt.
+         *
+         * @param option name in options.txt
+         * @param field name of field in GameSettings class
+         * @param descriptor type descriptor
+         */
+        protected void mapOption(final String option, final String field, final String descriptor) {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // if (as[0].equals(option)) {
+                        ALOAD_3,
+                        ICONST_0,
+                        AALOAD,
+                        push(methodInfo, option),
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z")),
+                        IFEQ, BinaryRegex.any(2),
+
+                        // field = ...;
+                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+            }.addXref(1, new FieldRef(getDeobfClass(), field, descriptor)));
+        }
+    }
 }
