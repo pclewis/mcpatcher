@@ -300,15 +300,21 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        push(methodInfo, 0.6666667f),
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
-                        push(methodInfo, 1.0f),
-                        FLOAD, BinaryRegex.backReference(1),
-                        push(methodInfo, 1.0f),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glScalef", "(FFF)V"))
+                        // GL11.glClear(256);
+                        push(methodInfo, 256),
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glClear", "(I)V")),
+
+                        // renderHand(f, i);
+                        ALOAD_0,
+                        FLOAD_1,
+                        BytecodeMatcher.anyILOAD,
+                        BytecodeMatcher.captureReference(INVOKESPECIAL)
                     );
                 }
-            }.setMethod(renderHand));
+            }
+                .setMethod(renderWorld)
+                .addXref(1, renderHand)
+            );
 
             memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
             memberMappers.add(new MethodMapper("renderWorld", "(FJ)V"));
@@ -420,7 +426,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // if (l == 0) {
+                        // if (l == 0L) {
                         LLOAD_2,
                         LCONST_0,
                         LCMP,
@@ -433,7 +439,7 @@ public class GLSLShader extends Mod {
                         GOTO, branch("C"),
 
                         label("A"),
-                        // } else if (l == 1) {
+                        // } else if (l == 1L) {
                         LLOAD_2,
                         LCONST_1,
                         LCMP,
@@ -562,7 +568,7 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, name, "()V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), name, "()V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), name, "(D)V")));
         }
     }
 
