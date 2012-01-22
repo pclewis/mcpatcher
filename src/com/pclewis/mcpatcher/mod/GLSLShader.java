@@ -5,14 +5,16 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.*;
+import javassist.bytecode.AccessFlag;
+import javassist.bytecode.BadBytecode;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
 
 public class GLSLShader extends Mod {
-    private static final String DISPLAY_CLASS = "org.lwjgl.opengl.Display";
     private static final String GL11_CLASS = "org.lwjgl.opengl.GL11";
 
     public GLSLShader(MinecraftVersion minecraftVersion) {
@@ -24,7 +26,7 @@ public class GLSLShader extends Mod {
         defaultEnabled = false;
 
         classMods.add(new MinecraftMod());
-        classMods.add(new BaseMod.BlockMod());
+        classMods.add(new BlockMod());
         classMods.add(new BaseMod.GLAllocationMod());
         classMods.add(new EntityRendererMod());
         classMods.add(new EntityLivingMod());
@@ -66,7 +68,7 @@ public class GLSLShader extends Mod {
                     );
                 }
             }.addXref(1, new FieldRef("GameSettings", "thirdPersonView", "I")));
-            
+
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
             memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
             memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
@@ -86,6 +88,19 @@ public class GLSLShader extends Mod {
             memberMappers.add(new MethodMapper("getAppDir", "(Ljava/lang/String;)Ljava/io/File;")
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
+            );
+        }
+    }
+
+    private class BlockMod extends BaseMod.BlockMod {
+        BlockMod() {
+            memberMappers.add(new FieldMapper(new String[]{
+                "lightOpacity",
+                "lightValue"
+            }, "[I")
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, true)
+                .accessFlag(AccessFlag.FINAL, true)
             );
         }
     }
@@ -189,7 +204,7 @@ public class GLSLShader extends Mod {
                     );
                 }
             }.targetMethod(renderWorld));
-            
+
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
@@ -282,20 +297,20 @@ public class GLSLShader extends Mod {
                         getMatch(),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endTerrain", "()V")),
                         GOTO, branch("C"),
-                        
+
                         label("A"),
                         // } else if (l == 1) {
                         LLOAD_2,
                         LCONST_1,
                         LCMP,
                         IFNE, branch("B"),
-                        
+
                         // Shaders.beginWater(); ...; Shaders.endWater();
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginWater", "()V")),
                         getMatch(),
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endWater", "()V")),
                         GOTO, branch("C"),
-                        
+
                         // } else {
                         label("B"),
 
@@ -392,7 +407,7 @@ public class GLSLShader extends Mod {
             addLightmapPatch("enableLightmap");
             addLightmapPatch("disableLightmap");
         }
-        
+
         private void addLightmapPatch(final String name) {
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -620,7 +635,7 @@ public class GLSLShader extends Mod {
             patches.add(new AddFieldPatch("shadersBuffer", "Ljava.nio.ByteBuffer;"));
             patches.add(new AddFieldPatch("shadersShortBuffer", "Ljava.nio.ShortBuffer;"));
             patches.add(new AddFieldPatch("shadersData", "[S"));
-            
+
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
@@ -670,7 +685,7 @@ public class GLSLShader extends Mod {
                     );
                 }
             });
-            
+
             patches.add(new AddMethodPatch("setEntity", "(I)V") {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
@@ -775,7 +790,7 @@ public class GLSLShader extends Mod {
 
                         getRawBufferCode(methodInfo, 6, -18),
                         getShaderBufferCode(methodInfo),
-                        
+
                         getRawBufferCode(methodInfo, 14, -2),
                         getShaderBufferCode(methodInfo),
 
@@ -784,7 +799,7 @@ public class GLSLShader extends Mod {
                         getShaderBufferCode(methodInfo)
                     );
                 }
-                
+
                 private byte[] getRawBufferCode(MethodInfo methodInfo, int offset1, int offset2) throws IOException {
                     return buildCode(
                         // rawBuffer[rawBufferIndex + offset1] = rawBuffer[rawBufferIndex + offset2];
@@ -804,7 +819,7 @@ public class GLSLShader extends Mod {
                         IASTORE
                     );
                 }
-                
+
                 private byte[] getShaderBufferCode(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         // shadersBuffer.putShort(shadersData[0]).putShort(shadersData[1]);
@@ -939,7 +954,7 @@ public class GLSLShader extends Mod {
                 .addXref(5, new FieldRef("Entity", "posZ", "D"))
                 .addXref(6, new FieldRef("Entity", "lastTickPosZ", "D"))
             );
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -965,7 +980,7 @@ public class GLSLShader extends Mod {
                 .setMethod(new MethodRef(getDeobfClass(), "getCelestialAngleRadians", "(F)F"))
                 .addXref(1, new MethodRef(getDeobfClass(), "getCelestialAngle", "(F)F"))
             );
-            
+
             memberMappers.add(new MethodMapper(new String[]{"getSeed", "getWorldTime"}, "()J"));
         }
     }

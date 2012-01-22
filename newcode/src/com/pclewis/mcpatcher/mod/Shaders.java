@@ -8,7 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.src.Block;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.ItemStack;
-import net.minecraft.src.Tessellator;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBVertexProgram;
 import org.lwjgl.opengl.GL11;
@@ -585,7 +584,7 @@ public class Shaders {
             ARBVertexProgram.glEnableVertexAttribArrayARB(entityAttrib);
             ARBVertexProgram.glVertexAttribPointerARB(entityAttrib, 2, false, false, 4, (ShortBuffer) shortBuffer.position(0));
         }
-        GL11.glDrawArrays(mode,  first, count);
+        GL11.glDrawArrays(mode, first, count);
         if (entityAttrib >= 0) {
             ARBVertexProgram.glDisableVertexAttribArrayARB(entityAttrib);
         }
