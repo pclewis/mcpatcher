@@ -551,6 +551,8 @@ public class GLSLShader extends Mod {
             final MethodRef addVertex = new MethodRef(getDeobfClass(), "addVertex", "(DDD)V");
             final FieldRef drawMode = new FieldRef(getDeobfClass(), "drawMode", "I");
             final FieldRef addedVertices = new FieldRef(getDeobfClass(), "addedVertices", "I");
+            final FieldRef convertQuadsToTriangles = new FieldRef(getDeobfClass(), "convertQuadsToTriangles", "Z");
+            final FieldRef hasNormals = new FieldRef(getDeobfClass(), "hasNormals", "Z");
             final FieldRef rawBuffer = new FieldRef(getDeobfClass(), "rawBuffer", "[I");
             final FieldRef rawBufferIndex = new FieldRef(getDeobfClass(), "rawBufferIndex", "I");
             final FieldRef shadersBuffer = new FieldRef(getDeobfClass(), "shadersBuffer", "Ljava/nio/ByteBuffer;");
@@ -615,7 +617,7 @@ public class GLSLShader extends Mod {
                 }
             }
                 .setMethod(new MethodRef(getDeobfClass(), "setNormal", "(FFF)V"))
-                .addXref(1, new FieldRef(getDeobfClass(), "hasNormals", "Z"))
+                .addXref(1, hasNormals)
                 .addXref(2, new FieldRef(getDeobfClass(), "normal", "I"))
             );
 
@@ -674,7 +676,7 @@ public class GLSLShader extends Mod {
                         IFEQ, BinaryRegex.any(2)
                     );
                 }
-            }.addXref(1, new FieldRef(getDeobfClass(), "convertQuadsToTriangles", "Z")));
+            }.addXref(1, convertQuadsToTriangles));
 
             memberMappers.add(new FieldMapper("instance", "LTessellator;").accessFlag(AccessFlag.STATIC, true));
 
@@ -810,8 +812,79 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
+                        // if (drawMode == 7
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, drawMode)
+                        reference(methodInfo, GETFIELD, drawMode),
+                        push(methodInfo, 7),
+                        IF_ICMPNE, branch("A"),
+
+                        // && convertQuadsToTriangles
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, convertQuadsToTriangles),
+                        IFEQ, branch("A"),
+
+                        // && (addedVertices + 1) % 4 == 0
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, addedVertices),
+                        ICONST_1,
+                        IADD,
+                        ICONST_4,
+                        IREM,
+                        IFNE, branch("A"),
+
+                        // && hasNormals) {
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, hasNormals),
+                        IFEQ, branch("A"),
+
+                        getRawBufferCode(methodInfo, 6, -18),
+                        getShaderBufferCode(methodInfo),
+                        
+                        getRawBufferCode(methodInfo, 14, -2),
+                        getShaderBufferCode(methodInfo),
+
+                        // }
+                        label("A"),
+                        getShaderBufferCode(methodInfo)
+                    );
+                }
+                
+                private byte[] getRawBufferCode(MethodInfo methodInfo, int offset1, int offset2) throws IOException {
+                    return buildCode(
+                        // rawBuffer[rawBufferIndex + offset1] = rawBuffer[rawBufferIndex + offset2];
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, rawBuffer),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, rawBufferIndex),
+                        push(methodInfo, offset1),
+                        IADD,
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, rawBuffer),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, rawBufferIndex),
+                        push(methodInfo, offset2),
+                        IADD,
+                        IALOAD,
+                        IASTORE
+                    );
+                }
+                
+                private byte[] getShaderBufferCode(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        // shadersBuffer.putShort(shadersData[0]).putShort(shadersData[1]);
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, shadersBuffer),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, shadersData),
+                        ICONST_0,
+                        SALOAD,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/ShortBuffer", "putShort", "(S)Ljava/nio/Buffer;")),
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, shadersData),
+                        ICONST_1,
+                        SALOAD,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/nio/Buffer", "putShort", "(S)Ljava/nio/Buffer;")),
+                        POP
                     );
                 }
             }.targetMethod(addVertex));
