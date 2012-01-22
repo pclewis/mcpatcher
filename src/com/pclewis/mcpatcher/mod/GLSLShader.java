@@ -22,7 +22,7 @@ public class GLSLShader extends Mod {
         author = "daxnitro";
         description = "Adds graphical shaders to the game.  Based on daxnitro's mod.";
         version = "2.0";
-        website = "http://nitrous.daxnitro.com/repo/";
+        website = "http://daxnitro.wikia.com/wiki/Shaders_2.0";
         defaultEnabled = false;
 
         classMods.add(new MinecraftMod());
