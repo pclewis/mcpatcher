@@ -133,6 +133,8 @@ public abstract class Mod {
     void setRefs() {
         for (ClassMod classMod : getClassMods()) {
             classMod.mod = this;
+            classMod.bestMatch = null;
+            classMod.bestMatchCount = 0;
             for (ClassSignature classSignature : classMod.classSignatures) {
                 classSignature.setClassMod(classMod);
             }

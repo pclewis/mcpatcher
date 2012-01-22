@@ -68,6 +68,8 @@ abstract public class ClassMod implements PatchComponent {
     ArrayList<String> targetClasses = new ArrayList<String>();
     ArrayList<String> errors = new ArrayList<String>();
     boolean addToConstPool = false;
+    int bestMatchCount;
+    String bestMatch;
     private ArrayList<Label> labels = new ArrayList<Label>();
     private HashMap<String, Integer> labelPositions = new HashMap<String, Integer>();
 
@@ -80,6 +82,7 @@ abstract public class ClassMod implements PatchComponent {
         ClassMap newMap = new ClassMap();
         String deobfName = getDeobfClass();
 
+        int sigIndex = 0;
         for (ClassSignature cs : classSignatures) {
             boolean found = false;
 
@@ -91,6 +94,11 @@ abstract public class ClassMod implements PatchComponent {
                 return false;
             }
             newMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
+            if (bestMatch == null || sigIndex > bestMatchCount) {
+                bestMatch = filename;
+                bestMatchCount = sigIndex;
+            }
+            sigIndex++;
         }
 
         targetClasses.add(classFile.getName());

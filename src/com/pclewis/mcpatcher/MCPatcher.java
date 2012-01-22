@@ -363,8 +363,14 @@ final public class MCPatcher {
                         classMod.addError(String.format("multiple classes matched:%s", sb.toString()));
                         Logger.log(Logger.LOG_MOD, "multiple classes matched %s:%s", classMod.getDeobfClass(), sb.toString());
                     } else if (classMod.targetClasses.size() == 0) {
-                        classMod.addError("no classes matched");
-                        Logger.log(Logger.LOG_MOD, "no classes matched %s", classMod.getDeobfClass());
+                        String bestInfo;
+                        if (classMod.bestMatch == null) {
+                            bestInfo = "";
+                        } else {
+                            bestInfo = String.format(" (best match: %s, %d signatures)", classMod.bestMatch, classMod.bestMatchCount + 1);
+                        }
+                        classMod.addError("no classes matched" + bestInfo);
+                        Logger.log(Logger.LOG_MOD, "no classes matched %s%s", classMod.getDeobfClass(), bestInfo);
                     }
                 }
             }
