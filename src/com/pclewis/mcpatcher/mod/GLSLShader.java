@@ -144,6 +144,8 @@ public class GLSLShader extends Mod {
 
     private class RenderGlobalMod extends ClassMod {
         RenderGlobalMod() {
+            final MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
+
             classSignatures.add(new ConstSignature("smoke"));
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
 
@@ -169,10 +171,11 @@ public class GLSLShader extends Mod {
                         reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glColor3f", "(FFF)V"))
                     );
                 }
-            }.setMethod(new MethodRef(getDeobfClass(), "renderSky", "(F)V")));
+            }.setMethod(renderSky));
 
             memberMappers.add(new MethodMapper("sortAndRender", "(LEntityLiving;ID)I"));
             memberMappers.add(new MethodMapper("renderAllRenderLists", "(ID)V"));
+            memberMappers.add(new FieldMapper("worldObj", "LWorld;"));
 
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
@@ -183,7 +186,13 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F"))
+                        ALOAD_0,
+                        reference(methodInfo, GETFIELD, new FieldRef("RenderGlobal", "worldObj", "LWorld;")),
+                        FLOAD_1,
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F")),
+                        BytecodeMatcher.anyFLOAD,
+                        FMUL,
+                        BytecodeMatcher.anyFSTORE
                     );
                 }
 
@@ -191,6 +200,32 @@ public class GLSLShader extends Mod {
                 public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setCelestialPosition", "()V"))
+                    );
+                }
+            }.targetMethod(renderSky));
+
+            addGLWrapper("glEnable");
+            addGLWrapper("glDisable");
+        }
+
+        private void addGLWrapper(final String name) {
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "wrap " + name;
+                }
+
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, name, "(I)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                    return buildCode(
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, name + "Wrapper", "(I)V"))
                     );
                 }
             });
@@ -1185,7 +1220,7 @@ public class GLSLShader extends Mod {
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
-                    return "clear Shaders.setEntity";
+                    return "clear Tessellator.setEntity";
                 }
 
                 @Override
