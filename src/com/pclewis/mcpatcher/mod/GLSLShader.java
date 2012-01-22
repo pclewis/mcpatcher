@@ -448,50 +448,14 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
                     return buildExpression(
-                        BytecodeMatcher.anyALOAD,
-                        BytecodeMatcher.anyALOAD,
-                        BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD_1,
-                        F2D,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I")),
-                        BinaryRegex.capture(BinaryRegex.or(BinaryRegex.build(POP), BytecodeMatcher.anyISTORE))
+                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I"))
                     );
                 }
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // if ($1 == 0) {
-                        getCaptureGroup(1),
-                        ICONST_0,
-                        IF_ICMPNE, branch("A"),
-
-                        // Shaders.beginTerrain(); ...; Shaders.endTerrain();
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginTerrain", "()V")),
-                        getMatch(),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endTerrain", "()V")),
-                        GOTO, branch("C"),
-
-                        label("A"),
-                        // } else if ($1 == 1) {
-                        getCaptureGroup(1),
-                        ICONST_1,
-                        IF_ICMPNE, branch("B"),
-
-                        // Shaders.beginWater(); ...; Shaders.endWater();
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginWater", "()V")),
-                        getMatch(),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "endWater", "()V")),
-                        GOTO, branch("C"),
-
-                        // } else {
-                        label("B"),
-
-                        // ...
-                        getMatch(),
-
-                        // }
-                        label("C")
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "sortAndRenderWrapper", "(LRenderGlobal;LEntityLiving;ID)I"))
                     );
                 }
             }.targetMethod(renderWorld));
@@ -873,7 +837,7 @@ public class GLSLShader extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "glDrawArrays -> Shaders.drawGLArrays";
+                    return "wrap glDrawArrays";
                 }
 
                 @Override
@@ -888,7 +852,7 @@ public class GLSLShader extends Mod {
                     return buildCode(
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, shadersShortBuffer),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "drawGLArrays", "(IIILjava/nio/ShortBuffer;)V"))
+                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "glDrawArraysWrapper", "(IIILjava/nio/ShortBuffer;)V"))
                     );
                 }
             }.targetMethod(draw));

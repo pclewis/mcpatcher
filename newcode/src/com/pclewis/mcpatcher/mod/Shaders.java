@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.src.Block;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.ItemStack;
+import net.minecraft.src.RenderGlobal;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBVertexProgram;
 import org.lwjgl.opengl.GL11;
@@ -579,7 +580,7 @@ public class Shaders {
         moonPosition = moonPos;
     }
 
-    public static void drawGLArrays(int mode, int first, int count, ShortBuffer shortBuffer) {
+    public static void glDrawArraysWrapper(int mode, int first, int count, ShortBuffer shortBuffer) {
         if (entityAttrib >= 0) {
             ARBVertexProgram.glEnableVertexAttribArrayARB(entityAttrib);
             ARBVertexProgram.glVertexAttribPointerARB(entityAttrib, 2, false, false, 4, (ShortBuffer) shortBuffer.position(0));
@@ -588,6 +589,21 @@ public class Shaders {
         if (entityAttrib >= 0) {
             ARBVertexProgram.glDisableVertexAttribArrayARB(entityAttrib);
         }
+    }
+
+    public static int sortAndRenderWrapper(RenderGlobal renderGlobal, EntityLiving entityLiving, int i, double d) {
+        if (i == 0) {
+            beginTerrain();
+        } else if (i == 1) {
+            beginWater();
+        }
+        int result = renderGlobal.sortAndRender(entityLiving, i, d);
+        if (i == 0) {
+            endTerrain();
+        } else if (i == 1) {
+            endWater();
+        }
+        return result;
     }
 
     private static float[] multiplyMat4xVec4(float[] ta, float[] tb) {
