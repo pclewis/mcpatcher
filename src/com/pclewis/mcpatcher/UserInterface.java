@@ -66,7 +66,7 @@ abstract class UserInterface {
 
     void updateModList() {
     }
-    
+
     void setStatusText(String format, Object... params) {
     }
 

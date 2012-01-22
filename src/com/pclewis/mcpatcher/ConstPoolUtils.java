@@ -18,7 +18,7 @@ class ConstPoolUtils {
     public static final String DESCRIPTOR_CHARS = DESCRIPTOR_TYPES + "()<>[";
 
     private static final byte[] NOT_FOUND = null;
-    
+
     private static final int MAX_LDC_INDEX = 255;
 
     public static int getTag(Object o) {

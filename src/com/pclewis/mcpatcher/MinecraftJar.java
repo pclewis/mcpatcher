@@ -5,7 +5,6 @@ import javassist.bytecode.ConstPool;
 
 import java.io.*;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.jar.JarException;

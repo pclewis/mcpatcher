@@ -31,7 +31,7 @@ final public class MinecraftVersion {
     private int[] parsedVersion;
     private int preRelease;
     private boolean weeklyBuild;
-    
+
     static final HashMap<String, String> knownMD5s = new HashMap<String, String>();
     private static final ArrayList<MinecraftVersion> versionOrdering = new ArrayList<MinecraftVersion>();
 
@@ -68,7 +68,7 @@ final public class MinecraftVersion {
 
         addKnownVersion("12w03a", "ea85d9c4058ba9e47d8130bd1bff8be9");
     }
-    
+
     private static void addKnownVersion(String versionString, String md5) {
         MinecraftVersion version = parseShortVersion(versionString);
         if (version == null) {
@@ -104,7 +104,7 @@ final public class MinecraftVersion {
             return null;
         }
     }
-    
+
     public static MinecraftVersion parseShortVersion(String versionString) {
         Matcher matcher = SHORT_PATTERN.matcher(versionString);
         if (matcher.find()) {
@@ -264,7 +264,7 @@ final public class MinecraftVersion {
     public String toString() {
         return getVersionString();
     }
-    
+
     private Integer comparePartial(MinecraftVersion that) {
         if (this.weeklyBuild != that.weeklyBuild) {
             return null;
@@ -285,7 +285,7 @@ final public class MinecraftVersion {
         }
         return this.preRelease - that.preRelease;
     }
-    
+
     /**
      * Compare two MinecraftVersions.
      *

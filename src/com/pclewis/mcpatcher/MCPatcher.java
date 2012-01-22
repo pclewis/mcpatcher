@@ -376,7 +376,7 @@ final public class MCPatcher {
             }
         }
     }
-    
+
     private static void mapModClassMembers(JarFile origJar) throws IOException, InterruptedException {
         Logger.log(Logger.LOG_JAR);
         Logger.log(Logger.LOG_JAR, "Analyzing %s (methods and fields)", origJar.getName());

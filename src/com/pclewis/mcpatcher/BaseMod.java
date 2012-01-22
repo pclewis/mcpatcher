@@ -540,8 +540,8 @@ public final class BaseMod extends Mod {
         /**
          * Map any GameSettings field stored in options.txt.
          *
-         * @param option name in options.txt
-         * @param field name of field in GameSettings class
+         * @param option     name in options.txt
+         * @param field      name of field in GameSettings class
          * @param descriptor type descriptor
          */
         protected void mapOption(final String option, final String field, final String descriptor) {

@@ -9,7 +9,7 @@ final class ColorMap {
 
     private int[] map;
     private int mapDefault;
-    
+
     static int getX(double temperature, double rainfall) {
         return (int) (COLORMAP_SCALE * (1.0 - temperature));
     }
@@ -43,7 +43,7 @@ final class ColorMap {
     boolean isCustom() {
         return map != null;
     }
-    
+
     void clear() {
         map = null;
     }

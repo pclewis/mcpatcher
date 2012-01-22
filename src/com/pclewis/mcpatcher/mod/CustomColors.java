@@ -1650,11 +1650,11 @@ public class CustomColors extends Mod {
             addWaterColorPatch("bubble", new float[]{1.0f, 1.0f, 1.0f});
         }
     }
-    
+
     private class EntityPortalFXMod extends ClassMod {
         EntityPortalFXMod() {
             parentClass = "EntityFX";
-            
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression(MethodInfo methodInfo) {
@@ -1684,7 +1684,7 @@ public class CustomColors extends Mod {
 
             addPortalPatch(0.9f, 0, "red");
             addPortalPatch(0.3f, 1, "green");
-            
+
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
@@ -1714,7 +1714,7 @@ public class CustomColors extends Mod {
                 }
             });
         }
-        
+
         private void addPortalPatch(final float origValue, final int index, final String color) {
             patches.add(new BytecodePatch() {
                 @Override

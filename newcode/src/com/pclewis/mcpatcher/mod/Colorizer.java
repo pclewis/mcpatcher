@@ -391,7 +391,7 @@ public class Colorizer {
             return;
         }
         lastTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
-        
+
         reset();
         reloadColorProperties();
         if (usePotionColors) {
@@ -436,7 +436,7 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(useWaterColors, "/misc/underwatercolor.png", 0x050533);
         fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(useFogColors, "/misc/fogcolor0.png", 0xc0d8ff);
         fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
-        
+
         blockColorMaps = new ColorMap[Block.blocksList.length];
         blockMetaColorMaps.clear();
 
@@ -486,13 +486,13 @@ public class Colorizer {
         loadIntColor("potion.water", temp, 0);
         waterBottleColor = temp[0];
     }
-    
+
     private static void reloadSwampColors() {
         int[] temp = new int[]{lilypadColor};
         loadIntColor("lilypad", temp, 0);
         lilypadColor = temp[0];
     }
-    
+
     private static void reloadBlockColors() {
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
@@ -534,7 +534,7 @@ public class Colorizer {
             }
         }
     }
-    
+
     private static void reloadParticleColors() {
         loadFloatColor("drop.water", waterBaseColor);
         loadFloatColor("particle.water", waterBaseColor);
@@ -547,7 +547,7 @@ public class Colorizer {
             }
         }
     }
-    
+
     private static void reloadRedstoneColors() {
         int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(REDSTONE_COLORS)));
         if (rgb != null && rgb.length >= 16) {
