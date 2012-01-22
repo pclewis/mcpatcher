@@ -940,6 +940,32 @@ public class GLSLShader extends Mod {
                 .addXref(6, new FieldRef("Entity", "lastTickPosZ", "D"))
             );
             
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // f1 = getCelestialAngle(f);
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        FLOAD_1,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        FSTORE_2,
+
+                        // return f1 * 3.141593f * 2.0f;
+                        FLOAD_2,
+                        push(methodInfo, (float) Math.PI),
+                        FMUL,
+                        push(methodInfo, 2.0f),
+                        FMUL,
+                        FRETURN,
+                        BinaryRegex.end()
+                    );
+                }
+            }
+                .setMethod(new MethodRef(getDeobfClass(), "getCelestialAngleRadians", "(F)F"))
+                .addXref(1, new MethodRef(getDeobfClass(), "getCelestialAngle", "(F)F"))
+            );
+            
             memberMappers.add(new MethodMapper(new String[]{"getSeed", "getWorldTime"}, "()J"));
         }
     }
