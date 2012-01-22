@@ -486,6 +486,7 @@ public class Shaders {
         activeProgram = program;
         glUseProgramObjectARB(programs[program]);
         if (programs[program] == 0) {
+            activeProgram = ProgramNone;
             return;
         } else if (program == ProgramTextured) {
             setProgramUniform1i("texture", 0);
