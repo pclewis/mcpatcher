@@ -5,10 +5,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.AccessFlag;
-import javassist.bytecode.BadBytecode;
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.MethodInfo;
+import javassist.bytecode.*;
 
 import java.io.IOException;
 
@@ -38,36 +35,55 @@ public class GLSLShader extends Mod {
         classMods.add(new RenderLivingMod());
         classMods.add(new WorldRendererMod());
         classMods.add(new RenderEngineMod());
-        /*
-        classMods.add(new GLViewportMod());
-        classMods.add(new EntityRendererMod());
-        classMods.add(new ItemMod());
-        classMods.add(new BlockMod());
         classMods.add(new GameSettingsMod());
-        classMods.add(new FrustrumMod());
-        classMods.add(new EnumOptionsMod());
-        classMods.add(new GuiButtonMod());
-        classMods.add(new GuiSmallButtonMod());
-        classMods.add(new GuiScreenMod());
-        classMods.add(new GuiVideoSettingsMod());
         classMods.add(new EntityPlayerMod());
         classMods.add(new EntityPlayerSPMod());
         classMods.add(new InventoryPlayerMod());
         classMods.add(new ItemStackMod());
-        classMods.add(new WorldInfoMod());
-        */
+        // STOP HERE
+        //classMods.add(new GLViewportMod());
+        //classMods.add(new ItemMod());
+        //classMods.add(new BlockMod());
+        //classMods.add(new FrustrumMod());
+        //classMods.add(new EnumOptionsMod());
+        //classMods.add(new GuiButtonMod());
+        //classMods.add(new GuiSmallButtonMod());
+        //classMods.add(new GuiScreenMod());
+        //classMods.add(new GuiVideoSettingsMod());
+        //classMods.add(new WorldInfoMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS));
     }
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression(MethodInfo methodInfo) {
+                    return buildExpression(
+                        // if (Keyboard.getEventKey() == 63) {
+                        reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/input/Keyboard", "getEventKey", "()I")),
+                        push(methodInfo, 63),
+                        IF_ICMPNE, BinaryRegex.any(2),
+
+                        // gameSettings.thirdPersonView++;
+                        ALOAD_0,
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        DUP,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        ICONST_1,
+                        IADD,
+                        BytecodeMatcher.anyReference(PUTFIELD)
+                    );
+                }
+            }.addXref(1, new FieldRef("GameSettings", "thirdPersonView", "I")));
+            
             memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
-            //memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
-            //memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
+            memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
+            memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
             memberMappers.add(new FieldMapper("entityRenderer", "LEntityRenderer;"));
             memberMappers.add(new FieldMapper("renderViewEntity", "LEntityLiving;"));
-            //memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
+            memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
 
             memberMappers.add(new FieldMapper(new String[]{
                 "displayWidth",
@@ -934,6 +950,8 @@ public class GLSLShader extends Mod {
                 .addXref(5, new FieldRef("Entity", "posZ", "D"))
                 .addXref(6, new FieldRef("Entity", "lastTickPosZ", "D"))
             );
+            
+            memberMappers.add(new MethodMapper(new String[]{"getSeed", "getWorldTime"}, "()J"));
         }
     }
 
@@ -1106,7 +1124,8 @@ public class GLSLShader extends Mod {
         }
     }
 
-    /*
+    // STOP HERE
+
     private class GLViewportMod extends ClassMod {
         GLViewportMod() {
             global = true;
@@ -1130,265 +1149,6 @@ public class GLSLShader extends Mod {
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "viewport", "(IIII)V"))
-                    );
-                }
-            });
-        }
-    }
-
-    private class EntityRendererMod extends ClassMod {
-        EntityRendererMod() {
-            classSignatures.add(new ConstSignature("ambient.weather.rain"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java.util.Random", "nextGaussian", "()D"))
-                    );
-                }
-            }.setMethodName("renderRainSnow"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glColorMask", "(ZZZZ)V"))
-                    );
-                }
-            }.setMethodName("renderWorld"));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        push(methodInfo, 2918), // GL_FOG_COLOR
-                        ALOAD_0,
-                        ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        FCONST_1,
-                        BytecodeMatcher.anyReference(INVOKESPECIAL),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(GL11_CLASS, "glFog", "(ILjava/nio/FloatBuffer;)V"))
-                    );
-                }
-            }
-                .addXref(1, new FieldRef("EntityRenderer", "fogColorRed", "F"))
-                .addXref(2, new FieldRef("EntityRenderer", "fogColorGreen", "F"))
-                .addXref(3, new FieldRef("EntityRenderer", "fogColorBlue", "F"))
-            );
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        // float f10 = fogColor2 + (fogColor1 - fogColor2) * f;
-                        ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        ALOAD_0,
-                        BinaryRegex.backReference(1),
-                        FSUB,
-                        FLOAD_1,
-                        FMUL,
-                        FADD,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
-
-                        // fogColorRed *= f10;
-                        ALOAD_0,
-                        DUP
-                    );
-                }
-            }
-                .addXref(1, new FieldRef("EntityRenderer", "fogColor2", "F"))
-                .addXref(2, new FieldRef("EntityRenderer", "fogColor1", "F"))
-            );
-
-            if (haveLightmaps) {
-                classSignatures.add(new BytecodeSignature() {
-                    @Override
-                    public String getMatchExpression(MethodInfo methodInfo) {
-                        return buildExpression(
-                            FCONST_1,
-                            INVOKEVIRTUAL, BinaryRegex.any(2),
-                            push(methodInfo, 0.95f),
-                            FMUL,
-                            push(methodInfo, 0.05f),
-                            FADD,
-                            BytecodeMatcher.anyFSTORE
-                        );
-                    }
-                }.setMethodName("updateLightmap"));
-            }
-
-            memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
-
-            memberMappers.add(new MethodMapper(
-                new String[]{
-                    "setupCameraTransform",
-                    "renderFirstPersonEffects"
-                },
-                "(FI)V"
-            ));
-
-            if (haveLightmaps) {
-                memberMappers.add(new MethodMapper(
-                    new String[]{
-                        "disableLightmap",
-                        "enableLightmap"
-                    },
-                    "(D)V"
-                ).accessFlag(AccessFlag.PUBLIC, true));
-            }
-
-            patches.add(new BytecodePatch.InsertAfter() {
-                @Override
-                public String getDescription() {
-                    return "call Shaders.processScene";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(BinaryRegex.or(
-                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderRainSnow", "(F)V"))),
-                        buildExpression(reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityRenderer", "renderWorld", "(FJ)V")))
-                    ));
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorRed", "F")),
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorGreen", "F")),
-                        ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("EntityRenderer", "fogColorBlue", "F")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "processScene", "(FFF)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "apply baseProgram";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, NEW, new ClassRef("Frustrum")),
-                        DUP,
-                        reference(methodInfo, INVOKESPECIAL, new MethodRef("Frustrum", "<init>", "()V")),
-                        BytecodeMatcher.anyASTORE
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgram", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "apply baseProgram, baseProgramBM";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return BinaryRegex.capture(BinaryRegex.build(
-                        BytecodeMatcher.anyALOAD,
-                        BytecodeMatcher.anyALOAD,
-                        BinaryRegex.subset(new byte[]{ICONST_0, ICONST_1}, true),
-                        BytecodeMatcher.anyFLOAD,
-                        F2D,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I"))
-                    ));
-                }
-
-                @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        // Shaders.bindTerrainMaps();
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "bindTerrainMaps", "()V")),
-
-                        // Shaders.setRenderType(1);
-                        ICONST_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setRenderType", "(I)V")),
-
-                        // Shaders.useProgram(Shaders.baseProgramBM);
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgramBM", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V")),
-
-                        getCaptureGroup(1),
-
-                        // Shaders.setRenderType(0);
-                        ICONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "setRenderType", "(I)V")),
-
-                        // Shaders.useProgram(Shaders.baseProgram);
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "baseProgram", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch.InsertAfter() {
-                @Override
-                public String getDescription() {
-                    return "copy depth texture (clouds)";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderGlobal", "renderClouds", "(F)V"))
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        // Shaders.copyDepthTexture(Shaders.depthTextureId);
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "depthTextureId", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "copyDepthTexture", "(I)V"))
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch.InsertAfter() {
-                @Override
-                public String getDescription() {
-                    return "copy depth texture (camera)";
-                }
-
-                @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    return buildExpression(
-                        reference(methodInfo, INVOKESPECIAL, new MethodRef("EntityRenderer", "renderFirstPersonEffects", "(FI)V"))
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
-                    return buildCode(
-                        // Shaders.copyDepthTexture(Shaders.depthTexture2Id);
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "depthTexture2Id", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "copyDepthTexture", "(I)V")),
-
-                        // Shaders.useProgram(0);
-                        ICONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "useProgram", "(I)V"))
                     );
                 }
             });
@@ -1446,27 +1206,9 @@ public class GLSLShader extends Mod {
         }
     }
 
-    private class GameSettingsMod extends ClassMod {
+    private class GameSettingsMod extends BaseMod.GameSettingsMod {
         GameSettingsMod() {
-            classSignatures.add(new ConstSignature("key.forward"));
-
-            memberMappers.add(new FieldMapper(new String[]{
-                "renderDistance"
-            }, "I")
-                .accessFlag(AccessFlag.PUBLIC, true)
-                .accessFlag(AccessFlag.STATIC, false)
-                .accessFlag(AccessFlag.FINAL, false)
-            );
-
-            memberMappers.add(new FieldMapper(new String[]{
-                "invertMouse",
-                "viewBobbing",
-                "anaglyph"
-            }, "Z")
-                .accessFlag(AccessFlag.PUBLIC, true)
-                .accessFlag(AccessFlag.STATIC, false)
-                .accessFlag(AccessFlag.FINAL, false)
-            );
+            mapOption("viewDistance", "renderDistance", "I");
         }
     }
 
@@ -1708,5 +1450,4 @@ public class GLSLShader extends Mod {
             }, "()J"));
         }
     }
-    */
 }
