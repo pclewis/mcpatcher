@@ -63,7 +63,7 @@ testclean:
 	rm -f $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1
 
 clean: testclean
-	rm -rf $(MCPATCHER) $(DOC_OUT) $(MODJAR) out $(LAUNCH4J_XML).tmp mcpatcher-*.jar mcpatcher-*.exe
+	rm -rf $(MCPATCHER) $(DOC_OUT) $(MODJAR) out $(LAUNCH4J_XML).tmp mcpatcher-*.jar mcpatcher-*.exe profile.txt profile.xml
 
 modjar: $(MCPATCHER)
 	rm -rf $(TMPDIR)
