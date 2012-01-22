@@ -450,22 +450,21 @@ public class GLSLShader extends Mod {
                     return buildExpression(
                         BytecodeMatcher.anyALOAD,
                         BytecodeMatcher.anyALOAD,
-                        ICONST_0,
+                        BinaryRegex.capture(BinaryRegex.any()),
                         FLOAD_1,
                         F2D,
                         reference(methodInfo, INVOKEVIRTUAL, new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I")),
-                        POP
+                        BinaryRegex.capture(BinaryRegex.or(BinaryRegex.build(POP), BytecodeMatcher.anyISTORE))
                     );
                 }
 
                 @Override
                 public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
                     return buildCode(
-                        // if (l == 0L) {
-                        LLOAD_2,
-                        LCONST_0,
-                        LCMP,
-                        IFNE, branch("A"),
+                        // if ($1 == 0) {
+                        getCaptureGroup(1),
+                        ICONST_0,
+                        IF_ICMPNE, branch("A"),
 
                         // Shaders.beginTerrain(); ...; Shaders.endTerrain();
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginTerrain", "()V")),
@@ -474,11 +473,10 @@ public class GLSLShader extends Mod {
                         GOTO, branch("C"),
 
                         label("A"),
-                        // } else if (l == 1L) {
-                        LLOAD_2,
-                        LCONST_1,
-                        LCMP,
-                        IFNE, branch("B"),
+                        // } else if ($1 == 1) {
+                        getCaptureGroup(1),
+                        ICONST_1,
+                        IF_ICMPNE, branch("B"),
 
                         // Shaders.beginWater(); ...; Shaders.endWater();
                         reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.SHADERS_CLASS, "beginWater", "()V")),
@@ -829,12 +827,20 @@ public class GLSLShader extends Mod {
                 @Override
                 public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
                     return buildCode(
+                        // if (Shaders.entityAttrib >= 0) {
+                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.SHADERS_CLASS, "entityAttrib", "I")),
+                        IFLT, branch("A"),
+
+                        // shadersData[0] = i;
                         ALOAD_0,
                         reference(methodInfo, GETFIELD, shadersData),
                         ICONST_0,
                         ILOAD_1,
                         I2S,
                         SASTORE,
+
+                        // }
+                        label("A"),
                         RETURN
                     );
                 }
