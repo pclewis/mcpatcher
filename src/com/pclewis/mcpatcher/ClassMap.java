@@ -499,18 +499,18 @@ public class ClassMap {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return BinaryRegex.build(
                         BinaryRegex.capture(BinaryRegex.subset(opcodes, true)),
-                        ConstPoolUtils.reference(methodInfo.getConstPool(), oldRef, false)
+                        ConstPoolUtils.reference(getMethodInfo().getConstPool(), oldRef, false)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        ConstPoolUtils.reference(methodInfo.getConstPool(), newRef, true)
+                        ConstPoolUtils.reference(getMethodInfo().getConstPool(), newRef, true)
                     );
                 }
             };

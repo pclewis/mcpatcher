@@ -27,11 +27,11 @@ class TileSizePatch extends BytecodePatch {
         }
     }
 
-    String prefix(MethodInfo methodInfo) {
+    String prefix() {
         return "";
     }
 
-    String suffix(MethodInfo methodInfo) {
+    String suffix() {
         return "";
     }
 
@@ -41,19 +41,19 @@ class TileSizePatch extends BytecodePatch {
     }
 
     @Override
-    public String getMatchExpression(MethodInfo methodInfo) {
+    public String getMatchExpression() {
         return buildExpression(
-            BinaryRegex.capture(prefix(methodInfo)),
-            push(methodInfo, value),
-            BinaryRegex.capture(suffix(methodInfo))
+            BinaryRegex.capture(prefix()),
+            push(value),
+            BinaryRegex.capture(suffix())
         );
     }
 
     @Override
-    public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+    public byte[] getReplacementBytes() throws IOException {
         return buildCode(
             getCaptureGroup(1),
-            reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, field, type)),
+            reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, field, type)),
             getCaptureGroup(2)
         );
     }
@@ -65,7 +65,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(IF_ICMPGE);
         }
     }
@@ -77,7 +77,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(IF_ICMPGT);
         }
     }
@@ -89,7 +89,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(IF_ICMPLT);
         }
     }
@@ -101,7 +101,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(IAND);
         }
     }
@@ -113,7 +113,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(IMUL);
         }
     }
@@ -125,7 +125,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(IREM);
         }
     }
@@ -137,7 +137,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(IDIV, I2D);
         }
     }
@@ -149,7 +149,7 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(NEWARRAY);
         }
     }
@@ -164,12 +164,12 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String prefix(MethodInfo methodInfo) {
-            return buildExpression(push(methodInfo, dimension));
+        public String prefix() {
+            return buildExpression(push(dimension));
         }
 
         @Override
-        public String suffix(MethodInfo methodInfo) {
+        public String suffix() {
             return buildExpression(MULTIANEWARRAY);
         }
     }
@@ -181,22 +181,22 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String getMatchExpression(MethodInfo methodInfo) {
+        public String getMatchExpression() {
             return buildExpression(
-                push(methodInfo, 16),
-                push(methodInfo, 16),
+                push(16),
+                push(16),
                 BinaryRegex.capture(buildExpression(
                     ALOAD_0,
                     GETFIELD, BinaryRegex.any(), BinaryRegex.any(),
                     ICONST_0
                 )),
-                push(methodInfo, 16)
+                push(16)
             );
         }
 
         @Override
-        public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-            byte[] getField = reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I"));
+        public byte[] getReplacementBytes() throws IOException {
+            byte[] getField = reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I"));
             return buildCode(
                 getField,
                 getField,
@@ -213,37 +213,37 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String getMatchExpression(MethodInfo methodInfo) {
+        public String getMatchExpression() {
             return buildExpression(
-                push(methodInfo, 16),
+                push(16),
                 BinaryRegex.capture(BinaryRegex.subset(new byte[]{IREM, IDIV}, true)),
-                push(methodInfo, 16),
+                push(16),
                 IMUL,
                 I2F,
                 BinaryRegex.capture(BinaryRegex.or(
                     BinaryRegex.build(FCONST_0),
-                    BinaryRegex.build(push(methodInfo, 15.99F))
+                    BinaryRegex.build(push(15.99F))
                 )),
                 FADD,
-                push(methodInfo, 256.0F)
+                push(256.0F)
             );
         }
 
         @Override
-        public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+        public byte[] getReplacementBytes() throws IOException {
             byte[] offset = getCaptureGroup(2);
             if (offset[0] != FCONST_0) {
-                offset = reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_sizeMinus0_01", "F"));
+                offset = reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_sizeMinus0_01", "F"));
             }
             return buildCode(
-                push(methodInfo, 16),
+                push(16),
                 getCaptureGroup(1),
-                reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
+                reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
                 IMUL,
                 I2F,
                 offset,
                 FADD,
-                reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_size16", "F"))
+                reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_size16", "F"))
             );
         }
     }
@@ -255,14 +255,14 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public String getMatchExpression(MethodInfo methodInfo) {
+        public String getMatchExpression() {
             return buildExpression(
                 BinaryRegex.capture(BinaryRegex.build(
                     BytecodeMatcher.anyFLOAD,
                     BytecodeMatcher.anyFLOAD,
                     FMUL
                 )),
-                push(methodInfo, 0.0625F),
+                push(0.0625F),
                 BinaryRegex.capture(BinaryRegex.build(
                     FADD,
                     BytecodeMatcher.anyFSTORE
@@ -271,10 +271,10 @@ class TileSizePatch extends BytecodePatch {
         }
 
         @Override
-        public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+        public byte[] getReplacementBytes() throws IOException {
             return buildCode(
                 getCaptureGroup(1),
-                reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_reciprocal", "F")),
+                reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_reciprocal", "F")),
                 getCaptureGroup(2)
             );
         }

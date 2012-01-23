@@ -38,16 +38,16 @@ public class RandomMobs extends Mod {
         RenderLivingMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         FCONST_0,
-                        push(methodInfo, -24.0f),
+                        push(-24.0f),
                         BytecodeMatcher.anyFLOAD,
                         FMUL,
-                        push(methodInfo, 0.0078125f),
+                        push(0.0078125f),
                         FSUB,
                         FCONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glTranslatef", "(FFF)V"))
+                        reference(INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glTranslatef", "(FFF)V"))
                     );
                 }
             }.setMethodName("doRenderLiving"));
@@ -59,18 +59,18 @@ public class RandomMobs extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.capture(BytecodeMatcher.anyALOAD),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("EntityLiving", "getEntityTexture", "()Ljava/lang/String;"))
+                        reference(INVOKEVIRTUAL, new MethodRef("EntityLiving", "getEntityTexture", "()Ljava/lang/String;"))
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntity;)Ljava/lang/String;"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntity;)Ljava/lang/String;"))
                     );
                 }
             });
@@ -94,18 +94,18 @@ public class RandomMobs extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        push(methodInfo, eyeTexture)
+                        push(eyeTexture)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_1,
-                        push(methodInfo, eyeTexture),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntity;Ljava/lang/String;)Ljava/lang/String;"))
+                        push(eyeTexture),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntity;Ljava/lang/String;)Ljava/lang/String;"))
                     );
                 }
             });
@@ -146,21 +146,21 @@ public class RandomMobs extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin()
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // nbttagcompound.setLong(skin);
                         ALOAD_1,
-                        push(methodInfo, ENTITY_SKIN_FIELD),
+                        push(ENTITY_SKIN_FIELD),
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V"))
+                        reference(GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
+                        reference(INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V")));
@@ -172,25 +172,25 @@ public class RandomMobs extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin()
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // skin = nbttagcompound.getLong("skin");
                         ALOAD_0,
                         ALOAD_1,
-                        push(methodInfo, ENTITY_SKIN_FIELD),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J")),
-                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
+                        push(ENTITY_SKIN_FIELD),
+                        reference(INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J")),
+                        reference(PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
 
                         // if (skin != 0L) {
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
+                        reference(GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
                         LCONST_0,
                         LCMP,
                         IFEQ, branch("A"),
@@ -198,7 +198,7 @@ public class RandomMobs extends Mod {
                         // skinSet = true;
                         ALOAD_0,
                         ICONST_1,
-                        reference(methodInfo, PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_SET_FIELD, "Z")),
+                        reference(PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_SET_FIELD, "Z")),
 
                         // }
                         label("A")

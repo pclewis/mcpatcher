@@ -68,8 +68,8 @@ public class BetterGrass extends Mod {
                 public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
                     int count = 0;
                     int flags = AccessFlag.PUBLIC | AccessFlag.STATIC | AccessFlag.FINAL;
-                    String descriptor = "L" + classFile.getName() + ";";
-                    for (Object o : classFile.getFields()) {
+                    String descriptor = "L" + getClassFile().getName() + ";";
+                    for (Object o : getClassFile().getFields()) {
                         FieldInfo fieldInfo = (FieldInfo) o;
                         if ((fieldInfo.getAccessFlags() & flags) == flags &&
                             fieldInfo.getDescriptor().equals(descriptor)) {
@@ -99,7 +99,7 @@ public class BetterGrass extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD, BinaryRegex.capture(BinaryRegex.any()),
                         BytecodeMatcher.captureReference(GETSTATIC),
@@ -109,7 +109,7 @@ public class BetterGrass extends Mod {
                         IF_ACMPNE, BinaryRegex.any(2),
                         BIPUSH, 68,
                         IRETURN,
-                        push(methodInfo, halfTextureID),
+                        push(halfTextureID),
                         IRETURN
                     );
                 }
@@ -142,8 +142,8 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             RETURN
                         );
@@ -153,10 +153,10 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     FieldRef array = new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX);
-                    byte[] getArray = reference(methodInfo, GETSTATIC, array);
-                    byte[] putArray = reference(methodInfo, PUTSTATIC, array);
+                    byte[] getArray = reference(GETSTATIC, array);
+                    byte[] putArray = reference(PUTSTATIC, array);
                     return buildCode(
                         // if (grassMatrix != null)
                         getArray,
@@ -166,7 +166,7 @@ public class BetterGrass extends Mod {
                         // grassMatrix = new int[4][2];
                         ICONST_4,
                         ICONST_2,
-                        reference(methodInfo, MULTIANEWARRAY, new ClassRef(fieldtype_MATRIX)), 2,
+                        reference(MULTIANEWARRAY, new ClassRef(fieldtype_MATRIX)), 2,
                         putArray,
 
                         // a[0][1] = -1;
@@ -214,7 +214,7 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // return material != Material.snow && material != Material.builtSnow ? 3 : 68;
                         ALOAD, BinaryRegex.capture(BinaryRegex.any()),
@@ -225,17 +225,17 @@ public class BetterGrass extends Mod {
                         IF_ACMPNE, BinaryRegex.any(2),
                         BIPUSH, 68,
                         IRETURN,
-                        push(methodInfo, halfTextureID),
+                        push(halfTextureID),
                         IRETURN
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    byte[] snow = reference(methodInfo, GETSTATIC, new FieldRef("Material", "snow", "LMaterial;"));
-                    byte[] builtSnow = reference(methodInfo, GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;"));
-                    byte[] getBlockID = reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "a", "(III)I"));
-                    byte[] matrix = reference(methodInfo, GETSTATIC, new FieldRef("BlockGrass", field_MATRIX, fieldtype_MATRIX));
+                public byte[] getReplacementBytes() throws IOException {
+                    byte[] snow = reference(GETSTATIC, new FieldRef("Material", "snow", "LMaterial;"));
+                    byte[] builtSnow = reference(GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;"));
+                    byte[] getBlockID = reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "a", "(III)I"));
+                    byte[] matrix = reference(GETSTATIC, new FieldRef("BlockGrass", field_MATRIX, fieldtype_MATRIX));
 
                     return buildCode(
                         // l -= 2;
@@ -271,16 +271,16 @@ public class BetterGrass extends Mod {
                         IALOAD,
                         IADD,
                         getBlockID,
-                        push(methodInfo, blockID),
+                        push(blockID),
                         IF_ICMPEQ, branch("B"),
 
                         // return 3;
-                        push(methodInfo, halfTextureID),
+                        push(halfTextureID),
                         IRETURN,
 
                         // return 0;
                         label("B"),
-                        push(methodInfo, fullTextureID),
+                        push(fullTextureID),
                         IRETURN,
 
                         // material = iblockaccess.getBlockMaterial(i+a[l][0], j, k+a[l][1]);
@@ -301,7 +301,7 @@ public class BetterGrass extends Mod {
                         ICONST_1,
                         IALOAD,
                         IADD,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
+                        reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
                         ASTORE, material,
 
                         // if (material == Material.snow)
@@ -353,16 +353,16 @@ public class BetterGrass extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().matches("^\\(L[^;]+;IIIFFF\\)Z$")) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().getDescriptor().matches("^\\(L[^;]+;IIIFFF\\)Z$")) {
                         return buildExpression(
-                            push(methodInfo, 0.5f),
+                            push(0.5f),
                             FSTORE, BinaryRegex.any(),
-                            push(methodInfo, 1.0f),
+                            push(1.0f),
                             FSTORE, BinaryRegex.capture(BinaryRegex.any()),
-                            push(methodInfo, 0.8f),
+                            push(0.8f),
                             FSTORE, BinaryRegex.any(),
-                            push(methodInfo, 0.6f),
+                            push(0.6f),
                             FSTORE, BinaryRegex.any(),
 
                             BinaryRegex.any(0, 20),
@@ -407,7 +407,7 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
                         BinaryRegex.capture(BinaryRegex.build(
@@ -428,19 +428,19 @@ public class BetterGrass extends Mod {
                         BinaryRegex.capture(BinaryRegex.build(
                             ALOAD_1,
                             ALOAD_0,
-                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                            reference(GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
                             ILOAD_2,
                             ILOAD_3,
                             ILOAD, 4,
                             BinaryRegex.any(1, 2),
-                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
+                            reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
                         )),
                         ISTORE, BinaryRegex.capture(BinaryRegex.any())
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(5),
                         DUP,
@@ -475,18 +475,18 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
                         BinaryRegex.capture(BinaryRegex.build(
                             ALOAD_1,
                             ALOAD_0,
-                            reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
+                            reference(GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
                             ILOAD_2,
                             ILOAD_3,
                             ILOAD, 4,
                             BinaryRegex.any(1, 2),
-                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
+                            reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
                         )),
                         ISTORE, BinaryRegex.capture(BinaryRegex.any()),
 
@@ -510,7 +510,7 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
                         ISTORE, getCaptureGroup(2),
@@ -601,7 +601,7 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return BinaryRegex.capture(BinaryRegex.build(
                         ICONST_0,
                         BinaryRegex.or(
@@ -633,9 +633,9 @@ public class BetterGrass extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-                    byte[] blockAccess = reference(methodInfo, GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;"));
-                    byte[] getBlockTexture = reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"));
+                public byte[] getReplacementBytes() throws IOException {
+                    byte[] blockAccess = reference(GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;"));
+                    byte[] getBlockTexture = reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"));
 
                     return buildCode(
                         getCaptureGroup(1),

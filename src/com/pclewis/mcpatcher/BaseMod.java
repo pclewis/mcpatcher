@@ -81,12 +81,12 @@ public final class BaseMod extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getName().equals("<init>")) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().getName().equals("<init>")) {
                         return buildExpression(
                             BinaryRegex.begin(),
                             ALOAD_0,
-                            reference(methodInfo, INVOKESPECIAL, new MethodRef("java.lang.Object", "<init>", "()V"))
+                            reference(INVOKESPECIAL, new MethodRef("java.lang.Object", "<init>", "()V"))
                         );
                     } else {
                         return null;
@@ -94,13 +94,13 @@ public final class BaseMod extends Mod {
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "setMinecraft", "(LMinecraft;)V")),
-                        push(methodInfo, MCPatcher.minecraft.getVersion().getVersionString()),
-                        push(methodInfo, MCPatcher.VERSION_STRING),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "setVersions", "(Ljava/lang/String;Ljava/lang/String;)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "setMinecraft", "(LMinecraft;)V")),
+                        push(MCPatcher.minecraft.getVersion().getVersionString()),
+                        push(MCPatcher.VERSION_STRING),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "setVersions", "(Ljava/lang/String;Ljava/lang/String;)V"))
                     );
                 }
             });
@@ -173,10 +173,10 @@ public final class BaseMod extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_1,
-                        reference(methodInfo, INVOKEVIRTUAL, getResourceAsStream),
+                        reference(INVOKEVIRTUAL, getResourceAsStream),
                         ARETURN
                     );
                 }
@@ -204,10 +204,10 @@ public final class BaseMod extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals("(I)Ljava/nio/ByteBuffer;")) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().getDescriptor().equals("(I)Ljava/nio/ByteBuffer;")) {
                         return buildExpression(
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("java.nio.ByteBuffer", "allocateDirect", "(I)Ljava/nio/ByteBuffer;"))
+                            reference(INVOKESTATIC, new MethodRef("java.nio.ByteBuffer", "allocateDirect", "(I)Ljava/nio/ByteBuffer;"))
                         );
                     } else {
                         return null;
@@ -232,7 +232,7 @@ public final class BaseMod extends Mod {
             classSignatures.add(new ClassSignature() {
                 @Override
                 public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
-                    List list = classFile.getMethods();
+                    List list = getClassFile().getMethods();
                     return list.size() >= 1 && ((MethodInfo) list.get(0)).getDescriptor().equals("(III)I");
                 }
             });
@@ -422,14 +422,14 @@ public final class BaseMod extends Mod {
         protected void addBlockSignature(final int blockID, final String blockName, final String className, final String fieldName, final String fieldClass) {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isStaticInitializer()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isStaticInitializer()) {
                         return buildExpression(
                             BytecodeMatcher.captureReference(NEW),
                             DUP,
-                            push(methodInfo, blockID),
+                            push(blockID),
                             BinaryRegex.nonGreedy(BinaryRegex.any(0, 60)),
-                            push(methodInfo, blockName),
+                            push(blockName),
                             BytecodeMatcher.anyReference(INVOKEVIRTUAL),
                             BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
                             BytecodeMatcher.captureReference(PUTSTATIC)
@@ -489,14 +489,14 @@ public final class BaseMod extends Mod {
         public FontRendererMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             BinaryRegex.begin(),
                             ALOAD_0,
                             BytecodeMatcher.anyReference(INVOKESPECIAL),
                             ALOAD_0,
-                            push(methodInfo, 256),
+                            push(256),
                             NEWARRAY, T_INT,
                             BytecodeMatcher.captureReference(PUTFIELD),
                             ALOAD_0,
@@ -547,14 +547,14 @@ public final class BaseMod extends Mod {
         protected void mapOption(final String option, final String field, final String descriptor) {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // if (as[0].equals(option)) {
                         ALOAD_3,
                         ICONST_0,
                         AALOAD,
-                        push(methodInfo, option),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z")),
+                        push(option),
+                        reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z")),
                         IFEQ, BinaryRegex.any(2),
 
                         // field = ...;

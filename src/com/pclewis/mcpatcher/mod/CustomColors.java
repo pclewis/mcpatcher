@@ -231,11 +231,11 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().equals(getRenderColor.getType())) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().getDescriptor().equals(getRenderColor.getType())) {
                         return buildExpression(
                             BinaryRegex.begin(),
-                            push(methodInfo, 0xffffff),
+                            push(0xffffff),
                             IRETURN,
                             BinaryRegex.end()
                         );
@@ -252,18 +252,18 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        push(methodInfo, 0xffffff)
+                        push(0xffffff)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
                         ALOAD_1,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
+                        reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
@@ -271,8 +271,8 @@ public class CustomColors extends Mod {
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I"))
+                        reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I"))
                     );
                 }
 
@@ -285,17 +285,17 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        push(methodInfo, 0xffffff)
+                        push(0xffffff)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;)I"))
                     );
                 }
             }.targetMethod(getRenderColor));
@@ -310,11 +310,11 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
-                            push(methodInfo, 0xffffff),
+                            push(0xffffff),
                             BytecodeMatcher.captureReference(PUTFIELD)
                         );
                     } else {
@@ -325,8 +325,8 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_1,
@@ -340,14 +340,14 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
-                            push(methodInfo, 0.5f),
+                            push(0.5f),
                             BytecodeMatcher.captureReference(PUTFIELD),
                             ALOAD_0,
-                            push(methodInfo, 0.5f),
+                            push(0.5f),
                             BytecodeMatcher.captureReference(PUTFIELD)
                         );
                     } else {
@@ -361,8 +361,8 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().startsWith("(Ljava/lang/String;)")) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().getDescriptor().startsWith("(Ljava/lang/String;)")) {
                         return buildExpression(
                             BinaryRegex.begin(),
                             ALOAD_0,
@@ -383,7 +383,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // d = iblockaccess.getWorldChunkManager().getTemperature(i, j, k);
                         ALOAD_1,
@@ -420,7 +420,7 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
                         ARETURN,
@@ -429,10 +429,10 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBiome", "(LBiomeGenBase;)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBiome", "(LBiomeGenBase;)V"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "setBiomeName", "(Ljava/lang/String;)LBiomeGenBase;")));
@@ -467,11 +467,11 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        push(methodInfo, MAGIC1),
+                        push(MAGIC1),
                         IAND,
-                        push(methodInfo, MAGIC2),
+                        push(MAGIC2),
                         IADD,
                         ICONST_2,
                         IDIV
@@ -479,12 +479,12 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
                         DLOAD, 5,
                         DLOAD, 7,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIDD)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIDD)I"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "get" + name + "Color", "(LIBlockAccess;III)I")));
@@ -500,7 +500,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_1,
                         BytecodeMatcher.anyReference(INVOKEINTERFACE),
@@ -525,18 +525,18 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;")),
+                        reference(INVOKEVIRTUAL, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;")),
                         BinaryRegex.any(0, 4),
-                        reference(methodInfo, GETFIELD, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
+                        reference(GETFIELD, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LWorldChunkManager;II)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LWorldChunkManager;II)I"))
                     );
                 }
             }.targetMethod(colorMultiplier));
@@ -550,10 +550,10 @@ public class CustomColors extends Mod {
             for (final int i : new int[]{138, 154, 155}) {
                 classSignatures.add(new BytecodeSignature() {
                     @Override
-                    public String getMatchExpression(MethodInfo methodInfo) {
-                        if (methodInfo.getDescriptor().equals("(II)I")) {
+                    public String getMatchExpression() {
+                        if (getMethodInfo().getDescriptor().equals("(II)I")) {
                             return buildExpression(
-                                push(methodInfo, i)
+                                push(i)
                             );
                         } else {
                             return null;
@@ -570,13 +570,13 @@ public class CustomColors extends Mod {
         ItemMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    String descriptor = methodInfo.getDescriptor();
+                public String getMatchExpression() {
+                    String descriptor = getMethodInfo().getDescriptor();
                     if (descriptor.equals("(I)I") || descriptor.equals("(II)I")) {
                         lastDescriptor = descriptor;
                         return buildExpression(
                             BinaryRegex.begin(),
-                            push(methodInfo, 0xffffff),
+                            push(0xffffff),
                             IRETURN,
                             BinaryRegex.end()
                         );
@@ -601,12 +601,12 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_1,
-                            push(methodInfo, 256),
+                            push(256),
                             IADD,
                             BytecodeMatcher.anyReference(PUTFIELD)
                         );
@@ -620,16 +620,16 @@ public class CustomColors extends Mod {
 
             patches.add(new AddMethodPatch("getColorFromDamage") {
                 @Override
-                public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
+                public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
                         ALOAD_0,
                         ILOAD_1,
                         (getColorFromDamageParams >= 2 ? new byte[]{ILOAD_2} : new byte[0]),
-                        reference(methodInfo, INVOKESPECIAL, new MethodRef("Item", "getColorFromDamage", getColorFromDamageDescriptor)),
+                        reference(INVOKESPECIAL, new MethodRef("Item", "getColorFromDamage", getColorFromDamageDescriptor)),
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "blockID", "I")),
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "blockID", "I")),
                         ILOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getItemColorFromDamage", "(III)I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getItemColorFromDamage", "(III)I")),
                         IRETURN
                     );
                 }
@@ -656,13 +656,13 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.lookBehind(BinaryRegex.build(
                             // if (itemstack.itemID > 256) {
                             ALOAD_2,
                             BytecodeMatcher.captureReference(GETFIELD),
-                            push(methodInfo, 256),
+                            push(256),
                             IF_ICMPGE, BinaryRegex.any(2),
 
                             // ...
@@ -670,19 +670,19 @@ public class CustomColors extends Mod {
                         ), true),
 
                         // GL11.glTranslatef(-0.9375f, -0.0625f, 0.0f);
-                        push(methodInfo, -0.9375f),
-                        push(methodInfo, -0.0625f),
+                        push(-0.9375f),
+                        push(-0.0625f),
                         FCONST_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glTranslatef", "(FFF)V"))
+                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glTranslatef", "(FFF)V"))
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_2,
                         getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWaterBlockGL", "(I)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWaterBlockGL", "(I)V"))
                     );
                 }
             });
@@ -696,8 +696,8 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.getDescriptor().startsWith("(Ljava/lang/String;)")) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().getDescriptor().startsWith("(Ljava/lang/String;)")) {
                         return buildExpression(
                             BinaryRegex.begin(),
                             ALOAD_0,
@@ -718,8 +718,8 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_1,
@@ -733,8 +733,8 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_3,
@@ -763,7 +763,7 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
                         ARETURN,
@@ -772,10 +772,10 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupPotion", "(LPotion;)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupPotion", "(LPotion;)V"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "setPotionName", "(Ljava/lang/String;)LPotion;")));
@@ -796,20 +796,20 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // int i = 0x385dc6;
                         BinaryRegex.begin(),
-                        push(methodInfo, MAGIC),
+                        push(MAGIC),
                         ISTORE_1
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // int i = Colorizer.getWaterBottleColor();
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getWaterBottleColor", "()I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getWaterBottleColor", "()I")),
                         ISTORE_1
                     );
                 }
@@ -834,21 +834,21 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin(),
-                        push(methodInfo, color),
+                        push(color),
                         IRETURN,
                         BinaryRegex.end()
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        push(methodInfo, color),
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(II)I")),
+                        push(color),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(II)I")),
                         IRETURN
                     );
                 }
@@ -860,7 +860,7 @@ public class CustomColors extends Mod {
         BlockLeavesMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin(),
                         ALOAD_1,
@@ -927,22 +927,22 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("ColorizerFoliage", "getFoliageColor" + name, "()I"))
+                        reference(INVOKESTATIC, new MethodRef("ColorizerFoliage", "getFoliageColor" + name, "()I"))
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
                         ALOAD_1,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
+                        reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IILWorldChunkManager;III)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IILWorldChunkManager;III)I"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I")));
@@ -955,21 +955,21 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // f8 = (f4 * 0.3f + f5 * 0.59f + f6 * 0.11f) * 0.6f;
                         FLOAD, BinaryRegex.any(),
-                        push(methodInfo, 0.3f),
+                        push(0.3f),
                         FMUL,
                         FLOAD, BinaryRegex.any(),
-                        push(methodInfo, 0.59f),
+                        push(0.59f),
                         FMUL,
                         FADD,
                         FLOAD, BinaryRegex.any(),
-                        push(methodInfo, 0.11f),
+                        push(0.11f),
                         FMUL,
                         FADD,
-                        push(methodInfo, 0.6f),
+                        push(0.6f),
                         FMUL,
                         FSTORE, BinaryRegex.any()
                     );
@@ -985,69 +985,69 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // f4 = (float) (k >> 16 & 0xff) / 255.0f;
                         ILOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        push(methodInfo, 16),
+                        push(16),
                         ISHR,
-                        push(methodInfo, 255),
+                        push(255),
                         IAND,
                         I2F,
-                        push(methodInfo, 255.0f),
+                        push(255.0f),
                         FDIV,
                         FSTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                         // f5 = (float) (k >> 8 & 0xff) / 255.0f;
                         ILOAD, BinaryRegex.backReference(1),
-                        push(methodInfo, 8),
+                        push(8),
                         ISHR,
-                        push(methodInfo, 255),
+                        push(255),
                         IAND,
                         I2F,
-                        push(methodInfo, 255.0f),
+                        push(255.0f),
                         FDIV,
                         FSTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                         // f6 = (float) (k & 0xff) / 255.0f;
                         ILOAD, BinaryRegex.backReference(1),
-                        push(methodInfo, 255),
+                        push(255),
                         IAND,
                         I2F,
-                        push(methodInfo, 255.0f),
+                        push(255.0f),
                         FDIV,
                         FSTORE, BinaryRegex.capture(BinaryRegex.any())
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // Colorizer.setupForFog(getWorldChunkManager(), entity);
                         ALOAD_0,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef(getDeobfClass(), "getWorldChunkManager", "()LWorldChunkManager;")),
+                        reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), "getWorldChunkManager", "()LWorldChunkManager;")),
                         ALOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LWorldChunkManager;LEntity;)V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LWorldChunkManager;LEntity;)V")),
 
                         // if (Colorizer.computeSkyColor(this)) {
                         ALOAD_0,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeSkyColor", "(LWorld;)Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeSkyColor", "(LWorld;)Z")),
                         IFEQ, branch("A"),
 
                         // f4 = Colorizer.setColor[0];
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
                         FSTORE, getCaptureGroup(2),
 
                         // f5 = Colorizer.setColor[1];
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
                         FSTORE, getCaptureGroup(3),
 
                         // f5 = Colorizer.setColor[2];
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         FSTORE, getCaptureGroup(4),
@@ -1078,13 +1078,13 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         FLOAD, BinaryRegex.capture(BinaryRegex.any()),
                         FLOAD_3,
-                        push(methodInfo, 0.94f),
+                        push(0.94f),
                         FMUL,
-                        push(methodInfo, 0.06f),
+                        push(0.06f),
                         FADD,
                         FMUL,
                         FSTORE, BinaryRegex.backReference(1)
@@ -1099,44 +1099,44 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // f3 = 0.7529412f;
-                        push(methodInfo, 0.7529412f),
+                        push(0.7529412f),
                         FSTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                         // f4 = 0.84705883f;
-                        push(methodInfo, 0.84705883f),
+                        push(0.84705883f),
                         FSTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                         // f5 = 1.0f;
-                        push(methodInfo, 1.0f),
+                        push(1.0f),
                         FSTORE, BinaryRegex.capture(BinaryRegex.any())
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_FOG0)) {
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
                         IFEQ, branch("A"),
 
                         // f3 = Colorizer.setColor[0];
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
                         FSTORE, getCaptureGroup(1),
 
                         // f4 = Colorizer.setColor[1];
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
                         FSTORE, getCaptureGroup(2),
 
                         // f5 = Colorizer.setColor[2];
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         FSTORE, getCaptureGroup(3),
@@ -1160,7 +1160,7 @@ public class CustomColors extends Mod {
         WorldChunkManagerMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ILOAD, 4,
                         ILOAD, 5,
@@ -1173,7 +1173,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin(),
                         ILOAD_1,
@@ -1197,7 +1197,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin(),
 
@@ -1246,13 +1246,13 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             // setSize(0.2f, 0.2f);
                             ALOAD_0,
-                            push(methodInfo, 0.2f),
-                            push(methodInfo, 0.2f),
+                            push(0.2f),
+                            push(0.2f),
                             BytecodeMatcher.anyReference(INVOKEVIRTUAL)
                         );
                     } else {
@@ -1263,8 +1263,8 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             // particleRed = particleGreen = particleBlue = 1.0f;
                             ALOAD_0,
@@ -1302,8 +1302,8 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (!methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (!getMethodInfo().isConstructor()) {
                         return null;
                     } else if (origColors == null) {
                         return buildExpression(
@@ -1313,58 +1313,58 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             // particleRed = r;
                             ALOAD_0,
-                            push(methodInfo, origColors[0]),
-                            reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+                            push(origColors[0]),
+                            reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
                             // particleGreen = g;
                             ALOAD_0,
-                            push(methodInfo, origColors[1]),
-                            reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+                            push(origColors[1]),
+                            reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
                             // particleBlue = b;
                             ALOAD_0,
-                            push(methodInfo, origColors[2]),
-                            reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                            push(origColors[2]),
+                            reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                         );
                     }
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // if (Colorizer.computeWaterColor(worldObj.getWorldChunkManager(), i, j, k)) {
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "worldObj", "LWorld;")),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "worldObj", "LWorld;")),
+                        reference(INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "posX", "D")),
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "posX", "D")),
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "posY", "D")),
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "posY", "D")),
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "posZ", "D")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "(LWorldChunkManager;DDD)Z")),
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "posZ", "D")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "(LWorldChunkManager;DDD)Z")),
                         IFEQ, branch("A"),
 
                         // particleRed = Colorizer.waterColor[0];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_0,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
                         // particleGreen = Colorizer.waterColor[1];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_1,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
                         // particleBlue = Colorizer.waterColor[2];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_2,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
                         GOTO, branch("B"),
 
                         // } else {
@@ -1373,18 +1373,18 @@ public class CustomColors extends Mod {
                         newColors == null ? new byte[]{} : buildCode(
                             // particleRed = r;
                             ALOAD_0,
-                            push(methodInfo, newColors[0]),
-                            reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+                            push(newColors[0]),
+                            reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
                             // particleGreen = g;
                             ALOAD_0,
-                            push(methodInfo, newColors[1]),
-                            reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+                            push(newColors[1]),
+                            reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
                             // particleBlue = b;
                             ALOAD_0,
-                            push(methodInfo, newColors[2]),
-                            reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                            push(newColors[2]),
+                            reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                         ),
 
                         // }
@@ -1402,15 +1402,15 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             // 0.2f * (float) Math.random() + 0.1f
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
+                            reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
                             D2F,
-                            push(methodInfo, 0.2f),
+                            push(0.2f),
                             FMUL,
-                            push(methodInfo, 0.1f),
+                            push(0.1f),
                             FADD,
                             F2D
                         );
@@ -1422,15 +1422,15 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             // 19 + rand.nextInt(4)
-                            push(methodInfo, 19),
+                            push(19),
                             ALOAD_0,
                             BytecodeMatcher.anyReference(GETFIELD),
                             ICONST_4,
-                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/util/Random", "nextInt", "(I)I")),
+                            reference(INVOKEVIRTUAL, new MethodRef("java/util/Random", "nextInt", "(I)I")),
                             IADD
                         );
                     } else {
@@ -1451,28 +1451,28 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // particleRed = 0.2f;
                         ALOAD_0,
-                        push(methodInfo, 0.2f),
+                        push(0.2f),
                         BytecodeMatcher.anyReference(PUTFIELD),
 
                         // particleGreen = 0.3f;
                         ALOAD_0,
-                        push(methodInfo, 0.3f),
+                        push(0.3f),
                         BytecodeMatcher.anyReference(PUTFIELD),
 
                         // particleBlue = 1.0f;
                         ALOAD_0,
-                        push(methodInfo, 1.0f),
+                        push(1.0f),
                         BytecodeMatcher.anyReference(PUTFIELD),
 
                         // ...
                         BinaryRegex.any(0, 30),
 
                         // 40 - age
-                        push(methodInfo, 40),
+                        push(40),
                         ALOAD_0,
                         BytecodeMatcher.captureReference(GETFIELD),
                         ISUB
@@ -1492,27 +1492,27 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // particleRed = 0.2f;
                         ALOAD_0,
-                        push(methodInfo, 0.2f),
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+                        push(0.2f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
                         // particleGreen = 0.3f;
                         ALOAD_0,
-                        push(methodInfo, 0.3f),
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+                        push(0.3f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
                         // particleBlue = 1.0f;
                         ALOAD_0,
-                        push(methodInfo, 1.0f),
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                        push(1.0f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode();
                 }
             }.targetMethod(onUpdate));
@@ -1524,58 +1524,58 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // particleRed = 1.0f;
                         ALOAD_0,
-                        push(methodInfo, 1.0f),
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+                        push(1.0f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
                         // particleGreen = 16.0f / (float)((40 - timer) + 16);
                         ALOAD_0,
-                        push(methodInfo, 16.0f),
+                        push(16.0f),
                         BinaryRegex.any(0, 20),
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
                         // particleBlue = 4.0f / (float)((40 - timer) + 8);
                         ALOAD_0,
-                        push(methodInfo, 4.0f),
+                        push(4.0f),
                         BinaryRegex.any(0, 20),
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // if (Colorizer.computeLavaDropColor(40 - timer)) {
-                        push(methodInfo, 40),
+                        push(40),
                         ALOAD_0,
-                        reference(methodInfo, GETFIELD, new FieldRef(getDeobfClass(), "timer", "I")),
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "timer", "I")),
                         ISUB,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLavaDropColor", "(I)Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLavaDropColor", "(I)Z")),
                         IFEQ, branch("A"),
 
                         // particleRed = Colorizer.setColor[0];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
 
                         // particleGreen = Colorizer.setColor[1];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
                         // particleBlue = Colorizer.setColor[2];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
 
                         // } else {
                         GOTO, branch("B"),
@@ -1601,8 +1601,8 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
                             ALOAD_0,
@@ -1627,18 +1627,18 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             // setParticleTextureIndex(32);
                             ALOAD_0,
-                            push(methodInfo, 32),
+                            push(32),
                             BytecodeMatcher.anyReference(INVOKEVIRTUAL),
 
                             // setSize(0.02F, 0.02F);
                             ALOAD_0,
-                            push(methodInfo, 0.02f),
-                            push(methodInfo, 0.02f),
+                            push(0.02f),
+                            push(0.02f),
                             BytecodeMatcher.anyReference(INVOKEVIRTUAL)
                         );
                     } else {
@@ -1657,14 +1657,14 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             // particleGreen *= 0.3f;
                             ALOAD_0,
                             DUP,
                             GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
-                            push(methodInfo, 0.3f),
+                            push(0.3f),
                             FMUL,
                             PUTFIELD, BinaryRegex.backReference(1),
 
@@ -1672,7 +1672,7 @@ public class CustomColors extends Mod {
                             ALOAD_0,
                             DUP,
                             GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
-                            push(methodInfo, 0.9f),
+                            push(0.9f),
                             FMUL,
                             PUTFIELD, BinaryRegex.backReference(2)
                         );
@@ -1692,8 +1692,8 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             RETURN
                         );
@@ -1703,13 +1703,13 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "portalColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "portalColor", "[F")),
                         ICONST_2,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                     );
                 }
             });
@@ -1723,10 +1723,10 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
-                            push(methodInfo, origValue)
+                            push(origValue)
                         );
                     } else {
                         return null;
@@ -1734,10 +1734,10 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "portalColor", "[F")),
-                        push(methodInfo, index),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "portalColor", "[F")),
+                        push(index),
                         FALOAD
                     );
                 }
@@ -1760,15 +1760,15 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        push(methodInfo, MAGIC)
+                        push(MAGIC)
                     );
                 }
 
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getLilyPadColor", "()I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getLilyPadColor", "()I"))
                     );
                 }
             });
@@ -1792,15 +1792,15 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // sun = world.func_35464_b(1.0F) * 0.95F + 0.05F;
                         ALOAD_1,
                         FCONST_1,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        push(methodInfo, 0.95f),
+                        push(0.95f),
                         FMUL,
-                        push(methodInfo, 0.05f),
+                        push(0.05f),
                         FADD,
                         FSTORE_3,
 
@@ -1894,21 +1894,21 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // fogColorRed = 0.02f;
                         ALOAD_0,
-                        push(methodInfo, 0.02f),
+                        push(0.02f),
                         BytecodeMatcher.captureReference(PUTFIELD),
 
                         // fogColorGreen = 0.02f;
                         ALOAD_0,
-                        push(methodInfo, 0.02f),
+                        push(0.02f),
                         BytecodeMatcher.captureReference(PUTFIELD),
 
                         // fogColorBlue = 0.2f;
                         ALOAD_0,
-                        push(methodInfo, 0.2f),
+                        push(0.2f),
                         BytecodeMatcher.captureReference(PUTFIELD)
                     );
                 }
@@ -1928,21 +1928,21 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ASTORE_1
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ASTORE_1,
 
                         // if (Colorizer.computeLightmap(this, world)) {
                         ALOAD_0,
                         ALOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLightmap", "(LEntityRenderer;LWorld;)Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLightmap", "(LEntityRenderer;LWorld;)Z")),
                         IFEQ, branch("A"),
 
                         // return;
@@ -1961,14 +1961,14 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // f1 = 1.0f - Math.pow(f1, 0.25);
-                        push(methodInfo, 1.0f),
+                        push(1.0f),
                         FLOAD, BinaryRegex.capture(BinaryRegex.any()),
                         F2D,
-                        push(methodInfo, 0.25),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Math", "pow", "(DD)D")),
+                        push(0.25),
+                        reference(INVOKESTATIC, new MethodRef("java/lang/Math", "pow", "(DD)D")),
                         D2F,
                         FSUB,
                         FSTORE, BinaryRegex.backReference(1),
@@ -1981,44 +1981,44 @@ public class CustomColors extends Mod {
                         BytecodeMatcher.anyALOAD,
                         BytecodeMatcher.anyReference(GETFIELD),
                         D2F,
-                        reference(methodInfo, PUTFIELD, fogColorBlue)
+                        reference(PUTFIELD, fogColorBlue)
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         // Colorizer.setupForFog(world.getWorldChunkManager(), entityliving);
                         ALOAD_2,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
+                        reference(INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ALOAD_3,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LWorldChunkManager;LEntity;)V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LWorldChunkManager;LEntity;)V")),
 
                         // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_FOG0)) {
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
                         IFEQ, branch("A"),
 
                         // fogColorRed = Colorizer.setColor[0];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, fogColorRed),
+                        reference(PUTFIELD, fogColorRed),
 
                         // fogColorGreen = Colorizer.setColor[1];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, fogColorGreen),
+                        reference(PUTFIELD, fogColorGreen),
 
                         // fogColorBlue = Colorizer.setColor[2];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, fogColorBlue),
+                        reference(PUTFIELD, fogColorBlue),
 
                         // }
                         label("A")
@@ -2033,53 +2033,53 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // fogColorRed = 0.02f;
                         ALOAD_0,
-                        push(methodInfo, 0.02f),
-                        reference(methodInfo, PUTFIELD, fogColorRed),
+                        push(0.02f),
+                        reference(PUTFIELD, fogColorRed),
 
                         // fogColorGreen = 0.02f;
                         ALOAD_0,
-                        push(methodInfo, 0.02f),
-                        reference(methodInfo, PUTFIELD, fogColorGreen),
+                        push(0.02f),
+                        reference(PUTFIELD, fogColorGreen),
 
                         // fogColorBlue = 0.2f;
                         ALOAD_0,
-                        push(methodInfo, 0.2f),
-                        reference(methodInfo, PUTFIELD, fogColorBlue)
+                        push(0.2f),
+                        reference(PUTFIELD, fogColorBlue)
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_UNDERWATER)) {
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_UNDERWATER", "I")),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_UNDERWATER", "I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
                         IFEQ, branch("A"),
 
                         // fogColorRed = Colorizer.setColor[0];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, fogColorRed),
+                        reference(PUTFIELD, fogColorRed),
 
                         // fogColorGreen = Colorizer.setColor[1];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, fogColorGreen),
+                        reference(PUTFIELD, fogColorGreen),
 
                         // fogColorBlue = Colorizer.setColor[2];
                         ALOAD_0,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
-                        reference(methodInfo, PUTFIELD, fogColorBlue),
+                        reference(PUTFIELD, fogColorBlue),
 
                         // }
                         label("A")
@@ -2093,20 +2093,20 @@ public class CustomColors extends Mod {
         RedstoneWireClassMod(final String description, final MethodRef method) {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // f = (float) l / 15.0f;
                         BytecodeMatcher.anyILOAD,
                         I2F,
-                        push(methodInfo, 15.0f),
+                        push(15.0f),
                         FDIV,
                         BytecodeMatcher.anyFSTORE,
 
                         // f1 = f * 0.6f + 0.4f;
                         BytecodeMatcher.anyFLOAD,
-                        push(methodInfo, 0.6f),
+                        push(0.6f),
                         FMUL,
-                        push(methodInfo, 0.4f),
+                        push(0.4f),
                         FADD,
                         BytecodeMatcher.anyFSTORE
                     );
@@ -2120,18 +2120,18 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ILOAD, BinaryRegex.capture(BinaryRegex.any()),
                         I2F,
-                        push(methodInfo, 15.0f),
+                        push(15.0f),
                         FDIV,
                         FSTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                         FLOAD, BinaryRegex.backReference(2),
-                        push(methodInfo, 0.6f),
+                        push(0.6f),
                         FMUL,
-                        push(methodInfo, 0.4f),
+                        push(0.4f),
                         FADD,
                         FSTORE, BinaryRegex.capture(BinaryRegex.any()),
 
@@ -2140,39 +2140,39 @@ public class CustomColors extends Mod {
                         FLOAD, BinaryRegex.backReference(2),
                         FLOAD, BinaryRegex.backReference(2),
                         FMUL,
-                        push(methodInfo, 0.7f),
+                        push(0.7f),
                         FMUL,
-                        push(methodInfo, 0.5f),
+                        push(0.5f),
                         FSUB,
                         FSTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                         FLOAD, BinaryRegex.backReference(2),
                         FLOAD, BinaryRegex.backReference(2),
                         FMUL,
-                        push(methodInfo, 0.6f),
+                        push(0.6f),
                         FMUL,
-                        push(methodInfo, 0.7f),
+                        push(0.7f),
                         FSUB,
                         FSTORE, BinaryRegex.capture(BinaryRegex.any())
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ILOAD, getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeRedstoneWireColor", "(I)Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeRedstoneWireColor", "(I)Z")),
                         IFEQ, branch("A"),
 
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
                         FSTORE, getCaptureGroup(3),
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
                         FSTORE, getCaptureGroup(4),
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         FSTORE, getCaptureGroup(5),
@@ -2207,7 +2207,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_1,
                         ALOAD_0,
@@ -2227,7 +2227,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD, 5,
                         FLOAD, 6,
@@ -2247,16 +2247,16 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin(),
-                        push(methodInfo, 0.5f),
+                        push(0.5f),
                         FSTORE, 6,
                         FCONST_1,
                         FSTORE, 7,
-                        push(methodInfo, 0.8f),
+                        push(0.8f),
                         FSTORE, 8,
-                        push(methodInfo, 0.6f),
+                        push(0.6f),
                         FSTORE, 9
                     );
                 }
@@ -2271,31 +2271,31 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        push(methodInfo, 205),
+                        push(205),
                         ISTORE, BinaryRegex.any()
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         // Colorizer.computeWaterColor();
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "()V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "()V")),
 
                         // tessellator.setColorOpaque(Colorizer.waterColor[0], Colorizer.waterColor[1], Colorizer.waterColor[2]);
                         ALOAD, 5,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_0,
                         FALOAD,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_1,
                         FALOAD,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "waterColor", "[F")),
                         ICONST_2,
                         FALOAD,
-                        reference(methodInfo, INVOKEVIRTUAL, setColorOpaque_F)
+                        reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockCauldron", "(LBlockCauldron;III)Z")));
@@ -2309,7 +2309,7 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // tessellator.setColorOpaque_F($1 * f5, $1 * f5, $1 * f5);
                         ALOAD, 10,
@@ -2322,12 +2322,12 @@ public class CustomColors extends Mod {
                         BinaryRegex.backReference(1),
                         FLOAD, 12,
                         FMUL,
-                        reference(methodInfo, INVOKEVIRTUAL, setColorOpaque_F)
+                        reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     byte[] extraCode;
                     if (done) {
                         extraCode = new byte[0];
@@ -2337,13 +2337,13 @@ public class CustomColors extends Mod {
                             // setColorF(Colorizer.colorizeBlock(block, world.getWorldChunkManager(), i, j, k, 0));
                             ALOAD_1,
                             ALOAD_2,
-                            reference(methodInfo, INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
+                            reference(INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
                             ILOAD_3,
                             ILOAD, 4,
                             ILOAD, 5,
                             ICONST_0,
-                            reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I")),
-                            reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V"))
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I")),
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V"))
                         );
                     }
                     return buildCode(
@@ -2351,22 +2351,22 @@ public class CustomColors extends Mod {
 
                         // tessellator.setColorOpaque_F(Colorizer.setColor[0] * f5, Colorizer.setColor[1] * f5, Colorizer.setColor[2] * f5);
                         ALOAD, 10,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
                         FLOAD, 12,
                         FMUL,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
                         FLOAD, 12,
                         FMUL,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         FLOAD, 12,
                         FMUL,
-                        reference(methodInfo, INVOKEVIRTUAL, setColorOpaque_F)
+                        reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
                 }
             }.targetMethod(renderBlockFallingSand));
@@ -2378,7 +2378,7 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // tessellator.setColorOpaque_F(f3 * f7, f3 * f7, f3 * f7);
                         ALOAD, 5,
@@ -2391,12 +2391,12 @@ public class CustomColors extends Mod {
                         FLOAD, BinaryRegex.backReference(1),
                         FLOAD, BinaryRegex.backReference(2),
                         FMUL,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
+                        reference(INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // tessellator.setColorOpaque_F(f3 * f7 * f, f3 * f7 * f1, f3 * f7 * f2);
                         ALOAD, 5,
@@ -2415,7 +2415,7 @@ public class CustomColors extends Mod {
                         FMUL,
                         FLOAD, 8,
                         FMUL,
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
+                        reference(INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockFluids", "(LBlock;III)Z")));
@@ -2426,15 +2426,15 @@ public class CustomColors extends Mod {
         EntityReddustFXMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             ALOAD_0,
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
-                            push(methodInfo, 0.20000000298023224),
+                            reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
+                            push(0.20000000298023224),
                             DMUL,
                             D2F,
-                            push(methodInfo, 0.8f),
+                            push(0.8f),
                             FADD,
                             BytecodeMatcher.anyFLOAD,
                             FMUL,
@@ -2455,12 +2455,12 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
-                    if (methodInfo.isConstructor()) {
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             FCONST_1,
                             FSTORE, 9,
-                            reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D"))
+                            reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D"))
                         );
                     } else {
                         return null;
@@ -2468,30 +2468,30 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         FCONST_1,
                         FSTORE, 9,
 
                         BIPUSH, 15,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeRedstoneWireColor", "(I)Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeRedstoneWireColor", "(I)Z")),
                         IFEQ, branch("A"),
 
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
                         FSTORE, 9,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
                         FSTORE, 10,
-                        reference(methodInfo, GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         FSTORE, 11,
 
                         label("A"),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D"))
+                        reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D"))
                     );
                 }
             });
@@ -2545,7 +2545,7 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         IRETURN,
                         BinaryRegex.end()
@@ -2553,10 +2553,10 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ILOAD_1,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeStem", "(II)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeStem", "(II)I"))
                     );
                 }
             }.targetMethod(getRenderColor));
@@ -2571,16 +2571,16 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
-                        push(methodInfo, 32),
+                        push(32),
                         BytecodeMatcher.anyISTORE,
-                        push(methodInfo, 256),
+                        push(256),
                         BytecodeMatcher.anyILOAD,
                         IDIV,
                         BytecodeMatcher.anyISTORE,
                         BinaryRegex.any(1, 50),
-                        push(methodInfo, "/environment/clouds.png")
+                        push("/environment/clouds.png")
                     );
                 }
             }.setMethod(renderClouds));
@@ -2592,7 +2592,7 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.capture(BinaryRegex.build(
                             BinaryRegex.begin(),
@@ -2609,10 +2609,10 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "drawFancyClouds", "(Z)Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "drawFancyClouds", "(Z)Z")),
                         getCaptureGroup(2)
                     );
                 }
@@ -2628,13 +2628,13 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin(),
                         BytecodeMatcher.anyReference(GETSTATIC),
                         ALOAD_1,
                         ALOAD_0,
-                        reference(methodInfo, INVOKEINTERFACE, new InterfaceMethodRef("java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
+                        reference(INVOKEINTERFACE, new InterfaceMethodRef("java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
                     );
                 }
             }.setMethod(addMapping));
@@ -2646,20 +2646,20 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         BinaryRegex.begin()
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_1,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupSpawnerEgg", "(Ljava/lang/String;III)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupSpawnerEgg", "(Ljava/lang/String;III)V"))
                     );
                 }
             }.targetMethod(addMapping));
@@ -2677,7 +2677,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         // s1 = EntityList.getEntityString(itemStack.getItemDamage());
                         ALOAD_1,
@@ -2696,14 +2696,14 @@ public class CustomColors extends Mod {
             classSignatures.add(new OrSignature(
                 new BytecodeSignature() {
                     @Override
-                    public String getMatchExpression(MethodInfo methodInfo) {
+                    public String getMatchExpression() {
                         return buildExpression(
                             // 64 + (i * 0x24faef & 0xc0)
                             BIPUSH, 64,
                             ILOAD_1,
-                            push(methodInfo, 0x24faef),
+                            push(0x24faef),
                             IMUL,
-                            push(methodInfo, 0xc0),
+                            push(0xc0),
                             IAND,
                             IADD
                         );
@@ -2712,9 +2712,9 @@ public class CustomColors extends Mod {
 
                 new BytecodeSignature() {
                     @Override
-                    public String getMatchExpression(MethodInfo methodInfo) {
+                    public String getMatchExpression() {
                         return buildExpression(
-                            push(methodInfo, 0xffffff),
+                            push(0xffffff),
                             IRETURN
                         );
                     }
@@ -2730,18 +2730,18 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         IRETURN
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ILOAD_1,
                         (getColorFromDamageParams >= 2 ? ILOAD_2 : ICONST_0),
-                        reference(methodInfo, INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSpawnerEgg", "(III)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSpawnerEgg", "(III)I"))
                     );
                 }
 
@@ -2788,20 +2788,20 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
                         ILOAD_2,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "colorValue", "I"))
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "colorValue", "I"))
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
                         ILOAD_2,
-                        reference(methodInfo, PUTFIELD, new FieldRef(getDeobfClass(), "origColorValue", "I"))
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "origColorValue", "I"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "<init>", "(II)V")));
@@ -2848,19 +2848,19 @@ public class CustomColors extends Mod {
                 }
 
                 @Override
-                public String getMatchExpression(MethodInfo methodInfo) {
+                public String getMatchExpression() {
                     return buildExpression(
                         RETURN
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        reference(methodInfo, GETSTATIC, new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")),
-                        reference(methodInfo, INVOKEVIRTUAL, new MethodRef("java/lang/Object", "clone", "()Ljava/lang/Object;")),
-                        reference(methodInfo, CHECKCAST, new ClassRef("[[F")),
-                        reference(methodInfo, PUTSTATIC, new FieldRef(getDeobfClass(), "origFleeceColorTable", "[[F"))
+                        reference(GETSTATIC, new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")),
+                        reference(INVOKEVIRTUAL, new MethodRef("java/lang/Object", "clone", "()Ljava/lang/Object;")),
+                        reference(CHECKCAST, new ClassRef("[[F")),
+                        reference(PUTSTATIC, new FieldRef(getDeobfClass(), "origFleeceColorTable", "[[F"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "<clinit>", "()V")));
