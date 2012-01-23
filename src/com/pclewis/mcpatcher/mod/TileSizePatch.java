@@ -21,7 +21,7 @@ class TileSizePatch extends BytecodePatch {
         } else if (field.startsWith("double_")) {
             type = "D";
         } else if (field.startsWith("long_")) {
-            type = "L";
+            type = "J";
         } else {
             type = "I";
         }
