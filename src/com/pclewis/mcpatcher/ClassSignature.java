@@ -41,6 +41,14 @@ abstract public class ClassSignature implements PatchComponent {
     }
 
     // PatchComponent methods
+    
+    final public ClassFile getClassFile() {
+        return classMod.getClassFile();
+    }
+    
+    final public MethodInfo getMethodInfo() {
+        return classMod.getMethodInfo();
+    }
 
     final public String buildExpression(Object... objects) {
         return classMod.buildExpression(objects);
@@ -49,11 +57,25 @@ abstract public class ClassSignature implements PatchComponent {
     final public byte[] buildCode(Object... objects) throws IOException {
         return classMod.buildCode(objects);
     }
+    
+    final public Object push(Object value) {
+        return classMod.push(value);
+    }
 
+    /**
+     * @deprecated
+     */
     final public Object push(MethodInfo methodInfo, Object value) {
         return classMod.push(methodInfo, value);
     }
 
+    final public byte[] reference(int opcode, JavaRef ref) {
+        return classMod.reference(opcode, ref);
+    }
+
+    /**
+     * @deprecated
+     */
     final public byte[] reference(MethodInfo methodInfo, int opcode, JavaRef ref) {
         return classMod.reference(methodInfo, opcode, ref);
     }

@@ -1,10 +1,25 @@
 package com.pclewis.mcpatcher;
 
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
 interface PatchComponent {
+    /**
+     * Gets current javassist ClassFile object.
+     *
+     * @return class file
+     */
+    public ClassFile getClassFile();
+
+    /**
+     * Gets current javassist MethodInfo object.
+     *
+     * @return method info
+     */
+    public MethodInfo getMethodInfo();
+
     /**
      * Combines any number of inputs to form a binary regular expression.  Used by
      * getMatchExpression method.
@@ -27,11 +42,29 @@ interface PatchComponent {
     /**
      * Push a single constant (int, double, float, string) onto the stack.
      *
+     * @param value
+     * @return bytecode or regex
+     */
+    public Object push(Object value);
+
+    /**
+     * Push a single constant (int, double, float, string) onto the stack.
+     *
      * @param methodInfo
      * @param value
-     * @return bytecode
+     * @return bytecode or regex
+     * @see #push(Object)
      */
     public Object push(MethodInfo methodInfo, Object value);
+
+    /**
+     * Invoke a method, field, or class reference with the given opcode.
+     *
+     * @param opcode
+     * @param ref
+     * @return bytecode
+     */
+    public byte[] reference(int opcode, JavaRef ref);
 
     /**
      * Invoke a method, field, or class reference with the given opcode.
@@ -40,6 +73,7 @@ interface PatchComponent {
      * @param opcode
      * @param ref
      * @return bytecode
+     * @see #reference(int, JavaRef)
      */
     public byte[] reference(MethodInfo methodInfo, int opcode, JavaRef ref);
 

@@ -15,14 +15,13 @@ public class FixedBytecodeSignature extends BytecodeSignature {
         matcher = new BytecodeMatcher(objects);
     }
 
-    /**
-     * @deprecated
-     */
-    final public String getMatchExpression(MethodInfo methodInfo) {
+    @Override
+    final public String getMatchExpression() {
         throw new AssertionError("Unreachable");
     }
 
-    protected boolean match(MethodInfo methodInfo) {
-        return matcher.match(methodInfo);
+    @Override
+    boolean match() {
+        return matcher.match(getMethodInfo());
     }
 }

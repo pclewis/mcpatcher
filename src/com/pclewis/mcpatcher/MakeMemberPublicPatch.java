@@ -32,6 +32,8 @@ public class MakeMemberPublicPatch extends ClassPatch {
 
     @Override
     public boolean apply(ClassFile classFile) throws BadBytecode {
+        classMod.classFile = classFile;
+        classMod.methodInfo = null;
         JavaRef target = map(member);
         boolean patched = false;
         int oldFlags;

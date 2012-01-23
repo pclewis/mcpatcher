@@ -24,25 +24,35 @@ abstract public class BytecodeSignature extends ClassSignature {
     HashMap<Integer, JavaRef> xrefs = new HashMap<Integer, JavaRef>();
 
     /**
+     * @deprecated
+     * @see #getMatchExpression()
+     */
+    public String getMatchExpression(MethodInfo methodInfo) {
+        throw new AbstractMethodError("getMatchExpression() unimplemented");
+    }
+
+    /**
      * Generate a regular expression for the current method.
      *
-     * @param methodInfo method object used with push and reference calls
      * @return String regex
-     * @see ClassSignature#push(javassist.bytecode.MethodInfo, Object)
-     * @see ClassSignature#reference(javassist.bytecode.MethodInfo, int, JavaRef)
+     * @see ClassSignature#push(Object)
+     * @see ClassSignature#reference(int, JavaRef)
      */
-    abstract public String getMatchExpression(MethodInfo methodInfo);
+    public String getMatchExpression() {
+        return getMatchExpression(getMethodInfo());
+    }
 
-    protected boolean match(MethodInfo methodInfo) {
-        matcher = new BytecodeMatcher(getMatchExpression(methodInfo));
-        return matcher.match(methodInfo);
+    boolean match() {
+        matcher = new BytecodeMatcher(getMatchExpression());
+        return matcher.match(getMethodInfo());
     }
 
     public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
+            classMod.methodInfo = methodInfo;
             CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
-            if (codeAttribute != null && match(methodInfo)) {
+            if (codeAttribute != null && match()) {
                 if (methodRef != null) {
                     String deobfName = classMod.getDeobfClass();
                     methodRef.className = deobfName;

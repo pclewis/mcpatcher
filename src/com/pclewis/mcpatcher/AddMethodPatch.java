@@ -87,17 +87,19 @@ abstract public class AddMethodPatch extends ClassPatch {
 
     @Override
     final public boolean apply(ClassFile classFile) throws BadBytecode, DuplicateMemberException, IOException {
+        classMod.classFile = classFile;
         boolean patched = false;
         prePatch(classFile);
         ConstPool constPool = classFile.getConstPool();
         MethodRef methodRef = (MethodRef) classMod.getClassMap().map(new MethodRef(classMod.getDeobfClass(), name, getDescriptor()));
         MethodInfo methodInfo = new MethodInfo(constPool, methodRef.getName(), methodRef.getType());
+        classMod.methodInfo = methodInfo;
         methodInfo.setAccessFlags(accessFlags);
         exceptionTable = new ExceptionTable(constPool);
         try {
             classMod.addToConstPool = true;
             classMod.resetLabels();
-            byte[] code = generateMethod(classFile, methodInfo);
+            byte[] code = generateMethod();
             if (code != null) {
                 classMod.resolveLabels(code, 0, 0);
                 CodeAttribute codeAttribute = new CodeAttribute(constPool, maxStackSize, numLocals, code, exceptionTable);
@@ -126,14 +128,22 @@ abstract public class AddMethodPatch extends ClassPatch {
     }
 
     /**
+     * @deprecated
+     * @see #generateMethod()
+     */
+    public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
+        throw new AbstractMethodError("generateMethod() unimplemented");
+    }
+
+    /**
      * Generate the bytecode for the new method.  May also set class members maxStackSize, numLocals,
      * and exceptionTable if the defaults are insufficient.
      *
-     * @param classFile  target class file
-     * @param methodInfo new empty method
      * @return bytecode
      * @throws BadBytecode
      * @throws IOException
      */
-    abstract public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException;
+    public byte[] generateMethod() throws BadBytecode, IOException {
+        return generateMethod(getClassFile(), getMethodInfo());
+    }
 }

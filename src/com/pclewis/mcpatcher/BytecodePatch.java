@@ -50,25 +50,43 @@ abstract public class BytecodePatch extends ClassPatch {
     }
 
     /**
+     * @deprecated
+     * @see #getMatchExpression()
+     */
+    public String getMatchExpression(MethodInfo methodInfo) {
+        throw new AbstractMethodError("getMatchExpression() unimplemented");
+    }
+
+    /**
      * Get a regular expression to look for within the target method's bytecode.  The expression
      * can contain opcodes (IADD, IF_ICMPGE, etc.).  Use the push method to generate bytecode
      * for loading constants, getting/setting fields, and invoking methods.
      *
-     * @param methodInfo current method
      * @return string using BinaryRegex methods
      */
-    abstract public String getMatchExpression(MethodInfo methodInfo);
+    public String getMatchExpression() {
+        return getMatchExpression(getMethodInfo());
+    }
+
+    /**
+     * @deprecated
+     * @see #getReplacementBytes()
+     */
+    public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
+        throw new AbstractMethodError("getReplacementBytes() unimplemented");
+    }
 
     /**
      * Get replacement bytecode after a match.  May be shorter or longer than the original bytecode;
      * MCPatcher will take care of padding.  Use the buildCode method to generate the return byte
      * array.
      *
-     * @param methodInfo current method
      * @return replacement bytes
      * @throws IOException
      */
-    abstract public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException;
+    public byte[] getReplacementBytes() throws IOException {
+        return getReplacementBytes(getMethodInfo());
+    }
 
     boolean apply(MethodInfo mi) throws BadBytecode {
         boolean patched = false;
@@ -76,7 +94,8 @@ abstract public class BytecodePatch extends ClassPatch {
         if (ca == null) {
             return patched;
         }
-        matcher = new BytecodeMatcher(getMatchExpression(mi));
+        classMod.methodInfo = mi;
+        matcher = new BytecodeMatcher(getMatchExpression());
         CodeIterator ci = ca.iterator();
         int oldStackSize = ca.computeMaxStack();
         int oldMaxLocals = ca.getMaxLocals();
@@ -91,7 +110,7 @@ abstract public class BytecodePatch extends ClassPatch {
                 classMod.addToConstPool = true;
                 classMod.resetLabels();
                 labelOffset = 0;
-                repl = getReplacementBytes(mi);
+                repl = getReplacementBytes();
             } catch (IOException e) {
                 Logger.log(e);
                 repl = null;
@@ -246,11 +265,13 @@ abstract public class BytecodePatch extends ClassPatch {
 
     @Override
     boolean apply(ClassFile classFile) throws BadBytecode {
+        classMod.classFile = classFile;
         boolean patched = false;
         for (Object o : classFile.getMethods()) {
-            MethodInfo mi = (MethodInfo) o;
-            if (filterMethod(mi)) {
-                if (apply(mi)) {
+            MethodInfo methodInfo = (MethodInfo) o;
+            classMod.methodInfo = methodInfo;
+            if (filterMethod(methodInfo)) {
+                if (apply(methodInfo)) {
                     patched = true;
                 }
             }
@@ -313,8 +334,8 @@ abstract public class BytecodePatch extends ClassPatch {
      */
     abstract public static class InsertAfter extends BytecodePatch {
         @Override
-        final public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-            byte[] insertBytes = getInsertBytes(methodInfo);
+        final public byte[] getReplacementBytes() throws IOException {
+            byte[] insertBytes = getInsertBytes();
             if (insertBytes == null) {
                 return null;
             } else {
@@ -326,7 +347,17 @@ abstract public class BytecodePatch extends ClassPatch {
             }
         }
 
-        abstract public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException;
+        /**
+         * @deprecated
+         * @see #getInsertBytes()
+         */
+        public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+            throw new AbstractMethodError("getInsertBytes unimplemented");
+        }
+
+        public byte[] getInsertBytes() throws IOException {
+            return getInsertBytes(getMethodInfo());
+        }
     }
 
     /**
@@ -334,8 +365,8 @@ abstract public class BytecodePatch extends ClassPatch {
      */
     abstract public static class InsertBefore extends BytecodePatch {
         @Override
-        final public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
-            byte[] insertBytes = getInsertBytes(methodInfo);
+        final public byte[] getReplacementBytes() throws IOException {
+            byte[] insertBytes = getInsertBytes();
             if (insertBytes == null) {
                 return null;
             } else {
@@ -346,6 +377,16 @@ abstract public class BytecodePatch extends ClassPatch {
             }
         }
 
-        abstract public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException;
+        /**
+         * @deprecated
+         * @see #getInsertBytes()
+         */
+        public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
+            throw new AbstractMethodError("getInsertBytes unimplemented");
+        }
+
+        public byte[] getInsertBytes() throws IOException {
+            return getInsertBytes(getMethodInfo());
+        }
     }
 }

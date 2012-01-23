@@ -68,6 +68,8 @@ abstract public class ClassMod implements PatchComponent {
     ArrayList<String> targetClasses = new ArrayList<String>();
     ArrayList<String> errors = new ArrayList<String>();
     boolean addToConstPool = false;
+    ClassFile classFile;
+    MethodInfo methodInfo;
     int bestMatchCount;
     String bestMatch;
     private ArrayList<Label> labels = new ArrayList<Label>();
@@ -75,6 +77,7 @@ abstract public class ClassMod implements PatchComponent {
 
     boolean matchClassFile(String filename, ClassFile classFile) {
         addToConstPool = false;
+        this.classFile = classFile;
         if (!filterFile(filename)) {
             return false;
         }
@@ -275,6 +278,14 @@ abstract public class ClassMod implements PatchComponent {
     }
 
     // PatchComponent methods
+    
+    final public ClassFile getClassFile() {
+        return classFile;
+    }
+    
+    final public MethodInfo getMethodInfo() {
+        return methodInfo;
+    }
 
     final public String buildExpression(Object... objects) {
         return BinaryRegex.build(objects);
@@ -314,12 +325,26 @@ abstract public class ClassMod implements PatchComponent {
         return baos.toByteArray();
     }
 
-    final public Object push(MethodInfo methodInfo, Object value) {
-        return ConstPoolUtils.push(methodInfo.getConstPool(), value, addToConstPool);
+    final public Object push(Object value) {
+        return ConstPoolUtils.push(getMethodInfo().getConstPool(), value, addToConstPool);
     }
 
+    /**
+     * @deprecated
+     */
+    final public Object push(MethodInfo methodInfo, Object value) {
+        return push(value);
+    }
+
+    final public byte[] reference(int opcode, JavaRef ref) {
+        return ConstPoolUtils.reference(getMethodInfo().getConstPool(), opcode, map(ref), addToConstPool);
+    }
+
+    /**
+     * @deprecated
+     */
     final public byte[] reference(MethodInfo methodInfo, int opcode, JavaRef ref) {
-        return ConstPoolUtils.reference(methodInfo.getConstPool(), opcode, map(ref), addToConstPool);
+        return reference(opcode, ref);
     }
 
     final public Mod getMod() {
