@@ -516,13 +516,7 @@ public class ClassMap {
                 }
             };
             patch.setClassMod(mod);
-
-            for (Object o : cf.getMethods()) {
-                MethodInfo mi = (MethodInfo) o;
-                mod.methodInfo = mi;
-                patch.apply(mi);
-                mod.methodInfo = null;
-            }
+            patch.apply(cf);
         }
     }
 

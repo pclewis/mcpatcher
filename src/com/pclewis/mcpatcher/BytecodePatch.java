@@ -88,7 +88,7 @@ abstract public class BytecodePatch extends ClassPatch {
         return getReplacementBytes(getMethodInfo());
     }
 
-    boolean apply(MethodInfo mi) throws BadBytecode {
+    private boolean apply(MethodInfo mi) throws BadBytecode {
         boolean patched = false;
         CodeAttribute ca = mi.getCodeAttribute();
         if (ca == null) {
