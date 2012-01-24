@@ -1,9 +1,7 @@
 package net.minecraft.src;
 
-public class EntityLiving extends Entity {
-    protected int health;
-
-    public EntityLiving(World worldObj) {
+public class EntityItem extends Entity {
+    public EntityItem(World worldObj) {
         super(worldObj);
     }
 

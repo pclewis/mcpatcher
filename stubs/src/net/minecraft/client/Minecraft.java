@@ -16,6 +16,14 @@ public class Minecraft {
     public EntityRenderer entityRenderer;
     public int displayWidth;
     public int displayHeight;
+    public MovingObjectPosition objectMouseOver;
+    public RenderGlobal renderGlobal;
+    public GuiScreen currentScreen;
+    public Timer timer;
+
+    public static File getMinecraftDir() {
+        return null;
+    }
 
     public static File getAppDir(String s) {
         return null;
