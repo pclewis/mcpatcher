@@ -86,6 +86,7 @@ abstract public class BytecodeSignature extends ClassSignature {
                 return true;
             }
         }
+        classMod.methodInfo = null;
         return false;
     }
 

@@ -87,7 +87,6 @@ abstract public class AddMethodPatch extends ClassPatch {
 
     @Override
     final public boolean apply(ClassFile classFile) throws BadBytecode, DuplicateMemberException, IOException {
-        classMod.classFile = classFile;
         boolean patched = false;
         prePatch(classFile);
         ConstPool constPool = classFile.getConstPool();
@@ -112,6 +111,7 @@ abstract public class AddMethodPatch extends ClassPatch {
                 patched = true;
             }
         } finally {
+            classMod.methodInfo = null;
             classMod.addToConstPool = false;
         }
         return patched;

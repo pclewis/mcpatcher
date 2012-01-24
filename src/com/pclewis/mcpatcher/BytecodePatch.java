@@ -94,7 +94,6 @@ abstract public class BytecodePatch extends ClassPatch {
         if (ca == null) {
             return patched;
         }
-        classMod.methodInfo = mi;
         matcher = new BytecodeMatcher(getMatchExpression());
         CodeIterator ci = ca.iterator();
         int oldStackSize = ca.computeMaxStack();
@@ -265,7 +264,6 @@ abstract public class BytecodePatch extends ClassPatch {
 
     @Override
     boolean apply(ClassFile classFile) throws BadBytecode {
-        classMod.classFile = classFile;
         boolean patched = false;
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
@@ -275,6 +273,7 @@ abstract public class BytecodePatch extends ClassPatch {
                     patched = true;
                 }
             }
+            classMod.methodInfo = null;
         }
         return patched;
     }

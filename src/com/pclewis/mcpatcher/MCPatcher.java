@@ -741,6 +741,8 @@ final public class MCPatcher {
             checkInterrupt();
             if (cm.targetClasses.contains(classFile.getName())) {
                 cm.addToConstPool = true;
+                cm.classFile = classFile;
+                cm.methodInfo = null;
                 cm.prePatch(filename, classFile);
                 if (cm.patches.size() > 0) {
                     Logger.log(Logger.LOG_MOD, "applying %s patch to %s for mod %s", cm.getDeobfClass(), filename, cm.mod.getName());

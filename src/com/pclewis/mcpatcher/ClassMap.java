@@ -442,6 +442,7 @@ public class ClassMap {
                     return newClass2;
                 }
             };
+            mod.classFile = cf;
             BytecodePatch patch = new BytecodePatch() {
                 final private String typeStr;
                 final private byte[] opcodes;
@@ -518,7 +519,9 @@ public class ClassMap {
 
             for (Object o : cf.getMethods()) {
                 MethodInfo mi = (MethodInfo) o;
+                mod.methodInfo = mi;
                 patch.apply(mi);
+                mod.methodInfo = null;
             }
         }
     }
