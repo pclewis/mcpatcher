@@ -38,7 +38,7 @@ public class GLSLShader extends Mod {
         classMods.add(new RenderBlocksMod());
         classMods.add(new EntityPlayerMod());
         classMods.add(new EntityPlayerSPMod());
-        classMods.add(new InventoryPlayerMod());
+        classMods.add(new InventoryPlayerMod(minecraftVersion));
         classMods.add(new ItemStackMod());
         classMods.add(new WorldMod());
         classMods.add(new WorldRendererMod());
@@ -1017,8 +1017,12 @@ public class GLSLShader extends Mod {
     }
 
     private class InventoryPlayerMod extends ClassMod {
-        InventoryPlayerMod() {
-            classSignatures.add(new ConstSignature("Inventory"));
+        InventoryPlayerMod(MinecraftVersion minecraftVersion) {
+            if (minecraftVersion.compareTo("12w04a") >= 0) {
+                classSignatures.add(new ConstSignature("container.inventory"));
+            } else {
+                classSignatures.add(new ConstSignature("Inventory"));
+            }
             classSignatures.add(new ConstSignature("Slot"));
 
             memberMappers.add(new MethodMapper("getCurrentItem", "()LItemStack;"));
