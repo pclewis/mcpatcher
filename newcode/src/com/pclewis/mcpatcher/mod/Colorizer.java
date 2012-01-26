@@ -520,6 +520,9 @@ public class Colorizer {
                 }
                 switch (tokensInt.length) {
                     case 1:
+                        if (tokensInt[0] < 0 || tokensInt[0] >= blockColorMaps.length) {
+                            continue;
+                        }
                         blockColorMaps[tokensInt[0]] = colorMap;
                         break;
 
