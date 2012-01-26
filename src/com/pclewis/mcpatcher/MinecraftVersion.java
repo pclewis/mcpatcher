@@ -67,6 +67,7 @@ final public class MinecraftVersion {
         addKnownVersion("1.1", "e92302d2acdba7c97e0d8df1e10d2006");
 
         addKnownVersion("12w03a", "ea85d9c4058ba9e47d8130bd1bff8be9");
+        addKnownVersion("12w04a", "c2e2d8c38288ac122001f2ed11c4d83a");
     }
 
     private static void addKnownVersion(String versionString, String md5) {
