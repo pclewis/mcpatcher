@@ -36,50 +36,81 @@ final public class MinecraftVersion {
     private static final ArrayList<MinecraftVersion> versionOrdering = new ArrayList<MinecraftVersion>();
 
     static {
-        addKnownVersion("beta-1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
+        try {
+            addKnownVersion("beta-1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
 
-        addKnownVersion("beta-1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
+            addKnownVersion("beta-1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
 
-        addKnownVersion("beta-1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
-        addKnownVersion("beta-1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
-        addKnownVersion("beta-1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
+            addKnownVersion("beta-1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
+            addKnownVersion("beta-1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
+            addKnownVersion("beta-1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
 
-        addKnownVersion("beta-1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
-        addKnownVersion("beta-1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
-        addKnownVersion("beta-1.9pre3", "334827dbe9183af6d650b39321a99e21");
-        addKnownVersion("beta-1.9pre4", "cae41f3746d3c4c440b2d63a403770e7");
-        addKnownVersion("beta-1.9pre5", "6258c4f293b939117efe640eda76dca4");
-        addKnownVersion("beta-1.9pre6", "2468205154374afe5f9caaba2ffbf5f8");
+            addKnownVersion("beta-1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
+            addKnownVersion("beta-1.9pre2", "962d79abeca031b44cf8dac8d4fcabe9");
+            addKnownVersion("beta-1.9pre3", "334827dbe9183af6d650b39321a99e21");
+            addKnownVersion("beta-1.9pre4", "cae41f3746d3c4c440b2d63a403770e7");
+            addKnownVersion("beta-1.9pre5", "6258c4f293b939117efe640eda76dca4");
+            addKnownVersion("beta-1.9pre6", "2468205154374afe5f9caaba2ffbf5f8");
 
-        addKnownVersion("rc1", "22d708f84dc44fba200c2a5e4261959c");
-        addKnownVersion("rc2pre1", "e8e264bcff34aecbc7ef7f850858c1d6");
-        addKnownVersion("rc2", "bd569d20dd3dd898ff4371af9bbe14e1");
+            addKnownVersion("rc1", "22d708f84dc44fba200c2a5e4261959c");
+            addKnownVersion("rc2pre1", "e8e264bcff34aecbc7ef7f850858c1d6");
+            addKnownVersion("rc2", "bd569d20dd3dd898ff4371af9bbe14e1");
 
-        addKnownVersion("1.0.0", "3820d222b95d0b8c520d9596a756a6e6");
+            addKnownVersion("1.0.0", "3820d222b95d0b8c520d9596a756a6e6");
 
-        addKnownVersion("11w47a", "2ad75c809570663ec561ca707983a45b");
-        addKnownVersion("11w48a", "cd86517284d62a0854234ae12abd019c");
-        addKnownVersion("11w49a", "a1f7969b6b546c492fecabfcb8e8525a");
-        addKnownVersion("11w50a", "8763eb2747d57e2958295bbd06e764b1");
+            addKnownVersion("11w47a", "2ad75c809570663ec561ca707983a45b");
+            addKnownVersion("11w48a", "cd86517284d62a0854234ae12abd019c");
+            addKnownVersion("11w49a", "a1f7969b6b546c492fecabfcb8e8525a");
+            addKnownVersion("11w50a", "8763eb2747d57e2958295bbd06e764b1");
 
-        addKnownVersion("12w01a", "468f1b4022eb81d5ca2f316e24a7ffe5");
+            addKnownVersion("12w01a", "468f1b4022eb81d5ca2f316e24a7ffe5");
 
-        addKnownVersion("1.1", "e92302d2acdba7c97e0d8df1e10d2006");
+            addKnownVersion("1.1", "e92302d2acdba7c97e0d8df1e10d2006");
 
-        addKnownVersion("12w03a", "ea85d9c4058ba9e47d8130bd1bff8be9");
-        addKnownVersion("12w04a", "c2e2d8c38288ac122001f2ed11c4d83a");
-        addKnownVersion("12w05a", "feabb7967bd528a9f3309a2d660d555d");
-        addKnownVersion("12w05b", "70affb4ae7da7e8b24f1bbbcbe58cf0f");
+            addKnownVersion("12w03a", "ea85d9c4058ba9e47d8130bd1bff8be9");
+            addKnownVersion("12w04a", "c2e2d8c38288ac122001f2ed11c4d83a");
+            addKnownVersion("12w05a", "feabb7967bd528a9f3309a2d660d555d");
+            addKnownVersion("12w05b", "70affb4ae7da7e8b24f1bbbcbe58cf0f");
+
+            for (int i = 0; i < versionOrdering.size(); i++) {
+                MinecraftVersion a = versionOrdering.get(i);
+                for (int j = 0; j < versionOrdering.size(); j++) {
+                    MinecraftVersion b = versionOrdering.get(j);
+                    Integer result = a.comparePartial(b);
+                    if (i == j) {
+                        if (result == null || result != 0) {
+                            throw new RuntimeException("incorrect ordering in known version table: " + a.getVersionString() + " != " + b.getVersionString());
+                        }
+                    } else if (i > j) {
+                        if (result != null && result <= 0) {
+                            throw new RuntimeException("incorrect ordering in known version table: " + a.getVersionString() + " <= " + b.getVersionString());
+                        }
+                    } else {
+                        if (result != null && result >= 0) {
+                            throw new RuntimeException("incorrect ordering in known version table: " + a.getVersionString() + " >= " + b.getVersionString());
+                        }
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            Logger.log(e);
+        }
     }
 
     private static void addKnownVersion(String versionString, String md5) {
-        MinecraftVersion version = parseShortVersion(versionString);
-        if (version == null) {
-            Logger.log(Logger.LOG_MAIN, "ERROR: bad known version %s", version);
-            return;
+        try {
+            MinecraftVersion version = parseShortVersion(versionString);
+            if (version == null) {
+                throw new IllegalArgumentException("bad known version " + version);
+            }
+            if (!md5.matches("\\p{XDigit}{32}")) {
+                throw new IllegalArgumentException("bad md5 sum for known version " + version);
+            }
+            versionOrdering.add(version);
+            knownMD5s.put(versionString, md5);
+        } catch (Throwable e) {
+            Logger.log(e);
         }
-        versionOrdering.add(version);
-        knownMD5s.put(versionString, md5);
     }
 
     private static int findClosestKnownVersion(MinecraftVersion version) {
