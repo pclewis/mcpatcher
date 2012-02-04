@@ -168,84 +168,103 @@ abstract public class BytecodePatch extends ClassPatch {
         while (ci.hasNext()) {
             int offset = ci.next();
             int local;
+            int wideReg = 0;
             switch (ci.byteAt(offset)) {
+                case LLOAD_0:
+                case DLOAD_0:
+                case LSTORE_0:
+                case DSTORE_0:
+                    wideReg = 1;
+                    /* fall through */
+
                 case ALOAD_0:
                 case ILOAD_0:
-                case LLOAD_0:
                 case FLOAD_0:
-                case DLOAD_0:
                 case ASTORE_0:
                 case ISTORE_0:
-                case LSTORE_0:
                 case FSTORE_0:
-                case DSTORE_0:
                     local = 0;
                     break;
 
+                case LLOAD_1:
+                case DLOAD_1:
+                case LSTORE_1:
+                case DSTORE_1:
+                    wideReg = 1;
+                    /* fall through */
+
                 case ALOAD_1:
                 case ILOAD_1:
-                case LLOAD_1:
                 case FLOAD_1:
-                case DLOAD_1:
                 case ASTORE_1:
                 case ISTORE_1:
-                case LSTORE_1:
                 case FSTORE_1:
-                case DSTORE_1:
                     local = 1;
                     break;
 
+                case LLOAD_2:
+                case DLOAD_2:
+                case LSTORE_2:
+                case DSTORE_2:
+                    wideReg = 1;
+                    /* fall through */
+
                 case ALOAD_2:
                 case ILOAD_2:
-                case LLOAD_2:
                 case FLOAD_2:
-                case DLOAD_2:
                 case ASTORE_2:
                 case ISTORE_2:
-                case LSTORE_2:
                 case FSTORE_2:
-                case DSTORE_2:
                     local = 2;
                     break;
 
+                case LLOAD_3:
+                case DLOAD_3:
+                case LSTORE_3:
+                case DSTORE_3:
+                    wideReg = 1;
+                    /* fall through */
+
                 case ALOAD_3:
                 case ILOAD_3:
-                case LLOAD_3:
                 case FLOAD_3:
-                case DLOAD_3:
                 case ASTORE_3:
                 case ISTORE_3:
-                case LSTORE_3:
                 case FSTORE_3:
-                case DSTORE_3:
                     local = 3;
                     break;
 
+                case LLOAD:
+                case DLOAD:
+                case LSTORE:
+                case DSTORE:
+                    wideReg = 1;
+                    /* fall through */
+
                 case ALOAD:
                 case ILOAD:
-                case LLOAD:
                 case FLOAD:
-                case DLOAD:
                 case ASTORE:
                 case ISTORE:
-                case LSTORE:
                 case FSTORE:
-                case DSTORE:
                     local = ci.byteAt(offset + 1) & 0xff;
                     break;
 
                 case WIDE:
                     switch (ci.byteAt(++offset)) {
+                        case LLOAD:
+                        case DLOAD:
+                        case LSTORE:
+                        case DSTORE:
+                            wideReg = 1;
+                            /* fall through */
+
                         case ALOAD:
                         case ILOAD:
-                        case LLOAD:
                         case FLOAD:
-                        case DLOAD:
                         case ASTORE:
                         case ISTORE:
-                        case LSTORE:
                         case FSTORE:
-                        case DSTORE:
                             local = Util.demarshal(new byte[]{(byte) ci.byteAt(offset + 1), (byte) ci.byteAt(offset + 2)});
                             break;
 
@@ -257,7 +276,7 @@ abstract public class BytecodePatch extends ClassPatch {
                 default:
                     continue;
             }
-            maxLocals = Math.max(maxLocals, local + 1);
+            maxLocals = Math.max(maxLocals, local + wideReg + 1);
         }
         return maxLocals;
     }
