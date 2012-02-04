@@ -131,8 +131,8 @@ abstract public class AddMethodPatch extends ClassPatch {
     }
 
     /**
-     * @deprecated
      * @see #generateMethod()
+     * @deprecated
      */
     public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
         throw new AbstractMethodError("generateMethod() unimplemented");

@@ -278,11 +278,11 @@ abstract public class ClassMod implements PatchComponent {
     }
 
     // PatchComponent methods
-    
+
     final public ClassFile getClassFile() {
         return classFile;
     }
-    
+
     final public MethodInfo getMethodInfo() {
         return methodInfo;
     }

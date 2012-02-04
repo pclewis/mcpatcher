@@ -41,11 +41,11 @@ abstract public class ClassSignature implements PatchComponent {
     }
 
     // PatchComponent methods
-    
+
     final public ClassFile getClassFile() {
         return classMod.getClassFile();
     }
-    
+
     final public MethodInfo getMethodInfo() {
         return classMod.getMethodInfo();
     }
@@ -57,7 +57,7 @@ abstract public class ClassSignature implements PatchComponent {
     final public byte[] buildCode(Object... objects) throws IOException {
         return classMod.buildCode(objects);
     }
-    
+
     final public Object push(Object value) {
         return classMod.push(value);
     }

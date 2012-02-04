@@ -50,8 +50,8 @@ abstract public class BytecodePatch extends ClassPatch {
     }
 
     /**
-     * @deprecated
      * @see #getMatchExpression()
+     * @deprecated
      */
     public String getMatchExpression(MethodInfo methodInfo) {
         throw new AbstractMethodError("getMatchExpression() unimplemented");
@@ -69,8 +69,8 @@ abstract public class BytecodePatch extends ClassPatch {
     }
 
     /**
-     * @deprecated
      * @see #getReplacementBytes()
+     * @deprecated
      */
     public byte[] getReplacementBytes(MethodInfo methodInfo) throws IOException {
         throw new AbstractMethodError("getReplacementBytes() unimplemented");
@@ -366,8 +366,8 @@ abstract public class BytecodePatch extends ClassPatch {
         }
 
         /**
-         * @deprecated
          * @see #getInsertBytes()
+         * @deprecated
          */
         public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
             throw new AbstractMethodError("getInsertBytes unimplemented");
@@ -396,8 +396,8 @@ abstract public class BytecodePatch extends ClassPatch {
         }
 
         /**
-         * @deprecated
          * @see #getInsertBytes()
+         * @deprecated
          */
         public byte[] getInsertBytes(MethodInfo methodInfo) throws IOException {
             throw new AbstractMethodError("getInsertBytes unimplemented");

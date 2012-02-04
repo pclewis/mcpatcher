@@ -4,7 +4,6 @@ import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
-import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

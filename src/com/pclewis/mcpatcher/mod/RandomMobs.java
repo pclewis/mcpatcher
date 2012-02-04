@@ -2,7 +2,6 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
-import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 

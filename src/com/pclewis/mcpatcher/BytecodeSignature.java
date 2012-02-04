@@ -24,8 +24,8 @@ abstract public class BytecodeSignature extends ClassSignature {
     HashMap<Integer, JavaRef> xrefs = new HashMap<Integer, JavaRef>();
 
     /**
-     * @deprecated
      * @see #getMatchExpression()
+     * @deprecated
      */
     public String getMatchExpression(MethodInfo methodInfo) {
         throw new AbstractMethodError("getMatchExpression() unimplemented");
