@@ -303,6 +303,11 @@ final public class MCPatcher {
                 if (classMap.get(reqClass) == null) {
                     continue classMod;
                 }
+                for (ClassMod classMod1 : mod.classMods) {
+                    if (classMod1.getDeobfClass().equals(reqClass) && classMod1.targetClasses.size() != 1) {
+                        continue classMod;
+                    }
+                }
             }
             List<JarEntry> candidateEntries;
             String targetClass = classMap.get(classMod.getDeobfClass());
