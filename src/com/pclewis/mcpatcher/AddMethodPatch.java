@@ -104,6 +104,9 @@ abstract public class AddMethodPatch extends ClassPatch {
                 CodeAttribute codeAttribute = new CodeAttribute(constPool, maxStackSize, numLocals, code, exceptionTable);
                 methodInfo.setCodeAttribute(codeAttribute);
                 int newMaxLocals = Math.max(BytecodePatch.computeMaxLocals(codeAttribute), numLocals);
+                if ((accessFlags & AccessFlag.STATIC) == 0) {
+                    newMaxLocals = Math.max(newMaxLocals, 1);
+                }
                 codeAttribute.setMaxLocals(newMaxLocals);
                 int newStackSize = Math.max(codeAttribute.computeMaxStack(), maxStackSize);
                 recordPatch(String.format("stack size %d, local vars %d", newStackSize, newMaxLocals));
