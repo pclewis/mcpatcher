@@ -207,6 +207,41 @@ public class HDFont extends Mod {
                     );
                 }
             }.targetMethod(getStringWidth));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "4.0f -> charWidthf[32]";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.capture(BinaryRegex.build(
+                            ALOAD_0,
+                            DUP,
+                            BytecodeMatcher.anyReference(GETFIELD)
+                        )),
+                        push(4.0f),
+                        BinaryRegex.capture(BinaryRegex.build(
+                            FADD,
+                            BytecodeMatcher.anyReference(PUTFIELD)
+                        ))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        ALOAD_0,
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "charWidthf", "[F")),
+                        push(32),
+                        FALOAD,
+                        getCaptureGroup(2)
+                    );
+                }
+            });
         }
     }
 }
