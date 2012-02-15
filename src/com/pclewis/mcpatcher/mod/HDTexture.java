@@ -439,7 +439,8 @@ public class HDTexture extends Mod {
                 RETURN
             ));
 
-            patches.add(new TileSizePatch(1.06F, "float_flameNudge"));
+            patches.add(new TileSizePatch(1.06f, "float_flameNudge"));
+            patches.add(new TileSizePatch(1.0600001f, "float_flameNudge"));
             patches.add(new TileSizePatch.ArraySizePatch(320, "int_flameArraySize"));
             patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
             patches.add(new TileSizePatch.WhilePatch(20, "int_flameHeight"));
