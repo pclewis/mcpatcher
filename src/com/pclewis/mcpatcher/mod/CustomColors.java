@@ -14,6 +14,7 @@ import static javassist.bytecode.Opcode.*;
 
 public class CustomColors extends Mod {
     private boolean haveSpawnerEggs;
+    private boolean haveNewBiomes;
     private String getColorFromDamageDescriptor;
     private int getColorFromDamageParams;
 
@@ -29,14 +30,15 @@ public class CustomColors extends Mod {
         }
 
         haveSpawnerEggs = minecraftVersion.compareTo("12w01a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
+        haveNewBiomes = minecraftVersion.compareTo("12w07a") >= 0;
 
         configPanel = new ConfigPanel();
 
         classMods.add(new BaseMod.MinecraftMod().mapTexturePackList());
         classMods.add(new BaseMod.TexturePackListMod());
         classMods.add(new BaseMod.TexturePackBaseMod());
-        classMods.add(new BaseMod.IBlockAccessMod());
 
+        classMods.add(new IBlockAccessMod());
         classMods.add(new BlockMod());
 
         classMods.add(new BiomeGenBaseMod());
@@ -300,6 +302,14 @@ public class CustomColors extends Mod {
             }.targetMethod(getRenderColor));
         }
     }
+    
+    private class IBlockAccessMod extends BaseMod.IBlockAccessMod {
+        IBlockAccessMod() {
+            if (haveNewBiomes) {
+                memberMappers.add(new MethodMapper("getBiomeGenAt", "(II)LBiomeGenBase;"));
+            }
+        }
+    }
 
     private class BiomeGenBaseMod extends ClassMod {
         BiomeGenBaseMod() {
@@ -497,48 +507,87 @@ public class CustomColors extends Mod {
 
             MethodRef colorMultiplier = new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I");
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        ALOAD_1,
-                        BytecodeMatcher.anyReference(INVOKEINTERFACE),
-                        ILOAD_2,
-                        BinaryRegex.any(0, 3),
-                        ILOAD, 4,
-                        BinaryRegex.any(0, 3),
-                        BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                        BinaryRegex.optional(BinaryRegex.build(
-                            ASTORE, 5,
-                            ALOAD, 5
-                        )),
-                        BytecodeMatcher.anyReference(GETFIELD)
-                    );
-                }
-            }.setMethod(colorMultiplier));
+            if (haveNewBiomes) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            ALOAD_1,
+                            ILOAD_2,
+                            BytecodeMatcher.anyILOAD,
+                            IADD,
+                            ILOAD, 4,
+                            BytecodeMatcher.anyILOAD,
+                            IADD,
+                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            BytecodeMatcher.anyReference(GETFIELD)
+                        );
+                    }
+                }.setMethod(colorMultiplier));
 
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "override water color";
-                }
+                patches.add(new BytecodePatch() {
+                    @Override
+                    public String getDescription() {
+                        return "override water color";
+                    }
 
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        reference(INVOKEVIRTUAL, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;")),
-                        BinaryRegex.any(0, 4),
-                        reference(GETFIELD, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
-                    );
-                }
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBiomeGenAt", "(II)LBiomeGenBase;"))
+                        );
+                    }
 
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LWorldChunkManager;II)I"))
-                    );
-                }
-            }.targetMethod(colorMultiplier));
+                    @Override
+                    public byte[] getReplacementBytes() throws IOException {
+                        return buildCode(
+                        );
+                    }
+                }.targetMethod(colorMultiplier));
+            } else {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            ALOAD_1,
+                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            ILOAD_2,
+                            BinaryRegex.any(0, 3),
+                            ILOAD, 4,
+                            BinaryRegex.any(0, 3),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                            BinaryRegex.optional(BinaryRegex.build(
+                                ASTORE, 5,
+                                ALOAD, 5
+                            )),
+                            BytecodeMatcher.anyReference(GETFIELD)
+                        );
+                    }
+                }.setMethod(colorMultiplier));
+
+                patches.add(new BytecodePatch() {
+                    @Override
+                    public String getDescription() {
+                        return "override water color";
+                    }
+
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            reference(INVOKEVIRTUAL, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;")),
+                            BinaryRegex.any(0, 4),
+                            reference(GETFIELD, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
+                        );
+                    }
+
+                    @Override
+                    public byte[] getReplacementBytes() throws IOException {
+                        return buildCode(
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LWorldChunkManager;II)I"))
+                        );
+                    }
+                }.targetMethod(colorMultiplier));
+            }
         }
     }
 
