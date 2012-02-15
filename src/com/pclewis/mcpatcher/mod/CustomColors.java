@@ -390,36 +390,76 @@ public class CustomColors extends Mod {
                 .addXref(1, new FieldRef(getDeobfClass(), "biomeName", "Ljava/lang/String;"))
             );
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        // d = iblockaccess.getWorldChunkManager().getTemperature(i, j, k);
-                        ALOAD_1,
-                        BytecodeMatcher.anyReference(INVOKEINTERFACE),
-                        ILOAD_2,
-                        ILOAD_3,
-                        ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        F2D,
-                        DSTORE, 5,
+            if (haveNewBiomes) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            // d = MathHelper.clampf(getTemperature(), 0.0f, 1.0f);
+                            BinaryRegex.begin(),
+                            ALOAD_0,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            FCONST_0,
+                            FCONST_1,
+                            BytecodeMatcher.anyReference(INVOKESTATIC),
+                            F2D,
+                            DSTORE_1,
 
-                        // d1 = iblockaccess.getWorldChunkManager().getRainfall(i, k);
-                        ALOAD_1,
-                        BytecodeMatcher.anyReference(INVOKEINTERFACE),
-                        ILOAD_2,
-                        ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        F2D,
-                        DSTORE, 7
-                    );
+                            // d1 = MathHelper.clampf(getRainfall(), 0.0f, 1.0f);
+                            ALOAD_0,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            FCONST_0,
+                            FCONST_1,
+                            BytecodeMatcher.anyReference(INVOKESTATIC),
+                            F2D,
+                            DSTORE_3,
+
+                            // return Colorizerxxx.yyy(d, d1);
+                            DLOAD_1,
+                            DLOAD_3,
+                            BytecodeMatcher.anyReference(INVOKESTATIC),
+                            IRETURN
+                        );
+                    }
                 }
-            }
-                .addXref(1, new MethodRef("WorldChunkManager", "getTemperature", "(III)F"))
-                .addXref(2, new MethodRef("WorldChunkManager", "getRainfall", "(II)F"))
-            );
+                    .addXref(1, new MethodRef(getDeobfClass(), "getTemperature", "()F"))
+                    .addXref(2, new MethodRef(getDeobfClass(), "getRainfall", "()F"))
+                );
 
-            memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "(LIBlockAccess;III)I"));
+                memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "()I"));
+            } else {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            // d = iblockaccess.getWorldChunkManager().getTemperature(i, j, k);
+                            ALOAD_1,
+                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            ILOAD_2,
+                            ILOAD_3,
+                            ILOAD, 4,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            F2D,
+                            DSTORE, 5,
+
+                            // d1 = iblockaccess.getWorldChunkManager().getRainfall(i, k);
+                            ALOAD_1,
+                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            ILOAD_2,
+                            ILOAD, 4,
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            F2D,
+                            DSTORE, 7
+                        );
+                    }
+                }
+                    .addXref(1, new MethodRef("WorldChunkManager", "getTemperature", "(III)F"))
+                    .addXref(2, new MethodRef("WorldChunkManager", "getRainfall", "(II)F"))
+                );
+
+                memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "(LIBlockAccess;III)I"));
+            }
+
             memberMappers.add(new FieldMapper("color", "I").accessFlag(AccessFlag.PUBLIC, true));
 
             patches.add(new BytecodePatch.InsertBefore() {
