@@ -141,7 +141,17 @@ class ConstPoolUtils {
     }
 
     public static Object push(ConstPool cp, Object value, boolean add) {
-        if (value instanceof Integer) {
+        if (value instanceof Boolean) {
+            if ((Boolean) value) {
+                return new byte[]{ICONST_1};
+            } else {
+                return new byte[]{ICONST_0};
+            }
+        } else if (value instanceof Byte) {
+            return push(cp, (int)(Byte) value, add);
+        } else if (value instanceof Character) {
+            return push(cp, (int)(Character) value, add);
+        } else if (value instanceof Integer) {
             int i = (Integer) value;
             switch (i) {
                 case -1:
