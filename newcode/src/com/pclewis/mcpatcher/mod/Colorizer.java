@@ -103,27 +103,22 @@ public class Colorizer {
     private static Entity fogCamera;
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
-        checkUpdate();
         return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
     }
 
     public static int colorizeBiome(int defaultColor, int index) {
-        checkUpdate();
         return fixedColorMaps[index].colorize(defaultColor);
     }
 
     public static int colorizeBiome(int defaultColor, int index, int i, int j, int k) {
-        checkUpdate();
         return fixedColorMaps[index].colorize(defaultColor, i, j, k);
     }
 
     public static int colorizeWater(Object dummy, int i, int k) {
-        checkUpdate();
         return fixedColorMaps[COLOR_MAP_WATER].colorize(BiomeHelper.instance.getBiomeGenAt(i, 64, k).waterColorMultiplier, i, 64, k);
     }
     
     public static int colorizeBlock(Block block, int i, int j, int k, int metadata) {
-        checkUpdate();
         ColorMap colorMap = null;
         if (!blockMetaColorMaps.isEmpty()) {
             colorMap = blockMetaColorMaps.get(ColorMap.getBlockMetaKey(block.blockID, metadata));
@@ -139,7 +134,6 @@ public class Colorizer {
     }
 
     public static int colorizeBlock(Block block) {
-        checkUpdate();
         ColorMap colorMap = blockColorMaps[block.blockID];
         if (colorMap == null) {
             return 0xffffff;
@@ -149,7 +143,6 @@ public class Colorizer {
     }
 
     public static int colorizeStem(int defaultColor, int blockMetadata) {
-        checkUpdate();
         if (stemColors == null) {
             return defaultColor;
         } else {
@@ -161,7 +154,6 @@ public class Colorizer {
         if (!useEggColors) {
             return defaultColor;
         }
-        checkUpdate();
         Integer value = null;
         HashMap<Integer, Integer> eggMap = (spots == 0 ? spawnerEggShellColors : spawnerEggSpotColors);
         if (eggMap.containsKey(entityID)) {
@@ -179,12 +171,10 @@ public class Colorizer {
     }
 
     public static int getWaterBottleColor() {
-        checkUpdate();
         return waterBottleColor;
     }
 
     public static int getLilyPadColor() {
-        checkUpdate();
         return lilypadColor;
     }
 
@@ -200,7 +190,6 @@ public class Colorizer {
         if (world == null || !useLightmaps) {
             return false;
         }
-        checkUpdate();
         int worldType = world.worldProvider.worldType;
         String name = String.format(LIGHTMAP_FORMAT, worldType);
         BufferedImage image;
@@ -258,7 +247,6 @@ public class Colorizer {
     }
 
     public static boolean computeRedstoneWireColor(int current) {
-        checkUpdate();
         if (redstoneColor == null) {
             return false;
         } else {
@@ -269,7 +257,6 @@ public class Colorizer {
 
     public static boolean computeWaterColor(double x, double y, double z) {
         if (useParticleColors) {
-            checkUpdate();
             int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER, (int) x, (int) y, (int) z);
             float[] multiplier = new float[3];
             intToFloat3(rgb, multiplier);
@@ -283,7 +270,6 @@ public class Colorizer {
     }
 
     public static void computeWaterColor() {
-        checkUpdate();
         int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER);
         intToFloat3(rgb, waterColor);
     }
@@ -296,7 +282,6 @@ public class Colorizer {
     }
 
     public static boolean computeLavaDropColor(int age) {
-        checkUpdate();
         if (lavaDropColors == null) {
             return false;
         } else {
@@ -307,6 +292,7 @@ public class Colorizer {
     }
 
     public static void setupBlockAccess(IBlockAccess blockAccess, boolean newBiomes) {
+        checkUpdate();
         if (blockAccess == null) {
             BiomeHelper.instance = null;
         } else if (newBiomes) {
@@ -329,7 +315,6 @@ public class Colorizer {
     }
 
     public static boolean computeFogColor(int index) {
-        checkUpdate();
         if (index < 0 || index >= fixedColorMaps.length || fogCamera == null || !fixedColorMaps[index].isCustom()) {
             return false;
         }
