@@ -7,4 +7,12 @@ public class BiomeGenBase {
     public float temperature;
     public float rainfall;
     public int waterColorMultiplier;
+    
+    public int getTemperaturef() {
+        return 0;
+    }
+    
+    public int getRainfallf() {
+        return 0;
+    }
 }

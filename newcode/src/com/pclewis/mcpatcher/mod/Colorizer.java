@@ -122,6 +122,12 @@ public class Colorizer {
         checkUpdate();
         return fixedColorMaps[COLOR_MAP_WATER].colorize(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, chunkManager, i, 64, k);
     }
+    
+    public static int colorizeWater(IBlockAccess blockAccess, int i, int k) {
+        checkUpdate();
+        BiomeGenBase biome = blockAccess.getBiomeGenAt(i, k);
+        return fixedColorMaps[COLOR_MAP_WATER].colorize(biome.waterColorMultiplier, biome.getTemperaturef(), biome.getRainfallf());
+    }
 
     public static int colorizeBlock(Block block, WorldChunkManager chunkManager, int i, int j, int k, int metadata) {
         checkUpdate();

@@ -609,10 +609,13 @@ public class CustomColors extends Mod {
                             BytecodeMatcher.anyILOAD,
                             IADD,
                             BytecodeMatcher.anyReference(INVOKEINTERFACE),
-                            BytecodeMatcher.anyReference(GETFIELD)
+                            BytecodeMatcher.captureReference(GETFIELD)
                         );
                     }
-                }.setMethod(colorMultiplier));
+                }
+                    .setMethod(colorMultiplier)
+                    .addXref(1, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
+                );
 
                 patches.add(new BytecodePatch() {
                     @Override
@@ -623,13 +626,15 @@ public class CustomColors extends Mod {
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
-                            reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBiomeGenAt", "(II)LBiomeGenBase;"))
+                            reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBiomeGenAt", "(II)LBiomeGenBase;")),
+                            reference(GETFIELD, new FieldRef(getDeobfClass(), "waterColorMultiplier", "I"))   
                         );
                     }
 
                     @Override
                     public byte[] getReplacementBytes() throws IOException {
                         return buildCode(
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LIBlockAccess;II)I"))
                         );
                     }
                 }.targetMethod(colorMultiplier));

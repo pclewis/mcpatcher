@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.WorldChunkManager;
 
 final class ColorMap {
