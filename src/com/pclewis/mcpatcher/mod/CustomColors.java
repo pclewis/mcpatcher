@@ -391,6 +391,51 @@ public class CustomColors extends Mod {
             );
 
             if (haveNewBiomes) {
+                /*
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        if (getMethodInfo().isConstructor()) {
+                            return buildExpression(
+                                ALOAD_0,
+                                push(0.5f),
+                                BytecodeMatcher.captureReference(PUTFIELD),
+                                ALOAD_0,
+                                push(0.5f),
+                                BytecodeMatcher.captureReference(PUTFIELD)
+                            );
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+                    .addXref(1, new FieldRef(getDeobfClass(), "temperature", "F"))
+                    .addXref(2, new FieldRef(getDeobfClass(), "rainfall", "F"))
+                );
+
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            ALOAD_0,
+                            reference(GETFIELD, new FieldRef(getDeobfClass(), "temperature", "F")),
+                            FRETURN
+                        );
+                    }
+                }.setMethod(new MethodRef(getDeobfClass(), "getTemperaturef", "()F")));
+
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            ALOAD_0,
+                            reference(GETFIELD, new FieldRef(getDeobfClass(), "rainfall", "F")),
+                            FRETURN
+                        );
+                    }
+                }.setMethod(new MethodRef(getDeobfClass(), "getRainfallf", "()F")));
+                */
+
                 classSignatures.add(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
@@ -422,11 +467,15 @@ public class CustomColors extends Mod {
                         );
                     }
                 }
-                    .addXref(1, new MethodRef(getDeobfClass(), "getTemperature", "()F"))
-                    .addXref(2, new MethodRef(getDeobfClass(), "getRainfall", "()F"))
+                    .addXref(1, new MethodRef(getDeobfClass(), "getTemperaturef", "()F"))
+                    .addXref(2, new MethodRef(getDeobfClass(), "getRainfallf", "()F"))
                 );
 
-                memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "()I"));
+                memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "()I")
+                    .accessFlag(AccessFlag.PUBLIC, true)
+                    .accessFlag(AccessFlag.STATIC, false)
+                    .accessFlag(AccessFlag.FINAL, false)
+                );
             } else {
                 classSignatures.add(new BytecodeSignature() {
                     @Override
@@ -983,31 +1032,53 @@ public class CustomColors extends Mod {
                 .addXref(3, new MethodRef("ColorizerFoliage", "getFoliageColorBirch", "()I"))
             );
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        ALOAD_1,
-                        BytecodeMatcher.captureReference(INVOKEINTERFACE),
-                        ILOAD_2,
-                        BinaryRegex.any(0, 3),
-                        ILOAD, 4,
-                        BinaryRegex.any(0, 3),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        ALOAD_1,
-                        ILOAD_2,
-                        BinaryRegex.any(0, 3),
-                        ILOAD_3,
-                        ILOAD, 4,
-                        BinaryRegex.any(0, 3),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL)
-                    );
+            if (haveNewBiomes) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            ALOAD_1,
+                            ILOAD_2,
+                            BytecodeMatcher.anyILOAD,
+                            IADD,
+                            ILOAD, 4,
+                            BytecodeMatcher.anyILOAD,
+                            IADD,
+                            BytecodeMatcher.captureReference(INVOKEINTERFACE),
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        );
+                    }
                 }
+                    .addXref(1, new InterfaceMethodRef("IBlockAccess", "getBiomeGenAt", "(II)LBiomeGenBase;"))
+                    .addXref(2, new MethodRef("BiomeGenBase", "getFoliageColor", "()I"))
+                );
+            } else {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            ALOAD_1,
+                            BytecodeMatcher.captureReference(INVOKEINTERFACE),
+                            ILOAD_2,
+                            BinaryRegex.any(0, 3),
+                            ILOAD, 4,
+                            BinaryRegex.any(0, 3),
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            ALOAD_1,
+                            ILOAD_2,
+                            BinaryRegex.any(0, 3),
+                            ILOAD_3,
+                            ILOAD, 4,
+                            BinaryRegex.any(0, 3),
+                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        );
+                    }
+                }
+                    .addXref(1, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;"))
+                    .addXref(2, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;"))
+                    .addXref(3, new MethodRef("BiomeGenBase", "getFoliageColor", "(LIBlockAccess;III)I"))
+                );
             }
-                .addXref(1, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;"))
-                .addXref(2, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;"))
-                .addXref(3, new MethodRef("BiomeGenBase", "getFoliageColor", "(LIBlockAccess;III)I"))
-            );
 
             addFoliagePatch("PINE", "Pine");
             addFoliagePatch("BIRCH", "Birch");
