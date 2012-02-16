@@ -102,6 +102,8 @@ public class Colorizer {
 
     private static Entity fogCamera;
     private static WorldChunkManager fogChunkManager;
+    
+    private static boolean newBiomes;
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         checkUpdate();
@@ -318,6 +320,9 @@ public class Colorizer {
         fogCamera = entity;
         if (!biomesLogged) {
             biomesLogged = true;
+            if (newBiomes) {
+                MCPatcherUtils.log("biomes v1.2 detected");
+            }
             for (BiomeGenBase biome : biomes) {
                 int x = ColorMap.getX(biome.temperature, biome.rainfall);
                 int y = ColorMap.getY(biome.temperature, biome.rainfall);
@@ -361,8 +366,9 @@ public class Colorizer {
         intToFloat3(color, setColor);
     }
 
-    public static void setupBiome(BiomeGenBase biome) {
+    public static void setupBiome(BiomeGenBase biome, boolean newBiomes) {
         biomes.add(biome);
+        Colorizer.newBiomes = newBiomes;
     }
 
     public static void setupPotion(Potion potion) {

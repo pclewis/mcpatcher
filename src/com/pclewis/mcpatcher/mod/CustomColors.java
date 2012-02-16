@@ -530,7 +530,8 @@ public class CustomColors extends Mod {
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBiome", "(LBiomeGenBase;)V"))
+                        push(haveNewBiomes),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBiome", "(LBiomeGenBase;Z)V"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "setBiomeName", "(Ljava/lang/String;)LBiomeGenBase;")));
