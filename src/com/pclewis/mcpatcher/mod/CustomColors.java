@@ -1166,6 +1166,8 @@ public class CustomColors extends Mod {
 
     private class WorldMod extends BaseMod.WorldMod {
         WorldMod() {
+            interfaces = new String[]{"IBlockAccess"};
+
             MethodRef getSkyColor = new MethodRef(getDeobfClass(), "getSkyColor", "(LEntity;F)LVec3D;");
 
             classSignatures.add(new BytecodeSignature() {

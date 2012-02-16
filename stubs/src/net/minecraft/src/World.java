@@ -2,7 +2,7 @@ package net.minecraft.src;
 
 import java.util.List;
 
-public class World {
+public class World implements IBlockAccess {
     public WorldInfo worldInfo;
     public List loadedEntityList;
     public WorldProvider worldProvider;
@@ -39,6 +39,14 @@ public class World {
     }
 
     public List getEntitiesWithinAABBExcludingEntity(Entity var1, AxisAlignedBB var2) {
+        return null;
+    }
+
+    public BiomeGenBase getBiomeGenAt(int i, int k) {
+        return null;
+    }
+
+    public WorldChunkManager getWorldChunkManager() {
         return null;
     }
 }
