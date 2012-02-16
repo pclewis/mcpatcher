@@ -640,7 +640,8 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature("splash"));
             classSignatures.add(new ConstSignature("liquid.water"));
 
-            MethodRef colorMultiplier = new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I");
+            final MethodRef colorMultiplier = new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I");
+            final FieldRef waterColorMultiplier = new FieldRef("BiomeGenBase", "waterColorMultiplier", "I");
 
             if (haveNewBiomes) {
                 classSignatures.add(new BytecodeSignature() {
@@ -660,7 +661,7 @@ public class CustomColors extends Mod {
                     }
                 }
                     .setMethod(colorMultiplier)
-                    .addXref(1, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
+                    .addXref(1, waterColorMultiplier)
                 );
 
                 patches.add(new BytecodePatch() {
@@ -673,7 +674,7 @@ public class CustomColors extends Mod {
                     public String getMatchExpression() {
                         return buildExpression(
                             reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBiomeGenAt", "(II)LBiomeGenBase;")),
-                            reference(GETFIELD, new FieldRef(getDeobfClass(), "waterColorMultiplier", "I"))   
+                            reference(GETFIELD, waterColorMultiplier)
                         );
                     }
 
@@ -716,7 +717,7 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             reference(INVOKEVIRTUAL, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;")),
                             BinaryRegex.any(0, 4),
-                            reference(GETFIELD, new FieldRef("BiomeGenBase", "waterColorMultiplier", "I"))
+                            reference(GETFIELD, waterColorMultiplier)
                         );
                     }
 
