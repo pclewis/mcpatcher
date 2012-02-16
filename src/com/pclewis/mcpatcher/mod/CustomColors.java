@@ -973,10 +973,20 @@ public class CustomColors extends Mod {
                         IF_ICMPNE, BinaryRegex.any(2),
 
                         BytecodeMatcher.captureReference(INVOKESTATIC),
-                        IRETURN,
+                        IRETURN
+                    );
+                }
+            }
+                .setMethod(new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I"))
+                .addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I"))
+                .addXref(2, new MethodRef("ColorizerFoliage", "getFoliageColorPine", "()I"))
+                .addXref(3, new MethodRef("ColorizerFoliage", "getFoliageColorBirch", "()I"))
+            );
 
-                        BinaryRegex.any(0, 50),
-
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
                         ALOAD_1,
                         BytecodeMatcher.captureReference(INVOKEINTERFACE),
                         ILOAD_2,
@@ -994,13 +1004,9 @@ public class CustomColors extends Mod {
                     );
                 }
             }
-                .setMethod(new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I"))
-                .addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I"))
-                .addXref(2, new MethodRef("ColorizerFoliage", "getFoliageColorPine", "()I"))
-                .addXref(3, new MethodRef("ColorizerFoliage", "getFoliageColorBirch", "()I"))
-                .addXref(4, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;"))
-                .addXref(5, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;"))
-                .addXref(6, new MethodRef("BiomeGenBase", "getFoliageColor", "(LIBlockAccess;III)I"))
+                .addXref(1, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;"))
+                .addXref(2, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;"))
+                .addXref(3, new MethodRef("BiomeGenBase", "getFoliageColor", "(LIBlockAccess;III)I"))
             );
 
             addFoliagePatch("PINE", "Pine");
