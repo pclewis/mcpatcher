@@ -101,9 +101,6 @@ public class Colorizer {
     private static boolean biomesLogged;
 
     private static Entity fogCamera;
-    private static WorldChunkManager fogChunkManager;
-    
-    private static boolean newBiomes;
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         checkUpdate();
@@ -115,23 +112,17 @@ public class Colorizer {
         return fixedColorMaps[index].colorize(defaultColor);
     }
 
-    public static int colorizeBiome(int defaultColor, int index, WorldChunkManager chunkManager, int i, int j, int k) {
+    public static int colorizeBiome(int defaultColor, int index, int i, int j, int k) {
         checkUpdate();
-        return fixedColorMaps[index].colorize(defaultColor, chunkManager, i, j, k);
+        return fixedColorMaps[index].colorize(defaultColor, i, j, k);
     }
 
-    public static int colorizeWater(WorldChunkManager chunkManager, int i, int k) {
+    public static int colorizeWater(Object dummy, int i, int k) {
         checkUpdate();
-        return fixedColorMaps[COLOR_MAP_WATER].colorize(chunkManager.getBiomeGenAt(i, k).waterColorMultiplier, chunkManager, i, 64, k);
+        return fixedColorMaps[COLOR_MAP_WATER].colorize(BiomeHelper.instance.getBiomeGenAt(i, 64, k).waterColorMultiplier, i, 64, k);
     }
     
-    public static int colorizeWater(IBlockAccess blockAccess, int i, int k) {
-        checkUpdate();
-        BiomeGenBase biome = blockAccess.getBiomeGenAt(i, k);
-        return fixedColorMaps[COLOR_MAP_WATER].colorize(biome.waterColorMultiplier, biome.getTemperaturef(), biome.getRainfallf());
-    }
-
-    public static int colorizeBlock(Block block, WorldChunkManager chunkManager, int i, int j, int k, int metadata) {
+    public static int colorizeBlock(Block block, int i, int j, int k, int metadata) {
         checkUpdate();
         ColorMap colorMap = null;
         if (!blockMetaColorMaps.isEmpty()) {
@@ -143,7 +134,7 @@ public class Colorizer {
         if (colorMap == null) {
             return 0xffffff;
         } else {
-            return colorMap.colorize(0xffffff, chunkManager, i, j, k);
+            return colorMap.colorize(0xffffff, i, j, k);
         }
     }
 
@@ -276,10 +267,10 @@ public class Colorizer {
         }
     }
 
-    public static boolean computeWaterColor(WorldChunkManager chunkManager, double x, double y, double z) {
+    public static boolean computeWaterColor(double x, double y, double z) {
         if (useParticleColors) {
             checkUpdate();
-            int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER, chunkManager, (int) x, (int) y, (int) z);
+            int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER, (int) x, (int) y, (int) z);
             float[] multiplier = new float[3];
             intToFloat3(rgb, multiplier);
             for (int i = 0; i < 3; i++) {
@@ -315,14 +306,18 @@ public class Colorizer {
         }
     }
 
-    public static void setupForFog(WorldChunkManager chunkManager, Entity entity) {
-        fogChunkManager = chunkManager;
+    public static void setupBlockAccess(IBlockAccess blockAccess, boolean newBiomes) {
+        if (newBiomes) {
+            BiomeHelper.instance = new BiomeHelper.New(blockAccess);
+        } else {
+            BiomeHelper.instance = new BiomeHelper.Old(blockAccess);
+        }
+    }
+
+public static void setupForFog(Entity entity) {
         fogCamera = entity;
         if (!biomesLogged) {
             biomesLogged = true;
-            if (newBiomes) {
-                MCPatcherUtils.log("biomes v1.2 detected");
-            }
             for (BiomeGenBase biome : biomes) {
                 int x = ColorMap.getX(biome.temperature, biome.rainfall);
                 int y = ColorMap.getY(biome.temperature, biome.rainfall);
@@ -333,7 +328,7 @@ public class Colorizer {
 
     public static boolean computeFogColor(int index) {
         checkUpdate();
-        if (index < 0 || index >= fixedColorMaps.length || fogChunkManager == null || fogCamera == null || !fixedColorMaps[index].isCustom()) {
+        if (index < 0 || index >= fixedColorMaps.length || fogCamera == null || !fixedColorMaps[index].isCustom()) {
             return false;
         }
         float[] f = new float[3];
@@ -345,7 +340,7 @@ public class Colorizer {
         setColor[2] = 0.0f;
         for (int i = -fogBlendRadius; i <= fogBlendRadius; i++) {
             for (int j = -fogBlendRadius; j <= fogBlendRadius; j++) {
-                int rgb = colorizeBiome(0xffffff, index, fogChunkManager, x + i, y, z + j);
+                int rgb = colorizeBiome(0xffffff, index, x + i, y, z + j);
                 intToFloat3(rgb, f);
                 setColor[0] += f[0];
                 setColor[1] += f[1];
@@ -366,9 +361,8 @@ public class Colorizer {
         intToFloat3(color, setColor);
     }
 
-    public static void setupBiome(BiomeGenBase biome, boolean newBiomes) {
+    public static void setupBiome(BiomeGenBase biome) {
         biomes.add(biome);
-        Colorizer.newBiomes = newBiomes;
     }
 
     public static void setupPotion(Potion potion) {

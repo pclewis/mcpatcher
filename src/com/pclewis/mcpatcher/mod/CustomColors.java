@@ -91,6 +91,9 @@ public class CustomColors extends Mod {
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS + "$Old"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS + "$New"));
     }
 
     private class ConfigPanel extends ModConfigPanel {
@@ -263,8 +266,6 @@ public class CustomColors extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        ALOAD_1,
-                        reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
@@ -273,7 +274,7 @@ public class CustomColors extends Mod {
                         ILOAD_3,
                         ILOAD, 4,
                         reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I")),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;IIII)I"))
                     );
                 }
 
@@ -530,8 +531,7 @@ public class CustomColors extends Mod {
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        push(haveNewBiomes),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBiome", "(LBiomeGenBase;Z)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBiome", "(LBiomeGenBase;)V"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "setBiomeName", "(Ljava/lang/String;)LBiomeGenBase;")));
@@ -635,7 +635,7 @@ public class CustomColors extends Mod {
                     @Override
                     public byte[] getReplacementBytes() throws IOException {
                         return buildCode(
-                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LIBlockAccess;II)I"))
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(Ljava/lang/Object;II)I"))
                         );
                     }
                 }.targetMethod(colorMultiplier));
@@ -678,7 +678,7 @@ public class CustomColors extends Mod {
                     @Override
                     public byte[] getReplacementBytes() throws IOException {
                         return buildCode(
-                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(LWorldChunkManager;II)I"))
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWater", "(Ljava/lang/Object;II)I"))
                         );
                     }
                 }.targetMethod(colorMultiplier));
@@ -1108,12 +1108,10 @@ public class CustomColors extends Mod {
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
-                        ALOAD_1,
-                        reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getWorldChunkManager", "()LWorldChunkManager;")),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IILWorldChunkManager;III)I"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIIII)I"))
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I")));
@@ -1194,11 +1192,9 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // Colorizer.setupForFog(getWorldChunkManager(), entity);
-                        ALOAD_0,
-                        reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), "getWorldChunkManager", "()LWorldChunkManager;")),
+                        // Colorizer.setupForFog(entity);
                         ALOAD_1,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LWorldChunkManager;LEntity;)V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LEntity;)V")),
 
                         // if (Colorizer.computeSkyColor(this)) {
                         ALOAD_0,
@@ -1503,17 +1499,14 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // if (Colorizer.computeWaterColor(worldObj.getWorldChunkManager(), i, j, k)) {
-                        ALOAD_0,
-                        reference(GETFIELD, new FieldRef(getDeobfClass(), "worldObj", "LWorld;")),
-                        reference(INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
+                        // if (Colorizer.computeWaterColor(i, j, k)) {
                         ALOAD_0,
                         reference(GETFIELD, new FieldRef(getDeobfClass(), "posX", "D")),
                         ALOAD_0,
                         reference(GETFIELD, new FieldRef(getDeobfClass(), "posY", "D")),
                         ALOAD_0,
                         reference(GETFIELD, new FieldRef(getDeobfClass(), "posZ", "D")),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "(LWorldChunkManager;DDD)Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeWaterColor", "(DDD)Z")),
                         IFEQ, branch("A"),
 
                         // particleRed = Colorizer.waterColor[0];
@@ -2159,11 +2152,9 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        // Colorizer.setupForFog(world.getWorldChunkManager(), entityliving);
-                        ALOAD_2,
-                        reference(INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
+                        // Colorizer.setupForFog(entityliving);
                         ALOAD_3,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LWorldChunkManager;LEntity;)V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LEntity;)V")),
 
                         // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_FOG0)) {
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
@@ -2505,15 +2496,13 @@ public class CustomColors extends Mod {
                     } else {
                         done = true;
                         extraCode = buildCode(
-                            // setColorF(Colorizer.colorizeBlock(block, world.getWorldChunkManager(), i, j, k, 0));
+                            // setColorF(Colorizer.colorizeBlock(block, i, j, k, 0));
                             ALOAD_1,
-                            ALOAD_2,
-                            reference(INVOKEVIRTUAL, new MethodRef("World", "getWorldChunkManager", "()LWorldChunkManager;")),
                             ILOAD_3,
                             ILOAD, 4,
                             ILOAD, 5,
                             ICONST_0,
-                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;LWorldChunkManager;IIII)I")),
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBlock", "(LBlock;IIII)I")),
                             reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V"))
                         );
                     }

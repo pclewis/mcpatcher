@@ -40,6 +40,7 @@ public class MCPatcherUtils {
     public static final String RANDOM_MOBS_CLASS = "com.pclewis.mcpatcher.mod.MobRandomizer";
     public static final String COLORIZER_CLASS = "com.pclewis.mcpatcher.mod.Colorizer";
     public static final String COLOR_MAP_CLASS = "com.pclewis.mcpatcher.mod.ColorMap";
+    public static final String BIOME_HELPER_CLASS = "com.pclewis.mcpatcher.mod.BiomeHelper";
     public static final String SHADERS_CLASS = "com.pclewis.mcpatcher.mod.Shaders";
 
     private MCPatcherUtils() {

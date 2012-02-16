@@ -65,7 +65,7 @@ final class ColorMap {
         }
     }
 
-    int colorize(int defaultColor, WorldChunkManager chunkManager, int i, int j, int k) {
-        return colorize(defaultColor, chunkManager.getTemperature(i, j, k), chunkManager.getRainfall(i, k));
+    int colorize(int defaultColor, int i, int j, int k) {
+        return colorize(defaultColor, BiomeHelper.instance.getTemperature(i, j, k), BiomeHelper.instance.getRainfall(i, j, k));
     }
 }
