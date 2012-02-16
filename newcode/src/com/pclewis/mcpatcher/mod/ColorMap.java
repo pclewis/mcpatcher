@@ -12,11 +12,11 @@ final class ColorMap {
     private int mapDefault;
 
     static int getX(double temperature, double rainfall) {
-        return (int) (COLORMAP_SCALE * (1.0 - temperature));
+        return (int) (COLORMAP_SCALE * (1.0 - Colorizer.clamp(temperature)));
     }
 
     static int getY(double temperature, double rainfall) {
-        return (int) (COLORMAP_SCALE * (1.0 - rainfall * temperature));
+        return (int) (COLORMAP_SCALE * (1.0 - Colorizer.clamp(rainfall) * Colorizer.clamp(temperature)));
     }
 
     static float getBlockMetaKey(int blockID, int metadata) {

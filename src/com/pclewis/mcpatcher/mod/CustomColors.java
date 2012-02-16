@@ -22,7 +22,7 @@ public class CustomColors extends Mod {
         name = MCPatcherUtils.CUSTOM_COLORS;
         author = "MCPatcher";
         description = "Gives texture packs control over hardcoded colors in the game.";
-        version = "1.3";
+        version = "1.4";
 
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") < 0) {
             addError("Requires Minecraft Beta 1.9 or newer.");
@@ -34,10 +34,10 @@ public class CustomColors extends Mod {
 
         configPanel = new ConfigPanel();
 
-        classMods.add(new BaseMod.MinecraftMod().mapTexturePackList());
         classMods.add(new BaseMod.TexturePackListMod());
         classMods.add(new BaseMod.TexturePackBaseMod());
 
+        classMods.add(new MinecraftMod());
         classMods.add(new IBlockAccessMod());
         classMods.add(new BlockMod());
 
@@ -226,6 +226,51 @@ public class CustomColors extends Mod {
 
         @Override
         public void save() {
+        }
+    }
+    
+    private class MinecraftMod extends BaseMod.MinecraftMod {
+        MinecraftMod() {
+            final MethodRef runGameLoop = new MethodRef(getDeobfClass(), "runGameLoop", "()V");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(65),
+                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/input/Keyboard", "isKeyDown", "(I)Z")),
+                        IFEQ, BinaryRegex.any(2),
+                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/Display", "update", "()V"))
+                    );
+                }
+            }.setMethod(runGameLoop));
+            
+            mapTexturePackList();
+            memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "set up block access";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "theWorld", "LWorld;")),
+                        push(haveNewBiomes),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBlockAccess", "(LIBlockAccess;Z)V"))
+                    );
+                }
+            }.targetMethod(runGameLoop));
         }
     }
 

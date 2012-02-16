@@ -307,14 +307,16 @@ public class Colorizer {
     }
 
     public static void setupBlockAccess(IBlockAccess blockAccess, boolean newBiomes) {
-        if (newBiomes) {
+        if (blockAccess == null) {
+            BiomeHelper.instance = null;
+        } else if (newBiomes) {
             BiomeHelper.instance = new BiomeHelper.New(blockAccess);
         } else {
             BiomeHelper.instance = new BiomeHelper.Old(blockAccess);
         }
     }
 
-public static void setupForFog(Entity entity) {
+    public static void setupForFog(Entity entity) {
         fogCamera = entity;
         if (!biomesLogged) {
             biomesLogged = true;
@@ -667,6 +669,16 @@ public static void setupForFog(Entity entity) {
             return 1.0f;
         } else {
             return f;
+        }
+    }
+    
+    static double clamp(double d) {
+        if (d < 0.0) {
+            return 0.0;
+        } else if (d > 1.0) {
+            return 1.0;
+        } else {
+            return d;
         }
     }
 

@@ -8,11 +8,11 @@ public class BiomeGenBase {
     public float rainfall;
     public int waterColorMultiplier;
     
-    public int getTemperaturef() { // 1.2 and up
-        return 0;
+    public float getTemperaturef() { // 1.2 and up
+        return 0.0f;
     }
     
-    public int getRainfallf() { // 1.2 and up
-        return 0;
+    public float getRainfallf() { // 1.2 and up
+        return 0.0f;
     }
 }
