@@ -604,34 +604,61 @@ public class CustomColors extends Mod {
         }
 
         private void addSwampColorPatch(final String index, final String name) {
-            patches.add(new BytecodePatch.InsertAfter() {
-                @Override
-                public String getDescription() {
-                    return "override swamp " + name.toLowerCase() + " color";
-                }
+            if (haveNewBiomes) {
+                patches.add(new BytecodePatch() {
+                    @Override
+                    public String getDescription() {
+                        return "override swamp " + name.toLowerCase() + " color";
+                    }
 
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        push(MAGIC1),
-                        IAND,
-                        push(MAGIC2),
-                        IADD,
-                        ICONST_2,
-                        IDIV
-                    );
-                }
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            IRETURN
+                        );
+                    }
 
-                @Override
-                public byte[] getInsertBytes() throws IOException {
-                    return buildCode(
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
-                        DLOAD, 5,
-                        DLOAD, 7,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIDD)I"))
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "get" + name + "Color", "(LIBlockAccess;III)I")));
+                    @Override
+                    public byte[] getReplacementBytes() throws IOException {
+                        return buildCode(
+                            reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
+                            DLOAD_1,
+                            DLOAD_3,
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSwamp", "(IIDD)I")),
+                            IRETURN
+                        );
+                    }
+                }.targetMethod(new MethodRef(getDeobfClass(), "get" + name + "Color", "()I")));
+            } else {
+                patches.add(new BytecodePatch.InsertAfter() {
+                    @Override
+                    public String getDescription() {
+                        return "override swamp " + name.toLowerCase() + " color";
+                    }
+    
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            push(MAGIC1),
+                            IAND,
+                            push(MAGIC2),
+                            IADD,
+                            ICONST_2,
+                            IDIV
+                        );
+                    }
+    
+                    @Override
+                    public byte[] getInsertBytes() throws IOException {
+                        return buildCode(
+                            reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
+                            DLOAD, 5,
+                            DLOAD, 7,
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIDD)I"))
+                        );
+                    }
+                }.targetMethod(new MethodRef(getDeobfClass(), "get" + name + "Color", "(LIBlockAccess;III)I")));
+            }
         }
     }
 
