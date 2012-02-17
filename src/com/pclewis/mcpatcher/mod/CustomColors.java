@@ -579,7 +579,7 @@ public class CustomColors extends Mod {
                             reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_" + index, "I")),
                             DLOAD_1,
                             DLOAD_3,
-                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSwamp", "(IIDD)I")),
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIDD)I")),
                             IRETURN
                         );
                     }

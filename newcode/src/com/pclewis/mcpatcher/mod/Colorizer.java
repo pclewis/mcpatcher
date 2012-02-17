@@ -118,10 +118,6 @@ public class Colorizer {
         return fixedColorMaps[COLOR_MAP_WATER].colorize(BiomeHelper.instance.getBiomeGenAt(i, 64, k).waterColorMultiplier, i, 64, k);
     }
     
-    public static int colorizeSwamp(int defaultColor, int index, double temperature, double rainfall) {
-        return fixedColorMaps[COLOR_MAP_SWAMP_FOLIAGE].colorize(defaultColor, temperature, rainfall);
-    }
-    
     public static int colorizeBlock(Block block, int i, int j, int k, int metadata) {
         ColorMap colorMap = null;
         if (!blockMetaColorMaps.isEmpty()) {
