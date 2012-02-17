@@ -117,7 +117,7 @@ public class Colorizer {
     public static int colorizeWater(Object dummy, int i, int k) {
         return fixedColorMaps[COLOR_MAP_WATER].colorize(BiomeHelper.instance.getBiomeGenAt(i, 64, k).waterColorMultiplier, i, 64, k);
     }
-    
+
     public static int colorizeBlock(Block block, int i, int j, int k, int metadata) {
         ColorMap colorMap = null;
         if (!blockMetaColorMaps.isEmpty()) {
@@ -656,7 +656,7 @@ public class Colorizer {
             return f;
         }
     }
-    
+
     static double clamp(double d) {
         if (d < 0.0) {
             return 0.0;

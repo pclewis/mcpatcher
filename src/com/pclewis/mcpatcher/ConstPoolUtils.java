@@ -148,9 +148,9 @@ class ConstPoolUtils {
                 return new byte[]{ICONST_0};
             }
         } else if (value instanceof Byte) {
-            return push(cp, (int)(Byte) value, add);
+            return push(cp, (int) (Byte) value, add);
         } else if (value instanceof Character) {
-            return push(cp, (int)(Character) value, add);
+            return push(cp, (int) (Character) value, add);
         } else if (value instanceof Integer) {
             int i = (Integer) value;
             switch (i) {

@@ -228,7 +228,7 @@ public class CustomColors extends Mod {
         public void save() {
         }
     }
-    
+
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
             final MethodRef runGameLoop = new MethodRef(getDeobfClass(), "runGameLoop", "()V");
@@ -244,7 +244,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.setMethod(runGameLoop));
-            
+
             mapTexturePackList();
             memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
 
@@ -348,7 +348,7 @@ public class CustomColors extends Mod {
             }.targetMethod(getRenderColor));
         }
     }
-    
+
     private class IBlockAccessMod extends BaseMod.IBlockAccessMod {
         IBlockAccessMod() {
             if (haveNewBiomes) {
@@ -590,7 +590,7 @@ public class CustomColors extends Mod {
                     public String getDescription() {
                         return "override swamp " + name.toLowerCase() + " color";
                     }
-    
+
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
@@ -602,7 +602,7 @@ public class CustomColors extends Mod {
                             IDIV
                         );
                     }
-    
+
                     @Override
                     public byte[] getInsertBytes() throws IOException {
                         return buildCode(
