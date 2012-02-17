@@ -437,51 +437,6 @@ public class CustomColors extends Mod {
             );
 
             if (haveNewBiomes) {
-                /*
-                classSignatures.add(new BytecodeSignature() {
-                    @Override
-                    public String getMatchExpression() {
-                        if (getMethodInfo().isConstructor()) {
-                            return buildExpression(
-                                ALOAD_0,
-                                push(0.5f),
-                                BytecodeMatcher.captureReference(PUTFIELD),
-                                ALOAD_0,
-                                push(0.5f),
-                                BytecodeMatcher.captureReference(PUTFIELD)
-                            );
-                        } else {
-                            return null;
-                        }
-                    }
-                }
-                    .addXref(1, new FieldRef(getDeobfClass(), "temperature", "F"))
-                    .addXref(2, new FieldRef(getDeobfClass(), "rainfall", "F"))
-                );
-
-                classSignatures.add(new BytecodeSignature() {
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            ALOAD_0,
-                            reference(GETFIELD, new FieldRef(getDeobfClass(), "temperature", "F")),
-                            FRETURN
-                        );
-                    }
-                }.setMethod(new MethodRef(getDeobfClass(), "getTemperaturef", "()F")));
-
-                classSignatures.add(new BytecodeSignature() {
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            ALOAD_0,
-                            reference(GETFIELD, new FieldRef(getDeobfClass(), "rainfall", "F")),
-                            FRETURN
-                        );
-                    }
-                }.setMethod(new MethodRef(getDeobfClass(), "getRainfallf", "()F")));
-                */
-
                 classSignatures.add(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
