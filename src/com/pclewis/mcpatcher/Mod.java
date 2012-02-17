@@ -263,11 +263,11 @@ public abstract class Mod {
 
     class Dependency {
         String name;
-        boolean enabled;
+        boolean required;
 
-        Dependency(String name, boolean enabled) {
+        Dependency(String name, boolean required) {
             this.name = name;
-            this.enabled = enabled;
+            this.required = required;
         }
     }
 }

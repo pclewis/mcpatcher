@@ -333,7 +333,7 @@ class ModList {
         }
         for (Mod.Dependency dep : mod.dependencies) {
             Mod dmod = modsByName.get(dep.name);
-            if (dep.enabled) {
+            if (dep.required) {
                 if (dmod == null) {
                     throw new ModDependencyException("dependent mod " + dep.name + " not available");
                 } else {
@@ -361,7 +361,7 @@ class ModList {
         for (Mod dmod : modsByIndex) {
             if (dmod != mod) {
                 for (Mod.Dependency dep : dmod.dependencies) {
-                    if (dep.name.equals(mod.getName()) && dep.enabled) {
+                    if (dep.name.equals(mod.getName()) && dep.required) {
                         disableMod(inst, dmod, true);
                         break;
                     }

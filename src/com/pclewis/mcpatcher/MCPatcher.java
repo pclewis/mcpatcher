@@ -426,7 +426,7 @@ final public class MCPatcher {
                     for (Mod.Dependency dep : mod.dependencies) {
                         Mod dmod = modList.get(dep.name);
                         checkInterrupt();
-                        if (dmod == null || !dmod.okToApply()) {
+                        if (dep.required && (dmod == null || !dmod.okToApply())) {
                             mod.addError(String.format("requires %s, which cannot be applied", dep.name));
                             didSomething = true;
                             break;
