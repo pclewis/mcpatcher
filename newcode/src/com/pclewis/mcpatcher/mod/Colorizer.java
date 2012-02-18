@@ -126,10 +126,24 @@ public class Colorizer {
         if (colorMap == null && block.blockID >= 0 && block.blockID < blockColorMaps.length) {
             colorMap = blockColorMaps[block.blockID];
         }
-        if (colorMap == null) {
+        if (colorMap == null || !colorMap.isCustom()) {
             return 0xffffff;
         } else {
-            return colorMap.colorize(0xffffff, i, j, k);
+            float[] sum = new float[3];
+            float[] sample = new float[3];
+            for (int di = -fogBlendRadius; di <= fogBlendRadius; di++) {
+                for (int dk = -fogBlendRadius; dk <= fogBlendRadius; dk++) {
+                    int rgb = colorMap.colorize(0xffffff, i + di, j, k + dk);
+                    intToFloat3(rgb, sample);
+                    sum[0] += sample[0];
+                    sum[1] += sample[1];
+                    sum[2] += sample[2];
+                }
+            }
+            sum[0] *= fogBlendScale;
+            sum[1] *= fogBlendScale;
+            sum[2] *= fogBlendScale;
+            return float3ToInt(sum);
         }
     }
 
