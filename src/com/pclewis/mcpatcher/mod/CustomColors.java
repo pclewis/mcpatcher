@@ -6,6 +6,8 @@ import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -113,6 +115,8 @@ public class CustomColors extends Mod {
         private JCheckBox cloudsCheckBox;
         private JCheckBox mapCheckBox;
         private JCheckBox sheepCheckBox;
+        private JSpinner fogBlendRadiusSpinner;
+        private JSpinner blockBlendRadiusSpinner;
 
         ConfigPanel() {
             waterCheckBox.addActionListener(new ActionListener() {
@@ -148,12 +152,6 @@ public class CustomColors extends Mod {
             lightmapCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", lightmapCheckBox.isSelected());
-                }
-            });
-
-            fogCheckBox.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "fog", fogCheckBox.isSelected());
                 }
             });
 
@@ -193,9 +191,41 @@ public class CustomColors extends Mod {
                 }
             });
 
+            fogCheckBox.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "fog", fogCheckBox.isSelected());
+                }
+            });
+
             otherBlockCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", otherBlockCheckBox.isSelected());
+                }
+            });
+            
+            fogBlendRadiusSpinner.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
+                    int value = 7;
+                    try {
+                        value = Integer.parseInt(fogBlendRadiusSpinner.getValue().toString());
+                        value = Math.min(Math.max(0, value), 99);
+                    } catch (NumberFormatException e1) {
+                    }
+                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", value);
+                    fogBlendRadiusSpinner.setValue(value);
+                }
+            });
+
+            blockBlendRadiusSpinner.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
+                    int value = 1;
+                    try {
+                        value = Integer.parseInt(blockBlendRadiusSpinner.getValue().toString());
+                        value = Math.min(Math.max(0, value), 99);
+                    } catch (NumberFormatException e1) {
+                    }
+                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", value);
+                    blockBlendRadiusSpinner.setValue(value);
                 }
             });
         }
@@ -213,14 +243,16 @@ public class CustomColors extends Mod {
             potionCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true));
             particleCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "particle", true));
             lightmapCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true));
-            fogCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true));
             cloudsCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "clouds", true));
             redstoneCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "redstone", true));
             stemCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "stem", true));
             eggCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true));
             mapCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "map", true));
             sheepCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true));
+            fogCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true));
             otherBlockCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true));
+            fogBlendRadiusSpinner.setValue(MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7));
+            blockBlendRadiusSpinner.setValue(MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1));
             eggCheckBox.setVisible(haveSpawnerEggs);
         }
 

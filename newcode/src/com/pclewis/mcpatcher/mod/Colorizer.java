@@ -130,7 +130,7 @@ public class Colorizer {
         }
         if (colorMap == null || !colorMap.isCustom()) {
             return 0xffffff;
-        } else if (!BiomeHelper.instance.useBlockBlending()) {
+        } else if (!BiomeHelper.instance.useBlockBlending() || blockBlendRadius == 0) {
             return colorMap.colorize(0xffffff, i, j, k);
         } else {
             float[] sum = new float[3];
