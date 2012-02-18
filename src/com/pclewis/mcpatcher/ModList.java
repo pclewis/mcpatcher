@@ -28,6 +28,7 @@ class ModList {
         new BuiltInMod(MCPatcherUtils.BETTER_GRASS, BetterGrass.class, false),
         new BuiltInMod(MCPatcherUtils.RANDOM_MOBS, RandomMobs.class, false),
         new BuiltInMod(MCPatcherUtils.CUSTOM_COLORS, CustomColors.class, false),
+        new BuiltInMod(MCPatcherUtils.BETTER_GLASS, BetterGlass.class, true),
         new BuiltInMod(MCPatcherUtils.GLSL_SHADERS, GLSLShader.class, true),
     };
 

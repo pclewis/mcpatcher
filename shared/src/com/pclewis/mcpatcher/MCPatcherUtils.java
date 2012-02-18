@@ -29,6 +29,7 @@ public class MCPatcherUtils {
     public static final String BETTER_GRASS = "Better Grass";
     public static final String RANDOM_MOBS = "Random Mobs";
     public static final String CUSTOM_COLORS = "Custom Colors";
+    public static final String BETTER_GLASS = "Better Glass";
     public static final String GLSL_SHADERS = "GLSL Shaders";
 
     public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
