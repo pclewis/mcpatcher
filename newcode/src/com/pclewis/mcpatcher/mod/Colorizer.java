@@ -2,6 +2,7 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.*;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
@@ -76,9 +77,9 @@ public class Colorizer {
     private static final boolean useSheepColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true);
     private static final boolean useBlockColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true);
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
-    private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
-    private static final int blockBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1);
-    private static final float blockBlendScale = 1.0f / ((2 * blockBlendRadius + 1) * (2 * blockBlendRadius + 1));
+    private static final float fogBlendScale = getBlendScale(fogBlendRadius);
+    private static int blockBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1);
+    private static float blockBlendScale = getBlendScale(blockBlendRadius);
 
     static TexturePackBase lastTexturePack;
 
@@ -130,6 +131,8 @@ public class Colorizer {
         }
         if (colorMap == null || !colorMap.isCustom()) {
             return 0xffffff;
+        } else if (blockBlendRadius == 0) {
+            return colorMap.colorize(0xffffff, i, j, k);
         } else {
             float[] sum = new float[3];
             float[] sample = new float[3];
@@ -315,6 +318,8 @@ public class Colorizer {
             BiomeHelper.instance = new BiomeHelper.New(blockAccess);
         } else {
             BiomeHelper.instance = new BiomeHelper.Old(blockAccess);
+            blockBlendRadius = 0;
+            blockBlendScale = getBlendScale(blockBlendRadius);
         }
     }
 
@@ -705,5 +710,9 @@ public class Colorizer {
                 rgb[offset2 + i] = xg * rgb0[i] + xf * rgb1[i];
             }
         }
+    }
+
+    private static float getBlendScale(int radius) {
+        return 1.0f / ((2 * radius + 1) * (2 * radius + 1));
     }
 }
