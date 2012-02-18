@@ -31,7 +31,7 @@ final class ColorMap {
             return;
         }
         if (map.length != COLORMAP_SIZE * COLORMAP_SIZE) {
-            System.out.printf("ERROR: %s must be %dx%d\n", filename, COLORMAP_SIZE, COLORMAP_SIZE);
+            MCPatcherUtils.error("%s must be %dx%d", filename, COLORMAP_SIZE, COLORMAP_SIZE);
             map = null;
             return;
         }

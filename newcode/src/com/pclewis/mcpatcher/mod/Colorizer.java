@@ -228,7 +228,7 @@ public class Colorizer {
         int width = image.getWidth();
         int height = image.getHeight();
         if (height != 2 * LIGHTMAP_SIZE) {
-            System.out.printf("ERROR: %s must be exactly %d pixels high\n", name, 2 * LIGHTMAP_SIZE);
+            MCPatcherUtils.error("%s must be exactly %d pixels high", name, 2 * LIGHTMAP_SIZE);
             lightmaps.put(worldType, null);
             return false;
         }
