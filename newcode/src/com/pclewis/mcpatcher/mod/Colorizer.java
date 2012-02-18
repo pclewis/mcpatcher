@@ -118,7 +118,7 @@ public class Colorizer {
     }
 
     public static int colorizeWater(Object dummy, int i, int k) {
-        return fixedColorMaps[COLOR_MAP_WATER].colorize(BiomeHelper.instance.getBiomeGenAt(i, 64, k).waterColorMultiplier, i, 64, k);
+        return fixedColorMaps[COLOR_MAP_WATER].colorize(BiomeHelper.instance.getWaterColorMultiplier(i, 64, k), i, 64, k);
     }
 
     public static int colorizeBlock(Block block, int i, int j, int k, int metadata) {

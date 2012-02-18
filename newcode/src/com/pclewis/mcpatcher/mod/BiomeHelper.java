@@ -19,6 +19,8 @@ abstract class BiomeHelper {
     abstract float getTemperature(int i, int j, int k);
 
     abstract float getRainfall(int i, int j, int k);
+    
+    abstract int getWaterColorMultiplier(int i, int j, int k);
 
     static class Old extends BiomeHelper {
         WorldChunkManager chunkManager;
@@ -42,14 +44,17 @@ abstract class BiomeHelper {
         float getRainfall(int i, int j, int k) {
             return chunkManager.getRainfall(i, k);
         }
+
+        @Override
+        int getWaterColorMultiplier(int i, int j, int k) {
+            return getBiomeGenAt(i, j, k).waterColorMultiplier;
+        }
     }
 
     static class New extends BiomeHelper {
         private static boolean logged;
 
         private BiomeGenBase lastBiome;
-        private float lastTemperature;
-        private float lastRainfall;
         private int lastI;
         private int lastK;
 
@@ -63,30 +68,27 @@ abstract class BiomeHelper {
 
         @Override
         BiomeGenBase getBiomeGenAt(int i, int j, int k) {
-            checkLast(i, j, k);
+            if (lastBiome == null || i != lastI || k != lastK) {
+                lastI = i;
+                lastK = k;
+                lastBiome = blockAccess.getBiomeGenAt(i, k);
+            }
             return lastBiome;
         }
 
         @Override
         float getTemperature(int i, int j, int k) {
-            checkLast(i, j, k);
-            return lastTemperature;
+            return getBiomeGenAt(i, j, k).getTemperaturef();
         }
 
         @Override
         float getRainfall(int i, int j, int k) {
-            checkLast(i, j, k);
-            return lastRainfall;
+            return getBiomeGenAt(i, j, k).getRainfallf();
         }
-        
-        private void checkLast(int i, int j, int k) {
-            if (lastBiome == null || i != lastI || k != lastK) {
-                lastI = i;
-                lastK = k;
-                lastBiome = blockAccess.getBiomeGenAt(i, k);
-                lastTemperature = lastBiome.getTemperaturef();
-                lastRainfall = lastBiome.getRainfallf();
-            }
+
+        @Override
+        int getWaterColorMultiplier(int i, int j, int k) {
+            return getBiomeGenAt(i, j, k).waterColorMultiplier;
         }
     }
 }
