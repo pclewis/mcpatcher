@@ -48,8 +48,9 @@ abstract class BiomeHelper {
         private static boolean logged;
 
         private BiomeGenBase lastBiome;
+        private float lastTemperature;
+        private float lastRainfall;
         private int lastI;
-        private int lastJ;
         private int lastK;
 
         New(IBlockAccess blockAccess) {
@@ -62,27 +63,30 @@ abstract class BiomeHelper {
 
         @Override
         BiomeGenBase getBiomeGenAt(int i, int j, int k) {
-            if (i == lastI && j == lastJ && k == lastK && lastBiome != null) {
-                return lastBiome;
-            } else {
-                BiomeGenBase biome = blockAccess.getBiomeGenAt(i, k);
-                lastBiome = biome;
-                lastI = i;
-                lastJ = j;
-                lastK = k;
-                return biome;
-            }
+            checkLast(i, j, k);
+            return lastBiome;
         }
 
         @Override
         float getTemperature(int i, int j, int k) {
-            return getBiomeGenAt(i, j, k).getTemperaturef();
+            checkLast(i, j, k);
+            return lastTemperature;
         }
 
         @Override
         float getRainfall(int i, int j, int k) {
-            return getBiomeGenAt(i, j, k).getRainfallf();
+            checkLast(i, j, k);
+            return lastRainfall;
+        }
+        
+        private void checkLast(int i, int j, int k) {
+            if (lastBiome == null || i != lastI || k != lastK) {
+                lastI = i;
+                lastK = k;
+                lastBiome = blockAccess.getBiomeGenAt(i, k);
+                lastTemperature = lastBiome.getTemperaturef();
+                lastRainfall = lastBiome.getRainfallf();
+            }
         }
     }
-
 }
