@@ -77,6 +77,8 @@ public class Colorizer {
     private static final boolean useBlockColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true);
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
     private static final float fogBlendScale = 1.0f / ((2 * fogBlendRadius + 1) * (2 * fogBlendRadius + 1));
+    private static final int blockBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1);
+    private static final float blockBlendScale = 1.0f / ((2 * blockBlendRadius + 1) * (2 * blockBlendRadius + 1));
 
     static TexturePackBase lastTexturePack;
 
@@ -131,8 +133,8 @@ public class Colorizer {
         } else {
             float[] sum = new float[3];
             float[] sample = new float[3];
-            for (int di = -fogBlendRadius; di <= fogBlendRadius; di++) {
-                for (int dk = -fogBlendRadius; dk <= fogBlendRadius; dk++) {
+            for (int di = -blockBlendRadius; di <= blockBlendRadius; di++) {
+                for (int dk = -blockBlendRadius; dk <= blockBlendRadius; dk++) {
                     int rgb = colorMap.colorize(0xffffff, i + di, j, k + dk);
                     intToFloat3(rgb, sample);
                     sum[0] += sample[0];
@@ -140,9 +142,9 @@ public class Colorizer {
                     sum[2] += sample[2];
                 }
             }
-            sum[0] *= fogBlendScale;
-            sum[1] *= fogBlendScale;
-            sum[2] *= fogBlendScale;
+            sum[0] *= blockBlendScale;
+            sum[1] *= blockBlendScale;
+            sum[2] *= blockBlendScale;
             return float3ToInt(sum);
         }
     }

@@ -221,7 +221,6 @@ public class CustomColors extends Mod {
             sheepCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true));
             otherBlockCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true));
             eggCheckBox.setVisible(haveSpawnerEggs);
-            MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
         }
 
         @Override
