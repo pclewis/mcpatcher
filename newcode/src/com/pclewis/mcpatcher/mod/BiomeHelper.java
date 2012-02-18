@@ -14,13 +14,43 @@ abstract class BiomeHelper {
         this.blockAccess = blockAccess;
     }
 
+    boolean useBlockBlending() {
+        return false;
+    }
+
     abstract BiomeGenBase getBiomeGenAt(int i, int j, int k);
 
     abstract float getTemperature(int i, int j, int k);
 
     abstract float getRainfall(int i, int j, int k);
-    
+
     abstract int getWaterColorMultiplier(int i, int j, int k);
+
+    static class Stub extends BiomeHelper {
+        Stub() {
+            super(null);
+        }
+
+        @Override
+        BiomeGenBase getBiomeGenAt(int i, int j, int k) {
+            return null;
+        }
+
+        @Override
+        float getTemperature(int i, int j, int k) {
+            return 0.5f;
+        }
+
+        @Override
+        float getRainfall(int i, int j, int k) {
+            return 1.0f;
+        }
+
+        @Override
+        int getWaterColorMultiplier(int i, int j, int k) {
+            return 0xffffff;
+        }
+    }
 
     static class Old extends BiomeHelper {
         WorldChunkManager chunkManager;
@@ -64,6 +94,11 @@ abstract class BiomeHelper {
                 logged = true;
                 MCPatcherUtils.log("biomes v1.2 detected");
             }
+        }
+
+        @Override
+        boolean useBlockBlending() {
+            return true;
         }
 
         @Override
