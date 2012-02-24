@@ -14,6 +14,10 @@ public class CustomAnimation extends TextureFX {
 
     static private Random rand = new Random();
 
+    CustomAnimation() {
+        super(0);
+    }
+
     public CustomAnimation(int tileNumber, int tileImage, int tileSize, String name, int minScrollDelay, int maxScrollDelay) {
         super(tileNumber);
 
@@ -55,7 +59,7 @@ public class CustomAnimation extends TextureFX {
         }
     }
 
-    static private void ARGBtoRGBA(int[] src, byte[] dest) {
+    static void ARGBtoRGBA(int[] src, byte[] dest) {
         for (int i = 0; i < src.length; ++i) {
             int v = src[i];
             dest[(i * 4) + 3] = (byte) ((v >> 24) & 0xff);
