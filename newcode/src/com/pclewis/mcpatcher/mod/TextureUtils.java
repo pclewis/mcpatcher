@@ -109,8 +109,7 @@ public class TextureUtils {
             textureFX instanceof StillWater ||
             textureFX instanceof FlowWater ||
             textureFX instanceof Fire ||
-            textureFX instanceof Portal ||
-            textureFX instanceof CustomAnimation) {
+            textureFX instanceof Portal) {
             return null;
         }
         System.out.printf("attempting to refresh unknown animation %s\n", textureFX.getClass().getName());
