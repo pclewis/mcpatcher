@@ -14,7 +14,7 @@ class ConstPoolUtils {
     public static final byte[] METHODREF_OPCODES = new byte[]{(byte) INVOKEVIRTUAL, (byte) INVOKESTATIC, (byte) INVOKESPECIAL};
     public static final byte[] INTERFACEMETHODREF_OPCODES = new byte[]{(byte) INVOKEINTERFACE};
 
-    public static final String DESCRIPTOR_TYPES = "VZBSIJFD";
+    public static final String DESCRIPTOR_TYPES = "VZBCSIJFD";
     public static final String DESCRIPTOR_CHARS = DESCRIPTOR_TYPES + "()<>[";
 
     private static final byte[] NOT_FOUND = null;
