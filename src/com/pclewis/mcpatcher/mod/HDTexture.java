@@ -742,6 +742,7 @@ public class HDTexture extends Mod {
 
             classSignatures.add(new ConstSignature("pack.txt"));
             classSignatures.add(new ConstSignature("pack.png"));
+            classSignatures.add(new ConstSignature(new ClassRef("java.util.zip.ZipFile")));
 
             memberMappers.add(new FieldMapper("zipFile", "Ljava/util/zip/ZipFile;"));
             memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
