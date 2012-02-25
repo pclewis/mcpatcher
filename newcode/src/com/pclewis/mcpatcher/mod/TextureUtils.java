@@ -160,7 +160,7 @@ public class TextureUtils {
             }
         }
         textureList.clear();
-        CustomAnimation.clear();
+        CustomAnimation.checkUpdate();
 
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         textureList.add(new Compass(minecraft));
@@ -186,15 +186,15 @@ public class TextureUtils {
         }
 
         if (!isDefault && customFire && hasResource("/anim/custom_fire_e_w.png") && hasResource("/anim/custom_fire_n_s.png")) {
-            CustomAnimation.addStrip("/terrain.png", "fire_n_s", FIRE_N_S_TEXTURE_INDEX);
-            CustomAnimation.addStrip("/terrain.png", "fire_e_w", FIRE_E_W_TEXTURE_INDEX);
+            CustomAnimation.addStrip("/terrain.png", "fire_n_s", FIRE_N_S_TEXTURE_INDEX, 1);
+            CustomAnimation.addStrip("/terrain.png", "fire_e_w", FIRE_E_W_TEXTURE_INDEX, 1);
         } else if (animatedFire) {
             textureList.add(new Fire(0));
             textureList.add(new Fire(1));
         }
 
         if (!isDefault && customPortal && hasResource("/anim/custom_portal.png")) {
-            CustomAnimation.addStrip("/terrain.png", "portal", PORTAL_TEXTURE_INDEX);
+            CustomAnimation.addStrip("/terrain.png", "portal", PORTAL_TEXTURE_INDEX, 1);
         } else if (animatedPortal) {
             textureList.add(new Portal());
         }
@@ -206,7 +206,7 @@ public class TextureUtils {
                 for (int tileNum = 0; tileNum < 256; tileNum++) {
                     String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
                     if (hasResource(resource)) {
-                        CustomAnimation.addStrip(textureName, imageName + "_" + tileNum, tileNum);
+                        CustomAnimation.addStrip(textureName, imageName + "_" + tileNum, tileNum, 1);
                     }
                 }
             }

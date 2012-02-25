@@ -13,7 +13,7 @@ import java.util.Properties;
 import java.util.Random;
 
 public class CustomAnimation {
-    private static final String CLASS_NAME = CustomAnimation.class.getName();
+    private static final String CLASS_NAME = CustomAnimation.class.getSimpleName();
 
     private static Random rand = new Random();
     private static final ArrayList<CustomAnimation> animations = new ArrayList<CustomAnimation>();
@@ -23,6 +23,7 @@ public class CustomAnimation {
     private final String srcName;
     private final int textureID;
     private final ByteBuffer imageData;
+    private final int tileSize;
     private final int x;
     private final int y;
     private final int w;
@@ -41,11 +42,7 @@ public class CustomAnimation {
         }
     }
     
-    public static void clear() {
-        animations.clear();
-    }
-
-    private static void checkUpdate() {
+    static void checkUpdate() {
         TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
         if (selectedTexturePack == lastTexturePack) {
             return;
@@ -55,18 +52,18 @@ public class CustomAnimation {
     }
     
     static void addStripOrTile(String textureName, String name, int tileNumber, int tileSize, int minScrollDelay, int maxScrollDelay) {
-        if (!addStrip(textureName, name, tileNumber)) {
+        if (!addStrip(textureName, name, tileNumber, tileSize)) {
             add(newTile(textureName, tileSize, tileNumber, minScrollDelay, maxScrollDelay));
         }
     }
     
-    static boolean addStrip(String textureName, String name, int tileNumber) {
-        String srcName = "/custom_" + name + ".png";
+    static boolean addStrip(String textureName, String name, int tileNumber, int tileSize) {
+        String srcName = "/anim/custom_" + name + ".png";
         if (TextureUtils.hasResource(srcName)) {
             try {
                 BufferedImage srcImage = TextureUtils.getResourceAsBufferedImage(srcName);
                 if (srcImage != null) {
-                    add(textureName, srcName, srcImage, (tileNumber % 16) * TileSize.int_size, (tileNumber / 16) * TileSize.int_size, TileSize.int_size, TileSize.int_size);
+                    add(newStrip(textureName, tileSize, srcName, srcImage, (tileNumber % 16) * TileSize.int_size, (tileNumber / 16) * TileSize.int_size, TileSize.int_size, TileSize.int_size));
                     return true;
                 }
             } catch (IOException e) {
@@ -76,18 +73,6 @@ public class CustomAnimation {
         return false;
     }
 
-    static void add(String textureName, String srcName, int x, int y, int w, int h) {
-        BufferedImage srcImage = MCPatcherUtils.readImage(lastTexturePack.getInputStream(srcName));
-        if (srcImage == null) {
-            return;
-        }
-        add(textureName, srcName, srcImage, x, y, w, h);
-    }
-    
-    static void add(String textureName, String srcName, BufferedImage srcImage, int x, int y, int w, int h) {
-        add(newStrip(textureName, srcName, srcImage, x, y, w, h));
-    }
-    
     private static void add(CustomAnimation animation) {
         if (animation != null) {
             animations.add(animation);
@@ -95,16 +80,12 @@ public class CustomAnimation {
         }
     }
 
-    private static boolean checkParams(String textureName, String srcName, int x, int y, int w, int h) {
+    private static CustomAnimation newStrip(String textureName, int tileSize, String srcName, BufferedImage srcImage, int x, int y, int w, int h) throws IOException {
         if (x < 0 || y < 0 || w <= 0 || h <= 0) {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%h", CLASS_NAME, srcName, x, y, w, h);
-            return false;
+            return null;
         }
-        return true;
-    }
-    
-    private static CustomAnimation newStrip(String textureName, String srcName, BufferedImage srcImage, int x, int y, int w, int h) {
-        BufferedImage destImage = MCPatcherUtils.readImage(lastTexturePack.getInputStream(textureName));
+        BufferedImage destImage = TextureUtils.getResourceAsBufferedImage(textureName);
         if (destImage == null) {
             MCPatcherUtils.error("%s: %s not found", CLASS_NAME, textureName);
             return null;
@@ -124,22 +105,22 @@ public class CustomAnimation {
             MCPatcherUtils.error("%s: %s dimensions %dx%d do not match %dx%d", CLASS_NAME, srcName, width, height, w, h);
             return null;
         }
-        ByteBuffer imageData = ByteBuffer.allocate(width * height * 4);
+        ByteBuffer imageData = ByteBuffer.allocateDirect(4 * width * height);
         int[] argb = new int[width * height];
-        byte[] rgba = new byte[width * height * 4];
+        byte[] rgba = new byte[4 * width * height];
         srcImage.getRGB(0, 0, width, height, argb, 0, width);
         ARGBtoRGBA(argb, rgba);
         imageData.put(rgba);
         int numFrames = height / h;
-        return new CustomAnimation(srcName, textureName, textureID, x, y, w, h, imageData, numFrames);
+        return new CustomAnimation(srcName, textureName, textureID, tileSize, x, y, w, h, imageData, numFrames);
     }
     
     private static CustomAnimation newTile(String textureName, int tileSize, int tileNumber, int minScrollDelay, int maxScrollDelay) {
         int x = (tileNumber % 16) * TileSize.int_size;
         int y = (tileNumber / 16) * TileSize.int_size;
-        int w = tileSize * TileSize.int_size;
-        int h = tileSize * TileSize.int_size;
-        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w >= 16 * TileSize.int_size || y + w >= 16 * TileSize.int_size) {
+        int w = TileSize.int_size;
+        int h = TileSize.int_size;
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w >= 16 * TileSize.int_size || y + h >= 16 * TileSize.int_size) {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%h", CLASS_NAME, textureName, x, y, w, h);
             return null;
         }
@@ -149,16 +130,17 @@ public class CustomAnimation {
             return null;
         }
         try {
-            return new CustomAnimation(textureName, textureID, x, y, w, h, minScrollDelay, maxScrollDelay);
+            return new CustomAnimation(textureName, textureID, tileSize, x, y, w, h, minScrollDelay, maxScrollDelay);
         } catch (IOException e) {
             return null;
         }
     }
     
-    private CustomAnimation(String srcName, String textureName, int textureID, int x, int y, int w, int h, ByteBuffer imageData, int numFrames) {
+    private CustomAnimation(String srcName, String textureName, int textureID, int tileSize, int x, int y, int w, int h, ByteBuffer imageData, int numFrames) {
         this.srcName = srcName;
         this.textureName = textureName;
         this.textureID = textureID;
+        this.tileSize = tileSize;
         this.x = x;
         this.y = y;
         this.w = w;
@@ -169,15 +151,16 @@ public class CustomAnimation {
         delegate = new Strip();
     }
     
-    private CustomAnimation(String textureName, int textureID, int x, int y, int w, int h, int minScrollDelay, int maxScrollDelay) throws IOException {
+    private CustomAnimation(String textureName, int textureID, int tileSize, int x, int y, int w, int h, int minScrollDelay, int maxScrollDelay) throws IOException {
         this.srcName = textureName;
         this.textureName = textureName;
         this.textureID = textureID;
+        this.tileSize = tileSize;
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
-        this.imageData = ByteBuffer.allocate(4 * w * h);
+        this.imageData = ByteBuffer.allocateDirect(4 * w * h);
         this.numFrames = h;
         currentFrame = -1;
         delegate = new Tile(minScrollDelay, maxScrollDelay);
@@ -190,50 +173,14 @@ public class CustomAnimation {
         if (++currentFrame >= numFrames) {
             currentFrame = 0;
         }
-        delegate.update();
+        for (int i = 0; i < tileSize; i++) {
+            for (int j = 0; j < tileSize; j++) {
+                delegate.update(i * TileSize.int_size, j * TileSize.int_size);
+            }
+        }
+        currentDelay = delegate.getDelay();
     }
     
-    /*
-    CustomAnimation(int tileNumber, int tileImage, int tileSize, String name, int minScrollDelay, int maxScrollDelay) {
-        this.tileNumber = tileNumber;
-        this.tileImage = tileImage;
-        this.tileSize = tileSize;
-
-        BufferedImage custom = null;
-        String imageName = (tileImage == 0 ? "/terrain.png" : "/gui/items.png");
-        String customSrc = "/anim/custom_" + name + ".png";
-        try {
-            custom = TextureUtils.getResourceAsBufferedImage(customSrc);
-            if (custom != null) {
-                imageName = customSrc;
-            }
-        } catch (IOException ex) {
-        }
-        MCPatcherUtils.log("new CustomAnimation %s, src=%s, buffer size=0x%x, tile=%d",
-            name, imageName, imageData.length, this.tileNumber
-        );
-
-        if (custom == null) {
-            delegate = new Tile(imageName, tileNumber, minScrollDelay, maxScrollDelay);
-        } else {
-            Properties properties = null;
-            InputStream inputStream = null;
-            try {
-                inputStream = TextureUtils.getResourceAsStream(customSrc.replaceFirst("\\.png$", ".properties"));
-                if (inputStream != null) {
-                    properties = new Properties();
-                    properties.load(inputStream);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                MCPatcherUtils.close(inputStream);
-            }
-            delegate = new Strip(custom, properties);
-        }
-    }
-    */
-
     static void ARGBtoRGBA(int[] src, byte[] dest) {
         for (int i = 0; i < src.length; ++i) {
             int v = src[i];
@@ -245,7 +192,8 @@ public class CustomAnimation {
     }
 
     private interface Delegate {
-        public void update();
+        public void update(int dx, int dy);
+        public int getDelay();
     }
 
     private class Tile implements Delegate {
@@ -260,17 +208,24 @@ public class CustomAnimation {
             BufferedImage tiles = TextureUtils.getResourceAsBufferedImage(textureName);
             int rgbInt[] = new int[w * h];
             byte rgbByte[] = new byte[4 * w * h];
-            tiles.getRGB(x, y, w, h, rgbInt, 0, w * h);
+            tiles.getRGB(x, y, w, h, rgbInt, 0, w);
             ARGBtoRGBA(rgbInt, rgbByte);
             imageData.put(rgbByte);
         }
 
-        public void update() {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x, y + h - currentFrame, w, currentFrame, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * currentFrame));
-            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x, y, w, h - currentFrame, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * (h - currentFrame)));
+        public void update(int dx, int dy) {
+            if (isScrolling) {
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy + h - currentFrame, w, currentFrame, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(0));
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy, w, h - currentFrame, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * currentFrame));
+            }
+        }
+        
+        public int getDelay() {
             if (maxScrollDelay > 0) {
-                currentDelay = rand.nextInt(maxScrollDelay - minScrollDelay + 1) + minScrollDelay;
+                return rand.nextInt(maxScrollDelay - minScrollDelay + 1) + minScrollDelay; 
+            } else {
+                return 0;
             }
         }
     }
@@ -282,19 +237,20 @@ public class CustomAnimation {
 
         Strip() {
             numTiles = numFrames;
+            Properties properties = null;
             InputStream inputStream = null;
             try {
                 inputStream = TextureUtils.getResourceAsStream(srcName.replaceFirst("\\.png$", ".properties"));
                 if (inputStream != null) {
-                    Properties properties = new Properties();
+                    properties = new Properties();
                     properties.load(inputStream);
-                    loadProperties(properties);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 MCPatcherUtils.close(inputStream);
             }
+            loadProperties(properties);
         }
 
         private void loadProperties(Properties properties) {
@@ -313,6 +269,9 @@ public class CustomAnimation {
         }
 
         private void loadTileOrder(Properties properties) {
+            if (properties == null) {
+                return;
+            }
             int i = 0;
             for (; getIntValue(properties, "tile.", i) != null; i++) {
             }
@@ -326,6 +285,9 @@ public class CustomAnimation {
         }
 
         private void loadTileDelay(Properties properties) {
+            if (properties == null) {
+                return;
+            }
             for (int i = 0; i < numFrames; i++) {
                 Integer value = getIntValue(properties, "duration.", i);
                 if (value != null) {
@@ -345,10 +307,13 @@ public class CustomAnimation {
             return null;
         }
 
-        public void update() {
+        public void update(int dx, int dy) {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x, y, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * h * currentFrame));
-            currentDelay = tileDelay[currentFrame];
+            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * h * currentFrame));
+        }
+        
+        public int getDelay() {
+            return tileDelay[currentFrame];
         }
     }
 }
