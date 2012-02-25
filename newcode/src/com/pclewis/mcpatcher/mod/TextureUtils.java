@@ -200,16 +200,8 @@ public class TextureUtils {
         }
 
         if (customOther) {
-            for (int tileImage = 0; tileImage < 2; tileImage++) {
-                String textureName = (tileImage == 0 ? "/terrain.png" : "/gui/items.png");
-                String imageName = (tileImage == 0 ? "terrain" : "item");
-                for (int tileNum = 0; tileNum < 256; tileNum++) {
-                    String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
-                    if (hasResource(resource)) {
-                        CustomAnimation.addStrip(textureName, imageName + "_" + tileNum, tileNum, 1);
-                    }
-                }
-            }
+            addOtherTextureFX("/terrain.png", "terrain");
+            addOtherTextureFX("/gui/items.png", "item");
         }
 
         for (TextureFX t : savedTextureFX) {
@@ -229,6 +221,15 @@ public class TextureUtils {
         refreshColorizer(ColorizerFoliage.colorBuffer, "/misc/foliagecolor.png");
 
         System.gc();
+    }
+    
+    private static void addOtherTextureFX(String textureName, String imageName) {
+        for (int tileNum = 0; tileNum < 256; tileNum++) {
+            String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
+            if (hasResource(resource)) {
+                CustomAnimation.addStrip(textureName, imageName + "_" + tileNum, tileNum, 1);
+            }
+        }
     }
 
     public static TexturePackBase getSelectedTexturePack() {
@@ -264,6 +265,18 @@ public class TextureUtils {
             resource.matches("^/font/.*\\.properties$") ||
             resource.matches("^/mob/.*\\d+.png$")
         );
+    }
+    
+    public static boolean isCustomTerrainItemResource(String resource) {
+        resource = resource.replaceFirst("^/anim", "");
+        return resource.equals("/custom_lava_still.png") ||
+            resource.equals("/custom_lava_flowing.png") ||
+            resource.equals("/custom_water_still.png") ||
+            resource.equals("/custom_water_flowing.png") ||
+            resource.equals("/custom_fire_n_s.png") ||
+            resource.equals("/custom_fire_e_w.png") ||
+            resource.equals("/custom_portal.png") ||
+            resource.matches("^/custom_(terrain|item)_\\d+\\.png$");
     }
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
@@ -333,7 +346,7 @@ public class TextureUtils {
         );
         if (!cached) {
             Integer i;
-            if (resource.matches("^(/anim)?/custom_.*\\.png$")) {
+            if (isCustomTerrainItemResource(resource)) {
                 i = 1;
             } else {
                 i = expectedColumns.get(resource);
