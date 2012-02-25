@@ -113,7 +113,7 @@ public class CustomAnimation {
         int y = (tileNumber / 16) * TileSize.int_size;
         int w = TileSize.int_size;
         int h = TileSize.int_size;
-        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w >= 16 * TileSize.int_size || y + h >= 16 * TileSize.int_size) {
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > 16 * TileSize.int_size || y + h > 16 * TileSize.int_size) {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%h", CLASS_NAME, textureName, x, y, w, h);
             return null;
         }
