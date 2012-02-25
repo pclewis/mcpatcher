@@ -17,7 +17,6 @@ public class CustomAnimation {
 
     private static Random rand = new Random();
     private static final ArrayList<CustomAnimation> animations = new ArrayList<CustomAnimation>();
-    private static TexturePackBase lastTexturePack;
 
     private final String textureName;
     private final String srcName;
@@ -36,18 +35,12 @@ public class CustomAnimation {
     private Delegate delegate;
 
     public static void updateAll() {
-        checkUpdate();
         for (CustomAnimation animation : animations) {
             animation.update();
         }
     }
-    
-    static void checkUpdate() {
-        TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
-        if (selectedTexturePack == lastTexturePack) {
-            return;
-        }
-        lastTexturePack = selectedTexturePack;
+
+    static void clear() {
         animations.clear();
     }
     
@@ -216,8 +209,9 @@ public class CustomAnimation {
         public void update(int dx, int dy) {
             if (isScrolling) {
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy + h - currentFrame, w, currentFrame, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(0));
-                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy, w, h - currentFrame, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * currentFrame));
+                int rowOffset = h - currentFrame;
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy + h - rowOffset, w, rowOffset, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(0));
+                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy, w, h - rowOffset, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * rowOffset));
             }
         }
         

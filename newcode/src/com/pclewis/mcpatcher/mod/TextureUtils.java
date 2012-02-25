@@ -160,7 +160,7 @@ public class TextureUtils {
             }
         }
         textureList.clear();
-        CustomAnimation.checkUpdate();
+        CustomAnimation.clear();
 
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         textureList.add(new Compass(minecraft));
