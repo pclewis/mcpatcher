@@ -75,7 +75,7 @@ public class CustomAnimation {
 
     private static CustomAnimation newStrip(String textureName, int tileSize, String srcName, BufferedImage srcImage, int x, int y, int w, int h) throws IOException {
         if (x < 0 || y < 0 || w <= 0 || h <= 0) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%h", CLASS_NAME, srcName, x, y, w, h);
+            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, srcName, x, y, w, h);
             return null;
         }
         BufferedImage destImage = TextureUtils.getResourceAsBufferedImage(textureName);
@@ -83,8 +83,8 @@ public class CustomAnimation {
             MCPatcherUtils.error("%s: %s not found", CLASS_NAME, textureName);
             return null;
         }
-        if (x + w >= destImage.getWidth() || y + h >= destImage.getHeight()) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%h", CLASS_NAME, srcName, x, y, w, h);
+        if (x + w > destImage.getWidth() || y + h > destImage.getHeight()) {
+            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, srcName, x, y, w, h);
             return null;
         }
         int textureID = MCPatcherUtils.getMinecraft().renderEngine.getTexture(textureName);
