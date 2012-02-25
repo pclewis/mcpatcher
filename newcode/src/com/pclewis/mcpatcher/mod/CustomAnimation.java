@@ -1,7 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import net.minecraft.src.TexturePackBase;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
@@ -22,7 +21,7 @@ public class CustomAnimation {
     private final String srcName;
     private final int textureID;
     private final ByteBuffer imageData;
-    private final int tileSize;
+    private final int tileCount;
     private final int x;
     private final int y;
     private final int w;
@@ -44,19 +43,38 @@ public class CustomAnimation {
         animations.clear();
     }
     
-    static void addStripOrTile(String textureName, String name, int tileNumber, int tileSize, int minScrollDelay, int maxScrollDelay) {
-        if (!addStrip(textureName, name, tileNumber, tileSize)) {
-            add(newTile(textureName, tileSize, tileNumber, minScrollDelay, maxScrollDelay));
+    static void addStrip(Properties properties) {
+        if (properties == null) {
+            return;
+        }
+        try {
+            String textureName = properties.getProperty("texture", "");
+            String srcName = properties.getProperty("source", "");
+            int x = Integer.parseInt(properties.getProperty("x", ""));
+            int y = Integer.parseInt(properties.getProperty("y", ""));
+            int w = Integer.parseInt(properties.getProperty("w", ""));
+            int h = Integer.parseInt(properties.getProperty("h", ""));
+            if (!"".equals(textureName) && !"".equals(srcName)) {
+                add(newStrip(textureName, 1, srcName, TextureUtils.getResourceAsBufferedImage(srcName), x, y, w, h, properties));
+            }
+        } catch (IOException e) {
+        } catch (NumberFormatException e) {
         }
     }
     
-    static boolean addStrip(String textureName, String name, int tileNumber, int tileSize) {
+    static void addStripOrTile(String textureName, String name, int tileNumber, int tileCount, int minScrollDelay, int maxScrollDelay) {
+        if (!addStrip(textureName, name, tileNumber, tileCount)) {
+            add(newTile(textureName, tileCount, tileNumber, minScrollDelay, maxScrollDelay));
+        }
+    }
+    
+    static boolean addStrip(String textureName, String name, int tileNumber, int tileCount) {
         String srcName = "/anim/custom_" + name + ".png";
         if (TextureUtils.hasResource(srcName)) {
             try {
                 BufferedImage srcImage = TextureUtils.getResourceAsBufferedImage(srcName);
                 if (srcImage != null) {
-                    add(newStrip(textureName, tileSize, srcName, srcImage, (tileNumber % 16) * TileSize.int_size, (tileNumber / 16) * TileSize.int_size, TileSize.int_size, TileSize.int_size));
+                    add(newStrip(textureName, tileCount, srcName, srcImage, (tileNumber % 16) * TileSize.int_size, (tileNumber / 16) * TileSize.int_size, TileSize.int_size, TileSize.int_size, null));
                     return true;
                 }
             } catch (IOException e) {
@@ -65,7 +83,7 @@ public class CustomAnimation {
         }
         return false;
     }
-
+    
     private static void add(CustomAnimation animation) {
         if (animation != null) {
             animations.add(animation);
@@ -73,7 +91,7 @@ public class CustomAnimation {
         }
     }
 
-    private static CustomAnimation newStrip(String textureName, int tileSize, String srcName, BufferedImage srcImage, int x, int y, int w, int h) throws IOException {
+    private static CustomAnimation newStrip(String textureName, int tileSize, String srcName, BufferedImage srcImage, int x, int y, int w, int h, Properties properties) throws IOException {
         if (x < 0 || y < 0 || w <= 0 || h <= 0) {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, srcName, x, y, w, h);
             return null;
@@ -105,7 +123,7 @@ public class CustomAnimation {
         ARGBtoRGBA(argb, rgba);
         imageData.put(rgba);
         int numFrames = height / h;
-        return new CustomAnimation(srcName, textureName, textureID, tileSize, x, y, w, h, imageData, numFrames);
+        return new CustomAnimation(srcName, textureName, textureID, tileSize, x, y, w, h, imageData, numFrames, properties);
     }
     
     private static CustomAnimation newTile(String textureName, int tileSize, int tileNumber, int minScrollDelay, int maxScrollDelay) {
@@ -129,11 +147,11 @@ public class CustomAnimation {
         }
     }
     
-    private CustomAnimation(String srcName, String textureName, int textureID, int tileSize, int x, int y, int w, int h, ByteBuffer imageData, int numFrames) {
+    private CustomAnimation(String srcName, String textureName, int textureID, int tileCount, int x, int y, int w, int h, ByteBuffer imageData, int numFrames, Properties properties) {
         this.srcName = srcName;
         this.textureName = textureName;
         this.textureID = textureID;
-        this.tileSize = tileSize;
+        this.tileCount = tileCount;
         this.x = x;
         this.y = y;
         this.w = w;
@@ -141,14 +159,14 @@ public class CustomAnimation {
         this.imageData = imageData;
         this.numFrames = numFrames;
         currentFrame = -1;
-        delegate = new Strip();
+        delegate = new Strip(properties);
     }
     
-    private CustomAnimation(String textureName, int textureID, int tileSize, int x, int y, int w, int h, int minScrollDelay, int maxScrollDelay) throws IOException {
+    private CustomAnimation(String textureName, int textureID, int tileCount, int x, int y, int w, int h, int minScrollDelay, int maxScrollDelay) throws IOException {
         this.srcName = textureName;
         this.textureName = textureName;
         this.textureID = textureID;
-        this.tileSize = tileSize;
+        this.tileCount = tileCount;
         this.x = x;
         this.y = y;
         this.w = w;
@@ -166,8 +184,8 @@ public class CustomAnimation {
         if (++currentFrame >= numFrames) {
             currentFrame = 0;
         }
-        for (int i = 0; i < tileSize; i++) {
-            for (int j = 0; j < tileSize; j++) {
+        for (int i = 0; i < tileCount; i++) {
+            for (int j = 0; j < tileCount; j++) {
                 delegate.update(i * TileSize.int_size, j * TileSize.int_size);
             }
         }
@@ -229,20 +247,21 @@ public class CustomAnimation {
         private int[] tileDelay;
         private final int numTiles;
 
-        Strip() {
+        Strip(Properties properties) {
             numTiles = numFrames;
-            Properties properties = null;
             InputStream inputStream = null;
-            try {
-                inputStream = TextureUtils.getResourceAsStream(srcName.replaceFirst("\\.png$", ".properties"));
-                if (inputStream != null) {
-                    properties = new Properties();
-                    properties.load(inputStream);
+            if (properties == null) {
+                try {
+                    inputStream = TextureUtils.getResourceAsStream(srcName.replaceFirst("\\.png$", ".properties"));
+                    if (inputStream != null) {
+                        properties = new Properties();
+                        properties.load(inputStream);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    MCPatcherUtils.close(inputStream);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                MCPatcherUtils.close(inputStream);
             }
             loadProperties(properties);
         }

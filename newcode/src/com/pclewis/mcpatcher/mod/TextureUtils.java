@@ -10,9 +10,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class TextureUtils {
@@ -202,6 +201,25 @@ public class TextureUtils {
         if (customOther) {
             addOtherTextureFX("/terrain.png", "terrain");
             addOtherTextureFX("/gui/items.png", "item");
+            if (selectedTexturePack instanceof TexturePackCustom) {
+                TexturePackCustom custom = (TexturePackCustom) selectedTexturePack;
+                for (ZipEntry entry : Collections.list(custom.zipFile.entries())) {
+                    String name = "/" + entry.getName();
+                    if (name.startsWith("/anim/") && name.endsWith(".properties") && !isCustomTerrainItemResource(name)) {
+                        InputStream inputStream = null;
+                        try {
+                            inputStream = custom.zipFile.getInputStream(entry);
+                            Properties properties = new Properties();
+                            properties.load(inputStream);
+                            CustomAnimation.addStrip(properties);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            MCPatcherUtils.close(inputStream);
+                        }
+                    }
+                }
+            }
         }
 
         for (TextureFX t : savedTextureFX) {
@@ -267,16 +285,16 @@ public class TextureUtils {
         );
     }
     
-    public static boolean isCustomTerrainItemResource(String resource) {
-        resource = resource.replaceFirst("^/anim", "");
-        return resource.equals("/custom_lava_still.png") ||
-            resource.equals("/custom_lava_flowing.png") ||
-            resource.equals("/custom_water_still.png") ||
-            resource.equals("/custom_water_flowing.png") ||
-            resource.equals("/custom_fire_n_s.png") ||
-            resource.equals("/custom_fire_e_w.png") ||
-            resource.equals("/custom_portal.png") ||
-            resource.matches("^/custom_(terrain|item)_\\d+\\.png$");
+    static boolean isCustomTerrainItemResource(String resource) {
+        resource = resource.replaceFirst("^/anim", "").replaceFirst("\\.(png|properties)$", "");
+        return resource.equals("/custom_lava_still") ||
+            resource.equals("/custom_lava_flowing") ||
+            resource.equals("/custom_water_still") ||
+            resource.equals("/custom_water_flowing") ||
+            resource.equals("/custom_fire_n_s") ||
+            resource.equals("/custom_fire_e_w") ||
+            resource.equals("/custom_portal") ||
+            resource.matches("^/custom_(terrain|item)_\\d+$");
     }
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
