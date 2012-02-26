@@ -440,7 +440,7 @@ public class TextureUtils {
         return hasResource(getSelectedTexturePack(), s);
     }
 
-    private static BufferedImage resizeImage(BufferedImage image, int width) {
+    static BufferedImage resizeImage(BufferedImage image, int width) {
         int height = image.getHeight() * width / image.getWidth();
         MCPatcherUtils.log("  resizing to %dx%d", width, height);
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);

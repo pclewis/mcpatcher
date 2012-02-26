@@ -44,18 +44,16 @@ public class CustomAnimation {
     }
     
     static void addStrip(Properties properties) {
-        if (properties == null) {
-            return;
-        }
         try {
-            String textureName = properties.getProperty("texture", "");
-            String srcName = properties.getProperty("source", "");
+            String textureName = properties.getProperty("to", "");
+            String srcName = properties.getProperty("from", "");
+            int tileCount = Integer.parseInt(properties.getProperty("tiles", "1"));
             int x = Integer.parseInt(properties.getProperty("x", ""));
             int y = Integer.parseInt(properties.getProperty("y", ""));
             int w = Integer.parseInt(properties.getProperty("w", ""));
             int h = Integer.parseInt(properties.getProperty("h", ""));
             if (!"".equals(textureName) && !"".equals(srcName)) {
-                add(newStrip(textureName, 1, srcName, TextureUtils.getResourceAsBufferedImage(srcName), x, y, w, h, properties));
+                add(newStrip(textureName, tileCount, srcName, TextureUtils.getResourceAsBufferedImage(srcName), x, y, w, h, properties));
             }
         } catch (IOException e) {
         } catch (NumberFormatException e) {
@@ -91,9 +89,9 @@ public class CustomAnimation {
         }
     }
 
-    private static CustomAnimation newStrip(String textureName, int tileSize, String srcName, BufferedImage srcImage, int x, int y, int w, int h, Properties properties) throws IOException {
-        if (x < 0 || y < 0 || w <= 0 || h <= 0) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, srcName, x, y, w, h);
+    private static CustomAnimation newStrip(String textureName, int tileCount, String srcName, BufferedImage srcImage, int x, int y, int w, int h, Properties properties) throws IOException {
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || tileCount <= 0) {
+            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;
         }
         BufferedImage destImage = TextureUtils.getResourceAsBufferedImage(textureName);
@@ -101,8 +99,8 @@ public class CustomAnimation {
             MCPatcherUtils.error("%s: %s not found", CLASS_NAME, textureName);
             return null;
         }
-        if (x + w > destImage.getWidth() || y + h > destImage.getHeight()) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, srcName, x, y, w, h);
+        if (x + tileCount * w > destImage.getWidth() || y + tileCount * h > destImage.getHeight()) {
+            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;
         }
         int textureID = MCPatcherUtils.getMinecraft().renderEngine.getTexture(textureName);
@@ -112,6 +110,11 @@ public class CustomAnimation {
         }
         int width = srcImage.getWidth();
         int height = srcImage.getHeight();
+        if (width != w) {
+            srcImage = TextureUtils.resizeImage(srcImage, w);
+            width = srcImage.getWidth();
+            height = srcImage.getHeight();
+        }
         if (width != w || height % h != 0) {
             MCPatcherUtils.error("%s: %s dimensions %dx%d do not match %dx%d", CLASS_NAME, srcName, width, height, w, h);
             return null;
@@ -122,17 +125,16 @@ public class CustomAnimation {
         srcImage.getRGB(0, 0, width, height, argb, 0, width);
         ARGBtoRGBA(argb, rgba);
         imageData.put(rgba);
-        int numFrames = height / h;
-        return new CustomAnimation(srcName, textureName, textureID, tileSize, x, y, w, h, imageData, numFrames, properties);
+        return new CustomAnimation(srcName, textureName, textureID, tileCount, x, y, w, h, imageData, height / h, properties);
     }
     
-    private static CustomAnimation newTile(String textureName, int tileSize, int tileNumber, int minScrollDelay, int maxScrollDelay) {
+    private static CustomAnimation newTile(String textureName, int tileCount, int tileNumber, int minScrollDelay, int maxScrollDelay) {
         int x = (tileNumber % 16) * TileSize.int_size;
         int y = (tileNumber / 16) * TileSize.int_size;
         int w = TileSize.int_size;
         int h = TileSize.int_size;
-        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > 16 * TileSize.int_size || y + h > 16 * TileSize.int_size) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%h", CLASS_NAME, textureName, x, y, w, h);
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + tileCount * w > 16 * TileSize.int_size || y + tileCount * h > 16 * TileSize.int_size) {
+            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, textureName, x, y, w, h);
             return null;
         }
         int textureID = MCPatcherUtils.getMinecraft().renderEngine.getTexture(textureName);
@@ -141,7 +143,7 @@ public class CustomAnimation {
             return null;
         }
         try {
-            return new CustomAnimation(textureName, textureID, tileSize, x, y, w, h, minScrollDelay, maxScrollDelay);
+            return new CustomAnimation(textureName, textureID, tileCount, x, y, w, h, minScrollDelay, maxScrollDelay);
         } catch (IOException e) {
             return null;
         }
@@ -322,7 +324,7 @@ public class CustomAnimation {
 
         public void update(int dx, int dy) {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * h * currentFrame));
+            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * h * tileOrder[currentFrame]));
         }
         
         public int getDelay() {
