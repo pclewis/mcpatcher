@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
@@ -277,10 +278,10 @@ public class CustomAnimation {
                 }
             }
             tileDelay = new int[numFrames];
-            for (int i = 0; i < numFrames; i++) {
-                tileDelay[i] = 1;
-            }
             loadTileDelay(properties);
+            for (int i = 0; i < numFrames; i++) {
+                tileDelay[i] = Math.max(tileDelay[i], 1);
+            }
         }
 
         private void loadTileOrder(Properties properties) {
@@ -303,23 +304,30 @@ public class CustomAnimation {
             if (properties == null) {
                 return;
             }
+            Integer defaultValue = getIntValue(properties, "duration");
             for (int i = 0; i < numFrames; i++) {
                 Integer value = getIntValue(properties, "duration.", i);
                 if (value != null) {
-                    tileDelay[i] = Math.max(value, 1);
+                    tileDelay[i] = value;
+                } else if (defaultValue != null) {
+                    tileDelay[i] = defaultValue;
                 }
             }
         }
-
-        private Integer getIntValue(Properties properties, String prefix, int index) {
+        
+        private Integer getIntValue(Properties properties, String key) {
             try {
-                String value = properties.getProperty(prefix + index);
+                String value = properties.getProperty(key);
                 if (value != null && value.matches("^\\d+$")) {
                     return Integer.parseInt(value);
                 }
             } catch (NumberFormatException e) {
             }
             return null;
+        }
+
+        private Integer getIntValue(Properties properties, String prefix, int index) {
+            return getIntValue(properties, prefix + index);
         }
 
         public void update(int dx, int dy) {
