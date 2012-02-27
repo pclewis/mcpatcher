@@ -358,12 +358,32 @@ public class Colorizer {
         return true;
     }
     
-    public static boolean computeFogColor(World world) {
-        return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_FOG0);
+    public static boolean computeFogColor(World world, float f) {
+        if (world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_FOG0)) {
+            computeLightningFlash(world, f);
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public static boolean computeSkyColor(World world) {
-        return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0);
+    public static boolean computeSkyColor(World world, float f) {
+        if (world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0)) {
+            computeLightningFlash(world, f);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private static void computeLightningFlash(World world, float f) {
+        if (world.lightningFlash > 0)
+        {
+            f = 0.45f * clamp(world.lightningFlash - f);
+            setColor[0] = setColor[0] * (1.0f - f) + 0.8f * f;
+            setColor[1] = setColor[1] * (1.0f - f) + 0.8f * f;
+            setColor[2] = setColor[2] * (1.0f - f) + 0.8f * f;
+        }
     }
 
     public static void setColorF(int color) {

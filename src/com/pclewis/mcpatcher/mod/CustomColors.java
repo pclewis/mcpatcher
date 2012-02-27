@@ -1258,9 +1258,10 @@ public class CustomColors extends Mod {
                         ALOAD_1,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LEntity;)V")),
 
-                        // if (Colorizer.computeSkyColor(this)) {
+                        // if (Colorizer.computeSkyColor(this, f)) {
                         ALOAD_0,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeSkyColor", "(LWorld;)Z")),
+                        FLOAD_2,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeSkyColor", "(LWorld;F)Z")),
                         IFEQ, branch("A"),
 
                         // f4 = Colorizer.setColor[0];
@@ -2218,9 +2219,10 @@ public class CustomColors extends Mod {
                         ALOAD_3,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LEntity;)V")),
 
-                        // if (Colorizer.computeFogColor(world)) {
+                        // if (Colorizer.computeFogColor(world, f)) {
                         ALOAD_2,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(LWorld;)Z")),
+                        FLOAD_1,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(LWorld;F)Z")),
                         IFEQ, branch("A"),
 
                         // fogColorRed = Colorizer.setColor[0];
