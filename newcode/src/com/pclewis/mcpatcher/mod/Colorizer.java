@@ -103,6 +103,9 @@ public class Colorizer {
     private static boolean biomesLogged;
 
     private static Entity fogCamera;
+    
+    public static float[] netherFogColor;
+    public static int endFogColor;
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
@@ -429,6 +432,9 @@ public class Colorizer {
 
         reset();
         reloadColorProperties();
+        if (useFogColors) {
+            reloadFogColors();
+        }
         if (usePotionColors) {
             reloadPotionColors();
         }
@@ -471,6 +477,9 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(useWaterColors, "/misc/underwatercolor.png", 0x050533);
         fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(useFogColors, "/misc/fogcolor0.png", 0xc0d8ff);
         fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
+        
+        netherFogColor = new float[]{0.2f, 0.03f, 0.03f};
+        endFogColor = 0x8080a0;
 
         blockColorMaps = new ColorMap[Block.blocksList.length];
         blockMetaColorMaps.clear();
@@ -511,6 +520,13 @@ public class Colorizer {
         } finally {
             MCPatcherUtils.close(inputStream);
         }
+    }
+    
+    private static void reloadFogColors() {
+        loadFloatColor("fog.nether", netherFogColor);
+        int[] a = new int[]{endFogColor};
+        loadIntColor("fog.end", a, 0);
+        endFogColor = a[0];
     }
 
     private static void reloadPotionColors() {
@@ -669,6 +685,19 @@ public class Colorizer {
             } catch (NumberFormatException e) {
             }
         }
+    }
+    
+    private static float[] loadFloatColor(String key) {
+        String value = properties.getProperty(key, "");
+        if (!value.equals("")) {
+            try {
+                float[] color = new float[3];
+                intToFloat3(Integer.parseInt(value, 16), color);
+                return color;
+            } catch (NumberFormatException e) {
+            }
+        }
+        return null;
     }
 
     private static void intToFloat3(int rgb, float[] f, int offset) {

@@ -59,6 +59,7 @@ public class CustomColors extends Mod {
 
         classMods.add(new WorldMod());
         classMods.add(new WorldProviderMod());
+        classMods.add(new WorldProviderHellMod());
         classMods.add(new WorldChunkManagerMod());
         classMods.add(new EntityMod());
         classMods.add(new EntityFXMod());
@@ -1380,6 +1381,62 @@ public class CustomColors extends Mod {
 
                         // }
                         label("B")
+                    );
+                }
+            }.targetMethod(getFogColor));
+        }
+    }
+    
+    private class WorldProviderHellMod extends ClassMod {
+        WorldProviderHellMod() {
+            parentClass = "WorldProvider";
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0.20000000298023224),
+                        push(0.029999999329447746),
+                        push(0.029999999329447746)
+                    );
+                }
+            });
+
+            MethodRef getFogColor = new MethodRef(getDeobfClass(), "getFogColor", "(FF)LVec3D;");
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override nether fog color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0.20000000298023224),
+                        push(0.029999999329447746),
+                        push(0.029999999329447746)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        // Colorizer.setColor[0], Colorizer.setColor[1], Colorizer.setColor[2]
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        F2D,
+
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        F2D,
+
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        F2D
                     );
                 }
             }.targetMethod(getFogColor));
