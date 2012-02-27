@@ -357,6 +357,10 @@ public class Colorizer {
         setColor[2] *= fogBlendScale;
         return true;
     }
+    
+    public static boolean computeFogColor(World world) {
+        return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_FOG0);
+    }
 
     public static boolean computeSkyColor(World world) {
         return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0);

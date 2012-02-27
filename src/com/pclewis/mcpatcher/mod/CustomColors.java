@@ -2218,9 +2218,9 @@ public class CustomColors extends Mod {
                         ALOAD_3,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LEntity;)V")),
 
-                        // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_FOG0)) {
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
+                        // if (Colorizer.computeFogColor(world)) {
+                        ALOAD_2,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(LWorld;)Z")),
                         IFEQ, branch("A"),
 
                         // fogColorRed = Colorizer.setColor[0];
