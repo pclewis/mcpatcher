@@ -60,6 +60,7 @@ public class CustomColors extends Mod {
         classMods.add(new WorldMod());
         classMods.add(new WorldProviderMod());
         classMods.add(new WorldProviderHellMod());
+        classMods.add(new WorldProviderEndMod());
         classMods.add(new WorldChunkManagerMod());
         classMods.add(new EntityMod());
         classMods.add(new EntityFXMod());
@@ -1434,6 +1435,67 @@ public class CustomColors extends Mod {
                         F2D,
 
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        F2D
+                    );
+                }
+            }.targetMethod(getFogColor));
+        }
+    }
+    
+    private class WorldProviderEndMod extends ClassMod {
+        WorldProviderEndMod() {
+            parentClass = "WorldProvider";
+
+            classSignatures.add(new ConstSignature(0x8080a0));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D
+                    );
+                }
+            });
+
+            MethodRef getFogColor = new MethodRef(getDeobfClass(), "getFogColor", "(FF)LVec3D;");
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override end fog color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endFogColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        F2D,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endFogColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        F2D,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endFogColor", "[F")),
                         ICONST_2,
                         FALOAD,
                         F2D
@@ -2911,6 +2973,7 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
 
             MethodRef renderClouds = new MethodRef(getDeobfClass(), "renderClouds", "(F)V");
+            MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -2927,6 +2990,15 @@ public class CustomColors extends Mod {
                     );
                 }
             }.setMethod(renderClouds));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("/misc/tunnel.png")
+                    );
+                }
+            }.setMethod(renderSky));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -2960,6 +3032,27 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderClouds));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override end sky color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0x181818)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endSkyColor", "I"))
+                    );
+                }
+            }.targetMethod(renderSky));
         }
     }
 

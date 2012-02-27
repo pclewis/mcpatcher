@@ -105,7 +105,8 @@ public class Colorizer {
     private static Entity fogCamera;
     
     public static float[] netherFogColor;
-    public static int endFogColor;
+    public static float[] endFogColor;
+    public static int endSkyColor;
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
@@ -479,7 +480,8 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
         
         netherFogColor = new float[]{0.2f, 0.03f, 0.03f};
-        endFogColor = 0x8080a0;
+        endFogColor = new float[]{0.075f, 0.075f, 0.94f};
+        endSkyColor = 0x181818;
 
         blockColorMaps = new ColorMap[Block.blocksList.length];
         blockMetaColorMaps.clear();
@@ -524,9 +526,8 @@ public class Colorizer {
     
     private static void reloadFogColors() {
         loadFloatColor("fog.nether", netherFogColor);
-        int[] a = new int[]{endFogColor};
-        loadIntColor("fog.end", a, 0);
-        endFogColor = a[0];
+        loadFloatColor("fog.end", endFogColor);
+        endSkyColor = loadIntColor("sky.end", endSkyColor);
     }
 
     private static void reloadPotionColors() {
@@ -674,6 +675,18 @@ public class Colorizer {
             } catch (NumberFormatException e) {
             }
         }
+    }
+    
+    private static int loadIntColor(String key, int color) {
+        //System.out.printf("%s=%06x\n", key, color);
+        String value = properties.getProperty(key, "");
+        if (!value.equals("")) {
+            try {
+                color = Integer.parseInt(value, 16);
+            } catch (NumberFormatException e) {
+            }
+        }
+        return color;
     }
 
     private static void loadFloatColor(String key, float[] color) {
