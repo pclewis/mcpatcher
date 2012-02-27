@@ -117,7 +117,9 @@ abstract public class BytecodePatch extends ClassPatch {
                 classMod.addToConstPool = false;
             }
             if (repl == null) {
-                offset = ci.next();
+                while (offset < matcher.getEnd() && ci.hasNext()) {
+                    offset = ci.next();
+                }
                 continue;
             }
 
