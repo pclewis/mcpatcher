@@ -2426,8 +2426,9 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature(0.1875));
             classSignatures.add(new ConstSignature(0.01));
 
-            MethodRef renderBlockFallingSand = new MethodRef(getDeobfClass(), "renderBlockFallingSand", "(LBlock;LWorld;III)V");
+            final MethodRef renderBlockFallingSand = new MethodRef(getDeobfClass(), "renderBlockFallingSand", "(LBlock;LWorld;III)V");
             final MethodRef setColorOpaque_F = new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V");
+            final MethodRef renderBlockFluids = new MethodRef(getDeobfClass(), "renderBlockFluids", "(LBlock;III)Z");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -2444,7 +2445,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }
-                .setMethod(new MethodRef(getDeobfClass(), "renderBlockFluids", "(LBlock;III)Z"))
+                .setMethod(renderBlockFluids)
                 .addXref(1, new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;"))
                 .addXref(2, new MethodRef("Block", "colorMultiplier", "(LIBlockAccess;III)I"))
             );
@@ -2592,6 +2593,67 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderBlockFallingSand));
+            
+            final int[] savedRegisters = new int[]{7, 8, 9}; // water shaders mod moves some local variables around
+
+            patches.add(new BytecodePatch() {
+                private boolean matched;
+
+                @Override
+                public String getDescription() {
+                    return "save water color registers";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    if (matched) {
+                        return null;
+                    } else {
+                        return buildExpression(
+                            // f = (float)(l >> 16 & 0xff) / 255F;
+                            BinaryRegex.capture(BytecodeMatcher.anyILOAD),
+                            push(16),
+                            ISHR,
+                            push(255),
+                            IAND,
+                            I2F,
+                            push(255.0f),
+                            FDIV,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                            // f1 = (float)(l >> 8 & 0xff) / 255F;
+                            BinaryRegex.backReference(1),
+                            push(8),
+                            ISHR,
+                            push(255),
+                            IAND,
+                            I2F,
+                            push(255.0f),
+                            FDIV,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                            // f2 = (float)(l & 0xff) / 255F;
+                            BinaryRegex.backReference(1),
+                            push(255),
+                            IAND,
+                            I2F,
+                            push(255.0f),
+                            FDIV,
+                            FSTORE, BinaryRegex.capture(BinaryRegex.any())
+                        );
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    matched = true;
+                    savedRegisters[0] = getCaptureGroup(2)[0] & 0xff;
+                    savedRegisters[1] = getCaptureGroup(3)[0] & 0xff;
+                    savedRegisters[2] = getCaptureGroup(4)[0] & 0xff;
+                    Logger.log(Logger.LOG_CONST, "water color registers: %d %d %d", savedRegisters[0], savedRegisters[1], savedRegisters[2]);
+                    return null;
+                }
+            }.targetMethod(renderBlockFluids));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -2625,22 +2687,22 @@ public class CustomColors extends Mod {
                         FLOAD, getCaptureGroup(1),
                         FLOAD, getCaptureGroup(2),
                         FMUL,
-                        FLOAD, 7,
+                        FLOAD, savedRegisters[0],
                         FMUL,
                         FLOAD, getCaptureGroup(1),
                         FLOAD, getCaptureGroup(2),
                         FMUL,
-                        FLOAD, 8,
+                        FLOAD, savedRegisters[1],
                         FMUL,
                         FLOAD, getCaptureGroup(1),
                         FLOAD, getCaptureGroup(2),
                         FMUL,
-                        FLOAD, 8,
+                        FLOAD, savedRegisters[2],
                         FMUL,
                         reference(INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockFluids", "(LBlock;III)Z")));
+            }.targetMethod(renderBlockFluids));
         }
     }
 
