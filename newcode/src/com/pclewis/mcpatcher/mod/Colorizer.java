@@ -16,6 +16,10 @@ public class Colorizer {
     private static final String LAVA_DROP_COLORS = "/misc/lavadropcolor.png";
 
     private static final String PALETTE_BLOCK_KEY = "palette.block.";
+    private static final String TEXT_KEY = "text.";
+    private static final String TEXT_CODE_KEY = TEXT_KEY + "code.";
+
+    private static final int CHAT_COLOR_UNSET = -2;
 
     public static final int COLOR_MAP_SWAMP_GRASS = 0;
     public static final int COLOR_MAP_SWAMP_FOLIAGE = 1;
@@ -101,6 +105,7 @@ public class Colorizer {
     private static Entity fogCamera;
 
     private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>();
+    private static final int[] textCodeColors = new int[32];
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
@@ -225,35 +230,19 @@ public class Colorizer {
                 MCPatcherUtils.close(os);
             }
         }
-        Integer newColor = null;
-        if (!textColorMap.containsKey(defaultColor)) {
-            String key;
-            switch (defaultColor) {
-                case 0x80ff20:
-                    key = "xpbar";
-                    break;
-    
-                case 0xff00ff:
-                    key = "boss";
-                    break;
-                
-                default:
-                    key = String.format("%06x", defaultColor);
-                    break;
-            }
-            if (properties.containsKey(key)) {
-                try {
-                    newColor = Integer.parseInt(properties.getProperty("text." + key, ""), 16);
-                } catch (NumberFormatException e) {
-                }
-            }
-            textColorMap.put(defaultColor, newColor);
-        }
-        newColor = textColorMap.get(defaultColor);
+        Integer newColor = textColorMap.get(defaultColor);
         if (newColor == null) {
             return high | defaultColor;
         } else {
             return high | newColor;
+        }
+    }
+    
+    public static int colorizeText(int defaultColor, int index) {
+        if (index < 0 || index >= textCodeColors.length || textCodeColors[index] == CHAT_COLOR_UNSET) {
+            return defaultColor;
+        } else {
+            return textCodeColors[index];
         }
     }
 
@@ -501,6 +490,7 @@ public class Colorizer {
         if (useSheepColors) {
             reloadSheepColors();
         }
+        reloadTextColors();
     }
 
     private static void reset() {
@@ -542,6 +532,9 @@ public class Colorizer {
         }
         EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
         textColorMap.clear();
+        for (int i = 0; i < textCodeColors.length; i++) {
+            textCodeColors[i] = CHAT_COLOR_UNSET;
+        }
     }
 
     private static void reloadColorProperties() {
@@ -673,6 +666,37 @@ public class Colorizer {
     private static void reloadSheepColors() {
         for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
             loadFloatColor("sheep." + getStringKey(ItemDye.dyeColorNames, EntitySheep.fleeceColorTable.length - 1 - i), EntitySheep.fleeceColorTable[i]);
+        }
+    }
+    
+    private static void reloadTextColors() {
+        for (int i = 0; i < textCodeColors.length; i++) {
+            loadIntColor(TEXT_CODE_KEY + i, textCodeColors, i);
+        }
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                continue;
+            }
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
+            if (!key.startsWith(TEXT_KEY) || key.startsWith(TEXT_CODE_KEY)) {
+                continue;
+            }
+            key = key.substring(TEXT_KEY.length()).trim();
+            try {
+                int newColor;
+                int oldColor;
+                if (key.equals("xpbar")) {
+                    oldColor = 0x80ff20;
+                } else if (key.equals("boss")) {
+                    oldColor = 0xff00ff;
+                } else {
+                    oldColor = Integer.parseInt(key, 16);
+                }
+                newColor = Integer.parseInt(value, 16);
+                textColorMap.put(oldColor, newColor);
+            } catch (NumberFormatException e) {
+            }
         }
     }
 

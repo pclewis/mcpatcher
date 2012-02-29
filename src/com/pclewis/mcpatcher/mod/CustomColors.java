@@ -3151,6 +3151,23 @@ public class CustomColors extends Mod {
         FontRendererMod() {
             final MethodRef renderString = new MethodRef(getDeobfClass(), "renderString", "(Ljava/lang/String;IIIZ)V");
             final MethodRef glColor4f = new MethodRef("org/lwjgl/opengl/GL11", "glColor4f", "(FFFF)V");
+            final FieldRef colorCode = new FieldRef(getDeobfClass(), "colorCode", "[I");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            push(32),
+                            NEWARRAY, T_INT,
+                            BytecodeMatcher.captureReference(PUTFIELD)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }.addXref(1, colorCode));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -3186,6 +3203,31 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderString));
+
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "override text color codes";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        reference(GETFIELD, colorCode),
+                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
+                        IALOAD
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeText", "(II)I"))
+                    );
+                }
+            });
         }
     }
 }
