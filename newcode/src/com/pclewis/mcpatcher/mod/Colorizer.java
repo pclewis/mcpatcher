@@ -14,6 +14,7 @@ public class Colorizer {
     private static final String REDSTONE_COLORS = "/misc/redstonecolor.png";
     private static final String STEM_COLORS = "/misc/stemcolor.png";
     private static final String LAVA_DROP_COLORS = "/misc/lavadropcolor.png";
+    private static final String MYCELIUM_COLORS = "/misc/myceliumparticlecolor.png";
 
     private static final String PALETTE_BLOCK_KEY = "palette.block.";
     private static final String TEXT_KEY = "text.";
@@ -60,6 +61,7 @@ public class Colorizer {
     private static float[][] redstoneColor; // /misc/redstonecolor.png
     private static int[] stemColors; // /misc/stemcolor.png
     private static ArrayList<Potion> potions = new ArrayList<Potion>(); // potion.*
+    private static final Random random = new Random(); 
 
     private static final boolean useWaterColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true);
     private static final boolean useSwampColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "swamp", true);
@@ -103,6 +105,12 @@ public class Colorizer {
     private static boolean biomesLogged;
 
     private static Entity fogCamera;
+    
+    public static float[] netherFogColor;
+    public static float[] endFogColor;
+    public static int endSkyColor;
+    
+    private static int[] myceliumColors;
 
     private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>();
     private static final int[] textCodeColors = new int[32];
@@ -415,9 +423,42 @@ public class Colorizer {
         setColor[2] *= fogBlendScale;
         return true;
     }
+    
+    public static boolean computeFogColor(World world, float f) {
+        if (world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_FOG0)) {
+            computeLightningFlash(world, f);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    public static boolean computeSkyColor(World world) {
-        return world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0);
+    public static boolean computeSkyColor(World world, float f) {
+        if (world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_SKY0)) {
+            computeLightningFlash(world, f);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private static void computeLightningFlash(World world, float f) {
+        if (world.lightningFlash > 0)
+        {
+            f = 0.45f * clamp(world.lightningFlash - f);
+            setColor[0] = setColor[0] * (1.0f - f) + 0.8f * f;
+            setColor[1] = setColor[1] * (1.0f - f) + 0.8f * f;
+            setColor[2] = setColor[2] * (1.0f - f) + 0.8f * f;
+        }
+    }
+    
+    public static boolean computeMyceliumParticleColor() {
+        if (myceliumColors == null) {
+            return false;
+        } else {
+            setColorF(myceliumColors[random.nextInt(myceliumColors.length)]);
+            return true;
+        }
     }
 
     public static void setColorF(int color) {
@@ -463,6 +504,9 @@ public class Colorizer {
 
         reset();
         reloadColorProperties();
+        if (useFogColors) {
+            reloadFogColors();
+        }
         if (usePotionColors) {
             reloadPotionColors();
         }
@@ -506,6 +550,10 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(useWaterColors, "/misc/underwatercolor.png", 0x050533);
         fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(useFogColors, "/misc/fogcolor0.png", 0xc0d8ff);
         fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
+        
+        netherFogColor = new float[]{0.2f, 0.03f, 0.03f};
+        endFogColor = new float[]{0.075f, 0.075f, 0.94f};
+        endSkyColor = 0x181818;
 
         blockColorMaps = new ColorMap[Block.blocksList.length];
         blockMetaColorMaps.clear();
@@ -531,6 +579,7 @@ public class Colorizer {
             }
         }
         EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
+        myceliumColors = null;
         textColorMap.clear();
         for (int i = 0; i < textCodeColors.length; i++) {
             textCodeColors[i] = COLOR_CODE_UNSET;
@@ -550,6 +599,12 @@ public class Colorizer {
         } finally {
             MCPatcherUtils.close(inputStream);
         }
+    }
+    
+    private static void reloadFogColors() {
+        loadFloatColor("fog.nether", netherFogColor);
+        loadFloatColor("fog.end", endFogColor);
+        endSkyColor = loadIntColor("sky.end", endSkyColor);
     }
 
     private static void reloadPotionColors() {
@@ -623,6 +678,7 @@ public class Colorizer {
                 intToFloat3(rgb[i], lavaDropColors, 3 * i);
             }
         }
+        myceliumColors = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(MYCELIUM_COLORS)));
     }
 
     private static void reloadRedstoneColors() {
@@ -732,6 +788,18 @@ public class Colorizer {
             }
         }
     }
+    
+    private static int loadIntColor(String key, int color) {
+        //System.out.printf("%s=%06x\n", key, color);
+        String value = properties.getProperty(key, "");
+        if (!value.equals("")) {
+            try {
+                color = Integer.parseInt(value, 16);
+            } catch (NumberFormatException e) {
+            }
+        }
+        return color;
+    }
 
     private static void loadFloatColor(String key, float[] color) {
         //System.out.printf("%s=%06x\n", key, float3ToInt(color));
@@ -742,6 +810,19 @@ public class Colorizer {
             } catch (NumberFormatException e) {
             }
         }
+    }
+    
+    private static float[] loadFloatColor(String key) {
+        String value = properties.getProperty(key, "");
+        if (!value.equals("")) {
+            try {
+                float[] color = new float[3];
+                intToFloat3(Integer.parseInt(value, 16), color);
+                return color;
+            } catch (NumberFormatException e) {
+            }
+        }
+        return null;
     }
 
     private static void intToFloat3(int rgb, float[] f, int offset) {

@@ -59,6 +59,8 @@ public class CustomColors extends Mod {
 
         classMods.add(new WorldMod());
         classMods.add(new WorldProviderMod());
+        classMods.add(new WorldProviderHellMod());
+        classMods.add(new WorldProviderEndMod());
         classMods.add(new WorldChunkManagerMod());
         classMods.add(new EntityMod());
         classMods.add(new EntityFXMod());
@@ -66,7 +68,9 @@ public class CustomColors extends Mod {
         classMods.add(new EntityDropParticleFXMod());
         classMods.add(new EntitySplashFXMod());
         classMods.add(new EntityBubbleFXMod());
+        classMods.add(new EntitySuspendFXMod());
         classMods.add(new EntityPortalFXMod());
+        classMods.add(new EntityAuraFXMod());
 
         classMods.add(new EntityLivingMod());
         classMods.add(new EntityRendererMod());
@@ -1261,9 +1265,10 @@ public class CustomColors extends Mod {
                         ALOAD_1,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LEntity;)V")),
 
-                        // if (Colorizer.computeSkyColor(this)) {
+                        // if (Colorizer.computeSkyColor(this, f)) {
                         ALOAD_0,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeSkyColor", "(LWorld;)Z")),
+                        FLOAD_2,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeSkyColor", "(LWorld;F)Z")),
                         IFEQ, branch("A"),
 
                         // f4 = Colorizer.setColor[0];
@@ -1382,6 +1387,123 @@ public class CustomColors extends Mod {
 
                         // }
                         label("B")
+                    );
+                }
+            }.targetMethod(getFogColor));
+        }
+    }
+    
+    private class WorldProviderHellMod extends ClassMod {
+        WorldProviderHellMod() {
+            parentClass = "WorldProvider";
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0.20000000298023224),
+                        push(0.029999999329447746),
+                        push(0.029999999329447746)
+                    );
+                }
+            });
+
+            MethodRef getFogColor = new MethodRef(getDeobfClass(), "getFogColor", "(FF)LVec3D;");
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override nether fog color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0.20000000298023224),
+                        push(0.029999999329447746),
+                        push(0.029999999329447746)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        // Colorizer.setColor[0], Colorizer.setColor[1], Colorizer.setColor[2]
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        F2D,
+
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        F2D,
+
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        F2D
+                    );
+                }
+            }.targetMethod(getFogColor));
+        }
+    }
+    
+    private class WorldProviderEndMod extends ClassMod {
+        WorldProviderEndMod() {
+            parentClass = "WorldProvider";
+
+            classSignatures.add(new ConstSignature(0x8080a0));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D
+                    );
+                }
+            });
+
+            MethodRef getFogColor = new MethodRef(getDeobfClass(), "getFogColor", "(FF)LVec3D;");
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override end fog color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D,
+                        BytecodeMatcher.anyFLOAD,
+                        F2D
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endFogColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        F2D,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endFogColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        F2D,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endFogColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        F2D
                     );
                 }
             }.targetMethod(getFogColor));
@@ -1530,7 +1652,7 @@ public class CustomColors extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "override " + name + " drop color";
+                    return "override " + name + " color";
                 }
 
                 @Override
@@ -1668,7 +1790,7 @@ public class CustomColors extends Mod {
                 }
             });
 
-            addWaterColorPatch("rain", new float[]{1.0f, 1.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
+            addWaterColorPatch("rain drop", new float[]{1.0f, 1.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
         }
     }
 
@@ -1712,7 +1834,7 @@ public class CustomColors extends Mod {
                 .addXref(1, new FieldRef(getDeobfClass(), "timer", "I"))
             );
 
-            addWaterColorPatch("water", new float[]{0.0f, 0.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
+            addWaterColorPatch("water drop", new float[]{0.0f, 0.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -1879,6 +2001,89 @@ public class CustomColors extends Mod {
             addWaterColorPatch("bubble", new float[]{1.0f, 1.0f, 1.0f});
         }
     }
+    
+    private class EntitySuspendFXMod extends ClassMod {
+        EntitySuspendFXMod() {
+            parentClass = "EntityFX";
+
+            classSignatures.add(new ConstSignature(0.4f));
+            classSignatures.add(new ConstSignature(0.7f));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            push(0.01f),
+                            push(0.01f),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override underwater suspend particle color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        push(0.4f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+
+                        ALOAD_0,
+                        push(0.4f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+
+                        ALOAD_0,
+                        push(0.7f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        push(0x6666b2),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_UNDERWATER", "I")),
+                        DLOAD_2,
+                        D2I,
+                        DLOAD, 4,
+                        D2I,
+                        DLOAD, 6,
+                        D2I,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIIII)I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V")),
+                        
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                    );
+                }
+            });
+        }
+    }
 
     private class EntityPortalFXMod extends ClassMod {
         EntityPortalFXMod() {
@@ -1968,6 +2173,62 @@ public class CustomColors extends Mod {
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "portalColor", "[F")),
                         push(index),
                         FALOAD
+                    );
+                }
+            });
+        }
+    }
+    
+    private class EntityAuraFXMod extends ClassMod {
+        EntityAuraFXMod() {
+            parentClass = "EntityFX";
+
+            classSignatures.add(new ConstSignature(0.019999999552965164));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            push(0.02f),
+                            push(0.02f),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            patches.add(new AddMethodPatch("colorize", "()LEntityAuraFX;") {
+                @Override
+                public byte[] generateMethod() throws BadBytecode, IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeMyceliumColor", "()Z")),
+                        IFEQ, branch("A"),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
+                        
+                        label("A"),
+                        ALOAD_0,
+                        ARETURN
                     );
                 }
             });
@@ -2221,9 +2482,10 @@ public class CustomColors extends Mod {
                         ALOAD_3,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupForFog", "(LEntity;)V")),
 
-                        // if (Colorizer.computeFogColor(Colorizer.COLOR_MAP_FOG0)) {
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_FOG0", "I")),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(I)Z")),
+                        // if (Colorizer.computeFogColor(world, f)) {
+                        ALOAD_2,
+                        FLOAD_1,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeFogColor", "(LWorld;F)Z")),
                         IFEQ, branch("A"),
 
                         // fogColorRed = Colorizer.setColor[0];
@@ -2848,6 +3110,7 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
 
             MethodRef renderClouds = new MethodRef(getDeobfClass(), "renderClouds", "(F)V");
+            MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -2864,6 +3127,15 @@ public class CustomColors extends Mod {
                     );
                 }
             }.setMethod(renderClouds));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("/misc/tunnel.png")
+                    );
+                }
+            }.setMethod(renderSky));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -2897,6 +3169,65 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderClouds));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override end sky color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0x181818)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "endSkyColor", "I"))
+                    );
+                }
+            }.targetMethod(renderSky));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override mycelium particle color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(BinaryRegex.lookBehind(BinaryRegex.build(
+                        // if (s.equals("townaura")) {
+                        ALOAD_1,
+                        push("townaura"),
+                        reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z")),
+                        IFEQ, BinaryRegex.any(2),
+
+                        // obj = new EntityAuraFX(worldObj, d, d1, d2, d3, d4, d5);
+                        reference(NEW, new ClassRef("EntityAuraFX")),
+                        DUP,
+                        ALOAD_0,
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        reference(INVOKESPECIAL, new MethodRef("EntityAuraFX", "<init>", "(LWorld;DDDDDD)V"))
+                    ), true));
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKEVIRTUAL, new MethodRef("EntityAuraFX", "colorize", "()LEntityAuraFX;"))
+                    );
+                }
+            });
         }
     }
 
