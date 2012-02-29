@@ -95,18 +95,16 @@ public class CustomAnimation {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;
         }
-        BufferedImage destImage = TextureUtils.getResourceAsBufferedImage(textureName);
-        if (destImage == null) {
-            MCPatcherUtils.error("%s: %s not found", CLASS_NAME, textureName);
-            return null;
-        }
-        if (x + tileCount * w > destImage.getWidth() || y + tileCount * h > destImage.getHeight()) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
-            return null;
-        }
         int textureID = MCPatcherUtils.getMinecraft().renderEngine.getTexture(textureName);
         if (textureID <= 0) {
             MCPatcherUtils.error("%s: invalid id %d for texture %s", CLASS_NAME, textureID, textureName);
+            return null;
+        }
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+        int destWidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+        int destHeight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+        if (x + tileCount * w > destWidth || y + tileCount * h > destHeight) {
+            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;
         }
         int width = srcImage.getWidth();
