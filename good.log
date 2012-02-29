@@ -3021,6 +3021,8 @@ Patching...
                                FLOAD 0x0c
                                FMUL
                                INVOKEVIRTUAL 0x01 0x28
+    save water color registers n(Loe;III)Z@19
+   water color registers: 7 8 9
     colorize bottom of water block n(Loe;III)Z@745
      ALOAD 0x05                ALOAD 0x05
      FLOAD 0x0e                FLOAD 0x0e
@@ -3036,7 +3038,7 @@ Patching...
                                FLOAD 0x0e
                                FLOAD 0x22
                                FMUL
-                               FLOAD 0x08
+                               FLOAD 0x09
                                FMUL
                                INVOKEVIRTUAL 0x01 0x28
  applying MapColor patch to uv.class for mod Custom Colors
@@ -4503,6 +4505,7 @@ Custom Colors
         [1] colorize cauldron water color
         [6] colorize falling sand and gravel
         [1] override redstone wire color
+        [1] save water color registers
     EntityReddustFX (ye.class)
         [1] override redstone particle color
     RenderGlobal (l.class)
