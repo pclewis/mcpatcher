@@ -10,9 +10,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class TextureUtils {
@@ -109,8 +108,7 @@ public class TextureUtils {
             textureFX instanceof StillWater ||
             textureFX instanceof FlowWater ||
             textureFX instanceof Fire ||
-            textureFX instanceof Portal ||
-            textureFX instanceof CustomAnimation) {
+            textureFX instanceof Portal) {
             return null;
         }
         System.out.printf("attempting to refresh unknown animation %s\n", textureFX.getClass().getName());
@@ -161,6 +159,7 @@ public class TextureUtils {
             }
         }
         textureList.clear();
+        CustomAnimation.clear();
 
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         textureList.add(new Compass(minecraft));
@@ -170,42 +169,54 @@ public class TextureUtils {
         boolean isDefault = (selectedTexturePack == null || selectedTexturePack instanceof TexturePackDefault);
 
         if (!isDefault && customLava) {
-            textureList.add(new CustomAnimation(LAVA_STILL_TEXTURE_INDEX, 0, 1, "lava_still", -1, -1));
-            textureList.add(new CustomAnimation(LAVA_FLOWING_TEXTURE_INDEX, 0, 2, "lava_flowing", 3, 6));
+            CustomAnimation.addStripOrTile("/terrain.png", "lava_still", LAVA_STILL_TEXTURE_INDEX, 1, -1, -1);
+            CustomAnimation.addStripOrTile("/terrain.png", "lava_flowing", LAVA_FLOWING_TEXTURE_INDEX, 2, 3, 6);
         } else if (animatedLava) {
             textureList.add(new StillLava());
             textureList.add(new FlowLava());
         }
 
         if (!isDefault && customWater) {
-            textureList.add(new CustomAnimation(WATER_STILL_TEXTURE_INDEX, 0, 1, "water_still", -1, -1));
-            textureList.add(new CustomAnimation(WATER_FLOWING_TEXTURE_INDEX, 0, 2, "water_flowing", 0, 0));
+            CustomAnimation.addStripOrTile("/terrain.png", "water_still", WATER_STILL_TEXTURE_INDEX, 1, -1, -1);
+            CustomAnimation.addStripOrTile("/terrain.png", "water_flowing", WATER_FLOWING_TEXTURE_INDEX, 2, 0, 0);
         } else if (animatedWater) {
             textureList.add(new StillWater());
             textureList.add(new FlowWater());
         }
 
         if (!isDefault && customFire && hasResource("/anim/custom_fire_e_w.png") && hasResource("/anim/custom_fire_n_s.png")) {
-            textureList.add(new CustomAnimation(FIRE_N_S_TEXTURE_INDEX, 0, 1, "fire_n_s", 2, 4));
-            textureList.add(new CustomAnimation(FIRE_E_W_TEXTURE_INDEX, 0, 1, "fire_e_w", 2, 4));
+            CustomAnimation.addStrip("/terrain.png", "fire_n_s", FIRE_N_S_TEXTURE_INDEX, 1);
+            CustomAnimation.addStrip("/terrain.png", "fire_e_w", FIRE_E_W_TEXTURE_INDEX, 1);
         } else if (animatedFire) {
             textureList.add(new Fire(0));
             textureList.add(new Fire(1));
         }
 
         if (!isDefault && customPortal && hasResource("/anim/custom_portal.png")) {
-            textureList.add(new CustomAnimation(PORTAL_TEXTURE_INDEX, 0, 1, "portal", -1, -1));
+            CustomAnimation.addStrip("/terrain.png", "portal", PORTAL_TEXTURE_INDEX, 1);
         } else if (animatedPortal) {
             textureList.add(new Portal());
         }
 
         if (customOther) {
-            for (int tileImage = 0; tileImage < 2; tileImage++) {
-                String imageName = (tileImage == 0 ? "terrain" : "item");
-                for (int tileNum = 0; tileNum < 256; tileNum++) {
-                    String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
-                    if (hasResource(resource)) {
-                        textureList.add(new CustomAnimation(tileNum, tileImage, 1, imageName + "_" + tileNum, 2, 4));
+            addOtherTextureFX("/terrain.png", "terrain");
+            addOtherTextureFX("/gui/items.png", "item");
+            if (selectedTexturePack instanceof TexturePackCustom) {
+                TexturePackCustom custom = (TexturePackCustom) selectedTexturePack;
+                for (ZipEntry entry : Collections.list(custom.zipFile.entries())) {
+                    String name = "/" + entry.getName();
+                    if (name.startsWith("/anim/") && name.endsWith(".properties") && !isCustomTerrainItemResource(name)) {
+                        InputStream inputStream = null;
+                        try {
+                            inputStream = custom.zipFile.getInputStream(entry);
+                            Properties properties = new Properties();
+                            properties.load(inputStream);
+                            CustomAnimation.addStrip(properties);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            MCPatcherUtils.close(inputStream);
+                        }
                     }
                 }
             }
@@ -219,6 +230,8 @@ public class TextureUtils {
             t.onTick();
         }
 
+        CustomAnimation.updateAll();
+
         if (ColorizerWater.colorBuffer != ColorizerFoliage.colorBuffer) {
             refreshColorizer(ColorizerWater.colorBuffer, "/misc/watercolor.png");
         }
@@ -226,6 +239,15 @@ public class TextureUtils {
         refreshColorizer(ColorizerFoliage.colorBuffer, "/misc/foliagecolor.png");
 
         System.gc();
+    }
+    
+    private static void addOtherTextureFX(String textureName, String imageName) {
+        for (int tileNum = 0; tileNum < 256; tileNum++) {
+            String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
+            if (hasResource(resource)) {
+                CustomAnimation.addStrip(textureName, imageName + "_" + tileNum, tileNum, 1);
+            }
+        }
     }
 
     public static TexturePackBase getSelectedTexturePack() {
@@ -261,6 +283,18 @@ public class TextureUtils {
             resource.matches("^/font/.*\\.properties$") ||
             resource.matches("^/mob/.*\\d+.png$")
         );
+    }
+    
+    static boolean isCustomTerrainItemResource(String resource) {
+        resource = resource.replaceFirst("^/anim", "").replaceFirst("\\.(png|properties)$", "");
+        return resource.equals("/custom_lava_still") ||
+            resource.equals("/custom_lava_flowing") ||
+            resource.equals("/custom_water_still") ||
+            resource.equals("/custom_water_flowing") ||
+            resource.equals("/custom_fire_n_s") ||
+            resource.equals("/custom_fire_e_w") ||
+            resource.equals("/custom_portal") ||
+            resource.matches("^/custom_(terrain|item)_\\d+$");
     }
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
@@ -330,7 +364,7 @@ public class TextureUtils {
         );
         if (!cached) {
             Integer i;
-            if (resource.matches("^(/anim)?/custom_.*\\.png$")) {
+            if (isCustomTerrainItemResource(resource)) {
                 i = 1;
             } else {
                 i = expectedColumns.get(resource);
@@ -406,7 +440,7 @@ public class TextureUtils {
         return hasResource(getSelectedTexturePack(), s);
     }
 
-    private static BufferedImage resizeImage(BufferedImage image, int width) {
+    static BufferedImage resizeImage(BufferedImage image, int width) {
         int height = image.getHeight() * width / image.getWidth();
         MCPatcherUtils.log("  resizing to %dx%d", width, height);
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);

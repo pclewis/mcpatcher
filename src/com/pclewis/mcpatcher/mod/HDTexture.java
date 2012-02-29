@@ -67,6 +67,8 @@ public class HDTexture extends Mod {
 
     private class RenderEngineMod extends ClassMod {
         RenderEngineMod() {
+            final MethodRef updateDynamicTextures = new MethodRef(getDeobfClass(), "updateDynamicTextures", "()V");
+
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
             classSignatures.add(new BytecodeSignature() {
@@ -82,11 +84,21 @@ public class HDTexture extends Mod {
                 }
             }.setMethodName("refreshTextures"));
 
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V"))
+                    );
+                }
+            }.setMethod(updateDynamicTextures));
+
             memberMappers.add(new FieldMapper("imageData", "Ljava/nio/ByteBuffer;"));
             memberMappers.add(new FieldMapper("textureList", "Ljava/util/List;"));
             memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
             memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
             memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
+            memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I"));
             if (haveGetImageRGB) {
                 memberMappers.add(new MethodMapper("getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I"));
             }
@@ -369,6 +381,27 @@ public class HDTexture extends Mod {
                     );
                 }
             });
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "update custom animations";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        RETURN
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.CUSTOM_ANIMATION_CLASS, "updateAll", "()V"))
+                    );
+                }
+            }.targetMethod(updateDynamicTextures));
         }
     }
 
