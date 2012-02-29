@@ -70,6 +70,7 @@ public class CustomColors extends Mod {
         classMods.add(new EntityBubbleFXMod());
         classMods.add(new EntitySuspendFXMod());
         classMods.add(new EntityPortalFXMod());
+        classMods.add(new EntityAuraFXMod());
 
         classMods.add(new EntityLivingMod());
         classMods.add(new EntityRendererMod());
@@ -2174,6 +2175,62 @@ public class CustomColors extends Mod {
             });
         }
     }
+    
+    private class EntityAuraFXMod extends ClassMod {
+        EntityAuraFXMod() {
+            parentClass = "EntityFX";
+
+            classSignatures.add(new ConstSignature(0.019999999552965164));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            push(0.02f),
+                            push(0.02f),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            patches.add(new AddMethodPatch("colorize", "()LEntityAuraFX;") {
+                @Override
+                public byte[] generateMethod() throws BadBytecode, IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeMyceliumColor", "()Z")),
+                        IFEQ, branch("A"),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
+                        
+                        label("A"),
+                        ALOAD_0,
+                        ARETURN
+                    );
+                }
+            });
+        }
+    }
 
     private class BlockLilyPadMod extends ClassMod {
         private static final int MAGIC = 0x208030;
@@ -3137,6 +3194,44 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderSky));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override mycelium particle color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(BinaryRegex.lookBehind(BinaryRegex.build(
+                        // if (s.equals("townaura")) {
+                        ALOAD_1,
+                        push("townaura"),
+                        reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z")),
+                        IFEQ, BinaryRegex.any(2),
+
+                        // obj = new EntityAuraFX(worldObj, d, d1, d2, d3, d4, d5);
+                        reference(NEW, new ClassRef("EntityAuraFX")),
+                        DUP,
+                        ALOAD_0,
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        BytecodeMatcher.anyDLOAD,
+                        reference(INVOKESPECIAL, new MethodRef("EntityAuraFX", "<init>", "(LWorld;DDDDDD)V"))
+                    ), true));
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKEVIRTUAL, new MethodRef("EntityAuraFX", "colorize", "()LEntityAuraFX;"))
+                    );
+                }
+            });
         }
     }
 
