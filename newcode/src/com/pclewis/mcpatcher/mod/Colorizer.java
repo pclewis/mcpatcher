@@ -19,7 +19,7 @@ public class Colorizer {
     private static final String TEXT_KEY = "text.";
     private static final String TEXT_CODE_KEY = TEXT_KEY + "code.";
 
-    private static final int CHAT_COLOR_UNSET = -2;
+    private static final int COLOR_CODE_UNSET = -2;
 
     public static final int COLOR_MAP_SWAMP_GRASS = 0;
     public static final int COLOR_MAP_SWAMP_FOLIAGE = 1;
@@ -239,7 +239,7 @@ public class Colorizer {
     }
     
     public static int colorizeText(int defaultColor, int index) {
-        if (index < 0 || index >= textCodeColors.length || textCodeColors[index] == CHAT_COLOR_UNSET) {
+        if (index < 0 || index >= textCodeColors.length || textCodeColors[index] == COLOR_CODE_UNSET) {
             return defaultColor;
         } else {
             return textCodeColors[index];
@@ -533,7 +533,7 @@ public class Colorizer {
         EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
         textColorMap.clear();
         for (int i = 0; i < textCodeColors.length; i++) {
-            textCodeColors[i] = CHAT_COLOR_UNSET;
+            textCodeColors[i] = COLOR_CODE_UNSET;
         }
     }
 
@@ -672,6 +672,9 @@ public class Colorizer {
     private static void reloadTextColors() {
         for (int i = 0; i < textCodeColors.length; i++) {
             loadIntColor(TEXT_CODE_KEY + i, textCodeColors, i);
+            if (textCodeColors[i] != COLOR_CODE_UNSET) {
+                textCodeColors[i + 16] = (textCodeColors[i] & 0xfcfcfc) >> 2;
+            }
         }
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
