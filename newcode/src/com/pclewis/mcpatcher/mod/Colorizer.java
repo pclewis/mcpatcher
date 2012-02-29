@@ -100,6 +100,8 @@ public class Colorizer {
 
     private static Entity fogCamera;
 
+    private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>();
+
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
     }
@@ -186,42 +188,73 @@ public class Colorizer {
     
     private static final HashMap<String, Integer> textMap = new HashMap<String, Integer>();
     private static long textTimer;
-    
+
     public static int colorizeText(String text, int defaultColor) {
         if (text != null) {
-            textMap.put(text, defaultColor & 0xffffff);
-            long now = System.currentTimeMillis();
-            if (now - textTimer > 5000L) {
-                textTimer = now;
-                File file = MCPatcherUtils.getMinecraftPath("texturepacks", "textmap.txt");
-                PrintWriter os = null;
-                try {
-                    os = new PrintWriter(new FileOutputStream(file));
-                    ArrayList<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>();
-                    list.addAll(textMap.entrySet());
-                    Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-                        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                            int a = o1.getValue();
-                            int b = o2.getValue();
-                            if (a != b) {
-                                return a - b;
-                            }
-                            return o1.getKey().compareTo(o2.getKey());
+            textMap.put(text, defaultColor);
+        }
+        int high = defaultColor & 0xff000000;
+        defaultColor &= 0xffffff;
+        long now = System.currentTimeMillis();
+        if (now - textTimer > 5000L) {
+            textTimer = now;
+            File file = MCPatcherUtils.getMinecraftPath("texturepacks", "textcolors.txt");
+            PrintWriter os = null;
+            try {
+                os = new PrintWriter(new FileOutputStream(file));
+                ArrayList<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>();
+                list.addAll(textMap.entrySet());
+                Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+                    public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                        int a = o1.getValue();
+                        int b = o2.getValue();
+                        if (a != b) {
+                            return a - b;
                         }
-                    });
-                    for (Map.Entry<String, Integer> entry : list) {
-                        String t = entry.getKey();
-                        int c = entry.getValue();
-                        os.printf("%06x: %s\n", c, t);
+                        return o1.getKey().compareTo(o2.getKey());
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    MCPatcherUtils.close(os);
+                });
+                for (Map.Entry<String, Integer> entry : list) {
+                    String t = entry.getKey();
+                    int c = entry.getValue();
+                    os.printf("%06x: %s\n", c, t);
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                MCPatcherUtils.close(os);
             }
         }
-        return defaultColor;
+        Integer newColor = null;
+        if (!textColorMap.containsKey(defaultColor)) {
+            String key;
+            switch (defaultColor) {
+                case 0x80ff20:
+                    key = "xpbar";
+                    break;
+    
+                case 0xff00ff:
+                    key = "boss";
+                    break;
+                
+                default:
+                    key = String.format("%06x", defaultColor);
+                    break;
+            }
+            if (properties.containsKey(key)) {
+                try {
+                    newColor = Integer.parseInt(properties.getProperty("text." + key, ""), 16);
+                } catch (NumberFormatException e) {
+                }
+            }
+            textColorMap.put(defaultColor, newColor);
+        }
+        newColor = textColorMap.get(defaultColor);
+        if (newColor == null) {
+            return high | defaultColor;
+        } else {
+            return high | newColor;
+        }
     }
 
     public static int getWaterBottleColor() {
@@ -508,6 +541,7 @@ public class Colorizer {
             }
         }
         EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
+        textColorMap.clear();
     }
 
     private static void reloadColorProperties() {
