@@ -68,6 +68,7 @@ public class CustomColors extends Mod {
         classMods.add(new EntityDropParticleFXMod());
         classMods.add(new EntitySplashFXMod());
         classMods.add(new EntityBubbleFXMod());
+        classMods.add(new EntitySuspendFXMod());
         classMods.add(new EntityPortalFXMod());
 
         classMods.add(new EntityLivingMod());
@@ -1647,7 +1648,7 @@ public class CustomColors extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "override " + name + " drop color";
+                    return "override " + name + " color";
                 }
 
                 @Override
@@ -1785,7 +1786,7 @@ public class CustomColors extends Mod {
                 }
             });
 
-            addWaterColorPatch("rain", new float[]{1.0f, 1.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
+            addWaterColorPatch("rain drop", new float[]{1.0f, 1.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
         }
     }
 
@@ -1829,7 +1830,7 @@ public class CustomColors extends Mod {
                 .addXref(1, new FieldRef(getDeobfClass(), "timer", "I"))
             );
 
-            addWaterColorPatch("water", new float[]{0.0f, 0.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
+            addWaterColorPatch("water drop", new float[]{0.0f, 0.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -1994,6 +1995,89 @@ public class CustomColors extends Mod {
             });
 
             addWaterColorPatch("bubble", new float[]{1.0f, 1.0f, 1.0f});
+        }
+    }
+    
+    private class EntitySuspendFXMod extends ClassMod {
+        EntitySuspendFXMod() {
+            parentClass = "EntityFX";
+
+            classSignatures.add(new ConstSignature(0.4f));
+            classSignatures.add(new ConstSignature(0.7f));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            push(0.01f),
+                            push(0.01f),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override underwater suspend particle color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        push(0.4f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+
+                        ALOAD_0,
+                        push(0.4f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+
+                        ALOAD_0,
+                        push(0.7f),
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        push(0x6666b2),
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "COLOR_MAP_UNDERWATER", "I")),
+                        DLOAD_2,
+                        D2I,
+                        DLOAD, 4,
+                        D2I,
+                        DLOAD, 6,
+                        D2I,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIIII)I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V")),
+                        
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_0,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleRed", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_1,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
+
+                        ALOAD_0,
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
+                        ICONST_2,
+                        FALOAD,
+                        reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
+                    );
+                }
+            });
         }
     }
 
