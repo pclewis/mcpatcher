@@ -5,12 +5,8 @@ import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
 public class Colorizer {
     private static final String COLOR_PROPERTIES = "/color.properties";
@@ -186,6 +182,46 @@ public class Colorizer {
             }
         }
         return value == null ? defaultColor : value;
+    }
+    
+    private static final HashMap<String, Integer> textMap = new HashMap<String, Integer>();
+    private static long textTimer;
+    
+    public static int colorizeText(String text, int defaultColor) {
+        if (text != null) {
+            textMap.put(text, defaultColor & 0xffffff);
+            long now = System.currentTimeMillis();
+            if (now - textTimer > 5000L) {
+                textTimer = now;
+                File file = MCPatcherUtils.getMinecraftPath("texturepacks", "textmap.txt");
+                PrintWriter os = null;
+                try {
+                    os = new PrintWriter(new FileOutputStream(file));
+                    ArrayList<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>();
+                    list.addAll(textMap.entrySet());
+                    Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+                        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                            int a = o1.getValue();
+                            int b = o2.getValue();
+                            if (a != b) {
+                                return a - b;
+                            }
+                            return o1.getKey().compareTo(o2.getKey());
+                        }
+                    });
+                    for (Map.Entry<String, Integer> entry : list) {
+                        String t = entry.getKey();
+                        int c = entry.getValue();
+                        os.printf("%06x: %s\n", c, t);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    MCPatcherUtils.close(os);
+                }
+            }
+        }
+        return defaultColor;
     }
 
     public static int getWaterBottleColor() {

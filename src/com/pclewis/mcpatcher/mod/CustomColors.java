@@ -90,8 +90,11 @@ public class CustomColors extends Mod {
             classMods.add(new EntityListMod());
             classMods.add(new ItemSpawnerEggMod());
         }
+        
+        classMods.add(new FontRendererMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS + "$Stub"));
@@ -3141,6 +3144,48 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "<clinit>", "()V")));
+        }
+    }
+    
+    private class FontRendererMod extends BaseMod.FontRendererMod {
+        FontRendererMod() {
+            final MethodRef renderString = new MethodRef(getDeobfClass(), "renderString", "(Ljava/lang/String;IIIZ)V");
+            final MethodRef glColor4f = new MethodRef("org/lwjgl/opengl/GL11", "glColor4f", "(FFFF)V");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKESTATIC, glColor4f)
+                    );
+                }
+            }.setMethod(renderString));
+
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "override text color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        ICONST_0,
+                        BytecodeMatcher.anyReference(PUTFIELD)
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_1,
+                        ILOAD, 4,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeText", "(Ljava/lang/String;I)I")),
+                        ISTORE, 4
+                    );
+                }
+            }.targetMethod(renderString));
         }
     }
 }
