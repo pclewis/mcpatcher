@@ -77,6 +77,7 @@ public class Colorizer {
     private static final boolean useMapColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "map", true);
     private static final boolean useSheepColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true);
     private static final boolean useBlockColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true);
+    private static final boolean useTextColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "text", true);
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
     private static final float fogBlendScale = getBlendScale(fogBlendRadius);
     private static final int blockBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1);
@@ -498,7 +499,9 @@ public class Colorizer {
         if (useSheepColors) {
             reloadSheepColors();
         }
-        reloadTextColors();
+        if (useTextColors) {
+            reloadTextColors();
+        }
     }
 
     private static void reset() {

@@ -123,6 +123,7 @@ public class CustomColors extends Mod {
         private JCheckBox sheepCheckBox;
         private JSpinner fogBlendRadiusSpinner;
         private JSpinner blockBlendRadiusSpinner;
+        private JCheckBox textCheckBox;
 
         ConfigPanel() {
             waterCheckBox.addActionListener(new ActionListener() {
@@ -208,7 +209,13 @@ public class CustomColors extends Mod {
                     MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", otherBlockCheckBox.isSelected());
                 }
             });
-            
+
+            textCheckBox.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "text", textCheckBox.isSelected());
+                }
+            });
+
             fogBlendRadiusSpinner.addChangeListener(new ChangeListener() {
                 public void stateChanged(ChangeEvent e) {
                     int value = 7;
@@ -257,6 +264,7 @@ public class CustomColors extends Mod {
             sheepCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true));
             fogCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true));
             otherBlockCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true));
+            textCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "text", true));
             fogBlendRadiusSpinner.setValue(MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7));
             blockBlendRadiusSpinner.setValue(MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1));
             eggCheckBox.setVisible(haveSpawnerEggs);
