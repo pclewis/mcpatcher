@@ -2212,7 +2212,7 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeMyceliumColor", "()Z")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeMyceliumParticleColor", "()Z")),
                         IFEQ, branch("A"),
 
                         ALOAD_0,
