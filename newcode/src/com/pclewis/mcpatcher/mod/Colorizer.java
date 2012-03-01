@@ -203,11 +203,11 @@ public class Colorizer {
     private static long textTimer;
 
     public static int colorizeText(String text, int defaultColor) {
+        int high = defaultColor & 0xff000000;
+        defaultColor &= 0xffffff;
         if (text != null) {
             textMap.put(text, defaultColor);
         }
-        int high = defaultColor & 0xff000000;
-        defaultColor &= 0xffffff;
         long now = System.currentTimeMillis();
         if (now - textTimer > 5000L) {
             textTimer = now;
@@ -250,7 +250,7 @@ public class Colorizer {
         if (index < 0 || index >= textCodeColors.length || textCodeColors[index] == COLOR_CODE_UNSET) {
             return defaultColor;
         } else {
-            return textCodeColors[index];
+            return (defaultColor & 0xff000000) | textCodeColors[index];
         }
     }
 
@@ -728,7 +728,7 @@ public class Colorizer {
     private static void reloadTextColors() {
         for (int i = 0; i < textCodeColors.length; i++) {
             loadIntColor(TEXT_CODE_KEY + i, textCodeColors, i);
-            if (textCodeColors[i] != COLOR_CODE_UNSET) {
+            if (textCodeColors[i] != COLOR_CODE_UNSET && i + 16 < textCodeColors.length) {
                 textCodeColors[i + 16] = (textCodeColors[i] & 0xfcfcfc) >> 2;
             }
         }
