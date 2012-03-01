@@ -98,7 +98,6 @@ public class CustomColors extends Mod {
         classMods.add(new FontRendererMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS + "$Stub"));
@@ -3527,9 +3526,8 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        ALOAD_1,
                         ILOAD, 4,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeText", "(Ljava/lang/String;I)I")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeText", "(I)I")),
                         ISTORE, 4
                     );
                 }

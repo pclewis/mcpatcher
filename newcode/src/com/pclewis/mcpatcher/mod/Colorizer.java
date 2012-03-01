@@ -199,45 +199,9 @@ public class Colorizer {
         return value == null ? defaultColor : value;
     }
     
-    private static final HashMap<String, Integer> textMap = new HashMap<String, Integer>();
-    private static long textTimer;
-
-    public static int colorizeText(String text, int defaultColor) {
+    public static int colorizeText(int defaultColor) {
         int high = defaultColor & 0xff000000;
         defaultColor &= 0xffffff;
-        if (text != null) {
-            textMap.put(text, defaultColor);
-        }
-        long now = System.currentTimeMillis();
-        if (now - textTimer > 5000L) {
-            textTimer = now;
-            File file = MCPatcherUtils.getMinecraftPath("texturepacks", "textcolors.txt");
-            PrintWriter os = null;
-            try {
-                os = new PrintWriter(new FileOutputStream(file));
-                ArrayList<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>();
-                list.addAll(textMap.entrySet());
-                Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-                    public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                        int a = o1.getValue();
-                        int b = o2.getValue();
-                        if (a != b) {
-                            return a - b;
-                        }
-                        return o1.getKey().compareTo(o2.getKey());
-                    }
-                });
-                for (Map.Entry<String, Integer> entry : list) {
-                    String t = entry.getKey();
-                    int c = entry.getValue();
-                    os.printf("%06x: %s\n", c, t);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                MCPatcherUtils.close(os);
-            }
-        }
         Integer newColor = textColorMap.get(defaultColor);
         if (newColor == null) {
             return high | defaultColor;
