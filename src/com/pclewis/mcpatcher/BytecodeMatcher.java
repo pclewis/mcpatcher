@@ -181,14 +181,15 @@ public class BytecodeMatcher extends BinaryMatcher {
         byte[] code = ca.getCode();
         int next;
 
-        while (ci.hasNext() && offset < code.length) {
+        while (offset < code.length) {
             if (!match(code, offset)) {
                 break;
             }
             try {
-                while ((next = ci.next()) < getStart())
+                for (next = offset; next < getStart() && ci.hasNext(); next = ci.next())
                     ;
             } catch (BadBytecode e) {
+                Logger.log(e);
                 break;
             }
             if (next == getStart()) {
