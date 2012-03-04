@@ -519,7 +519,7 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
         
         netherFogColor = new float[]{0.2f, 0.03f, 0.03f};
-        endFogColor = new float[]{0.075f, 0.075f, 0.94f};
+        endFogColor = new float[]{0.075f, 0.075f, 0.094f};
         endSkyColor = 0x181818;
 
         blockColorMaps = new ColorMap[Block.blocksList.length];
