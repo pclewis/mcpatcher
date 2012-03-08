@@ -3153,9 +3153,8 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        BinaryRegex.lookBehind(BinaryRegex.any(21), false),
                         BinaryRegex.capture(BinaryRegex.build(
-                            BinaryRegex.begin(),
-                            BinaryRegex.any(0, 20),
                             ALOAD_0,
                             BytecodeMatcher.anyReference(GETFIELD),
                             BytecodeMatcher.anyReference(GETFIELD),
