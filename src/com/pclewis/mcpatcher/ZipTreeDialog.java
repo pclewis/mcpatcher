@@ -23,6 +23,7 @@ public class ZipTreeDialog extends JDialog {
         prefix = "";
 
         setContentPane(contentPane);
+        setIconImage(MainForm.programIcon);
         setTitle("Select folder to add to minecraft.jar");
         setMinimumSize(new Dimension(384, 384));
         setResizable(true);

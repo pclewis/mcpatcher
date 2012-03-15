@@ -37,6 +37,8 @@ class MainForm {
         "</table>" +
             "</html>";
 
+    static Image programIcon;
+
     private JPanel mainPanel;
     JFrame frame;
     private int frameWidth = 518;
@@ -109,9 +111,12 @@ class MainForm {
             }
         });
 
+        programIcon = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/icon.png"));
+
         frame = new JFrame("Minecraft Patcher " + MCPatcher.VERSION_STRING);
         frame.setResizable(true);
         frame.setContentPane(mainPanel);
+        frame.setIconImage(programIcon);
         frame.addWindowListener(new WindowListener() {
             public void windowOpened(WindowEvent e) {
             }

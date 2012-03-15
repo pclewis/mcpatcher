@@ -42,6 +42,7 @@ public class AddModDialog extends JDialog {
             fileMap.putAll(mod.fileMap);
         }
 
+        setIconImage(MainForm.programIcon);
         setContentPane(contentPane);
         setTitle("Add external mod");
         setMinimumSize(new Dimension(512, 512));

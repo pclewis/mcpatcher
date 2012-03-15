@@ -62,6 +62,7 @@ class ConflictDialog {
         JDialog dialog = pane.createDialog("Mod conflict detected");
         dialog.setModal(true);
         dialog.setResizable(true);
+        dialog.setIconImage(MainForm.programIcon);
         dialog.setVisible(true);
         Object result = pane.getValue();
         return result instanceof Integer ? (Integer) result : JOptionPane.NO_OPTION;
