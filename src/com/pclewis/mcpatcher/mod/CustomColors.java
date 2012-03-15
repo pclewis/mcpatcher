@@ -17,6 +17,7 @@ import static javassist.bytecode.Opcode.*;
 public class CustomColors extends Mod {
     private boolean haveSpawnerEggs;
     private boolean haveNewBiomes;
+    private boolean haveFontColor;
     private String getColorFromDamageDescriptor;
     private int getColorFromDamageParams;
 
@@ -33,6 +34,7 @@ public class CustomColors extends Mod {
 
         haveSpawnerEggs = minecraftVersion.compareTo("12w01a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveNewBiomes = minecraftVersion.compareTo("12w07a") >= 0;
+        haveFontColor = minecraftVersion.compareTo("11w49a") >= 0;
 
         configPanel = new ConfigPanel();
 
@@ -94,8 +96,10 @@ public class CustomColors extends Mod {
             classMods.add(new EntityListMod());
             classMods.add(new ItemSpawnerEggMod());
         }
-        
-        classMods.add(new FontRendererMod());
+
+        if (haveFontColor) {
+            classMods.add(new FontRendererMod());
+        }
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
