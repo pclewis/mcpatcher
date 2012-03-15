@@ -49,4 +49,8 @@ public class World implements IBlockAccess {
     public WorldChunkManager getWorldChunkManager() {
         return null;
     }
+
+    public int getBlockMetadata(int i, int j, int k) {
+        return 0;
+    }
 }

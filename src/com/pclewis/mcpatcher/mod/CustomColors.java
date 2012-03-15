@@ -2687,7 +2687,35 @@ public class CustomColors extends Mod {
         BlockRedstoneWireMod() {
             super("override redstone wire particle color", new MethodRef("BlockRedstoneWire", "randomDisplayTick", "(LWorld;IIILjava/util/Random;)V"));
 
+            parentClass = "Block";
+
             classSignatures.add(new ConstSignature("reddust"));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override redstone color multiplier";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0x800000)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_1,
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        push(0x800000),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeRedstoneWire", "(LIBlockAccess;IIII)I"))
+                    );
+                }
+            }.targetMethod(new MethodRef(getDeobfClass(), "colorMultiplier", "(LIBlockAccess;III)I")));
         }
     }
 
@@ -2740,7 +2768,6 @@ public class CustomColors extends Mod {
                     );
                 }
             }.addXref(1, setColorOpaque_F));
-
 
             classSignatures.add(new BytecodeSignature() {
                 @Override

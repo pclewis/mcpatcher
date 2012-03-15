@@ -303,6 +303,15 @@ public class Colorizer {
             return true;
         }
     }
+    
+    public static int colorizeRedstoneWire(IBlockAccess blockAccess, int i, int j, int k, int defaultColor) {
+        if (redstoneColor == null) {
+            return defaultColor;
+        } else {
+            int metadata = Math.max(Math.min(blockAccess.getBlockMetadata(i, j, k), 15), 0);
+            return float3ToInt(redstoneColor[metadata]);
+        }
+    }
 
     public static boolean computeWaterColor(double x, double y, double z) {
         if (useParticleColors) {
