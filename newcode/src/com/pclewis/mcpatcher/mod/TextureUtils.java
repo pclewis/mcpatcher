@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -216,6 +217,40 @@ public class TextureUtils {
                             e.printStackTrace();
                         } finally {
                             MCPatcherUtils.close(inputStream);
+                        }
+                    }
+                }
+            } else if (selectedTexturePack.getClass().getSimpleName().equals("TexturePackFolder")) {
+                File folder = null;
+                try {
+                    for (Field field : selectedTexturePack.getClass().getFields()) {
+                        if (field.getType().equals(File.class)) {
+                            folder = (File) field.get(selectedTexturePack);
+                            break;
+                        }
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+                if (folder != null) {
+                    folder = new File(folder, "anim");
+                    if (folder.isDirectory()) {
+                        for (File file : folder.listFiles(new FilenameFilter() {
+                            public boolean accept(File dir, String name) {
+                                return name.endsWith(".properties") && !isCustomTerrainItemResource("/anim/" + name);
+                            }
+                        })) {
+                            InputStream inputStream = null;
+                            try {
+                                inputStream = new FileInputStream(file);
+                                Properties properties = new Properties();
+                                properties.load(inputStream);
+                                CustomAnimation.addStrip(properties);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } finally {
+                                MCPatcherUtils.close(inputStream);
+                            }
                         }
                     }
                 }

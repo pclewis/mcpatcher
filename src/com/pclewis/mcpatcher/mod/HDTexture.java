@@ -14,6 +14,7 @@ public class HDTexture extends Mod {
     private boolean haveAlternateFont;
     private boolean haveUnicode;
     private boolean haveGetImageRGB;
+    private boolean haveFolderTexturePacks;
 
     public HDTexture(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_TEXTURES;
@@ -26,6 +27,7 @@ public class HDTexture extends Mod {
         haveAlternateFont = minecraftVersion.compareTo("Beta 1.9 Prerelease 3") >= 0;
         haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveGetImageRGB = minecraftVersion.compareTo("Beta 1.6") >= 0;
+        haveFolderTexturePacks = minecraftVersion.compareTo("12w08a") >= 0;
 
         classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
@@ -44,6 +46,9 @@ public class HDTexture extends Mod {
         classMods.add(new TexturePackBaseMod());
         classMods.add(new TexturePackCustomMod());
         classMods.add(new BaseMod.TexturePackDefaultMod());
+        if (haveFolderTexturePacks) {
+            classMods.add(new TexturePackFolderMod());
+        }
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
@@ -59,6 +64,7 @@ public class HDTexture extends Mod {
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_SIZE_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Delegate"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Tile"));
@@ -831,6 +837,20 @@ public class HDTexture extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "closeTexturePackFile", "()V")));
+        }
+    }
+    
+    private class TexturePackFolderMod extends ClassMod {
+        TexturePackFolderMod() {
+            parentClass = "TexturePackBase";
+
+            classSignatures.add(new ConstSignature("pack.txt"));
+            classSignatures.add(new ConstSignature("pack.png"));
+            classSignatures.add(new ConstSignature(new ClassRef("java.io.FileInputStream")));
+
+            memberMappers.add(new FieldMapper("folder", "Ljava/io/File;"));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "folder", "Ljava/io/File;")));
         }
     }
 
