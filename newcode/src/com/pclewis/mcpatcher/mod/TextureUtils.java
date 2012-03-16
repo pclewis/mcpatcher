@@ -4,27 +4,32 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class TextureUtils {
-    private static boolean animatedFire;
-    private static boolean animatedLava;
-    private static boolean animatedWater;
-    private static boolean animatedPortal;
-    private static boolean customFire;
-    private static boolean customLava;
-    private static boolean customWater;
-    private static boolean customPortal;
-    private static boolean customOther;
+    private static final boolean animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
+    private static final boolean animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedLava", true);
+    private static final boolean animatedWater = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedWater", true);
+    private static final boolean animatedPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedPortal", true);
+    private static final boolean customFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customFire", true);
+    private static final boolean customLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customLava", true);
+    private static final boolean customWater = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customWater", true);
+    private static final boolean customPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customPortal", true);
+    private static final boolean customOther = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customOther", true);
+
+    private static final boolean reclaimGLMemory = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false);
+    private static final boolean autoRefreshTextures = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "autoRefreshTextures", false);
 
     public static final int LAVA_STILL_TEXTURE_INDEX = 14 * 16 + 13;  // Block.lavaStill.blockIndexInTexture
     public static final int LAVA_FLOWING_TEXTURE_INDEX = LAVA_STILL_TEXTURE_INDEX + 1; // Block.lavaMoving.blockIndexInTexture
@@ -34,70 +39,35 @@ public class TextureUtils {
     public static final int FIRE_N_S_TEXTURE_INDEX = FIRE_E_W_TEXTURE_INDEX + 16;
     public static final int PORTAL_TEXTURE_INDEX = 0 * 16 + 14; // Block.portal.blockIndexInTexture
 
-    private static HashMap<String, Integer> expectedColumns = new HashMap<String, Integer>();
+    static TexturePackBase lastTexturePack;
+    private static long textureChangeDetectTimer;
 
-    private static boolean useTextureCache;
-    private static boolean reclaimGLMemory;
-    private static boolean autoRefreshTextures;
-    private static TexturePackBase lastTexturePack = null;
-    private static HashMap<String, BufferedImage> cache = new HashMap<String, BufferedImage>();
-
-    private static int textureRefreshCount;
-
-    static {
-        animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
-        animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedLava", true);
-        animatedWater = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedWater", true);
-        animatedPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedPortal", true);
-        customFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customFire", true);
-        customLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customLava", true);
-        customWater = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customWater", true);
-        customPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customPortal", true);
-        customOther = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customOther", true);
-
-        useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", false);
-        reclaimGLMemory = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false);
-        autoRefreshTextures = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "autoRefreshTextures", false);
-
-        expectedColumns.put("/terrain.png", 16);
-        expectedColumns.put("/gui/items.png", 16);
-        expectedColumns.put("/misc/dial.png", 1);
-    }
-
-    public static boolean setTileSize() {
-        MCPatcherUtils.log("\nchanging skin to %s", getTexturePackName(getSelectedTexturePack()));
-        int size = getTileSize();
-        if (size == TileSize.int_size) {
-            MCPatcherUtils.log("tile size %d unchanged", size);
-            return false;
-        } else {
-            MCPatcherUtils.log("setting tile size to %d (was %d)", size, TileSize.int_size);
-            TileSize.setTileSize(size);
-            return true;
+    public static void checkUpdate() {
+        checkTexturePackFileChange();
+        TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
+        if (lastTexturePack != selectedTexturePack) {
+            lastTexturePack = selectedTexturePack;
+            TileSize.refresh();
+            refreshTextureFX(MCPatcherUtils.getMinecraft().renderEngine.textureFXList);
+            refreshCustomAnimations();
+            refreshFontRenderer();
+            refreshColorizers();
+            System.gc();
         }
     }
 
-    private static void setFontRenderer(Minecraft minecraft, FontRenderer fontRenderer, String filename) {
+    private static void refreshFontRenderer(Minecraft minecraft, FontRenderer fontRenderer, String filename) {
         boolean saveUnicode = fontRenderer.isUnicode;
         fontRenderer.initialize(minecraft.gameSettings, filename, minecraft.renderEngine);
         fontRenderer.isUnicode = saveUnicode;
     }
 
-    public static void setFontRenderer() {
-        MCPatcherUtils.log("setFontRenderer()");
+    private static void refreshFontRenderer() {
+        MCPatcherUtils.log("refreshFontRenderer()");
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
-        setFontRenderer(minecraft, minecraft.fontRenderer, "/font/default.png");
+        refreshFontRenderer(minecraft, minecraft.fontRenderer, "/font/default.png");
         if (minecraft.alternateFontRenderer != minecraft.fontRenderer) {
-            setFontRenderer(minecraft, minecraft.alternateFontRenderer, "/font/alternate.png");
-        }
-    }
-
-    public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {
-        TextureFX fx = refreshTextureFX(textureFX);
-        if (fx != null) {
-            MCPatcherUtils.log("registering new TextureFX class %s", textureFX.getClass().getName());
-            textureList.add(fx);
-            fx.onTick();
+            refreshFontRenderer(minecraft, minecraft.alternateFontRenderer, "/font/alternate.png");
         }
     }
 
@@ -112,16 +82,17 @@ public class TextureUtils {
             textureFX instanceof Portal) {
             return null;
         }
-        System.out.printf("attempting to refresh unknown animation %s\n", textureFX.getClass().getName());
+        MCPatcherUtils.warn("attempting to refresh unknown animation %s", textureFX.getClass().getName());
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         Class<? extends TextureFX> textureFXClass = textureFX.getClass();
+        TileSize tileSize = TileSize.getTileSize(textureFX);
         for (int i = 0; i < 3; i++) {
             Constructor<? extends TextureFX> constructor;
             try {
                 switch (i) {
                     case 0:
                         constructor = textureFXClass.getConstructor(Minecraft.class, Integer.TYPE);
-                        return constructor.newInstance(minecraft, TileSize.int_size);
+                        return constructor.newInstance(minecraft, tileSize);
 
                     case 1:
                         constructor = textureFXClass.getConstructor(Minecraft.class);
@@ -140,16 +111,24 @@ public class TextureUtils {
                 e.printStackTrace();
             }
         }
-        if (textureFX.imageData.length != TileSize.int_numBytes) {
+        if (textureFX.imageData.length < tileSize.int_numBytes) {
             MCPatcherUtils.log("resizing %s buffer from %d to %d bytes",
-                textureFXClass.getName(), textureFX.imageData.length, TileSize.int_numBytes
+                textureFXClass.getName(), textureFX.imageData.length, tileSize.int_numBytes
             );
-            textureFX.imageData = new byte[TileSize.int_numBytes];
+            textureFX.imageData = new byte[tileSize.int_numBytes];
+        }
+        try {
+            Method refreshMethod = textureFXClass.getDeclaredMethod("refresh", Minecraft.class, Integer.TYPE);
+            refreshMethod.invoke(textureFX, minecraft, tileSize);
+        } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return textureFX;
     }
 
-    public static void refreshTextureFX(java.util.List<TextureFX> textureList) {
+    private static void refreshTextureFX(java.util.List<TextureFX> textureList) {
         MCPatcherUtils.log("refreshTextureFX()");
 
         ArrayList<TextureFX> savedTextureFX = new ArrayList<TextureFX>();
@@ -159,8 +138,8 @@ public class TextureUtils {
                 savedTextureFX.add(fx);
             }
         }
-        textureList.clear();
         CustomAnimation.clear();
+        textureList.clear();
 
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         textureList.add(new Compass(minecraft));
@@ -199,17 +178,74 @@ public class TextureUtils {
             textureList.add(new Portal());
         }
 
-        if (customOther) {
-            addOtherTextureFX("/terrain.png", "terrain");
-            addOtherTextureFX("/gui/items.png", "item");
-            if (selectedTexturePack instanceof TexturePackCustom) {
-                TexturePackCustom custom = (TexturePackCustom) selectedTexturePack;
-                for (ZipEntry entry : Collections.list(custom.zipFile.entries())) {
-                    String name = "/" + entry.getName();
-                    if (name.startsWith("/anim/") && name.endsWith(".properties") && !isCustomTerrainItemResource(name)) {
+        for (TextureFX t : savedTextureFX) {
+            textureList.add(t);
+        }
+
+        for (TextureFX t : textureList) {
+            t.onTick();
+        }
+    }
+
+    private static void addOtherTextureFX(String textureName, String imageName) {
+        for (int tileNum = 0; tileNum < 256; tileNum++) {
+            String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
+            if (hasResource(resource)) {
+                CustomAnimation.addStrip(textureName, imageName + "_" + tileNum, tileNum, 1);
+            }
+        }
+    }
+
+    private static void refreshCustomAnimations() {
+        if (!customOther) {
+            return;
+        }
+
+        addOtherTextureFX("/terrain.png", "terrain");
+        addOtherTextureFX("/gui/items.png", "item");
+
+        TexturePackBase selectedTexturePack = getSelectedTexturePack();
+        if (selectedTexturePack instanceof TexturePackCustom) {
+            TexturePackCustom custom = (TexturePackCustom) selectedTexturePack;
+            for (ZipEntry entry : Collections.list(custom.zipFile.entries())) {
+                String name = "/" + entry.getName();
+                if (name.startsWith("/anim/") && name.endsWith(".properties") && !isCustomTerrainItemResource(name)) {
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = custom.zipFile.getInputStream(entry);
+                        Properties properties = new Properties();
+                        properties.load(inputStream);
+                        CustomAnimation.addStrip(properties);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        MCPatcherUtils.close(inputStream);
+                    }
+                }
+            }
+        } else if (selectedTexturePack.getClass().getSimpleName().equals("TexturePackFolder")) {
+            File folder = null;
+            try {
+                for (Field field : selectedTexturePack.getClass().getFields()) {
+                    if (field.getType().equals(File.class)) {
+                        folder = (File) field.get(selectedTexturePack);
+                        break;
+                    }
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            if (folder != null) {
+                folder = new File(folder, "anim");
+                if (folder.isDirectory()) {
+                    for (File file : folder.listFiles(new FilenameFilter() {
+                        public boolean accept(File dir, String name) {
+                            return name.endsWith(".properties") && !isCustomTerrainItemResource("/anim/" + name);
+                        }
+                    })) {
                         InputStream inputStream = null;
                         try {
-                            inputStream = custom.zipFile.getInputStream(entry);
+                            inputStream = new FileInputStream(file);
                             Properties properties = new Properties();
                             properties.load(inputStream);
                             CustomAnimation.addStrip(properties);
@@ -220,69 +256,18 @@ public class TextureUtils {
                         }
                     }
                 }
-            } else if (selectedTexturePack.getClass().getSimpleName().equals("TexturePackFolder")) {
-                File folder = null;
-                try {
-                    for (Field field : selectedTexturePack.getClass().getFields()) {
-                        if (field.getType().equals(File.class)) {
-                            folder = (File) field.get(selectedTexturePack);
-                            break;
-                        }
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                if (folder != null) {
-                    folder = new File(folder, "anim");
-                    if (folder.isDirectory()) {
-                        for (File file : folder.listFiles(new FilenameFilter() {
-                            public boolean accept(File dir, String name) {
-                                return name.endsWith(".properties") && !isCustomTerrainItemResource("/anim/" + name);
-                            }
-                        })) {
-                            InputStream inputStream = null;
-                            try {
-                                inputStream = new FileInputStream(file);
-                                Properties properties = new Properties();
-                                properties.load(inputStream);
-                                CustomAnimation.addStrip(properties);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } finally {
-                                MCPatcherUtils.close(inputStream);
-                            }
-                        }
-                    }
-                }
             }
         }
 
-        for (TextureFX t : savedTextureFX) {
-            textureList.add(t);
-        }
-
-        for (TextureFX t : textureList) {
-            t.onTick();
-        }
-
         CustomAnimation.updateAll();
+    }
 
+    private static void refreshColorizers() {
         if (ColorizerWater.colorBuffer != ColorizerFoliage.colorBuffer) {
             refreshColorizer(ColorizerWater.colorBuffer, "/misc/watercolor.png");
         }
         refreshColorizer(ColorizerGrass.colorBuffer, "/misc/grasscolor.png");
         refreshColorizer(ColorizerFoliage.colorBuffer, "/misc/foliagecolor.png");
-
-        System.gc();
-    }
-    
-    private static void addOtherTextureFX(String textureName, String imageName) {
-        for (int tileNum = 0; tileNum < 256; tileNum++) {
-            String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
-            if (hasResource(resource)) {
-                CustomAnimation.addStrip(textureName, imageName + "_" + tileNum, tileNum, 1);
-            }
-        }
     }
 
     public static TexturePackBase getSelectedTexturePack() {
@@ -306,11 +291,10 @@ public class TextureUtils {
         }
         buffer.put(data);
         buffer.position(0).limit(needed);
-        TileSize.int_glBufferSize = needed;
         return buffer;
     }
 
-    public static boolean isRequiredResource(String resource) {
+    private static boolean isRequiredResource(String resource) {
         return !(resource.startsWith("/custom_") ||
             resource.startsWith("/anim/custom_") ||
             resource.equals("/terrain_nh.png") ||
@@ -320,7 +304,7 @@ public class TextureUtils {
         );
     }
     
-    static boolean isCustomTerrainItemResource(String resource) {
+    private static boolean isCustomTerrainItemResource(String resource) {
         resource = resource.replaceFirst("^/anim", "").replaceFirst("\\.(png|properties)$", "");
         return resource.equals("/custom_lava_still") ||
             resource.equals("/custom_lava_flowing") ||
@@ -360,57 +344,15 @@ public class TextureUtils {
         return getResourceAsStream(getSelectedTexturePack(), resource);
     }
 
-    public static BufferedImage getResourceAsBufferedImage(TexturePackBase texturePack, String resource) throws IOException {
-        BufferedImage image = null;
-        boolean cached = false;
-
-        if (useTextureCache && texturePack == lastTexturePack) {
-            image = cache.get(resource);
-            if (image != null) {
-                cached = true;
-            }
+    public static BufferedImage getResourceAsBufferedImage(TexturePackBase texturePack, String resource) {
+        if (texturePack == null) {
+            return null;
         }
-
-        if (image == null) {
-            InputStream is = getResourceAsStream(texturePack, resource);
-            if (is != null) {
-                try {
-                    image = ImageIO.read(is);
-                } finally {
-                    MCPatcherUtils.close(is);
-                }
-            }
-        }
-
-        if (image == null) {
-            if (isRequiredResource(resource)) {
-                throw new IOException(resource + " image is null");
-            } else {
-                return null;
-            }
-        }
-
-        if (useTextureCache && !cached && texturePack != lastTexturePack) {
-            MCPatcherUtils.log("clearing texture cache (%d items)", cache.size());
-            cache.clear();
-        }
-        MCPatcherUtils.log("opened %s %dx%d from %s",
-            resource, image.getWidth(), image.getHeight(), (cached ? "cache" : getTexturePackName(texturePack))
-        );
-        if (!cached) {
-            Integer i;
-            if (isCustomTerrainItemResource(resource)) {
-                i = 1;
-            } else {
-                i = expectedColumns.get(resource);
-            }
-            if (i != null && image.getWidth() != i * TileSize.int_size) {
-                image = resizeImage(image, i * TileSize.int_size);
-            }
-            if (useTextureCache) {
-                lastTexturePack = texturePack;
-                cache.put(resource, image);
-            }
+        BufferedImage image = MCPatcherUtils.readImage(texturePack.getInputStream(resource));
+        if (image != null) {
+            MCPatcherUtils.log("opened %s %dx%d from %s",
+                resource, image.getWidth(), image.getHeight(), getTexturePackName(texturePack)
+            );
             if (resource.matches("^/mob/.*_eyes\\d*\\.png$")) {
                 int p = 0;
                 for (int x = 0; x < image.getWidth(); x++) {
@@ -426,8 +368,10 @@ public class TextureUtils {
                     MCPatcherUtils.log("  fixed %d transparent pixels", p, resource);
                 }
             }
+            else if (resource.equals("/misc/dial.png")) {
+                image = resizeImage(image, TileSize.tileSizes[1].int_size);
+            }
         }
-
         return image;
     }
 
@@ -439,43 +383,21 @@ public class TextureUtils {
         return getResourceAsBufferedImage(resource);
     }
 
-    public static int getTileSize(TexturePackBase texturePack) {
-        int size = 0;
-        for (Map.Entry<String, Integer> entry : expectedColumns.entrySet()) {
-            InputStream is = null;
-            try {
-                is = getResourceAsStream(texturePack, entry.getKey());
-                if (is != null) {
-                    BufferedImage bi = ImageIO.read(is);
-                    int newSize = bi.getWidth() / entry.getValue();
-                    MCPatcherUtils.log("  %s tile size is %d", entry.getKey(), newSize);
-                    size = Math.max(size, newSize);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                MCPatcherUtils.close(is);
-            }
-        }
-        return size > 0 ? size : 16;
-    }
-
-    public static int getTileSize() {
-        return getTileSize(getSelectedTexturePack());
-    }
-
-    public static boolean hasResource(TexturePackBase texturePack, String resource) {
+    static boolean hasResource(TexturePackBase texturePack, String resource) {
         InputStream is = getResourceAsStream(texturePack, resource);
         boolean has = (is != null);
         MCPatcherUtils.close(is);
         return has;
     }
 
-    public static boolean hasResource(String s) {
+    static boolean hasResource(String s) {
         return hasResource(getSelectedTexturePack(), s);
     }
 
     static BufferedImage resizeImage(BufferedImage image, int width) {
+        if (width == image.getWidth()) {
+            return image;
+        }
         int height = image.getHeight() * width / image.getWidth();
         MCPatcherUtils.log("  resizing to %dx%d", width, height);
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -486,9 +408,9 @@ public class TextureUtils {
 
     private static void refreshColorizer(int[] colorBuffer, String resource) {
         try {
-            BufferedImage bi = getResourceAsBufferedImage(resource);
-            if (bi != null) {
-                bi.getRGB(0, 0, 256, 256, colorBuffer, 0, 256);
+            BufferedImage image = getResourceAsBufferedImage(resource);
+            if (image != null && image.getWidth() == 256 && image.getHeight() == 256) {
+                image.getRGB(0, 0, 256, 256, colorBuffer, 0, 256);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -543,13 +465,14 @@ public class TextureUtils {
             pack.tmpFile = null;
         }
     }
-
-    public static void checkTexturePackChange(Minecraft minecraft) {
-        if (!autoRefreshTextures || ++textureRefreshCount < 16) {
+    
+    private static void checkTexturePackFileChange() {
+        long now = System.currentTimeMillis();
+        if (!autoRefreshTextures || now - textureChangeDetectTimer < 500L) {
             return;
         }
-        textureRefreshCount = 0;
-        TexturePackList list = minecraft.texturePackList;
+        textureChangeDetectTimer = now;
+        TexturePackList list = MCPatcherUtils.getMinecraft().texturePackList;
         if (!(list.selectedTexturePack instanceof TexturePackCustom)) {
             return;
         }
@@ -579,12 +502,10 @@ public class TextureUtils {
                 MCPatcherUtils.log("setting new texture pack");
                 list.selectedTexturePack = list.defaultTexturePack;
                 list.setTexturePack(tpc);
-                minecraft.renderEngine.setTileSize(minecraft);
                 return;
             }
         }
         MCPatcherUtils.log("selected texture pack not found after refresh, switching to default");
         list.setTexturePack(list.defaultTexturePack);
-        minecraft.renderEngine.setTileSize(minecraft);
     }
 }

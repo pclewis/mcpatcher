@@ -15,7 +15,6 @@ public class HDTextureConfig extends ModConfigPanel {
     private JComboBox lavaCombo;
     private JComboBox fireCombo;
     private JComboBox portalCombo;
-    private JCheckBox textureCacheCheckBox;
     private JCheckBox shrinkGLMemoryCheckBox;
     private JComboBox otherCombo;
     private JCheckBox autoRefreshTexturesCheckBox;
@@ -52,12 +51,6 @@ public class HDTextureConfig extends ModConfigPanel {
                             break;
                     }
                 }
-            }
-        });
-
-        textureCacheCheckBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "useTextureCache", textureCacheCheckBox.isSelected());
             }
         });
 
@@ -98,7 +91,6 @@ public class HDTextureConfig extends ModConfigPanel {
             }
         } catch (Throwable e) {
         }
-        textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", is64bit));
         shrinkGLMemoryCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false));
         autoRefreshTexturesCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "autoRefreshTextures", false));
     }

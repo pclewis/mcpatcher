@@ -1,7 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
@@ -69,11 +68,12 @@ public class CustomAnimation {
     
     static boolean addStrip(String textureName, String name, int tileNumber, int tileCount) {
         String srcName = "/anim/custom_" + name + ".png";
-        if (TextureUtils.hasResource(srcName)) {
+        TileSize tileSize = TileSize.getTileSize(textureName);
+        if (tileSize != null && TextureUtils.hasResource(srcName)) {
             try {
                 BufferedImage srcImage = TextureUtils.getResourceAsBufferedImage(srcName);
                 if (srcImage != null) {
-                    add(newStrip(textureName, tileCount, srcName, srcImage, (tileNumber % 16) * TileSize.int_size, (tileNumber / 16) * TileSize.int_size, TileSize.int_size, TileSize.int_size, null));
+                    add(newStrip(textureName, tileCount, srcName, srcImage, (tileNumber % 16) * tileSize.int_size, (tileNumber / 16) * tileSize.int_size, tileSize.int_size, tileSize.int_size, null));
                     return true;
                 }
             } catch (IOException e) {
@@ -107,13 +107,9 @@ public class CustomAnimation {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;
         }
+        srcImage = TextureUtils.resizeImage(srcImage, w);
         int width = srcImage.getWidth();
         int height = srcImage.getHeight();
-        if (width != w) {
-            srcImage = TextureUtils.resizeImage(srcImage, w);
-            width = srcImage.getWidth();
-            height = srcImage.getHeight();
-        }
         if (width != w || height % h != 0) {
             MCPatcherUtils.error("%s: %s dimensions %dx%d do not match %dx%d", CLASS_NAME, srcName, width, height, w, h);
             return null;
@@ -128,11 +124,12 @@ public class CustomAnimation {
     }
     
     private static CustomAnimation newTile(String textureName, int tileCount, int tileNumber, int minScrollDelay, int maxScrollDelay) {
-        int x = (tileNumber % 16) * TileSize.int_size;
-        int y = (tileNumber / 16) * TileSize.int_size;
-        int w = TileSize.int_size;
-        int h = TileSize.int_size;
-        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + tileCount * w > 16 * TileSize.int_size || y + tileCount * h > 16 * TileSize.int_size) {
+        TileSize tileSize = TileSize.getTileSize(textureName);
+        int x = (tileNumber % 16) * tileSize.int_size;
+        int y = (tileNumber / 16) * tileSize.int_size;
+        int w = tileSize.int_size;
+        int h = tileSize.int_size;
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + tileCount * w > 16 * tileSize.int_size || y + tileCount * h > 16 * tileSize.int_size) {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, textureName, x, y, w, h);
             return null;
         }
@@ -187,7 +184,7 @@ public class CustomAnimation {
         }
         for (int i = 0; i < tileCount; i++) {
             for (int j = 0; j < tileCount; j++) {
-                delegate.update(i * TileSize.int_size, j * TileSize.int_size);
+                delegate.update(i * w, j * h);
             }
         }
         currentDelay = delegate.getDelay();

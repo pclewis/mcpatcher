@@ -5,7 +5,8 @@ import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 public class Colorizer {
