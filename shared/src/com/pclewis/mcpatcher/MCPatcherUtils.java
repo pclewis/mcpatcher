@@ -165,6 +165,16 @@ public class MCPatcherUtils {
     }
 
     /**
+     * Write a message to minecraft standard output.
+     *
+     * @param format printf-style format string
+     * @param params printf-style parameters
+     */
+    public static void printf(String format, Object... params) {
+        System.out.printf(format + "\n", params);
+    }
+
+    /**
      * Gets a value from mcpatcher.xml.
      *
      * @param mod          name of mod
