@@ -62,7 +62,7 @@ public class Colorizer {
     private static float[][] redstoneColor; // /misc/redstonecolor.png
     private static int[] stemColors; // /misc/stemcolor.png
     private static ArrayList<Potion> potions = new ArrayList<Potion>(); // potion.*
-    private static final Random random = new Random(); 
+    private static final Random random = new Random();
 
     private static final boolean useWaterColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "water", true);
     private static final boolean useSwampColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "swamp", true);
@@ -107,11 +107,11 @@ public class Colorizer {
     private static boolean biomesLogged;
 
     private static Entity fogCamera;
-    
+
     public static float[] netherFogColor;
     public static float[] endFogColor;
     public static int endSkyColor;
-    
+
     private static int[] myceliumColors;
 
     private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>();
@@ -200,7 +200,7 @@ public class Colorizer {
         }
         return value == null ? defaultColor : value;
     }
-    
+
     public static int colorizeText(int defaultColor) {
         int high = defaultColor & 0xff000000;
         defaultColor &= 0xffffff;
@@ -211,7 +211,7 @@ public class Colorizer {
             return high | newColor;
         }
     }
-    
+
     public static int colorizeText(int defaultColor, int index) {
         if (index < 0 || index >= textCodeColors.length || textCodeColors[index] == COLOR_CODE_UNSET) {
             return defaultColor;
@@ -304,7 +304,7 @@ public class Colorizer {
             return true;
         }
     }
-    
+
     public static int colorizeRedstoneWire(IBlockAccess blockAccess, int i, int j, int k, int defaultColor) {
         if (redstoneColor == null) {
             return defaultColor;
@@ -398,7 +398,7 @@ public class Colorizer {
         setColor[2] *= fogBlendScale;
         return true;
     }
-    
+
     public static boolean computeFogColor(World world, float f) {
         if (world.worldProvider.worldType == 0 && computeFogColor(COLOR_MAP_FOG0)) {
             computeLightningFlash(world, f);
@@ -416,17 +416,16 @@ public class Colorizer {
             return false;
         }
     }
-    
+
     private static void computeLightningFlash(World world, float f) {
-        if (world.lightningFlash > 0)
-        {
+        if (world.lightningFlash > 0) {
             f = 0.45f * clamp(world.lightningFlash - f);
             setColor[0] = setColor[0] * (1.0f - f) + 0.8f * f;
             setColor[1] = setColor[1] * (1.0f - f) + 0.8f * f;
             setColor[2] = setColor[2] * (1.0f - f) + 0.8f * f;
         }
     }
-    
+
     public static boolean computeMyceliumParticleColor() {
         if (myceliumColors == null) {
             return false;
@@ -527,7 +526,7 @@ public class Colorizer {
         fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(useWaterColors, "/misc/underwatercolor.png", 0x050533);
         fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(useFogColors, "/misc/fogcolor0.png", 0xc0d8ff);
         fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
-        
+
         netherFogColor = new float[]{0.2f, 0.03f, 0.03f};
         endFogColor = new float[]{0.075f, 0.075f, 0.094f};
         endSkyColor = 0x181818;
@@ -577,7 +576,7 @@ public class Colorizer {
             MCPatcherUtils.close(inputStream);
         }
     }
-    
+
     private static void reloadFogColors() {
         loadFloatColor("fog.nether", netherFogColor);
         loadFloatColor("fog.end", endFogColor);
@@ -701,7 +700,7 @@ public class Colorizer {
             loadFloatColor("sheep." + getStringKey(ItemDye.dyeColorNames, EntitySheep.fleeceColorTable.length - 1 - i), EntitySheep.fleeceColorTable[i]);
         }
     }
-    
+
     private static void reloadTextColors() {
         for (int i = 0; i < textCodeColors.length; i++) {
             loadIntColor(TEXT_CODE_KEY + i, textCodeColors, i);
@@ -765,7 +764,7 @@ public class Colorizer {
             }
         }
     }
-    
+
     private static int loadIntColor(String key, int color) {
         //System.out.printf("%s=%06x\n", key, color);
         String value = properties.getProperty(key, "");
@@ -788,7 +787,7 @@ public class Colorizer {
             }
         }
     }
-    
+
     private static float[] loadFloatColor(String key) {
         String value = properties.getProperty(key, "");
         if (!value.equals("")) {

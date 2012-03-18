@@ -8,8 +8,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -303,7 +303,7 @@ public class TextureUtils {
             resource.matches("^/mob/.*\\d+.png$")
         );
     }
-    
+
     private static boolean isCustomTerrainItemResource(String resource) {
         resource = resource.replaceFirst("^/anim", "").replaceFirst("\\.(png|properties)$", "");
         return resource.equals("/custom_lava_still") ||
@@ -367,8 +367,7 @@ public class TextureUtils {
                 if (p > 0) {
                     MCPatcherUtils.log("  fixed %d transparent pixels", p, resource);
                 }
-            }
-            else if (resource.equals("/misc/dial.png")) {
+            } else if (resource.equals("/misc/dial.png")) {
                 image = resizeImage(image, TileSize.tileSizes[1].int_size);
             }
         }
@@ -465,7 +464,7 @@ public class TextureUtils {
             pack.tmpFile = null;
         }
     }
-    
+
     private static void checkTexturePackFileChange() {
         long now = System.currentTimeMillis();
         if (!autoRefreshTextures || now - textureChangeDetectTimer < 500L) {
