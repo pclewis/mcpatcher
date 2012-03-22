@@ -514,7 +514,8 @@ public final class BaseMod extends Mod {
 
             classSignatures.add(new OrSignature(
                 new ConstSignature("0123456789abcdef"),
-                new ConstSignature("0123456789abcdefk")
+                new ConstSignature("0123456789abcdefk"),
+                new ConstSignature("/font/glyph_sizes.bin")
             ));
         }
     }
