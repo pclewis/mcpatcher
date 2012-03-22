@@ -880,9 +880,11 @@ public class HDTexture extends Mod {
             }
 
             patches.add(new AddMethodPatch("initialize", "()V") {
+                MethodInfo constructor;
+
                 @Override
                 public byte[] generateMethod() {
-                    MethodInfo constructor = getClassFile().getMethod("<init>");
+                    getDescriptor();
                     CodeAttribute ca = constructor.getCodeAttribute();
                     getMethodInfo().setDescriptor(constructor.getDescriptor().replace("Z)", ")"));
                     maxStackSize = ca.getMaxStack();
@@ -900,6 +902,23 @@ public class HDTexture extends Mod {
                     }
                     code[3] = NOP;
                     return code;
+                }
+                
+                @Override
+                public String getDescriptor() {
+                    if (constructor == null) {
+                        for (Object o : getClassFile().getMethods()) {
+                            MethodInfo method = (MethodInfo) o;
+                            if (method.isConstructor() && method.getDescriptor().contains("Z)")) {
+                                constructor = method;
+                                break;
+                            }
+                        }
+                        if (constructor == null) {
+                            throw new RuntimeException("could not find FontRenderer constructor");
+                        }
+                    }
+                    return constructor.getDescriptor().replace("Z)", ")");
                 }
             });
         }
