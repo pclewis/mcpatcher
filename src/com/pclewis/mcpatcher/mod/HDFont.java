@@ -7,8 +7,6 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class HDFont extends Mod {
-    public static final String FONT_UTILS_CLASS = "com.pclewis.mcpatcher.mod.FontUtils";
-
     private final boolean haveGetCharWidth;
 
     public HDFont(MinecraftVersion minecraftVersion) {
@@ -21,16 +19,16 @@ public class HDFont extends Mod {
 
         classMods.add(new FontRendererMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(FONT_UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.FONT_UTILS_CLASS));
     }
 
     private class FontRendererMod extends BaseMod.FontRendererMod {
-        private FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
-        private FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
-        private MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
-        private MethodRef getCharWidth = new MethodRef(getDeobfClass(), "getCharWidth", "(C)I");
-
         FontRendererMod() {
+            final FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
+            final FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
+            final MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
+            final MethodRef getCharWidth = new MethodRef(getDeobfClass(), "getCharWidth", "(C)I");
+
             memberMappers.add(new MethodMapper("getStringWidth", "(Ljava/lang/String;)I"));
             if (haveGetCharWidth) {
                 memberMappers.add(new MethodMapper("getCharWidth", "(C)I"));
@@ -68,7 +66,7 @@ public class HDFont extends Mod {
                         ALOAD, 7 + registerOffset,
                         ALOAD_0,
                         reference(GETFIELD, charWidth),
-                        reference(INVOKESTATIC, new MethodRef(FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F")),
                         reference(PUTFIELD, charWidthf)
                     );
                 }
@@ -145,7 +143,7 @@ public class HDFont extends Mod {
                     @Override
                     public byte[] getReplacementBytes() throws IOException {
                         return buildCode(
-                            reference(INVOKESTATIC, new MethodRef(FONT_UTILS_CLASS, "getCharWidthf", "(LFontRenderer;C)F")),
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "getCharWidthf", "(LFontRenderer;C)F")),
                             FSTORE, CHAR_WIDTH_REGISTER
                         );
                     }

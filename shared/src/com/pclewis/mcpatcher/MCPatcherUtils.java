@@ -38,6 +38,7 @@ public class MCPatcherUtils {
     public static final String TILE_SIZE_CLASS = "com.pclewis.mcpatcher.mod.TileSize";
     public static final String TEXTURE_UTILS_CLASS = "com.pclewis.mcpatcher.mod.TextureUtils";
     public static final String CUSTOM_ANIMATION_CLASS = "com.pclewis.mcpatcher.mod.CustomAnimation";
+    public static final String FONT_UTILS_CLASS = "com.pclewis.mcpatcher.mod.FontUtils";
     public static final String RANDOM_MOBS_CLASS = "com.pclewis.mcpatcher.mod.MobRandomizer";
     public static final String COLORIZER_CLASS = "com.pclewis.mcpatcher.mod.Colorizer";
     public static final String COLOR_MAP_CLASS = "com.pclewis.mcpatcher.mod.ColorMap";
