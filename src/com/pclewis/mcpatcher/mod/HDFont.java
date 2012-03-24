@@ -9,11 +9,15 @@ import static javassist.bytecode.Opcode.*;
 public class HDFont extends Mod {
     public static final String FONT_UTILS_CLASS = "com.pclewis.mcpatcher.mod.FontUtils";
 
+    private boolean haveGetCharWidth;
+
     public HDFont(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_FONT;
         author = "MCPatcher";
         description = "Provides support for higher resolution fonts.";
         version = "1.2";
+
+        haveGetCharWidth = minecraftVersion.compareTo("1.2.4") >= 0;
 
         classMods.add(new FontRendererMod());
 
@@ -24,9 +28,13 @@ public class HDFont extends Mod {
         private FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
         private FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
         private MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
+        private MethodRef getCharWidth = new MethodRef(getDeobfClass(), "getCharWidth", "(C)I");
 
         FontRendererMod() {
             memberMappers.add(new MethodMapper("getStringWidth", "(Ljava/lang/String;)I"));
+            if (haveGetCharWidth) {
+                memberMappers.add(new MethodMapper("getCharWidth", "(C)I"));
+            }
 
             patches.add(new AddFieldPatch("charWidthf", "[F"));
 

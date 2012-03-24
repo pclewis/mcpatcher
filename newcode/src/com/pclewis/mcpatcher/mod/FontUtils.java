@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import net.minecraft.src.FontRenderer;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -89,6 +90,15 @@ public class FontUtils {
             }
         }
         return charWidthf;
+    }
+
+    public static float getCharWidthf(FontRenderer fontRenderer, char ch) {
+        float width = fontRenderer.getCharWidth(ch);
+        if (width < 0 || ch > 127 || ch < 0) {
+            return width;
+        } else {
+            return fontRenderer.charWidthf[ch];
+        }
     }
 
     private static boolean isOpaque(int pixel) {
