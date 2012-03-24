@@ -18,6 +18,7 @@ public class CustomColors extends Mod {
     private boolean haveSpawnerEggs;
     private boolean haveNewBiomes;
     private boolean haveFontColor;
+    private boolean renderStringReturnsInt;
     private String getColorFromDamageDescriptor;
     private int getColorFromDamageParams;
 
@@ -35,6 +36,7 @@ public class CustomColors extends Mod {
         haveSpawnerEggs = minecraftVersion.compareTo("12w01a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveNewBiomes = minecraftVersion.compareTo("12w07a") >= 0;
         haveFontColor = minecraftVersion.compareTo("11w49a") >= 0;
+        renderStringReturnsInt = minecraftVersion.compareTo("1.2.4") >= 0;
 
         configPanel = new ConfigPanel();
 
@@ -3517,7 +3519,7 @@ public class CustomColors extends Mod {
     
     private class FontRendererMod extends BaseMod.FontRendererMod {
         FontRendererMod() {
-            final MethodRef renderString = new MethodRef(getDeobfClass(), "renderString", "(Ljava/lang/String;IIIZ)V");
+            final MethodRef renderString = new MethodRef(getDeobfClass(), "renderString", "(Ljava/lang/String;IIIZ)" + (renderStringReturnsInt ? "I" : "V"));
             final MethodRef glColor4f = new MethodRef("org/lwjgl/opengl/GL11", "glColor4f", "(FFFF)V");
             final FieldRef colorCode = new FieldRef(getDeobfClass(), "colorCode", "[I");
 
@@ -3541,6 +3543,8 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        push(0xff000000),
+                        BinaryRegex.any(0, 100),
                         reference(INVOKESTATIC, glColor4f)
                     );
                 }
