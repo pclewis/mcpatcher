@@ -7,11 +7,6 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 class TileSizePatch extends BytecodePatch {
-    static final MethodRef getTileSize1 = new MethodRef(MCPatcherUtils.TILE_SIZE_CLASS, "getTileSize", "(LTextureFX;)L" + MCPatcherUtils.TILE_SIZE_CLASS.replace('.', '/') + ";");
-    static final MethodRef getTileSize2 = new MethodRef(MCPatcherUtils.TILE_SIZE_CLASS, "getTileSize", "(LItemRenderer;)L" + MCPatcherUtils.TILE_SIZE_CLASS.replace('.', '/') + ";");
-    
-    private MethodRef tileSizeMethod = getTileSize1;
-    
     protected Object value;
     protected String field;
     protected String type;
@@ -38,11 +33,6 @@ class TileSizePatch extends BytecodePatch {
     String suffix() {
         return "";
     }
-    
-    TileSizePatch setTileSizeMethod(MethodRef methodRef) {
-        tileSizeMethod = methodRef;
-        return this;
-    }
 
     @Override
     public String getDescription() {
@@ -62,9 +52,7 @@ class TileSizePatch extends BytecodePatch {
     public byte[] getReplacementBytes() throws IOException {
         return buildCode(
             getCaptureGroup(1),
-            ALOAD_0,
-            reference(INVOKESTATIC, tileSizeMethod),
-            reference(GETFIELD, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, field, type)),
+            reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, field, type)),
             getCaptureGroup(2)
         );
     }
@@ -207,11 +195,7 @@ class TileSizePatch extends BytecodePatch {
 
         @Override
         public byte[] getReplacementBytes() throws IOException {
-            byte[] getField = buildCode(
-                ALOAD_0,
-                reference(INVOKESTATIC, getTileSize1),
-                reference(GETFIELD, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I"))
-            );
+            byte[] getField = reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I"));
             return buildCode(
                 getField,
                 getField,
@@ -248,25 +232,17 @@ class TileSizePatch extends BytecodePatch {
         public byte[] getReplacementBytes() throws IOException {
             byte[] offset = getCaptureGroup(2);
             if (offset[0] != FCONST_0) {
-                offset = buildCode(
-                    ALOAD_0,
-                    reference(INVOKESTATIC, getTileSize2),
-                    reference(GETFIELD, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_sizeMinus0_01", "F"))
-                );
+                offset = reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_sizeMinus0_01", "F"));
             }
             return buildCode(
                 push(16),
                 getCaptureGroup(1),
-                ALOAD_0,
-                reference(INVOKESTATIC, getTileSize2),
-                reference(GETFIELD, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
+                reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
                 IMUL,
                 I2F,
                 offset,
                 FADD,
-                ALOAD_0,
-                reference(INVOKESTATIC, getTileSize2),
-                reference(GETFIELD, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_size16", "F"))
+                reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_size16", "F"))
             );
         }
     }
@@ -297,9 +273,7 @@ class TileSizePatch extends BytecodePatch {
         public byte[] getReplacementBytes() throws IOException {
             return buildCode(
                 getCaptureGroup(1),
-                ALOAD_0,
-                reference(INVOKESTATIC, getTileSize2),
-                reference(GETFIELD, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_reciprocal", "F")),
+                reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "float_reciprocal", "F")),
                 getCaptureGroup(2)
             );
         }
