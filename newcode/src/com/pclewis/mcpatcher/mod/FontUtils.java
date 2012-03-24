@@ -94,11 +94,36 @@ public class FontUtils {
 
     public static float getCharWidthf(FontRenderer fontRenderer, char ch) {
         float width = fontRenderer.getCharWidth(ch);
-        if (width < 0 || ch > 127 || ch < 0) {
+        if (width < 0 || ch >= fontRenderer.charWidthf.length || ch < 0) {
             return width;
         } else {
             return fontRenderer.charWidthf[ch];
         }
+    }
+    
+    public static float getStringWidthf(FontRenderer fontRenderer, String s) {
+        float totalWidth = 0.0f;
+        if (s != null) {
+            for (int i = 0; i < s.length(); i++) {
+                char c = s.charAt(i);
+                boolean isLink = false;
+                float cWidth = fontRenderer.getCharWidth(c);
+                if (cWidth < 0.0f && i < s.length() - 1) {
+                    c = s.charAt(i + 1);
+                    if (c == 'l' || c == 'L') {
+                        isLink = true;
+                    } else if (c == 'r' || c == 'R') {
+                        isLink = false;
+                    }
+                    cWidth = fontRenderer.getCharWidth(c);
+                }
+                totalWidth += cWidth;
+                if (isLink) {
+                    totalWidth++;
+                }
+            }
+        }
+        return totalWidth;
     }
 
     private static boolean isOpaque(int pixel) {

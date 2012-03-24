@@ -23,16 +23,12 @@ public class HDFont extends Mod {
     }
 
     private class FontRendererMod extends BaseMod.FontRendererMod {
-        FontRendererMod() {
-            final FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
-            final FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
-            final MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
-            final MethodRef getCharWidth = new MethodRef(getDeobfClass(), "getCharWidth", "(C)I");
+        private final FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
+        private final FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
+        private final MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
 
+        FontRendererMod() {
             memberMappers.add(new MethodMapper("getStringWidth", "(Ljava/lang/String;)I"));
-            if (haveGetCharWidth) {
-                memberMappers.add(new MethodMapper("getCharWidth", "(C)I"));
-            }
 
             patches.add(new AddFieldPatch("charWidthf", "[F"));
 
@@ -124,144 +120,49 @@ public class HDFont extends Mod {
             }.targetMethod(getStringWidth));
 
             if (haveGetCharWidth) {
-                final int CHAR_WIDTH_REGISTER = 6;
-
-                patches.add(new BytecodePatch() {
-                    @Override
-                    public String getDescription() {
-                        return "use getCharWidthf";
-                    }
-
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            reference(INVOKEVIRTUAL, getCharWidth),
-                            ISTORE, CHAR_WIDTH_REGISTER
-                        );
-                    }
-
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
-                        return buildCode(
-                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "getCharWidthf", "(LFontRenderer;C)F")),
-                            FSTORE, CHAR_WIDTH_REGISTER
-                        );
-                    }
-                }.targetMethod(getStringWidth));
-
-                patches.add(new BytecodePatch() {
-                    @Override
-                    public String getDescription() {
-                        return "use charWidthf in getStringWidth (loop1)";
-                    }
-
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            ILOAD, CHAR_WIDTH_REGISTER,
-                            IFGE, BinaryRegex.capture(BinaryRegex.any(2))
-                        );
-                    }
-
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
-                        return buildCode(
-                            FLOAD, CHAR_WIDTH_REGISTER,
-                            FCONST_0,
-                            FCMPG,
-                            IFGE, getCaptureGroup(1)
-                        );
-                    }
-                }.targetMethod(getStringWidth));
-
-                patches.add(new BytecodePatch() {
-                    @Override
-                    public String getDescription() {
-                        return "use charWidthf in getStringWidth (loop2)";
-                    }
-
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            ILOAD_2,
-                            ILOAD, CHAR_WIDTH_REGISTER,
-                            IADD,
-                            ISTORE_2
-                        );
-                    }
-
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
-                        return buildCode(
-                            FLOAD_2,
-                            FLOAD, CHAR_WIDTH_REGISTER,
-                            FADD,
-                            FSTORE_2
-                        );
-                    }
-                }.targetMethod(getStringWidth));
-
-                patches.add(new BytecodePatch() {
-                    @Override
-                    public String getDescription() {
-                        return "use charWidthf in getStringWidth (loop3)";
-                    }
-
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            IINC, 2, 1
-                        );
-                    }
-
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
-                        return buildCode(
-                            FLOAD_2,
-                            FCONST_1,
-                            FADD,
-                            FSTORE_2
-                        );
-                    }
-                }.targetMethod(getStringWidth));
+                addStringWidthPatchesV2();
             } else {
-                patches.add(new BytecodePatch() {
-                    @Override
-                    public String getDescription() {
-                        return "use charWidthf in getStringWidth (loop)";
-                    }
-    
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            ILOAD_2,
-                            ALOAD_0,
-                            reference(GETFIELD, charWidth),
-                            BinaryRegex.capture(BytecodeMatcher.anyILOAD),
-                            BIPUSH, 32,
-                            IADD,
-                            IALOAD,
-                            IADD,
-                            ISTORE_2
-                        );
-                    }
-    
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
-                        return buildCode(
-                            FLOAD_2,
-                            ALOAD_0,
-                            reference(GETFIELD, charWidthf),
-                            getCaptureGroup(1),
-                            BIPUSH, 32,
-                            IADD,
-                            FALOAD,
-                            FADD,
-                            FSTORE_2
-                        );
-                    }
-                }.targetMethod(getStringWidth));
+                addStringWidthPatchesV1();
             }
+        }
+
+        private void addStringWidthPatchesV1() {
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "use charWidthf in getStringWidth (loop)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ILOAD_2,
+                        ALOAD_0,
+                        reference(GETFIELD, charWidth),
+                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
+                        BIPUSH, 32,
+                        IADD,
+                        IALOAD,
+                        IADD,
+                        ISTORE_2
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        FLOAD_2,
+                        ALOAD_0,
+                        reference(GETFIELD, charWidthf),
+                        getCaptureGroup(1),
+                        BIPUSH, 32,
+                        IADD,
+                        FALOAD,
+                        FADD,
+                        FSTORE_2
+                    );
+                }
+            }.targetMethod(getStringWidth));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -316,69 +217,100 @@ public class HDFont extends Mod {
                     );
                 }
             }.targetMethod(getStringWidth));
-            
-            if (haveGetCharWidth) {
-                patches.add(new BytecodePatch() {
-                    @Override
-                    public String getDescription() {
-                        return "4.0f -> charWidthf[32]";
-                    }
 
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            push(4.0f),
-                            FRETURN
-                        );
-                    }
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "4.0f -> charWidthf[32]";
+                }
 
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
-                        return buildCode(
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.capture(BinaryRegex.build(
                             ALOAD_0,
-                            reference(GETFIELD, new FieldRef(getDeobfClass(), "charWidthf", "[F")),
-                            push(32),
-                            FALOAD,
-                            FRETURN
-                        );
-                    }
-                });
-            } else {
-                patches.add(new BytecodePatch() {
-                    @Override
-                    public String getDescription() {
-                        return "4.0f -> charWidthf[32]";
-                    }
+                            DUP,
+                            BytecodeMatcher.anyReference(GETFIELD)
+                        )),
+                        push(4.0f),
+                        BinaryRegex.capture(BinaryRegex.build(
+                            FADD,
+                            BytecodeMatcher.anyReference(PUTFIELD)
+                        ))
+                    );
+                }
 
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            BinaryRegex.capture(BinaryRegex.build(
-                                ALOAD_0,
-                                DUP,
-                                BytecodeMatcher.anyReference(GETFIELD)
-                            )),
-                            push(4.0f),
-                            BinaryRegex.capture(BinaryRegex.build(
-                                FADD,
-                                BytecodeMatcher.anyReference(PUTFIELD)
-                            ))
-                        );
-                    }
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        getCaptureGroup(1),
+                        ALOAD_0,
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "charWidthf", "[F")),
+                        push(32),
+                        FALOAD,
+                        getCaptureGroup(2)
+                    );
+                }
+            });
+        }
 
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
-                        return buildCode(
-                            getCaptureGroup(1),
-                            ALOAD_0,
-                            reference(GETFIELD, new FieldRef(getDeobfClass(), "charWidthf", "[F")),
-                            push(32),
-                            FALOAD,
-                            getCaptureGroup(2)
-                        );
-                    }
-                });
-            }
+        private void addStringWidthPatchesV2() {
+            final MethodRef getStringWidthf = new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "getStringWidthf", "(LFontRenderer;Ljava/lang/String;)F");
+
+            memberMappers.add(new MethodMapper("getCharWidth", "(C)I"));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "replace getStringWidth";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        BinaryRegex.any(0, 1000),
+                        BinaryRegex.end()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        ALOAD_1,
+                        reference(INVOKESTATIC, getStringWidthf),
+                        F2I,
+                        IRETURN
+                    );
+                }
+            }.targetMethod(getStringWidth));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "4.0f -> charWidthf[32]";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(4.0f),
+                        FRETURN
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), "charWidthf", "[F")),
+                        push(32),
+                        FALOAD,
+                        FRETURN
+                    );
+                }
+            });
         }
     }
 }

@@ -4,7 +4,7 @@ public class FontRenderer {
     public boolean isUnicode;
     public float[] charWidthf;
     
-    public int getCharWidth(char c) {
+    public int getCharWidth(char c) { // 1.2.4 and up
         return 0;
     }
 
