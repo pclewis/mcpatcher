@@ -248,9 +248,9 @@ public class Colorizer {
             image = MCPatcherUtils.readImage(lastTexturePack.getInputStream(name));
             lightmaps.put(worldType, image);
             if (image == null) {
-                MCPatcherUtils.log("using default lighting for world %d", worldType);
+                MCPatcherUtils.debug("using default lighting for world %d", worldType);
             } else {
-                MCPatcherUtils.log("using %s", name);
+                MCPatcherUtils.debug("using %s", name);
             }
         }
         if (image == null) {
@@ -367,7 +367,7 @@ public class Colorizer {
             for (BiomeGenBase biome : biomes) {
                 int x = ColorMap.getX(biome.temperature, biome.rainfall);
                 int y = ColorMap.getY(biome.temperature, biome.rainfall);
-                MCPatcherUtils.log("setupBiome #%d \"%s\" %06x (%d,%d)", biome.biomeID, biome.biomeName, biome.waterColorMultiplier, x, y);
+                MCPatcherUtils.debug("setupBiome #%d \"%s\" %06x (%d,%d)", biome.biomeID, biome.biomeName, biome.waterColorMultiplier, x, y);
             }
         }
     }
@@ -445,7 +445,7 @@ public class Colorizer {
 
     public static void setupPotion(Potion potion) {
         //System.out.printf("potion.%s=%06x\n", potion.name, potion.color);
-        MCPatcherUtils.log("setupPotion #%d \"%s\" %06x", potion.id, potion.name, potion.color);
+        MCPatcherUtils.debug("setupPotion #%d \"%s\" %06x", potion.id, potion.name, potion.color);
         potion.origColor = potion.color;
         potions.add(potion);
     }
@@ -453,7 +453,7 @@ public class Colorizer {
     public static void setupSpawnerEgg(String entityName, int entityID, int defaultShellColor, int defaultSpotColor) {
         //System.out.printf("egg.shell.%s=%06x\n", entityName, defaultShellColor);
         //System.out.printf("egg.spots.%s=%06x\n", entityName, defaultSpotColor);
-        MCPatcherUtils.log("setupSpawnerEgg #%d \"%s\" %06x %06x", entityID, entityName, defaultShellColor, defaultSpotColor);
+        MCPatcherUtils.debug("setupSpawnerEgg #%d \"%s\" %06x %06x", entityID, entityName, defaultShellColor, defaultSpotColor);
         entityNamesByID.put(entityID, entityName);
     }
 
@@ -567,7 +567,7 @@ public class Colorizer {
         try {
             inputStream = lastTexturePack.getInputStream(COLOR_PROPERTIES);
             if (inputStream != null) {
-                MCPatcherUtils.log("reloading %s", COLOR_PROPERTIES);
+                MCPatcherUtils.debug("reloading %s", COLOR_PROPERTIES);
                 properties.load(inputStream);
             }
         } catch (IOException e) {
@@ -638,7 +638,7 @@ public class Colorizer {
                     default:
                         continue;
                 }
-                MCPatcherUtils.log("using %s for block %s, default color %06x", key, idString, colorMap.colorize());
+                MCPatcherUtils.debug("using %s for block %s, default color %06x", key, idString, colorMap.colorize());
             }
         }
     }

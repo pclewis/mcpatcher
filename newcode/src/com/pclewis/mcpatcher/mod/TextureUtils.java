@@ -64,13 +64,13 @@ public class TextureUtils {
     }
 
     public static boolean setTileSize() {
-        MCPatcherUtils.log("\nchanging skin to %s", getTexturePackName(getSelectedTexturePack()));
+        MCPatcherUtils.debug("\nchanging skin to %s", getTexturePackName(getSelectedTexturePack()));
         int size = getTileSize();
         if (size == TileSize.int_size) {
-            MCPatcherUtils.log("tile size %d unchanged", size);
+            MCPatcherUtils.debug("tile size %d unchanged", size);
             return false;
         } else {
-            MCPatcherUtils.log("setting tile size to %d (was %d)", size, TileSize.int_size);
+            MCPatcherUtils.debug("setting tile size to %d (was %d)", size, TileSize.int_size);
             TileSize.setTileSize(size);
             return true;
         }
@@ -83,7 +83,7 @@ public class TextureUtils {
     }
 
     public static void setFontRenderer() {
-        MCPatcherUtils.log("setFontRenderer()");
+        MCPatcherUtils.debug("setFontRenderer()");
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         setFontRenderer(minecraft, minecraft.fontRenderer, "/font/default.png");
         if (minecraft.alternateFontRenderer != minecraft.fontRenderer) {
@@ -94,7 +94,7 @@ public class TextureUtils {
     public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {
         TextureFX fx = refreshTextureFX(textureFX);
         if (fx != null) {
-            MCPatcherUtils.log("registering new TextureFX class %s", textureFX.getClass().getName());
+            MCPatcherUtils.debug("registering new TextureFX class %s", textureFX.getClass().getName());
             textureList.add(fx);
             fx.onTick();
         }
@@ -111,7 +111,7 @@ public class TextureUtils {
             textureFX instanceof Portal) {
             return null;
         }
-        System.out.printf("attempting to refresh unknown animation %s\n", textureFX.getClass().getName());
+        MCPatcherUtils.info("attempting to refresh unknown animation %s", textureFX.getClass().getName());
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         Class<? extends TextureFX> textureFXClass = textureFX.getClass();
         for (int i = 0; i < 3; i++) {
@@ -140,7 +140,7 @@ public class TextureUtils {
             }
         }
         if (textureFX.imageData.length != TileSize.int_numBytes) {
-            MCPatcherUtils.log("resizing %s buffer from %d to %d bytes",
+            MCPatcherUtils.debug("resizing %s buffer from %d to %d bytes",
                 textureFXClass.getName(), textureFX.imageData.length, TileSize.int_numBytes
             );
             textureFX.imageData = new byte[TileSize.int_numBytes];
@@ -149,7 +149,7 @@ public class TextureUtils {
     }
 
     public static void refreshTextureFX(java.util.List<TextureFX> textureList) {
-        MCPatcherUtils.log("refreshTextureFX()");
+        MCPatcherUtils.debug("refreshTextureFX()");
 
         ArrayList<TextureFX> savedTextureFX = new ArrayList<TextureFX>();
         for (TextureFX t : textureList) {
@@ -381,10 +381,10 @@ public class TextureUtils {
         }
 
         if (useTextureCache && !cached && texturePack != lastTexturePack) {
-            MCPatcherUtils.log("clearing texture cache (%d items)", cache.size());
+            MCPatcherUtils.debug("clearing texture cache (%d items)", cache.size());
             cache.clear();
         }
-        MCPatcherUtils.log("opened %s %dx%d from %s",
+        MCPatcherUtils.debug("opened %s %dx%d from %s",
             resource, image.getWidth(), image.getHeight(), (cached ? "cache" : getTexturePackName(texturePack))
         );
         if (!cached) {
@@ -413,7 +413,7 @@ public class TextureUtils {
                     }
                 }
                 if (p > 0) {
-                    MCPatcherUtils.log("  fixed %d transparent pixels", p, resource);
+                    MCPatcherUtils.debug("  fixed %d transparent pixels", p, resource);
                 }
             }
         }
@@ -438,7 +438,7 @@ public class TextureUtils {
                 if (is != null) {
                     BufferedImage bi = ImageIO.read(is);
                     int newSize = bi.getWidth() / entry.getValue();
-                    MCPatcherUtils.log("  %s tile size is %d", entry.getKey(), newSize);
+                    MCPatcherUtils.debug("  %s tile size is %d", entry.getKey(), newSize);
                     size = Math.max(size, newSize);
                 }
             } catch (Exception e) {
@@ -467,7 +467,7 @@ public class TextureUtils {
 
     static BufferedImage resizeImage(BufferedImage image, int width) {
         int height = image.getHeight() * width / image.getWidth();
-        MCPatcherUtils.log("  resizing to %dx%d", width, height);
+        MCPatcherUtils.debug("  resizing to %dx%d", width, height);
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = newImage.createGraphics();
         graphics2D.drawImage(image, 0, 0, width, height, null);
@@ -513,7 +513,7 @@ public class TextureUtils {
             pack.origZip = pack.zipFile;
             pack.zipFile = newZipFile;
             newZipFile = null;
-            MCPatcherUtils.log("copied %s to %s, lastModified = %d", pack.file.getPath(), pack.tmpFile.getPath(), pack.lastModified);
+            MCPatcherUtils.debug("copied %s to %s, lastModified = %d", pack.file.getPath(), pack.tmpFile.getPath(), pack.lastModified);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -529,7 +529,7 @@ public class TextureUtils {
             pack.zipFile = pack.origZip;
             pack.origZip = null;
             pack.tmpFile.delete();
-            MCPatcherUtils.log("deleted %s", pack.tmpFile.getPath());
+            MCPatcherUtils.debug("deleted %s", pack.tmpFile.getPath());
             pack.tmpFile = null;
         }
     }
@@ -548,7 +548,7 @@ public class TextureUtils {
         if (lastModified == pack.lastModified || lastModified == 0 || pack.lastModified == 0) {
             return;
         }
-        MCPatcherUtils.log("%s lastModified changed from %d to %d", pack.file.getPath(), pack.lastModified, lastModified);
+        MCPatcherUtils.debug("%s lastModified changed from %d to %d", pack.file.getPath(), pack.lastModified, lastModified);
         ZipFile zipFile = null;
         try {
             zipFile = new ZipFile(pack.file);
@@ -566,14 +566,14 @@ public class TextureUtils {
             }
             TexturePackCustom tpc = (TexturePackCustom) tp;
             if (tpc.file.equals(pack.file)) {
-                MCPatcherUtils.log("setting new texture pack");
+                MCPatcherUtils.debug("setting new texture pack");
                 list.selectedTexturePack = list.defaultTexturePack;
                 list.setTexturePack(tpc);
                 minecraft.renderEngine.setTileSize(minecraft);
                 return;
             }
         }
-        MCPatcherUtils.log("selected texture pack not found after refresh, switching to default");
+        MCPatcherUtils.debug("selected texture pack not found after refresh, switching to default");
         list.setTexturePack(list.defaultTexturePack);
         minecraft.renderEngine.setTileSize(minecraft);
     }

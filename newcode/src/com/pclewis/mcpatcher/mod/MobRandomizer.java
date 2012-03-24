@@ -17,7 +17,7 @@ public class MobRandomizer {
     private static final long MASK = (1L << 48) - 1;
 
     public static void reset() {
-        MCPatcherUtils.log("reset random mobs list");
+        MCPatcherUtils.debug("reset random mobs list");
         mobHash.clear();
     }
 
@@ -58,7 +58,7 @@ public class MobRandomizer {
                 }
             }
             if (variations.size() > 1) {
-                MCPatcherUtils.log("found %d variations for %s", variations.size(), texture);
+                MCPatcherUtils.debug("found %d variations for %s", variations.size(), texture);
             }
             mobHash.put(texture, variations);
         }

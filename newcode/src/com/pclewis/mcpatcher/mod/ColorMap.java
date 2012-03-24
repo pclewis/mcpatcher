@@ -36,7 +36,7 @@ final class ColorMap {
             return;
         }
         mapDefault = colorize(0xffffff, 0.5, 1.0);
-        MCPatcherUtils.log("using %s, default color %06x", filename, mapDefault);
+        MCPatcherUtils.debug("using %s, default color %06x", filename, mapDefault);
     }
 
     boolean isCustom() {

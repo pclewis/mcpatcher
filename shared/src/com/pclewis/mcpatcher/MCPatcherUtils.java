@@ -127,11 +127,12 @@ public class MCPatcherUtils {
      *
      * @param format printf-style format string
      * @param params printf-style parameters
+     * @deprecated
+     * @see #info(String, Object...)
+     * @see #debug(String, Object...)
      */
     public static void log(String format, Object... params) {
-        if (debug) {
-            System.out.printf(format + "\n", params);
-        }
+        debug(format, params);
     }
 
     /**
@@ -165,13 +166,25 @@ public class MCPatcherUtils {
     }
 
     /**
-     * Write a message to minecraft standard output.
+     * Write an informational message to minecraft standard output.
      *
      * @param format printf-style format string
      * @param params printf-style parameters
      */
-    public static void printf(String format, Object... params) {
+    public static void info(String format, Object... params) {
         System.out.printf(format + "\n", params);
+    }
+
+    /**
+     * Write a debug message to minecraft standard output.
+     *
+     * @param format printf-style format string
+     * @param params printf-style parameters
+     */
+    public static void debug(String format, Object... params) {
+        if (debug) {
+            System.out.printf(format + "\n", params);
+        }
     }
 
     /**

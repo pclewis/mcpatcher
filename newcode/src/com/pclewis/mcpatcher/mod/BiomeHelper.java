@@ -92,7 +92,7 @@ abstract class BiomeHelper {
             super(blockAccess);
             if (!logged) {
                 logged = true;
-                MCPatcherUtils.log("biomes v1.2 detected");
+                MCPatcherUtils.debug("biomes v1.2 detected");
             }
         }
 

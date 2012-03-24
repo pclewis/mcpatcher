@@ -1,7 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
@@ -86,7 +85,7 @@ public class CustomAnimation {
     private static void add(CustomAnimation animation) {
         if (animation != null) {
             animations.add(animation);
-            MCPatcherUtils.log("new %s %s %dx%d -> %s @ %d,%d (%d frames)", CLASS_NAME, animation.srcName, animation.w, animation.h, animation.textureName, animation.x, animation.y, animation.numFrames);
+            MCPatcherUtils.debug("new %s %s %dx%d -> %s @ %d,%d (%d frames)", CLASS_NAME, animation.srcName, animation.w, animation.h, animation.textureName, animation.x, animation.y, animation.numFrames);
         }
     }
 

@@ -34,7 +34,7 @@ public class FontUtils {
     }
 
     public static float[] computeCharWidths(String filename, BufferedImage image, int[] rgb, int[] charWidth) {
-        MCPatcherUtils.log("computeCharWidths(%s)", filename);
+        MCPatcherUtils.debug("computeCharWidths(%s)", filename);
         float[] charWidthf = new float[charWidth.length];
         int width = image.getWidth();
         int height = image.getHeight();
@@ -51,7 +51,7 @@ public class FontUtils {
                     int pixel = rgb[x + y * width];
                     if (isOpaque(pixel)) {
                         if (printThis(ch)) {
-                            MCPatcherUtils.log("'%c' pixel (%d, %d) = %08x, colIdx = %d", (char) ch, x, y, pixel, colIdx);
+                            MCPatcherUtils.debug("'%c' pixel (%d, %d) = %08x, colIdx = %d", (char) ch, x, y, pixel, colIdx);
                         }
                         charWidthf[ch] = (128.0f * (float) (colIdx + 1)) / (float) width + 1.0f;
                         if (showLines) {
@@ -85,7 +85,7 @@ public class FontUtils {
         for (int ch = 0; ch < charWidth.length; ch++) {
             charWidth[ch] = Math.round(charWidthf[ch]);
             if (printThis(ch)) {
-                MCPatcherUtils.log("charWidth['%c'] = %f", (char) ch, charWidthf[ch]);
+                MCPatcherUtils.debug("charWidth['%c'] = %f", (char) ch, charWidthf[ch]);
             }
         }
         return charWidthf;
@@ -137,7 +137,7 @@ public class FontUtils {
             return;
         }
 
-        MCPatcherUtils.log("reading character widths from %s", textFile);
+        MCPatcherUtils.debug("reading character widths from %s", textFile);
         try {
             Properties props = new Properties();
             props.load(is);
@@ -149,7 +149,7 @@ public class FontUtils {
                         int ch = Integer.parseInt(key.substring(6));
                         float width = Float.parseFloat(value);
                         if (ch >= 0 && ch < charWidthf.length) {
-                            MCPatcherUtils.log("    setting charWidthf[%d] to %f", ch, width);
+                            MCPatcherUtils.debug("    setting charWidthf[%d] to %f", ch, width);
                             charWidthf[ch] = width;
                             isOverride[ch] = true;
                         }
