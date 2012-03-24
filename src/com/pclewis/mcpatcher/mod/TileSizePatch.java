@@ -9,9 +9,9 @@ import static javassist.bytecode.Opcode.*;
 class TileSizePatch extends BytecodePatch {
     static final MethodRef getTileSize1 = new MethodRef(MCPatcherUtils.TILE_SIZE_CLASS, "getTileSize", "(LTextureFX;)L" + MCPatcherUtils.TILE_SIZE_CLASS.replace('.', '/') + ";");
     static final MethodRef getTileSize2 = new MethodRef(MCPatcherUtils.TILE_SIZE_CLASS, "getTileSize", "(LItemRenderer;)L" + MCPatcherUtils.TILE_SIZE_CLASS.replace('.', '/') + ";");
-
+    
     private MethodRef tileSizeMethod = getTileSize1;
-
+    
     protected Object value;
     protected String field;
     protected String type;
@@ -38,7 +38,7 @@ class TileSizePatch extends BytecodePatch {
     String suffix() {
         return "";
     }
-
+    
     TileSizePatch setTileSizeMethod(MethodRef methodRef) {
         tileSizeMethod = methodRef;
         return this;

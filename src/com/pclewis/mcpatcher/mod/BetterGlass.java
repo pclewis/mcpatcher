@@ -38,7 +38,7 @@ public class BetterGlass extends Mod {
             addBlockSignature("BlockPane");
         }
     }
-
+    
     private class BlockBreakableMod extends ClassMod {
         BlockBreakableMod() {
             parentClass = "Block";
@@ -77,12 +77,12 @@ public class BetterGlass extends Mod {
             }.targetMethod(new MethodRef(getDeobfClass(), "getRenderBlockPass", "()I")));
         }
     }
-
+    
     private class BlockPaneMod extends ClassMod {
         BlockPaneMod() {
             parentClass = "Block";
             prerequisiteClasses.add(parentClass);
-
+            
             patches.add(new AddMethodPatch("getRenderBlockPass", "()I") {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
@@ -121,7 +121,7 @@ public class BetterGlass extends Mod {
                 .setMethod(renderBlockAsItem)
                 .addXref(1, getRenderType)
             );
-
+            
             memberMappers.add(new MethodMapper("renderBlockPane", "(LBlockPane;III)Z"));
 
             patches.add(new BytecodePatch() {
@@ -163,7 +163,7 @@ public class BetterGlass extends Mod {
                         BytecodeMatcher.anyALOAD,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
                         ISTORE, BinaryRegex.capture(BinaryRegex.any()),
-
+                        
                         // ...
                         BinaryRegex.any(0, 30),
 
@@ -181,7 +181,7 @@ public class BetterGlass extends Mod {
                 .setMethod(updateRenderer)
                 .addXref(1, getRenderBlockPass)
             );
-
+            
             memberMappers.add(new FieldMapper("skipRenderPass", "[Z"));
 
             patches.add(new BytecodePatch() {
@@ -329,9 +329,9 @@ public class BetterGlass extends Mod {
                     );
                 }
             }.setMethod(renderWorld));
-
+            
             patches.add(new AddFieldPatch("betterGrassLoop", "I"));
-
+            
             addRenderPassPatch(renderAllRenderLists);
             addRenderPassPatch(sortAndRender);
 
@@ -350,7 +350,7 @@ public class BetterGlass extends Mod {
                             push(771),
                             reference(INVOKESTATIC, glBlendFunc)
                         )),
-
+                        
                         // ...
                         BinaryRegex.capture(BinaryRegex.build(
                             BinaryRegex.any(0, 1000)
@@ -372,12 +372,12 @@ public class BetterGlass extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-
+                        
                         // loop = 1;
                         ALOAD_0,
                         ICONST_1,
                         reference(PUTFIELD, loop),
-
+                        
                         // if (loop >= 3) goto B;
                         label("A"),
                         ALOAD_0,
@@ -387,7 +387,7 @@ public class BetterGlass extends Mod {
 
                         // ...
                         getCaptureGroup(2),
-
+                        
                         // loop++;
                         ALOAD_0,
                         DUP,
@@ -404,7 +404,7 @@ public class BetterGlass extends Mod {
                 }
             }.targetMethod(renderWorld));
         }
-
+        
         private void addRenderPassPatch(final MethodRef method) {
             patches.add(new BytecodePatch() {
                 @Override
@@ -445,7 +445,7 @@ public class BetterGlass extends Mod {
         RenderGlobalMod() {
             final MethodRef sortAndRender = new MethodRef(getDeobfClass(), "sortAndRender", "(LEntityLiving;ID)I");
             final MethodRef renderAllRenderLists = new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V");
-
+            
             classSignatures.add(new ConstSignature("smoke"));
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
 
@@ -461,11 +461,11 @@ public class BetterGlass extends Mod {
                     }
                 }
             }.setMethod(sortAndRender));
-
+            
             memberMappers.add(new MethodMapper("renderAllRenderLists", "(ID)V"));
         }
     }
-
+    
     private class ItemRendererMod extends ClassMod {
         ItemRendererMod() {
             final MethodRef renderItem = new MethodRef(getDeobfClass(), "renderItem", "(LEntityLiving;LItemStack;I)V");
@@ -556,12 +556,12 @@ public class BetterGlass extends Mod {
             });
         }
     }
-
+    
     private class RenderItemMod extends ClassMod {
         RenderItemMod() {
             final MethodRef doRenderItem = new MethodRef(getDeobfClass(), "doRenderItem", "(LEntityItem;DDDFF)V");
             final MethodRef drawItemIntoGui = new MethodRef(getDeobfClass(), "drawItemIntoGui", "(LFontRenderer;LRenderEngine;IIIII)V");
-
+            
             classSignatures.add(new ConstSignature("/terrain.png"));
             classSignatures.add(new ConstSignature("/gui/items.png"));
             classSignatures.add(new ConstSignature("%blur%/misc/glint.png"));

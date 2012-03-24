@@ -106,7 +106,7 @@ public class HDTexture extends Mod {
             if (haveColorizerWater) {
                 memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
             }
-
+            
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "textureFXList", "Ljava/util/List;")));
 
             patches.add(new BytecodePatch() {
@@ -679,7 +679,7 @@ public class HDTexture extends Mod {
             }.targetMethod(new MethodRef(getDeobfClass(), "closeTexturePackFile", "()V")));
         }
     }
-
+    
     private class TexturePackFolderMod extends ClassMod {
         TexturePackFolderMod() {
             parentClass = "TexturePackBase";

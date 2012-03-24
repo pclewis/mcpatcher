@@ -4,6 +4,8 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 final public class TileSize {
@@ -11,9 +13,9 @@ final public class TileSize {
 
     public final String textureName;
     public final int textureID;
-
+    
     public final int columns;
-
+    
     public final int int_size;
     public final int int_sizeMinus1;
     public final int int_sizeHalf;
@@ -41,17 +43,17 @@ final public class TileSize {
     public final double double_sizeMinus1;
     public final double double_compassCenterMin;
     public final double double_compassCenterMax;
-
+    
     static {
         tileSizes = new TileSize[2];
         refresh();
     }
-
+    
     static void refresh() {
         tileSizes[0] = new TileSize("/terrain.png", 16);
         tileSizes[1] = new TileSize("/gui/items.png", 16);
     }
-
+    
     public static TileSize getTileSize(TextureFX textureFX) {
         if (textureFX instanceof Compass || textureFX instanceof Watch) {
             // we must handle these directly because getTileSize is called before tileImage is set to 1
@@ -60,15 +62,15 @@ final public class TileSize {
             return tileSizes[textureFX.tileImage];
         }
     }
-
+    
     public static TileSize getTileSize(ItemRenderer itemRenderer) {
         return tileSizes[1];
     }
-
+    
     public static TileSize getTileSize(int index) {
         return tileSizes[index];
     }
-
+    
     public static TileSize getTileSize(String textureName) {
         for (TileSize tileSize : tileSizes) {
             if (tileSize.textureName.equals(textureName)) {
@@ -77,7 +79,7 @@ final public class TileSize {
         }
         return null;
     }
-
+    
     private TileSize(String textureName, int columns) {
         this.textureName = textureName;
         this.columns = columns;
@@ -91,7 +93,7 @@ final public class TileSize {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
             size = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH) / columns;
         }
-
+        
         int_size = size;
         int_sizeMinus1 = size - 1;
         int_sizeHalf = size / 2;

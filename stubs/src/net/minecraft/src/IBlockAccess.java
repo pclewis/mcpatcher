@@ -4,6 +4,6 @@ public interface IBlockAccess {
     public BiomeGenBase getBiomeGenAt(int i, int k); // 1.2 and up
 
     public WorldChunkManager getWorldChunkManager(); // 1.1 and below
-
+    
     public int getBlockMetadata(int i, int j, int k);
 }

@@ -1403,7 +1403,7 @@ public class CustomColors extends Mod {
             }.targetMethod(getFogColor));
         }
     }
-
+    
     private class WorldProviderHellMod extends ClassMod {
         WorldProviderHellMod() {
             parentClass = "WorldProvider";
@@ -1459,7 +1459,7 @@ public class CustomColors extends Mod {
             }.targetMethod(getFogColor));
         }
     }
-
+    
     private class WorldProviderEndMod extends ClassMod {
         WorldProviderEndMod() {
             parentClass = "WorldProvider";
@@ -2012,7 +2012,7 @@ public class CustomColors extends Mod {
             addWaterColorPatch("bubble", new float[]{1.0f, 1.0f, 1.0f});
         }
     }
-
+    
     private class EntitySuspendFXMod extends ClassMod {
         EntitySuspendFXMod() {
             parentClass = "EntityFX";
@@ -2072,7 +2072,7 @@ public class CustomColors extends Mod {
                         D2I,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeBiome", "(IIIII)I")),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setColorF", "(I)V")),
-
+                        
                         ALOAD_0,
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
@@ -2189,7 +2189,7 @@ public class CustomColors extends Mod {
             });
         }
     }
-
+    
     private class EntityAuraFXMod extends ClassMod {
         EntityAuraFXMod() {
             parentClass = "EntityFX";
@@ -2236,7 +2236,7 @@ public class CustomColors extends Mod {
                         ICONST_2,
                         FALOAD,
                         reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F")),
-
+                        
                         label("A"),
                         ALOAD_0,
                         ARETURN
@@ -2896,7 +2896,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }.targetMethod(renderBlockFallingSand));
-
+            
             final int[] savedRegisters = new int[]{7, 8, 9}; // water shaders mod moves some local variables around
 
             patches.add(new BytecodePatch() {
@@ -3514,7 +3514,7 @@ public class CustomColors extends Mod {
             }.targetMethod(new MethodRef(getDeobfClass(), "<clinit>", "()V")));
         }
     }
-
+    
     private class FontRendererMod extends BaseMod.FontRendererMod {
         FontRendererMod() {
             final MethodRef renderString = new MethodRef(getDeobfClass(), "renderString", "(Ljava/lang/String;IIIZ)V");
