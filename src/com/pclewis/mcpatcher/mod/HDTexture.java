@@ -883,6 +883,11 @@ public class HDTexture extends Mod {
                 MethodInfo constructor;
 
                 @Override
+                public void prePatch(ClassFile classFile) {
+                    constructor = null;
+                }
+
+                @Override
                 public byte[] generateMethod() {
                     getDescriptor();
                     CodeAttribute ca = constructor.getCodeAttribute();
