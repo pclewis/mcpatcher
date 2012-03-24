@@ -128,9 +128,9 @@ public class MCPatcherUtils {
      *
      * @param format printf-style format string
      * @param params printf-style parameters
-     * @deprecated
      * @see #info(String, Object...)
      * @see #debug(String, Object...)
+     * @deprecated
      */
     public static void log(String format, Object... params) {
         debug(format, params);

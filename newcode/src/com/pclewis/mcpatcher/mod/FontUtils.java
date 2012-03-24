@@ -100,7 +100,7 @@ public class FontUtils {
             return fontRenderer.charWidthf[ch];
         }
     }
-    
+
     public static float getStringWidthf(FontRenderer fontRenderer, String s) {
         float totalWidth = 0.0f;
         if (s != null) {

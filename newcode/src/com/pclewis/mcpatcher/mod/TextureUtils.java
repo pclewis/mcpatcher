@@ -265,7 +265,7 @@ public class TextureUtils {
 
         System.gc();
     }
-    
+
     private static void addOtherTextureFX(String textureName, String imageName) {
         for (int tileNum = 0; tileNum < 256; tileNum++) {
             String resource = "/anim/custom_" + imageName + "_" + tileNum + ".png";
@@ -309,7 +309,7 @@ public class TextureUtils {
             resource.matches("^/mob/.*\\d+.png$")
         );
     }
-    
+
     static boolean isCustomTerrainItemResource(String resource) {
         resource = resource.replaceFirst("^/anim", "").replaceFirst("\\.(png|properties)$", "");
         return resource.equals("/custom_lava_still") ||

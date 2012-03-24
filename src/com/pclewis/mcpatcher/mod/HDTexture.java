@@ -839,7 +839,7 @@ public class HDTexture extends Mod {
             }.targetMethod(new MethodRef(getDeobfClass(), "closeTexturePackFile", "()V")));
         }
     }
-    
+
     private class TexturePackFolderMod extends ClassMod {
         TexturePackFolderMod() {
             parentClass = "TexturePackBase";
@@ -908,7 +908,7 @@ public class HDTexture extends Mod {
                     code[3] = NOP;
                     return code;
                 }
-                
+
                 @Override
                 public String getDescriptor() {
                     if (constructor == null) {
