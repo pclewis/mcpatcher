@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -202,7 +201,8 @@ public class TextureUtils {
         if (customOther) {
             addOtherTextureFX("/terrain.png", "terrain");
             addOtherTextureFX("/gui/items.png", "item");
-            if (selectedTexturePack instanceof TexturePackCustom) {
+            if (selectedTexturePack instanceof TexturePackDefault) {
+            } else if (selectedTexturePack instanceof TexturePackCustom) {
                 TexturePackCustom custom = (TexturePackCustom) selectedTexturePack;
                 for (ZipEntry entry : Collections.list(custom.zipFile.entries())) {
                     String name = "/" + entry.getName();
@@ -220,18 +220,8 @@ public class TextureUtils {
                         }
                     }
                 }
-            } else if (selectedTexturePack.getClass().getSimpleName().equals("TexturePackFolder")) {
-                File folder = null;
-                try {
-                    for (Field field : selectedTexturePack.getClass().getFields()) {
-                        if (field.getType().equals(File.class)) {
-                            folder = (File) field.get(selectedTexturePack);
-                            break;
-                        }
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
+            } else if (selectedTexturePack instanceof TexturePackFolder) {
+                File folder = ((TexturePackFolder) selectedTexturePack).folder;
                 if (folder != null) {
                     folder = new File(folder, "anim");
                     if (folder.isDirectory()) {
