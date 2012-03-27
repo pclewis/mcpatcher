@@ -37,7 +37,7 @@ class MainForm {
         "</table>" +
             "</html>";
 
-    static Image programIcon;
+    private static Image programIcon;
 
     private JPanel mainPanel;
     JFrame frame;
@@ -111,12 +111,10 @@ class MainForm {
             }
         });
 
-        programIcon = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/icon.png"));
-
         frame = new JFrame("Minecraft Patcher " + MCPatcher.VERSION_STRING);
         frame.setResizable(true);
         frame.setContentPane(mainPanel);
-        frame.setIconImage(programIcon);
+        setIconImage(frame);
         frame.addWindowListener(new WindowListener() {
             public void windowOpened(WindowEvent e) {
             }
@@ -432,6 +430,16 @@ class MainForm {
 
         mainMenu = new MainMenu(this);
         frame.setJMenuBar(mainMenu.menuBar);
+    }
+    
+    static void setIconImage(Window window) {
+        try {
+            if (programIcon == null) {
+                programIcon = Toolkit.getDefaultToolkit().getImage(MainForm.class.getResource("/resources/icon.png"));
+            }
+            window.setIconImage(programIcon);
+        } catch (Throwable e) {
+        }
     }
 
     public void show() {
