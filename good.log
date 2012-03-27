@@ -1,5 +1,5 @@
-MCPatcher version is 2.3.5
-OS: Linux 3.3.0-4.fc16.x86_64 amd64
+MCPatcher version is 2.3.5_01
+OS: Linux 3.2.10-3.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_31 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.2.4 (md5 25423eab6d8707f96cc6ad8a21a7250a)
@@ -4276,7 +4276,7 @@ Patching...
      PUTSTATIC 0x00 0x0c       PUTSTATIC 0x00 0x0c
     class ref com.pclewis.mcpatcher.mod.CustomAnimation -> com/pclewis/mcpatcher/mod/CustomAnimation updateAll()V@22
      CHECKCAST 0x00 0x10       CHECKCAST 0x00 0x10
-    class ref com.pclewis.mcpatcher.mod.CustomAnimation -> com/pclewis/mcpatcher/mod/CustomAnimation newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@420
+    class ref com.pclewis.mcpatcher.mod.CustomAnimation -> com/pclewis/mcpatcher/mod/CustomAnimation newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@419
      NEW 0x00 0x10             NEW 0x00 0x10
     class ref com.pclewis.mcpatcher.mod.CustomAnimation -> com/pclewis/mcpatcher/mod/CustomAnimation newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@182
      NEW 0x00 0x10             NEW 0x00 0x10
@@ -4304,7 +4304,7 @@ Patching...
      GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
     field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@197
      GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@312
+    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@311
      GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
     field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@91
      GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
@@ -4320,9 +4320,9 @@ Patching...
      INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x67
     method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> aaw.b (Ljava/lang/String;)I newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@143
      INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x67
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.ARGBtoRGBA ([I[B)V -> com/pclewis/mcpatcher/mod/CustomAnimation.ARGBtoRGBA ([I[B)V newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@409
+    method ref com.pclewis.mcpatcher.mod.CustomAnimation.ARGBtoRGBA ([I[B)V -> com/pclewis/mcpatcher/mod/CustomAnimation.ARGBtoRGBA ([I[B)V newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@408
      INVOKESTATIC 0x00 0x43    INVOKESTATIC 0x00 0x43
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@446
+    method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@445
      INVOKESPECIAL 0x00 0x45   INVOKESPECIAL 0x00 0x45
     method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (Ljava/lang/String;IIIIIIII)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (Ljava/lang/String;IIIIIIII)V newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@201
      INVOKESPECIAL 0x00 0x47   INVOKESPECIAL 0x00 0x47
