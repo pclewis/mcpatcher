@@ -113,7 +113,7 @@ public class CustomAnimation {
             width = srcImage.getWidth();
             height = srcImage.getHeight();
         }
-        if (width != w || height % h != 0) {
+        if (width != w || height < h) {
             MCPatcherUtils.error("%s: %s dimensions %dx%d do not match %dx%d", CLASS_NAME, srcName, width, height, w, h);
             return null;
         }
