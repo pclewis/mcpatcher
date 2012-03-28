@@ -186,7 +186,7 @@ public class CustomAnimation {
         }
         for (int i = 0; i < tileCount; i++) {
             for (int j = 0; j < tileCount; j++) {
-                delegate.update(i * TileSize.int_size, j * TileSize.int_size);
+                delegate.update(i * w, j * h);
             }
         }
         currentDelay = delegate.getDelay();
