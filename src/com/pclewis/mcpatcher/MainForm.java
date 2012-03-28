@@ -341,25 +341,31 @@ class MainForm {
         patchButton.addActionListener(new ActionListener() {
             class PatchThread implements Runnable {
                 public void run() {
-                    boolean patchOk = true;
-                    HashMap<String, ArrayList<Mod>> conflicts = MCPatcher.getConflicts();
-                    if (conflicts.size() > 0) {
-                        ConflictDialog dialog = new ConflictDialog(conflicts);
-                        int result = dialog.getResult();
-                        if (result != JOptionPane.YES_OPTION) {
-                            patchOk = false;
+                    try {
+                        boolean patchOk = true;
+                        HashMap<String, ArrayList<Mod>> conflicts = MCPatcher.getConflicts();
+                        if (conflicts.size() > 0) {
+                            ConflictDialog dialog = new ConflictDialog(conflicts);
+                            int result = dialog.getResult();
+                            if (result != JOptionPane.YES_OPTION) {
+                                patchOk = false;
+                            }
                         }
-                    }
-                    if (patchOk && !MCPatcher.patch()) {
+                        if (patchOk && !MCPatcher.patch()) {
+                            tabbedPane.setSelectedIndex(TAB_LOG);
+                            JOptionPane.showMessageDialog(frame,
+                                "There was an error during patching.  " +
+                                    "See log for more information.  " +
+                                    "Your original minecraft.jar has been restored.",
+                                "Error", JOptionPane.ERROR_MESSAGE
+                            );
+                        }
+                    } catch (Throwable e) {
+                        Logger.log(e);
                         tabbedPane.setSelectedIndex(TAB_LOG);
-                        JOptionPane.showMessageDialog(frame,
-                            "There was an error during patching.  " +
-                                "See log for more information.  " +
-                                "Your original minecraft.jar has been restored.",
-                            "Error", JOptionPane.ERROR_MESSAGE
-                        );
+                    } finally {
+                        setBusy(false);
                     }
-                    setBusy(false);
                 }
             }
 
