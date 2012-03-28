@@ -429,11 +429,6 @@ public class HDTexture extends Mod {
 
             patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
         }
-
-        @Override
-        public void prePatch(String filename, ClassFile classFile) {
-            mod.getClassMap().addInheritance(getDeobfClass(), MCPatcherUtils.CUSTOM_ANIMATION_CLASS);
-        }
     }
 
     private class CompassMod extends ClassMod {
