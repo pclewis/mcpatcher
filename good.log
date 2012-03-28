@@ -3966,8 +3966,6 @@ Patching...
      GETFIELD 0x00 0x32        GETFIELD 0x03 0xce
     field ref net.minecraft.src.TextureFX.imageData [B -> tt.f [B refreshTextureFX(Ltt;)Ltt;@303
      PUTFIELD 0x00 0x32        PUTFIELD 0x03 0xce
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.clear ()V -> com/pclewis/mcpatcher/mod/CustomAnimation.clear ()V refreshTextureFX(Ljava/util/List;)V@70
-     INVOKESTATIC 0x00 0x3d    INVOKESTATIC 0x00 0x3d
     method ref net.minecraft.src.Compass.<init> (Lnet/minecraft/client/Minecraft;)V -> tu.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@83
      INVOKESPECIAL 0x00 0x3e   INVOKESPECIAL 0x03 0xcf
     method ref net.minecraft.src.Watch.<init> (Lnet/minecraft/client/Minecraft;)V -> ht.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@98
@@ -3976,14 +3974,6 @@ Patching...
      INSTANCEOF 0x00 0x40      INSTANCEOF 0x03 0xd2
     class ref net.minecraft.src.TexturePackDefault -> lc refreshTextureFX(Ljava/util/List;)V@440
      INSTANCEOF 0x00 0x40      INSTANCEOF 0x03 0xd2
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V -> com/pclewis/mcpatcher/mod/CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V refreshTextureFX(Ljava/util/List;)V@150
-     INVOKESTATIC 0x00 0x44    INVOKESTATIC 0x00 0x44
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V -> com/pclewis/mcpatcher/mod/CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V refreshTextureFX(Ljava/util/List;)V@164
-     INVOKESTATIC 0x00 0x44    INVOKESTATIC 0x00 0x44
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V -> com/pclewis/mcpatcher/mod/CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V refreshTextureFX(Ljava/util/List;)V@225
-     INVOKESTATIC 0x00 0x44    INVOKESTATIC 0x00 0x44
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V -> com/pclewis/mcpatcher/mod/CustomAnimation.addStripOrTile (Ljava/lang/String;Ljava/lang/String;IIII)V refreshTextureFX(Ljava/util/List;)V@238
-     INVOKESTATIC 0x00 0x44    INVOKESTATIC 0x00 0x44
     method ref net.minecraft.src.StillLava.<init> ()V -> bv.<init> ()V refreshTextureFX(Ljava/util/List;)V@181
      INVOKESPECIAL 0x00 0x47   INVOKESPECIAL 0x03 0xd3
     method ref net.minecraft.src.FlowLava.<init> ()V -> gf.<init> ()V refreshTextureFX(Ljava/util/List;)V@195
@@ -3992,14 +3982,6 @@ Patching...
      INVOKESPECIAL 0x00 0x4d   INVOKESPECIAL 0x03 0xd5
     method ref net.minecraft.src.FlowWater.<init> ()V -> ael.<init> ()V refreshTextureFX(Ljava/util/List;)V@269
      INVOKESPECIAL 0x00 0x4e   INVOKESPECIAL 0x03 0xd6
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z -> com/pclewis/mcpatcher/mod/CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z refreshTextureFX(Ljava/util/List;)V@312
-     INVOKESTATIC 0x00 0x54    INVOKESTATIC 0x00 0x54
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z -> com/pclewis/mcpatcher/mod/CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z refreshTextureFX(Ljava/util/List;)V@323
-     INVOKESTATIC 0x00 0x54    INVOKESTATIC 0x00 0x54
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z -> com/pclewis/mcpatcher/mod/CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z refreshTextureFX(Ljava/util/List;)V@392
-     INVOKESTATIC 0x00 0x54    INVOKESTATIC 0x00 0x54
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z -> com/pclewis/mcpatcher/mod/CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z addOtherTextureFX(Ljava/lang/String;Ljava/lang/String;)V@76
-     INVOKESTATIC 0x00 0x54    INVOKESTATIC 0x00 0x54
     method ref net.minecraft.src.Fire.<init> (I)V -> nh.<init> (I)V refreshTextureFX(Ljava/util/List;)V@342
      INVOKESPECIAL 0x00 0x57   INVOKESPECIAL 0x03 0xd7
     method ref net.minecraft.src.Fire.<init> (I)V -> nh.<init> (I)V refreshTextureFX(Ljava/util/List;)V@357
@@ -4034,18 +4016,12 @@ Patching...
      GETFIELD 0x00 0x63        GETFIELD 0x03 0xdc
     field ref net.minecraft.src.TexturePackCustom.zipFile Ljava/util/zip/ZipFile; -> aju.e Ljava/util/zip/ZipFile; closeTexturePackFile(Laju;)V@19
      PUTFIELD 0x00 0x63        PUTFIELD 0x03 0xdc
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStrip (Ljava/util/Properties;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.addStrip (Ljava/util/Properties;)V refreshTextureFX(Ljava/util/List;)V@586
-     INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x00 0x77
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStrip (Ljava/util/Properties;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.addStrip (Ljava/util/Properties;)V refreshTextureFX(Ljava/util/List;)V@738
-     INVOKESTATIC 0x00 0x77    INVOKESTATIC 0x00 0x77
     class ref net.minecraft.src.TexturePackFolder -> aiq refreshTextureFX(Ljava/util/List;)V@629
      INSTANCEOF 0x00 0x7b      INSTANCEOF 0x03 0xde
     class ref net.minecraft.src.TexturePackFolder -> aiq refreshTextureFX(Ljava/util/List;)V@636
      CHECKCAST 0x00 0x7b       CHECKCAST 0x03 0xde
     field ref net.minecraft.src.TexturePackFolder.folder Ljava/io/File; -> aiq.g Ljava/io/File; refreshTextureFX(Ljava/util/List;)V@639
      GETFIELD 0x00 0x7c        GETFIELD 0x03 0xe1
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.updateAll ()V -> com/pclewis/mcpatcher/mod/CustomAnimation.updateAll ()V refreshTextureFX(Ljava/util/List;)V@858
-     INVOKESTATIC 0x00 0x86    INVOKESTATIC 0x00 0x86
     field ref net.minecraft.src.ColorizerWater.colorBuffer [I -> zt.a [I refreshTextureFX(Ljava/util/List;)V@861
      GETSTATIC 0x00 0x87       GETSTATIC 0x03 0xe5
     field ref net.minecraft.src.ColorizerWater.colorBuffer [I -> zt.a [I refreshTextureFX(Ljava/util/List;)V@870
@@ -4177,274 +4153,17 @@ Patching...
    string replace Lnet/minecraft/src/TextureFX; -> Ltt; @1323
   adding com/pclewis/mcpatcher/mod/TextureUtils$1.class for HD Textures
   adding com/pclewis/mcpatcher/mod/CustomAnimation.class for HD Textures
-   field imageData -> f
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.srcName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.srcName Ljava/lang/String; add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@28
-     GETFIELD 0x00 0x01        GETFIELD 0x00 0x01
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.srcName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.srcName Ljava/lang/String; <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@6
-     PUTFIELD 0x00 0x01        PUTFIELD 0x00 0x01
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.srcName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.srcName Ljava/lang/String; <init>(Ljava/lang/String;IIIIIIII)V@6
-     PUTFIELD 0x00 0x01        PUTFIELD 0x00 0x01
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.srcName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.srcName Ljava/lang/String; access$1000(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/lang/String;@1
-     GETFIELD 0x00 0x01        GETFIELD 0x00 0x01
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.numFrames I -> com/pclewis/mcpatcher/mod/CustomAnimation.numFrames I add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@84
-     GETFIELD 0x00 0x02        GETFIELD 0x00 0x02
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.numFrames I -> com/pclewis/mcpatcher/mod/CustomAnimation.numFrames I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@58
-     PUTFIELD 0x00 0x02        PUTFIELD 0x00 0x02
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.numFrames I -> com/pclewis/mcpatcher/mod/CustomAnimation.numFrames I <init>(Ljava/lang/String;IIIIIIII)V@65
-     PUTFIELD 0x00 0x02        PUTFIELD 0x00 0x02
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.numFrames I -> com/pclewis/mcpatcher/mod/CustomAnimation.numFrames I update()V@27
-     GETFIELD 0x00 0x02        GETFIELD 0x00 0x02
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.numFrames I -> com/pclewis/mcpatcher/mod/CustomAnimation.numFrames I access$900(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I@1
-     GETFIELD 0x00 0x02        GETFIELD 0x00 0x02
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.numFrames I -> com/pclewis/mcpatcher/mod/CustomAnimation.numFrames I access$902(Lcom/pclewis/mcpatcher/mod/CustomAnimation;I)I@3
-     PUTFIELD 0x00 0x02        PUTFIELD 0x00 0x02
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.rand Ljava/util/Random; -> com/pclewis/mcpatcher/mod/CustomAnimation.rand Ljava/util/Random; access$800()Ljava/util/Random;@0
-     GETSTATIC 0x00 0x03       GETSTATIC 0x00 0x03
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.rand Ljava/util/Random; -> com/pclewis/mcpatcher/mod/CustomAnimation.rand Ljava/util/Random; <clinit>()V@16
-     PUTSTATIC 0x00 0x03       PUTSTATIC 0x00 0x03
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentFrame I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentFrame I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@63
-     PUTFIELD 0x00 0x04        PUTFIELD 0x00 0x04
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentFrame I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentFrame I <init>(Ljava/lang/String;IIIIIIII)V@70
-     PUTFIELD 0x00 0x04        PUTFIELD 0x00 0x04
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentFrame I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentFrame I update()V@17
-     GETFIELD 0x00 0x04        GETFIELD 0x00 0x04
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentFrame I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentFrame I update()V@23
-     PUTFIELD 0x00 0x04        PUTFIELD 0x00 0x04
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentFrame I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentFrame I update()V@35
-     PUTFIELD 0x00 0x04        PUTFIELD 0x00 0x04
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentFrame I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentFrame I access$700(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I@1
-     GETFIELD 0x00 0x04        GETFIELD 0x00 0x04
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.textureID I -> com/pclewis/mcpatcher/mod/CustomAnimation.textureID I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@16
-     PUTFIELD 0x00 0x05        PUTFIELD 0x00 0x05
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.textureID I -> com/pclewis/mcpatcher/mod/CustomAnimation.textureID I <init>(Ljava/lang/String;IIIIIIII)V@16
-     PUTFIELD 0x00 0x05        PUTFIELD 0x00 0x05
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.textureID I -> com/pclewis/mcpatcher/mod/CustomAnimation.textureID I access$600(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I@1
-     GETFIELD 0x00 0x05        GETFIELD 0x00 0x05
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.imageData Ljava/nio/ByteBuffer; -> com/pclewis/mcpatcher/mod/CustomAnimation.f Ljava/nio/ByteBuffer; <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@52
-     PUTFIELD 0x00 0x06        PUTFIELD 0x01 0x5e
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.imageData Ljava/nio/ByteBuffer; -> com/pclewis/mcpatcher/mod/CustomAnimation.f Ljava/nio/ByteBuffer; <init>(Ljava/lang/String;IIIIIIII)V@59
-     PUTFIELD 0x00 0x06        PUTFIELD 0x01 0x5e
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.imageData Ljava/nio/ByteBuffer; -> com/pclewis/mcpatcher/mod/CustomAnimation.f Ljava/nio/ByteBuffer; access$500(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer;@1
-     GETFIELD 0x00 0x06        GETFIELD 0x01 0x5e
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.y I -> com/pclewis/mcpatcher/mod/CustomAnimation.y I add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@73
-     GETFIELD 0x00 0x07        GETFIELD 0x00 0x07
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.y I -> com/pclewis/mcpatcher/mod/CustomAnimation.y I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@34
-     PUTFIELD 0x00 0x07        PUTFIELD 0x00 0x07
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.y I -> com/pclewis/mcpatcher/mod/CustomAnimation.y I <init>(Ljava/lang/String;IIIIIIII)V@33
-     PUTFIELD 0x00 0x07        PUTFIELD 0x00 0x07
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.y I -> com/pclewis/mcpatcher/mod/CustomAnimation.y I access$400(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I@1
-     GETFIELD 0x00 0x07        GETFIELD 0x00 0x07
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.x I -> com/pclewis/mcpatcher/mod/CustomAnimation.x I add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@62
-     GETFIELD 0x00 0x08        GETFIELD 0x00 0x08
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.x I -> com/pclewis/mcpatcher/mod/CustomAnimation.x I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@28
-     PUTFIELD 0x00 0x08        PUTFIELD 0x00 0x08
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.x I -> com/pclewis/mcpatcher/mod/CustomAnimation.x I <init>(Ljava/lang/String;IIIIIIII)V@27
-     PUTFIELD 0x00 0x08        PUTFIELD 0x00 0x08
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.x I -> com/pclewis/mcpatcher/mod/CustomAnimation.x I access$300(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I@1
-     GETFIELD 0x00 0x08        GETFIELD 0x00 0x08
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.h I -> com/pclewis/mcpatcher/mod/CustomAnimation.h I add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@45
-     GETFIELD 0x00 0x09        GETFIELD 0x00 0x09
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.h I -> com/pclewis/mcpatcher/mod/CustomAnimation.h I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@46
-     PUTFIELD 0x00 0x09        PUTFIELD 0x00 0x09
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.h I -> com/pclewis/mcpatcher/mod/CustomAnimation.h I <init>(Ljava/lang/String;IIIIIIII)V@45
-     PUTFIELD 0x00 0x09        PUTFIELD 0x00 0x09
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.h I -> com/pclewis/mcpatcher/mod/CustomAnimation.h I access$200(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I@1
-     GETFIELD 0x00 0x09        GETFIELD 0x00 0x09
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.w I -> com/pclewis/mcpatcher/mod/CustomAnimation.w I add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@35
-     GETFIELD 0x00 0x0a        GETFIELD 0x00 0x0a
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.w I -> com/pclewis/mcpatcher/mod/CustomAnimation.w I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@40
-     PUTFIELD 0x00 0x0a        PUTFIELD 0x00 0x0a
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.w I -> com/pclewis/mcpatcher/mod/CustomAnimation.w I <init>(Ljava/lang/String;IIIIIIII)V@39
-     PUTFIELD 0x00 0x0a        PUTFIELD 0x00 0x0a
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.w I -> com/pclewis/mcpatcher/mod/CustomAnimation.w I access$100(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I@1
-     GETFIELD 0x00 0x0a        GETFIELD 0x00 0x0a
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.textureName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.textureName Ljava/lang/String; add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@55
-     GETFIELD 0x00 0x0b        GETFIELD 0x00 0x0b
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.textureName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.textureName Ljava/lang/String; <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@11
-     PUTFIELD 0x00 0x0b        PUTFIELD 0x00 0x0b
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.textureName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.textureName Ljava/lang/String; <init>(Ljava/lang/String;IIIIIIII)V@11
-     PUTFIELD 0x00 0x0b        PUTFIELD 0x00 0x0b
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.textureName Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.textureName Ljava/lang/String; access$000(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/lang/String;@1
-     GETFIELD 0x00 0x0b        GETFIELD 0x00 0x0b
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.animations Ljava/util/ArrayList; -> com/pclewis/mcpatcher/mod/CustomAnimation.animations Ljava/util/ArrayList; updateAll()V@0
-     GETSTATIC 0x00 0x0c       GETSTATIC 0x00 0x0c
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.animations Ljava/util/ArrayList; -> com/pclewis/mcpatcher/mod/CustomAnimation.animations Ljava/util/ArrayList; clear()V@0
-     GETSTATIC 0x00 0x0c       GETSTATIC 0x00 0x0c
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.animations Ljava/util/ArrayList; -> com/pclewis/mcpatcher/mod/CustomAnimation.animations Ljava/util/ArrayList; add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@4
-     GETSTATIC 0x00 0x0c       GETSTATIC 0x00 0x0c
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.animations Ljava/util/ArrayList; -> com/pclewis/mcpatcher/mod/CustomAnimation.animations Ljava/util/ArrayList; <clinit>()V@26
-     PUTSTATIC 0x00 0x0c       PUTSTATIC 0x00 0x0c
-    class ref com.pclewis.mcpatcher.mod.CustomAnimation -> com/pclewis/mcpatcher/mod/CustomAnimation updateAll()V@22
-     CHECKCAST 0x00 0x10       CHECKCAST 0x00 0x10
-    class ref com.pclewis.mcpatcher.mod.CustomAnimation -> com/pclewis/mcpatcher/mod/CustomAnimation newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@419
-     NEW 0x00 0x10             NEW 0x00 0x10
-    class ref com.pclewis.mcpatcher.mod.CustomAnimation -> com/pclewis/mcpatcher/mod/CustomAnimation newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@182
-     NEW 0x00 0x10             NEW 0x00 0x10
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.update ()V -> com/pclewis/mcpatcher/mod/CustomAnimation.update ()V updateAll()V@27
-     INVOKEVIRTUAL 0x00 0x11   INVOKEVIRTUAL 0x00 0x11
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.newStrip (Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation; -> com/pclewis/mcpatcher/mod/CustomAnimation.newStrip (Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation; addStrip(Ljava/util/Properties;)V@116
-     INVOKESTATIC 0x00 0x20    INVOKESTATIC 0x00 0x20
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.newStrip (Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation; -> com/pclewis/mcpatcher/mod/CustomAnimation.newStrip (Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation; addStrip(Ljava/lang/String;Ljava/lang/String;II)Z@75
-     INVOKESTATIC 0x00 0x20    INVOKESTATIC 0x00 0x20
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.add (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.add (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V addStrip(Ljava/util/Properties;)V@119
-     INVOKESTATIC 0x00 0x21    INVOKESTATIC 0x00 0x21
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.add (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.add (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V addStripOrTile(Ljava/lang/String;Ljava/lang/String;IIII)V@20
-     INVOKESTATIC 0x00 0x21    INVOKESTATIC 0x00 0x21
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.add (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.add (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V addStrip(Ljava/lang/String;Ljava/lang/String;II)Z@78
-     INVOKESTATIC 0x00 0x21    INVOKESTATIC 0x00 0x21
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z -> com/pclewis/mcpatcher/mod/CustomAnimation.addStrip (Ljava/lang/String;Ljava/lang/String;II)Z addStripOrTile(Ljava/lang/String;Ljava/lang/String;IIII)V@4
-     INVOKESTATIC 0x00 0x24    INVOKESTATIC 0x00 0x24
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.newTile (Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation; -> com/pclewis/mcpatcher/mod/CustomAnimation.newTile (Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation; addStripOrTile(Ljava/lang/String;Ljava/lang/String;IIII)V@17
-     INVOKESTATIC 0x00 0x25    INVOKESTATIC 0x00 0x25
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; add(Lcom/pclewis/mcpatcher/mod/CustomAnimation;)V@21
-     GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@33
-     GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@111
-     GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@197
-     GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@311
-     GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@91
-     GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@161
-     GETSTATIC 0x00 0x32       GETSTATIC 0x00 0x32
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.CLASS_NAME Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.CLASS_NAME Ljava/lang/String; <clinit>()V@6
-     PUTSTATIC 0x00 0x32       PUTSTATIC 0x00 0x32
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Laaw; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@89
-     GETFIELD 0x00 0x38        GETFIELD 0x01 0x62
+     GETFIELD 0x00 0x38        GETFIELD 0x01 0x5f
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Laaw; newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@139
-     GETFIELD 0x00 0x38        GETFIELD 0x01 0x62
+     GETFIELD 0x00 0x38        GETFIELD 0x01 0x5f
     method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> aaw.b (Ljava/lang/String;)I newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@93
-     INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x67
+     INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x64
     method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> aaw.b (Ljava/lang/String;)I newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@143
-     INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x67
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.ARGBtoRGBA ([I[B)V -> com/pclewis/mcpatcher/mod/CustomAnimation.ARGBtoRGBA ([I[B)V newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@408
-     INVOKESTATIC 0x00 0x43    INVOKESTATIC 0x00 0x43
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@445
-     INVOKESPECIAL 0x00 0x45   INVOKESPECIAL 0x00 0x45
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.<init> (Ljava/lang/String;IIIIIIII)V -> com/pclewis/mcpatcher/mod/CustomAnimation.<init> (Ljava/lang/String;IIIIIIII)V newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@201
-     INVOKESPECIAL 0x00 0x47   INVOKESPECIAL 0x00 0x47
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.tileCount I -> com/pclewis/mcpatcher/mod/CustomAnimation.tileCount I <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@22
-     PUTFIELD 0x00 0x49        PUTFIELD 0x00 0x49
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.tileCount I -> com/pclewis/mcpatcher/mod/CustomAnimation.tileCount I <init>(Ljava/lang/String;IIIIIIII)V@21
-     PUTFIELD 0x00 0x49        PUTFIELD 0x00 0x49
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.tileCount I -> com/pclewis/mcpatcher/mod/CustomAnimation.tileCount I update()V@42
-     GETFIELD 0x00 0x49        GETFIELD 0x00 0x49
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.tileCount I -> com/pclewis/mcpatcher/mod/CustomAnimation.tileCount I update()V@52
-     GETFIELD 0x00 0x49        GETFIELD 0x00 0x49
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; -> com/pclewis/mcpatcher/mod/CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; <init>(Ljava/lang/String;Ljava/lang/String;IIIIIILjava/nio/ByteBuffer;ILjava/util/Properties;)V@77
-     PUTFIELD 0x00 0x4c        PUTFIELD 0x00 0x4c
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; -> com/pclewis/mcpatcher/mod/CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; <init>(Ljava/lang/String;IIIIIIII)V@86
-     PUTFIELD 0x00 0x4c        PUTFIELD 0x00 0x4c
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; -> com/pclewis/mcpatcher/mod/CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; update()V@59
-     GETFIELD 0x00 0x4c        GETFIELD 0x00 0x4c
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; -> com/pclewis/mcpatcher/mod/CustomAnimation.delegate Lcom/pclewis/mcpatcher/mod/CustomAnimation$Delegate; update()V@91
-     GETFIELD 0x00 0x4c        GETFIELD 0x00 0x4c
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentDelay I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentDelay I update()V@2
-     GETFIELD 0x00 0x4f        GETFIELD 0x00 0x4f
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentDelay I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentDelay I update()V@8
-     PUTFIELD 0x00 0x4f        PUTFIELD 0x00 0x4f
-    field ref com.pclewis.mcpatcher.mod.CustomAnimation.currentDelay I -> com/pclewis/mcpatcher/mod/CustomAnimation.currentDelay I update()V@99
-     PUTFIELD 0x00 0x4f        PUTFIELD 0x00 0x4f
+     INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x64
   adding com/pclewis/mcpatcher/mod/CustomAnimation$Delegate.class for HD Textures
   adding com/pclewis/mcpatcher/mod/CustomAnimation$Tile.class for HD Textures
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$000 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.access$000 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/lang/String; <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@36
-     INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x00 0x06
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@45
-     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x08
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@59
-     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x08
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@83
-     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x08
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@94
-     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x08
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@72
-     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x08
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@125
-     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x08
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@155
-     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x08
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@49
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x09
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@64
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x09
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@87
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x09
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@24
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x09
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@62
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x09
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@132
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x09
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@75
-     INVOKESTATIC 0x00 0x0a    INVOKESTATIC 0x00 0x0a
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@44
-     INVOKESTATIC 0x00 0x0a    INVOKESTATIC 0x00 0x0a
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@107
-     INVOKESTATIC 0x00 0x0a    INVOKESTATIC 0x00 0x0a
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@79
-     INVOKESTATIC 0x00 0x0b    INVOKESTATIC 0x00 0x0b
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@53
-     INVOKESTATIC 0x00 0x0b    INVOKESTATIC 0x00 0x0b
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@116
-     INVOKESTATIC 0x00 0x0b    INVOKESTATIC 0x00 0x0b
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.ARGBtoRGBA ([I[B)V -> com/pclewis/mcpatcher/mod/CustomAnimation.ARGBtoRGBA ([I[B)V <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@105
-     INVOKESTATIC 0x00 0x0d    INVOKESTATIC 0x00 0x0d
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; -> com/pclewis/mcpatcher/mod/CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;II)V@109
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x00 0x0e
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; -> com/pclewis/mcpatcher/mod/CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; update(II)V@86
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x00 0x0e
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; -> com/pclewis/mcpatcher/mod/CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; update(II)V@147
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x00 0x0e
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$600 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$600 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@14
-     INVOKESTATIC 0x00 0x10    INVOKESTATIC 0x00 0x10
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$700 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$700 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@31
-     INVOKESTATIC 0x00 0x12    INVOKESTATIC 0x00 0x12
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$800 ()Ljava/util/Random; -> com/pclewis/mcpatcher/mod/CustomAnimation.access$800 ()Ljava/util/Random; getDelay()I@7
-     INVOKESTATIC 0x00 0x16    INVOKESTATIC 0x00 0x16
   adding com/pclewis/mcpatcher/mod/CustomAnimation$Strip.class for HD Textures
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;Ljava/util/Properties;)V@11
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I loadProperties(Ljava/util/Properties;)V@17
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I loadProperties(Ljava/util/Properties;)V@32
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I loadProperties(Ljava/util/Properties;)V@61
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I loadProperties(Ljava/util/Properties;)V@81
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I loadTileOrder(Ljava/util/Properties;)V@42
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I loadTileOrder(Ljava/util/Properties;)V@57
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$900 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I loadTileDelay(Ljava/util/Properties;)V@20
-     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x03
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$1000 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/lang/String; -> com/pclewis/mcpatcher/mod/CustomAnimation.access$1000 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/lang/String; <init>(Lcom/pclewis/mcpatcher/mod/CustomAnimation;Ljava/util/Properties;)V@24
-     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x00 0x05
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$902 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;I)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$902 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;I)I loadTileOrder(Ljava/util/Properties;)V@33
-     INVOKESTATIC 0x00 0x18    INVOKESTATIC 0x00 0x18
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$600 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$600 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@7
-     INVOKESTATIC 0x00 0x29    INVOKESTATIC 0x00 0x29
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$300 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@21
-     INVOKESTATIC 0x00 0x2b    INVOKESTATIC 0x00 0x2b
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$400 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@30
-     INVOKESTATIC 0x00 0x2c    INVOKESTATIC 0x00 0x2c
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@39
-     INVOKESTATIC 0x00 0x2d    INVOKESTATIC 0x00 0x2d
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$100 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@67
-     INVOKESTATIC 0x00 0x2d    INVOKESTATIC 0x00 0x2d
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@46
-     INVOKESTATIC 0x00 0x2e    INVOKESTATIC 0x00 0x2e
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$200 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@75
-     INVOKESTATIC 0x00 0x2e    INVOKESTATIC 0x00 0x2e
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; -> com/pclewis/mcpatcher/mod/CustomAnimation.access$500 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)Ljava/nio/ByteBuffer; update(II)V@59
-     INVOKESTATIC 0x00 0x2f    INVOKESTATIC 0x00 0x2f
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$700 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$700 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I update(II)V@87
-     INVOKESTATIC 0x00 0x30    INVOKESTATIC 0x00 0x30
-    method ref com.pclewis.mcpatcher.mod.CustomAnimation.access$700 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I -> com/pclewis/mcpatcher/mod/CustomAnimation.access$700 (Lcom/pclewis/mcpatcher/mod/CustomAnimation;)I getDelay()I@8
-     INVOKESTATIC 0x00 0x30    INVOKESTATIC 0x00 0x30
   adding com/pclewis/mcpatcher/mod/FontUtils.class for HD Font
    method signature (Lnet/minecraft/src/FontRenderer;C)F -> (Lnl;C)F
    method signature (Lnet/minecraft/src/FontRenderer;Ljava/lang/String;)F -> (Lnl;Ljava/lang/String;)F
