@@ -926,7 +926,11 @@ public class HDTexture extends Mod {
 
     private class GameSettingsMod extends ClassMod {
         GameSettingsMod() {
-            classSignatures.add(new ConstSignature("key.forward"));
+            classSignatures.add(new ConstSignature("options.txt"));
+            classSignatures.add(new OrSignature(
+                new ConstSignature("key.forward"),
+                new ConstSignature("Forward")
+            ));
         }
     }
 
