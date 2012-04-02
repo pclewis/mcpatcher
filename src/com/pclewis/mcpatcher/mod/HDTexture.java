@@ -909,7 +909,9 @@ public class HDTexture extends Mod {
                     if (constructor == null) {
                         for (Object o : getClassFile().getMethods()) {
                             MethodInfo method = (MethodInfo) o;
-                            if (method.isConstructor() && method.getDescriptor().contains("Z)")) {
+                            if (method.isConstructor() &&
+                                ((haveUnicode && method.getDescriptor().contains("Z)")) ||
+                                    (!haveUnicode && !method.getDescriptor().equals("()V")))) {
                                 constructor = method;
                                 break;
                             }
