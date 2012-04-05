@@ -315,7 +315,7 @@ public class Colorizer {
     }
 
     public static boolean computeWaterColor(double x, double y, double z) {
-        if (useParticleColors) {
+        if (useParticleColors && fixedColorMaps[COLOR_MAP_WATER].isCustom()) {
             int rgb = colorizeBiome(0xffffff, COLOR_MAP_WATER, (int) x, (int) y, (int) z);
             float[] multiplier = new float[3];
             intToFloat3(rgb, multiplier);
