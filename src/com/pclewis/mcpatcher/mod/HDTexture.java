@@ -940,8 +940,19 @@ public class HDTexture extends Mod {
         GetResourceMod() {
             global = true;
 
-            classSignatures.add(new ConstSignature(new ClassRef("java.lang.Class")));
-            classSignatures.add(new ConstSignature(new MethodRef("javax.imageio.ImageIO", "read", null)));
+            final MethodRef getResource = new MethodRef("java.lang.Class", "getResource", "(Ljava/lang/String;)Ljava/net/URL;");
+            final MethodRef readURL = new MethodRef("javax.imageio.ImageIO", "read", "(Ljava/net/URL;)Ljava/awt/image/BufferedImage;");
+            final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
+            final MethodRef readStream = new MethodRef("javax.imageio.ImageIO", "read", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
+
+            classSignatures.add(new OrSignature(
+                new ConstSignature(getResource),
+                new ConstSignature(getResourceAsStream)
+            ));
+            classSignatures.add(new OrSignature(
+                new ConstSignature(readURL),
+                new ConstSignature(readStream)
+            ));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -952,19 +963,14 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BytecodeMatcher.anyLDC,
-                        BinaryRegex.capture(BinaryRegex.or(
-                            BytecodeMatcher.anyLDC,
-                            BytecodeMatcher.anyALOAD
-                        )),
                         BinaryRegex.or(
                             buildExpression(
-                                reference(INVOKEVIRTUAL, new MethodRef("java.lang.Class", "getResource", "(Ljava/lang/String;)Ljava/net/URL;")),
-                                reference(INVOKESTATIC, new MethodRef("javax.imageio.ImageIO", "read", "(Ljava/net/URL;)Ljava/awt/image/BufferedImage;"))
+                                reference(INVOKEVIRTUAL, getResource),
+                                reference(INVOKESTATIC, readURL)
                             ),
                             buildExpression(
-                                reference(INVOKEVIRTUAL, new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;")),
-                                reference(INVOKESTATIC, new MethodRef("javax.imageio.ImageIO", "read", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"))
+                                reference(INVOKEVIRTUAL, getResourceAsStream),
+                                reference(INVOKESTATIC, readStream)
                             )
                         )
                     );
@@ -973,8 +979,7 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        getCaptureGroup(1),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/Object;Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
                     );
                 }
             });

@@ -425,6 +425,10 @@ public class TextureUtils {
         return getResourceAsBufferedImage(getSelectedTexturePack(), resource);
     }
 
+    public static BufferedImage getResourceAsBufferedImage(Object o1, String resource) throws IOException {
+        return getResourceAsBufferedImage(resource);
+    }
+
     public static BufferedImage getResourceAsBufferedImage(Object o1, Object o2, String resource) throws IOException {
         return getResourceAsBufferedImage(resource);
     }
