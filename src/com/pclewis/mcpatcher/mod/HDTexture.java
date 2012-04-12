@@ -787,9 +787,9 @@ public class HDTexture extends Mod {
         TexturePackBaseMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
 
+            final String[] names = {"openTexturePackFile", "closeTexturePackFile"};
             if (useITexturePack) {
-                final String[] names = {"openTexturePackFile", "closeTexturePackFile"};
-                memberMappers.add(new MethodMapper(names, "(LRenderEngine;)V"));
+                memberMappers.add(new MethodMapper(new String[]{names[0] + "1", names[1] + "1"}, "(LRenderEngine;)V"));
 
                 for (final String n : names) {
                     patches.add(new AddMethodPatch(n, "()V") {
@@ -799,7 +799,7 @@ public class HDTexture extends Mod {
                                 ALOAD_0,
                                 reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "getMinecraft", "()LMinecraft;")),
                                 reference(GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
-                                reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), n, "(LRenderEngine;)V")),
+                                reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), n + "1", "(LRenderEngine;)V")),
                                 RETURN
                             );
                         }
@@ -815,7 +815,7 @@ public class HDTexture extends Mod {
                     }
                 });
             } else {
-                memberMappers.add(new MethodMapper(new String[]{null, "openTexturePackFile", "closeTexturePackFile"}, "()V"));
+                memberMappers.add(new MethodMapper(new String[]{null, names[0], names[1]}, "()V"));
             }
         }
     }
