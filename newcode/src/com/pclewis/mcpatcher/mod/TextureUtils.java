@@ -306,7 +306,9 @@ public class TextureUtils {
             resource.equals("/terrain_nh.png") ||
             resource.equals("/terrain_s.png") ||
             resource.matches("^/font/.*\\.properties$") ||
-            resource.matches("^/mob/.*\\d+.png$")
+            resource.matches("^/mob/.*\\d+.png$") ||
+            resource.equals("/ctm.png") ||
+            resource.matches("^/ctm/block\\d+.png$")
         );
     }
 
