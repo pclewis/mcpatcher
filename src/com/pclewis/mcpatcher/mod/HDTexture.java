@@ -74,8 +74,13 @@ public class HDTexture extends Mod {
     private class RenderEngineMod extends ClassMod {
         RenderEngineMod() {
             final MethodRef updateDynamicTextures = new MethodRef(getDeobfClass(), "updateDynamicTextures", "()V");
+            final MethodRef readTextureImage =  new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
+            final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
+            final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
+            final MethodRef getInputStream = new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
+            final MethodRef glTexSubImage2D = new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
 
-            classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
+            classSignatures.add(new ConstSignature(glTexSubImage2D));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -94,7 +99,7 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V"))
+                        reference(INVOKESTATIC, glTexSubImage2D)
                     );
                 }
             }.setMethod(updateDynamicTextures));
@@ -157,8 +162,8 @@ public class HDTexture extends Mod {
                     return buildExpression(
                         push(16),
                         push(16),
-                        SIPUSH, 0x19, 0x08, // GL_RGBA
-                        SIPUSH, 0x14, 0x01  // GL_UNSIGNED_BYTE
+                        push(0x1908), // GL_RGBA
+                        push(0x1401) // GL_UNSIGNED_BYTE
                     );
                 }
 
@@ -167,8 +172,8 @@ public class HDTexture extends Mod {
                     return buildCode(
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_size", "I")),
-                        SIPUSH, 0x19, 0x08,
-                        SIPUSH, 0x14, 0x01
+                        push(0x1908), // GL_RGBA
+                        push(0x1401) // GL_UNSIGNED_BYTE
                     );
                 }
             });
@@ -182,8 +187,8 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKEVIRTUAL, new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")),
-                        reference(INVOKESPECIAL, new MethodRef("RenderEngine", "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"))
+                        reference(INVOKEVIRTUAL, getInputStream),
+                        reference(INVOKESPECIAL, readTextureImage)
                     );
                 }
 
@@ -206,7 +211,7 @@ public class HDTexture extends Mod {
                     return buildExpression(
                         ALOAD_2,
                         ALOAD_1,
-                        reference(INVOKEVIRTUAL, new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")),
+                        reference(INVOKEVIRTUAL, getInputStream),
                         BytecodeMatcher.anyASTORE,
                         BytecodeMatcher.anyALOAD,
                         IFNONNULL, BinaryRegex.any(2),
@@ -214,12 +219,12 @@ public class HDTexture extends Mod {
                         ALOAD_0,
                         GETFIELD, BinaryRegex.any(2),
                         BytecodeMatcher.anyILOAD,
-                        reference(INVOKEVIRTUAL, new MethodRef("RenderEngine", "setupTexture", "(Ljava/awt/image/BufferedImage;I)V")),
+                        reference(INVOKEVIRTUAL, setupTexture),
                         GOTO, BinaryRegex.any(2),
                         ALOAD_0,
                         ALOAD_0,
                         BytecodeMatcher.anyALOAD,
-                        reference(INVOKESPECIAL, new MethodRef("RenderEngine", "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"))
+                        reference(INVOKESPECIAL, readTextureImage)
                     );
                 }
 
@@ -309,7 +314,7 @@ public class HDTexture extends Mod {
                         RETURN
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V")));
+            }.targetMethod(registerTextureFX));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -333,7 +338,7 @@ public class HDTexture extends Mod {
                         label("A")
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V")));
+            }.targetMethod(setupTexture));
 
             patches.add(new BytecodePatch() {
                 @Override
