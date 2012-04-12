@@ -803,7 +803,7 @@ public class HDTexture extends Mod {
                                 RETURN
                             );
                         }
-                    }.allowDuplicate(true));
+                    });
                 }
 
                 memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
