@@ -11,6 +11,7 @@ abstract public class AddMethodPatch extends ClassPatch {
     private String name;
     private String type;
     private int accessFlags;
+    private boolean allowDuplicate;
 
     /**
      * May be set to specify a different max stack size for the method.
@@ -77,6 +78,17 @@ abstract public class AddMethodPatch extends ClassPatch {
         this(name, null, accessFlags);
     }
 
+    /**
+     * Set whether to ignore duplicate method errors when applying this patch.
+     *
+     * @param allowDuplicate true or false
+     * @return this
+     */
+    public AddMethodPatch allowDuplicate(boolean allowDuplicate) {
+        this.allowDuplicate = allowDuplicate;
+        return this;
+    }
+
     @Override
     final public String getDescription() {
         return String.format("insert method %s %s", name, getDescriptor());
@@ -109,9 +121,15 @@ abstract public class AddMethodPatch extends ClassPatch {
                 }
                 codeAttribute.setMaxLocals(newMaxLocals);
                 int newStackSize = Math.max(codeAttribute.computeMaxStack(), maxStackSize);
-                recordPatch(String.format("stack size %d, local vars %d", newStackSize, newMaxLocals));
-                classFile.addMethod(methodInfo);
-                patched = true;
+                try {
+                    classFile.addMethod(methodInfo);
+                    patched = true;
+                    recordPatch(String.format("stack size %d, local vars %d", newStackSize, newMaxLocals));
+                } catch (DuplicateMemberException e) {
+                    if (!allowDuplicate) {
+                        throw e;
+                    }
+                }
             }
         } finally {
             classMod.methodInfo = null;

@@ -221,7 +221,7 @@ public class TextureUtils {
                     }
                 }
             } else if (selectedTexturePack instanceof TexturePackFolder) {
-                File folder = ((TexturePackFolder) selectedTexturePack).folder;
+                File folder = ((TexturePackFolder) selectedTexturePack).getFolder();
                 if (folder != null) {
                     folder = new File(folder, "anim");
                     if (folder.isDirectory()) {

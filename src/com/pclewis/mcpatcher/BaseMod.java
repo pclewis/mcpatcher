@@ -180,11 +180,11 @@ public final class BaseMod extends Mod {
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
                             reference(GETSTATIC, defaultTexturePack),
-                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
+                            reference(CHECKCAST, new ClassRef("TexturePackBase")),
                             ARETURN
                         );
                     }
-                });
+                }.allowDuplicate(true));
 
                 patches.add(new AddMethodPatch("getSelectedTexturePack", "()LTexturePackBase;") {
                     @Override
@@ -192,11 +192,11 @@ public final class BaseMod extends Mod {
                         return buildCode(
                             ALOAD_0,
                             reference(GETFIELD, selectedTexturePack),
-                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
+                            reference(CHECKCAST, new ClassRef("TexturePackBase")),
                             ARETURN
                         );
                     }
-                });
+                }.allowDuplicate(true));
             } else {
                 useITexturePack = false;
 
@@ -212,11 +212,10 @@ public final class BaseMod extends Mod {
                         return buildCode(
                             ALOAD_0,
                             reference(GETFIELD, defaultTexturePack),
-                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
                             ARETURN
                         );
                     }
-                });
+                }.allowDuplicate(true));
 
                 patches.add(new AddMethodPatch("getSelectedTexturePack", "()LTexturePackBase;") {
                     @Override
@@ -224,11 +223,10 @@ public final class BaseMod extends Mod {
                         return buildCode(
                             ALOAD_0,
                             reference(GETFIELD, selectedTexturePack),
-                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
                             ARETURN
                         );
                     }
-                });
+                }.allowDuplicate(true));
             }
         }
     }
@@ -264,6 +262,8 @@ public final class BaseMod extends Mod {
             }.setMethodName("getInputStream"));
 
             memberMappers.add(new FieldMapper("texturePackFileName", "Ljava/lang/String;"));
+
+            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "texturePackFileName", "Ljava/lang/String;")));
         }
     }
 
@@ -272,6 +272,8 @@ public final class BaseMod extends Mod {
      */
     public static class TexturePackDefaultMod extends ClassMod {
         public TexturePackDefaultMod() {
+            parentClass = "TexturePackBase";
+
             classSignatures.add(new ConstSignature("The default look of Minecraft"));
         }
     }

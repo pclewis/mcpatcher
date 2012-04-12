@@ -57,6 +57,12 @@ public class AddFieldPatch extends ClassPatch {
         this(name, null, accessFlags);
     }
 
+    /**
+     * Set whether to ignore duplicate field errors when applying this patch.
+     *
+     * @param allowDuplicate true or false
+     * @return this
+     */
     public AddFieldPatch allowDuplicate(boolean allowDuplicate) {
         this.allowDuplicate = allowDuplicate;
         return this;

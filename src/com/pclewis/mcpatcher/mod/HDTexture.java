@@ -1,27 +1,25 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.BadBytecode;
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.CodeAttribute;
-import javassist.bytecode.MethodInfo;
+import javassist.bytecode.*;
 
 import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
 
 public class HDTexture extends Mod {
-    private boolean haveColorizerWater;
-    private boolean haveAlternateFont;
-    private boolean haveUnicode;
-    private boolean haveGetImageRGB;
-    private boolean haveFolderTexturePacks;
+    private final boolean haveColorizerWater;
+    private final boolean haveAlternateFont;
+    private final boolean haveUnicode;
+    private final boolean haveGetImageRGB;
+    private final boolean haveFolderTexturePacks;
+    private final boolean haveITexturePack;
 
     public HDTexture(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for texture packs of size 32x32 and higher.";
-        version = "1.2";
+        version = "1.3";
         configPanel = new HDTextureConfig();
 
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
@@ -29,6 +27,7 @@ public class HDTexture extends Mod {
         haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveGetImageRGB = minecraftVersion.compareTo("Beta 1.6") >= 0;
         haveFolderTexturePacks = minecraftVersion.compareTo("12w08a") >= 0;
+        haveITexturePack = minecraftVersion.compareTo("12w15a") >= 0;
 
         classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
@@ -804,8 +803,17 @@ public class HDTexture extends Mod {
                                 RETURN
                             );
                         }
-                    });
+                    }.allowDuplicate(true));
                 }
+
+                memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
+
+                patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")) {
+                    @Override
+                    public int getNewFlags(int oldFlags) {
+                        return (oldFlags & ~(AccessFlag.PRIVATE | AccessFlag.PROTECTED | AccessFlag.FINAL)) | AccessFlag.PUBLIC;
+                    }
+                });
             } else {
                 memberMappers.add(new MethodMapper(new String[]{null, "openTexturePackFile", "closeTexturePackFile"}, "()V"));
             }
@@ -816,19 +824,25 @@ public class HDTexture extends Mod {
         TexturePackCustomMod() {
             parentClass = "TexturePackBase";
 
-            classSignatures.add(new ConstSignature("pack.txt"));
-            classSignatures.add(new ConstSignature("pack.png"));
             classSignatures.add(new ConstSignature(new ClassRef("java.util.zip.ZipFile")));
+            if (!haveITexturePack) {
+                classSignatures.add(new ConstSignature("pack.txt"));
+                classSignatures.add(new ConstSignature("pack.png"));
+
+                memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
+
+                patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
+            }
 
             memberMappers.add(new FieldMapper("zipFile", "Ljava/util/zip/ZipFile;"));
-            memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "zipFile", "Ljava/util/zip/ZipFile;")));
-            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
 
             patches.add(new AddFieldPatch("origZip", "Ljava/util/zip/ZipFile;"));
             patches.add(new AddFieldPatch("tmpFile", "Ljava/io/File;"));
             patches.add(new AddFieldPatch("lastModified", "J"));
+
+            String methodDescriptor = haveITexturePack ? "(LRenderEngine;)V" : "()V";
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -851,7 +865,7 @@ public class HDTexture extends Mod {
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "openTexturePackFile", "(LTexturePackCustom;)V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "openTexturePackFile", "()V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "openTexturePackFile", methodDescriptor)));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -873,7 +887,7 @@ public class HDTexture extends Mod {
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "closeTexturePackFile", "(LTexturePackCustom;)V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "closeTexturePackFile", "()V")));
+            }.targetMethod(new MethodRef(getDeobfClass(), "closeTexturePackFile", methodDescriptor)));
         }
     }
 
@@ -881,13 +895,40 @@ public class HDTexture extends Mod {
         TexturePackFolderMod() {
             parentClass = "TexturePackBase";
 
-            classSignatures.add(new ConstSignature("pack.txt"));
-            classSignatures.add(new ConstSignature("pack.png"));
+            final String fileField;
+
+            if (haveITexturePack) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            ALOAD_1,
+                            push(1),
+                            reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;"))
+                        );
+                    }
+                });
+
+                fileField = "file";
+            } else {
+                classSignatures.add(new ConstSignature("pack.txt"));
+                classSignatures.add(new ConstSignature("pack.png"));
+
+                fileField = "folder";
+                memberMappers.add(new FieldMapper(fileField, "Ljava/io/File;"));
+            }
             classSignatures.add(new ConstSignature(new ClassRef("java.io.FileInputStream")));
 
-            memberMappers.add(new FieldMapper("folder", "Ljava/io/File;"));
-
-            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "folder", "Ljava/io/File;")));
+            patches.add(new AddMethodPatch("getFolder", "()Ljava/io/File;") {
+                @Override
+                public byte[] generateMethod() throws BadBytecode, IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(GETFIELD, new FieldRef(getDeobfClass(), fileField, "Ljava/io/File;")),
+                        ARETURN
+                    );
+                }
+            });
         }
     }
 
