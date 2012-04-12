@@ -235,11 +235,14 @@ public final class BaseMod extends Mod {
      * Matches TexturePackBase class and maps getInputStream method.
      */
     public static class TexturePackBaseMod extends ClassMod {
+        protected boolean useInterface;
+
         public TexturePackBaseMod(MinecraftVersion minecraftVersion) {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
 
             classSignatures.add(new ConstSignature(getResourceAsStream));
             if (minecraftVersion.compareTo("12w15a") >= 0) {
+                useInterface = true;
                 classSignatures.add(new ConstSignature("/pack.txt"));
                 interfaces = new String[]{"ITexturePack"};
             } else {

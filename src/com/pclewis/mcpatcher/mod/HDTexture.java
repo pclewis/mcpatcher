@@ -787,7 +787,28 @@ public class HDTexture extends Mod {
     private class TexturePackBaseMod extends BaseMod.TexturePackBaseMod {
         TexturePackBaseMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
-            memberMappers.add(new MethodMapper(new String[]{null, "openTexturePackFile", "closeTexturePackFile"}, "()V"));
+
+            if (useInterface) {
+                final String[] names = {"openTexturePackFile", "closeTexturePackFile"};
+                memberMappers.add(new MethodMapper(names, "(LRenderEngine;)V"));
+
+                for (final String n : names) {
+                    patches.add(new AddMethodPatch(n, "()V") {
+                        @Override
+                        public byte[] generateMethod() throws BadBytecode, IOException {
+                            return buildCode(
+                                ALOAD_0,
+                                reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "getMinecraft", "()LMinecraft;")),
+                                reference(GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
+                                reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), n, "(LRenderEngine;)V")),
+                                RETURN
+                            );
+                        }
+                    });
+                }
+            } else {
+                memberMappers.add(new MethodMapper(new String[]{null, "openTexturePackFile", "closeTexturePackFile"}, "()V"));
+            }
         }
     }
 
