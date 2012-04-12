@@ -161,11 +161,46 @@ public final class BaseMod extends Mod {
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
                 );
-                memberMappers.add(new FieldMapper("defaultTexturePack", "LITexturePack;")
+                memberMappers.add(new FieldMapper("defaultTexturePackStatic", "LITexturePack;")
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, true)
                     .accessFlag(AccessFlag.FINAL, true)
                 );
+
+                final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;");
+                final FieldRef defaultTexturePackStatic = new FieldRef(getDeobfClass(), "defaultTexturePackStatic", "LITexturePack;");
+                final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;");
+
+                patches.add(new MakeMemberPublicPatch(selectedTexturePack));
+                patches.add(new MakeMemberPublicPatch(defaultTexturePackStatic));
+                patches.add(new AddFieldPatch("defaultTexturePack", "LITexturePack;").allowDuplicate(true));
+                patches.add(new BytecodePatch() {
+                    @Override
+                    public String getDescription() {
+                        return "initialize non-static defaultTexturePack";
+                    }
+
+                    @Override
+                    public String getMatchExpression() {
+                        if (getMethodInfo().isConstructor()) {
+                            return buildExpression(
+                                RETURN
+                            );
+                        } else {
+                            return null;
+                        }
+                    }
+
+                    @Override
+                    public byte[] getReplacementBytes() throws IOException {
+                        return buildCode(
+                            ALOAD_0,
+                            reference(GETSTATIC, defaultTexturePackStatic),
+                            reference(PUTFIELD, defaultTexturePack),
+                            RETURN
+                        );
+                    }
+                });
             } else {
                 memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
                 memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
