@@ -40,8 +40,8 @@ public class CustomColors extends Mod {
 
         configPanel = new ConfigPanel();
 
-        classMods.add(new BaseMod.TexturePackListMod());
-        classMods.add(new BaseMod.TexturePackBaseMod());
+        classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
+        classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
 
         classMods.add(new MinecraftMod());
         classMods.add(new IBlockAccessMod());

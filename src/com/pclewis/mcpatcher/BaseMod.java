@@ -151,13 +151,25 @@ public final class BaseMod extends Mod {
      * Matches TexturePackList class and maps selected and default texture pack fields.
      */
     public static class TexturePackListMod extends ClassMod {
-        public TexturePackListMod() {
+        public TexturePackListMod(MinecraftVersion minecraftVersion) {
             classSignatures.add(new ConstSignature(".zip"));
             classSignatures.add(new ConstSignature("texturepacks"));
 
-            memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
-            memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
-            memberMappers.add(new FieldMapper("minecraft", "LMinecraft;"));
+            if (minecraftVersion.compareTo("12w15a") >= 0) {
+                memberMappers.add(new FieldMapper("selectedTexturePack", "LITexturePack;")
+                    .accessFlag(AccessFlag.PRIVATE, true)
+                    .accessFlag(AccessFlag.STATIC, false)
+                    .accessFlag(AccessFlag.FINAL, false)
+                );
+                memberMappers.add(new FieldMapper("defaultTexturePack", "LITexturePack;")
+                    .accessFlag(AccessFlag.PRIVATE, true)
+                    .accessFlag(AccessFlag.STATIC, true)
+                    .accessFlag(AccessFlag.FINAL, true)
+                );
+            } else {
+                memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
+                memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
+            }
         }
     }
 
@@ -165,11 +177,16 @@ public final class BaseMod extends Mod {
      * Matches TexturePackBase class and maps getInputStream method.
      */
     public static class TexturePackBaseMod extends ClassMod {
-        public TexturePackBaseMod() {
+        public TexturePackBaseMod(MinecraftVersion minecraftVersion) {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
 
             classSignatures.add(new ConstSignature(getResourceAsStream));
-            classSignatures.add(new ConstSignature("pack.txt").negate(true));
+            if (minecraftVersion.compareTo("12w15a") >= 0) {
+                classSignatures.add(new ConstSignature("/pack.txt"));
+                interfaces = new String[]{"ITexturePack"};
+            } else {
+                classSignatures.add(new ConstSignature("pack.txt").negate(true));
+            }
 
             classSignatures.add(new BytecodeSignature() {
                 @Override

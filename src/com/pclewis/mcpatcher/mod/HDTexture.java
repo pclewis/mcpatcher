@@ -42,8 +42,8 @@ public class HDTexture extends Mod {
         classMods.add(new PortalMod());
         classMods.add(new MinecraftMod());
         classMods.add(new BaseMod.GLAllocationMod());
-        classMods.add(new TexturePackListMod());
-        classMods.add(new TexturePackBaseMod());
+        classMods.add(new TexturePackListMod(minecraftVersion));
+        classMods.add(new TexturePackBaseMod(minecraftVersion));
         classMods.add(new TexturePackCustomMod());
         classMods.add(new BaseMod.TexturePackDefaultMod());
         if (haveFolderTexturePacks) {
@@ -716,7 +716,8 @@ public class HDTexture extends Mod {
     }
 
     private class TexturePackListMod extends BaseMod.TexturePackListMod {
-        TexturePackListMod() {
+        TexturePackListMod(MinecraftVersion minecraftVersion) {
+            super(minecraftVersion);
             memberMappers.add(new MethodMapper("updateAvailableTexturePacks", "()V"));
             memberMappers.add(new MethodMapper("setTexturePack", "(LTexturePackBase;)Z"));
             memberMappers.add(new MethodMapper("availableTexturePacks", "()Ljava/util/List;"));
@@ -765,7 +766,8 @@ public class HDTexture extends Mod {
     }
 
     private class TexturePackBaseMod extends BaseMod.TexturePackBaseMod {
-        TexturePackBaseMod() {
+        TexturePackBaseMod(MinecraftVersion minecraftVersion) {
+            super(minecraftVersion);
             memberMappers.add(new MethodMapper(new String[]{null, "openTexturePackFile", "closeTexturePackFile"}, "()V"));
         }
     }
