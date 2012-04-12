@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
+import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.MethodInfo;
@@ -719,7 +720,11 @@ public class HDTexture extends Mod {
         TexturePackListMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
             memberMappers.add(new MethodMapper("updateAvailableTexturePacks", "()V"));
-            memberMappers.add(new MethodMapper("setTexturePack", "(LTexturePackBase;)Z"));
+            if (useInterface) {
+                memberMappers.add(new MethodMapper("setTexturePack", "(LITexturePack;)Z"));
+            } else {
+                memberMappers.add(new MethodMapper("setTexturePack", "(LTexturePackBase;)Z"));
+            }
             memberMappers.add(new MethodMapper("availableTexturePacks", "()Ljava/util/List;"));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;")));
@@ -762,6 +767,20 @@ public class HDTexture extends Mod {
                     );
                 }
             });
+
+            if (useInterface) {
+                patches.add(new AddMethodPatch("setTexturePack", "(LTexturePackBase;)Z") {
+                    @Override
+                    public byte[] generateMethod() throws BadBytecode, IOException {
+                        return buildCode(
+                            ALOAD_0,
+                            ALOAD_1,
+                            reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), "setTexturePack", "(LITexturePack;)Z")),
+                            IRETURN
+                        );
+                    }
+                });
+            }
         }
     }
 

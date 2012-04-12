@@ -279,7 +279,7 @@ public class TextureUtils {
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         return minecraft == null ? null :
             minecraft.texturePackList == null ? null :
-                minecraft.texturePackList.selectedTexturePack;
+                minecraft.texturePackList.getSelectedTexturePack();
     }
 
     public static String getTexturePackName(TexturePackBase texturePack) {
@@ -544,10 +544,10 @@ public class TextureUtils {
         }
         textureRefreshCount = 0;
         TexturePackList list = minecraft.texturePackList;
-        if (!(list.selectedTexturePack instanceof TexturePackCustom)) {
+        if (!(list.getSelectedTexturePack() instanceof TexturePackCustom)) {
             return;
         }
-        TexturePackCustom pack = (TexturePackCustom) list.selectedTexturePack;
+        TexturePackCustom pack = (TexturePackCustom) list.getSelectedTexturePack();
         long lastModified = pack.file.lastModified();
         if (lastModified == pack.lastModified || lastModified == 0 || pack.lastModified == 0) {
             return;
@@ -571,14 +571,13 @@ public class TextureUtils {
             TexturePackCustom tpc = (TexturePackCustom) tp;
             if (tpc.file.equals(pack.file)) {
                 MCPatcherUtils.debug("setting new texture pack");
-                list.selectedTexturePack = list.defaultTexturePack;
                 list.setTexturePack(tpc);
                 minecraft.renderEngine.setTileSize(minecraft);
                 return;
             }
         }
         MCPatcherUtils.debug("selected texture pack not found after refresh, switching to default");
-        list.setTexturePack(list.defaultTexturePack);
+        list.setTexturePack(list.getDefaultTexturePack());
         minecraft.renderEngine.setTileSize(minecraft);
     }
 }

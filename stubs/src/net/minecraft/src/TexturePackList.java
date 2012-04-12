@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TexturePackList {
-    public TexturePackBase defaultTexturePack;
-    public TexturePackBase selectedTexturePack;
-
     public void updateAvailableTexturePacks() {
     }
 
@@ -16,5 +13,13 @@ public class TexturePackList {
 
     public List<TexturePackBase> availableTexturePacks() {
         return new ArrayList<TexturePackBase>();
+    }
+
+    public TexturePackBase getDefaultTexturePack() { // added by BaseMod.TexturePackBaseMod
+        return null;
+    }
+
+    public TexturePackBase getSelectedTexturePack() { // added by BaseMod.TexturePackBaseMod
+        return null;
     }
 }

@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher;
 
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
@@ -151,11 +152,15 @@ public final class BaseMod extends Mod {
      * Matches TexturePackList class and maps selected and default texture pack fields.
      */
     public static class TexturePackListMod extends ClassMod {
+        protected boolean useInterface;
+
         public TexturePackListMod(MinecraftVersion minecraftVersion) {
             classSignatures.add(new ConstSignature(".zip"));
             classSignatures.add(new ConstSignature("texturepacks"));
 
             if (minecraftVersion.compareTo("12w15a") >= 0) {
+                useInterface = true;
+
                 memberMappers.add(new FieldMapper("selectedTexturePack", "LITexturePack;")
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, false)
@@ -168,42 +173,60 @@ public final class BaseMod extends Mod {
                 );
 
                 final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;");
-                final FieldRef defaultTexturePackStatic = new FieldRef(getDeobfClass(), "defaultTexturePackStatic", "LITexturePack;");
                 final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;");
 
-                patches.add(new MakeMemberPublicPatch(selectedTexturePack));
-                patches.add(new MakeMemberPublicPatch(defaultTexturePackStatic));
-                patches.add(new AddFieldPatch("defaultTexturePack", "LITexturePack;").allowDuplicate(true));
-                patches.add(new BytecodePatch() {
+                patches.add(new AddMethodPatch("getDefaultTexturePack", "()LTexturePackBase;") {
                     @Override
-                    public String getDescription() {
-                        return "initialize non-static defaultTexturePack";
+                    public byte[] generateMethod() throws BadBytecode, IOException {
+                        return buildCode(
+                            reference(GETSTATIC, defaultTexturePack),
+                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
+                            ARETURN
+                        );
                     }
+                });
 
+                patches.add(new AddMethodPatch("getSelectedTexturePack", "()LTexturePackBase;") {
                     @Override
-                    public String getMatchExpression() {
-                        if (getMethodInfo().isConstructor()) {
-                            return buildExpression(
-                                RETURN
-                            );
-                        } else {
-                            return null;
-                        }
-                    }
-
-                    @Override
-                    public byte[] getReplacementBytes() throws IOException {
+                    public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
                             ALOAD_0,
-                            reference(GETSTATIC, defaultTexturePackStatic),
-                            reference(PUTFIELD, defaultTexturePack),
-                            RETURN
+                            reference(GETFIELD, selectedTexturePack),
+                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
+                            ARETURN
                         );
                     }
                 });
             } else {
                 memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
                 memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
+
+                final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LTexturePackBase;");
+                final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;");
+
+                patches.add(new AddMethodPatch("getDefaultTexturePack", "()LTexturePackBase;") {
+                    @Override
+                    public byte[] generateMethod() throws BadBytecode, IOException {
+                        return buildCode(
+                            ALOAD_0,
+                            reference(GETFIELD, defaultTexturePack),
+                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
+                            ARETURN
+                        );
+                    }
+                });
+
+                patches.add(new AddMethodPatch("getSelectedTexturePack", "()LTexturePackBase;") {
+                    @Override
+                    public byte[] generateMethod() throws BadBytecode, IOException {
+                        return buildCode(
+                            ALOAD_0,
+                            reference(GETFIELD, selectedTexturePack),
+                            reference(CHECKCAST, new ClassRef(getDeobfClass())),
+                            ARETURN
+                        );
+                    }
+                });
             }
         }
     }

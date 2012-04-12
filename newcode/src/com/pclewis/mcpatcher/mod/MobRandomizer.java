@@ -26,7 +26,7 @@ public class MobRandomizer {
     }
 
     public static String randomTexture(Entity entity, String texture) {
-        TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
+        TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack();
         if (lastTexturePack != selectedTexturePack) {
             lastTexturePack = selectedTexturePack;
             reset();

@@ -471,10 +471,10 @@ public class Colorizer {
     }
 
     private static void checkUpdate() {
-        if (lastTexturePack == MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack) {
+        if (lastTexturePack == MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack()) {
             return;
         }
-        lastTexturePack = MCPatcherUtils.getMinecraft().texturePackList.selectedTexturePack;
+        lastTexturePack = MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack();
 
         reset();
         reloadColorProperties();
