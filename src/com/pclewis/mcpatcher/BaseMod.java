@@ -152,14 +152,14 @@ public final class BaseMod extends Mod {
      * Matches TexturePackList class and maps selected and default texture pack fields.
      */
     public static class TexturePackListMod extends ClassMod {
-        protected boolean useInterface;
+        protected final boolean useITexturePack;
 
         public TexturePackListMod(MinecraftVersion minecraftVersion) {
             classSignatures.add(new ConstSignature(".zip"));
             classSignatures.add(new ConstSignature("texturepacks"));
 
             if (minecraftVersion.compareTo("12w15a") >= 0) {
-                useInterface = true;
+                useITexturePack = true;
 
                 memberMappers.add(new FieldMapper("selectedTexturePack", "LITexturePack;")
                     .accessFlag(AccessFlag.PRIVATE, true)
@@ -198,6 +198,8 @@ public final class BaseMod extends Mod {
                     }
                 });
             } else {
+                useITexturePack = false;
+
                 memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
                 memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
 
@@ -235,17 +237,18 @@ public final class BaseMod extends Mod {
      * Matches TexturePackBase class and maps getInputStream method.
      */
     public static class TexturePackBaseMod extends ClassMod {
-        protected boolean useInterface;
+        protected final boolean useITexturePack;
 
         public TexturePackBaseMod(MinecraftVersion minecraftVersion) {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
 
             classSignatures.add(new ConstSignature(getResourceAsStream));
             if (minecraftVersion.compareTo("12w15a") >= 0) {
-                useInterface = true;
+                useITexturePack = true;
                 classSignatures.add(new ConstSignature("/pack.txt"));
                 interfaces = new String[]{"ITexturePack"};
             } else {
+                useITexturePack = false;
                 classSignatures.add(new ConstSignature("pack.txt").negate(true));
             }
 

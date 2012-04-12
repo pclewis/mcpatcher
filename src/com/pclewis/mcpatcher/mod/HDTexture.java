@@ -720,7 +720,7 @@ public class HDTexture extends Mod {
         TexturePackListMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
             memberMappers.add(new MethodMapper("updateAvailableTexturePacks", "()V"));
-            if (useInterface) {
+            if (useITexturePack) {
                 memberMappers.add(new MethodMapper("setTexturePack", "(LITexturePack;)Z"));
             } else {
                 memberMappers.add(new MethodMapper("setTexturePack", "(LTexturePackBase;)Z"));
@@ -768,7 +768,7 @@ public class HDTexture extends Mod {
                 }
             });
 
-            if (useInterface) {
+            if (useITexturePack) {
                 patches.add(new AddMethodPatch("setTexturePack", "(LTexturePackBase;)Z") {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
@@ -788,7 +788,7 @@ public class HDTexture extends Mod {
         TexturePackBaseMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
 
-            if (useInterface) {
+            if (useITexturePack) {
                 final String[] names = {"openTexturePackFile", "closeTexturePackFile"};
                 memberMappers.add(new MethodMapper(names, "(LRenderEngine;)V"));
 
