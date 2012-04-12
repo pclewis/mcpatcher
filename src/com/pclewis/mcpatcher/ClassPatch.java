@@ -14,6 +14,7 @@ import java.util.HashMap;
 abstract public class ClassPatch implements PatchComponent {
     ClassMod classMod;
     HashMap<String, Integer> numMatches = new HashMap<String, Integer>();
+    boolean optional;
 
     /**
      * Returns a text description of the patch.  This string will be displayed in the log window and

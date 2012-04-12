@@ -86,6 +86,7 @@ abstract public class AddMethodPatch extends ClassPatch {
      */
     public AddMethodPatch allowDuplicate(boolean allowDuplicate) {
         this.allowDuplicate = allowDuplicate;
+        optional = allowDuplicate;
         return this;
     }
 

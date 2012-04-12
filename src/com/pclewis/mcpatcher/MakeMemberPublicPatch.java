@@ -15,6 +15,7 @@ public class MakeMemberPublicPatch extends ClassPatch {
     public MakeMemberPublicPatch(FieldRef fieldRef) {
         member = fieldRef;
         type = "field";
+        optional = true;
     }
 
     /**
@@ -23,6 +24,7 @@ public class MakeMemberPublicPatch extends ClassPatch {
     public MakeMemberPublicPatch(MethodRef methodRef) {
         member = methodRef;
         type = "method";
+        optional = true;
     }
 
     @Override

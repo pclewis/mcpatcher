@@ -65,6 +65,7 @@ public class AddFieldPatch extends ClassPatch {
      */
     public AddFieldPatch allowDuplicate(boolean allowDuplicate) {
         this.allowDuplicate = allowDuplicate;
+        optional = allowDuplicate;
         return this;
     }
 

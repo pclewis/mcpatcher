@@ -511,7 +511,7 @@ final public class MCPatcher {
                     ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<Map.Entry<String, Integer>>();
                     for (int i = 0; i < classMod.patches.size(); i++) {
                         ClassPatch classPatch = classMod.patches.get(i);
-                        if (classPatch.numMatches.isEmpty()) {
+                        if (classPatch.numMatches.isEmpty() && !classPatch.optional) {
                             String desc = null;
                             Throwable e = null;
                             try {
