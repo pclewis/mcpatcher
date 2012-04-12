@@ -437,7 +437,7 @@ class MainForm {
         mainMenu = new MainMenu(this);
         frame.setJMenuBar(mainMenu.menuBar);
     }
-    
+
     static void setIconImage(Window window) {
         try {
             if (programIcon == null) {
