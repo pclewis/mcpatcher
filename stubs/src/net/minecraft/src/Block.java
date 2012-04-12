@@ -6,11 +6,15 @@ public class Block {
 
     public int blockID;
 
+    public int getBlockTexture(IBlockAccess blockAccess, int i, int j, int k, int face) {
+        return 0;
+    }
+
     public boolean renderAsNormalBlock() {
         return false;
     }
 
     public float blockStrength(EntityPlayer thePlayer) {
-        return 0;  //To change body of created methods use File | Settings | File Templates.
+        return 0;
     }
 }

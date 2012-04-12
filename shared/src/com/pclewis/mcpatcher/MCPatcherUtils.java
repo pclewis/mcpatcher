@@ -29,6 +29,7 @@ public class MCPatcherUtils {
     public static final String BETTER_GRASS = "Better Grass";
     public static final String RANDOM_MOBS = "Random Mobs";
     public static final String CUSTOM_COLORS = "Custom Colors";
+    public static final String CONNECTED_TEXTURES = "Connected Textures";
     public static final String BETTER_GLASS = "Better Glass";
     public static final String GLSL_SHADERS = "GLSL Shaders";
 
@@ -43,6 +44,7 @@ public class MCPatcherUtils {
     public static final String COLORIZER_CLASS = "com.pclewis.mcpatcher.mod.Colorizer";
     public static final String COLOR_MAP_CLASS = "com.pclewis.mcpatcher.mod.ColorMap";
     public static final String BIOME_HELPER_CLASS = "com.pclewis.mcpatcher.mod.BiomeHelper";
+    public static final String CTM_UTILS_CLASS = "com.pclewis.mcpatcher.mod.CTMUtils";
     public static final String SHADERS_CLASS = "com.pclewis.mcpatcher.mod.Shaders";
 
     private MCPatcherUtils() {
