@@ -719,16 +719,10 @@ public class HDTexture extends Mod {
         TexturePackListMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
             memberMappers.add(new MethodMapper("updateAvailableTexturePacks", "()V"));
-            if (useITexturePack) {
-                memberMappers.add(new MethodMapper("setTexturePack", "(LITexturePack;)Z"));
-            } else {
-                memberMappers.add(new MethodMapper("setTexturePack", "(LTexturePackBase;)Z"));
-            }
-            memberMappers.add(new MethodMapper("availableTexturePacks", "()Ljava/util/List;"));
+            final String texturePackType = useITexturePack ? "LITexturePack;" : "LTexturePackBase;";
+            memberMappers.add(new MethodMapper("setTexturePack", "(" + texturePackType + ")Z"));
 
-            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;")));
-
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "TexturePackList.setTileSize(selectedTexturePack) on texture pack change";
@@ -737,35 +731,25 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(buildExpression(
-                            ALOAD_0,
-                            reference(GETFIELD, new FieldRef("TexturePackList", "selectedTexturePack", "LTexturePackBase;")),
-                            INVOKEVIRTUAL, BinaryRegex.any(2)
-                        )),
-                        BinaryRegex.capture(buildExpression(
-                            ICONST_1,
-                            IRETURN
-                        ))
+                        ICONST_1,
+                        IRETURN
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        getCaptureGroup(1),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setTileSize", "()Z")),
                         POP,
-                        ALOAD_0,
-                        reference(GETFIELD, new FieldRef("TexturePackList", "minecraft", "LMinecraft;")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "getMinecraft", "()LMinecraft;")),
                         DUP,
                         reference(GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
                         SWAP,
                         reference(INVOKEVIRTUAL, new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V")),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setFontRenderer", "()V")),
-                        getCaptureGroup(2)
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setFontRenderer", "()V"))
                     );
                 }
-            });
+            }.targetMethod(new MethodRef(getDeobfClass(), "setTexturePack", "(" + texturePackType + ")Z")));
 
             if (useITexturePack) {
                 patches.add(new AddMethodPatch("setTexturePack", "(LTexturePackBase;)Z") {
