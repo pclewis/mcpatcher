@@ -9,6 +9,7 @@ public class AddFieldPatch extends ClassPatch {
     private String name;
     private String type;
     private int accessFlags;
+    private boolean allowDuplicate;
 
     /**
      * Add a new public, non-static field.
@@ -56,6 +57,11 @@ public class AddFieldPatch extends ClassPatch {
         this(name, null, accessFlags);
     }
 
+    public AddFieldPatch allowDuplicate(boolean allowDuplicate) {
+        this.allowDuplicate = allowDuplicate;
+        return this;
+    }
+
     /**
      * Called to get the descriptor for the new field.  Use this instead of setting the descriptor in the constructor
      * to have the field type set at patch time.
@@ -75,8 +81,16 @@ public class AddFieldPatch extends ClassPatch {
     boolean apply(ClassFile classFile) throws BadBytecode, DuplicateMemberException {
         FieldInfo fieldInfo = new FieldInfo(classFile.getConstPool(), name, classMod.getClassMap().mapTypeString(getDescriptor()));
         fieldInfo.setAccessFlags(accessFlags);
-        recordPatch();
-        classFile.addField(fieldInfo);
+        try {
+            classFile.addField(fieldInfo);
+            recordPatch();
+        } catch (DuplicateMemberException e) {
+            if (allowDuplicate) {
+                return false;
+            } else {
+                throw e;
+            }
+        }
         return true;
     }
 }
