@@ -42,6 +42,9 @@ public class HDTexture extends Mod {
         classMods.add(new PortalMod());
         classMods.add(new MinecraftMod());
         classMods.add(new BaseMod.GLAllocationMod());
+        if (haveITexturePack) {
+            classMods.add(new ITexturePackMod());
+        }
         classMods.add(new TexturePackListMod(minecraftVersion));
         classMods.add(new TexturePackBaseMod(minecraftVersion));
         classMods.add(new TexturePackCustomMod());
@@ -77,8 +80,17 @@ public class HDTexture extends Mod {
             final MethodRef readTextureImage =  new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
             final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
             final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
-            final MethodRef getInputStream = new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
             final MethodRef glTexSubImage2D = new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
+
+            final int getInputStreamOpcode;
+            final JavaRef getInputStream;
+            if (haveITexturePack) {
+                getInputStreamOpcode = INVOKEINTERFACE;
+                getInputStream = new InterfaceMethodRef("ITexturePack", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
+            } else {
+                getInputStreamOpcode = INVOKEVIRTUAL;
+                getInputStream = new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
+            }
 
             classSignatures.add(new ConstSignature(glTexSubImage2D));
 
@@ -187,7 +199,7 @@ public class HDTexture extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKEVIRTUAL, getInputStream),
+                        reference(getInputStreamOpcode, getInputStream),
                         reference(INVOKESPECIAL, readTextureImage)
                     );
                 }
@@ -211,7 +223,7 @@ public class HDTexture extends Mod {
                     return buildExpression(
                         ALOAD_2,
                         ALOAD_1,
-                        reference(INVOKEVIRTUAL, getInputStream),
+                        reference(getInputStreamOpcode, getInputStream),
                         BytecodeMatcher.anyASTORE,
                         BytecodeMatcher.anyALOAD,
                         IFNONNULL, BinaryRegex.any(2),
@@ -717,6 +729,14 @@ public class HDTexture extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "runTick", "()V")));
+        }
+    }
+
+    private class ITexturePackMod extends ClassMod {
+        ITexturePackMod() {
+            prerequisiteClasses.add("TexturePackBase");
+
+            memberMappers.add(new MethodMapper("getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;"));
         }
     }
 
