@@ -83,7 +83,7 @@ public class BetterGlass extends Mod {
             parentClass = "Block";
             prerequisiteClasses.add(parentClass);
 
-            patches.add(new AddMethodPatch("getRenderBlockPass", "()I") {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getRenderBlockPass", "()I")) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -122,7 +122,7 @@ public class BetterGlass extends Mod {
                 .addXref(1, getRenderType)
             );
 
-            memberMappers.add(new MethodMapper("renderBlockPane", "(LBlockPane;III)Z"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderBlockPane", "(LBlockPane;III)Z")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -182,7 +182,7 @@ public class BetterGlass extends Mod {
                 .addXref(1, getRenderBlockPass)
             );
 
-            memberMappers.add(new FieldMapper("skipRenderPass", "[Z"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "skipRenderPass", "[Z")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -330,7 +330,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(renderWorld));
 
-            patches.add(new AddFieldPatch("betterGrassLoop", "I"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "betterGrassLoop", "I")));
 
             addRenderPassPatch(renderAllRenderLists);
             addRenderPassPatch(sortAndRender);
@@ -462,7 +462,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(sortAndRender));
 
-            memberMappers.add(new MethodMapper("renderAllRenderLists", "(ID)V"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V")));
         }
     }
 

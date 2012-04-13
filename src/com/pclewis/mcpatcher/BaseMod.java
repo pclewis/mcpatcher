@@ -143,7 +143,7 @@ public final class BaseMod extends Mod {
         }
 
         public MinecraftMod mapTexturePackList() {
-            memberMappers.add(new FieldMapper("texturePackList", "LTexturePackList;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackList", "LTexturePackList;")));
             return this;
         }
     }
@@ -161,12 +161,12 @@ public final class BaseMod extends Mod {
             if (minecraftVersion.compareTo("12w15a") >= 0) {
                 useITexturePack = true;
 
-                memberMappers.add(new FieldMapper("selectedTexturePack", "LITexturePack;")
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;"))
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
                 );
-                memberMappers.add(new FieldMapper("defaultTexturePackStatic", "LITexturePack;")
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "defaultTexturePackStatic", "LITexturePack;"))
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, true)
                     .accessFlag(AccessFlag.FINAL, true)
@@ -175,7 +175,7 @@ public final class BaseMod extends Mod {
                 final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;");
                 final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;");
 
-                patches.add(new AddMethodPatch("getDefaultTexturePack", "()LTexturePackBase;") {
+                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getDefaultTexturePack", "()LTexturePackBase;")) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -186,7 +186,7 @@ public final class BaseMod extends Mod {
                     }
                 }.allowDuplicate(true));
 
-                patches.add(new AddMethodPatch("getSelectedTexturePack", "()LTexturePackBase;") {
+                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getSelectedTexturePack", "()LTexturePackBase;")) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -200,13 +200,13 @@ public final class BaseMod extends Mod {
             } else {
                 useITexturePack = false;
 
-                memberMappers.add(new FieldMapper("selectedTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PUBLIC, true));
-                memberMappers.add(new FieldMapper("defaultTexturePack", "LTexturePackBase;").accessFlag(AccessFlag.PRIVATE, true));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "selectedTexturePack", "LTexturePackBase;")).accessFlag(AccessFlag.PUBLIC, true));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;")).accessFlag(AccessFlag.PRIVATE, true));
 
                 final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LTexturePackBase;");
                 final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;");
 
-                patches.add(new AddMethodPatch("getDefaultTexturePack", "()LTexturePackBase;") {
+                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getDefaultTexturePack", "()LTexturePackBase;")) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -217,7 +217,7 @@ public final class BaseMod extends Mod {
                     }
                 }.allowDuplicate(true));
 
-                patches.add(new AddMethodPatch("getSelectedTexturePack", "()LTexturePackBase;") {
+                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getSelectedTexturePack", "()LTexturePackBase;")) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -261,7 +261,7 @@ public final class BaseMod extends Mod {
                 }
             }.setMethodName("getInputStream"));
 
-            memberMappers.add(new FieldMapper("texturePackFileName", "Ljava/lang/String;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackFileName", "Ljava/lang/String;")));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "texturePackFileName", "Ljava/lang/String;")));
         }
@@ -320,11 +320,11 @@ public final class BaseMod extends Mod {
                 }
             });
 
-            memberMappers.add(new MethodMapper(new String[]{"getBlockId", "getBlockMetadata"}, "(III)I"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockId", "(III)I"), new MethodRef(getDeobfClass(), "getBlockMetadata", "(III)I")));
         }
 
         public IBlockAccessMod mapMaterial() {
-            memberMappers.add(new MethodMapper("getBlockMaterial", "(III)LMaterial;"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockMaterial", "(III)LMaterial;")));
             return this;
         }
     }
@@ -463,13 +463,13 @@ public final class BaseMod extends Mod {
         public BlockMod() {
             classSignatures.add(new ConstSignature(" is already occupied by "));
 
-            memberMappers.add(new FieldMapper("blockID", "I")
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockID", "I"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
                 .accessFlag(AccessFlag.FINAL, true)
             );
 
-            memberMappers.add(new FieldMapper("blocksList", "[LBlock;")
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blocksList", "[LBlock;"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
                 .accessFlag(AccessFlag.FINAL, true)

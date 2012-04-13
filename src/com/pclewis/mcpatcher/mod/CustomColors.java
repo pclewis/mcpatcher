@@ -298,7 +298,7 @@ public class CustomColors extends Mod {
             }.setMethod(runGameLoop));
 
             mapTexturePackList();
-            memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "theWorld", "LWorld;")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -404,7 +404,7 @@ public class CustomColors extends Mod {
     private class IBlockAccessMod extends BaseMod.IBlockAccessMod {
         IBlockAccessMod() {
             if (haveNewBiomes) {
-                memberMappers.add(new MethodMapper("getBiomeGenAt", "(II)LBiomeGenBase;"));
+                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBiomeGenAt", "(II)LBiomeGenBase;")));
             }
         }
     }
@@ -524,7 +524,7 @@ public class CustomColors extends Mod {
                     .addXref(2, new MethodRef(getDeobfClass(), "getRainfallf", "()F"))
                 );
 
-                memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "()I")
+                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getGrassColor", "()I"), new MethodRef(getDeobfClass(), "getFoliageColor", "()I"))
                     .accessFlag(AccessFlag.PUBLIC, true)
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
@@ -559,10 +559,10 @@ public class CustomColors extends Mod {
                     .addXref(2, new MethodRef("WorldChunkManager", "getRainfall", "(II)F"))
                 );
 
-                memberMappers.add(new MethodMapper(new String[]{"getGrassColor", "getFoliageColor"}, "(LIBlockAccess;III)I"));
+                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getGrassColor", "(LIBlockAccess;III)I"), new MethodRef(getDeobfClass(), "getFoliageColor", "(LIBlockAccess;III)I")));
             }
 
-            memberMappers.add(new FieldMapper("color", "I").accessFlag(AccessFlag.PUBLIC, true));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "color", "I")).accessFlag(AccessFlag.PUBLIC, true));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -839,9 +839,9 @@ public class CustomColors extends Mod {
                 }
             });
 
-            memberMappers.add(new FieldMapper("blockID", "I").accessFlag(AccessFlag.PRIVATE, true));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockID", "I")).accessFlag(AccessFlag.PRIVATE, true));
 
-            patches.add(new AddMethodPatch("getColorFromDamage") {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getColorFromDamage", null)) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -970,7 +970,7 @@ public class CustomColors extends Mod {
             }.addXref(1, new FieldRef(getDeobfClass(), "color", "I")));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "name", "Ljava/lang/String;")));
-            patches.add(new AddFieldPatch("origColor", "I"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origColor", "I")));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "color", "I")) {
                 @Override
@@ -1227,7 +1227,7 @@ public class CustomColors extends Mod {
                 }
             }.setMethod(getSkyColor));
 
-            memberMappers.add(new MethodMapper("getWorldChunkManager", "()LWorldChunkManager;"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getWorldChunkManager", "()LWorldChunkManager;")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -1553,7 +1553,7 @@ public class CustomColors extends Mod {
                 }
             });
 
-            memberMappers.add(new MethodMapper("getBiomeGenAt", "(II)LBiomeGenBase;"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBiomeGenAt", "(II)LBiomeGenBase;")));
         }
     }
 
@@ -1603,7 +1603,7 @@ public class CustomColors extends Mod {
                 .addXref(6, new FieldRef(getDeobfClass(), "prevPosZ", "D"))
             );
 
-            memberMappers.add(new FieldMapper("worldObj", "LWorld;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "worldObj", "LWorld;")));
         }
     }
 
@@ -2214,7 +2214,7 @@ public class CustomColors extends Mod {
                 }
             });
 
-            patches.add(new AddMethodPatch("colorize", "()LEntityAuraFX;") {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "colorize", "()LEntityAuraFX;")) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -2792,7 +2792,7 @@ public class CustomColors extends Mod {
                 }
             }.setMethod(renderBlockFallingSand));
 
-            memberMappers.add(new MethodMapper("renderBlockCauldron", "(LBlockCauldron;III)Z"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderBlockCauldron", "(LBlockCauldron;III)Z")));
 
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
@@ -3414,10 +3414,10 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature(0xff0000));
             classSignatures.add(new ConstSignature(0xa0a0ff));
 
-            memberMappers.add(new FieldMapper("mapColorArray", "[LMapColor;").accessFlag(AccessFlag.STATIC, true));
-            memberMappers.add(new FieldMapper(new String[]{"colorValue", "colorIndex"}, "I").accessFlag(AccessFlag.STATIC, false));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "mapColorArray", "[LMapColor;")).accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "colorValue", "I"), new FieldRef(getDeobfClass(), "colorIndex", "I")).accessFlag(AccessFlag.STATIC, false));
 
-            patches.add(new AddFieldPatch("origColorValue", "I"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origColorValue", "I")));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "colorValue", "I")) {
                 @Override
@@ -3466,7 +3466,7 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature("purple"));
             classSignatures.add(new ConstSignature("cyan"));
 
-            memberMappers.add(new FieldMapper("dyeColorNames", "[Ljava/lang/String;").accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "dyeColorNames", "[Ljava/lang/String;")).accessFlag(AccessFlag.STATIC, true));
         }
     }
 
@@ -3475,9 +3475,9 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature("/mob/sheep.png"));
             classSignatures.add(new ConstSignature("mob.sheep"));
 
-            memberMappers.add(new FieldMapper("fleeceColorTable", "[[F").accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")).accessFlag(AccessFlag.STATIC, true));
 
-            patches.add(new AddFieldPatch("origFleeceColorTable", "[[F", AccessFlag.PUBLIC | AccessFlag.STATIC));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origFleeceColorTable", "[[F"), AccessFlag.PUBLIC | AccessFlag.STATIC));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")) {
                 @Override

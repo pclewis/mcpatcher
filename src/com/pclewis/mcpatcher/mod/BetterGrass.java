@@ -80,13 +80,13 @@ public class BetterGrass extends Mod {
                 }
             });
 
-            memberMappers.add(new FieldMapper(new String[]{null, "ground"}, "LMaterial;").accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(null, new FieldRef(getDeobfClass(), "ground", "LMaterial;")).accessFlag(AccessFlag.STATIC, true));
         }
     }
 
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
-            memberMappers.add(new MethodMapper("getBlockTexture", "(LIBlockAccess;IIII)I"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockTexture", "(LIBlockAccess;IIII)I")));
         }
     }
 
@@ -133,7 +133,7 @@ public class BetterGrass extends Mod {
                 BytecodeMatcher.captureReference(INVOKEINTERFACE)
             ).addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")));
 
-            patches.add(new AddFieldPatch(field_MATRIX, fieldtype_MATRIX, AccessFlag.PUBLIC | AccessFlag.STATIC));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX), AccessFlag.PUBLIC | AccessFlag.STATIC));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -398,7 +398,7 @@ public class BetterGrass extends Mod {
                 }
             }.setMethod(renderStandardBlockWithColorMultiplier));
 
-            memberMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;")));
 
             patches.add(new BytecodePatch() {
                 @Override

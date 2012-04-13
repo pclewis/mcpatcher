@@ -122,21 +122,21 @@ public class RandomMobs extends Mod {
             classSignatures.add(new ConstSignature("Motion"));
             classSignatures.add(new ConstSignature("Rotation"));
 
-            memberMappers.add(new FieldMapper("entityId", "I")
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "entityId", "I"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
-            memberMappers.add(new FieldMapper("nextEntityID", "I")
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "nextEntityID", "I"))
                 .accessFlag(AccessFlag.PRIVATE, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
-            memberMappers.add(new MethodMapper("getEntityTexture", "()Ljava/lang/String;"));
-            memberMappers.add(new MethodMapper(new String[]{"writeToNBT", "readFromNBT"}, "(LNBTTagCompound;)V")
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getEntityTexture", "()Ljava/lang/String;")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V"), new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V"))
                 .accessFlag(AccessFlag.PUBLIC, true)
             );
 
-            patches.add(new AddFieldPatch(ENTITY_SKIN_FIELD, "J"));
-            patches.add(new AddFieldPatch(ENTITY_SKIN_SET_FIELD, "Z"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), ENTITY_SKIN_FIELD, "J")));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), ENTITY_SKIN_SET_FIELD, "Z")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -221,8 +221,8 @@ public class RandomMobs extends Mod {
             classSignatures.add(new ConstSignature(new ClassRef("java.util.HashMap")));
             classSignatures.add(new ConstSignature(" entries"));
 
-            memberMappers.add(new MethodMapper("getLong", "(Ljava/lang/String;)J"));
-            memberMappers.add(new MethodMapper("setLong", "(Ljava/lang/String;J)V"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getLong", "(Ljava/lang/String;)J")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "setLong", "(Ljava/lang/String;J)V")));
         }
     }
 }

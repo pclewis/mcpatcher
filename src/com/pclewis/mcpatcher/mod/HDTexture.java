@@ -116,17 +116,17 @@ public class HDTexture extends Mod {
                 }
             }.setMethod(updateDynamicTextures));
 
-            memberMappers.add(new FieldMapper("imageData", "Ljava/nio/ByteBuffer;"));
-            memberMappers.add(new FieldMapper("textureList", "Ljava/util/List;"));
-            memberMappers.add(new MethodMapper("registerTextureFX", "(LTextureFX;)V"));
-            memberMappers.add(new MethodMapper("readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;"));
-            memberMappers.add(new MethodMapper("setupTexture", "(Ljava/awt/image/BufferedImage;I)V"));
-            memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I")));
             if (haveGetImageRGB) {
-                memberMappers.add(new MethodMapper("getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I"));
+                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I")));
             }
             if (haveColorizerWater) {
-                memberMappers.add(new MethodMapper("readTextureImageData", "(Ljava/lang/String;)[I"));
+                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "readTextureImageData", "(Ljava/lang/String;)[I")));
             }
 
             patches.add(new BytecodePatch() {
@@ -379,7 +379,7 @@ public class HDTexture extends Mod {
 
             patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
 
-            patches.add(new AddMethodPatch("setTileSize", "(Lnet/minecraft/client/Minecraft;)V") {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setTileSize", "(Lnet/minecraft/client/Minecraft;)V")) {
                 @Override
                 public byte[] generateMethod() throws IOException {
                     maxStackSize = 10;
@@ -441,8 +441,8 @@ public class HDTexture extends Mod {
                 BinaryRegex.end()
             ).setMethodName("onTick"));
 
-            memberMappers.add(new FieldMapper("imageData", "[B"));
-            memberMappers.add(new FieldMapper(new String[]{"tileNumber", null, "tileSize", "tileImage"}, "I"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "imageData", "[B")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "tileNumber", "I"), null, new FieldRef(getDeobfClass(), "tileSize", "I"), new FieldRef(getDeobfClass(), "tileImage", "I")));
 
             patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
         }
@@ -644,13 +644,13 @@ public class HDTexture extends Mod {
                 }
             }.setMethodName("runTick"));
 
-            memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
-            memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
             if (haveAlternateFont) {
-                memberMappers.add(new FieldMapper(new String[]{"fontRenderer", "alternateFontRenderer"}, "LFontRenderer;"));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "fontRenderer", "LFontRenderer;"), new FieldRef(getDeobfClass(), "alternateFontRenderer", "LFontRenderer;")));
             } else {
-                memberMappers.add(new FieldMapper("fontRenderer", "LFontRenderer;"));
-                memberMappers.add(new FieldMapper("alternateFontRenderer", "LFontRenderer;"));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "fontRenderer", "LFontRenderer;")));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "alternateFontRenderer", "LFontRenderer;")));
             }
 
             patches.add(new BytecodePatch() {
@@ -736,16 +736,16 @@ public class HDTexture extends Mod {
         ITexturePackMod() {
             prerequisiteClasses.add("TexturePackBase");
 
-            memberMappers.add(new MethodMapper("getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
         }
     }
 
     private class TexturePackListMod extends BaseMod.TexturePackListMod {
         TexturePackListMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
-            memberMappers.add(new MethodMapper("updateAvailableTexturePacks", "()V"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "updateAvailableTexturePacks", "()V")));
             final String texturePackType = useITexturePack ? "LITexturePack;" : "LTexturePackBase;";
-            memberMappers.add(new MethodMapper("setTexturePack", "(" + texturePackType + ")Z"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "setTexturePack", "(" + texturePackType + ")Z")));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -777,7 +777,7 @@ public class HDTexture extends Mod {
             }.targetMethod(new MethodRef(getDeobfClass(), "setTexturePack", "(" + texturePackType + ")Z")));
 
             if (useITexturePack) {
-                patches.add(new AddMethodPatch("setTexturePack", "(LTexturePackBase;)Z") {
+                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setTexturePack", "(LTexturePackBase;)Z")) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -798,10 +798,10 @@ public class HDTexture extends Mod {
 
             final String[] names = {"openTexturePackFile", "closeTexturePackFile"};
             if (useITexturePack) {
-                memberMappers.add(new MethodMapper(new String[]{names[0] + "1", names[1] + "1"}, "(LRenderEngine;)V"));
+                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), names[0] + "1", "(LRenderEngine;)V"), new MethodRef(getDeobfClass(), names[1] + "1", "(LRenderEngine;)V")));
 
                 for (final String n : names) {
-                    patches.add(new AddMethodPatch(n, "()V") {
+                    patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), n, "()V")) {
                         @Override
                         public byte[] generateMethod() throws BadBytecode, IOException {
                             return buildCode(
@@ -815,7 +815,7 @@ public class HDTexture extends Mod {
                     });
                 }
 
-                memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
 
                 patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")) {
                     @Override
@@ -824,7 +824,7 @@ public class HDTexture extends Mod {
                     }
                 });
             } else {
-                memberMappers.add(new MethodMapper(new String[]{null, names[0], names[1]}, "()V"));
+                memberMappers.add(new MethodMapper(null, new MethodRef(getDeobfClass(), names[0], "()V"), new MethodRef(getDeobfClass(), names[1], "()V")));
             }
         }
     }
@@ -838,18 +838,18 @@ public class HDTexture extends Mod {
                 classSignatures.add(new ConstSignature("pack.txt"));
                 classSignatures.add(new ConstSignature("pack.png"));
 
-                memberMappers.add(new FieldMapper("file", "Ljava/io/File;"));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
 
                 patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
             }
 
-            memberMappers.add(new FieldMapper("zipFile", "Ljava/util/zip/ZipFile;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "zipFile", "Ljava/util/zip/ZipFile;")));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "zipFile", "Ljava/util/zip/ZipFile;")));
 
-            patches.add(new AddFieldPatch("origZip", "Ljava/util/zip/ZipFile;"));
-            patches.add(new AddFieldPatch("tmpFile", "Ljava/io/File;"));
-            patches.add(new AddFieldPatch("lastModified", "J"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origZip", "Ljava/util/zip/ZipFile;")));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "tmpFile", "Ljava/io/File;")));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "lastModified", "J")));
 
             String methodDescriptor = haveITexturePack ? "(LRenderEngine;)V" : "()V";
 
@@ -924,11 +924,11 @@ public class HDTexture extends Mod {
                 classSignatures.add(new ConstSignature("pack.png"));
 
                 fileField = "folder";
-                memberMappers.add(new FieldMapper(fileField, "Ljava/io/File;"));
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), fileField, "Ljava/io/File;")));
             }
             classSignatures.add(new ConstSignature(new ClassRef("java.io.FileInputStream")));
 
-            patches.add(new AddMethodPatch("getFolder", "()Ljava/io/File;") {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getFolder", "()Ljava/io/File;")) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -963,10 +963,10 @@ public class HDTexture extends Mod {
 
                 patches.add(new MakeMemberPublicPatch(isUnicode));
             } else {
-                patches.add(new AddFieldPatch("isUnicode", "Z"));
+                patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "isUnicode", "Z")));
             }
 
-            patches.add(new AddMethodPatch("initialize", "()V") {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "initialize", "()V")) {
                 MethodInfo constructor;
 
                 @Override
@@ -1084,7 +1084,7 @@ public class HDTexture extends Mod {
         private ColorizerMod(String name) {
             this.name = name;
 
-            memberMappers.add(new FieldMapper("colorBuffer", "[I"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "colorBuffer", "[I")));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(name, "colorBuffer", "[I")));
         }

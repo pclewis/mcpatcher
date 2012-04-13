@@ -28,9 +28,9 @@ public class HDFont extends Mod {
         private final MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
 
         FontRendererMod() {
-            memberMappers.add(new MethodMapper("getStringWidth", "(Ljava/lang/String;)I"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I")));
 
-            patches.add(new AddFieldPatch("charWidthf", "[F"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "charWidthf", "[F")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -257,7 +257,7 @@ public class HDFont extends Mod {
         private void addStringWidthPatchesV2() {
             final MethodRef getStringWidthf = new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "getStringWidthf", "(LFontRenderer;Ljava/lang/String;)F");
 
-            memberMappers.add(new MethodMapper("getCharWidth", "(C)I"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getCharWidth", "(C)I")));
 
             patches.add(new BytecodePatch() {
                 @Override

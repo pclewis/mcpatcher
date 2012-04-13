@@ -67,12 +67,12 @@ public class GLSLShader extends Mod {
                 }
             }.addXref(1, new FieldRef("GameSettings", "thirdPersonView", "I")));
 
-            memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
-            memberMappers.add(new FieldMapper("gameSettings", "LGameSettings;"));
-            memberMappers.add(new FieldMapper("thePlayer", "LEntityPlayerSP;"));
-            memberMappers.add(new FieldMapper("entityRenderer", "LEntityRenderer;"));
-            memberMappers.add(new FieldMapper("renderViewEntity", "LEntityLiving;"));
-            memberMappers.add(new FieldMapper("theWorld", "LWorld;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "thePlayer", "LEntityPlayerSP;")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "entityRenderer", "LEntityRenderer;")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderViewEntity", "LEntityLiving;")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "theWorld", "LWorld;")));
 
             memberMappers.add(new FieldMapper(new String[]{
                 "displayWidth",
@@ -83,7 +83,7 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.FINAL, false)
             );
 
-            memberMappers.add(new MethodMapper("getAppDir", "(Ljava/lang/String;)Ljava/io/File;")
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getAppDir", "(Ljava/lang/String;)Ljava/io/File;"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
@@ -107,7 +107,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethodName("refreshTextures"));
 
-            memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I")));
         }
     }
 
@@ -142,9 +142,9 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(renderSky));
 
-            memberMappers.add(new MethodMapper("sortAndRender", "(LEntityLiving;ID)I"));
-            memberMappers.add(new MethodMapper("renderAllRenderLists", "(ID)V"));
-            memberMappers.add(new FieldMapper("worldObj", "LWorld;"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "sortAndRender", "(LEntityLiving;ID)I")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V")));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "worldObj", "LWorld;")));
 
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
@@ -320,9 +320,9 @@ public class GLSLShader extends Mod {
                 .addXref(1, renderHand)
             );
 
-            memberMappers.add(new FieldMapper("mc", "LMinecraft;"));
-            memberMappers.add(new MethodMapper("renderWorld", "(FJ)V"));
-            memberMappers.add(new MethodMapper(new String[]{"disableLightmap", "enableLightmap"}, "(D)V"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "mc", "LMinecraft;")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderWorld", "(FJ)V")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "disableLightmap", "(D)V"), new MethodRef(getDeobfClass(), "enableLightmap", "(D)V")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -700,11 +700,11 @@ public class GLSLShader extends Mod {
                 }
             }.addXref(1, convertQuadsToTriangles));
 
-            memberMappers.add(new FieldMapper("instance", "LTessellator;").accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "instance", "LTessellator;")).accessFlag(AccessFlag.STATIC, true));
 
-            patches.add(new AddFieldPatch("shadersBuffer", "Ljava.nio.ByteBuffer;"));
-            patches.add(new AddFieldPatch("shadersShortBuffer", "Ljava.nio.ShortBuffer;"));
-            patches.add(new AddFieldPatch("shadersData", "[S"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersBuffer", "Ljava.nio.ByteBuffer;")));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersShortBuffer", "Ljava.nio.ShortBuffer;")));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersData", "[S")));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -756,7 +756,7 @@ public class GLSLShader extends Mod {
                 }
             });
 
-            patches.add(new AddMethodPatch("setEntity", "(I)V") {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setEntity", "(I)V")) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -932,7 +932,7 @@ public class GLSLShader extends Mod {
             setupBlockFace(5, "South", 1, 0, 0);
 
             memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
-            memberMappers.add(new MethodMapper("renderBlockByRenderType", "(LBlock;III)Z"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderBlockByRenderType", "(LBlock;III)Z")));
         }
 
         private void setupBlockFace(int index, final String direction, final int x, final int y, final int z) {
@@ -972,7 +972,7 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("humanoid"));
             classSignatures.add(new ConstSignature("/mob/char.png"));
 
-            memberMappers.add(new FieldMapper("inventory", "LInventoryPlayer;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "inventory", "LInventoryPlayer;")));
         }
     }
 
@@ -994,7 +994,7 @@ public class GLSLShader extends Mod {
             }
             classSignatures.add(new ConstSignature("Slot"));
 
-            memberMappers.add(new MethodMapper("getCurrentItem", "()LItemStack;"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getCurrentItem", "()LItemStack;")));
         }
     }
 
@@ -1106,7 +1106,7 @@ public class GLSLShader extends Mod {
                 .addXref(1, new MethodRef(getDeobfClass(), "getCelestialAngle", "(F)F"))
             );
 
-            memberMappers.add(new MethodMapper(new String[]{"getSeed", "getWorldTime"}, "()J"));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getSeed", "()J"), new MethodRef(getDeobfClass(), "getWorldTime", "()J")));
         }
     }
 
@@ -1125,7 +1125,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(updateRenderer));
 
-            memberMappers.add(new FieldMapper("worldObj", "LWorld;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "worldObj", "LWorld;")));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override

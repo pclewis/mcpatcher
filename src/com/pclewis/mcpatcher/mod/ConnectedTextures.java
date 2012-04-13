@@ -95,7 +95,7 @@ public class ConnectedTextures extends Mod {
         MinecraftMod() {
             mapTexturePackList();
 
-            memberMappers.add(new FieldMapper("renderEngine", "LRenderEngine;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
         }
     }
 
@@ -103,7 +103,7 @@ public class ConnectedTextures extends Mod {
         RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
-            memberMappers.add(new MethodMapper("getTexture", "(Ljava/lang/String;)I")
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
@@ -171,9 +171,9 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, startDrawing)
             );
 
-            memberMappers.add(new FieldMapper("instance", "LTessellator;").accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "instance", "LTessellator;")).accessFlag(AccessFlag.STATIC, true));
 
-            patches.add(new AddFieldPatch("preserve", "Z"));
+            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "preserve", "Z")));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -259,7 +259,7 @@ public class ConnectedTextures extends Mod {
                 .addXref(2, overrideBlockTexture)
             );
 
-            memberMappers.add(new FieldMapper("blockAccess", "LIBlockAccess;"));
+            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;")));
             memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
 
             patches.add(new BytecodePatch() {
