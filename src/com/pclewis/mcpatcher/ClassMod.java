@@ -365,11 +365,26 @@ abstract public class ClassMod implements PatchComponent {
         private int clearAccessFlags;
         private int count;
 
+        MemberMapper(JavaRef... refs) {
+            names = new String[refs.length];
+            for (int i = 0; i < refs.length; i++) {
+                if (refs[i] != null) {
+                    names[i] = refs[i].getName();
+                    if (descriptor == null) {
+                        descriptor = refs[i].getType();
+                    }
+                }
+            }
+            if (descriptor == null) {
+                throw new RuntimeException("refs list is empty");
+            }
+        }
+
         /**
          * @param names      descriptive field names
          * @param descriptor Java type descriptor
          */
-        public MemberMapper(String[] names, String descriptor) {
+        MemberMapper(String[] names, String descriptor) {
             this.names = names.clone();
             this.descriptor = descriptor;
         }
@@ -378,7 +393,7 @@ abstract public class ClassMod implements PatchComponent {
          * @param name       descriptive field name
          * @param descriptor Java type descriptor
          */
-        public MemberMapper(String name, String descriptor) {
+        MemberMapper(String name, String descriptor) {
             this(new String[]{name}, descriptor);
         }
 
@@ -425,10 +440,26 @@ abstract public class ClassMod implements PatchComponent {
      * the match is done by type signature, but this can be overridden.
      */
     public class FieldMapper extends MemberMapper {
+        public FieldMapper(FieldRef... refs) {
+            super(refs);
+        }
+
+        /**
+         * @deprecated
+         * @see #FieldMapper(FieldRef...)
+         * @param names field names
+         * @param descriptor field type
+         */
         public FieldMapper(String[] names, String descriptor) {
             super(names, descriptor);
         }
 
+        /**
+         * @deprecated
+         * @see #FieldMapper(FieldRef...)
+         * @param name field name
+         * @param descriptor field type
+         */
         public FieldMapper(String name, String descriptor) {
             super(name, descriptor);
         }
@@ -451,10 +482,26 @@ abstract public class ClassMod implements PatchComponent {
      * the match is done by type signature, but this can be overridden.
      */
     public class MethodMapper extends MemberMapper {
+        public MethodMapper(MethodRef... refs) {
+            super(refs);
+        }
+
+        /**
+         * @deprecated
+         * @see #MethodMapper(MethodRef...)
+         * @param names method names
+         * @param descriptor method type
+         */
         public MethodMapper(String[] names, String descriptor) {
             super(names, descriptor);
         }
 
+        /**
+         * @deprecated
+         * @see #MethodMapper(MethodRef...)
+         * @param name method name
+         * @param descriptor method type
+         */
         public MethodMapper(String name, String descriptor) {
             super(name, descriptor);
         }

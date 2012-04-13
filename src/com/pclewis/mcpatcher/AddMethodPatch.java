@@ -8,52 +8,74 @@ import java.io.IOException;
  * ClassPatch that adds a new method to a class file.  The added method is made public by default.
  */
 abstract public class AddMethodPatch extends ClassPatch {
-    private String name;
-    private String type;
+    private MethodRef methodRef;
     private int accessFlags;
     private boolean allowDuplicate;
 
     /**
      * May be set to specify a different max stack size for the method.
      *
-     * @see #generateMethod(ClassFile, MethodInfo)
+     * @see #generateMethod()
      */
     protected int maxStackSize;
     /**
      * May be set to specify a different number of local variables for the new method.
      *
-     * @see #generateMethod(ClassFile, MethodInfo)
+     * @see #generateMethod()
      */
     protected int numLocals;
     /**
      * May be set to specify an exception table for the new method.
      *
-     * @see #generateMethod(ClassFile, MethodInfo)
+     * @see #generateMethod()
      */
     protected ExceptionTable exceptionTable;
 
     /**
+     * Add a new public, non-static method.
+     *
+     * @param methodRef method
+     */
+    public AddMethodPatch(MethodRef methodRef) {
+        this(methodRef, AccessFlag.PUBLIC);
+    }
+
+    /**
+     * Add a new method.
+     *
+     * @param methodRef method
+     * @param accessFlags Java access flags
+     * @see javassist.bytecode.AccessFlag
+     */
+    public AddMethodPatch(MethodRef methodRef, int accessFlags) {
+        this.methodRef = methodRef;
+        this.accessFlags = accessFlags;
+    }
+
+    /**
      * Create an AddMethodPatch with given name and type.
      *
+     * @deprecated
+     * @see #AddMethodPatch(MethodRef)
      * @param name name of method
      * @param type Java type descriptor of method; may use deobfuscated names
      */
     public AddMethodPatch(String name, String type) {
-        this(name, type, AccessFlag.PUBLIC);
+        this(new MethodRef(null, name, type), AccessFlag.PUBLIC);
     }
 
     /**
      * Create an AddMethodPatch with given name, type, and access flags.
      *
+     * @deprecated
+     * @see #AddMethodPatch(MethodRef, int)
      * @param name        name of method
      * @param type        Java type descriptor of method; may use deobfuscated names
      * @param accessFlags method access flags
      * @see javassist.bytecode.AccessFlag
      */
     public AddMethodPatch(String name, String type, int accessFlags) {
-        this.name = name;
-        this.type = type;
-        this.accessFlags = accessFlags;
+        this(new MethodRef(null, name, type), accessFlags);
     }
 
     /**
@@ -63,7 +85,7 @@ abstract public class AddMethodPatch extends ClassPatch {
      * @param name name of method
      */
     public AddMethodPatch(String name) {
-        this(name, null);
+        this(name, AccessFlag.PUBLIC);
     }
 
     /**
@@ -75,7 +97,7 @@ abstract public class AddMethodPatch extends ClassPatch {
      * @see javassist.bytecode.AccessFlag
      */
     public AddMethodPatch(String name, int accessFlags) {
-        this(name, null, accessFlags);
+        this(new MethodRef(null, name, null), accessFlags);
     }
 
     /**
@@ -92,7 +114,7 @@ abstract public class AddMethodPatch extends ClassPatch {
 
     @Override
     final public String getDescription() {
-        return String.format("insert method %s %s", name, getDescriptor());
+        return String.format("insert method %s %s", methodRef.getName(), getDescriptor());
     }
 
     protected void prePatch(ClassFile classFile) throws BadBytecode, IOException {
@@ -103,7 +125,7 @@ abstract public class AddMethodPatch extends ClassPatch {
         boolean patched = false;
         prePatch(classFile);
         ConstPool constPool = classFile.getConstPool();
-        MethodRef methodRef = (MethodRef) classMod.getClassMap().map(new MethodRef(classMod.getDeobfClass(), name, getDescriptor()));
+        MethodRef methodRef = (MethodRef) classMod.getClassMap().map(new MethodRef(classMod.getDeobfClass(), this.methodRef.getName(), getDescriptor()));
         MethodInfo methodInfo = new MethodInfo(constPool, methodRef.getName(), methodRef.getType());
         classMod.methodInfo = methodInfo;
         methodInfo.setAccessFlags(accessFlags);
@@ -146,7 +168,7 @@ abstract public class AddMethodPatch extends ClassPatch {
      * @return descriptor
      */
     public String getDescriptor() {
-        return type;
+        return methodRef.getType();
     }
 
     /**

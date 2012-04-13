@@ -6,19 +6,41 @@ import javassist.bytecode.*;
  * ClassPatch that adds a new field to a class file.
  */
 public class AddFieldPatch extends ClassPatch {
-    private String name;
-    private String type;
+    private FieldRef fieldRef;
     private int accessFlags;
     private boolean allowDuplicate;
 
     /**
      * Add a new public, non-static field.
      *
+     * @param fieldRef new field
+     */
+    public AddFieldPatch(FieldRef fieldRef) {
+        this(fieldRef, AccessFlag.PUBLIC);
+    }
+
+    /**
+     * Add a new field.
+     *
+     * @param fieldRef new field
+     * @param accessFlags Java access flags (public, private, etc.).
+     * @see javassist.bytecode.AccessFlag
+     */
+    public AddFieldPatch(FieldRef fieldRef, int accessFlags) {
+        this.fieldRef = fieldRef;
+        this.accessFlags = accessFlags;
+    }
+
+    /**
+     * Add a new public, non-static field.
+     *
+     * @deprecated
+     * @see #AddFieldPatch(FieldRef)
      * @param name field name
      * @param type field type descriptor
      */
     public AddFieldPatch(String name, String type) {
-        this(name, type, AccessFlag.PUBLIC);
+        this(new FieldRef(null, name, type));
     }
 
     /**
@@ -30,19 +52,15 @@ public class AddFieldPatch extends ClassPatch {
      * @see javassist.bytecode.AccessFlag
      */
     public AddFieldPatch(String name, String type, int accessFlags) {
-        this.name = name;
-        this.type = type;
-        this.accessFlags = accessFlags;
+        this(new FieldRef(null, name,  type), accessFlags);
     }
 
     /**
      * Add a new public, non-static field.
      * NOTE: getDescriptor must be overridden if you are using this constructor.
-     *
-     * @param name field name
      */
     public AddFieldPatch(String name) {
-        this(name, null, AccessFlag.PUBLIC);
+        this(name, AccessFlag.PUBLIC);
     }
 
     /**
@@ -54,7 +72,7 @@ public class AddFieldPatch extends ClassPatch {
      * @see javassist.bytecode.AccessFlag
      */
     public AddFieldPatch(String name, int accessFlags) {
-        this(name, null, accessFlags);
+        this(new FieldRef(null, name, null), accessFlags);
     }
 
     /**
@@ -76,17 +94,17 @@ public class AddFieldPatch extends ClassPatch {
      * @return descriptor
      */
     public String getDescriptor() {
-        return type;
+        return fieldRef.getType();
     }
 
     @Override
     public String getDescription() {
-        return String.format("insert field %s %s", name, getDescriptor());
+        return String.format("insert field %s %s", fieldRef.getName(), getDescriptor());
     }
 
     @Override
     boolean apply(ClassFile classFile) throws BadBytecode, DuplicateMemberException {
-        FieldInfo fieldInfo = new FieldInfo(classFile.getConstPool(), name, classMod.getClassMap().mapTypeString(getDescriptor()));
+        FieldInfo fieldInfo = new FieldInfo(classFile.getConstPool(), fieldRef.getName(), classMod.getClassMap().mapTypeString(getDescriptor()));
         fieldInfo.setAccessFlags(accessFlags);
         try {
             classFile.addField(fieldInfo);
