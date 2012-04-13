@@ -94,35 +94,6 @@ public class GLSLShader extends Mod {
         RenderEngineMod() {
             classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
-            classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
-                ALOAD_0,
-                BytecodeMatcher.captureReference(GETFIELD),
-                BytecodeMatcher.captureReference(GETFIELD),
-                ASTORE_2,
-                ALOAD_0
-            )
-                .addXref(1, new FieldRef("RenderEngine", "texturePackList", "LTexturePackList;"))
-                .addXref(2, new FieldRef("TexturePackList", "selectedTexturePack", "LTexturePackBase;"))
-            );
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        ALOAD_0,
-                        ALOAD_0,
-                        ALOAD_2,
-                        ALOAD_1,
-                        BIPUSH, 7,
-                        reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;")),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        BytecodeMatcher.anyReference(INVOKESPECIAL),
-                        BytecodeMatcher.anyReference(INVOKESPECIAL)
-                    );
-                }
-            }.addXref(1, new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
-
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
