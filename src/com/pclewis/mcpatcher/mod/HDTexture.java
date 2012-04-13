@@ -384,8 +384,6 @@ public class HDTexture extends Mod {
             patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setTileSize", "(Lnet/minecraft/client/Minecraft;)V")) {
                 @Override
                 public byte[] generateMethod() throws IOException {
-                    maxStackSize = 10;
-                    numLocals = 5;
                     return buildCode(
                         // imageData = GLAllocation.createDirectByteBuffer(TileSize.int_glBufferSize);
                         ALOAD_0,
