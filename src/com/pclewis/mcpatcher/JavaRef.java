@@ -7,12 +7,12 @@ import javassist.bytecode.ConstPool;
  * referencing classes and members.
  *
  * @see ClassMap#map(JavaRef)
- * @see ClassMod#reference(javassist.bytecode.MethodInfo, int, JavaRef)
+ * @see ClassMod#reference(int, JavaRef)
  */
 abstract public class JavaRef {
-    protected String className;
-    protected String name;
-    protected String type;
+    final protected String className;
+    final protected String name;
+    final protected String type;
 
     public JavaRef(String className, String name, String type) {
         this.className = (className == null ? null : className.replaceAll("/", "."));

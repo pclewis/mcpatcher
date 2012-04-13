@@ -45,10 +45,9 @@ abstract public class BytecodeSignature extends ClassSignature {
             if (codeAttribute != null && match()) {
                 if (methodRef != null) {
                     String deobfName = classMod.getDeobfClass();
-                    methodRef.className = deobfName;
                     tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
                     tempClassMap.addMethodMap(deobfName, methodRef.getName(), methodInfo.getName(), methodInfo.getDescriptor());
-                    if (!methodRef.getType().equals("")) {
+                    if (methodRef.getType() != null) {
                         ArrayList<String> descTypes = ConstPoolUtils.parseDescriptor(methodRef.getType());
                         ArrayList<String> obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
                         if (descTypes.size() == obfTypes.size()) {
@@ -88,7 +87,7 @@ abstract public class BytecodeSignature extends ClassSignature {
      * @return this
      */
     public BytecodeSignature setMethodName(String methodName) {
-        return setMethod(new MethodRef("", methodName, ""));
+        return setMethod(new MethodRef(null, methodName, null));
     }
 
     /**
@@ -99,7 +98,7 @@ abstract public class BytecodeSignature extends ClassSignature {
      * @return this
      */
     public BytecodeSignature setMethod(MethodRef methodRef) {
-        this.methodRef = new MethodRef("", methodRef.getName(), methodRef.getType());
+        this.methodRef = methodRef;
         return this;
     }
 
