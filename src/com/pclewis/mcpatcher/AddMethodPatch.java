@@ -150,14 +150,6 @@ abstract public class AddMethodPatch extends ClassPatch {
     }
 
     /**
-     * @see #generateMethod()
-     * @deprecated
-     */
-    public byte[] generateMethod(ClassFile classFile, MethodInfo methodInfo) throws BadBytecode, IOException {
-        throw new AbstractMethodError("generateMethod() unimplemented");
-    }
-
-    /**
      * Generate the bytecode for the new method.  May also set class members maxStackSize, numLocals,
      * and exceptionTable if the defaults are insufficient.
      *
@@ -165,7 +157,5 @@ abstract public class AddMethodPatch extends ClassPatch {
      * @throws BadBytecode
      * @throws IOException
      */
-    public byte[] generateMethod() throws BadBytecode, IOException {
-        return generateMethod(getClassFile(), getMethodInfo());
-    }
+    abstract public byte[] generateMethod() throws BadBytecode, IOException;
 }

@@ -24,23 +24,13 @@ abstract public class BytecodeSignature extends ClassSignature {
     HashMap<Integer, JavaRef> xrefs = new HashMap<Integer, JavaRef>();
 
     /**
-     * @see #getMatchExpression()
-     * @deprecated
-     */
-    public String getMatchExpression(MethodInfo methodInfo) {
-        throw new AbstractMethodError("getMatchExpression() unimplemented");
-    }
-
-    /**
      * Generate a regular expression for the current method.
      *
      * @return String regex
      * @see ClassSignature#push(Object)
      * @see ClassSignature#reference(int, JavaRef)
      */
-    public String getMatchExpression() {
-        return getMatchExpression(getMethodInfo());
-    }
+    abstract public String getMatchExpression();
 
     boolean match() {
         matcher = new BytecodeMatcher(getMatchExpression());

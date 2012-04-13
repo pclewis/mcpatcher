@@ -48,16 +48,6 @@ interface PatchComponent {
     public Object push(Object value);
 
     /**
-     * Push a single constant (int, double, float, string) onto the stack.
-     *
-     * @param methodInfo
-     * @param value
-     * @return bytecode or regex
-     * @see #push(Object)
-     */
-    public Object push(MethodInfo methodInfo, Object value);
-
-    /**
      * Invoke a method, field, or class reference with the given opcode.
      *
      * @param opcode
@@ -65,17 +55,6 @@ interface PatchComponent {
      * @return bytecode
      */
     public byte[] reference(int opcode, JavaRef ref);
-
-    /**
-     * Invoke a method, field, or class reference with the given opcode.
-     *
-     * @param methodInfo
-     * @param opcode
-     * @param ref
-     * @return bytecode
-     * @see #reference(int, JavaRef)
-     */
-    public byte[] reference(MethodInfo methodInfo, int opcode, JavaRef ref);
 
     /**
      * Gets a reference to the containing mod.

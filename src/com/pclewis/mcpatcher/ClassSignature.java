@@ -62,22 +62,8 @@ abstract public class ClassSignature implements PatchComponent {
         return classMod.push(value);
     }
 
-    /**
-     * @deprecated
-     */
-    final public Object push(MethodInfo methodInfo, Object value) {
-        return classMod.push(methodInfo, value);
-    }
-
     final public byte[] reference(int opcode, JavaRef ref) {
         return classMod.reference(opcode, ref);
-    }
-
-    /**
-     * @deprecated
-     */
-    final public byte[] reference(MethodInfo methodInfo, int opcode, JavaRef ref) {
-        return classMod.reference(methodInfo, opcode, ref);
     }
 
     final public Mod getMod() {
