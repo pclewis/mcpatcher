@@ -2,12 +2,34 @@ package com.pclewis.mcpatcher;
 
 import javassist.bytecode.*;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * ClassPatch that makes a particular member field or method public.
+ * ClassPatch that changes the access flags of a particular member field or method.  Default
+ * behavior is to make the member public.
  */
 public class MakeMemberPublicPatch extends ClassPatch {
+    private static final HashMap<String, Integer> accessFlags = new HashMap<String, Integer>() {
+        {
+            for (Field f : AccessFlag.class.getDeclaredFields()) {
+                int mod = f.getModifiers();
+                if (f.getGenericType() == Integer.TYPE && Modifier.isPublic(mod) && Modifier.isStatic(mod) && Modifier.isFinal(mod)) {
+                    try {
+                        put(f.getName().toLowerCase(), f.getInt(null));
+                    } catch (IllegalAccessException e) {
+                    }
+                }
+            }
+        }
+    };
+
     private JavaRef member;
     private String type;
+    private int oldFlags;
+    private int newFlags;
 
     /**
      * @param fieldRef may use deobfuscated names, provided they are in the class map
@@ -29,7 +51,29 @@ public class MakeMemberPublicPatch extends ClassPatch {
 
     @Override
     public String getDescription() {
-        return String.format("make %s %s public", type, member.getName());
+        int changes = oldFlags ^ newFlags;
+        StringBuilder s = new StringBuilder();
+        s.append("make ").append(type).append(" ").append(member.getName()).append(" ");
+        boolean first = true;
+        for (Map.Entry<String, Integer> entry : accessFlags.entrySet()) {
+            String name = entry.getKey();
+            int flag = entry.getValue();
+            if ((changes & flag) != 0) {
+                if ((oldFlags & flag) != 0 && (flag == AccessFlag.PRIVATE || flag == AccessFlag.PROTECTED)) {
+                    continue;
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    s.append(", ");
+                }
+                if ((oldFlags & flag) != 0) {
+                    s.append("not ");
+                }
+                s.append(name);
+            }
+        }
+        return s.toString();
     }
 
     @Override
@@ -38,8 +82,6 @@ public class MakeMemberPublicPatch extends ClassPatch {
         classMod.methodInfo = null;
         JavaRef target = map(member);
         boolean patched = false;
-        int oldFlags;
-        int newFlags;
         if (target instanceof FieldRef) {
             for (Object o : classFile.getFields()) {
                 FieldInfo fi = (FieldInfo) o;

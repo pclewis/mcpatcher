@@ -3421,11 +3421,6 @@ public class CustomColors extends Mod {
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "colorValue", "I")) {
                 @Override
-                public String getDescription() {
-                    return super.getDescription().replaceFirst("public$", "not final");
-                }
-
-                @Override
                 public int getNewFlags(int oldFlags) {
                     return oldFlags & ~AccessFlag.FINAL;
                 }
@@ -3480,11 +3475,6 @@ public class CustomColors extends Mod {
             patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origFleeceColorTable", "[[F"), AccessFlag.PUBLIC | AccessFlag.STATIC));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")) {
-                @Override
-                public String getDescription() {
-                    return super.getDescription().replaceFirst("public$", "not final");
-                }
-
                 @Override
                 public int getNewFlags(int oldFlags) {
                     return oldFlags & ~AccessFlag.FINAL;
