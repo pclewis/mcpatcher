@@ -28,9 +28,9 @@ public class HDFont extends Mod {
         private final MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
 
         FontRendererMod() {
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I")));
+            memberMappers.add(new MethodMapper(getStringWidth));
 
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "charWidthf", "[F")));
+            patches.add(new AddFieldPatch(charWidthf));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -245,7 +245,7 @@ public class HDFont extends Mod {
                     return buildCode(
                         getCaptureGroup(1),
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef(getDeobfClass(), "charWidthf", "[F")),
+                        reference(GETFIELD, charWidthf),
                         push(32),
                         FALOAD,
                         getCaptureGroup(2)
@@ -304,7 +304,7 @@ public class HDFont extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef(getDeobfClass(), "charWidthf", "[F")),
+                        reference(GETFIELD, charWidthf),
                         push(32),
                         FALOAD,
                         FRETURN

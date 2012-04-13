@@ -182,7 +182,7 @@ public class BetterGlass extends Mod {
                 .addXref(1, getRenderBlockPass)
             );
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "skipRenderPass", "[Z")));
+            memberMappers.add(new FieldMapper(skipRenderPass));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -330,7 +330,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(renderWorld));
 
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "betterGrassLoop", "I")));
+            patches.add(new AddFieldPatch(loop));
 
             addRenderPassPatch(renderAllRenderLists);
             addRenderPassPatch(sortAndRender);
@@ -462,7 +462,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(sortAndRender));
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V")));
+            memberMappers.add(new MethodMapper(renderAllRenderLists));
         }
     }
 

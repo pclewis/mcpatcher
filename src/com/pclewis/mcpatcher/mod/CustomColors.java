@@ -2973,7 +2973,7 @@ public class CustomColors extends Mod {
                         FLOAD, BinaryRegex.backReference(1),
                         FLOAD, BinaryRegex.backReference(2),
                         FMUL,
-                        reference(INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
+                        reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
                 }
 
@@ -2997,7 +2997,7 @@ public class CustomColors extends Mod {
                         FMUL,
                         FLOAD, savedRegisters[2],
                         FMUL,
-                        reference(INVOKEVIRTUAL, new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V"))
+                        reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
                 }
             }.targetMethod(renderBlockFluids));

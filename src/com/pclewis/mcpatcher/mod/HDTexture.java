@@ -81,6 +81,11 @@ public class HDTexture extends Mod {
             final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
             final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
             final MethodRef glTexSubImage2D = new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
+            final FieldRef imageData = new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;");
+            final FieldRef textureList = new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;");
+            final MethodRef getTexture = new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I");
+            final MethodRef getImageRGB = new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I");
+            final MethodRef readTextureImageData = new MethodRef(getDeobfClass(), "readTextureImageData", "(Ljava/lang/String;)[I");
 
             final int getInputStreamOpcode;
             final JavaRef getInputStream;
@@ -116,17 +121,17 @@ public class HDTexture extends Mod {
                 }
             }.setMethod(updateDynamicTextures));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;")));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V")));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;")));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V")));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I")));
+            memberMappers.add(new FieldMapper(imageData));
+            memberMappers.add(new FieldMapper(textureList));
+            memberMappers.add(new MethodMapper(registerTextureFX));
+            memberMappers.add(new MethodMapper(readTextureImage));
+            memberMappers.add(new MethodMapper(setupTexture));
+            memberMappers.add(new MethodMapper(getTexture));
             if (haveGetImageRGB) {
-                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I")));
+                memberMappers.add(new MethodMapper(getImageRGB));
             }
             if (haveColorizerWater) {
-                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "readTextureImageData", "(Ljava/lang/String;)[I")));
+                memberMappers.add(new MethodMapper(readTextureImageData));
             }
 
             patches.add(new BytecodePatch() {
@@ -251,8 +256,6 @@ public class HDTexture extends Mod {
             });
 
             patches.add(new BytecodePatch() {
-                private FieldRef imageData;
-
                 @Override
                 public String getDescription() {
                     return "imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()";
@@ -260,7 +263,6 @@ public class HDTexture extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    imageData = new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;");
                     return buildExpression(
                         // imageData.clear();
                         ALOAD_0,
@@ -320,7 +322,7 @@ public class HDTexture extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef("RenderEngine", "textureList", "Ljava/util/List;")),
+                        reference(GETFIELD, textureList),
                         ALOAD_1,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "registerTextureFX", "(Ljava/util/List;LTextureFX;)V")),
                         RETURN
@@ -375,7 +377,7 @@ public class HDTexture extends Mod {
                         label("A")
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I")));
+            }.targetMethod(getImageRGB));
 
             patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
 
@@ -389,15 +391,15 @@ public class HDTexture extends Mod {
                         ALOAD_0,
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.TILE_SIZE_CLASS, "int_glBufferSize", "I")),
                         reference(INVOKESTATIC, new MethodRef("GLAllocation", "createDirectByteBuffer", "(I)Ljava/nio/ByteBuffer;")),
-                        reference(PUTFIELD, new FieldRef("RenderEngine", "imageData", "Ljava/nio/ByteBuffer;")),
+                        reference(PUTFIELD, imageData),
 
                         // refreshTextures();
                         ALOAD_0,
-                        reference(INVOKEVIRTUAL, new MethodRef("RenderEngine", "refreshTextures", "()V")),
+                        reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), "refreshTextures", "()V")),
 
                         // TextureUtils.refreshTextureFX(textureList);
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef("RenderEngine", "textureList", "Ljava/util/List;")),
+                        reference(GETFIELD, textureList),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "refreshTextureFX", "(Ljava/util/List;)V")),
 
                         RETURN
@@ -943,9 +945,9 @@ public class HDTexture extends Mod {
 
     private class FontRendererMod extends BaseMod.FontRendererMod {
         FontRendererMod() {
-            if (haveUnicode) {
-                FieldRef isUnicode = new FieldRef(getDeobfClass(), "isUnicode", "Z");
+            final FieldRef isUnicode = new FieldRef(getDeobfClass(), "isUnicode", "Z");
 
+            if (haveUnicode) {
                 classSignatures.add(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
@@ -963,7 +965,7 @@ public class HDTexture extends Mod {
 
                 patches.add(new MakeMemberPublicPatch(isUnicode));
             } else {
-                patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "isUnicode", "Z")));
+                patches.add(new AddFieldPatch(isUnicode));
             }
 
             patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "initialize", "()V")) {

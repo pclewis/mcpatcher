@@ -133,7 +133,9 @@ public class BetterGrass extends Mod {
                 BytecodeMatcher.captureReference(INVOKEINTERFACE)
             ).addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")));
 
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX), AccessFlag.PUBLIC | AccessFlag.STATIC));
+            final FieldRef array = new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX);
+
+            patches.add(new AddFieldPatch(array, AccessFlag.PUBLIC | AccessFlag.STATIC));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -154,7 +156,6 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
-                    FieldRef array = new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX);
                     byte[] getArray = reference(GETSTATIC, array);
                     byte[] putArray = reference(PUTSTATIC, array);
                     return buildCode(

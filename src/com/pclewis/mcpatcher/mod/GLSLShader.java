@@ -321,7 +321,7 @@ public class GLSLShader extends Mod {
             );
 
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "mc", "LMinecraft;")));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderWorld", "(FJ)V")));
+            memberMappers.add(new MethodMapper(renderWorld));
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "disableLightmap", "(D)V"), new MethodRef(getDeobfClass(), "enableLightmap", "(D)V")));
 
             patches.add(new BytecodePatch() {
@@ -704,7 +704,7 @@ public class GLSLShader extends Mod {
 
             patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersBuffer", "Ljava.nio.ByteBuffer;")));
             patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersShortBuffer", "Ljava.nio.ShortBuffer;")));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersData", "[S")));
+            patches.add(new AddFieldPatch(shadersData));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override

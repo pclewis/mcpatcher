@@ -259,7 +259,7 @@ public class ConnectedTextures extends Mod {
                 .addXref(2, overrideBlockTexture)
             );
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;")));
+            memberMappers.add(new FieldMapper(blockAccess));
             memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
 
             patches.add(new BytecodePatch() {

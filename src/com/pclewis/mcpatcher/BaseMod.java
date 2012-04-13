@@ -161,7 +161,10 @@ public final class BaseMod extends Mod {
             if (minecraftVersion.compareTo("12w15a") >= 0) {
                 useITexturePack = true;
 
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;"))
+                final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;");
+                final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;");
+
+                memberMappers.add(new FieldMapper(selectedTexturePack)
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
@@ -171,9 +174,6 @@ public final class BaseMod extends Mod {
                     .accessFlag(AccessFlag.STATIC, true)
                     .accessFlag(AccessFlag.FINAL, true)
                 );
-
-                final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;");
-                final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;");
 
                 patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getDefaultTexturePack", "()LTexturePackBase;")) {
                     @Override
@@ -200,11 +200,11 @@ public final class BaseMod extends Mod {
             } else {
                 useITexturePack = false;
 
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "selectedTexturePack", "LTexturePackBase;")).accessFlag(AccessFlag.PUBLIC, true));
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;")).accessFlag(AccessFlag.PRIVATE, true));
-
                 final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LTexturePackBase;");
                 final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;");
+
+                memberMappers.add(new FieldMapper(selectedTexturePack).accessFlag(AccessFlag.PUBLIC, true));
+                memberMappers.add(new FieldMapper(defaultTexturePack).accessFlag(AccessFlag.PRIVATE, true));
 
                 patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getDefaultTexturePack", "()LTexturePackBase;")) {
                     @Override
