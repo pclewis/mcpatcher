@@ -218,7 +218,7 @@ public class ConnectedTextures extends Mod {
     }
 
     private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
-        private final String[] faceMethods = new String[6];
+        private final MethodRef[] faceMethods = new MethodRef[6];
         private final FieldRef overrideBlockTexture = new FieldRef(getDeobfClass(), "overrideBlockTexture", "I");
         private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
@@ -260,7 +260,7 @@ public class ConnectedTextures extends Mod {
             );
 
             memberMappers.add(new FieldMapper(blockAccess));
-            memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
+            memberMappers.add(new MethodMapper(faceMethods));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -307,9 +307,7 @@ public class ConnectedTextures extends Mod {
         }
 
         private void setupBlockFace(final int face, final String direction) {
-            String methodName = "render" + direction + "Face";
-            final MethodRef method = new MethodRef(getDeobfClass(), methodName, "(LBlock;DDDI)V");
-            faceMethods[face] = methodName;
+            faceMethods[face] = new MethodRef(getDeobfClass(), "render" + direction + "Face", "(LBlock;DDDI)V");
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -377,30 +375,7 @@ public class ConnectedTextures extends Mod {
                         label("B")
                     );
                 }
-            }.targetMethod(method));
-
-            /*
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "reset connected textures (" + direction.toLowerCase() + " face)";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        RETURN
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes() throws IOException {
-                    return buildCode(
-                        reference(INVOKESTATIC, reset)
-                    );
-                }
-            }.targetMethod(method));
-            */
+            }.targetMethod(faceMethods[face]));
         }
     }
 }

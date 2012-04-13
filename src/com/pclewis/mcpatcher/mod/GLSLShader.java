@@ -74,10 +74,10 @@ public class GLSLShader extends Mod {
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderViewEntity", "LEntityLiving;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "theWorld", "LWorld;")));
 
-            memberMappers.add(new FieldMapper(new String[]{
-                "displayWidth",
-                "displayHeight"
-            }, "I")
+            memberMappers.add(new FieldMapper(
+                new FieldRef(getDeobfClass(), "displayWidth", "I"),
+                new FieldRef(getDeobfClass(), "displayHeight", "I")
+            )
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
                 .accessFlag(AccessFlag.FINAL, false)
@@ -549,10 +549,10 @@ public class GLSLShader extends Mod {
 
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
-            memberMappers.add(new FieldMapper(new String[]{
-                "lightOpacity",
-                "lightValue"
-            }, "[I")
+            memberMappers.add(new FieldMapper(
+                new FieldRef(getDeobfClass(), "lightOpacity", "[I"),
+                new FieldRef(getDeobfClass(), "lightValue", "[I")
+            )
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
                 .accessFlag(AccessFlag.FINAL, true)
@@ -921,23 +921,23 @@ public class GLSLShader extends Mod {
     }
 
     private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
-        String[] faceMethods = new String[6];
+        private final MethodRef[] faceMethods = new MethodRef[6];
 
         RenderBlocksMod() {
             setupBlockFace(0, "Bottom", 0, -1, 0);
             setupBlockFace(1, "Top", 0, 1, 0);
-            setupBlockFace(2, "East", 0, 0, -1);
-            setupBlockFace(3, "West", 0, 0, 1);
-            setupBlockFace(4, "North", -1, 0, 0);
-            setupBlockFace(5, "South", 1, 0, 0);
+            setupBlockFace(2, "North", 0, 0, -1);
+            setupBlockFace(3, "South", 0, 0, 1);
+            setupBlockFace(4, "West", -1, 0, 0);
+            setupBlockFace(5, "East", 1, 0, 0);
 
-            memberMappers.add(new MethodMapper(faceMethods, "(LBlock;DDDI)V"));
+            memberMappers.add(new MethodMapper(faceMethods));
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderBlockByRenderType", "(LBlock;III)Z")));
         }
 
-        private void setupBlockFace(int index, final String direction, final int x, final int y, final int z) {
-            String methodName = "render" + direction + "Face";
-            faceMethods[index] = methodName;
+        private void setupBlockFace(int face, final String direction, final int x, final int y, final int z) {
+            faceMethods[face] = new MethodRef(getDeobfClass(), "render" + direction + "Face", "(LBlock;DDDI)V");
+
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -963,7 +963,7 @@ public class GLSLShader extends Mod {
                         reference(INVOKEVIRTUAL, new MethodRef("Tessellator", "setNormal", "(FFF)V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), methodName, "(LBlock;DDDI)V")));
+            }.targetMethod(faceMethods[face]));
         }
     }
 
@@ -1004,11 +1004,11 @@ public class GLSLShader extends Mod {
             classSignatures.add(new ConstSignature("Count"));
             classSignatures.add(new ConstSignature("Damage"));
 
-            memberMappers.add(new FieldMapper(new String[]{
-                "stackSize",
-                "animationsToGo",
-                "itemID"
-            }, "I")
+            memberMappers.add(new FieldMapper(
+                new FieldRef(getDeobfClass(), "stackSize", "I"),
+                new FieldRef(getDeobfClass(), "animationsToGo", "I"),
+                new FieldRef(getDeobfClass(), "itemID", "I")
+            )
                 .accessFlag(AccessFlag.PUBLIC, true)
             );
         }
