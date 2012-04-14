@@ -2,30 +2,13 @@ package com.pclewis.mcpatcher;
 
 import javassist.bytecode.*;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * ClassPatch that changes the access flags of a particular member field or method.  Default
  * behavior is to make the member public.
  */
 public class MakeMemberPublicPatch extends ClassPatch {
-    private static final HashMap<String, Integer> accessFlags = new HashMap<String, Integer>() {
-        {
-            for (Field f : AccessFlag.class.getDeclaredFields()) {
-                int mod = f.getModifiers();
-                if (f.getGenericType() == Integer.TYPE && Modifier.isPublic(mod) && Modifier.isStatic(mod) && Modifier.isFinal(mod)) {
-                    try {
-                        put(f.getName().toLowerCase(), f.getInt(null));
-                    } catch (IllegalAccessException e) {
-                    }
-                }
-            }
-        }
-    };
-
     private JavaRef member;
     private String type;
     private int oldFlags;
@@ -51,27 +34,35 @@ public class MakeMemberPublicPatch extends ClassPatch {
 
     @Override
     public String getDescription() {
-        int changes = oldFlags ^ newFlags;
+        int added = ~oldFlags & newFlags;
+        int removed = oldFlags & ~newFlags;
         StringBuilder s = new StringBuilder();
         s.append("make ").append(type).append(" ").append(member.getName()).append(" ");
         boolean first = true;
-        for (Map.Entry<String, Integer> entry : accessFlags.entrySet()) {
-            String name = entry.getKey();
-            int flag = entry.getValue();
-            if ((changes & flag) != 0) {
-                if ((oldFlags & flag) != 0 && (flag == AccessFlag.PRIVATE || flag == AccessFlag.PROTECTED)) {
-                    continue;
-                }
-                if (first) {
-                    first = false;
-                } else {
-                    s.append(", ");
-                }
-                if ((oldFlags & flag) != 0) {
-                    s.append("not ");
-                }
-                s.append(name);
+        for (String flag : Modifier.toString(AccessFlag.toModifier(removed)).split("\\s+")) {
+            if (flag.equals("")) {
+                continue;
             }
+            if (AccessFlag.isPublic(added) && (flag.equals("protected") || flag.equals("private"))) {
+                continue;
+            }
+            if (first) {
+                first = false;
+            } else {
+                s.append(", ");
+            }
+            s.append("not ").append(flag);
+        }
+        for (String flag : Modifier.toString(AccessFlag.toModifier(added)).split("\\s+")) {
+            if (flag.equals("")) {
+                continue;
+            }
+            if (first) {
+                first = false;
+            } else {
+                s.append(", ");
+            }
+            s.append(flag);
         }
         return s.toString();
     }
