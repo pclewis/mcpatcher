@@ -138,7 +138,17 @@ abstract public class AddMethodPatch extends ClassPatch {
                 classMod.resolveLabels(code, 0, 0);
                 CodeAttribute codeAttribute = new CodeAttribute(constPool, maxStackSize, numLocals, code, exceptionTable);
                 methodInfo.setCodeAttribute(codeAttribute);
-                int newMaxLocals = Math.max(BytecodePatch.computeMaxLocals(codeAttribute), numLocals);
+                int argLocals = (accessFlags & AccessFlag.STATIC) == 0 ? 0 : 1;
+                int newMaxLocals = numLocals;
+                for (String t : ConstPoolUtils.parseDescriptor(methodRef.getType())) {
+                    if (t.equals("D") || t.equals("L")) {
+                        argLocals += 2;
+                    } else {
+                        argLocals++;
+                    }
+                }
+                newMaxLocals = Math.max(argLocals, newMaxLocals);
+                newMaxLocals = Math.max(BytecodePatch.computeMaxLocals(codeAttribute), newMaxLocals);
                 if ((accessFlags & AccessFlag.STATIC) == 0) {
                     newMaxLocals = Math.max(newMaxLocals, 1);
                 }
