@@ -232,6 +232,7 @@ public class CTMUtils {
         if (selectedTexturePack == lastTexturePack) {
             return;
         }
+        MCPatcherUtils.info("refreshing connected textures");
         lastTexturePack = selectedTexturePack;
         terrainTexture = getTexture("/terrain.png");
         for (int i = 0; i < availTexture.length; i++) {
@@ -268,6 +269,9 @@ public class CTMUtils {
                     break;
             }
             availTexture[i] = getTexture(textureName);
+            if (availTexture[i] >= 0) {
+                MCPatcherUtils.info("using %s (texture id %d) for block %d", textureName, availTexture[i], i);
+            }
         }
         bindTexture();
     }
