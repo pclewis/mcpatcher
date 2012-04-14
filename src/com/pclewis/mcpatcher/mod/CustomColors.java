@@ -103,6 +103,8 @@ public class CustomColors extends Mod {
             classMods.add(new FontRendererMod());
         }
 
+        classMods.add(new RenderXPOrbMod());
+
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS));
@@ -3586,6 +3588,60 @@ public class CustomColors extends Mod {
                     return buildCode(
                         getCaptureGroup(1),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeText", "(II)I"))
+                    );
+                }
+            });
+        }
+    }
+
+    private class RenderXPOrbMod extends ClassMod {
+        RenderXPOrbMod() {
+            final MethodRef render = new MethodRef(getDeobfClass(), "render", "(LEntityXPOrb;DDDFF)V");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("/item/xporb.png")
+                    );
+                }
+            }.setMethod(render));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override xp orb color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.lookBehind(BinaryRegex.build(
+                            // MathHelper.sin(f8 + 0.0F)
+                            BinaryRegex.capture(BytecodeMatcher.anyFLOAD),
+                            push(0.0f),
+                            FADD,
+                            BytecodeMatcher.anyReference(INVOKESTATIC),
+
+                            // ...
+                            BinaryRegex.any(0, 200)
+                        ), true),
+
+                        // tessellator.setColorRGBA_I(i1, 128);
+                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
+                        BinaryRegex.lookAhead(BinaryRegex.build(
+                            push(128),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                        ), true)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        getCaptureGroup(2),
+                        getCaptureGroup(1),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeXPOrb", "(IF)I"))
                     );
                 }
             });

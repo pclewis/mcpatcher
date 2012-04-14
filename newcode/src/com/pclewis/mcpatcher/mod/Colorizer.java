@@ -16,6 +16,7 @@ public class Colorizer {
     private static final String STEM_COLORS = "/misc/stemcolor.png";
     private static final String LAVA_DROP_COLORS = "/misc/lavadropcolor.png";
     private static final String MYCELIUM_COLORS = "/misc/myceliumparticlecolor.png";
+    private static final String XPORB_COLORS = "/misc/xporbcolor.png";
 
     private static final String PALETTE_BLOCK_KEY = "palette.block.";
     private static final String TEXT_KEY = "text.";
@@ -79,6 +80,7 @@ public class Colorizer {
     private static final boolean useSheepColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true);
     private static final boolean useBlockColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true);
     private static final boolean useTextColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "text", true);
+    private static final boolean useXPOrbColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "xporb", true);
     private static final int fogBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "fogBlendRadius", 7);
     private static final float fogBlendScale = getBlendScale(fogBlendRadius);
     private static final int blockBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1);
@@ -113,6 +115,8 @@ public class Colorizer {
     public static int endSkyColor;
 
     private static int[] myceliumColors;
+
+    private static int[] xpOrbColors;
 
     private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>();
     private static final int[] textCodeColors = new int[32];
@@ -217,6 +221,14 @@ public class Colorizer {
             return defaultColor;
         } else {
             return (defaultColor & 0xff000000) | textCodeColors[index];
+        }
+    }
+
+    public static int colorizeXPOrb(int origColor, float timer) {
+        if (xpOrbColors == null || xpOrbColors.length == 0) {
+            return origColor;
+        } else {
+            return xpOrbColors[(int) ((Math.sin(timer) + 1.0) * (xpOrbColors.length - 1) / 2.0)];
         }
     }
 
@@ -511,6 +523,9 @@ public class Colorizer {
         if (useTextColors) {
             reloadTextColors();
         }
+        if (useXPOrbColors) {
+            reloadXPOrbColors();
+        }
     }
 
     private static void reset() {
@@ -556,6 +571,7 @@ public class Colorizer {
         }
         EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
         myceliumColors = null;
+        xpOrbColors = null;
         textColorMap.clear();
         for (int i = 0; i < textCodeColors.length; i++) {
             textCodeColors[i] = COLOR_CODE_UNSET;
@@ -733,6 +749,10 @@ public class Colorizer {
             } catch (NumberFormatException e) {
             }
         }
+    }
+
+    private static void reloadXPOrbColors() {
+        xpOrbColors = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(XPORB_COLORS)));
     }
 
     private static String getStringKey(String[] keys, int index) {
