@@ -118,8 +118,9 @@ public class Colorizer {
 
     private static int[] xpOrbColors;
 
-    private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>();
-    private static final int[] textCodeColors = new int[32];
+    private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>(); // text.*
+    private static final int[] textCodeColors = new int[32]; // text.code.*
+    private static int signTextColor; // text.sign
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
@@ -222,6 +223,10 @@ public class Colorizer {
         } else {
             return (defaultColor & 0xff000000) | textCodeColors[index];
         }
+    }
+
+    public static int colorizeSignText() {
+        return signTextColor;
     }
 
     public static int colorizeXPOrb(int origColor, float timer) {
@@ -576,6 +581,7 @@ public class Colorizer {
         for (int i = 0; i < textCodeColors.length; i++) {
             textCodeColors[i] = COLOR_CODE_UNSET;
         }
+        signTextColor = 0;
     }
 
     private static void reloadColorProperties() {
@@ -749,6 +755,7 @@ public class Colorizer {
             } catch (NumberFormatException e) {
             }
         }
+        signTextColor = loadIntColor("text.sign", 0);
     }
 
     private static void reloadXPOrbColors() {

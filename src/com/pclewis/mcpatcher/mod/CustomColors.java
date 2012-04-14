@@ -101,6 +101,7 @@ public class CustomColors extends Mod {
 
         if (haveFontColor) {
             classMods.add(new FontRendererMod());
+            classMods.add(new TileEntitySignRendererMod());
         }
 
         classMods.add(new RenderXPOrbMod());
@@ -3588,6 +3589,51 @@ public class CustomColors extends Mod {
                     return buildCode(
                         getCaptureGroup(1),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeText", "(II)I"))
+                    );
+                }
+            });
+        }
+    }
+
+    private class TileEntitySignRendererMod extends ClassMod {
+        TileEntitySignRendererMod() {
+            final MethodRef renderTileSignEntityAt = new MethodRef(getDeobfClass(), "renderTileSignEntityAt", "(LTileEntitySign;DDDF)V");
+            final MethodRef glDepthMask = new MethodRef("org/lwjgl/opengl/GL11", "glDepthMask", "(Z)V");
+
+            classSignatures.add(new ConstSignature(glDepthMask));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("/item/sign.png")
+                    );
+                }
+            }.setMethod(renderTileSignEntityAt));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override sign text color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ICONST_0,
+                        reference(INVOKESTATIC, glDepthMask),
+                        ICONST_0,
+                        BinaryRegex.capture(BytecodeMatcher.anyISTORE)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ICONST_0,
+                        reference(INVOKESTATIC, glDepthMask),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSignText", "()I")),
+                        getCaptureGroup(1)
                     );
                 }
             });
