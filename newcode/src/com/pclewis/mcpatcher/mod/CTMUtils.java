@@ -146,6 +146,7 @@ public class CTMUtils {
     private static boolean active;
 
     public static void start() {
+        checkUpdate();
         active = true;
     }
 
@@ -153,7 +154,6 @@ public class CTMUtils {
         if (!active || blockAccess == null || face < 0 || face > 5) {
             return origTexture;
         }
-        checkUpdate();
         if (getConnectedTexture(blockAccess, block.blockID, i, j, k, face) && bindTexture(newTexture)) {
             textureChanged = true;
             return newTextureIndex;
