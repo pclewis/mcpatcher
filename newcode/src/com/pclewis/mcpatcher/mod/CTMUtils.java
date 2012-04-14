@@ -269,6 +269,7 @@ public class CTMUtils {
             }
             availTexture[i] = getTexture(textureName);
         }
+        bindTexture();
     }
 
     private static int getTexture(String name) {
