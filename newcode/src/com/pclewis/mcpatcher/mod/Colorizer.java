@@ -233,7 +233,7 @@ public class Colorizer {
         if (xpOrbColors == null || xpOrbColors.length == 0) {
             return origColor;
         } else {
-            return xpOrbColors[(int) ((Math.sin(timer) + 1.0) * (xpOrbColors.length - 1) / 2.0)];
+            return xpOrbColors[(int) ((Math.sin(timer / 4.0) + 1.0) * (xpOrbColors.length - 1) / 2.0)];
         }
     }
 
