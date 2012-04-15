@@ -39,6 +39,7 @@ public class ConnectedTextures extends Mod {
         private JCheckBox bookshelfCheckBox;
         private JCheckBox sandstoneCheckBox;
         private JCheckBox otherCheckBox;
+        private JCheckBox outlineCheckBox;
 
         public ConfigPanel() {
             glassCheckBox.addActionListener(new ActionListener() {
@@ -71,6 +72,12 @@ public class ConnectedTextures extends Mod {
                     MCPatcherUtils.set(MCPatcherUtils.CONNECTED_TEXTURES, "other", otherCheckBox.isSelected());
                 }
             });
+
+            outlineCheckBox.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    MCPatcherUtils.set(MCPatcherUtils.CONNECTED_TEXTURES, "outline", outlineCheckBox.isSelected());
+                }
+            });
         }
 
         @Override
@@ -85,6 +92,7 @@ public class ConnectedTextures extends Mod {
             bookshelfCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "bookshelf", true));
             sandstoneCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "sandstone", true));
             otherCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "other", true));
+            outlineCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "outline", false));
         }
 
         @Override

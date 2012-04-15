@@ -7,6 +7,7 @@ import net.minecraft.src.Tessellator;
 import net.minecraft.src.TexturePackBase;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class CTMUtils {
@@ -15,6 +16,9 @@ public class CTMUtils {
     private static final boolean enableBookshelf = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "bookshelf", true);
     private static final boolean enableSandstone = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "sandstone", true);
     private static final boolean enableOther = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "other", true);
+    private static final boolean enableOutline = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "outline", false);
+
+    private static final int NUM_TILES = 256;
 
     private static final int BLOCK_ID_GLASS = 20;
     private static final int BLOCK_ID_GLASS_PANE = 102;
@@ -112,7 +116,7 @@ public class CTMUtils {
     // 128 64  32
     // 1   *   16
     // 2   4   8
-    private static final int[] GLASS_TEXTURE_INDEX = new int[]{
+    private static final int[] GENERIC_TEXTURE_INDEX = new int[]{
         0, 3, 0, 3, 16, 5, 16, 19, 0, 3, 0, 3, 16, 5, 16, 19,
         1, 2, 1, 2, 4, 7, 4, 37, 1, 2, 1, 2, 17, 39, 17, 18,
         0, 3, 0, 3, 16, 5, 16, 19, 0, 3, 0, 3, 16, 5, 16, 19,
@@ -138,7 +142,10 @@ public class CTMUtils {
     };
 
     private static TexturePackBase lastTexturePack;
-    private static final int availTexture[] = new int[Block.blocksList.length];
+    private static final int blockTexture[] = new int[Block.blocksList.length];
+    private static final int blockFaces[] = new int[Block.blocksList.length];
+    private static final int tileTexture[] = new int[NUM_TILES];
+    private static final int tileFaces[] = new int[NUM_TILES];
     private static int terrainTexture;
     private static int newTexture;
     private static int newTextureIndex;
@@ -154,7 +161,7 @@ public class CTMUtils {
         if (!active || blockAccess == null || face < 0 || face > 5) {
             return origTexture;
         }
-        if (getConnectedTexture(blockAccess, block.blockID, i, j, k, face) && bindTexture(newTexture)) {
+        if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face) && bindTexture(newTexture)) {
             textureChanged = true;
             return newTextureIndex;
         } else {
@@ -176,12 +183,20 @@ public class CTMUtils {
         return b;
     }
 
-    private static boolean getConnectedTexture(IBlockAccess blockAccess, int blockId, int i, int j, int k, int face) {
-        if (blockId < 0 || blockId >= availTexture.length) {
+    private static boolean getConnectedTexture(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+        return getConnectedTextureByBlock(blockAccess, blockId, origTexture, i, j, k, face) ||
+            getConnectedTextureByTile(blockAccess, blockId, origTexture, i, j, k, face);
+    }
+
+    private static boolean getConnectedTextureByBlock(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+        if (blockId < 0 || blockId >= blockTexture.length) {
+            return false;
+        }
+        if ((blockFaces[blockId] & (1 << face)) == 0) {
             return false;
         }
         newTextureIndex = 0;
-        newTexture = availTexture[blockId];
+        newTexture = blockTexture[blockId];
         if (newTexture < 0) {
             return false;
         }
@@ -197,7 +212,7 @@ public class CTMUtils {
                         neighborBits |= (1 << bit);
                     }
                 }
-                newTextureIndex = GLASS_TEXTURE_INDEX[neighborBits];
+                newTextureIndex = GENERIC_TEXTURE_INDEX[neighborBits];
                 return true;
 
             case BLOCK_ID_BOOKSHELF:
@@ -227,6 +242,31 @@ public class CTMUtils {
         }
     }
 
+    private static boolean getConnectedTextureByTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+        if (origTexture < 0 || origTexture >= tileTexture.length) {
+            return false;
+        }
+        if ((tileFaces[origTexture] & (1 << face)) == 0) {
+            return false;
+        }
+        newTextureIndex = 0;
+        newTexture = tileTexture[origTexture];
+        if (newTexture < 0) {
+            return false;
+        }
+
+        int[][] offsets = NEIGHBOR_OFFSET[face];
+        int neighborBits = 0;
+        for (int bit = 0; bit < 8; bit++) {
+            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[bit])) {
+                neighborBits |= (1 << bit);
+            }
+        }
+        newTextureIndex = GENERIC_TEXTURE_INDEX[neighborBits];
+
+        return true;
+    }
+
     private static void checkUpdate() {
         TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack();
         if (selectedTexturePack == lastTexturePack) {
@@ -235,7 +275,9 @@ public class CTMUtils {
         MCPatcherUtils.info("refreshing connected textures");
         lastTexturePack = selectedTexturePack;
         terrainTexture = getTexture("/terrain.png");
-        for (int i = 0; i < availTexture.length; i++) {
+
+        for (int i = 0; i < blockTexture.length; i++) {
+            blockFaces[i] = -1;
             String textureName = null;
             switch (i) {
                 case BLOCK_ID_GLASS:
@@ -268,12 +310,89 @@ public class CTMUtils {
                     }
                     break;
             }
-            availTexture[i] = getTexture(textureName);
-            if (availTexture[i] >= 0) {
-                MCPatcherUtils.info("using %s (texture id %d) for block %d", textureName, availTexture[i], i);
+            blockTexture[i] = getTexture(textureName);
+            if (blockTexture[i] >= 0) {
+                MCPatcherUtils.info("using %s (texture id %d) for block %d", textureName, blockTexture[i], i);
             }
         }
+
+        for (int i = 0; i < tileTexture.length; i++) {
+            tileTexture[i] = -1;
+            tileFaces[i] = -1;
+            String textureName = null;
+            if (enableOther) {
+                textureName = "/ctm/terrain" + i + ".png";
+            }
+            tileTexture[i] = getTexture(textureName);
+            if (tileTexture[i] >= 0) {
+                MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", textureName, tileTexture[i], i);
+            }
+        }
+
+        if (enableOutline) {
+            setupOutline();
+        }
+
         bindTexture();
+    }
+
+    private static void setupOutline() {
+        BufferedImage terrain = MCPatcherUtils.readImage(lastTexturePack.getInputStream("/terrain.png"));
+        if (terrain == null) {
+            return;
+        }
+        BufferedImage template = MCPatcherUtils.readImage(lastTexturePack.getInputStream("/ctm/template.png"));
+        if (template == null) {
+            return;
+        }
+
+        int width = terrain.getWidth();
+        int height = terrain.getHeight();
+        if (template.getWidth() != width) {
+            BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics2D = newImage.createGraphics();
+            graphics2D.drawImage(template, 0, 0, width, height, null);
+            template = newImage;
+        }
+
+        for (int i = 0; i < tileTexture.length; i++) {
+            setupOutline(i, terrain, template);
+        }
+    }
+
+    private static void setupOutline(int tileNum, BufferedImage terrain, BufferedImage template) {
+        if (tileTexture[tileNum] >= 0) {
+            return;
+        }
+        switch (tileNum) {
+            case 14 * 16 + 13: // still lava
+            case 14 * 16 + 14: // flowing lava
+            case 12 * 16 + 13: // still water
+            case 12 * 16 + 14: // flowing water
+            case 1 * 16 + 15: // fire east-west
+            case 2 * 16 + 15: // fire north-south
+            case 0 * 16 + 14: // portal
+                return;
+
+            default:
+                break;
+        }
+        int tileSize = terrain.getWidth() / 16;
+        int tileX = (tileNum % 16) * tileSize;
+        int tileY = (tileNum / 16) * tileSize;
+
+        BufferedImage newImage = new BufferedImage(template.getWidth(), template.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for (int x = 0; x < template.getWidth(); x++) {
+            for (int y = 0; y < template.getHeight(); y++) {
+                int rgb = template.getRGB(x, y);
+                if ((rgb & 0xff000000) == 0) {
+                    rgb = terrain.getRGB(tileX + (x % tileSize), tileY + (y % tileSize));
+                }
+                newImage.setRGB(x, y, rgb);
+            }
+        }
+
+        tileTexture[tileNum] = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(newImage);
     }
 
     private static int getTexture(String name) {
