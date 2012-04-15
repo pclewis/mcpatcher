@@ -9,6 +9,9 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class CTMUtils {
     private static final boolean enableGlass = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "glass", true);
@@ -276,6 +279,13 @@ public class CTMUtils {
         lastTexturePack = selectedTexturePack;
         terrainTexture = getTexture("/terrain.png");
 
+        refreshBlockTextures();
+        refreshTileTextures();
+
+        bindTexture();
+    }
+
+    private static void refreshBlockTextures() {
         for (int i = 0; i < blockTexture.length; i++) {
             blockFaces[i] = -1;
             String textureName = null;
@@ -313,9 +323,12 @@ public class CTMUtils {
             blockTexture[i] = getTexture(textureName);
             if (blockTexture[i] >= 0) {
                 MCPatcherUtils.info("using %s (texture id %d) for block %d", textureName, blockTexture[i], i);
+                loadTextureProperties(textureName, blockTexture, blockFaces, i);
             }
         }
+    }
 
+    private static void refreshTileTextures() {
         for (int i = 0; i < tileTexture.length; i++) {
             tileTexture[i] = -1;
             tileFaces[i] = -1;
@@ -326,14 +339,51 @@ public class CTMUtils {
             tileTexture[i] = getTexture(textureName);
             if (tileTexture[i] >= 0) {
                 MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", textureName, tileTexture[i], i);
+                loadTextureProperties(textureName, tileTexture, tileFaces, i);
             }
         }
-
         if (enableOutline) {
             setupOutline();
         }
+    }
 
-        bindTexture();
+    private static void loadTextureProperties(String textureName, int[] textures, int[] faces, int index) {
+        String filename = textureName.replaceFirst("\\.png$", ".properties");
+        InputStream is = null;
+        Properties properties = new Properties();
+        try {
+            is = lastTexturePack.getInputStream(filename);
+            if (is == null) {
+                return;
+            }
+            properties.load(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            MCPatcherUtils.close(is);
+        }
+
+        int flags = 0;
+        for (String val : properties.getProperty("faces", "all").trim().toLowerCase().split("\\s+")) {
+            if (val.equals("bottom")) {
+                flags |= (1 << BOTTOM_FACE);
+            } else if (val.equals("top")) {
+                flags |= (1 << TOP_FACE);
+            } else if (val.equals("north")) {
+                flags |= (1 << NORTH_FACE);
+            } else if (val.equals("south")) {
+                flags |= (1 << SOUTH_FACE);
+            } else if (val.equals("east")) {
+                flags |= (1 << EAST_FACE);
+            } else if (val.equals("west")) {
+                flags |= (1 << WEST_FACE);
+            } else if (val.equals("side") || val.equals("sides")) {
+                flags |= (1 << NORTH_FACE) | (1 << SOUTH_FACE) | (1 << EAST_FACE) | (1 << WEST_FACE);
+            } else if (val.equals("all")) {
+                flags = -1;
+            }
+        }
+        faces[index] = flags;
     }
 
     private static void setupOutline() {
