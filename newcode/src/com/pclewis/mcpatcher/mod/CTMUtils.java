@@ -145,10 +145,8 @@ public class CTMUtils {
     };
 
     private static TexturePackBase lastTexturePack;
-    private static final int blockTexture[] = new int[Block.blocksList.length];
-    private static final int blockFaces[] = new int[Block.blocksList.length];
-    private static final int tileTexture[] = new int[NUM_TILES];
-    private static final int tileFaces[] = new int[NUM_TILES];
+    private static TextureOverride blocks[];
+    private static TextureOverride tiles[];
     private static int terrainTexture;
     private static int newTexture;
     private static int newTextureIndex;
@@ -192,82 +190,48 @@ public class CTMUtils {
     }
 
     private static boolean getConnectedTextureByBlock(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-        if (blockId < 0 || blockId >= blockTexture.length) {
+        if (blockId < 0 || blockId >= blocks.length) {
             return false;
         }
-        if ((blockFaces[blockId] & (1 << face)) == 0) {
+        TextureOverride override = blocks[blockId];
+        if (override == null || (override.faces & (1 << face)) == 0) {
             return false;
         }
         newTextureIndex = 0;
-        newTexture = blockTexture[blockId];
+        newTexture = override.texture;
         if (newTexture < 0) {
             return false;
         }
 
-        int[][] offsets = NEIGHBOR_OFFSET[face];
-        int neighborBits = 0;
         switch (blockId) {
             default:
             case BLOCK_ID_GLASS:
             case BLOCK_ID_GLASS_PANE:
-                for (int bit = 0; bit < 8; bit++) {
-                    if (shouldConnect(blockAccess, blockId, i, j, k, offsets[bit])) {
-                        neighborBits |= (1 << bit);
-                    }
-                }
-                newTextureIndex = GENERIC_TEXTURE_INDEX[neighborBits];
-                return true;
+                return override.override(blockAccess, blockId, origTexture, i, j, k, face);
 
             case BLOCK_ID_BOOKSHELF:
-                if (face < 2) {
-                    return false;
-                }
-                for (int bit = 0; bit < 2; bit++) {
-                    if (shouldConnect(blockAccess, blockId, i, j, k, offsets[4 * bit])) {
-                        neighborBits |= (1 << bit);
-                    }
-                }
-                newTextureIndex = BOOKSHELF_TEXTURE_INDEX[neighborBits];
-                return true;
+                return override.overrideBookshelf(blockAccess, blockId, origTexture, i, j, k, face);
 
             case BLOCK_ID_SANDSTONE:
-                if (face < 2) {
-                    return false;
-                }
-                if (blockAccess.getBlockMetadata(i, j, k) != 0) {
-                    return false;
-                }
-                if (shouldConnect(blockAccess, blockId, i, j, k, GO_UP)) {
-                    newTextureIndex = 66;
-                    return true;
-                }
-                return false;
+                return override.overrideSandstone(blockAccess, blockId, origTexture, i, j, k, face);
         }
     }
 
     private static boolean getConnectedTextureByTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-        if (origTexture < 0 || origTexture >= tileTexture.length) {
+        if (origTexture < 0 || origTexture >= tiles.length) {
             return false;
         }
-        if ((tileFaces[origTexture] & (1 << face)) == 0) {
+        TextureOverride override = tiles[origTexture];
+        if (override == null || (override.faces & (1 << face)) == 0) {
             return false;
         }
         newTextureIndex = 0;
-        newTexture = tileTexture[origTexture];
+        newTexture = override.texture;
         if (newTexture < 0) {
             return false;
         }
 
-        int[][] offsets = NEIGHBOR_OFFSET[face];
-        int neighborBits = 0;
-        for (int bit = 0; bit < 8; bit++) {
-            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[bit])) {
-                neighborBits |= (1 << bit);
-            }
-        }
-        newTextureIndex = GENERIC_TEXTURE_INDEX[neighborBits];
-
-        return true;
+        return override.override(blockAccess, blockId, origTexture, i, j, k, face);
     }
 
     private static void checkUpdate() {
@@ -286,8 +250,8 @@ public class CTMUtils {
     }
 
     private static void refreshBlockTextures() {
-        for (int i = 0; i < blockTexture.length; i++) {
-            blockFaces[i] = -1;
+        blocks = new TextureOverride[Block.blocksList.length];
+        for (int i = 0; i < blocks.length; i++) {
             String textureName = null;
             switch (i) {
                 case BLOCK_ID_GLASS:
@@ -320,70 +284,29 @@ public class CTMUtils {
                     }
                     break;
             }
-            blockTexture[i] = getTexture(textureName);
-            if (blockTexture[i] >= 0) {
-                MCPatcherUtils.info("using %s (texture id %d) for block %d", textureName, blockTexture[i], i);
-                loadTextureProperties(textureName, blockTexture, blockFaces, i);
+            if (textureName != null) {
+                TextureOverride override = new TextureOverride("block", textureName);
+                if (override.isValid()) {
+                    MCPatcherUtils.info("using %s (texture id %d) for block %d", textureName, override.texture, i);
+                    blocks[i] = override;
+                }
             }
         }
     }
 
     private static void refreshTileTextures() {
-        for (int i = 0; i < tileTexture.length; i++) {
-            tileTexture[i] = -1;
-            tileFaces[i] = -1;
-            String textureName = null;
-            if (enableOther) {
-                textureName = "/ctm/terrain" + i + ".png";
-            }
-            tileTexture[i] = getTexture(textureName);
-            if (tileTexture[i] >= 0) {
-                MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", textureName, tileTexture[i], i);
-                loadTextureProperties(textureName, tileTexture, tileFaces, i);
+        tiles = new TextureOverride[NUM_TILES];
+        if (enableOther) {
+            for (int i = 0; i < tiles.length; i++) {
+                TextureOverride override = new TextureOverride("terrain", i);
+                if (override.isValid()) {
+                    MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", override.textureName, override.texture, i);
+                }
             }
         }
         if (enableOutline) {
             setupOutline();
         }
-    }
-
-    private static void loadTextureProperties(String textureName, int[] textures, int[] faces, int index) {
-        String filename = textureName.replaceFirst("\\.png$", ".properties");
-        InputStream is = null;
-        Properties properties = new Properties();
-        try {
-            is = lastTexturePack.getInputStream(filename);
-            if (is == null) {
-                return;
-            }
-            properties.load(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            MCPatcherUtils.close(is);
-        }
-
-        int flags = 0;
-        for (String val : properties.getProperty("faces", "all").trim().toLowerCase().split("\\s+")) {
-            if (val.equals("bottom")) {
-                flags |= (1 << BOTTOM_FACE);
-            } else if (val.equals("top")) {
-                flags |= (1 << TOP_FACE);
-            } else if (val.equals("north")) {
-                flags |= (1 << NORTH_FACE);
-            } else if (val.equals("south")) {
-                flags |= (1 << SOUTH_FACE);
-            } else if (val.equals("east")) {
-                flags |= (1 << EAST_FACE);
-            } else if (val.equals("west")) {
-                flags |= (1 << WEST_FACE);
-            } else if (val.equals("side") || val.equals("sides")) {
-                flags |= (1 << NORTH_FACE) | (1 << SOUTH_FACE) | (1 << EAST_FACE) | (1 << WEST_FACE);
-            } else if (val.equals("all")) {
-                flags = -1;
-            }
-        }
-        faces[index] = flags;
     }
 
     private static void setupOutline() {
@@ -405,13 +328,13 @@ public class CTMUtils {
             template = newImage;
         }
 
-        for (int i = 0; i < tileTexture.length; i++) {
+        for (int i = 0; i < tiles.length; i++) {
             setupOutline(i, terrain, template);
         }
     }
 
     private static void setupOutline(int tileNum, BufferedImage terrain, BufferedImage template) {
-        if (tileTexture[tileNum] >= 0) {
+        if (tiles[tileNum] != null) {
             return;
         }
         switch (tileNum) {
@@ -427,11 +350,12 @@ public class CTMUtils {
             default:
                 break;
         }
+
         int tileSize = terrain.getWidth() / 16;
         int tileX = (tileNum % 16) * tileSize;
         int tileY = (tileNum / 16) * tileSize;
-
         BufferedImage newImage = new BufferedImage(template.getWidth(), template.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
         for (int x = 0; x < template.getWidth(); x++) {
             for (int y = 0; y < template.getHeight(); y++) {
                 int rgb = template.getRGB(x, y);
@@ -442,7 +366,10 @@ public class CTMUtils {
             }
         }
 
-        tileTexture[tileNum] = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(newImage);
+        TextureOverride override = new TextureOverride("tile", newImage);
+        if (override.isValid()) {
+            tiles[tileNum] = override;
+        }
     }
 
     private static int getTexture(String name) {
@@ -491,5 +418,154 @@ public class CTMUtils {
             c[i] = a[i] + b[i];
         }
         return c;
+    }
+
+    private static class TextureOverride {
+        private static final long MULTIPLIER = 0x5deece66dL;
+        private static final long ADDEND = 0xbL;
+        private static final long MASK = (1L << 48) - 1;
+
+        final String type;
+        final String textureName;
+        final int texture;
+        final int faces;
+        final boolean random;
+        final int numTiles;
+
+        TextureOverride(String type, int index) {
+            this(type, "/ctm/" + type + index + ".png");
+        }
+
+        TextureOverride(String type, String textureName) {
+            this.type = type;
+            this.textureName = textureName;
+
+            texture = getTexture(textureName);
+
+            String filename = textureName.replaceFirst("\\.png$", ".properties");
+            InputStream is = null;
+            Properties properties = new Properties();
+            try {
+                is = lastTexturePack.getInputStream(filename);
+                if (is != null) {
+                    properties.load(is);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                MCPatcherUtils.close(is);
+            }
+
+            int flags = 0;
+            for (String val : properties.getProperty("faces", "all").trim().toLowerCase().split("\\s+")) {
+                if (val.equals("bottom")) {
+                    flags |= (1 << BOTTOM_FACE);
+                } else if (val.equals("top")) {
+                    flags |= (1 << TOP_FACE);
+                } else if (val.equals("north")) {
+                    flags |= (1 << NORTH_FACE);
+                } else if (val.equals("south")) {
+                    flags |= (1 << SOUTH_FACE);
+                } else if (val.equals("east")) {
+                    flags |= (1 << EAST_FACE);
+                } else if (val.equals("west")) {
+                    flags |= (1 << WEST_FACE);
+                } else if (val.equals("side") || val.equals("sides")) {
+                    flags |= (1 << NORTH_FACE) | (1 << SOUTH_FACE) | (1 << EAST_FACE) | (1 << WEST_FACE);
+                } else if (val.equals("all")) {
+                    flags = -1;
+                }
+            }
+            faces = flags;
+
+            String val = properties.getProperty("mode", "ctm").trim().toLowerCase();
+            if (val.equals("random")) {
+                val = properties.getProperty("tiles", "0").trim();
+                int n = 0;
+                try {
+                    n = Integer.parseInt(val);
+                } catch (NumberFormatException e) {
+                }
+                random = true;
+                numTiles = n;
+            } else {
+                random = false;
+                numTiles = 0;
+            }
+        }
+
+        TextureOverride(String type, BufferedImage image) {
+            this.type = type;
+            textureName = null;
+            texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
+            faces = -1;
+            random = false;
+            numTiles = 0;
+        }
+
+        boolean isValid() {
+            if (texture < 0) {
+                return false;
+            }
+            if (random && numTiles <= 0) {
+                return false;
+            }
+            return true;
+        }
+
+        boolean override(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+            if (random) {
+                long n = face;
+                n <<= 16;
+                n ^= i;
+                n <<= 16;
+                n ^= j;
+                n <<= 16;
+                n ^= k;
+                n = MULTIPLIER * n + ADDEND;
+                n = MULTIPLIER * n + ADDEND;
+                n &= MASK;
+                newTextureIndex = (int) (((double) n / (double) (MASK + 1)) * numTiles);
+            } else {
+                int[][] offsets = NEIGHBOR_OFFSET[face];
+                int neighborBits = 0;
+                for (int bit = 0; bit < 8; bit++) {
+                    if (shouldConnect(blockAccess, blockId, i, j, k, offsets[bit])) {
+                        neighborBits |= (1 << bit);
+                    }
+                }
+                newTextureIndex = GENERIC_TEXTURE_INDEX[neighborBits];
+            }
+            return true;
+        }
+
+        boolean overrideBookshelf(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+            if (face < 2) {
+                return false;
+            }
+            int neighborBits = 0;
+            int[][] offsets = NEIGHBOR_OFFSET[face];
+            for (int bit = 0; bit < 2; bit++) {
+                if (shouldConnect(blockAccess, blockId, i, j, k, offsets[4 * bit])) {
+                    neighborBits |= (1 << bit);
+                }
+            }
+            newTextureIndex = BOOKSHELF_TEXTURE_INDEX[neighborBits];
+            return true;
+        }
+
+        boolean overrideSandstone(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+            if (face < 2) {
+                return false;
+            }
+            if (blockAccess.getBlockMetadata(i, j, k) != 0) {
+                return false;
+            }
+            if (shouldConnect(blockAccess, blockId, i, j, k, GO_UP)) {
+                newTextureIndex = 66;
+                return true;
+            }
+            return false;
+        }
     }
 }

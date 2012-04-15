@@ -30,6 +30,7 @@ public class ConnectedTextures extends Mod {
         classMods.add(new RenderBlocksMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS + "$TextureOverride"));
     }
 
     private class ConfigPanel extends ModConfigPanel {
