@@ -298,7 +298,7 @@ public class CTMUtils {
         tiles = new TextureOverride[NUM_TILES];
         if (enableOther) {
             for (int i = 0; i < tiles.length; i++) {
-                TextureOverride override = new TextureOverride("terrain", i);
+                TextureOverride override = new TextureOverride("terrain", "/ctm/terrain" + i + ".png");
                 if (override.isValid()) {
                     MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", override.textureName, override.texture, i);
                 }
@@ -431,10 +431,6 @@ public class CTMUtils {
         final int faces;
         final boolean random;
         final int numTiles;
-
-        TextureOverride(String type, int index) {
-            this(type, "/ctm/" + type + index + ".png");
-        }
 
         TextureOverride(String type, String textureName) {
             this.type = type;
