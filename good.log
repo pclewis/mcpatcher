@@ -1,5 +1,5 @@
 MCPatcher version is 2.3.6
-OS: Linux 3.2.10-3.fc16.x86_64 amd64
+OS: Linux 3.3.1-5.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_31 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.2.5 (md5 8e8778078a175a33603a585257f28563)
@@ -67,8 +67,12 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.2.5.jar (1524 files)
    renderBlockFluids matches n (Lpb;III)Z
   RenderBlocks matches vl.class
    renderStandardBlock matches o (Lpb;III)Z
+  TileEntitySignRenderer matches ll.class
+   renderTileSignEntityAt matches a (Lsc;DDDF)V
   RenderLiving matches fe.class
    doRenderLiving matches a (Lacq;DDDFF)V
+  RenderXPOrb matches tb.class
+   render matches a (Lbz;DDDFF)V
   RenderSpider matches amo.class
   RenderEnderman matches st.class
   TextureFX matches tt.class
@@ -317,11 +321,14 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.2.5.jar (methods and fields)
   EntityList (aao.class)
   ItemSpawnerEgg (acv.class)
   FontRenderer (nl.class)
+  TileEntitySignRenderer (ll.class)
+  RenderXPOrb (tb.class)
   Minecraft (net/minecraft/client/Minecraft.class)
    field texturePackList matches E Lgi;
    field renderEngine matches p Laaw;
   RenderEngine (aaw.class)
    method getTexture matches b (Ljava/lang/String;)I
+   method allocateAndSetupTexture matches a (Ljava/awt/image/BufferedImage;)I
   TexturePackList (gi.class)
    field selectedTexturePack matches a Lh;
    field defaultTexturePack matches c Lh;
@@ -709,6 +716,7 @@ Custom Colors
         field prevPosY -> m D
         field prevPosZ -> n D
         field worldObj -> k Lxd;
+    class EntityXPOrb (bz.class)
     class FontRenderer (nl.class)
         method renderString -> a (Ljava/lang/String;IIIZ)I
         field charWidth -> d [I
@@ -761,6 +769,8 @@ Custom Colors
     class RenderGlobal (l.class)
         method renderClouds -> b (F)V
         method renderSky -> a (F)V
+    class RenderXPOrb (tb.class)
+        method render -> a (Lbz;DDDFF)V
     class Tessellator (adz.class)
         method setColorOpaque_F -> a (FFF)V
     class TexturePackBase (h.class)
@@ -769,6 +779,9 @@ Custom Colors
     class TexturePackList (gi.class)
         field defaultTexturePack -> c Lh;
         field selectedTexturePack -> a Lh;
+    class TileEntitySign (sc.class)
+    class TileEntitySignRenderer (ll.class)
+        method renderTileSignEntityAt -> a (Lsc;DDDF)V
     class Vec3D (bo.class)
     class World (xd.class) extends IBlockAccess
         method getBiomeGenAt -> a (II)Labn;
@@ -818,6 +831,7 @@ Custom Colors
     class net.minecraft.src.EntitySheep alias for EntitySheep
     class net.minecraft.src.EntitySplashFX alias for EntitySplashFX
     class net.minecraft.src.EntitySuspendFX alias for EntitySuspendFX
+    class net.minecraft.src.EntityXPOrb alias for EntityXPOrb
     class net.minecraft.src.FontRenderer alias for FontRenderer
     class net.minecraft.src.GameSettings alias for GameSettings
     class net.minecraft.src.IBlockAccess alias for IBlockAccess
@@ -833,9 +847,12 @@ Custom Colors
     class net.minecraft.src.RenderBlocks alias for RenderBlocks
     class net.minecraft.src.RenderEngine alias for RenderEngine
     class net.minecraft.src.RenderGlobal alias for RenderGlobal
+    class net.minecraft.src.RenderXPOrb alias for RenderXPOrb
     class net.minecraft.src.Tessellator alias for Tessellator
     class net.minecraft.src.TexturePackBase alias for TexturePackBase
     class net.minecraft.src.TexturePackList alias for TexturePackList
+    class net.minecraft.src.TileEntitySign alias for TileEntitySign
+    class net.minecraft.src.TileEntitySignRenderer alias for TileEntitySignRenderer
     class net.minecraft.src.Vec3D alias for Vec3D
     class net.minecraft.src.World alias for World
     class net.minecraft.src.WorldChunkManager alias for WorldChunkManager
@@ -866,6 +883,7 @@ Connected Textures
         field blockAccess -> a Lali;
         field overrideBlockTexture -> d I
     class RenderEngine (aaw.class)
+        method allocateAndSetupTexture -> a (Ljava/awt/image/BufferedImage;)I
         method getTexture -> b (Ljava/lang/String;)I
     class Tessellator (adz.class)
         method draw -> a ()I
@@ -1742,7 +1760,7 @@ Patching...
                                IFNONNULL 0x00 0x05
                                ALOAD_2
                                ARETURN
-    insert method setTileSize (Lnet/minecraft/client/Minecraft;)V stack size 10, local vars 5
+    insert method setTileSize (Lnet/minecraft/client/Minecraft;)V stack size 2, local vars 2
     update custom animations a()V@202
                                INVOKESTATIC 0x01 0xa2
  applying Tessellator patch to adz.class for mod Connected Textures
@@ -2593,10 +2611,21 @@ Patching...
                                IRETURN
     post render standard block o(Lpb;III)Z@182
                                INVOKESTATIC 0x03 0x63
+ applying TileEntitySignRenderer patch to ll.class for mod Custom Colors
+    override sign text color a(Lsc;DDDF)V@248
+     ICONST_0                  ICONST_0
+     INVOKESTATIC 0x00 0x2b    INVOKESTATIC 0x00 0x2b
+     ICONST_0                  INVOKESTATIC 0x00 0x85
+     ISTORE 0x0d               ISTORE 0x0d
  applying RenderLiving patch to fe.class for mod Random Mobs
     replace mob textures a(Lacq;FFFFFF)V@5
      ALOAD_1                   ALOAD_1
      INVOKEVIRTUAL 0x00 0x49   INVOKESTATIC 0x01 0x2e
+ applying RenderXPOrb patch to tb.class for mod Custom Colors
+    override xp orb color a(Lbz;DDDFF)V@273
+     ILOAD 0x18                ILOAD 0x18
+                               FLOAD 0x14
+                               INVOKESTATIC 0x00 0x86
  applying RenderSpider patch to amo.class for mod Random Mobs
     override spider eye texture a(Lcb;IF)I@7
      LDC 0x04                  ALOAD_1
@@ -3571,7 +3600,7 @@ Patching...
  applying Potion patch to aad.class for mod Custom Colors
     make field name public
     insert field origColor I
-    make field color public
+    make field color not final, public
     map potions by name a(Ljava/lang/String;)Laad;@5
      ALOAD_0                   ALOAD_0
                                INVOKESTATIC 0x01 0x1e
@@ -4492,189 +4521,193 @@ Patching...
    field signature Lnet/minecraft/src/TexturePackBase; -> Lh;
    field signature Lnet/minecraft/src/Entity; -> Lnn;
     field ref net.minecraft.src.Block.blockID I -> pb.bO I colorizeBlock(Lpb;IIII)I@16
-     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x45
+     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x63
     field ref net.minecraft.src.Block.blockID I -> pb.bO I colorizeBlock(Lpb;IIII)I@41
-     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x45
+     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x63
     field ref net.minecraft.src.Block.blockID I -> pb.bO I colorizeBlock(Lpb;IIII)I@48
-     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x45
+     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x63
     field ref net.minecraft.src.Block.blockID I -> pb.bO I colorizeBlock(Lpb;IIII)I@62
-     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x45
+     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x63
     field ref net.minecraft.src.Block.blockID I -> pb.bO I colorizeBlock(Lpb;)I@4
-     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x45
+     GETFIELD 0x00 0x0a        GETFIELD 0x04 0x63
     field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> xd.t Lalb; computeLightmap(Llr;Lxd;)Z@13
-     GETFIELD 0x00 0x30        GETFIELD 0x04 0x4a
+     GETFIELD 0x00 0x37        GETFIELD 0x04 0x68
     field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> xd.t Lalb; computeFogColor(Lxd;F)Z@1
-     GETFIELD 0x00 0x30        GETFIELD 0x04 0x4a
+     GETFIELD 0x00 0x37        GETFIELD 0x04 0x68
     field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> xd.t Lalb; computeSkyColor(Lxd;F)Z@1
-     GETFIELD 0x00 0x30        GETFIELD 0x04 0x4a
+     GETFIELD 0x00 0x37        GETFIELD 0x04 0x68
     field ref net.minecraft.src.WorldProvider.worldType I -> alb.g I computeLightmap(Llr;Lxd;)Z@16
-     GETFIELD 0x00 0x31        GETFIELD 0x04 0x4f
+     GETFIELD 0x00 0x38        GETFIELD 0x04 0x6d
     field ref net.minecraft.src.WorldProvider.worldType I -> alb.g I computeFogColor(Lxd;F)Z@4
-     GETFIELD 0x00 0x31        GETFIELD 0x04 0x4f
+     GETFIELD 0x00 0x38        GETFIELD 0x04 0x6d
     field ref net.minecraft.src.WorldProvider.worldType I -> alb.g I computeSkyColor(Lxd;F)Z@4
-     GETFIELD 0x00 0x31        GETFIELD 0x04 0x4f
+     GETFIELD 0x00 0x38        GETFIELD 0x04 0x6d
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; computeLightmap(Llr;Lxd;)Z@68
-     GETSTATIC 0x00 0x37       GETSTATIC 0x04 0x51
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; checkUpdate()V@0
-     GETSTATIC 0x00 0x37       GETSTATIC 0x04 0x51
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; checkUpdate()V@25
-     PUTSTATIC 0x00 0x37       PUTSTATIC 0x04 0x51
+     PUTSTATIC 0x00 0x3e       PUTSTATIC 0x04 0x6f
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; reloadColorProperties()V@2
-     GETSTATIC 0x00 0x37       GETSTATIC 0x04 0x51
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; reloadParticleColors()V@24
-     GETSTATIC 0x00 0x37       GETSTATIC 0x04 0x51
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; reloadParticleColors()V@78
-     GETSTATIC 0x00 0x37       GETSTATIC 0x04 0x51
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; reloadRedstoneColors()V@0
-     GETSTATIC 0x00 0x37       GETSTATIC 0x04 0x51
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; reloadStemColors()V@0
-     GETSTATIC 0x00 0x37       GETSTATIC 0x04 0x51
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
+    field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; reloadXPOrbColors()V@0
+     GETSTATIC 0x00 0x3e       GETSTATIC 0x04 0x6f
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; computeLightmap(Llr;Lxd;)Z@72
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x04 0x56
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x04 0x74
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; reloadColorProperties()V@7
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x04 0x56
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x04 0x74
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; reloadParticleColors()V@29
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x04 0x56
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x04 0x74
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; reloadParticleColors()V@83
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x04 0x56
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x04 0x74
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; reloadRedstoneColors()V@5
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x04 0x56
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x04 0x74
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; reloadStemColors()V@5
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x04 0x56
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x04 0x74
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; reloadXPOrbColors()V@6
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x04 0x74
     field ref net.minecraft.src.World.lightningFlash I -> xd.n I computeLightmap(Llr;Lxd;)Z@227
-     GETFIELD 0x00 0x42        GETFIELD 0x04 0x59
+     GETFIELD 0x00 0x49        GETFIELD 0x04 0x77
     field ref net.minecraft.src.World.lightningFlash I -> xd.n I computeLightningFlash(Lxd;F)V@1
-     GETFIELD 0x00 0x42        GETFIELD 0x04 0x59
+     GETFIELD 0x00 0x49        GETFIELD 0x04 0x77
     field ref net.minecraft.src.World.lightningFlash I -> xd.n I computeLightningFlash(Lxd;F)V@10
-     GETFIELD 0x00 0x42        GETFIELD 0x04 0x59
+     GETFIELD 0x00 0x49        GETFIELD 0x04 0x77
     method ref net.minecraft.src.World.getSunAngle (F)F -> xd.b (F)F computeLightmap(Llr;Lxd;)Z@241
-     INVOKEVIRTUAL 0x00 0x44   INVOKEVIRTUAL 0x04 0x5c
+     INVOKEVIRTUAL 0x00 0x4b   INVOKEVIRTUAL 0x04 0x7a
     field ref net.minecraft.src.EntityRenderer.torchFlickerX F -> lr.e F computeLightmap(Llr;Lxd;)Z@260
-     GETFIELD 0x00 0x47        GETFIELD 0x04 0x60
+     GETFIELD 0x00 0x4e        GETFIELD 0x04 0x7e
     field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.A Lhu; computeLightmap(Llr;Lxd;)Z@280
-     GETFIELD 0x00 0x4a        GETFIELD 0x04 0x64
+     GETFIELD 0x00 0x51        GETFIELD 0x04 0x82
     field ref net.minecraft.src.GameSettings.gammaSetting F -> hu.O F computeLightmap(Llr;Lxd;)Z@283
-     GETFIELD 0x00 0x4b        GETFIELD 0x04 0x69
+     GETFIELD 0x00 0x52        GETFIELD 0x04 0x87
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Laaw; computeLightmap(Llr;Lxd;)Z@528
-     GETFIELD 0x00 0x4d        GETFIELD 0x04 0x6d
+     GETFIELD 0x00 0x54        GETFIELD 0x04 0x8b
     field ref net.minecraft.src.EntityRenderer.lightmapTexture I -> lr.d I computeLightmap(Llr;Lxd;)Z@538
-     GETFIELD 0x00 0x4e        GETFIELD 0x04 0x6f
+     GETFIELD 0x00 0x55        GETFIELD 0x04 0x8d
     method ref net.minecraft.src.RenderEngine.createTextureFromBytes ([IIII)V -> aaw.a ([IIII)V computeLightmap(Llr;Lxd;)Z@541
-     INVOKEVIRTUAL 0x00 0x4f   INVOKEVIRTUAL 0x04 0x73
+     INVOKEVIRTUAL 0x00 0x56   INVOKEVIRTUAL 0x04 0x91
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> ali.e (III)I colorizeRedstoneWire(Lali;IIII)I@13
-     INVOKEINTERFACE 0x00 0x55 0x04 0x00  INVOKEINTERFACE 0x04 0x77 0x04 0x00
+     INVOKEINTERFACE 0x00 0x5c 0x04 0x00  INVOKEINTERFACE 0x04 0x95 0x04 0x00
     method ref com.pclewis.mcpatcher.mod.BiomeHelper$New.<init> (Lnet/minecraft/src/IBlockAccess;)V -> com.pclewis.mcpatcher.mod.BiomeHelper$New.<init> (Lali;)V setupBlockAccess(Lali;Z)V@29
-     INVOKESPECIAL 0x00 0x61   INVOKESPECIAL 0x04 0x7a
+     INVOKESPECIAL 0x00 0x68   INVOKESPECIAL 0x04 0x98
     method ref com.pclewis.mcpatcher.mod.BiomeHelper$Old.<init> (Lnet/minecraft/src/IBlockAccess;)V -> com.pclewis.mcpatcher.mod.BiomeHelper$Old.<init> (Lali;)V setupBlockAccess(Lali;Z)V@43
-     INVOKESPECIAL 0x00 0x63   INVOKESPECIAL 0x04 0x7b
+     INVOKESPECIAL 0x00 0x6a   INVOKESPECIAL 0x04 0x99
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnn; setupForFog(Lnn;)V@1
-     PUTSTATIC 0x00 0x64       PUTSTATIC 0x04 0x7d
+     PUTSTATIC 0x00 0x6b       PUTSTATIC 0x04 0x9b
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnn; computeFogColor(I)Z@12
-     GETSTATIC 0x00 0x64       GETSTATIC 0x04 0x7d
+     GETSTATIC 0x00 0x6b       GETSTATIC 0x04 0x9b
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnn; computeFogColor(I)Z@35
-     GETSTATIC 0x00 0x64       GETSTATIC 0x04 0x7d
+     GETSTATIC 0x00 0x6b       GETSTATIC 0x04 0x9b
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnn; computeFogColor(I)Z@43
-     GETSTATIC 0x00 0x64       GETSTATIC 0x04 0x7d
+     GETSTATIC 0x00 0x6b       GETSTATIC 0x04 0x9b
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnn; computeFogColor(I)Z@51
-     GETSTATIC 0x00 0x64       GETSTATIC 0x04 0x7d
+     GETSTATIC 0x00 0x6b       GETSTATIC 0x04 0x9b
     class ref net.minecraft.src.BiomeGenBase -> abn setupForFog(Lnn;)V@36
-     CHECKCAST 0x00 0x6a       CHECKCAST 0x04 0x7f
+     CHECKCAST 0x00 0x71       CHECKCAST 0x04 0x9d
     field ref net.minecraft.src.BiomeGenBase.temperature F -> abn.F F setupForFog(Lnn;)V@41
-     GETFIELD 0x00 0x6b        GETFIELD 0x04 0x81
+     GETFIELD 0x00 0x72        GETFIELD 0x04 0x9f
     field ref net.minecraft.src.BiomeGenBase.temperature F -> abn.F F setupForFog(Lnn;)V@55
-     GETFIELD 0x00 0x6b        GETFIELD 0x04 0x81
+     GETFIELD 0x00 0x72        GETFIELD 0x04 0x9f
     field ref net.minecraft.src.BiomeGenBase.rainfall F -> abn.G F setupForFog(Lnn;)V@46
-     GETFIELD 0x00 0x6c        GETFIELD 0x04 0x84
+     GETFIELD 0x00 0x73        GETFIELD 0x04 0xa2
     field ref net.minecraft.src.BiomeGenBase.rainfall F -> abn.G F setupForFog(Lnn;)V@60
-     GETFIELD 0x00 0x6c        GETFIELD 0x04 0x84
+     GETFIELD 0x00 0x73        GETFIELD 0x04 0xa2
     field ref net.minecraft.src.BiomeGenBase.biomeID I -> abn.M I setupForFog(Lnn;)V@78
-     GETFIELD 0x00 0x70        GETFIELD 0x04 0x87
+     GETFIELD 0x00 0x77        GETFIELD 0x04 0xa5
     field ref net.minecraft.src.BiomeGenBase.biomeName Ljava/lang/String; -> abn.y Ljava/lang/String; setupForFog(Lnn;)V@88
-     GETFIELD 0x00 0x71        GETFIELD 0x04 0x89
+     GETFIELD 0x00 0x78        GETFIELD 0x04 0xa7
     field ref net.minecraft.src.BiomeGenBase.waterColorMultiplier I -> abn.H I setupForFog(Lnn;)V@95
-     GETFIELD 0x00 0x72        GETFIELD 0x04 0x8c
+     GETFIELD 0x00 0x79        GETFIELD 0x04 0xaa
     field ref net.minecraft.src.Entity.posX D -> nn.o D computeFogColor(I)Z@38
-     GETFIELD 0x00 0x73        GETFIELD 0x04 0x91
+     GETFIELD 0x00 0x7a        GETFIELD 0x04 0xaf
     field ref net.minecraft.src.Entity.posY D -> nn.p D computeFogColor(I)Z@46
-     GETFIELD 0x00 0x74        GETFIELD 0x04 0x93
+     GETFIELD 0x00 0x7b        GETFIELD 0x04 0xb1
     field ref net.minecraft.src.Entity.posZ D -> nn.q D computeFogColor(I)Z@54
-     GETFIELD 0x00 0x75        GETFIELD 0x04 0x96
+     GETFIELD 0x00 0x7c        GETFIELD 0x04 0xb4
     method ref com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lnet/minecraft/src/World;F)V -> com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lxd;F)V computeFogColor(Lxd;F)Z@20
-     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x04 0x98
+     INVOKESTATIC 0x00 0x80    INVOKESTATIC 0x04 0xb6
     method ref com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lnet/minecraft/src/World;F)V -> com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lxd;F)V computeSkyColor(Lxd;F)Z@20
-     INVOKESTATIC 0x00 0x79    INVOKESTATIC 0x04 0x98
+     INVOKESTATIC 0x00 0x80    INVOKESTATIC 0x04 0xb6
     field ref net.minecraft.src.Potion.id I -> aad.H I setupPotion(Laad;)V@9
-     GETFIELD 0x00 0x82        GETFIELD 0x04 0x9b
+     GETFIELD 0x00 0x89        GETFIELD 0x04 0xb9
     field ref net.minecraft.src.Potion.name Ljava/lang/String; -> aad.I Ljava/lang/String; setupPotion(Laad;)V@19
-     GETFIELD 0x00 0x83        GETFIELD 0x04 0x9d
+     GETFIELD 0x00 0x8a        GETFIELD 0x04 0xbb
     field ref net.minecraft.src.Potion.name Ljava/lang/String; -> aad.I Ljava/lang/String; reloadPotionColors()V@27
-     GETFIELD 0x00 0x83        GETFIELD 0x04 0x9d
+     GETFIELD 0x00 0x8a        GETFIELD 0x04 0xbb
     field ref net.minecraft.src.Potion.color I -> aad.N I setupPotion(Laad;)V@26
-     GETFIELD 0x00 0x84        GETFIELD 0x04 0xa0
+     GETFIELD 0x00 0x8b        GETFIELD 0x04 0xbe
     field ref net.minecraft.src.Potion.color I -> aad.N I setupPotion(Laad;)V@38
-     GETFIELD 0x00 0x84        GETFIELD 0x04 0xa0
+     GETFIELD 0x00 0x8b        GETFIELD 0x04 0xbe
     field ref net.minecraft.src.Potion.color I -> aad.N I reset()V@393
-     PUTFIELD 0x00 0x84        PUTFIELD 0x04 0xa0
-    field ref net.minecraft.src.Potion.color I -> aad.N I loadIntColor(Ljava/lang/String;Laad;)V@26
-     PUTFIELD 0x00 0x84        PUTFIELD 0x04 0xa0
+     PUTFIELD 0x00 0x8b        PUTFIELD 0x04 0xbe
+    field ref net.minecraft.src.Potion.color I -> aad.N I loadIntColor(Ljava/lang/String;Laad;)V@28
+     PUTFIELD 0x00 0x8b        PUTFIELD 0x04 0xbe
     field ref net.minecraft.src.Potion.origColor I -> aad.origColor I setupPotion(Laad;)V@41
-     PUTFIELD 0x00 0x85        PUTFIELD 0x04 0xa1
+     PUTFIELD 0x00 0x8c        PUTFIELD 0x04 0xbf
     field ref net.minecraft.src.Potion.origColor I -> aad.origColor I reset()V@390
-     GETFIELD 0x00 0x85        GETFIELD 0x04 0xa1
+     GETFIELD 0x00 0x8c        GETFIELD 0x04 0xbf
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Lgi; checkUpdate()V@6
-     GETFIELD 0x00 0x89        GETFIELD 0x04 0xa5
+     GETFIELD 0x00 0x90        GETFIELD 0x04 0xc3
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Lgi; checkUpdate()V@19
-     GETFIELD 0x00 0x89        GETFIELD 0x04 0xa5
+     GETFIELD 0x00 0x90        GETFIELD 0x04 0xc3
     method ref net.minecraft.src.TexturePackList.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> gi.getSelectedTexturePack ()Lh; checkUpdate()V@9
-     INVOKEVIRTUAL 0x00 0x8a   INVOKEVIRTUAL 0x04 0xaa
+     INVOKEVIRTUAL 0x00 0x91   INVOKEVIRTUAL 0x04 0xc8
     method ref net.minecraft.src.TexturePackList.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> gi.getSelectedTexturePack ()Lh; checkUpdate()V@22
-     INVOKEVIRTUAL 0x00 0x8a   INVOKEVIRTUAL 0x04 0xaa
+     INVOKEVIRTUAL 0x00 0x91   INVOKEVIRTUAL 0x04 0xc8
     field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> pb.m [Lpb; reset()V@239
-     GETSTATIC 0x00 0xbf       GETSTATIC 0x04 0xae
+     GETSTATIC 0x00 0xc8       GETSTATIC 0x04 0xcc
     class ref net.minecraft.src.Potion -> aad reset()V@384
-     CHECKCAST 0x00 0xc7       CHECKCAST 0x04 0x9a
+     CHECKCAST 0x00 0xd0       CHECKCAST 0x04 0xb8
     class ref net.minecraft.src.Potion -> aad reloadPotionColors()V@22
-     CHECKCAST 0x00 0xc7       CHECKCAST 0x04 0x9a
+     CHECKCAST 0x00 0xd0       CHECKCAST 0x04 0xb8
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> wh.a [Lwh; reset()V@399
-     GETSTATIC 0x00 0xc8       GETSTATIC 0x04 0xb3
+     GETSTATIC 0x00 0xd1       GETSTATIC 0x04 0xd1
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> wh.a [Lwh; reloadMapColors()V@3
-     GETSTATIC 0x00 0xc8       GETSTATIC 0x04 0xb3
+     GETSTATIC 0x00 0xd1       GETSTATIC 0x04 0xd1
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> wh.a [Lwh; reloadMapColors()V@10
-     GETSTATIC 0x00 0xc8       GETSTATIC 0x04 0xb3
+     GETSTATIC 0x00 0xd1       GETSTATIC 0x04 0xd1
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> wh.a [Lwh; reloadMapColors()V@23
-     GETSTATIC 0x00 0xc8       GETSTATIC 0x04 0xb3
-    field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> wh.a [Lwh; reloadMapColors()V@63
-     GETSTATIC 0x00 0xc8       GETSTATIC 0x04 0xb3
+     GETSTATIC 0x00 0xd1       GETSTATIC 0x04 0xd1
+    field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> wh.a [Lwh; reloadMapColors()V@64
+     GETSTATIC 0x00 0xd1       GETSTATIC 0x04 0xd1
     field ref net.minecraft.src.MapColor.origColorValue I -> wh.origColorValue I reset()V@423
-     GETFIELD 0x00 0xc9        GETFIELD 0x04 0xb4
+     GETFIELD 0x00 0xd2        GETFIELD 0x04 0xd2
     field ref net.minecraft.src.MapColor.origColorValue I -> wh.origColorValue I reloadMapColors()V@28
-     GETFIELD 0x00 0xc9        GETFIELD 0x04 0xb4
+     GETFIELD 0x00 0xd2        GETFIELD 0x04 0xd2
     field ref net.minecraft.src.MapColor.colorValue I -> wh.p I reset()V@426
-     PUTFIELD 0x00 0xca        PUTFIELD 0x04 0xb6
-    field ref net.minecraft.src.MapColor.colorValue I -> wh.p I reloadMapColors()V@71
-     PUTFIELD 0x00 0xca        PUTFIELD 0x04 0xb6
+     PUTFIELD 0x00 0xd3        PUTFIELD 0x04 0xd4
+    field ref net.minecraft.src.MapColor.colorValue I -> wh.p I reloadMapColors()V@72
+     PUTFIELD 0x00 0xd3        PUTFIELD 0x04 0xd4
     field ref net.minecraft.src.EntitySheep.origFleeceColorTable [[F -> cu.origFleeceColorTable [[F reset()V@435
-     GETSTATIC 0x00 0xcb       GETSTATIC 0x04 0xb9
+     GETSTATIC 0x00 0xd4       GETSTATIC 0x04 0xd7
     field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> cu.a [[F reset()V@444
-     PUTSTATIC 0x00 0xcd       PUTSTATIC 0x04 0xbb
+     PUTSTATIC 0x00 0xd6       PUTSTATIC 0x04 0xd9
     field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> cu.a [[F reloadSheepColors()V@3
-     GETSTATIC 0x00 0xcd       GETSTATIC 0x04 0xbb
+     GETSTATIC 0x00 0xd6       GETSTATIC 0x04 0xd9
     field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> cu.a [[F reloadSheepColors()V@26
-     GETSTATIC 0x00 0xcd       GETSTATIC 0x04 0xbb
+     GETSTATIC 0x00 0xd6       GETSTATIC 0x04 0xd9
     field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> cu.a [[F reloadSheepColors()V@43
-     GETSTATIC 0x00 0xcd       GETSTATIC 0x04 0xbb
+     GETSTATIC 0x00 0xd6       GETSTATIC 0x04 0xd9
     method ref com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Laad;)V reloadPotionColors()V@31
-     INVOKESTATIC 0x00 0xd9    INVOKESTATIC 0x04 0xbd
+     INVOKESTATIC 0x00 0xe2    INVOKESTATIC 0x04 0xdb
     field ref net.minecraft.src.ItemDye.dyeColorNames [Ljava/lang/String; -> hm.a [Ljava/lang/String; reloadSheepColors()V@23
-     GETSTATIC 0x01 0x02       GETSTATIC 0x04 0xc1
-   string replace Lnet/minecraft/src/EntityRenderer; -> Llr; @2536
-   string replace Lnet/minecraft/src/MapColor; -> Lwh; @6671
-   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @4004
-   string replace Lnet/minecraft/src/BiomeGenBase; -> Labn; @4611
+     GETSTATIC 0x01 0x0b       GETSTATIC 0x04 0xdf
+   string replace Lnet/minecraft/src/EntityRenderer; -> Llr; @2710
+   string replace Lnet/minecraft/src/MapColor; -> Lwh; @6870
+   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @4158
+   string replace Lnet/minecraft/src/BiomeGenBase; -> Labn; @4765
    string replace Lnet/minecraft/src/Block; -> Lpb; @775
-   string replace Lnet/minecraft/src/World; -> Lxd; @2530
-   string replace Lnet/minecraft/src/Entity; -> Lnn; @4614
-   string replace Lnet/minecraft/src/Potion; -> Laad; @5483
+   string replace Lnet/minecraft/src/World; -> Lxd; @2704
+   string replace Lnet/minecraft/src/Entity; -> Lnn; @4768
+   string replace Lnet/minecraft/src/Potion; -> Laad; @5637
   adding com/pclewis/mcpatcher/mod/ColorMap.class for Custom Colors
     field ref com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.Colorizer.lastTexturePack Lh; <init>(ZLjava/lang/String;I)V@15
      GETSTATIC 0x00 0x07       GETSTATIC 0x00 0x80
@@ -4749,55 +4782,96 @@ Patching...
    string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @234
   adding com/pclewis/mcpatcher/mod/CTMUtils.class for Connected Textures
    method signature (Lnet/minecraft/src/Block;Lnet/minecraft/src/IBlockAccess;IIIII)I -> (Lpb;Lali;IIIII)I
-   method signature (Lnet/minecraft/src/IBlockAccess;IIIII)Z -> (Lali;IIIII)Z
+   method signature (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> (Lali;IIIIII)Z
+   method signature (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> (Lali;IIIIII)Z
+   method signature (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> (Lali;IIIIII)Z
+   method signature (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> (Lali;IIII[I)Z
+   method signature ()Lnet/minecraft/src/TexturePackBase; -> ()Lh;
    method signature (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> (Lali;IIII[I)Z
    field signature Lnet/minecraft/src/TexturePackBase; -> Lh;
-    field ref net.minecraft.src.Block.blockID I -> pb.bO I setup(Lpb;Lali;IIIII)I@29
-     GETFIELD 0x00 0x04        GETFIELD 0x01 0x2a
-    method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lnet/minecraft/src/IBlockAccess;IIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lali;IIIII)Z setup(Lpb;Lali;IIIII)I@38
-     INVOKESTATIC 0x00 0x05    INVOKESTATIC 0x01 0x2c
-    method ref com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lali;IIII[I)Z getConnectedTexture(Lali;IIIII)Z@109
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x01 0x2e
-    method ref com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lali;IIII[I)Z getConnectedTexture(Lali;IIIII)Z@171
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x01 0x2e
-    method ref com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lali;IIII[I)Z getConnectedTexture(Lali;IIIII)Z@235
-     INVOKESTATIC 0x00 0x0e    INVOKESTATIC 0x01 0x2e
-    interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> ali.e (III)I getConnectedTexture(Lali;IIIII)Z@216
-     INVOKEINTERFACE 0x00 0x11 0x04 0x00  INVOKEINTERFACE 0x01 0x33 0x04 0x00
-    field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Lgi; checkUpdate()V@3
-     GETFIELD 0x00 0x14        GETFIELD 0x01 0x37
-    method ref net.minecraft.src.TexturePackList.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> gi.getSelectedTexturePack ()Lh; checkUpdate()V@6
-     INVOKEVIRTUAL 0x00 0x15   INVOKEVIRTUAL 0x01 0x3c
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.shouldConnect (Lali;IIII[I)Z access$400(Lali;IIII[I)Z@8
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x01 0xb0
     field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; checkUpdate()V@11
-     GETSTATIC 0x00 0x16       GETSTATIC 0x01 0x3e
-    field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; checkUpdate()V@19
-     PUTSTATIC 0x00 0x16       PUTSTATIC 0x01 0x3e
+     GETSTATIC 0x00 0x07       GETSTATIC 0x01 0xb2
+    field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; checkUpdate()V@28
+     PUTSTATIC 0x00 0x07       PUTSTATIC 0x01 0xb2
+    field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; setupOutline()V@0
+     GETSTATIC 0x00 0x07       GETSTATIC 0x01 0xb2
+    field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; setupOutline()V@17
+     GETSTATIC 0x00 0x07       GETSTATIC 0x01 0xb2
     field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; getTexture(Ljava/lang/String;)I@6
-     GETSTATIC 0x00 0x16       GETSTATIC 0x01 0x3e
+     GETSTATIC 0x00 0x07       GETSTATIC 0x01 0xb2
+    field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; access$100()Lh;@0
+     GETSTATIC 0x00 0x07       GETSTATIC 0x01 0xb2
+    field ref net.minecraft.src.Block.blockID I -> pb.bO I setup(Lpb;Lali;IIIII)I@26
+     GETFIELD 0x00 0x0c        GETFIELD 0x01 0xb7
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lali;IIIIII)Z setup(Lpb;Lali;IIIII)I@37
+     INVOKESTATIC 0x00 0x0d    INVOKESTATIC 0x01 0xb9
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTextureByBlock (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTextureByBlock (Lali;IIIIII)Z getConnectedTexture(Lali;IIIIII)Z@10
+     INVOKESTATIC 0x00 0x13    INVOKESTATIC 0x01 0xbb
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTextureByTile (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTextureByTile (Lali;IIIIII)Z getConnectedTexture(Lali;IIIIII)Z@26
+     INVOKESTATIC 0x00 0x14    INVOKESTATIC 0x01 0xbd
+    method ref com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.override (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.override (Lali;IIIIII)Z getConnectedTextureByBlock(Lali;IIIIII)Z@116
+     INVOKEVIRTUAL 0x00 0x18   INVOKEVIRTUAL 0x01 0xbf
+    method ref com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.override (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.override (Lali;IIIIII)Z getConnectedTextureByTile(Lali;IIIIII)Z@73
+     INVOKEVIRTUAL 0x00 0x18   INVOKEVIRTUAL 0x01 0xbf
+    method ref com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.overrideBookshelf (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.overrideBookshelf (Lali;IIIIII)Z getConnectedTextureByBlock(Lali;IIIIII)Z@132
+     INVOKEVIRTUAL 0x00 0x19   INVOKEVIRTUAL 0x01 0xc1
+    method ref com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.overrideSandstone (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils$TextureOverride.overrideSandstone (Lali;IIIIII)Z getConnectedTextureByBlock(Lali;IIIIII)Z@148
+     INVOKEVIRTUAL 0x00 0x1a   INVOKEVIRTUAL 0x01 0xc3
+    field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.E Lgi; checkUpdate()V@3
+     GETFIELD 0x00 0x1d        GETFIELD 0x01 0xc7
+    method ref net.minecraft.src.TexturePackList.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> gi.getSelectedTexturePack ()Lh; checkUpdate()V@6
+     INVOKEVIRTUAL 0x00 0x1e   INVOKEVIRTUAL 0x01 0xcb
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> pb.m [Lpb; refreshBlockTextures()V@0
+     GETSTATIC 0x00 0x26       GETSTATIC 0x01 0xcf
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; setupOutline()V@5
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x01 0xd3
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; setupOutline()V@22
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x01 0xd3
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; getTexture(Ljava/lang/String;)I@10
-     INVOKEVIRTUAL 0x00 0x26   INVOKEVIRTUAL 0x01 0x42
+     INVOKEVIRTUAL 0x00 0x3f   INVOKEVIRTUAL 0x01 0xd3
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Laaw; getTexture(Ljava/lang/String;)I@26
-     GETFIELD 0x00 0x28        GETFIELD 0x01 0x46
+     GETFIELD 0x00 0x4e        GETFIELD 0x01 0xd7
     method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> aaw.b (Ljava/lang/String;)I getTexture(Ljava/lang/String;)I@30
-     INVOKEVIRTUAL 0x00 0x29   INVOKEVIRTUAL 0x01 0x4a
+     INVOKEVIRTUAL 0x00 0x4f   INVOKEVIRTUAL 0x01 0xdb
     field ref net.minecraft.src.Tessellator.instance Lnet/minecraft/src/Tessellator; -> adz.a Ladz; bindTexture(I)Z@15
-     GETSTATIC 0x00 0x2c       GETSTATIC 0x01 0x4f
+     GETSTATIC 0x00 0x52       GETSTATIC 0x01 0xe0
     field ref net.minecraft.src.Tessellator.preserve Z -> adz.preserve Z bindTexture(I)Z@21
-     PUTFIELD 0x00 0x2d        PUTFIELD 0x01 0x50
+     PUTFIELD 0x00 0x53        PUTFIELD 0x01 0xe1
     field ref net.minecraft.src.Tessellator.preserve Z -> adz.preserve Z bindTexture(I)Z@35
-     PUTFIELD 0x00 0x2d        PUTFIELD 0x01 0x50
+     PUTFIELD 0x00 0x53        PUTFIELD 0x01 0xe1
     method ref net.minecraft.src.Tessellator.draw ()I -> adz.a ()I bindTexture(I)Z@25
-     INVOKEVIRTUAL 0x00 0x2e   INVOKEVIRTUAL 0x01 0x52
+     INVOKEVIRTUAL 0x00 0x54   INVOKEVIRTUAL 0x01 0xe3
     method ref net.minecraft.src.Tessellator.startDrawingQuads ()V -> adz.b ()V bindTexture(I)Z@30
-     INVOKEVIRTUAL 0x00 0x2f   INVOKEVIRTUAL 0x01 0x54
+     INVOKEVIRTUAL 0x00 0x55   INVOKEVIRTUAL 0x01 0xe5
     interface method ref net.minecraft.src.IBlockAccess.getBlockId (III)I -> ali.a (III)I shouldConnect(Lali;IIII[I)Z@20
-     INVOKEINTERFACE 0x00 0x31 0x04 0x00  INVOKEINTERFACE 0x01 0x56 0x04 0x00
-    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> pb.m [Lpb; <clinit>()V@2264
-     GETSTATIC 0x00 0x43       GETSTATIC 0x01 0x5a
-   string replace Lnet/minecraft/src/Block; -> Lpb; @257
-   string replace Lnet/minecraft/src/Tessellator; -> Ladz; @1890
-   string replace Lnet/minecraft/src/TexturePackBase; -> Lh; @938
-   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @278
+     INVOKEINTERFACE 0x00 0x57 0x04 0x00  INVOKEINTERFACE 0x01 0xe9 0x04 0x00
+   string replace Lnet/minecraft/src/Block; -> Lpb; @281
+   string replace Lnet/minecraft/src/Tessellator; -> Ladz; @3148
+   string replace Lnet/minecraft/src/TexturePackBase; -> Lh; @1041
+   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @302
+  adding com/pclewis/mcpatcher/mod/CTMUtils$TextureOverride.class for Connected Textures
+   method signature (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> (Lali;IIIIII)Z
+   method signature (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> (Lali;IIIIII)Z
+   method signature (Lnet/minecraft/src/IBlockAccess;IIIIII)Z -> (Lali;IIIIII)Z
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.access$100 ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.access$100 ()Lh; <init>(Ljava/lang/String;Ljava/lang/String;)V@43
+     INVOKESTATIC 0x00 0x0b    INVOKESTATIC 0x00 0xeb
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; <init>(Ljava/lang/String;Ljava/lang/String;)V@47
+     INVOKEVIRTUAL 0x00 0x0c   INVOKEVIRTUAL 0x00 0xf0
+    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Laaw; <init>(Ljava/lang/String;Ljava/awt/image/BufferedImage;)V@18
+     GETFIELD 0x00 0x2c        GETFIELD 0x00 0xf4
+    method ref net.minecraft.src.RenderEngine.allocateAndSetupTexture (Ljava/awt/image/BufferedImage;)I -> aaw.a (Ljava/awt/image/BufferedImage;)I <init>(Ljava/lang/String;Ljava/awt/image/BufferedImage;)V@22
+     INVOKEVIRTUAL 0x00 0x2d   INVOKEVIRTUAL 0x00 0xf8
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.access$400 (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.access$400 (Lali;IIII[I)Z override(Lali;IIIIII)Z@144
+     INVOKESTATIC 0x00 0x38    INVOKESTATIC 0x00 0xfb
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.access$400 (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.access$400 (Lali;IIII[I)Z overrideBookshelf(Lali;IIIIII)Z@43
+     INVOKESTATIC 0x00 0x38    INVOKESTATIC 0x00 0xfb
+    method ref com.pclewis.mcpatcher.mod.CTMUtils.access$400 (Lnet/minecraft/src/IBlockAccess;IIII[I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.access$400 (Lali;IIII[I)Z overrideSandstone(Lali;IIIIII)Z@36
+     INVOKESTATIC 0x00 0x38    INVOKESTATIC 0x00 0xfb
+    interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> ali.e (III)I overrideSandstone(Lali;IIIIII)Z@15
+     INVOKEINTERFACE 0x00 0x3b 0x04 0x00  INVOKEINTERFACE 0x00 0xff 0x04 0x00
+   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @1930
 
 Done!
 
@@ -5014,7 +5088,7 @@ Custom Colors
         [1] override water block color in third person
     Potion (aad.class)
         [1] insert field origColor I
-        [1] make field color public
+        [1] make field color not final, public
         [1] make field name public
         [1] map potions by name
     PotionHelper (hx.class)
@@ -5096,8 +5170,13 @@ Custom Colors
     FontRenderer (nl.class)
         [1] override text color
         [1] override text color codes
+    TileEntitySignRenderer (ll.class)
+        [1] override sign text color
+    RenderXPOrb (tb.class)
+        [1] override xp orb color
 
 Connected Textures
+    added com/pclewis/mcpatcher/mod/CTMUtils$TextureOverride.class
     added com/pclewis/mcpatcher/mod/CTMUtils.class
     Minecraft (net/minecraft/client/Minecraft.class)
     RenderEngine (aaw.class)
