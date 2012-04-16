@@ -301,6 +301,7 @@ public class CTMUtils {
                 TextureOverride override = new TextureOverride("terrain", "/ctm/terrain" + i + ".png");
                 if (override.isValid()) {
                     MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", override.textureName, override.texture, i);
+                    tiles[i] = override;
                 }
             }
         }
