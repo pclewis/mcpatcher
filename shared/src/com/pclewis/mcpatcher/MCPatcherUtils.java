@@ -8,6 +8,8 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.zip.ZipFile;
 
 /**
@@ -451,5 +453,44 @@ public class MCPatcherUtils {
             image.getRGB(0, 0, width, height, rgb, 0, width);
             return rgb;
         }
+    }
+
+    /**
+     * Parse a comma-separated list of integers/ranges.
+     *
+     * @param list comma-separated list, e.g., 2-4,5,8,12-20
+     * @return possibly empty, sorted array with duplicates removed
+     */
+    public static int[] parseIntegerList(String list) {
+        ArrayList<Integer> tmpList = new ArrayList<Integer>();
+        for (String token : list.split(",")) {
+            token = token.trim();
+            try {
+                if (token.matches("^\\d+$")) {
+                    tmpList.add(Integer.parseInt(token));
+                } else if (token.matches("^\\d+-\\d+$")) {
+                    String[] t = token.split("-");
+                    int min = Integer.parseInt(t[0]);
+                    int max = Integer.parseInt(t[1]);
+                    for (int i = min; i <= max; i++) {
+                        tmpList.add(i);
+                    }
+                }
+            } catch (NumberFormatException e) {
+            }
+        }
+        Collections.sort(tmpList);
+        for (int i = 0; i < tmpList.size(); ) {
+            if (i > 0 && tmpList.get(i).equals(tmpList.get(i - 1))) {
+                tmpList.remove(i);
+            } else {
+                i++;
+            }
+        }
+        int[] a = new int[tmpList.size()];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = tmpList.get(i);
+        }
+        return a;
     }
 }
