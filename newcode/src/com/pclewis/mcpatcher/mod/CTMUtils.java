@@ -167,26 +167,30 @@ public class CTMUtils {
     private static TextureOverride blocks[];
     private static TextureOverride tiles[];
     private static int terrainTexture;
-    private static int newTexture;
-    private static int newTextureIndex;
-    private static boolean textureChanged;
+
     private static boolean active;
+    private static boolean textureChanged;
+    private static int newTexture;
+
+    public static int newTextureIndex;
+    public static Tessellator newTessellator;
 
     public static void start() {
         checkUpdate();
         active = true;
     }
 
-    public static int setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int face, int origTexture) {
+    public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int face, int origTexture) {
         if (!active || blockAccess == null || face < 0 || face > 5) {
-            return origTexture;
+            return false;
         }
         if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face) && bindTexture(newTexture)) {
+            newTessellator = getTessellator(newTexture);
             textureChanged = true;
-            return newTextureIndex;
+            return true;
         } else {
             reset();
-            return origTexture;
+            return false;
         }
     }
 
@@ -414,6 +418,10 @@ public class CTMUtils {
         } else {
             return MCPatcherUtils.getMinecraft().renderEngine.getTexture(name);
         }
+    }
+
+    private static Tessellator getTessellator(int texture) {
+        return Tessellator.instance;
     }
 
     private static boolean bindTexture(int texture) {

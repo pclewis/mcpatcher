@@ -238,7 +238,7 @@ public class ConnectedTextures extends Mod {
         private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
         private final MethodRef start = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "start", "()V");
-        private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)I");
+        private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)Z");
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
         private final MethodRef finish = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "finish", "(Z)Z");
 
@@ -336,7 +336,7 @@ public class ConnectedTextures extends Mod {
                         BinaryRegex.capture(BinaryRegex.build(
                             // tessellator = Tessellator.instance;
                             reference(GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
-                            BytecodeMatcher.anyASTORE,
+                            ASTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                             // if (overrideBlockTexture >= 0) {
                             ALOAD_0,
@@ -348,7 +348,7 @@ public class ConnectedTextures extends Mod {
                         BinaryRegex.capture(BinaryRegex.build(
                             ALOAD_0,
                             reference(GETFIELD, overrideBlockTexture),
-                            ISTORE, 8
+                            ISTORE, BinaryRegex.capture(BinaryRegex.any())
                         ))
                     );
                 }
@@ -362,16 +362,14 @@ public class ConnectedTextures extends Mod {
                         IFLT, branch("A"),
 
                         // texture = overrideBlockTexture;
-                        getCaptureGroup(2),
+                        getCaptureGroup(3),
 
-                        // CTMUtils.finish();
+                        // CTMUtils.reset();
                         reference(INVOKESTATIC, reset),
                         GOTO, branch("B"),
 
-                        // } else {
+                        // } else if (CTMUtils.setup(block, blockAccess, (int) x, (int) y, (int) z, face, texture)) {
                         label("A"),
-
-                        // texture = CTMUtils.setup(block, blockAccess, (int) x, (int) y, (int) z, face, texture);
                         ALOAD_1,
                         ALOAD_0,
                         reference(GETFIELD, blockAccess),
@@ -382,9 +380,17 @@ public class ConnectedTextures extends Mod {
                         DLOAD, 6,
                         D2I,
                         push(face),
-                        ILOAD, 8,
+                        ILOAD, getCaptureGroup(4),
                         reference(INVOKESTATIC, setup),
-                        ISTORE, 8,
+                        IFEQ, branch("B"),
+
+                        // texture = CTMUtils.newTextureIndex;
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTextureIndex", "I")),
+                        ISTORE, getCaptureGroup(4),
+
+                        // tessellator = CTMUtils.newTessellator;
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTessellator", "LTessellator;")),
+                        ASTORE, getCaptureGroup(2),
 
                         // }
                         label("B")
