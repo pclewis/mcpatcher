@@ -256,38 +256,38 @@ public class CTMUtils {
             switch (i) {
                 case BLOCK_ID_GLASS:
                     if (enableGlass) {
-                        textureName = "/ctm.png";
+                        textureName = "/ctm";
                     }
                     break;
 
                 case BLOCK_ID_GLASS_PANE:
                     if (enableGlassPane) {
-                        textureName = "/ctm.png";
+                        textureName = "/ctm";
                     }
                     break;
 
                 case BLOCK_ID_BOOKSHELF:
                     if (enableBookshelf) {
-                        textureName = "/ctm.png";
+                        textureName = "/ctm";
                     }
                     break;
 
                 case BLOCK_ID_SANDSTONE:
                     if (enableSandstone) {
-                        textureName = "/ctm.png";
+                        textureName = "/ctm";
                     }
                     break;
 
                 default:
                     if (enableOther) {
-                        textureName = "/ctm/block" + i + ".png";
+                        textureName = "/ctm/block" + i;
                     }
                     break;
             }
             if (textureName != null) {
                 TextureOverride override = new TextureOverride("block", textureName);
                 if (override.isValid()) {
-                    MCPatcherUtils.info("using %s (texture id %d) for block %d", textureName, override.texture, i);
+                    MCPatcherUtils.info("using %s (texture id %d) for block %d", override.textureName, override.texture, i);
                     blocks[i] = override;
                 }
             }
@@ -298,7 +298,7 @@ public class CTMUtils {
         tiles = new TextureOverride[NUM_TILES];
         if (enableOther) {
             for (int i = 0; i < tiles.length; i++) {
-                TextureOverride override = new TextureOverride("terrain", "/ctm/terrain" + i + ".png");
+                TextureOverride override = new TextureOverride("terrain", "/ctm/terrain" + i);
                 if (override.isValid()) {
                     MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", override.textureName, override.texture, i);
                     tiles[i] = override;
@@ -433,17 +433,13 @@ public class CTMUtils {
         final boolean random;
         final int numTiles;
 
-        TextureOverride(String type, String textureName) {
+        TextureOverride(String type, String filePrefix) {
             this.type = type;
-            this.textureName = textureName;
 
-            texture = getTexture(textureName);
-
-            String filename = textureName.replaceFirst("\\.png$", ".properties");
             InputStream is = null;
             Properties properties = new Properties();
             try {
-                is = lastTexturePack.getInputStream(filename);
+                is = lastTexturePack.getInputStream(filePrefix + ".properties");
                 if (is != null) {
                     properties.load(is);
                 }
@@ -452,6 +448,8 @@ public class CTMUtils {
             } finally {
                 MCPatcherUtils.close(is);
             }
+            textureName = properties.getProperty("source", filePrefix + ".png");
+            texture = getTexture(textureName);
 
             int flags = 0;
             for (String val : properties.getProperty("faces", "all").trim().toLowerCase().split("\\s+")) {
