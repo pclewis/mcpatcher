@@ -463,7 +463,7 @@ public class MCPatcherUtils {
      */
     public static int[] parseIntegerList(String list) {
         ArrayList<Integer> tmpList = new ArrayList<Integer>();
-        for (String token : list.split(",")) {
+        for (String token : list.replace(',', ' ').split("\\s+")) {
             token = token.trim();
             try {
                 if (token.matches("^\\d+$")) {
