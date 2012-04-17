@@ -31,6 +31,7 @@ public class ConnectedTextures extends Mod {
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS + "$TextureOverride"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SUPER_TESSELLATOR_CLASS));
     }
 
     private class ConfigPanel extends ModConfigPanel {
@@ -159,6 +160,19 @@ public class ConnectedTextures extends Mod {
             final MethodRef draw = new MethodRef(getDeobfClass(), "draw", "()I");
             final MethodRef startDrawingQuads = new MethodRef(getDeobfClass(), "startDrawingQuads", "()V");
             final MethodRef startDrawing = new MethodRef(getDeobfClass(), "startDrawing", "(I)V");
+            final MethodRef tessellatorInit = new MethodRef("Tessellator", "<init>", "(I)V");
+            final MethodRef setBrightness = new MethodRef(getDeobfClass(), "setBrightness", "(I)V");
+            final MethodRef setColorRGBA = new MethodRef(getDeobfClass(), "setColorRGBA", "(IIII)V");
+            final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
+            final FieldRef hasNormals = new FieldRef(getDeobfClass(), "hasNormals", "Z");
+            final FieldRef normal = new FieldRef(getDeobfClass(), "normal", "I");
+            final FieldRef isDrawing = new FieldRef(getDeobfClass(), "isDrawing", "Z");
+            final FieldRef drawMode = new FieldRef(getDeobfClass(), "drawMode", "I");
+            final FieldRef hasBrightness = new FieldRef(getDeobfClass(), "hasBrightness", "Z");
+            final FieldRef brightness = new FieldRef(getDeobfClass(), "brightness", "I");
+            final FieldRef isColorDisabled = new FieldRef(getDeobfClass(), "isColorDisabled", "Z");
+            final FieldRef hasColor = new FieldRef(getDeobfClass(), "hasColor", "Z");
+            final FieldRef color = new FieldRef(getDeobfClass(), "color", "I");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -168,6 +182,30 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             }.setMethod(draw));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+
+                        BinaryRegex.any(0, 50),
+
+                        push("Already tesselating!"),
+                        BinaryRegex.any(0, 100),
+
+                        ALOAD_0,
+                        ILOAD_1,
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .setMethod(startDrawing)
+                .addXref(1, isDrawing)
+                .addXref(2, drawMode)
+            );
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -186,9 +224,131 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, startDrawing)
             );
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "instance", "LTessellator;")).accessFlag(AccessFlag.STATIC, true));
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        push(1),
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        FLOAD_1,
+                        push(127.0f),
+                        FMUL,
+                        F2I,
+                        I2B,
+
+                        BinaryRegex.any(0, 100),
+
+                        IOR,
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .addXref(1, hasNormals)
+                .addXref(2, normal)
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        ICONST_1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        ALOAD_0,
+                        ILOAD_1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        RETURN,
+                        BinaryRegex.end()
+                    );
+                }
+            }
+                .setMethod(setBrightness)
+                .addXref(1, hasBrightness)
+                .addXref(2, brightness)
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+
+                        BinaryRegex.any(0, 200),
+
+                        ALOAD_0,
+                        ICONST_1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        BinaryRegex.any(0, 100),
+
+                        reference(GETSTATIC, new FieldRef("java/nio/ByteOrder", "LITTLE_ENDIAN",  "Ljava/nio/ByteOrder;")),
+
+                        BinaryRegex.any(0, 100),
+
+                        IOR,
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .setMethod(setColorRGBA)
+                .addXref(1, isColorDisabled)
+                .addXref(2, hasColor)
+                .addXref(3, color)
+            );
+
+            memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
             patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "preserve", "Z")));
+
+            for (JavaRef ref : new JavaRef[]{
+                tessellatorInit, isDrawing, drawMode, hasNormals, normal, hasBrightness, brightness, isColorDisabled,
+                hasColor, color
+            }) {
+                patches.add(new MakeMemberPublicPatch(ref) {
+                    public int getNewFlags(int oldFlags) {
+                        return (oldFlags & ~AccessFlag.PRIVATE) | AccessFlag.PROTECTED;
+                    }
+                });
+            }
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "replace tessellator instance";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isStaticInitializer()) {
+                        return buildExpression(
+                            reference(NEW, new ClassRef("Tessellator")),
+                            DUP,
+                            BinaryRegex.capture(BytecodeMatcher.anyLDC),
+                            reference(INVOKESPECIAL, tessellatorInit)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(NEW, new ClassRef(MCPatcherUtils.SUPER_TESSELLATOR_CLASS)),
+                        DUP,
+                        getCaptureGroup(1),
+                        reference(INVOKESPECIAL, new MethodRef(MCPatcherUtils.SUPER_TESSELLATOR_CLASS, "<init>", "(I)V"))
+                    );
+                }
+            });
 
             patches.add(new BytecodePatch() {
                 @Override
