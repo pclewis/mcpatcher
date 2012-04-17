@@ -166,7 +166,7 @@ public class CTMUtils {
     private static TexturePackBase lastTexturePack;
     private static TextureOverride blocks[];
     private static TextureOverride tiles[];
-    private static int terrainTexture;
+    static int terrainTexture;
 
     private static boolean active;
     private static boolean textureChanged;
@@ -181,11 +181,11 @@ public class CTMUtils {
     }
 
     public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int face, int origTexture) {
-        if (!active || blockAccess == null || face < 0 || face > 5) {
+        if (!active || blockAccess == null || face < 0 || face > 5 || !(Tessellator.instance instanceof SuperTessellator)) {
             return false;
         }
         if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face) && bindTexture(newTexture)) {
-            newTessellator = getTessellator(newTexture);
+            newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             textureChanged = true;
             return true;
         } else {
@@ -265,6 +265,9 @@ public class CTMUtils {
         MCPatcherUtils.info("refreshing connected textures");
         lastTexturePack = selectedTexturePack;
         terrainTexture = getTexture("/terrain.png");
+        if (Tessellator.instance instanceof SuperTessellator) {
+            ((SuperTessellator) Tessellator.instance).clearTessellators();
+        }
 
         refreshBlockTextures();
         refreshTileTextures();
