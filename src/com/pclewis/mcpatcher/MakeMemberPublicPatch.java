@@ -15,21 +15,18 @@ public class MakeMemberPublicPatch extends ClassPatch {
     private int newFlags;
 
     /**
-     * @param fieldRef may use deobfuscated names, provided they are in the class map
+     * @param ref may use deobfuscated names, provided they are in the class map
      */
-    public MakeMemberPublicPatch(FieldRef fieldRef) {
-        member = fieldRef;
-        type = "field";
+    public MakeMemberPublicPatch(JavaRef ref) {
+        member = ref;
         optional = true;
-    }
-
-    /**
-     * @param methodRef may use deobfuscated names, provided they are in the class map
-     */
-    public MakeMemberPublicPatch(MethodRef methodRef) {
-        member = methodRef;
-        type = "method";
-        optional = true;
+        if (ref instanceof FieldRef) {
+            type = "field";
+        } else if (ref instanceof MethodRef) {
+            type = "method";
+        } else {
+            throw new IllegalArgumentException("unexpected type: " + ref.getClass().getName());
+        }
     }
 
     @Override
@@ -44,6 +41,9 @@ public class MakeMemberPublicPatch extends ClassPatch {
                 continue;
             }
             if (AccessFlag.isPublic(added) && (flag.equals("protected") || flag.equals("private"))) {
+                continue;
+            }
+            if (AccessFlag.isProtected(added) && flag.equals("private")) {
                 continue;
             }
             if (first) {
