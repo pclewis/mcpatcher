@@ -120,28 +120,47 @@ public class CTMUtils {
     // 1   *   16
     // 2   4   8
     private static final int[] GENERIC_TEXTURE_INDEX = new int[]{
-        0, 3, 0, 3, 16, 5, 16, 19, 0, 3, 0, 3, 16, 5, 16, 19,
-        1, 2, 1, 2, 4, 7, 4, 37, 1, 2, 1, 2, 17, 39, 17, 18,
-        0, 3, 0, 3, 16, 5, 16, 19, 0, 3, 0, 3, 16, 5, 16, 19,
-        1, 2, 1, 2, 4, 7, 4, 37, 1, 2, 1, 2, 17, 39, 17, 18,
-        48, 21, 48, 21, 32, 23, 32, 55, 48, 21, 48, 21, 32, 23, 32, 55,
-        20, 22, 20, 22, 6, 58, 6, 25, 20, 22, 20, 22, 36, 9, 36, 26,
-        48, 21, 48, 21, 32, 23, 32, 55, 48, 21, 48, 21, 32, 23, 32, 55,
-        49, 52, 49, 52, 38, 8, 38, 42, 49, 52, 49, 52, 33, 27, 33, 57,
-        0, 3, 0, 3, 16, 5, 16, 19, 0, 3, 0, 3, 16, 5, 16, 19,
-        1, 2, 1, 2, 4, 7, 4, 37, 1, 2, 1, 2, 17, 39, 17, 18,
-        0, 3, 0, 3, 16, 5, 16, 19, 0, 3, 0, 3, 16, 5, 16, 19,
-        1, 2, 1, 2, 4, 7, 4, 37, 1, 2, 1, 2, 17, 39, 17, 18,
-        48, 51, 48, 51, 32, 53, 32, 35, 48, 51, 48, 51, 32, 53, 32, 35,
-        20, 54, 20, 54, 6, 24, 6, 10, 20, 54, 20, 54, 36, 43, 36, 56,
-        48, 51, 48, 51, 32, 53, 32, 35, 48, 51, 48, 51, 32, 53, 32, 35,
-        49, 50, 49, 50, 38, 11, 38, 40, 49, 50, 49, 50, 33, 41, 33, 34,
+        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
+        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
+        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
+        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
+        36, 17, 36, 17, 24, 19, 24, 43, 36, 17, 36, 17, 24, 19, 24, 43,
+        16, 18, 16, 18, 6, 46, 6, 21, 16, 18, 16, 18, 28, 9, 28, 22,
+        36, 17, 36, 17, 24, 19, 24, 43, 36, 17, 36, 17, 24, 19, 24, 43,
+        37, 40, 37, 40, 30, 8, 30, 34, 37, 40, 37, 40, 25, 23, 25, 45,
+        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
+        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
+        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
+        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
+        36, 39, 36, 39, 24, 41, 24, 27, 36, 39, 36, 39, 24, 41, 24, 27,
+        16, 42, 16, 42, 6, 20, 6, 10, 16, 42, 16, 42, 28, 35, 28, 44,
+        36, 39, 36, 39, 24, 41, 24, 27, 36, 39, 36, 39, 24, 41, 24, 27,
+        37, 38, 37, 38, 30, 11, 30, 32, 37, 38, 37, 38, 25, 33, 25, 26,
     };
 
     // Index into this array is formed from these bit values:
     // 1   *   2
     private static final int[] BOOKSHELF_TEXTURE_INDEX = new int[]{
-        15, 14, 12, 13,
+        3, 2, 0, 1,
+    };
+
+    private static final int[] SANDSTONE_TEXTURE_INDEX = new int[]{
+        0, 1, 2, 3,
+    };
+
+    private static final int[] GENERIC_TILE_MAPPING = new int[]{
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+        32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+    };
+
+    private static final int[] BOOKSHELF_TILE_MAPPING = new int[]{
+        12, 13, 14, 15,
+    };
+
+    private static final int[] SANDSTONE_TILE_MAPPING = new int[]{
+        64, 65, 66, 67,
     };
 
     private static TexturePackBase lastTexturePack;
@@ -253,39 +272,51 @@ public class CTMUtils {
         blocks = new TextureOverride[Block.blocksList.length];
         for (int i = 0; i < blocks.length; i++) {
             String textureName = null;
+            int[] tileMap1 = null;
+            int[] tileMap2 = null;
             switch (i) {
                 case BLOCK_ID_GLASS:
                     if (enableGlass) {
                         textureName = "/ctm";
+                        tileMap1 = GENERIC_TEXTURE_INDEX;
+                        tileMap2 = GENERIC_TILE_MAPPING;
                     }
                     break;
 
                 case BLOCK_ID_GLASS_PANE:
                     if (enableGlassPane) {
                         textureName = "/ctm";
+                        tileMap1 = GENERIC_TEXTURE_INDEX;
+                        tileMap2 = GENERIC_TILE_MAPPING;
                     }
                     break;
 
                 case BLOCK_ID_BOOKSHELF:
                     if (enableBookshelf) {
                         textureName = "/ctm";
+                        tileMap1 = BOOKSHELF_TEXTURE_INDEX;
+                        tileMap2 = BOOKSHELF_TILE_MAPPING;
                     }
                     break;
 
                 case BLOCK_ID_SANDSTONE:
                     if (enableSandstone) {
                         textureName = "/ctm";
+                        tileMap1 = SANDSTONE_TEXTURE_INDEX;
+                        tileMap2 = SANDSTONE_TILE_MAPPING;
                     }
                     break;
 
                 default:
                     if (enableOther) {
                         textureName = "/ctm/block" + i;
+                        tileMap1 = GENERIC_TEXTURE_INDEX;
+                        tileMap2 = GENERIC_TILE_MAPPING;
                     }
                     break;
             }
             if (textureName != null) {
-                TextureOverride override = new TextureOverride("block", textureName);
+                TextureOverride override = new TextureOverride("block", textureName, tileMap1, tileMap2);
                 if (override.isValid()) {
                     MCPatcherUtils.info("using %s (texture id %d) for block %d", override.textureName, override.texture, i);
                     blocks[i] = override;
@@ -298,7 +329,7 @@ public class CTMUtils {
         tiles = new TextureOverride[NUM_TILES];
         if (enableOther) {
             for (int i = 0; i < tiles.length; i++) {
-                TextureOverride override = new TextureOverride("terrain", "/ctm/terrain" + i);
+                TextureOverride override = new TextureOverride("terrain", "/ctm/terrain" + i, GENERIC_TEXTURE_INDEX, GENERIC_TILE_MAPPING);
                 if (override.isValid()) {
                     MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", override.textureName, override.texture, i);
                     tiles[i] = override;
@@ -367,7 +398,7 @@ public class CTMUtils {
             }
         }
 
-        TextureOverride override = new TextureOverride("tile", newImage);
+        TextureOverride override = new TextureOverride("tile", newImage, GENERIC_TEXTURE_INDEX, GENERIC_TILE_MAPPING);
         if (override.isValid()) {
             tiles[tileNum] = override;
         }
@@ -431,9 +462,9 @@ public class CTMUtils {
         final int texture;
         final int faces;
         final boolean random;
-        final int numTiles;
+        final int[] tileMap;
 
-        TextureOverride(String type, String filePrefix) {
+        TextureOverride(String type, String filePrefix, int[] tileMap1, int[] tileMap2) {
             this.type = type;
 
             InputStream is = null;
@@ -473,39 +504,53 @@ public class CTMUtils {
             }
             faces = flags;
 
-            String val = properties.getProperty("mode", "ctm").trim().toLowerCase();
-            if (val.equals("random")) {
-                val = properties.getProperty("tiles", "0").trim();
-                int n = 0;
-                try {
-                    n = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+            random = properties.getProperty("mode", "ctm").trim().toLowerCase().equals("random");
+            if (random) {
+                int[] newTileMap = MCPatcherUtils.parseIntegerList(properties.getProperty("tiles", "0-" + (NUM_TILES - 1)));
+                if (newTileMap.length > 0) {
+                    tileMap = newTileMap;
+                } else {
+                    tileMap = null;
                 }
-                random = true;
-                numTiles = n;
             } else {
-                random = false;
-                numTiles = 0;
+                String val = properties.getProperty("tiles", "").trim();
+                int[] newTileMap2;
+                if ("".equals(val)) {
+                    newTileMap2 = tileMap2;
+                } else {
+                    newTileMap2 = MCPatcherUtils.parseIntegerList(val);
+                    if (newTileMap2.length != tileMap2.length) {
+                        MCPatcherUtils.error("tile map in %s.properties requires %d entries, got %d",
+                            filePrefix, tileMap2.length, newTileMap2.length
+                        );
+                        newTileMap2 = null;
+                    }
+                }
+                if (newTileMap2 == null) {
+                    tileMap = null;
+                } else {
+                    tileMap = new int[tileMap1.length];
+                    for (int i = 0; i < tileMap1.length; i++) {
+                        tileMap[i] = tileMap2[tileMap1[i]];
+                    }
+                }
             }
         }
 
-        TextureOverride(String type, BufferedImage image) {
+        TextureOverride(String type, BufferedImage image, int[] tileMap1, int[] tileMap2) {
             this.type = type;
+            tileMap = new int[tileMap1.length];
+            for (int i = 0; i < tileMap1.length; i++) {
+                tileMap[i] = tileMap2[tileMap1[i]];
+            }
             textureName = null;
             texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
             faces = -1;
             random = false;
-            numTiles = 0;
         }
 
         boolean isValid() {
-            if (texture < 0) {
-                return false;
-            }
-            if (random && numTiles <= 0) {
-                return false;
-            }
-            return true;
+            return texture >= 0 && tileMap != null;
         }
 
         boolean override(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
@@ -520,7 +565,7 @@ public class CTMUtils {
                 n = MULTIPLIER * n + ADDEND;
                 n = MULTIPLIER * n + ADDEND;
                 n &= MASK;
-                newTextureIndex = (int) (((double) n / (double) (MASK + 1)) * numTiles);
+                newTextureIndex = tileMap[(int) (((double) n / (double) (MASK + 1)) * tileMap.length)];
             } else {
                 int[][] offsets = NEIGHBOR_OFFSET[face];
                 int neighborBits = 0;
@@ -529,35 +574,36 @@ public class CTMUtils {
                         neighborBits |= (1 << bit);
                     }
                 }
-                newTextureIndex = GENERIC_TEXTURE_INDEX[neighborBits];
+                newTextureIndex = tileMap[neighborBits];
             }
             return true;
         }
 
         boolean overrideBookshelf(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-            if (face < 2) {
+            if (face <= TOP_FACE) {
                 return false;
             }
-            int neighborBits = 0;
             int[][] offsets = NEIGHBOR_OFFSET[face];
-            for (int bit = 0; bit < 2; bit++) {
-                if (shouldConnect(blockAccess, blockId, i, j, k, offsets[4 * bit])) {
-                    neighborBits |= (1 << bit);
-                }
+            int neighborBits = 0;
+            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[0])) {
+                neighborBits |= 1;
             }
-            newTextureIndex = BOOKSHELF_TEXTURE_INDEX[neighborBits];
+            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[4])) {
+                neighborBits |= 2;
+            }
+            newTextureIndex = tileMap[neighborBits];
             return true;
         }
 
         boolean overrideSandstone(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-            if (face < 2) {
+            if (face <= TOP_FACE) {
                 return false;
             }
             if (blockAccess.getBlockMetadata(i, j, k) != 0) {
                 return false;
             }
             if (shouldConnect(blockAccess, blockId, i, j, k, GO_UP)) {
-                newTextureIndex = 66;
+                newTextureIndex = tileMap[2];
                 return true;
             }
             return false;
