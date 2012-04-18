@@ -34,11 +34,6 @@ public class SuperTessellator extends Tessellator {
             copyFields(newTessellator, texture, true);
             children.put(texture, newTessellator);
         }
-        if (isDrawing && !newTessellator.isDrawing) {
-            newTessellator.startDrawing(drawMode);
-        } else if (!isDrawing && newTessellator.isDrawing) {
-            newTessellator.reset();
-        }
         return newTessellator;
     }
 
@@ -67,9 +62,10 @@ public class SuperTessellator extends Tessellator {
         newTessellator.bufferSize = saveBufferSize;
         newTessellator.texture = texture;
         newTessellator.reset();
-        newTessellator.isDrawing = false;
-        if (isDrawing) {
+        if (isDrawing && !newTessellator.isDrawing) {
             newTessellator.startDrawing(drawMode);
+        } else if (!isDrawing && newTessellator.isDrawing) {
+            newTessellator.reset();
         }
     }
 
