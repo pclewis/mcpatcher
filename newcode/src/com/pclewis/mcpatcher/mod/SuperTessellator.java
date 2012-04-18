@@ -26,9 +26,11 @@ public class SuperTessellator extends Tessellator {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
             newTessellator = new Tessellator(defaultBufferSize);
             children.put(texture, newTessellator);
-            if (oldTessellator.isDrawing) {
-                newTessellator.startDrawing(oldTessellator.drawMode);
-            }
+        }
+        if (oldTessellator.isDrawing && !newTessellator.isDrawing) {
+            newTessellator.startDrawing(oldTessellator.drawMode);
+        } else if (!oldTessellator.isDrawing && newTessellator.isDrawing) {
+            newTessellator.reset();
         }
         newTessellator.hasBrightness = oldTessellator.hasBrightness;
         newTessellator.brightness = oldTessellator.brightness;
@@ -50,7 +52,6 @@ public class SuperTessellator extends Tessellator {
 
     @Override
     public void reset() {
-        MCPatcherUtils.info("reset()");
         super.reset();
         for (Tessellator t : children.values()) {
             t.reset();
@@ -59,7 +60,6 @@ public class SuperTessellator extends Tessellator {
 
     @Override
     public int draw() {
-        MCPatcherUtils.info("draw()");
         int result = super.draw();
         for (Tessellator t : children.values()) {
             result += t.draw();
@@ -69,7 +69,6 @@ public class SuperTessellator extends Tessellator {
 
     @Override
     public void startDrawing(int drawMode) {
-        MCPatcherUtils.info("startDrawing(%d)", drawMode);
         super.startDrawing(drawMode);
         for (Tessellator t : children.values()) {
             t.startDrawing(drawMode);

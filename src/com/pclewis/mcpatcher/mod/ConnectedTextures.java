@@ -1,8 +1,8 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import com.sun.org.apache.bcel.internal.generic.DADD;
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.ClassFile;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -305,7 +305,7 @@ public class ConnectedTextures extends Mod {
 
                         BinaryRegex.any(0, 100),
 
-                        reference(GETSTATIC, new FieldRef("java/nio/ByteOrder", "LITTLE_ENDIAN",  "Ljava/nio/ByteOrder;")),
+                        reference(GETSTATIC, new FieldRef("java/nio/ByteOrder", "LITTLE_ENDIAN", "Ljava/nio/ByteOrder;")),
 
                         BinaryRegex.any(0, 100),
 
@@ -430,6 +430,11 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             });
+        }
+
+        @Override
+        public void prePatch(String filename, ClassFile classFile) {
+            getClassMap().addInheritance(getDeobfClass(), MCPatcherUtils.SUPER_TESSELLATOR_CLASS);
         }
     }
 
