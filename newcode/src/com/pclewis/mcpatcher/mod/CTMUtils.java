@@ -431,11 +431,13 @@ public class CTMUtils {
         if (texture >= 0) {
             int curTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
             if (curTexture != texture) {
+                /*
                 Tessellator tessellator = Tessellator.instance;
                 tessellator.preserve = true;
                 tessellator.draw();
                 tessellator.startDrawingQuads();
                 tessellator.preserve = false;
+                */
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
             }
             return true;

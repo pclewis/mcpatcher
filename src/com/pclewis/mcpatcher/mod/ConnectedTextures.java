@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
+import com.sun.org.apache.bcel.internal.generic.DADD;
 import javassist.bytecode.AccessFlag;
 
 import javax.swing.*;
@@ -160,9 +161,12 @@ public class ConnectedTextures extends Mod {
             final MethodRef draw = new MethodRef(getDeobfClass(), "draw", "()I");
             final MethodRef startDrawingQuads = new MethodRef(getDeobfClass(), "startDrawingQuads", "()V");
             final MethodRef startDrawing = new MethodRef(getDeobfClass(), "startDrawing", "(I)V");
-            final MethodRef tessellatorInit = new MethodRef("Tessellator", "<init>", "(I)V");
+            final MethodRef constructor = new MethodRef("Tessellator", "<init>", "(I)V");
+            final MethodRef setNormal = new MethodRef(getDeobfClass(), "setNormal", "(FFF)V");
             final MethodRef setBrightness = new MethodRef(getDeobfClass(), "setBrightness", "(I)V");
             final MethodRef setColorRGBA = new MethodRef(getDeobfClass(), "setColorRGBA", "(IIII)V");
+            final MethodRef setTextureUV = new MethodRef(getDeobfClass(), "setTextureUV", "(DD)V");
+            final MethodRef setTranslation = new MethodRef(getDeobfClass(), "setTranslation", "(DDD)V");
             final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
             final FieldRef hasNormals = new FieldRef(getDeobfClass(), "hasNormals", "Z");
             final FieldRef normal = new FieldRef(getDeobfClass(), "normal", "I");
@@ -173,6 +177,12 @@ public class ConnectedTextures extends Mod {
             final FieldRef isColorDisabled = new FieldRef(getDeobfClass(), "isColorDisabled", "Z");
             final FieldRef hasColor = new FieldRef(getDeobfClass(), "hasColor", "Z");
             final FieldRef color = new FieldRef(getDeobfClass(), "color", "I");
+            final FieldRef hasTexture = new FieldRef(getDeobfClass(), "hasTexture", "Z");
+            final FieldRef textureU = new FieldRef(getDeobfClass(), "textureU", "D");
+            final FieldRef textureV = new FieldRef(getDeobfClass(), "textureV", "D");
+            final FieldRef xOffset = new FieldRef(getDeobfClass(), "xOffset", "D");
+            final FieldRef yOffset = new FieldRef(getDeobfClass(), "yOffset", "D");
+            final FieldRef zOffset = new FieldRef(getDeobfClass(), "zOffset", "D");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -246,6 +256,7 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             }
+                .setMethod(setNormal)
                 .addXref(1, hasNormals)
                 .addXref(2, normal)
             );
@@ -304,19 +315,65 @@ public class ConnectedTextures extends Mod {
                 .addXref(3, color)
             );
 
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        ALOAD_0,
+                        ICONST_1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        ALOAD_0,
+                        DLOAD_1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        ALOAD_0,
+                        DLOAD_3,
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .setMethod(setTextureUV)
+                .addXref(1, hasTexture)
+                .addXref(2, textureU)
+                .addXref(3, textureV)
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        DLOAD_1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        ALOAD_0,
+                        DLOAD_3,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        ALOAD_0,
+                        DLOAD, 5,
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .setMethod(setTranslation)
+                .addXref(1, xOffset)
+                .addXref(2, yOffset)
+                .addXref(3, zOffset)
+            );
+
             memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
             patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "preserve", "Z")));
 
             for (JavaRef ref : new JavaRef[]{
-                tessellatorInit, isDrawing, drawMode, hasNormals, normal, hasBrightness, brightness, isColorDisabled,
-                hasColor, color
+                constructor, startDrawing, isDrawing, drawMode, setNormal, hasNormals, normal,
+                setBrightness, hasBrightness, brightness, setColorRGBA, isColorDisabled, hasColor, color,
+                hasTexture, textureU, textureV, setTranslation, xOffset, yOffset, zOffset
             }) {
-                patches.add(new MakeMemberPublicPatch(ref) {
-                    public int getNewFlags(int oldFlags) {
-                        return (oldFlags & ~AccessFlag.PRIVATE) | AccessFlag.PROTECTED;
-                    }
-                });
+                patches.add(new MakeMemberPublicPatch(ref));
             }
 
             patches.add(new BytecodePatch() {
@@ -332,7 +389,7 @@ public class ConnectedTextures extends Mod {
                             reference(NEW, new ClassRef("Tessellator")),
                             DUP,
                             BinaryRegex.capture(BytecodeMatcher.anyLDC),
-                            reference(INVOKESPECIAL, tessellatorInit)
+                            reference(INVOKESPECIAL, constructor)
                         );
                     } else {
                         return null;

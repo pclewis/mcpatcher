@@ -14,13 +14,32 @@ public class SuperTessellator extends Tessellator {
     Tessellator getTessellator(int texture) {
         if (texture == CTMUtils.terrainTexture) {
             return this;
-        } else if (children.containsKey(texture)) {
-            return children.get(texture);
-        } else {
-            Tessellator newTessellator = new Tessellator(0x200000);
+        }
+        Tessellator oldTessellator = Tessellator.instance;
+        Tessellator newTessellator = children.get(texture);
+        if (newTessellator == null) {
+            newTessellator = new Tessellator(0x200000);
             children.put(texture, newTessellator);
+        } else {
             return newTessellator;
         }
+        if (oldTessellator.isDrawing) {
+            newTessellator.startDrawing(oldTessellator.drawMode);
+        }
+        if (oldTessellator.hasBrightness) {
+            newTessellator.setBrightness(oldTessellator.brightness);
+        }
+        newTessellator.isColorDisabled = oldTessellator.isColorDisabled;
+        newTessellator.hasColor = oldTessellator.hasColor;
+        newTessellator.color = oldTessellator.color;
+        newTessellator.hasBrightness = oldTessellator.hasBrightness;
+        newTessellator.brightness = oldTessellator.brightness;
+        newTessellator.hasNormals = oldTessellator.hasNormals;
+        if (newTessellator.hasTexture) {
+            newTessellator.setTextureUV(oldTessellator.textureU, oldTessellator.textureV);
+        }
+        newTessellator.setTranslation(oldTessellator.xOffset, oldTessellator.yOffset, oldTessellator.zOffset);
+        return newTessellator;
     }
 
     void clearTessellators() {
