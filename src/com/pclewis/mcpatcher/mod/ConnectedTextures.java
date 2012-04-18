@@ -167,6 +167,7 @@ public class ConnectedTextures extends Mod {
             final MethodRef setColorRGBA = new MethodRef(getDeobfClass(), "setColorRGBA", "(IIII)V");
             final MethodRef setTextureUV = new MethodRef(getDeobfClass(), "setTextureUV", "(DD)V");
             final MethodRef setTranslation = new MethodRef(getDeobfClass(), "setTranslation", "(DDD)V");
+            final MethodRef reset = new MethodRef(getDeobfClass(), "reset", "()V");
             final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
             final FieldRef hasNormals = new FieldRef(getDeobfClass(), "hasNormals", "Z");
             final FieldRef normal = new FieldRef(getDeobfClass(), "normal", "I");
@@ -207,6 +208,9 @@ public class ConnectedTextures extends Mod {
                         BinaryRegex.any(0, 100),
 
                         ALOAD_0,
+                        BytecodeMatcher.captureReference(INVOKESPECIAL),
+
+                        ALOAD_0,
                         ILOAD_1,
                         BytecodeMatcher.captureReference(PUTFIELD)
                     );
@@ -214,7 +218,8 @@ public class ConnectedTextures extends Mod {
             }
                 .setMethod(startDrawing)
                 .addXref(1, isDrawing)
-                .addXref(2, drawMode)
+                .addXref(2, reset)
+                .addXref(3, drawMode)
             );
 
             classSignatures.add(new BytecodeSignature() {
@@ -366,12 +371,10 @@ public class ConnectedTextures extends Mod {
 
             memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "preserve", "Z")));
-
             for (JavaRef ref : new JavaRef[]{
                 constructor, startDrawing, isDrawing, drawMode, setNormal, hasNormals, normal,
                 setBrightness, hasBrightness, brightness, setColorRGBA, isColorDisabled, hasColor, color,
-                hasTexture, textureU, textureV, setTranslation, xOffset, yOffset, zOffset
+                hasTexture, textureU, textureV, setTranslation, xOffset, yOffset, zOffset, reset
             }) {
                 patches.add(new MakeMemberPublicPatch(ref));
             }
@@ -410,42 +413,23 @@ public class ConnectedTextures extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "preserve state during texture change";
+                    return "fix references to reset method";
                 }
 
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD_0,
-                            ILOAD_1,
-                            BytecodeMatcher.anyReference(PUTFIELD)
-                        )),
-                        BinaryRegex.capture(BinaryRegex.any(0, 100)),
-                        RETURN
+                        reference(INVOKESPECIAL, reset)
                     );
                 }
 
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // drawMode = i;
-                        getCaptureGroup(1),
-
-                        // if (!preserve) {
-                        ALOAD_0,
-                        reference(GETFIELD, new FieldRef(getDeobfClass(), "preserve", "Z")),
-                        IFNE, branch("A"),
-
-                        // ...
-                        getCaptureGroup(2),
-
-                        // }
-                        label("A"),
-                        RETURN
+                        reference(INVOKEVIRTUAL, reset)
                     );
                 }
-            }.targetMethod(startDrawing));
+            });
         }
     }
 
