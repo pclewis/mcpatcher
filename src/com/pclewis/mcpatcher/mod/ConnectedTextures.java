@@ -16,7 +16,7 @@ public class ConnectedTextures extends Mod {
         name = MCPatcherUtils.CONNECTED_TEXTURES;
         author = "MCPatcher";
         description = "Connects adjacent blocks of the same type.";
-        version = "1.0";
+        version = "1.1";
         defaultEnabled = false;
 
         configPanel = new ConfigPanel();
@@ -648,7 +648,7 @@ public class ConnectedTextures extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "pre render standard block";
+                    return "pre render world";
                 }
 
                 @Override
@@ -669,7 +669,7 @@ public class ConnectedTextures extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "post render standard block";
+                    return "post render world";
                 }
 
                 @Override
