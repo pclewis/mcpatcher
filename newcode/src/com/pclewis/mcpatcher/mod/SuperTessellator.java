@@ -26,6 +26,7 @@ public class SuperTessellator extends Tessellator {
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
             newTessellator = new Tessellator(defaultBufferSize);
+            newTessellator.texture = texture;
             children.put(texture, newTessellator);
         }
         if (isDrawing && !newTessellator.isDrawing) {
@@ -61,20 +62,11 @@ public class SuperTessellator extends Tessellator {
 
     @Override
     public int draw() {
-        int result = super.draw();
-        if (CTMUtils.active && !children.isEmpty()) {
-            for (Map.Entry<Integer, Tessellator> entry : children.entrySet()) {
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, entry.getKey());
-                result += entry.getValue().draw();
-            }
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, CTMUtils.terrainTexture);
-        } else {
-            for (Tessellator t : children.values()) {
-                t.reset();
-                t.isDrawing = false;
-            }
+        int total = 0;
+        for (Tessellator t : children.values()) {
+            total += t.draw();
         }
-        return result;
+        return total + super.draw();
     }
 
     @Override

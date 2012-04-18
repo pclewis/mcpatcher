@@ -185,6 +185,7 @@ public class ConnectedTextures extends Mod {
             final FieldRef xOffset = new FieldRef(getDeobfClass(), "xOffset", "D");
             final FieldRef yOffset = new FieldRef(getDeobfClass(), "yOffset", "D");
             final FieldRef zOffset = new FieldRef(getDeobfClass(), "zOffset", "D");
+            final FieldRef texture = new FieldRef(getDeobfClass(), "texture", "I");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -380,6 +381,8 @@ public class ConnectedTextures extends Mod {
                 patches.add(new MakeMemberPublicPatch(ref));
             }
 
+            patches.add(new AddFieldPatch(texture));
+
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
@@ -410,6 +413,69 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             });
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "initialize texture field to -1";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            RETURN
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        push(-1),
+                        reference(PUTFIELD, texture)
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "bind texture before drawing";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        reference(INVOKEVIRTUAL, new MethodRef("java/nio/IntBuffer", "clear", "()Ljava/nio/Buffer;")),
+                        POP
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        // if (texture >= 0) {
+                        ALOAD_0,
+                        reference(GETFIELD, texture),
+                        IFLT, branch("A"),
+
+                        // GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
+                        push(3553), // GL11.GL_TEXTURE_2D
+                        ALOAD_0,
+                        reference(GETFIELD, texture),
+                        reference(INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glBindTexture", "(II)V")),
+
+                        // }
+                        label("A")
+                    );
+                }
+            }.targetMethod(draw));
 
             patches.add(new BytecodePatch() {
                 @Override

@@ -25,6 +25,8 @@ public class Tessellator {
     public int normal;
     public boolean isDrawing;
 
+    public int texture; // added by ctm
+
     public Tessellator(int bufferSize) {
     }
 

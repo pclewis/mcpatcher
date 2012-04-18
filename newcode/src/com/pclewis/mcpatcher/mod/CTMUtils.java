@@ -177,6 +177,7 @@ public class CTMUtils {
 
     public static void start() {
         checkUpdate();
+        Tessellator.instance.texture = terrainTexture;
         active = true;
     }
 
@@ -184,9 +185,8 @@ public class CTMUtils {
         if (!active || blockAccess == null || face < 0 || face > 5 || !(Tessellator.instance instanceof SuperTessellator)) {
             return false;
         }
-        if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face) && bindTexture(newTexture)) {
+        if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face)) {
             newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
-            textureChanged = true;
             return true;
         } else {
             reset();
@@ -203,6 +203,7 @@ public class CTMUtils {
 
     public static void finish() {
         reset();
+        Tessellator.instance.texture = -1;
         active = false;
     }
 
