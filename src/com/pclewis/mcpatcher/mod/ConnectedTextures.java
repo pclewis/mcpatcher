@@ -168,6 +168,7 @@ public class ConnectedTextures extends Mod {
             final FieldRef isDrawing = new FieldRef(getDeobfClass(), "isDrawing", "Z");
             final FieldRef drawMode = new FieldRef(getDeobfClass(), "drawMode", "I");
             final FieldRef texture = new FieldRef(getDeobfClass(), "texture", "I");
+            final FieldRef bufferSize = new FieldRef(getDeobfClass(), "bufferSize", "I");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -223,9 +224,24 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, startDrawing)
             );
 
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            ILOAD_1,
+                            BytecodeMatcher.captureReference(PUTFIELD)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }.addXref(1, bufferSize));
+
             memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
-            for (JavaRef ref : new JavaRef[]{constructor, startDrawing, isDrawing, drawMode, draw, reset}) {
+            for (JavaRef ref : new JavaRef[]{constructor, startDrawing, isDrawing, drawMode, draw, reset, bufferSize}) {
                 patches.add(new MakeMemberPublicPatch(ref));
             }
 

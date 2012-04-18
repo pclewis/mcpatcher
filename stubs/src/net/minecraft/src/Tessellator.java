@@ -8,7 +8,7 @@ public class Tessellator {
     public int rawBuffer[];
     public int rawBufferIndex;
     public int addedVertices;
-
+    public int bufferSize;
     public int drawMode;
     public boolean isDrawing;
 

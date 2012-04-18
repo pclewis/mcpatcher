@@ -30,7 +30,7 @@ public class SuperTessellator extends Tessellator {
         Tessellator newTessellator = children.get(texture);
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
-            newTessellator = new Tessellator(defaultBufferSize);
+            newTessellator = new Tessellator(defaultBufferSize / 16);
             copyFields(newTessellator, texture, true);
             children.put(texture, newTessellator);
         }
@@ -47,6 +47,7 @@ public class SuperTessellator extends Tessellator {
     }
 
     private void copyFields(Tessellator newTessellator, int texture, boolean isNew) {
+        int saveBufferSize = newTessellator.bufferSize;
         for (Field f : Tessellator.class.getDeclaredFields()) {
             Class<?> type = f.getType();
             int modifiers = f.getModifiers();
@@ -63,12 +64,13 @@ public class SuperTessellator extends Tessellator {
                 }
             }
         }
+        newTessellator.bufferSize = saveBufferSize;
+        newTessellator.texture = texture;
         newTessellator.reset();
         newTessellator.isDrawing = false;
         if (isDrawing) {
             newTessellator.startDrawing(drawMode);
         }
-        newTessellator.texture = texture;
     }
 
     @Override
