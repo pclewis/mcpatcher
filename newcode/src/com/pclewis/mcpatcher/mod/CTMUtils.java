@@ -201,10 +201,9 @@ public class CTMUtils {
         }
     }
 
-    public static boolean finish(boolean b) {
+    public static void finish() {
         reset();
         active = false;
-        return b;
     }
 
     private static boolean getConnectedTexture(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {

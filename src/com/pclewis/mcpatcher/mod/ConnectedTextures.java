@@ -29,6 +29,7 @@ public class ConnectedTextures extends Mod {
         classMods.add(new BlockMod());
         classMods.add(new TessellatorMod());
         classMods.add(new RenderBlocksMod());
+        classMods.add(new WorldRendererMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS + "$TextureOverride"));
@@ -443,10 +444,8 @@ public class ConnectedTextures extends Mod {
         private final FieldRef overrideBlockTexture = new FieldRef(getDeobfClass(), "overrideBlockTexture", "I");
         private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
-        private final MethodRef start = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "start", "()V");
         private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)Z");
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
-        private final MethodRef finish = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "finish", "(Z)Z");
 
         RenderBlocksMod() {
             setupBlockFace(0, "Bottom");
@@ -482,49 +481,6 @@ public class ConnectedTextures extends Mod {
 
             memberMappers.add(new FieldMapper(blockAccess));
             memberMappers.add(new MethodMapper(faceMethods));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "pre render standard block";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin()
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        reference(INVOKESTATIC, start)
-                    );
-                }
-            }.targetMethod(renderStandardBlock));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "post render standard block";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        IRETURN
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        reference(INVOKESTATIC, finish),
-                        IRETURN
-                    );
-                }
-            }.targetMethod(renderStandardBlock));
         }
 
         private void setupBlockFace(final int face, final String direction) {
@@ -603,6 +559,68 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             }.targetMethod(faceMethods[face]));
+        }
+    }
+
+    private class WorldRendererMod extends ClassMod {
+        WorldRendererMod() {
+            final MethodRef updateRenderer = new MethodRef(getDeobfClass(), "updateRenderer", "()V");
+            final MethodRef start = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "start", "()V");
+            final MethodRef finish = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "finish", "()V");
+
+            classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glNewList", "(II)V")));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(1.000001F)
+                    );
+                }
+            }.setMethod(updateRenderer));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "pre render standard block";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, start)
+                    );
+                }
+            }.targetMethod(updateRenderer));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "post render standard block";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        RETURN
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, finish),
+                        RETURN
+                    );
+                }
+            }.targetMethod(updateRenderer));
         }
     }
 }
