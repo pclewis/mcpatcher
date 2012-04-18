@@ -8,9 +8,7 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class BetterGlass extends Mod {
-    private static final String GL11_CLASS = "org.lwjgl.opengl.GL11";
-
-    private static final MethodRef glEnable = new MethodRef(GL11_CLASS, "glEnable", "(I)V");
+    private static final MethodRef glEnable = new MethodRef(MCPatcherUtils.GL11_CLASS, "glEnable", "(I)V");
     private static final MethodRef getRenderBlockPass = new MethodRef("Block", "getRenderBlockPass", "()I");
 
     public BetterGlass(MinecraftVersion minecraftVersion) {
@@ -153,7 +151,7 @@ public class BetterGlass extends Mod {
             final MethodRef updateRenderer = new MethodRef(getDeobfClass(), "updateRenderer", "()V");
             final FieldRef skipRenderPass = new FieldRef(getDeobfClass(), "skipRenderPass", "[Z");
 
-            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glNewList", "(II)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -310,8 +308,8 @@ public class BetterGlass extends Mod {
         final FieldRef loop = new FieldRef(getDeobfClass(), "betterGrassLoop", "I");
 
         EntityRendererMod() {
-            final MethodRef glBlendFunc = new MethodRef(GL11_CLASS, "glBlendFunc", "(II)V");
-            final MethodRef glDisable = new MethodRef(GL11_CLASS, "glDisable", "(I)V");
+            final MethodRef glBlendFunc = new MethodRef(MCPatcherUtils.GL11_CLASS, "glBlendFunc", "(II)V");
+            final MethodRef glDisable = new MethodRef(MCPatcherUtils.GL11_CLASS, "glDisable", "(I)V");
             final MethodRef sortAndRender = new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I");
             final MethodRef renderAllRenderLists = new MethodRef("RenderGlobal", "renderAllRenderLists", "(ID)V");
 
@@ -473,7 +471,7 @@ public class BetterGlass extends Mod {
             final FieldRef renderEngine = new FieldRef("Minecraft", "renderEngine", "LRenderEngine;");
             final MethodRef getTexture = new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I");
             final FieldRef itemID = new FieldRef("ItemStack", "itemID", "I");
-            final MethodRef glBindTexture = new MethodRef(GL11_CLASS, "glBindTexture", "(II)V");
+            final MethodRef glBindTexture = new MethodRef(MCPatcherUtils.GL11_CLASS, "glBindTexture", "(II)V");
 
             classSignatures.add(new ConstSignature("/terrain.png"));
             classSignatures.add(new ConstSignature("/gui/items.png"));
@@ -588,7 +586,7 @@ public class BetterGlass extends Mod {
                         push(1.0f),
                         push(0.0f),
                         push(0.0f),
-                        reference(INVOKESTATIC, new MethodRef(GL11_CLASS, "glRotatef", "(FFFF)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glRotatef", "(FFFF)V"))
                     );
                 }
             }.setMethod(drawItemIntoGui));

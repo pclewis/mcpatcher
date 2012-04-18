@@ -114,7 +114,7 @@ public class ConnectedTextures extends Mod {
 
     private class RenderEngineMod extends ClassMod {
         RenderEngineMod() {
-            classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I"))
                 .accessFlag(AccessFlag.PUBLIC, true)
@@ -469,7 +469,7 @@ public class ConnectedTextures extends Mod {
                         push(3553), // GL11.GL_TEXTURE_2D
                         ALOAD_0,
                         reference(GETFIELD, texture),
-                        reference(INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glBindTexture", "(II)V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glBindTexture", "(II)V")),
 
                         // }
                         label("A")
@@ -634,7 +634,7 @@ public class ConnectedTextures extends Mod {
             final MethodRef start = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "start", "()V");
             final MethodRef finish = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "finish", "()V");
 
-            classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glNewList", "(II)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override

@@ -37,6 +37,7 @@ public class MCPatcherUtils {
 
     public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
     public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
+    public static final String GL11_CLASS = "org.lwjgl.opengl.GL11";
 
     public static final String TILE_SIZE_CLASS = "com.pclewis.mcpatcher.mod.TileSize";
     public static final String TEXTURE_UTILS_CLASS = "com.pclewis.mcpatcher.mod.TextureUtils";

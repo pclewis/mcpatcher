@@ -46,7 +46,7 @@ public class RandomMobs extends Mod {
                         push(0.0078125f),
                         FSUB,
                         FCONST_0,
-                        reference(INVOKESTATIC, new MethodRef("org.lwjgl.opengl.GL11", "glTranslatef", "(FFF)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glTranslatef", "(FFF)V"))
                     );
                 }
             }.setMethodName("doRenderLiving"));

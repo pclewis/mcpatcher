@@ -283,7 +283,7 @@ public final class BaseMod extends Mod {
      */
     public static class GLAllocationMod extends ClassMod {
         public GLAllocationMod() {
-            classSignatures.add(new ConstSignature(new MethodRef("org.lwjgl.opengl.GL11", "glDeleteLists", "(II)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glDeleteLists", "(II)V")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override

@@ -13,8 +13,6 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class GLSLShader extends Mod {
-    private static final String GL11_CLASS = "org.lwjgl.opengl.GL11";
-
     public GLSLShader(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.GLSL_SHADERS;
         author = "daxnitro";
@@ -92,7 +90,7 @@ public class GLSLShader extends Mod {
 
     private class RenderEngineMod extends ClassMod {
         RenderEngineMod() {
-            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -137,7 +135,7 @@ public class GLSLShader extends Mod {
                         FMUL,
                         push(0.1f),
                         FADD,
-                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glColor3f", "(FFF)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glColor3f", "(FFF)V"))
                     );
                 }
             }.setMethod(renderSky));
@@ -187,7 +185,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKESTATIC, new MethodRef(GL11_CLASS, name, "(I)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, name, "(I)V"))
                     );
                 }
 
@@ -210,7 +208,7 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push(514),
-                        reference(INVOKESTATIC, new MethodRef(GL11_CLASS, "glDepthFunc", "(I)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glDepthFunc", "(I)V"))
                     );
                 }
             });
@@ -229,7 +227,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKESTATIC, new MethodRef(GL11_CLASS, name, "(I)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, name, "(I)V"))
                     );
                 }
 
@@ -271,7 +269,7 @@ public class GLSLShader extends Mod {
                         BytecodeMatcher.captureReference(GETFIELD),
                         push(1.0f),
                         BytecodeMatcher.anyReference(INVOKESPECIAL),
-                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glFog", "(ILjava/nio/FloatBuffer;)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glFog", "(ILjava/nio/FloatBuffer;)V"))
                     );
                 }
             }
@@ -285,8 +283,8 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push(5889), // GL_PROJECTION
-                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glMatrixMode", "(I)V")),
-                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glLoadIdentity", "()V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glMatrixMode", "(I)V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glLoadIdentity", "()V"))
                     );
                 }
             }.setMethod(setupCameraTransform));
@@ -306,7 +304,7 @@ public class GLSLShader extends Mod {
                     return buildExpression(
                         // GL11.glClear(256);
                         push(256),
-                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glClear", "(I)V")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glClear", "(I)V")),
 
                         // renderHand(f, i);
                         ALOAD_0,
@@ -812,7 +810,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKESTATIC, new MethodRef(GL11_CLASS, "glDrawArrays", "(III)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glDrawArrays", "(III)V"))
                     );
                 }
 
@@ -1114,7 +1112,7 @@ public class GLSLShader extends Mod {
         WorldRendererMod() {
             final MethodRef updateRenderer = new MethodRef(getDeobfClass(), "updateRenderer", "()V");
 
-            classSignatures.add(new ConstSignature(new MethodRef(GL11_CLASS, "glNewList", "(II)V")));
+            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override

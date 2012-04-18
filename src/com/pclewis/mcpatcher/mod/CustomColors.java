@@ -907,7 +907,7 @@ public class CustomColors extends Mod {
                         push(-0.9375f),
                         push(-0.0625f),
                         FCONST_0,
-                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/GL11", "glTranslatef", "(FFF)V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glTranslatef", "(FFF)V"))
                     );
                 }
 
@@ -3521,7 +3521,7 @@ public class CustomColors extends Mod {
     private class FontRendererMod extends BaseMod.FontRendererMod {
         FontRendererMod() {
             final MethodRef renderString = new MethodRef(getDeobfClass(), "renderString", "(Ljava/lang/String;IIIZ)" + (renderStringReturnsInt ? "I" : "V"));
-            final MethodRef glColor4f = new MethodRef("org/lwjgl/opengl/GL11", "glColor4f", "(FFFF)V");
+            final MethodRef glColor4f = new MethodRef(MCPatcherUtils.GL11_CLASS, "glColor4f", "(FFFF)V");
             final FieldRef colorCode = new FieldRef(getDeobfClass(), "colorCode", "[I");
 
             classSignatures.add(new BytecodeSignature() {
@@ -3606,7 +3606,7 @@ public class CustomColors extends Mod {
     private class TileEntitySignRendererMod extends ClassMod {
         TileEntitySignRendererMod() {
             final MethodRef renderTileSignEntityAt = new MethodRef(getDeobfClass(), "renderTileSignEntityAt", "(LTileEntitySign;DDDF)V");
-            final MethodRef glDepthMask = new MethodRef("org/lwjgl/opengl/GL11", "glDepthMask", "(Z)V");
+            final MethodRef glDepthMask = new MethodRef(MCPatcherUtils.GL11_CLASS, "glDepthMask", "(Z)V");
 
             classSignatures.add(new ConstSignature(glDepthMask));
 
