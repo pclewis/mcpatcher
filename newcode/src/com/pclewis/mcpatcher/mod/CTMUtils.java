@@ -177,11 +177,14 @@ public class CTMUtils {
     public static void start() {
         checkUpdate();
         Tessellator.instance.texture = terrainTexture;
-        active = true;
+        if (Tessellator.instance instanceof SuperTessellator) {
+            ((SuperTessellator) Tessellator.instance).needCopy = true;
+            active = true;
+        }
     }
 
     public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int face, int origTexture) {
-        if (!active || blockAccess == null || face < 0 || face > 5 || !(Tessellator.instance instanceof SuperTessellator)) {
+        if (!active || blockAccess == null || face < 0 || face > 5) {
             return false;
         }
         if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face) && newTexture != terrainTexture) {

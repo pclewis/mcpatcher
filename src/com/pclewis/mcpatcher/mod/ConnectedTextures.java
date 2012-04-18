@@ -163,28 +163,10 @@ public class ConnectedTextures extends Mod {
             final MethodRef startDrawingQuads = new MethodRef(getDeobfClass(), "startDrawingQuads", "()V");
             final MethodRef startDrawing = new MethodRef(getDeobfClass(), "startDrawing", "(I)V");
             final MethodRef constructor = new MethodRef("Tessellator", "<init>", "(I)V");
-            final MethodRef setNormal = new MethodRef(getDeobfClass(), "setNormal", "(FFF)V");
-            final MethodRef setBrightness = new MethodRef(getDeobfClass(), "setBrightness", "(I)V");
-            final MethodRef setColorRGBA = new MethodRef(getDeobfClass(), "setColorRGBA", "(IIII)V");
-            final MethodRef setTextureUV = new MethodRef(getDeobfClass(), "setTextureUV", "(DD)V");
-            final MethodRef setTranslation = new MethodRef(getDeobfClass(), "setTranslation", "(DDD)V");
             final MethodRef reset = new MethodRef(getDeobfClass(), "reset", "()V");
             final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
-            final FieldRef hasNormals = new FieldRef(getDeobfClass(), "hasNormals", "Z");
-            final FieldRef normal = new FieldRef(getDeobfClass(), "normal", "I");
             final FieldRef isDrawing = new FieldRef(getDeobfClass(), "isDrawing", "Z");
             final FieldRef drawMode = new FieldRef(getDeobfClass(), "drawMode", "I");
-            final FieldRef hasBrightness = new FieldRef(getDeobfClass(), "hasBrightness", "Z");
-            final FieldRef brightness = new FieldRef(getDeobfClass(), "brightness", "I");
-            final FieldRef isColorDisabled = new FieldRef(getDeobfClass(), "isColorDisabled", "Z");
-            final FieldRef hasColor = new FieldRef(getDeobfClass(), "hasColor", "Z");
-            final FieldRef color = new FieldRef(getDeobfClass(), "color", "I");
-            final FieldRef hasTexture = new FieldRef(getDeobfClass(), "hasTexture", "Z");
-            final FieldRef textureU = new FieldRef(getDeobfClass(), "textureU", "D");
-            final FieldRef textureV = new FieldRef(getDeobfClass(), "textureV", "D");
-            final FieldRef xOffset = new FieldRef(getDeobfClass(), "xOffset", "D");
-            final FieldRef yOffset = new FieldRef(getDeobfClass(), "yOffset", "D");
-            final FieldRef zOffset = new FieldRef(getDeobfClass(), "zOffset", "D");
             final FieldRef texture = new FieldRef(getDeobfClass(), "texture", "I");
 
             classSignatures.add(new BytecodeSignature() {
@@ -241,143 +223,9 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, startDrawing)
             );
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        push(1),
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        FLOAD_1,
-                        push(127.0f),
-                        FMUL,
-                        F2I,
-                        I2B,
-
-                        BinaryRegex.any(0, 100),
-
-                        IOR,
-                        BytecodeMatcher.captureReference(PUTFIELD)
-                    );
-                }
-            }
-                .setMethod(setNormal)
-                .addXref(1, hasNormals)
-                .addXref(2, normal)
-            );
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        ICONST_1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        ALOAD_0,
-                        ILOAD_1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        RETURN,
-                        BinaryRegex.end()
-                    );
-                }
-            }
-                .setMethod(setBrightness)
-                .addXref(1, hasBrightness)
-                .addXref(2, brightness)
-            );
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-
-                        BinaryRegex.any(0, 200),
-
-                        ALOAD_0,
-                        ICONST_1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        BinaryRegex.any(0, 100),
-
-                        reference(GETSTATIC, new FieldRef("java/nio/ByteOrder", "LITTLE_ENDIAN", "Ljava/nio/ByteOrder;")),
-
-                        BinaryRegex.any(0, 100),
-
-                        IOR,
-                        BytecodeMatcher.captureReference(PUTFIELD)
-                    );
-                }
-            }
-                .setMethod(setColorRGBA)
-                .addXref(1, isColorDisabled)
-                .addXref(2, hasColor)
-                .addXref(3, color)
-            );
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        ICONST_1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        ALOAD_0,
-                        DLOAD_1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        ALOAD_0,
-                        DLOAD_3,
-                        BytecodeMatcher.captureReference(PUTFIELD)
-                    );
-                }
-            }
-                .setMethod(setTextureUV)
-                .addXref(1, hasTexture)
-                .addXref(2, textureU)
-                .addXref(3, textureV)
-            );
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        ALOAD_0,
-                        DLOAD_1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        ALOAD_0,
-                        DLOAD_3,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-
-                        ALOAD_0,
-                        DLOAD, 5,
-                        BytecodeMatcher.captureReference(PUTFIELD)
-                    );
-                }
-            }
-                .setMethod(setTranslation)
-                .addXref(1, xOffset)
-                .addXref(2, yOffset)
-                .addXref(3, zOffset)
-            );
-
             memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
-            for (JavaRef ref : new JavaRef[]{
-                constructor, startDrawing, isDrawing, drawMode, setNormal, hasNormals, normal,
-                setBrightness, hasBrightness, brightness, setColorRGBA, isColorDisabled, hasColor, color,
-                hasTexture, textureU, textureV, setTranslation, xOffset, yOffset, zOffset, reset
-            }) {
+            for (JavaRef ref : new JavaRef[]{constructor, startDrawing, isDrawing, drawMode, draw, reset}) {
                 patches.add(new MakeMemberPublicPatch(ref));
             }
 

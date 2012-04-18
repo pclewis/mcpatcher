@@ -2,15 +2,17 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.Tessellator;
-import org.lwjgl.opengl.GL11;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.Map;
 
 public class SuperTessellator extends Tessellator {
     private static int defaultBufferSize;
 
     private final HashMap<Integer, Tessellator> children = new HashMap<Integer, Tessellator>();
+
+    boolean needCopy;
 
     public SuperTessellator(int bufferSize) {
         super(bufferSize);
@@ -19,11 +21,17 @@ public class SuperTessellator extends Tessellator {
     }
 
     Tessellator getTessellator(int texture) {
+        if (needCopy) {
+            for (Tessellator t : children.values()) {
+                copyFields(t, t.texture, false);
+            }
+            needCopy = false;
+        }
         Tessellator newTessellator = children.get(texture);
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
             newTessellator = new Tessellator(defaultBufferSize);
-            newTessellator.texture = texture;
+            copyFields(newTessellator, texture, true);
             children.put(texture, newTessellator);
         }
         if (isDrawing && !newTessellator.isDrawing) {
@@ -31,22 +39,36 @@ public class SuperTessellator extends Tessellator {
         } else if (!isDrawing && newTessellator.isDrawing) {
             newTessellator.reset();
         }
-        newTessellator.hasBrightness = hasBrightness;
-        newTessellator.brightness = brightness;
-        newTessellator.isColorDisabled = isColorDisabled;
-        newTessellator.hasColor = hasColor;
-        newTessellator.color = color;
-        newTessellator.hasNormals = hasNormals;
-        newTessellator.normal = normal;
-        newTessellator.hasTexture = hasTexture;
-        newTessellator.textureU = textureU;
-        newTessellator.textureV = textureV;
-        newTessellator.setTranslation(xOffset, yOffset, zOffset);
         return newTessellator;
     }
 
     void clearTessellators() {
         children.clear();
+    }
+
+    private void copyFields(Tessellator newTessellator, int texture, boolean isNew) {
+        for (Field f : Tessellator.class.getDeclaredFields()) {
+            Class<?> type = f.getType();
+            int modifiers = f.getModifiers();
+            if (!Modifier.isStatic(modifiers) && type.isPrimitive()) {
+                f.setAccessible(true);
+                try {
+                    Object value = f.get(this);
+                    if (isNew) {
+                        MCPatcherUtils.debug("  copy %s %s %s = %s", Modifier.toString(modifiers), type.toString(), f.getName(), value.toString());
+                    }
+                    f.set(newTessellator, value);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        newTessellator.reset();
+        newTessellator.isDrawing = false;
+        if (isDrawing) {
+            newTessellator.startDrawing(drawMode);
+        }
+        newTessellator.texture = texture;
     }
 
     @Override
