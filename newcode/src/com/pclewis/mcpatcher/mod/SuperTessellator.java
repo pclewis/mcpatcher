@@ -2,8 +2,10 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.Tessellator;
+import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class SuperTessellator extends Tessellator {
     private static int defaultBufferSize;
@@ -20,29 +22,28 @@ public class SuperTessellator extends Tessellator {
         if (texture == CTMUtils.terrainTexture) {
             return this;
         }
-        Tessellator oldTessellator = Tessellator.instance;
         Tessellator newTessellator = children.get(texture);
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
             newTessellator = new Tessellator(defaultBufferSize);
             children.put(texture, newTessellator);
         }
-        if (oldTessellator.isDrawing && !newTessellator.isDrawing) {
-            newTessellator.startDrawing(oldTessellator.drawMode);
-        } else if (!oldTessellator.isDrawing && newTessellator.isDrawing) {
+        if (isDrawing && !newTessellator.isDrawing) {
+            newTessellator.startDrawing(drawMode);
+        } else if (!isDrawing && newTessellator.isDrawing) {
             newTessellator.reset();
         }
-        newTessellator.hasBrightness = oldTessellator.hasBrightness;
-        newTessellator.brightness = oldTessellator.brightness;
-        newTessellator.isColorDisabled = oldTessellator.isColorDisabled;
-        newTessellator.hasColor = oldTessellator.hasColor;
-        newTessellator.color = oldTessellator.color;
-        newTessellator.hasNormals = oldTessellator.hasNormals;
-        newTessellator.normal = oldTessellator.normal;
-        newTessellator.hasTexture = oldTessellator.hasTexture;
-        newTessellator.textureU = oldTessellator.textureU;
-        newTessellator.textureV = oldTessellator.textureV;
-        newTessellator.setTranslation(oldTessellator.xOffset, oldTessellator.yOffset, oldTessellator.zOffset);
+        newTessellator.hasBrightness = hasBrightness;
+        newTessellator.brightness = brightness;
+        newTessellator.isColorDisabled = isColorDisabled;
+        newTessellator.hasColor = hasColor;
+        newTessellator.color = color;
+        newTessellator.hasNormals = hasNormals;
+        newTessellator.normal = normal;
+        newTessellator.hasTexture = hasTexture;
+        newTessellator.textureU = textureU;
+        newTessellator.textureV = textureV;
+        newTessellator.setTranslation(xOffset, yOffset, zOffset);
         return newTessellator;
     }
 
@@ -60,10 +61,13 @@ public class SuperTessellator extends Tessellator {
 
     @Override
     public int draw() {
+        int curTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         int result = super.draw();
-        for (Tessellator t : children.values()) {
-            result += t.draw();
+        for (Map.Entry<Integer, Tessellator> entry : children.entrySet()) {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, entry.getKey());
+            result += entry.getValue().draw();
         }
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, curTexture);
         return result;
     }
 
