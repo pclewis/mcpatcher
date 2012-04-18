@@ -168,7 +168,7 @@ public class CTMUtils {
     private static TextureOverride tiles[];
     static int terrainTexture;
 
-    private static boolean active;
+    static boolean active;
     private static boolean textureChanged;
     private static int newTexture;
 
