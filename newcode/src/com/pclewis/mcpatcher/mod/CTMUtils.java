@@ -166,10 +166,9 @@ public class CTMUtils {
     private static TexturePackBase lastTexturePack;
     private static TextureOverride blocks[];
     private static TextureOverride tiles[];
-    static int terrainTexture;
+    private static int terrainTexture;
 
-    static boolean active;
-    private static boolean textureChanged;
+    private static boolean active;
     private static int newTexture;
 
     public static int newTextureIndex;
@@ -185,7 +184,7 @@ public class CTMUtils {
         if (!active || blockAccess == null || face < 0 || face > 5 || !(Tessellator.instance instanceof SuperTessellator)) {
             return false;
         }
-        if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face)) {
+        if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face) && newTexture != terrainTexture) {
             newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
@@ -195,10 +194,6 @@ public class CTMUtils {
     }
 
     public static void reset() {
-        if (textureChanged) {
-            bindTexture();
-            textureChanged = false;
-        }
     }
 
     public static void finish() {
@@ -272,7 +267,7 @@ public class CTMUtils {
         refreshBlockTextures();
         refreshTileTextures();
 
-        bindTexture();
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrainTexture);
     }
 
     private static void refreshBlockTextures() {
@@ -421,22 +416,6 @@ public class CTMUtils {
         } else {
             return MCPatcherUtils.getMinecraft().renderEngine.getTexture(name);
         }
-    }
-
-    private static boolean bindTexture(int texture) {
-        if (texture >= 0) {
-            int curTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-            if (curTexture != texture) {
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private static boolean bindTexture() {
-        return bindTexture(terrainTexture);
     }
 
     private static boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {

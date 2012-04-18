@@ -19,9 +19,6 @@ public class SuperTessellator extends Tessellator {
     }
 
     Tessellator getTessellator(int texture) {
-        if (texture == CTMUtils.terrainTexture) {
-            return this;
-        }
         Tessellator newTessellator = children.get(texture);
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
