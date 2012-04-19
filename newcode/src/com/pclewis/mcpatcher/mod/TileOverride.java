@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 abstract class TileOverride {
+    final String filePrefix;
     final String textureName;
     final int texture;
     final int faces;
@@ -50,8 +51,10 @@ abstract class TileOverride {
             override = new Horizontal(filePrefix, properties);
         } else if (method.equals("sandstone") || method.equals("top")) {
             override = new Top(filePrefix, properties);
+        } else if (method.equals("repeat") || method.equals("pattern")) {
+            override = new Repeat(filePrefix, properties);
         } else {
-            MCPatcherUtils.error("unknown method \"%s\" in %s.properties", method, filePrefix);
+            MCPatcherUtils.error("%s.properties: unknown method \"%s\"", filePrefix, method);
         }
 
         return override != null && override.isValid() ? override : null;
@@ -63,6 +66,7 @@ abstract class TileOverride {
     }
 
     private TileOverride(BufferedImage image) {
+        filePrefix = null;
         textureName = null;
         texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
         faces = -1;
@@ -72,10 +76,11 @@ abstract class TileOverride {
     }
 
     private TileOverride(String filePrefix, Properties properties) {
+        this.filePrefix = filePrefix;
         textureName = properties.getProperty("source", filePrefix + ".png");
         texture = CTMUtils.getTexture(textureName);
         if (properties.contains("source") && texture < 0) {
-            MCPatcherUtils.error("source texture %s not found", textureName);
+            error("source texture %s not found", textureName);
         }
 
         int flags = 0;
@@ -115,12 +120,12 @@ abstract class TileOverride {
         int[] defaultTileMap = getDefaultTileMap();
         if (defaultTileMap == null) {
             if (tileList.equals("")) {
-                MCPatcherUtils.error("no tile map given in %s.properties", filePrefix);
+                error("no tile map given");
                 tileMap = null;
             } else {
                 tileMap = MCPatcherUtils.parseIntegerList(tileList);
                 if (tileMap.length == 0) {
-                    MCPatcherUtils.error("no tile map given in %s.properties", filePrefix);
+                    error("no tile map given");
                 }
             }
         } else {
@@ -129,16 +134,22 @@ abstract class TileOverride {
             } else {
                 tileMap = MCPatcherUtils.parseIntegerList(tileList);
                 if (tileMap.length != defaultTileMap.length) {
-                    MCPatcherUtils.error("tile map in %s.properties requires %d entries, got %d",
-                        filePrefix, defaultTileMap.length, tileMap.length
-                    );
+                    error("tile map requires %d entries, got %d", filePrefix, defaultTileMap.length, tileMap.length);
                 }
             }
         }
     }
 
     boolean isValid() {
-        return texture >= 0 && tileMap != null;
+        return texture >= 0 && tileMap != null && tileMap.length > 0;
+    }
+
+    final void error(String format, Object... params) {
+        if (filePrefix == null) {
+            MCPatcherUtils.error(format, params);
+        } else {
+            MCPatcherUtils.error(filePrefix + ".properties: " + format, params);
+        }
     }
 
     final boolean shouldConnect(IBlockAccess blockAccess, Block block, int tileNum, int i, int j, int k, int face, int[] offset) {
@@ -157,8 +168,11 @@ abstract class TileOverride {
     final boolean exclude(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
         if ((faces & (1 << face)) == 0) {
             return true;
-        } else if (metadata != -1 && (metadata & (1 << blockAccess.getBlockMetadata(i, j, k))) == 0) {
-            return true;
+        } else if (metadata != -1) {
+            int meta = blockAccess.getBlockMetadata(i, j, k);
+            if (meta >= 0 && meta < 32 && (metadata & (1 << meta)) == 0) {
+                return true;
+            }
         }
         return false;
     }
@@ -344,6 +358,82 @@ abstract class TileOverride {
                 return tileMap[2];
             }
             return -1;
+        }
+    }
+
+    static class Repeat extends TileOverride {
+        private final int width;
+        private final int height;
+
+        Repeat(String filePrefix, Properties properties) {
+            super(filePrefix, properties);
+            int w = 0;
+            int h = 0;
+            try {
+                w = Integer.parseInt(properties.getProperty("width", "0"));
+                h = Integer.parseInt(properties.getProperty("height", "0"));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            width = w;
+            height = h;
+        }
+
+        @Override
+        int[] getDefaultTileMap() {
+            return null;
+        }
+
+        @Override
+        boolean isValid() {
+            if (!super.isValid()) {
+                return false;
+            } else if (width <= 0 || height <= 0 || width * height > CTMUtils.NUM_TILES) {
+                error("invalid width and height (%dx%d)", width, height);
+                return false;
+            } else if (tileMap.length != width * height) {
+                error("must have exactly width * height (=%d) tiles, got %d", width * height, tileMap.length);
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        @Override
+        int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+            int x;
+            int y;
+            switch (face) {
+                case CTMUtils.TOP_FACE:
+                case CTMUtils.BOTTOM_FACE:
+                    x = i;
+                    y = k;
+                    break;
+
+                case CTMUtils.NORTH_FACE:
+                case CTMUtils.SOUTH_FACE:
+                    x = i;
+                    y = j;
+                    break;
+
+                case CTMUtils.EAST_FACE:
+                case CTMUtils.WEST_FACE:
+                    x = k;
+                    y = j;
+                    break;
+
+                default:
+                    return -1;
+            }
+            x %= width;
+            if (x < 0) {
+                x += width;
+            }
+            y %= height;
+            if (y < 0) {
+                y += height;
+            }
+            return tileMap[width * y + x];
         }
     }
 }

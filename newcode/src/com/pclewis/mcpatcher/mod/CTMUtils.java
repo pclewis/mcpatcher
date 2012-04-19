@@ -19,7 +19,7 @@ public class CTMUtils {
     private static final boolean enableOther = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "other", true);
     private static final boolean enableOutline = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "outline", false);
 
-    private static final int NUM_TILES = 256;
+    static final int NUM_TILES = 256;
 
     static final int BLOCK_ID_GLASS = 20;
     static final int BLOCK_ID_GLASS_PANE = 102;
