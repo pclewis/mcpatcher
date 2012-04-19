@@ -264,11 +264,13 @@ abstract class TileOverride {
         private static final long ADDEND = 0xbL;
         private static final long MASK = (1L << 48) - 1;
 
+        private final boolean allFacesTheSame;
         private final int[] weight;
         private final int sum;
 
         private Random1(String filePrefix, Properties properties) {
             super(filePrefix, properties);
+            allFacesTheSame = Boolean.parseBoolean(properties.getProperty("allFacesTheSame", "false"));
             ArrayList<Integer> w = new ArrayList<Integer>();
             for (String t : properties.getProperty("weights", "").split("\\s+")) {
                 if (w.size() >= tileMap.length) {
@@ -308,7 +310,7 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            long n = face;
+            long n = (allFacesTheSame ? 0 : face);
             n = MULTIPLIER * n + ADDEND;
             n ^= i;
             n = MULTIPLIER * n + ADDEND;
