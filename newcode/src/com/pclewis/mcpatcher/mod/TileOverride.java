@@ -7,6 +7,7 @@ import net.minecraft.src.IBlockAccess;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Properties;
 
 abstract class TileOverride {
@@ -263,8 +264,41 @@ abstract class TileOverride {
         private static final long ADDEND = 0xbL;
         private static final long MASK = (1L << 48) - 1;
 
+        private final int[] weight;
+        private final int sum;
+
         private Random1(String filePrefix, Properties properties) {
             super(filePrefix, properties);
+            ArrayList<Integer> w = new ArrayList<Integer>();
+            for (String t : properties.getProperty("weights", "").split("\\s+")) {
+                if (w.size() >= tileMap.length) {
+                    break;
+                }
+                try {
+                    w.add(Math.max(Integer.parseInt(t), 0));
+                } catch (NumberFormatException e) {
+                }
+            }
+            while (w.size() < tileMap.length) {
+                w.add(1);
+            }
+            int s = 0;
+            boolean useWeight = false;
+            for (Integer i : w) {
+                s += i;
+                if (!i.equals(w.get(0))) {
+                    useWeight = true;
+                }
+            }
+            sum = s;
+            if (useWeight && sum > 0) {
+                weight = new int[tileMap.length];
+                for (int i = 0; i < weight.length; i++) {
+                    weight[i] = w.get(i);
+                }
+            } else {
+                weight = null;
+            }
         }
 
         @Override
@@ -283,7 +317,18 @@ abstract class TileOverride {
             n ^= k;
             n = MULTIPLIER * n + ADDEND;
             n &= MASK;
-            return tileMap[(int) (((double) n / (double) (MASK + 1)) * tileMap.length)];
+
+            double d = (double) n / (double) (MASK + 1);
+            if (weight == null) {
+                return tileMap[(int) (d * tileMap.length)];
+            } else {
+                int m = (int) (d * sum);
+                int index;
+                for (index = 0; index < weight.length - 1 && m >= weight[index]; index++) {
+                    m -= weight[index];
+                }
+                return tileMap[index];
+            }
         }
 
         @Override
