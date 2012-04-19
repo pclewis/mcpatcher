@@ -103,6 +103,14 @@ abstract class TileOverride {
         }
     }
 
+    static int[] compose(int[] map1, int[] map2) {
+        int[] newMap = new int[map2.length];
+        for (int i = 0; i < map2.length; i++) {
+            newMap[i] = map1[map2[i]];
+        }
+        return newMap;
+    }
+
     boolean isValid() {
         return texture >= 0 && tileMap != null;
     }
@@ -145,10 +153,7 @@ abstract class TileOverride {
 
         Default(String filePrefix, Properties properties) {
             super(filePrefix, properties);
-            neighborTileMap = new int[neighborMap.length];
-            for (int i = 0; i < neighborMap.length; i++) {
-                neighborTileMap[i] = tileMap[neighborMap[i]];
-            }
+            neighborTileMap = compose(tileMap, neighborMap);
         }
 
         @Override
@@ -168,9 +173,49 @@ abstract class TileOverride {
             return neighborTileMap[neighborBits];
         }
 
-        private static boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
+        static boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
             return blockAccess.getBlockId(i + offset[0], j + offset[1], k + offset[2]) == blockId;
         }
 
+    }
+
+    static class Horizontal extends TileOverride {
+        private static final int[] defaultTileMap = new int[]{
+            12, 13, 14, 15,
+        };
+
+        // Index into this array is formed from these bit values:
+        // 1   *   2
+        private static final int[] neighborMap = new int[]{
+            3, 2, 0, 1,
+        };
+
+        private final int[] neighborTileMap;
+
+        Horizontal(String filePrefix, Properties properties) {
+            super(filePrefix, properties);
+            neighborTileMap = compose(tileMap, neighborMap);
+        }
+
+        @Override
+        int[] getDefaultTileMap() {
+            return defaultTileMap;
+        }
+
+        @Override
+        int getTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+            if (face <= CTMUtils.TOP_FACE) {
+                return -1;
+            }
+            int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
+            int neighborBits = 0;
+            if (Default.shouldConnect(blockAccess, blockId, i, j, k, offsets[0])) {
+                neighborBits |= 1;
+            }
+            if (Default.shouldConnect(blockAccess, blockId, i, j, k, offsets[4])) {
+                neighborBits |= 2;
+            }
+            return neighborTileMap[neighborBits];
+        }
     }
 }
