@@ -488,15 +488,17 @@ public class CTMUtils {
             }
             faces = flags;
 
-            random = properties.getProperty("mode", "ctm").trim().toLowerCase().equals("random");
-            if (random) {
+            String method = properties.getProperty("method", "ctm").trim().toLowerCase();
+            if (method.equals("random")) {
+                random = true;
                 int[] newTileMap = MCPatcherUtils.parseIntegerList(properties.getProperty("tiles", "0-" + (NUM_TILES - 1)));
                 if (newTileMap.length > 0) {
                     tileMap = newTileMap;
                 } else {
                     tileMap = null;
                 }
-            } else {
+            } else if (method.equals("ctm")) {
+                random = false;
                 String val = properties.getProperty("tiles", "").trim();
                 int[] newTileMap2;
                 if ("".equals(val)) {
@@ -515,9 +517,13 @@ public class CTMUtils {
                 } else {
                     tileMap = new int[tileMap1.length];
                     for (int i = 0; i < tileMap1.length; i++) {
-                        tileMap[i] = tileMap2[tileMap1[i]];
+                        tileMap[i] = newTileMap2[tileMap1[i]];
                     }
                 }
+            } else {
+                MCPatcherUtils.error("unknown method \"%s\" in %s.properties", method, filePrefix);
+                random = false;
+                tileMap = null;
             }
         }
 
