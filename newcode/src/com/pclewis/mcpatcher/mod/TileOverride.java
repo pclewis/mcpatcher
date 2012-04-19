@@ -71,7 +71,7 @@ abstract class TileOverride {
     private TileOverride(String filePrefix, Properties properties) {
         textureName = properties.getProperty("source", filePrefix + ".png");
         texture = CTMUtils.getTexture(textureName);
-        if (texture < 0) {
+        if (properties.contains("source") && texture < 0) {
             MCPatcherUtils.error("source texture %s not found", textureName);
         }
 

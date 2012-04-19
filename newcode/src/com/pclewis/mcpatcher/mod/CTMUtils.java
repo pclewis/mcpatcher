@@ -207,45 +207,45 @@ public class CTMUtils {
     private static void refreshBlockTextures() {
         blocks = new TileOverride[Block.blocksList.length];
         for (int i = 0; i < blocks.length; i++) {
-            String textureName = null;
+            String prefix = null;
             Properties properties = new Properties();
             switch (i) {
                 case BLOCK_ID_GLASS:
                     if (enableGlass) {
-                        textureName = "/ctm";
+                        prefix = "/ctm";
                         properties.setProperty("method", "glass");
                     }
                     break;
 
                 case BLOCK_ID_GLASS_PANE:
                     if (enableGlassPane) {
-                        textureName = "/ctm";
+                        prefix = "/ctm";
                         properties.setProperty("method", "glass");
                     }
                     break;
 
                 case BLOCK_ID_BOOKSHELF:
                     if (enableBookshelf) {
-                        textureName = "/ctm";
+                        prefix = "/ctm";
                         properties.setProperty("method", "bookshelf");
                     }
                     break;
 
                 case BLOCK_ID_SANDSTONE:
                     if (enableSandstone) {
-                        textureName = "/ctm";
+                        prefix = "/ctm";
                         properties.setProperty("method", "sandstone");
                     }
                     break;
 
                 default:
                     if (enableOther) {
-                        textureName = "/ctm/block" + i;
+                        prefix = "/ctm/block" + i;
                         properties = null;
                     }
                     break;
             }
-            blocks[i] = TileOverride.create(textureName, properties);
+            blocks[i] = TileOverride.create(prefix, properties);
         }
     }
 
