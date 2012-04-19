@@ -16,7 +16,7 @@ public class ConnectedTextures extends Mod {
         name = MCPatcherUtils.CONNECTED_TEXTURES;
         author = "MCPatcher";
         description = "Connects adjacent blocks of the same type.";
-        version = "1.1";
+        version = "1.2";
         defaultEnabled = false;
 
         configPanel = new ConfigPanel();
@@ -36,6 +36,7 @@ public class ConnectedTextures extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SUPER_TESSELLATOR_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Default"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Random1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Horizontal"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Top"));
     }

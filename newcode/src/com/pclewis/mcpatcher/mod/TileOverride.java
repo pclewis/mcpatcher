@@ -3,6 +3,7 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.IBlockAccess;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -11,30 +12,38 @@ abstract class TileOverride {
     final String textureName;
     final int texture;
     final int faces;
+    final boolean connectByTile;
     final int[] tileMap;
 
-    static TileOverride create(String filePrefix) {
-        InputStream is = null;
-        Properties properties = new Properties();
-        try {
-            is = CTMUtils.lastTexturePack.getInputStream(filePrefix + ".properties");
-            if (is != null) {
-                properties.load(is);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            MCPatcherUtils.close(is);
-        }
-        return create(filePrefix, properties);
-    }
-
     static TileOverride create(String filePrefix, Properties properties) {
+        if (filePrefix == null) {
+            return null;
+        }
+        if (properties == null) {
+            InputStream is = null;
+            try {
+                is = CTMUtils.lastTexturePack.getInputStream(filePrefix + ".properties");
+                if (is != null) {
+                    properties = new Properties();
+                    properties.load(is);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                MCPatcherUtils.close(is);
+            }
+        }
+        if (properties == null) {
+            return null;
+        }
+
         String method = properties.getProperty("method", "default").trim().toLowerCase();
         TileOverride override = null;
 
         if (method.equals("default") || method.equals("glass") || method.equals("ctm")) {
             override = new Default(filePrefix, properties);
+        } else if (method.equals("random")) {
+            override = new Random1(filePrefix, properties);
         } else if (method.equals("bookshelf") || method.equals("horizontal")) {
             override = new Horizontal(filePrefix, properties);
         } else if (method.equals("sandstone") || method.equals("top")) {
@@ -43,11 +52,20 @@ abstract class TileOverride {
             MCPatcherUtils.error("unknown method \"%s\" in %s.properties", method, filePrefix);
         }
 
-        if (override != null && override.isValid()) {
-            return override;
-        } else {
-            return null;
-        }
+        return override != null && override.isValid() ? override : null;
+    }
+
+    static TileOverride create(BufferedImage image) {
+        TileOverride override = new Default(image);
+        return override.isValid() ? override : null;
+    }
+
+    TileOverride(BufferedImage image) {
+        textureName = null;
+        texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
+        faces = -1;
+        connectByTile = true;
+        tileMap = null;
     }
 
     TileOverride(String filePrefix, Properties properties) {
@@ -78,6 +96,9 @@ abstract class TileOverride {
             }
         }
         faces = flags;
+
+        String connectType = properties.getProperty("connect", "block").trim().toLowerCase();
+        connectByTile = connectType.equals("tile");
 
         String tileList = properties.getProperty("tiles", "");
         int[] defaultTileMap = getDefaultTileMap();
@@ -113,7 +134,7 @@ abstract class TileOverride {
         return newMap;
     }
 
-    static boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
+    boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
         return blockAccess.getBlockId(i + offset[0], j + offset[1], k + offset[2]) == blockId;
     }
 
@@ -121,8 +142,16 @@ abstract class TileOverride {
         return texture >= 0 && tileMap != null;
     }
 
+    final int getTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+        if ((faces & (1 << face)) == 0) {
+            return -1;
+        } else {
+            return getTileImpl(blockAccess, blockId, origTexture, i, j, k, face);
+        }
+    }
+
     abstract int[] getDefaultTileMap();
-    abstract int getTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face);
+    abstract int getTileImpl(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face);
     
     static class Default extends TileOverride {
         private static final int[] defaultTileMap = new int[]{
@@ -157,6 +186,11 @@ abstract class TileOverride {
 
         private final int[] neighborTileMap;
 
+        Default(BufferedImage image) {
+            super(image);
+            neighborTileMap = compose(defaultTileMap, neighborMap);
+        }
+
         Default(String filePrefix, Properties properties) {
             super(filePrefix, properties);
             neighborTileMap = compose(tileMap, neighborMap);
@@ -168,7 +202,7 @@ abstract class TileOverride {
         }
 
         @Override
-        int getTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+        int getTileImpl(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
             for (int bit = 0; bit < 8; bit++) {
@@ -178,7 +212,41 @@ abstract class TileOverride {
             }
             return neighborTileMap[neighborBits];
         }
+    }
 
+    static class Random1 extends TileOverride {
+        private static final long MULTIPLIER = 0x5deece66dL;
+        private static final long ADDEND = 0xbL;
+        private static final long MASK = (1L << 48) - 1;
+
+        Random1(String filePrefix, Properties properties) {
+            super(filePrefix, properties);
+        }
+
+        @Override
+        int[] getDefaultTileMap() {
+            return null;
+        }
+
+        @Override
+        int getTileImpl(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+            long n = face;
+            n <<= 16;
+            n ^= i;
+            n <<= 16;
+            n ^= j;
+            n <<= 16;
+            n ^= k;
+            n = MULTIPLIER * n + ADDEND;
+            n = MULTIPLIER * n + ADDEND;
+            n &= MASK;
+            return tileMap[(int) (((double) n / (double) (MASK + 1)) * tileMap.length)];
+        }
+
+        @Override
+        boolean isValid() {
+            return super.isValid() && tileMap.length > 0;
+        }
     }
 
     static class Horizontal extends TileOverride {
@@ -205,7 +273,7 @@ abstract class TileOverride {
         }
 
         @Override
-        int getTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+        int getTileImpl(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
             if (face <= CTMUtils.TOP_FACE) {
                 return -1;
             }
@@ -236,7 +304,7 @@ abstract class TileOverride {
         }
 
         @Override
-        int getTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+        int getTileImpl(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
             if (face <= CTMUtils.TOP_FACE) {
                 return -1;
             }

@@ -164,8 +164,8 @@ public class CTMUtils {
     };
 
     static TexturePackBase lastTexturePack;
-    private static TextureOverride blocks[];
-    private static TextureOverride tiles[];
+    private static TileOverride blocks[];
+    private static TileOverride tiles[];
     private static int terrainTexture;
 
     private static boolean active;
@@ -214,45 +214,26 @@ public class CTMUtils {
         if (blockId < 0 || blockId >= blocks.length) {
             return false;
         }
-        TextureOverride override = blocks[blockId];
-        if (override == null || (override.faces & (1 << face)) == 0) {
+        TileOverride override = blocks[blockId];
+        if (override == null) {
             return false;
         }
-        newTextureIndex = 0;
         newTexture = override.texture;
-        if (newTexture < 0) {
-            return false;
-        }
-
-        switch (blockId) {
-            default:
-            case BLOCK_ID_GLASS:
-            case BLOCK_ID_GLASS_PANE:
-                return override.override(blockAccess, blockId, origTexture, i, j, k, face);
-
-            case BLOCK_ID_BOOKSHELF:
-                return override.overrideBookshelf(blockAccess, blockId, origTexture, i, j, k, face);
-
-            case BLOCK_ID_SANDSTONE:
-                return override.overrideSandstone(blockAccess, blockId, origTexture, i, j, k, face);
-        }
+        newTextureIndex = override.getTile(blockAccess, blockId, origTexture, i, j, k, face);
+        return newTextureIndex >= 0;
     }
 
     private static boolean getConnectedTextureByTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
         if (origTexture < 0 || origTexture >= tiles.length) {
             return false;
         }
-        TextureOverride override = tiles[origTexture];
-        if (override == null || (override.faces & (1 << face)) == 0) {
+        TileOverride override = tiles[origTexture];
+        if (override == null) {
             return false;
         }
         newTextureIndex = 0;
-        newTexture = override.texture;
-        if (newTexture < 0) {
-            return false;
-        }
-
-        return override.override(blockAccess, blockId, origTexture, i, j, k, face);
+        newTextureIndex = override.getTile(blockAccess, blockId, origTexture, i, j, k, face);
+        return newTextureIndex >= 0;
     }
 
     private static void checkUpdate() {
@@ -274,70 +255,60 @@ public class CTMUtils {
     }
 
     private static void refreshBlockTextures() {
-        blocks = new TextureOverride[Block.blocksList.length];
+        blocks = new TileOverride[Block.blocksList.length];
         for (int i = 0; i < blocks.length; i++) {
             String textureName = null;
-            int[] tileMap1 = null;
-            int[] tileMap2 = null;
+            Properties properties = new Properties();
             switch (i) {
                 case BLOCK_ID_GLASS:
                     if (enableGlass) {
                         textureName = "/ctm";
-                        tileMap1 = GENERIC_TEXTURE_INDEX;
-                        tileMap2 = GENERIC_TILE_MAPPING;
+                        properties.setProperty("method", "glass");
                     }
                     break;
 
                 case BLOCK_ID_GLASS_PANE:
                     if (enableGlassPane) {
                         textureName = "/ctm";
-                        tileMap1 = GENERIC_TEXTURE_INDEX;
-                        tileMap2 = GENERIC_TILE_MAPPING;
+                        properties.setProperty("method", "glass");
                     }
                     break;
 
                 case BLOCK_ID_BOOKSHELF:
                     if (enableBookshelf) {
                         textureName = "/ctm";
-                        tileMap1 = BOOKSHELF_TEXTURE_INDEX;
-                        tileMap2 = BOOKSHELF_TILE_MAPPING;
+                        properties.setProperty("method", "bookshelf");
                     }
                     break;
 
                 case BLOCK_ID_SANDSTONE:
                     if (enableSandstone) {
                         textureName = "/ctm";
-                        tileMap1 = SANDSTONE_TEXTURE_INDEX;
-                        tileMap2 = SANDSTONE_TILE_MAPPING;
+                        properties.setProperty("method", "sandstone");
                     }
                     break;
 
                 default:
                     if (enableOther) {
                         textureName = "/ctm/block" + i;
-                        tileMap1 = GENERIC_TEXTURE_INDEX;
-                        tileMap2 = GENERIC_TILE_MAPPING;
+                        properties = null;
                     }
                     break;
             }
-            if (textureName != null) {
-                TextureOverride override = new TextureOverride("block", textureName, tileMap1, tileMap2);
-                if (override.isValid()) {
-                    MCPatcherUtils.info("using %s (texture id %d) for block %d", override.textureName, override.texture, i);
-                    blocks[i] = override;
-                }
-            }
+            blocks[i] = TileOverride.create(textureName, properties);
         }
     }
 
     private static void refreshTileTextures() {
-        tiles = new TextureOverride[NUM_TILES];
+        tiles = new TileOverride[NUM_TILES];
         if (enableOther) {
+            Properties properties = new Properties();
+            properties.setProperty("method", "default");
+            properties.setProperty("connect", "tile");
             for (int i = 0; i < tiles.length; i++) {
-                TextureOverride override = new TextureOverride("terrain", "/ctm/terrain" + i, GENERIC_TEXTURE_INDEX, GENERIC_TILE_MAPPING);
-                if (override.isValid()) {
-                    MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", override.textureName, override.texture, i);
-                    tiles[i] = override;
+                tiles[i] = TileOverride.create("/ctm/terrain" + i, properties);
+                if (tiles[i] != null) {
+                    MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", tiles[i].textureName, tiles[i].texture, i);
                 }
             }
         }
@@ -403,10 +374,7 @@ public class CTMUtils {
             }
         }
 
-        TextureOverride override = new TextureOverride("tile", newImage, GENERIC_TEXTURE_INDEX, GENERIC_TILE_MAPPING);
-        if (override.isValid()) {
-            tiles[tileNum] = override;
-        }
+        tiles[tileNum] = TileOverride.create(newImage);
     }
 
     static int getTexture(String name) {
