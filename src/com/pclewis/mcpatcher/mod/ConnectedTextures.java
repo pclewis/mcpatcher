@@ -32,7 +32,6 @@ public class ConnectedTextures extends Mod {
         classMods.add(new WorldRendererMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS + "$TextureOverride"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SUPER_TESSELLATOR_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Default"));

@@ -60,7 +60,7 @@ abstract class TileOverride {
         return override.isValid() ? override : null;
     }
 
-    TileOverride(BufferedImage image) {
+    private TileOverride(BufferedImage image) {
         textureName = null;
         texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
         faces = -1;
@@ -68,7 +68,7 @@ abstract class TileOverride {
         tileMap = null;
     }
 
-    TileOverride(String filePrefix, Properties properties) {
+    private TileOverride(String filePrefix, Properties properties) {
         textureName = properties.getProperty("source", filePrefix + ".png");
         texture = CTMUtils.getTexture(textureName);
         if (texture < 0) {
@@ -134,7 +134,7 @@ abstract class TileOverride {
         return newMap;
     }
 
-    boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
+    boolean shouldConnect(IBlockAccess blockAccess, int blockId, int tileNum, int i, int j, int k, int[] offset) {
         return blockAccess.getBlockId(i + offset[0], j + offset[1], k + offset[2]) == blockId;
     }
 
@@ -151,8 +151,9 @@ abstract class TileOverride {
     }
 
     abstract int[] getDefaultTileMap();
+
     abstract int getTileImpl(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face);
-    
+
     static class Default extends TileOverride {
         private static final int[] defaultTileMap = new int[]{
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
@@ -186,12 +187,12 @@ abstract class TileOverride {
 
         private final int[] neighborTileMap;
 
-        Default(BufferedImage image) {
+        private Default(BufferedImage image) {
             super(image);
             neighborTileMap = compose(defaultTileMap, neighborMap);
         }
 
-        Default(String filePrefix, Properties properties) {
+        private Default(String filePrefix, Properties properties) {
             super(filePrefix, properties);
             neighborTileMap = compose(tileMap, neighborMap);
         }
@@ -206,7 +207,7 @@ abstract class TileOverride {
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
             for (int bit = 0; bit < 8; bit++) {
-                if (shouldConnect(blockAccess, blockId, i, j, k, offsets[bit])) {
+                if (shouldConnect(blockAccess, blockId, origTexture, i, j, k, offsets[bit])) {
                     neighborBits |= (1 << bit);
                 }
             }
@@ -219,7 +220,7 @@ abstract class TileOverride {
         private static final long ADDEND = 0xbL;
         private static final long MASK = (1L << 48) - 1;
 
-        Random1(String filePrefix, Properties properties) {
+        private Random1(String filePrefix, Properties properties) {
             super(filePrefix, properties);
         }
 
@@ -262,7 +263,7 @@ abstract class TileOverride {
 
         private final int[] neighborTileMap;
 
-        Horizontal(String filePrefix, Properties properties) {
+        private Horizontal(String filePrefix, Properties properties) {
             super(filePrefix, properties);
             neighborTileMap = compose(tileMap, neighborMap);
         }
@@ -279,10 +280,10 @@ abstract class TileOverride {
             }
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
-            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[0])) {
+            if (shouldConnect(blockAccess, blockId, origTexture, i, j, k, offsets[0])) {
                 neighborBits |= 1;
             }
-            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[4])) {
+            if (shouldConnect(blockAccess, blockId, origTexture, i, j, k, offsets[4])) {
                 neighborBits |= 2;
             }
             return neighborTileMap[neighborBits];
@@ -294,7 +295,7 @@ abstract class TileOverride {
             64, 65, 66, 67,
         };
 
-        Top(String filePrefix, Properties properties) {
+        private Top(String filePrefix, Properties properties) {
             super(filePrefix, properties);
         }
 
@@ -311,7 +312,7 @@ abstract class TileOverride {
             if (blockAccess.getBlockMetadata(i, j, k) != 0) {
                 return -1;
             }
-            if (shouldConnect(blockAccess, blockId, i, j, k, CTMUtils.GO_UP)) {
+            if (shouldConnect(blockAccess, blockId, origTexture, i, j, k, CTMUtils.GO_UP)) {
                 return tileMap[2];
             }
             return -1;

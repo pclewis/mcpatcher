@@ -9,8 +9,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class CTMUtils {
@@ -113,54 +111,6 @@ public class CTMUtils {
             GO_UP,
             add(GO_SOUTH, GO_UP),
         },
-    };
-
-    // Index into this array is formed from these bit values:
-    // 128 64  32
-    // 1   *   16
-    // 2   4   8
-    private static final int[] GENERIC_TEXTURE_INDEX = new int[]{
-        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
-        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
-        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
-        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
-        36, 17, 36, 17, 24, 19, 24, 43, 36, 17, 36, 17, 24, 19, 24, 43,
-        16, 18, 16, 18, 6, 46, 6, 21, 16, 18, 16, 18, 28, 9, 28, 22,
-        36, 17, 36, 17, 24, 19, 24, 43, 36, 17, 36, 17, 24, 19, 24, 43,
-        37, 40, 37, 40, 30, 8, 30, 34, 37, 40, 37, 40, 25, 23, 25, 45,
-        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
-        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
-        0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
-        1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
-        36, 39, 36, 39, 24, 41, 24, 27, 36, 39, 36, 39, 24, 41, 24, 27,
-        16, 42, 16, 42, 6, 20, 6, 10, 16, 42, 16, 42, 28, 35, 28, 44,
-        36, 39, 36, 39, 24, 41, 24, 27, 36, 39, 36, 39, 24, 41, 24, 27,
-        37, 38, 37, 38, 30, 11, 30, 32, 37, 38, 37, 38, 25, 33, 25, 26,
-    };
-
-    // Index into this array is formed from these bit values:
-    // 1   *   2
-    private static final int[] BOOKSHELF_TEXTURE_INDEX = new int[]{
-        3, 2, 0, 1,
-    };
-
-    private static final int[] SANDSTONE_TEXTURE_INDEX = new int[]{
-        0, 1, 2, 3,
-    };
-
-    private static final int[] GENERIC_TILE_MAPPING = new int[]{
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-        32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
-    };
-
-    private static final int[] BOOKSHELF_TILE_MAPPING = new int[]{
-        12, 13, 14, 15,
-    };
-
-    private static final int[] SANDSTONE_TILE_MAPPING = new int[]{
-        64, 65, 66, 67,
     };
 
     static TexturePackBase lastTexturePack;
@@ -389,10 +339,6 @@ public class CTMUtils {
         }
     }
 
-    private static boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
-        return blockAccess.getBlockId(i + offset[0], j + offset[1], k + offset[2]) == blockId;
-    }
-
     private static int[] add(int[] a, int[] b) {
         if (a.length != b.length) {
             throw new RuntimeException("arrays to add are not same length");
@@ -402,169 +348,5 @@ public class CTMUtils {
             c[i] = a[i] + b[i];
         }
         return c;
-    }
-
-    private static class TextureOverride {
-        private static final long MULTIPLIER = 0x5deece66dL;
-        private static final long ADDEND = 0xbL;
-        private static final long MASK = (1L << 48) - 1;
-
-        final String type;
-        final String textureName;
-        final int texture;
-        final int faces;
-        final boolean random;
-        final int[] tileMap;
-
-        TextureOverride(String type, String filePrefix, int[] tileMap1, int[] tileMap2) {
-            this.type = type;
-
-            InputStream is = null;
-            Properties properties = new Properties();
-            try {
-                is = lastTexturePack.getInputStream(filePrefix + ".properties");
-                if (is != null) {
-                    properties.load(is);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                MCPatcherUtils.close(is);
-            }
-            textureName = properties.getProperty("source", filePrefix + ".png");
-            texture = getTexture(textureName);
-
-            int flags = 0;
-            for (String val : properties.getProperty("faces", "all").trim().toLowerCase().split("\\s+")) {
-                if (val.equals("bottom")) {
-                    flags |= (1 << BOTTOM_FACE);
-                } else if (val.equals("top")) {
-                    flags |= (1 << TOP_FACE);
-                } else if (val.equals("north")) {
-                    flags |= (1 << NORTH_FACE);
-                } else if (val.equals("south")) {
-                    flags |= (1 << SOUTH_FACE);
-                } else if (val.equals("east")) {
-                    flags |= (1 << EAST_FACE);
-                } else if (val.equals("west")) {
-                    flags |= (1 << WEST_FACE);
-                } else if (val.equals("side") || val.equals("sides")) {
-                    flags |= (1 << NORTH_FACE) | (1 << SOUTH_FACE) | (1 << EAST_FACE) | (1 << WEST_FACE);
-                } else if (val.equals("all")) {
-                    flags = -1;
-                }
-            }
-            faces = flags;
-
-            String method = properties.getProperty("method", "ctm").trim().toLowerCase();
-            if (method.equals("random")) {
-                random = true;
-                int[] newTileMap = MCPatcherUtils.parseIntegerList(properties.getProperty("tiles", "0-" + (NUM_TILES - 1)));
-                if (newTileMap.length > 0) {
-                    tileMap = newTileMap;
-                } else {
-                    tileMap = null;
-                }
-            } else if (method.equals("ctm")) {
-                random = false;
-                String val = properties.getProperty("tiles", "").trim();
-                int[] newTileMap2;
-                if ("".equals(val)) {
-                    newTileMap2 = tileMap2;
-                } else {
-                    newTileMap2 = MCPatcherUtils.parseIntegerList(val);
-                    if (newTileMap2.length != tileMap2.length) {
-                        MCPatcherUtils.error("tile map in %s.properties requires %d entries, got %d",
-                            filePrefix, tileMap2.length, newTileMap2.length
-                        );
-                        newTileMap2 = null;
-                    }
-                }
-                if (newTileMap2 == null) {
-                    tileMap = null;
-                } else {
-                    tileMap = new int[tileMap1.length];
-                    for (int i = 0; i < tileMap1.length; i++) {
-                        tileMap[i] = newTileMap2[tileMap1[i]];
-                    }
-                }
-            } else {
-                MCPatcherUtils.error("unknown method \"%s\" in %s.properties", method, filePrefix);
-                random = false;
-                tileMap = null;
-            }
-        }
-
-        TextureOverride(String type, BufferedImage image, int[] tileMap1, int[] tileMap2) {
-            this.type = type;
-            tileMap = new int[tileMap1.length];
-            for (int i = 0; i < tileMap1.length; i++) {
-                tileMap[i] = tileMap2[tileMap1[i]];
-            }
-            textureName = null;
-            texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
-            faces = -1;
-            random = false;
-        }
-
-        boolean isValid() {
-            return texture >= 0 && tileMap != null;
-        }
-
-        boolean override(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-            if (random) {
-                long n = face;
-                n <<= 16;
-                n ^= i;
-                n <<= 16;
-                n ^= j;
-                n <<= 16;
-                n ^= k;
-                n = MULTIPLIER * n + ADDEND;
-                n = MULTIPLIER * n + ADDEND;
-                n &= MASK;
-                newTextureIndex = tileMap[(int) (((double) n / (double) (MASK + 1)) * tileMap.length)];
-            } else {
-                int[][] offsets = NEIGHBOR_OFFSET[face];
-                int neighborBits = 0;
-                for (int bit = 0; bit < 8; bit++) {
-                    if (shouldConnect(blockAccess, blockId, i, j, k, offsets[bit])) {
-                        neighborBits |= (1 << bit);
-                    }
-                }
-                newTextureIndex = tileMap[neighborBits];
-            }
-            return true;
-        }
-
-        boolean overrideBookshelf(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-            if (face <= TOP_FACE) {
-                return false;
-            }
-            int[][] offsets = NEIGHBOR_OFFSET[face];
-            int neighborBits = 0;
-            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[0])) {
-                neighborBits |= 1;
-            }
-            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[4])) {
-                neighborBits |= 2;
-            }
-            newTextureIndex = tileMap[neighborBits];
-            return true;
-        }
-
-        boolean overrideSandstone(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-            if (face <= TOP_FACE) {
-                return false;
-            }
-            if (blockAccess.getBlockMetadata(i, j, k) != 0) {
-                return false;
-            }
-            if (shouldConnect(blockAccess, blockId, i, j, k, GO_UP)) {
-                newTextureIndex = tileMap[2];
-                return true;
-            }
-            return false;
-        }
     }
 }
