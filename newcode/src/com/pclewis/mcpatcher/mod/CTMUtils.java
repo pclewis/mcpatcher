@@ -28,25 +28,25 @@ public class CTMUtils {
     private static final int BLOCK_ID_BOOKSHELF = 47;
     private static final int BLOCK_ID_SANDSTONE = 24;
 
-    private static final int BOTTOM_FACE = 0; // 0, -1, 0
-    private static final int TOP_FACE = 1; // 0, 1, 0
-    private static final int NORTH_FACE = 2; // 0, 0, -1
-    private static final int SOUTH_FACE = 3; // 0, 0, 1
-    private static final int WEST_FACE = 4; // -1, 0, 0
-    private static final int EAST_FACE = 5; // 1, 0, 0
+    static final int BOTTOM_FACE = 0; // 0, -1, 0
+    static final int TOP_FACE = 1; // 0, 1, 0
+    static final int NORTH_FACE = 2; // 0, 0, -1
+    static final int SOUTH_FACE = 3; // 0, 0, 1
+    static final int WEST_FACE = 4; // -1, 0, 0
+    static final int EAST_FACE = 5; // 1, 0, 0
 
-    private static final int[] GO_DOWN = new int[]{0, -1, 0};
-    private static final int[] GO_UP = new int[]{0, 1, 0};
-    private static final int[] GO_NORTH = new int[]{0, 0, -1};
-    private static final int[] GO_SOUTH = new int[]{0, 0, 1};
-    private static final int[] GO_WEST = new int[]{-1, 0, 0};
-    private static final int[] GO_EAST = new int[]{1, 0, 0};
+    static final int[] GO_DOWN = new int[]{0, -1, 0};
+    static final int[] GO_UP = new int[]{0, 1, 0};
+    static final int[] GO_NORTH = new int[]{0, 0, -1};
+    static final int[] GO_SOUTH = new int[]{0, 0, 1};
+    static final int[] GO_WEST = new int[]{-1, 0, 0};
+    static final int[] GO_EAST = new int[]{1, 0, 0};
 
     // NEIGHBOR_OFFSETS[a][b][c] = offset from starting block
     // a: face 0-5
     // b: neighbor 0-7
     // c: coordinate (x,y,z) 0-2
-    private static final int[][][] NEIGHBOR_OFFSET = new int[][][]{
+    static final int[][][] NEIGHBOR_OFFSET = new int[][][]{
         // BOTTOM_FACE
         {
             GO_WEST,
@@ -163,7 +163,7 @@ public class CTMUtils {
         64, 65, 66, 67,
     };
 
-    private static TexturePackBase lastTexturePack;
+    static TexturePackBase lastTexturePack;
     private static TextureOverride blocks[];
     private static TextureOverride tiles[];
     private static int terrainTexture;
@@ -409,7 +409,7 @@ public class CTMUtils {
         }
     }
 
-    private static int getTexture(String name) {
+    static int getTexture(String name) {
         if (name == null) {
             return -1;
         }
