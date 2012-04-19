@@ -21,10 +21,10 @@ public class CTMUtils {
 
     private static final int NUM_TILES = 256;
 
-    private static final int BLOCK_ID_GLASS = 20;
-    private static final int BLOCK_ID_GLASS_PANE = 102;
-    private static final int BLOCK_ID_BOOKSHELF = 47;
-    private static final int BLOCK_ID_SANDSTONE = 24;
+    static final int BLOCK_ID_GLASS = 20;
+    static final int BLOCK_ID_GLASS_PANE = 102;
+    static final int BLOCK_ID_BOOKSHELF = 47;
+    static final int BLOCK_ID_SANDSTONE = 24;
 
     static final int BOTTOM_FACE = 0; // 0, -1, 0
     static final int TOP_FACE = 1; // 0, 1, 0
@@ -137,7 +137,7 @@ public class CTMUtils {
         if (!active || blockAccess == null || face < 0 || face > 5) {
             return false;
         }
-        if (getConnectedTexture(blockAccess, block.blockID, origTexture, i, j, k, face) && newTexture != terrainTexture) {
+        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, face) && newTexture != terrainTexture) {
             newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
@@ -155,12 +155,13 @@ public class CTMUtils {
         active = false;
     }
 
-    private static boolean getConnectedTexture(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
-        return getConnectedTextureByBlock(blockAccess, blockId, origTexture, i, j, k, face) ||
-            getConnectedTextureByTile(blockAccess, blockId, origTexture, i, j, k, face);
+    private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+        return getConnectedTextureByBlock(blockAccess, block, origTexture, i, j, k, face) ||
+            getConnectedTextureByTile(blockAccess, block, origTexture, i, j, k, face);
     }
 
-    private static boolean getConnectedTextureByBlock(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+    private static boolean getConnectedTextureByBlock(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+        int blockId = block.blockID;
         if (blockId < 0 || blockId >= blocks.length) {
             return false;
         }
@@ -169,11 +170,11 @@ public class CTMUtils {
             return false;
         }
         newTexture = override.texture;
-        newTextureIndex = override.getTile(blockAccess, blockId, origTexture, i, j, k, face);
+        newTextureIndex = override.getTile(blockAccess, block, origTexture, i, j, k, face);
         return newTextureIndex >= 0;
     }
 
-    private static boolean getConnectedTextureByTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+    private static boolean getConnectedTextureByTile(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
         if (origTexture < 0 || origTexture >= tiles.length) {
             return false;
         }
@@ -182,7 +183,7 @@ public class CTMUtils {
             return false;
         }
         newTextureIndex = 0;
-        newTextureIndex = override.getTile(blockAccess, blockId, origTexture, i, j, k, face);
+        newTextureIndex = override.getTile(blockAccess, block, origTexture, i, j, k, face);
         return newTextureIndex >= 0;
     }
 
@@ -214,6 +215,7 @@ public class CTMUtils {
                     if (enableGlass) {
                         prefix = "/ctm";
                         properties.setProperty("method", "glass");
+                        properties.setProperty("connect", "block");
                     }
                     break;
 
@@ -221,6 +223,7 @@ public class CTMUtils {
                     if (enableGlassPane) {
                         prefix = "/ctm";
                         properties.setProperty("method", "glass");
+                        properties.setProperty("connect", "block");
                     }
                     break;
 
@@ -228,6 +231,7 @@ public class CTMUtils {
                     if (enableBookshelf) {
                         prefix = "/ctm";
                         properties.setProperty("method", "bookshelf");
+                        properties.setProperty("connect", "block");
                     }
                     break;
 
@@ -235,6 +239,7 @@ public class CTMUtils {
                     if (enableSandstone) {
                         prefix = "/ctm";
                         properties.setProperty("method", "sandstone");
+                        properties.setProperty("connect", "block");
                     }
                     break;
 
