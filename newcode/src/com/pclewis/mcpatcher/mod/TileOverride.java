@@ -232,13 +232,12 @@ abstract class TileOverride {
         @Override
         int getTileImpl(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
             long n = face;
-            n <<= 16;
-            n ^= i;
-            n <<= 16;
-            n ^= j;
-            n <<= 16;
-            n ^= k;
             n = MULTIPLIER * n + ADDEND;
+            n ^= i;
+            n = MULTIPLIER * n + ADDEND;
+            n ^= j;
+            n = MULTIPLIER * n + ADDEND;
+            n ^= k;
             n = MULTIPLIER * n + ADDEND;
             n &= MASK;
             return tileMap[(int) (((double) n / (double) (MASK + 1)) * tileMap.length)];
