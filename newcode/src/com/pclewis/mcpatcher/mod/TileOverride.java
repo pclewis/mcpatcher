@@ -30,13 +30,15 @@ abstract class TileOverride {
     }
 
     static TileOverride create(String filePrefix, Properties properties) {
-        String method = properties.getProperty("method", "glass").trim().toLowerCase();
+        String method = properties.getProperty("method", "default").trim().toLowerCase();
         TileOverride override = null;
 
-        if (method.equals("glass") || method.equals("ctm")) {
+        if (method.equals("default") || method.equals("glass") || method.equals("ctm")) {
             override = new Default(filePrefix, properties);
         } else if (method.equals("bookshelf") || method.equals("horizontal")) {
+            override = new Horizontal(filePrefix, properties);
         } else if (method.equals("sandstone") || method.equals("top")) {
+            override = new Top(filePrefix, properties);
         } else {
             MCPatcherUtils.error("unknown method \"%s\" in %s.properties", method, filePrefix);
         }
@@ -111,6 +113,10 @@ abstract class TileOverride {
         return newMap;
     }
 
+    static boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
+        return blockAccess.getBlockId(i + offset[0], j + offset[1], k + offset[2]) == blockId;
+    }
+
     boolean isValid() {
         return texture >= 0 && tileMap != null;
     }
@@ -173,10 +179,6 @@ abstract class TileOverride {
             return neighborTileMap[neighborBits];
         }
 
-        static boolean shouldConnect(IBlockAccess blockAccess, int blockId, int i, int j, int k, int[] offset) {
-            return blockAccess.getBlockId(i + offset[0], j + offset[1], k + offset[2]) == blockId;
-        }
-
     }
 
     static class Horizontal extends TileOverride {
@@ -209,13 +211,42 @@ abstract class TileOverride {
             }
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
-            if (Default.shouldConnect(blockAccess, blockId, i, j, k, offsets[0])) {
+            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[0])) {
                 neighborBits |= 1;
             }
-            if (Default.shouldConnect(blockAccess, blockId, i, j, k, offsets[4])) {
+            if (shouldConnect(blockAccess, blockId, i, j, k, offsets[4])) {
                 neighborBits |= 2;
             }
             return neighborTileMap[neighborBits];
+        }
+    }
+
+    static class Top extends TileOverride {
+        private static final int[] defaultTileMap = new int[]{
+            64, 65, 66, 67,
+        };
+
+        Top(String filePrefix, Properties properties) {
+            super(filePrefix, properties);
+        }
+
+        @Override
+        int[] getDefaultTileMap() {
+            return defaultTileMap;
+        }
+
+        @Override
+        int getTile(IBlockAccess blockAccess, int blockId, int origTexture, int i, int j, int k, int face) {
+            if (face <= CTMUtils.TOP_FACE) {
+                return -1;
+            }
+            if (blockAccess.getBlockMetadata(i, j, k) != 0) {
+                return -1;
+            }
+            if (shouldConnect(blockAccess, blockId, i, j, k, CTMUtils.GO_UP)) {
+                return tileMap[2];
+            }
+            return -1;
         }
     }
 }
