@@ -313,13 +313,10 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            long n = (allFacesTheSame ? 0 : face);
-            n = MULTIPLIER * n + ADDEND;
-            n ^= i;
-            n = MULTIPLIER * n + ADDEND;
-            n ^= j;
-            n = MULTIPLIER * n + ADDEND;
-            n ^= k;
+            long n = (allFacesTheSame ? 1 : face);
+            n = MULTIPLIER * n * i + ADDEND;
+            n = MULTIPLIER * n * j + ADDEND;
+            n = MULTIPLIER * n * k + ADDEND;
             n = MULTIPLIER * n + ADDEND;
             n &= MASK;
 
