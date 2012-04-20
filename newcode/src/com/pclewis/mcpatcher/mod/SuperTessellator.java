@@ -21,6 +21,9 @@ public class SuperTessellator extends Tessellator {
     }
 
     Tessellator getTessellator(int texture) {
+        if (texture == CTMUtils.terrainTexture) {
+            return this;
+        }
         if (needCopy) {
             for (Tessellator t : children.values()) {
                 copyFields(t, t.texture, false);

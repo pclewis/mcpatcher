@@ -114,9 +114,9 @@ public class CTMUtils {
     };
 
     static TexturePackBase lastTexturePack;
+    static int terrainTexture;
     private static TileOverride blocks[];
     private static TileOverride tiles[];
-    private static int terrainTexture;
 
     private static boolean active;
     private static int newTexture;
@@ -137,7 +137,7 @@ public class CTMUtils {
         if (!active || blockAccess == null || face < 0 || face > 5) {
             return false;
         }
-        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, face) && newTexture != terrainTexture) {
+        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, face)) {
             newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
