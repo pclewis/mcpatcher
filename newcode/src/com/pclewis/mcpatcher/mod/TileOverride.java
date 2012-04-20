@@ -138,7 +138,7 @@ abstract class TileOverride {
             } else {
                 tileMap = MCPatcherUtils.parseIntegerList(tileList);
                 if (tileMap.length != defaultTileMap.length) {
-                    error("tile map requires %d entries, got %d", filePrefix, defaultTileMap.length, tileMap.length);
+                    error("tile map requires %d entries, got %d", defaultTileMap.length, tileMap.length);
                 }
             }
         }
