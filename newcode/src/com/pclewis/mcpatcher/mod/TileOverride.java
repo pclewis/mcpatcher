@@ -286,33 +286,24 @@ abstract class TileOverride {
                 symmetry = 1;
             }
 
-            ArrayList<Integer> w = new ArrayList<Integer>();
-            for (String t : properties.getProperty("weights", "").split("\\s+")) {
-                if (w.size() >= tileMap.length) {
-                    break;
-                }
-                try {
-                    w.add(Math.max(Integer.parseInt(t), 0));
-                } catch (NumberFormatException e) {
-                }
-            }
-            while (w.size() < tileMap.length) {
-                w.add(1);
-            }
-            int s = 0;
             boolean useWeight = false;
-            for (Integer i : w) {
-                s += i;
-                if (!i.equals(w.get(0))) {
+            int[] wt = new int[tileMap.length];
+            int sum1 = 0;
+            String[] list = properties.getProperty("weights", "").split("\\s+");
+            for (int i = 0; i < tileMap.length; i++) {
+                if (i < list.length && list[i].matches("^\\d+$")) {
+                    wt[i] = Math.max(Integer.parseInt(list[i]), 0);
+                } else {
+                    wt[i] = 1;
+                }
+                if (i > 0 && wt[i] != wt[0]) {
                     useWeight = true;
                 }
+                sum1 += wt[i];
             }
-            sum = s;
+            sum = sum1;
             if (useWeight && sum > 0) {
-                weight = new int[tileMap.length];
-                for (int i = 0; i < weight.length; i++) {
-                    weight[i] = w.get(i);
-                }
+                weight = wt;
             } else {
                 weight = null;
             }
