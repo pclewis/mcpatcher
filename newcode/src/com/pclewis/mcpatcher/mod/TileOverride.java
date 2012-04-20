@@ -7,7 +7,6 @@ import net.minecraft.src.IBlockAccess;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Properties;
 
 abstract class TileOverride {
@@ -41,7 +40,7 @@ abstract class TileOverride {
             return null;
         }
 
-        if (connectByTile) {
+        if (connectByTile && !properties.contains("connect")) {
             properties.setProperty("connect", "tile");
         }
         String method = properties.getProperty("method", "default").trim().toLowerCase();
@@ -163,7 +162,12 @@ abstract class TileOverride {
         if (exclude(blockAccess, block, tileNum, i, j, k, face)) {
             return false;
         } else if (connectByTile) {
-            return block.getBlockTexture(blockAccess, i, j, k, face) == tileNum;
+            block = Block.blocksList[blockAccess.getBlockId(i, j, k)];
+            if (block == null) {
+                return false;
+            } else {
+                return block.getBlockTexture(blockAccess, i, j, k, face) == tileNum;
+            }
         } else {
             return blockAccess.getBlockId(i, j, k) == block.blockID;
         }
