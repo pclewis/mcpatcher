@@ -263,17 +263,29 @@ abstract class TileOverride {
     }
 
     static class Random1 extends TileOverride {
+        private static final long P1 = 0x1c3764a30115L;
+        private static final long P2 = 0x227c1adccd1dL;
+        private static final long P3 = 0xe0d251c03ba5L;
+        private static final long P4 = 0xa2fb1377aeb3L;
         private static final long MULTIPLIER = 0x5deece66dL;
         private static final long ADDEND = 0xbL;
-        private static final long MASK = (1L << 48) - 1;
 
-        private final boolean allFacesTheSame;
+        private final int symmetry;
         private final int[] weight;
         private final int sum;
 
         private Random1(String filePrefix, Properties properties) {
             super(filePrefix, properties);
-            allFacesTheSame = Boolean.parseBoolean(properties.getProperty("allFacesTheSame", "false"));
+
+            String sym = properties.getProperty("symmetry", "none");
+            if (sym.equals("all")) {
+                symmetry = 6;
+            } else if (sym.equals("opposite")) {
+                symmetry = 2;
+            } else {
+                symmetry = 1;
+            }
+
             ArrayList<Integer> w = new ArrayList<Integer>();
             for (String t : properties.getProperty("weights", "").split("\\s+")) {
                 if (w.size() >= tileMap.length) {
@@ -313,24 +325,20 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            if (allFacesTheSame) {
-                face = 1;
-            }
-            long n = 0x5deece66dL * i * (i + ADDEND) + 0x50edce6ed6L * j * (j + ADDEND) + 0xd6ce56ce5L * k * (k + ADDEND) + 0xdee65ec6dL * face * (face + ADDEND);
-            n = MULTIPLIER * n + ADDEND;
-            n &= MASK;
+            face /= symmetry;
+            long n = P1 * i * (i + ADDEND) + P2 * j * (j + ADDEND) + P3 * k * (k + ADDEND) + P4 * face * (face + ADDEND);
+            n = MULTIPLIER * (n + i + j + k + face) + ADDEND;
+            int index = (int) ((n >> 32) ^ n) & 0x7fffffff;
 
-            double d = (double) n / (double) (MASK + 1);
             if (weight == null) {
-                return tileMap[(int) (d * tileMap.length)];
+                index %= tileMap.length;
             } else {
-                int m = (int) (d * sum);
-                int index;
+                int m = index % sum;
                 for (index = 0; index < weight.length - 1 && m >= weight[index]; index++) {
                     m -= weight[index];
                 }
-                return tileMap[index];
             }
+            return tileMap[index];
         }
     }
 
