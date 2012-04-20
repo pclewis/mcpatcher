@@ -313,10 +313,10 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            long n = (allFacesTheSame ? 1 : face);
-            n = MULTIPLIER * n * i + ADDEND;
-            n = MULTIPLIER * n * j + ADDEND;
-            n = MULTIPLIER * n * k + ADDEND;
+            if (allFacesTheSame) {
+                face = 1;
+            }
+            long n = 0x5deece66dL * i * (i + ADDEND) + 0x50edce6ed6L * j * (j + ADDEND) + 0xd6ce56ce5L * k * (k + ADDEND) + 0xdee65ec6dL * face * (face + ADDEND);
             n = MULTIPLIER * n + ADDEND;
             n &= MASK;
 
@@ -331,11 +331,6 @@ abstract class TileOverride {
                 }
                 return tileMap[index];
             }
-        }
-
-        @Override
-        boolean isValid() {
-            return super.isValid() && tileMap.length > 0;
         }
     }
 
