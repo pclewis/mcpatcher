@@ -182,7 +182,7 @@ public class CTMUtils {
         if (override == null) {
             return false;
         }
-        newTextureIndex = 0;
+        newTexture = override.texture;
         newTextureIndex = override.getTile(blockAccess, block, origTexture, i, j, k, face);
         return newTextureIndex >= 0;
     }
@@ -250,18 +250,18 @@ public class CTMUtils {
                     }
                     break;
             }
-            blocks[i] = TileOverride.create(prefix, properties);
+            blocks[i] = TileOverride.create(prefix, properties, false);
+            if (blocks[i] != null) {
+                MCPatcherUtils.info("using %s (texture id %d) for block %d", blocks[i].textureName, blocks[i].texture, i);
+            }
         }
     }
 
     private static void refreshTileTextures() {
         tiles = new TileOverride[NUM_TILES];
         if (enableOther) {
-            Properties properties = new Properties();
-            properties.setProperty("method", "default");
-            properties.setProperty("connect", "tile");
             for (int i = 0; i < tiles.length; i++) {
-                tiles[i] = TileOverride.create("/ctm/terrain" + i, properties);
+                tiles[i] = TileOverride.create("/ctm/terrain" + i, null, true);
                 if (tiles[i] != null) {
                     MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", tiles[i].textureName, tiles[i].texture, i);
                 }

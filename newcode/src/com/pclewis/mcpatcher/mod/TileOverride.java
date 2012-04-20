@@ -19,7 +19,7 @@ abstract class TileOverride {
     final boolean connectByTile;
     final int[] tileMap;
 
-    static TileOverride create(String filePrefix, Properties properties) {
+    static TileOverride create(String filePrefix, Properties properties, boolean connectByTile) {
         if (filePrefix == null) {
             return null;
         }
@@ -41,6 +41,9 @@ abstract class TileOverride {
             return null;
         }
 
+        if (connectByTile) {
+            properties.setProperty("connect", "tile");
+        }
         String method = properties.getProperty("method", "default").trim().toLowerCase();
         TileOverride override = null;
 
