@@ -379,7 +379,7 @@ abstract class TileOverride {
 
     static class Top extends TileOverride {
         private static final int[] defaultTileMap = new int[]{
-            64, 65, 66, 67,
+            66,
         };
 
         private Top(String filePrefix, Properties properties) {
@@ -400,7 +400,7 @@ abstract class TileOverride {
                 return -1;
             }
             if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, CTMUtils.GO_UP)) {
-                return tileMap[2];
+                return tileMap[0];
             }
             return -1;
         }
