@@ -171,11 +171,15 @@ public class ConnectedTextures extends Mod {
             final MethodRef startDrawing = new MethodRef(getDeobfClass(), "startDrawing", "(I)V");
             final MethodRef constructor = new MethodRef("Tessellator", "<init>", "(I)V");
             final MethodRef reset = new MethodRef(getDeobfClass(), "reset", "()V");
+            final MethodRef addVertex = new MethodRef(getDeobfClass(), "addVertex", "(DDD)V");
             final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
             final FieldRef isDrawing = new FieldRef(getDeobfClass(), "isDrawing", "Z");
             final FieldRef drawMode = new FieldRef(getDeobfClass(), "drawMode", "I");
             final FieldRef texture = new FieldRef(getDeobfClass(), "texture", "I");
             final FieldRef bufferSize = new FieldRef(getDeobfClass(), "bufferSize", "I");
+            final FieldRef addedVertices = new FieldRef(getDeobfClass(), "addedVertices", "I");
+            final FieldRef vertexCount = new FieldRef(getDeobfClass(), "vertexCount", "I");
+            final FieldRef rawBufferIndex = new FieldRef(getDeobfClass(), "rawBufferIndex", "I");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -185,6 +189,39 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             }.setMethod(draw));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        push(4),
+                        IREM,
+
+                        BinaryRegex.any(0, 1000),
+
+                        ALOAD_0,
+                        DUP,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        ICONST_1,
+                        IADD,
+                        BytecodeMatcher.anyReference(PUTFIELD),
+
+                        ALOAD_0,
+                        DUP,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        push(8),
+                        IADD,
+                        BytecodeMatcher.anyReference(PUTFIELD)
+                    );
+                }
+            }
+                .setMethod(addVertex)
+                .addXref(1, addedVertices)
+                .addXref(2, vertexCount)
+                .addXref(3, rawBufferIndex)
+            );
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -248,7 +285,8 @@ public class ConnectedTextures extends Mod {
 
             memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
-            for (JavaRef ref : new JavaRef[]{constructor, startDrawing, isDrawing, drawMode, draw, reset, bufferSize}) {
+            for (JavaRef ref : new JavaRef[]{constructor, startDrawing, isDrawing, drawMode, draw, reset, bufferSize,
+                addedVertices, vertexCount, rawBufferIndex}) {
                 patches.add(new MakeMemberPublicPatch(ref));
             }
 

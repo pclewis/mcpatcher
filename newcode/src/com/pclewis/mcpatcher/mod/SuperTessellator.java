@@ -26,7 +26,7 @@ public class SuperTessellator extends Tessellator {
         }
         if (needCopy) {
             for (Tessellator t : children.values()) {
-                copyFields(t, t.texture, false);
+                copyFields(t, false);
             }
             needCopy = false;
         }
@@ -34,7 +34,8 @@ public class SuperTessellator extends Tessellator {
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
             newTessellator = new Tessellator(defaultBufferSize / 16);
-            copyFields(newTessellator, texture, true);
+            newTessellator.texture = texture;
+            copyFields(newTessellator, true);
             children.put(texture, newTessellator);
         }
         return newTessellator;
@@ -44,8 +45,12 @@ public class SuperTessellator extends Tessellator {
         children.clear();
     }
 
-    private void copyFields(Tessellator newTessellator, int texture, boolean isNew) {
+    private void copyFields(Tessellator newTessellator, boolean isNew) {
         int saveBufferSize = newTessellator.bufferSize;
+        int saveVertexCount = newTessellator.vertexCount;
+        int saveAddedVertices = newTessellator.addedVertices;
+        int saveRawBufferIndex = newTessellator.rawBufferIndex;
+        int saveTexture = newTessellator.texture;
         for (Field f : Tessellator.class.getDeclaredFields()) {
             Class<?> type = f.getType();
             int modifiers = f.getModifiers();
@@ -63,8 +68,10 @@ public class SuperTessellator extends Tessellator {
             }
         }
         newTessellator.bufferSize = saveBufferSize;
-        newTessellator.texture = texture;
-        newTessellator.reset();
+        newTessellator.vertexCount = saveVertexCount;
+        newTessellator.addedVertices = saveAddedVertices;
+        newTessellator.rawBufferIndex = saveRawBufferIndex;
+        newTessellator.texture = saveTexture;
         if (isDrawing && !newTessellator.isDrawing) {
             newTessellator.startDrawing(drawMode);
         } else if (!isDrawing && newTessellator.isDrawing) {
