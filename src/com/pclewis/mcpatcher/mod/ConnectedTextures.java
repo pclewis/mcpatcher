@@ -3,11 +3,13 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.ClassFile;
+import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static javassist.bytecode.Opcode.*;
 
@@ -378,9 +380,15 @@ public class ConnectedTextures extends Mod {
         private final MethodRef[] faceMethods = new MethodRef[6];
         private final FieldRef overrideBlockTexture = new FieldRef(getDeobfClass(), "overrideBlockTexture", "I");
         private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
+        private final FieldRef instance = new FieldRef("Tessellator", "instance", "LTessellator;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
         private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)Z");
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
+        private final FieldRef newTextureIndex = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTextureIndex", "I");
+        private final FieldRef newTessellator = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTessellator", "LTessellator;");
+
+        private ArrayList<MethodInfo> renderMethods = new ArrayList<MethodInfo>();
+        private ArrayList<Integer> tessellatorRegisters = new ArrayList<Integer>();
 
         RenderBlocksMod() {
             setupBlockFace(0, "Bottom");
@@ -416,6 +424,107 @@ public class ConnectedTextures extends Mod {
 
             memberMappers.add(new FieldMapper(blockAccess));
             memberMappers.add(new MethodMapper(faceMethods));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "find potential render methods";
+                }
+
+                @Override
+                public boolean filterMethod(MethodInfo methodInfo) {
+                    return methodInfo.getDescriptor().matches("^\\(L[a-z]+;III.*");
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(GETSTATIC, instance),
+                        ASTORE, BinaryRegex.capture(BinaryRegex.any())
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    renderMethods.add(getMethodInfo());
+                    tessellatorRegisters.add(getCaptureGroup(1)[0] & 0xff);
+                    return null;
+                }
+            });
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                private int tessellatorRegister;
+
+                @Override
+                public String getDescription() {
+                    return "setup connected textures (other blocks)";
+                }
+
+                @Override
+                public boolean filterMethod(MethodInfo methodInfo) {
+                    for (int i = 0; i < renderMethods.size(); i++) {
+                        MethodInfo m = renderMethods.get(i);
+                        if (methodInfo.getName().equals(m.getName()) &&
+                            methodInfo.getDescriptor().equals(m.getDescriptor())) {
+                            tessellatorRegister = tessellatorRegisters.get(i);
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // j = (i & 0x0f) << 4;
+                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        push(0x0f),
+                        IAND,
+                        push(4),
+                        ISHL,
+                        ISTORE, BinaryRegex.any(),
+
+                        // k = (i & 0xf0);
+                        ILOAD, BinaryRegex.backReference(1),
+                        push(0xf0),
+                        IAND,
+                        ISTORE, BinaryRegex.any()
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        // if (overrideBlockTexture < 0
+                        ALOAD_0,
+                        reference(GETFIELD, overrideBlockTexture),
+                        IFGE, branch("A"),
+
+                        // && CTMUtils.setup(block, blockAccess, i, j, k, 0, texture)) {
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(GETFIELD, blockAccess),
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        push(0),
+                        ILOAD, getCaptureGroup(1),
+                        reference(INVOKESTATIC, setup),
+                        IFEQ, branch("A"),
+
+                        // texture = CTMUtils.newTextureIndex;
+                        reference(GETSTATIC, newTextureIndex),
+                        ISTORE, getCaptureGroup(1),
+
+                        // tessellator = CTMUtils.newTessellator;
+                        reference(GETSTATIC, newTessellator),
+                        ASTORE, tessellatorRegister,
+
+                        // }
+                        label("A")
+                    );
+                }
+            });
         }
 
         private void setupBlockFace(final int face, final String direction) {
@@ -482,11 +591,11 @@ public class ConnectedTextures extends Mod {
                         IFEQ, branch("B"),
 
                         // texture = CTMUtils.newTextureIndex;
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTextureIndex", "I")),
+                        reference(GETSTATIC, newTextureIndex),
                         ISTORE, getCaptureGroup(4),
 
                         // tessellator = CTMUtils.newTessellator;
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTessellator", "LTessellator;")),
+                        reference(GETSTATIC, newTessellator),
                         ASTORE, getCaptureGroup(2),
 
                         // }
