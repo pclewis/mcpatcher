@@ -62,12 +62,12 @@ abstract class TileOverride {
             MCPatcherUtils.error("%s.properties: unknown method \"%s\"", filePrefix, method);
         }
 
-        return override != null && override.isValid() ? override : null;
+        return override == null || override.disabled ? null : override;
     }
 
     static TileOverride create(BufferedImage image) {
         TileOverride override = new CTM(image);
-        return override.isValid() ? override : null;
+        return override.disabled ? null : override;
     }
 
     private TileOverride(BufferedImage image) {
@@ -145,10 +145,6 @@ abstract class TileOverride {
         }
     }
 
-    boolean isValid() {
-        return !disabled && texture >= 0 && tileMap != null && tileMap.length > 0;
-    }
-
     boolean requiresFace() {
         return true;
     }
@@ -199,7 +195,6 @@ abstract class TileOverride {
         if (face < 0) {
             if (requiresFace()) {
                 error("method=%s is not supported for non-standard blocks", getMethod());
-                disabled = true;
                 return -1;
             } else {
                 face = 0;
@@ -471,6 +466,11 @@ abstract class TileOverride {
             }
             width = w;
             height = h;
+            if (width <= 0 || height <= 0 || width * height > CTMUtils.NUM_TILES) {
+                error("invalid width and height (%dx%d)", width, height);
+            } else if (tileMap.length != width * height) {
+                error("must have exactly width * height (=%d) tiles, got %d", width * height, tileMap.length);
+            }
         }
 
         @Override
@@ -481,21 +481,6 @@ abstract class TileOverride {
         @Override
         int[] getDefaultTileMap() {
             return null;
-        }
-
-        @Override
-        boolean isValid() {
-            if (!super.isValid()) {
-                return false;
-            } else if (width <= 0 || height <= 0 || width * height > CTMUtils.NUM_TILES) {
-                error("invalid width and height (%dx%d)", width, height);
-                return false;
-            } else if (tileMap.length != width * height) {
-                error("must have exactly width * height (=%d) tiles, got %d", width * height, tileMap.length);
-                return false;
-            } else {
-                return true;
-            }
         }
 
         @Override
