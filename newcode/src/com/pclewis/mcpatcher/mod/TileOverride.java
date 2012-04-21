@@ -18,6 +18,8 @@ abstract class TileOverride {
     final boolean connectByTile;
     final int[] tileMap;
 
+    boolean disabled;
+
     static TileOverride create(String filePrefix, Properties properties, boolean connectByTile) {
         if (filePrefix == null) {
             return null;
@@ -47,7 +49,7 @@ abstract class TileOverride {
         TileOverride override = null;
 
         if (method.equals("default") || method.equals("glass") || method.equals("ctm")) {
-            override = new Default(filePrefix, properties);
+            override = new CTM(filePrefix, properties);
         } else if (method.equals("random")) {
             override = new Random1(filePrefix, properties);
         } else if (method.equals("bookshelf") || method.equals("horizontal")) {
@@ -64,7 +66,7 @@ abstract class TileOverride {
     }
 
     static TileOverride create(BufferedImage image) {
-        TileOverride override = new Default(image);
+        TileOverride override = new CTM(image);
         return override.isValid() ? override : null;
     }
 
@@ -144,7 +146,7 @@ abstract class TileOverride {
     }
 
     boolean isValid() {
-        return texture >= 0 && tileMap != null && tileMap.length > 0;
+        return !disabled && texture >= 0 && tileMap != null && tileMap.length > 0;
     }
 
     boolean requiresFace() {
@@ -157,6 +159,7 @@ abstract class TileOverride {
         } else {
             MCPatcherUtils.error(filePrefix + ".properties: " + format, params);
         }
+        disabled = true;
     }
 
     final boolean shouldConnect(IBlockAccess blockAccess, Block block, int tileNum, int i, int j, int k, int face, int[] offset) {
@@ -190,8 +193,13 @@ abstract class TileOverride {
     }
 
     final int getTile(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+        if (disabled) {
+            return -1;
+        }
         if (face < 0) {
             if (requiresFace()) {
+                error("method=%s is not supported for non-standard blocks", getMethod());
+                disabled = true;
                 return -1;
             } else {
                 face = 0;
@@ -212,11 +220,13 @@ abstract class TileOverride {
         return newMap;
     }
 
+    abstract String getMethod();
+
     abstract int[] getDefaultTileMap();
 
     abstract int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face);
 
-    final static class Default extends TileOverride {
+    final static class CTM extends TileOverride {
         private static final int[] defaultTileMap = new int[]{
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
@@ -249,14 +259,19 @@ abstract class TileOverride {
 
         private final int[] neighborTileMap;
 
-        private Default(BufferedImage image) {
+        private CTM(BufferedImage image) {
             super(image);
             neighborTileMap = compose(defaultTileMap, neighborMap);
         }
 
-        private Default(String filePrefix, Properties properties) {
+        private CTM(String filePrefix, Properties properties) {
             super(filePrefix, properties);
             neighborTileMap = compose(tileMap, neighborMap);
+        }
+
+        @Override
+        String getMethod() {
+            return "ctm";
         }
 
         @Override
@@ -296,6 +311,11 @@ abstract class TileOverride {
         }
 
         @Override
+        String getMethod() {
+            return "horizontal";
+        }
+
+        @Override
         int[] getDefaultTileMap() {
             return defaultTileMap;
         }
@@ -324,6 +344,11 @@ abstract class TileOverride {
 
         private Top(String filePrefix, Properties properties) {
             super(filePrefix, properties);
+        }
+
+        @Override
+        String getMethod() {
+            return "top";
         }
 
         @Override
@@ -397,6 +422,11 @@ abstract class TileOverride {
         }
 
         @Override
+        String getMethod() {
+            return "random";
+        }
+
+        @Override
         int[] getDefaultTileMap() {
             return null;
         }
@@ -441,6 +471,11 @@ abstract class TileOverride {
             }
             width = w;
             height = h;
+        }
+
+        @Override
+        String getMethod() {
+            return "repeat";
         }
 
         @Override
