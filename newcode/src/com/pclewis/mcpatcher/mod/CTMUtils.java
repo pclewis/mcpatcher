@@ -115,8 +115,8 @@ public class CTMUtils {
 
     static TexturePackBase lastTexturePack;
     static int terrainTexture;
-    private static TileOverride blocks[];
-    private static TileOverride tiles[];
+    private static TileOverride blockOverrides[];
+    private static TileOverride tileOverrides[];
 
     private static boolean active;
     private static int newTexture;
@@ -146,6 +146,21 @@ public class CTMUtils {
         }
     }
 
+    public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int origTexture) {
+        if (!active || blockAccess == null) {
+            return false;
+        }
+        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, 0)) {
+            SuperTessellator instance = (SuperTessellator) Tessellator.instance;
+            newTessellator = instance.getTessellator(newTexture);
+            instance.copyFields(newTessellator, false);
+            return true;
+        } else {
+            reset();
+            return false;
+        }
+    }
+
     public static void reset() {
     }
 
@@ -156,29 +171,15 @@ public class CTMUtils {
     }
 
     private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        return getConnectedTextureByBlock(blockAccess, block, origTexture, i, j, k, face) ||
-            getConnectedTextureByTile(blockAccess, block, origTexture, i, j, k, face);
+        return getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, blockOverrides, block.blockID) ||
+            getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, tileOverrides, origTexture);
     }
 
-    private static boolean getConnectedTextureByBlock(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        int blockId = block.blockID;
-        if (blockId < 0 || blockId >= blocks.length) {
+    private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face, TileOverride[] overrides, int index) {
+        if (index < 0 || index >= overrides.length) {
             return false;
         }
-        TileOverride override = blocks[blockId];
-        if (override == null) {
-            return false;
-        }
-        newTexture = override.texture;
-        newTextureIndex = override.getTile(blockAccess, block, origTexture, i, j, k, face);
-        return newTextureIndex >= 0;
-    }
-
-    private static boolean getConnectedTextureByTile(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        if (origTexture < 0 || origTexture >= tiles.length) {
-            return false;
-        }
-        TileOverride override = tiles[origTexture];
+        TileOverride override = overrides[index];
         if (override == null) {
             return false;
         }
@@ -206,8 +207,8 @@ public class CTMUtils {
     }
 
     private static void refreshBlockTextures() {
-        blocks = new TileOverride[Block.blocksList.length];
-        for (int i = 0; i < blocks.length; i++) {
+        blockOverrides = new TileOverride[Block.blocksList.length];
+        for (int i = 0; i < blockOverrides.length; i++) {
             String prefix = null;
             Properties properties = new Properties();
             switch (i) {
@@ -250,20 +251,20 @@ public class CTMUtils {
                     }
                     break;
             }
-            blocks[i] = TileOverride.create(prefix, properties, false);
-            if (blocks[i] != null) {
-                MCPatcherUtils.info("using %s (texture id %d) for block %d", blocks[i].textureName, blocks[i].texture, i);
+            blockOverrides[i] = TileOverride.create(prefix, properties, false);
+            if (blockOverrides[i] != null) {
+                MCPatcherUtils.info("using %s (texture id %d) for block %d", blockOverrides[i].textureName, blockOverrides[i].texture, i);
             }
         }
     }
 
     private static void refreshTileTextures() {
-        tiles = new TileOverride[NUM_TILES];
+        tileOverrides = new TileOverride[NUM_TILES];
         if (enableOther) {
-            for (int i = 0; i < tiles.length; i++) {
-                tiles[i] = TileOverride.create("/ctm/terrain" + i, null, true);
-                if (tiles[i] != null) {
-                    MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", tiles[i].textureName, tiles[i].texture, i);
+            for (int i = 0; i < tileOverrides.length; i++) {
+                tileOverrides[i] = TileOverride.create("/ctm/terrain" + i, null, true);
+                if (tileOverrides[i] != null) {
+                    MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", tileOverrides[i].textureName, tileOverrides[i].texture, i);
                 }
             }
         }
@@ -291,13 +292,13 @@ public class CTMUtils {
             template = newImage;
         }
 
-        for (int i = 0; i < tiles.length; i++) {
+        for (int i = 0; i < tileOverrides.length; i++) {
             setupOutline(i, terrain, template);
         }
     }
 
     private static void setupOutline(int tileNum, BufferedImage terrain, BufferedImage template) {
-        if (tiles[tileNum] != null) {
+        if (tileOverrides[tileNum] != null) {
             return;
         }
         switch (tileNum) {
@@ -329,7 +330,7 @@ public class CTMUtils {
             }
         }
 
-        tiles[tileNum] = TileOverride.create(newImage);
+        tileOverrides[tileNum] = TileOverride.create(newImage);
     }
 
     static int getTexture(String name) {

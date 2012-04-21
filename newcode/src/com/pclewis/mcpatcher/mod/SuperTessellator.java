@@ -45,7 +45,7 @@ public class SuperTessellator extends Tessellator {
         children.clear();
     }
 
-    private void copyFields(Tessellator newTessellator, boolean isNew) {
+    void copyFields(Tessellator newTessellator, boolean isNew) {
         int saveBufferSize = newTessellator.bufferSize;
         int saveVertexCount = newTessellator.vertexCount;
         int saveAddedVertices = newTessellator.addedVertices;

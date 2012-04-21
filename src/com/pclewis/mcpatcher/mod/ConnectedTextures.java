@@ -421,6 +421,7 @@ public class ConnectedTextures extends Mod {
         private final FieldRef instance = new FieldRef("Tessellator", "instance", "LTessellator;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
         private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)Z");
+        private final MethodRef setupNoFace = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIII)Z");
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
         private final FieldRef newTextureIndex = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTextureIndex", "I");
         private final FieldRef newTessellator = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTessellator", "LTessellator;");
@@ -538,16 +539,15 @@ public class ConnectedTextures extends Mod {
                         reference(GETFIELD, overrideBlockTexture),
                         IFGE, branch("A"),
 
-                        // && CTMUtils.setup(block, blockAccess, i, j, k, 0, texture)) {
+                        // && CTMUtils.setup(block, blockAccess, i, j, k, texture)) {
                         ALOAD_1,
                         ALOAD_0,
                         reference(GETFIELD, blockAccess),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        push(0),
                         ILOAD, getCaptureGroup(1),
-                        reference(INVOKESTATIC, setup),
+                        reference(INVOKESTATIC, setupNoFace),
                         IFEQ, branch("A"),
 
                         // texture = CTMUtils.newTextureIndex;
