@@ -84,8 +84,12 @@ abstract class TileOverride {
         this.filePrefix = filePrefix;
         textureName = properties.getProperty("source", filePrefix + ".png");
         texture = CTMUtils.getTexture(textureName);
-        if (properties.contains("source") && texture < 0) {
-            error("source texture %s not found", textureName);
+        if (texture < 0) {
+            if (properties.contains("source")) {
+                error("source texture %s not found", textureName);
+            } else {
+                disabled = true;
+            }
         }
 
         int flags = 0;
@@ -150,8 +154,8 @@ abstract class TileOverride {
     }
 
     final void error(String format, Object... params) {
-        if (filePrefix == null) {
-            MCPatcherUtils.error(format, params);
+        if (filePrefix == null || filePrefix.equals("/ctm")) {
+            //MCPatcherUtils.error(format, params);
         } else {
             MCPatcherUtils.error(filePrefix + ".properties: " + format, params);
         }
@@ -189,9 +193,6 @@ abstract class TileOverride {
     }
 
     final int getTile(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        if (disabled) {
-            return -1;
-        }
         if (face < 0) {
             if (requiresFace()) {
                 error("method=%s is not supported for non-standard blocks", getMethod());

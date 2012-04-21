@@ -183,6 +183,10 @@ public class CTMUtils {
         if (override == null) {
             return false;
         }
+        if (override.disabled) {
+            overrides[index] = null;
+            return false;
+        }
         newTexture = override.texture;
         newTextureIndex = override.getTile(blockAccess, block, origTexture, i, j, k, face);
         return newTextureIndex >= 0;
