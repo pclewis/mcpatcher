@@ -150,7 +150,7 @@ public class CTMUtils {
         if (!active || blockAccess == null) {
             return false;
         }
-        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, 0)) {
+        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, -1)) {
             SuperTessellator instance = (SuperTessellator) Tessellator.instance;
             newTessellator = instance.getTessellator(newTexture);
             instance.copyFields(newTessellator, false);
