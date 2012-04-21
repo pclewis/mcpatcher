@@ -166,22 +166,21 @@ abstract class TileOverride {
         i += offset[0];
         j += offset[1];
         k += offset[2];
-        if (exclude(blockAccess, block, tileNum, i, j, k, face)) {
+        int neighborID = blockAccess.getBlockId(i, j, k);
+        Block neighbor = Block.blocksList[neighborID];
+        if (exclude(blockAccess, neighbor, tileNum, i, j, k, face)) {
             return false;
         } else if (connectByTile) {
-            block = Block.blocksList[blockAccess.getBlockId(i, j, k)];
-            if (block == null) {
-                return false;
-            } else {
-                return block.getBlockTexture(blockAccess, i, j, k, face) == tileNum;
-            }
+            return neighbor.getBlockTexture(blockAccess, i, j, k, face) == tileNum;
         } else {
-            return blockAccess.getBlockId(i, j, k) == block.blockID;
+            return neighborID == block.blockID;
         }
     }
 
     final boolean exclude(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        if ((faces & (1 << face)) == 0) {
+        if (block == null) {
+            return true;
+        } else if ((faces & (1 << face)) == 0) {
             return true;
         } else if (metadata != -1) {
             int meta = blockAccess.getBlockMetadata(i, j, k);
