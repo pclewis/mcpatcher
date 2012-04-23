@@ -115,10 +115,8 @@ abstract class TileOverride {
         faces = flags;
 
         int meta = 0;
-        for (int i : MCPatcherUtils.parseIntegerList(properties.getProperty("metadata", "0-31"))) {
-            if (i >= 0 && i < 32) {
-                meta |= (1 << i);
-            }
+        for (int i : MCPatcherUtils.parseIntegerList(properties.getProperty("metadata", "0-31"), 0, 31)) {
+            meta |= (1 << i);
         }
         metadata = meta;
 
@@ -132,7 +130,7 @@ abstract class TileOverride {
                 error("no tile map given");
                 tileMap = null;
             } else {
-                tileMap = MCPatcherUtils.parseIntegerList(tileList);
+                tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
                 if (tileMap.length == 0) {
                     error("no tile map given");
                 }
@@ -141,7 +139,7 @@ abstract class TileOverride {
             if (tileList.equals("")) {
                 tileMap = defaultTileMap;
             } else {
-                tileMap = MCPatcherUtils.parseIntegerList(tileList);
+                tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
                 if (tileMap.length != defaultTileMap.length) {
                     error("tile map requires %d entries, got %d", defaultTileMap.length, tileMap.length);
                 }

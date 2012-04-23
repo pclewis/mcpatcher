@@ -462,9 +462,11 @@ public class MCPatcherUtils {
      * Parse a comma-separated list of integers/ranges.
      *
      * @param list comma-separated list, e.g., 2-4,5,8,12-20
-     * @return possibly empty, sorted array with duplicates removed
+     * @param minValue smallest value allowed in the list
+     * @param maxValue largest value allowed in the list
+     * @return possibly empty integer array
      */
-    public static int[] parseIntegerList(String list) {
+    public static int[] parseIntegerList(String list, int minValue, int maxValue) {
         ArrayList<Integer> tmpList = new ArrayList<Integer>();
         for (String token : list.replace(',', ' ').split("\\s+")) {
             token = token.trim();
@@ -482,12 +484,13 @@ public class MCPatcherUtils {
             } catch (NumberFormatException e) {
             }
         }
-        Collections.sort(tmpList);
-        for (int i = 0; i < tmpList.size(); ) {
-            if (i > 0 && tmpList.get(i).equals(tmpList.get(i - 1))) {
-                tmpList.remove(i);
-            } else {
-                i++;
+        if (minValue <= maxValue) {
+            for (int i = 0; i < tmpList.size(); ) {
+                if (tmpList.get(i) < minValue || tmpList.get(i) > maxValue) {
+                    tmpList.remove(i);
+                } else {
+                    i++;
+                }
             }
         }
         int[] a = new int[tmpList.size()];
