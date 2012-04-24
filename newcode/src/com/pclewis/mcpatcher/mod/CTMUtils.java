@@ -128,7 +128,6 @@ public class CTMUtils {
         checkUpdate();
         Tessellator.instance.texture = terrainTexture;
         if (Tessellator.instance instanceof SuperTessellator) {
-            ((SuperTessellator) Tessellator.instance).needCopy = true;
             active = true;
         }
     }
@@ -151,9 +150,7 @@ public class CTMUtils {
             return false;
         }
         if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, -1)) {
-            SuperTessellator instance = (SuperTessellator) Tessellator.instance;
-            newTessellator = instance.getTessellator(newTexture);
-            instance.copyFields(newTessellator, false);
+            newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
             reset();

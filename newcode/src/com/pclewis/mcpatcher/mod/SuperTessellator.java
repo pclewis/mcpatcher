@@ -12,8 +12,6 @@ public class SuperTessellator extends Tessellator {
 
     private final HashMap<Integer, Tessellator> children = new HashMap<Integer, Tessellator>();
 
-    boolean needCopy;
-
     public SuperTessellator(int bufferSize) {
         super(bufferSize);
         MCPatcherUtils.info("new %s(%d)", getClass().getSimpleName(), bufferSize);
@@ -24,12 +22,6 @@ public class SuperTessellator extends Tessellator {
         if (texture == CTMUtils.terrainTexture) {
             return this;
         }
-        if (needCopy) {
-            for (Tessellator t : children.values()) {
-                copyFields(t, false);
-            }
-            needCopy = false;
-        }
         Tessellator newTessellator = children.get(texture);
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
@@ -37,6 +29,8 @@ public class SuperTessellator extends Tessellator {
             newTessellator.texture = texture;
             copyFields(newTessellator, true);
             children.put(texture, newTessellator);
+        } else {
+            copyFields(newTessellator, false);
         }
         return newTessellator;
     }
@@ -45,7 +39,7 @@ public class SuperTessellator extends Tessellator {
         children.clear();
     }
 
-    void copyFields(Tessellator newTessellator, boolean isNew) {
+    private void copyFields(Tessellator newTessellator, boolean isNew) {
         int saveBufferSize = newTessellator.bufferSize;
         int saveVertexCount = newTessellator.vertexCount;
         int saveAddedVertices = newTessellator.addedVertices;
