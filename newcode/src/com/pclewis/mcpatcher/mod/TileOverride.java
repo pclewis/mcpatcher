@@ -451,6 +451,7 @@ abstract class TileOverride {
     final static class Repeat extends TileOverride {
         private final int width;
         private final int height;
+        private final int symmetry;
 
         Repeat(String filePrefix, Properties properties) {
             super(filePrefix, properties);
@@ -468,6 +469,13 @@ abstract class TileOverride {
                 error("invalid width and height (%dx%d)", width, height);
             } else if (tileMap.length != width * height) {
                 error("must have exactly width * height (=%d) tiles, got %d", width * height, tileMap.length);
+            }
+
+            String sym = properties.getProperty("symmetry", "none");
+            if (sym.equals("opposite")) {
+                symmetry = ~1;
+            } else {
+                symmetry = -1;
             }
         }
 
@@ -488,6 +496,7 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+            face &= symmetry;
             int x;
             int y;
             switch (face) {
