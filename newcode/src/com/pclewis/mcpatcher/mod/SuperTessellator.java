@@ -5,17 +5,19 @@ import net.minecraft.src.Tessellator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SuperTessellator extends Tessellator {
-    private static int defaultBufferSize;
+    private static final Integer MAGIC_VALUE = 0x12345678;
 
     private final HashMap<Integer, Tessellator> children = new HashMap<Integer, Tessellator>();
+    private final Field[] fieldsToCopy;
 
     public SuperTessellator(int bufferSize) {
         super(bufferSize);
         MCPatcherUtils.info("new %s(%d)", getClass().getSimpleName(), bufferSize);
-        defaultBufferSize = bufferSize;
+        fieldsToCopy = getFieldsToCopy();
     }
 
     Tessellator getTessellator(int texture) {
@@ -25,7 +27,7 @@ public class SuperTessellator extends Tessellator {
         Tessellator newTessellator = children.get(texture);
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
-            newTessellator = new Tessellator(defaultBufferSize / 16);
+            newTessellator = new Tessellator(Math.max(bufferSize / 16, 131072));
             newTessellator.texture = texture;
             copyFields(newTessellator, true);
             children.put(texture, newTessellator);
@@ -38,34 +40,55 @@ public class SuperTessellator extends Tessellator {
     void clearTessellators() {
         children.clear();
     }
-
-    private void copyFields(Tessellator newTessellator, boolean isNew) {
-        int saveBufferSize = newTessellator.bufferSize;
-        int saveVertexCount = newTessellator.vertexCount;
-        int saveAddedVertices = newTessellator.addedVertices;
-        int saveRawBufferIndex = newTessellator.rawBufferIndex;
-        int saveTexture = newTessellator.texture;
+    
+    private Field[] getFieldsToCopy() {
+        int saveBufferSize = bufferSize;
+        int saveVertexCount = vertexCount;
+        int saveAddedVertices = addedVertices;
+        int saveRawBufferIndex = rawBufferIndex;
+        int saveTexture = texture;
+        bufferSize = MAGIC_VALUE;
+        vertexCount = MAGIC_VALUE;
+        addedVertices = MAGIC_VALUE;
+        rawBufferIndex = MAGIC_VALUE;
+        texture = MAGIC_VALUE;
+        ArrayList<Field> fields = new ArrayList<Field>();
         for (Field f : Tessellator.class.getDeclaredFields()) {
-            Class<?> type = f.getType();
-            int modifiers = f.getModifiers();
-            if (!Modifier.isStatic(modifiers) && type.isPrimitive()) {
-                f.setAccessible(true);
-                try {
-                    Object value = f.get(this);
-                    if (isNew) {
-                        MCPatcherUtils.debug("  copy %s %s %s = %s", Modifier.toString(modifiers), type.toString(), f.getName(), value.toString());
+            try {
+                Class<?> type = f.getType();
+                int modifiers = f.getModifiers();
+                if (!Modifier.isStatic(modifiers) && type.isPrimitive()) {
+                    f.setAccessible(true);
+                    if (type == Integer.TYPE && MAGIC_VALUE.equals(f.get(this))) {
+                        continue;
                     }
-                    f.set(newTessellator, value);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    MCPatcherUtils.debug("  copy %s %s %s", Modifier.toString(f.getModifiers()), f.getType().toString(), f.getName());
+                    fields.add(f);
                 }
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
         }
-        newTessellator.bufferSize = saveBufferSize;
-        newTessellator.vertexCount = saveVertexCount;
-        newTessellator.addedVertices = saveAddedVertices;
-        newTessellator.rawBufferIndex = saveRawBufferIndex;
-        newTessellator.texture = saveTexture;
+        bufferSize = saveBufferSize;
+        vertexCount = saveVertexCount;
+        addedVertices = saveAddedVertices;
+        rawBufferIndex = saveRawBufferIndex;
+        texture = saveTexture;
+        return fields.toArray(new Field[fields.size()]);
+    }
+
+    private void copyFields(Tessellator newTessellator, boolean isNew) {
+        for (Field f : fieldsToCopy) {
+            try {
+                Object value = f.get(this);
+                if (isNew) {
+                    MCPatcherUtils.debug("  copy %s %s %s = %s", Modifier.toString(f.getModifiers()), f.getType().toString(), f.getName(), value.toString());
+                }
+                f.set(newTessellator, value);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
         if (isDrawing && !newTessellator.isDrawing) {
             newTessellator.startDrawing(drawMode);
         } else if (!isDrawing && newTessellator.isDrawing) {
