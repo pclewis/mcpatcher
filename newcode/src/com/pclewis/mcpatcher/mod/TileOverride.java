@@ -498,15 +498,23 @@ abstract class TileOverride {
                     break;
 
                 case CTMUtils.NORTH_FACE:
+                    x = -i;
+                    y = -j;
+                    break;
+
                 case CTMUtils.SOUTH_FACE:
                     x = i;
-                    y = j;
+                    y = -j;
+                    break;
+
+                case CTMUtils.WEST_FACE:
+                    x = k;
+                    y = -j;
                     break;
 
                 case CTMUtils.EAST_FACE:
-                case CTMUtils.WEST_FACE:
-                    x = k;
-                    y = j;
+                    x = -k;
+                    y = -j;
                     break;
 
                 default:
