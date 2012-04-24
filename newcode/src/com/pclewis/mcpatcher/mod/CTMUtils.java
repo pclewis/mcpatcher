@@ -20,13 +20,21 @@ public class CTMUtils {
     private static final boolean enableNonStandard = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "nonStandard", true);
     private static final boolean enableOutline = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "outline", false);
 
-    static final int NUM_TILES = 256;
-
     static final int BLOCK_ID_GLASS = 20;
     static final int BLOCK_ID_BED = 26;
     static final int BLOCK_ID_GLASS_PANE = 102;
     static final int BLOCK_ID_BOOKSHELF = 47;
     static final int BLOCK_ID_SANDSTONE = 24;
+
+    static final int NUM_TILES = 256;
+
+    static final int TILE_NUM_STILL_LAVA = 14 * 16 + 13;
+    static final int TILE_NUM_FLOWING_LAVA = 14 * 16 + 14;
+    static final int TILE_NUM_STILL_WATER = 12 * 16 + 13;
+    static final int TILE_NUM_FLOWING_WATER = 12 * 16 + 14;
+    static final int TILE_NUM_FIRE_E_W = 1 * 16 + 15;
+    static final int TILE_NUM_FIRE_N_S = 2 * 16 + 15;
+    static final int TILE_NUM_PORTAL = 0 * 16 + 14;
 
     static final int BOTTOM_FACE = 0; // 0, -1, 0
     static final int TOP_FACE = 1; // 0, 1, 0
@@ -311,13 +319,13 @@ public class CTMUtils {
             return;
         }
         switch (tileNum) {
-            case 14 * 16 + 13: // still lava
-            case 14 * 16 + 14: // flowing lava
-            case 12 * 16 + 13: // still water
-            case 12 * 16 + 14: // flowing water
-            case 1 * 16 + 15: // fire east-west
-            case 2 * 16 + 15: // fire north-south
-            case 0 * 16 + 14: // portal
+            case TILE_NUM_STILL_LAVA: // still lava
+            case TILE_NUM_FLOWING_LAVA: // flowing lava
+            case TILE_NUM_STILL_WATER: // still water
+            case TILE_NUM_FLOWING_WATER: // flowing water
+            case TILE_NUM_FIRE_E_W: // fire east-west
+            case TILE_NUM_FIRE_N_S: // fire north-south
+            case TILE_NUM_PORTAL: // portal
                 return;
 
             default:
