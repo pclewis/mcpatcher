@@ -49,7 +49,8 @@ public class ConnectedTextures extends Mod {
         private JCheckBox glassPaneCheckBox;
         private JCheckBox bookshelfCheckBox;
         private JCheckBox sandstoneCheckBox;
-        private JCheckBox otherCheckBox;
+        private JCheckBox standardCheckBox;
+        private JCheckBox nonStandardCheckBox;
         private JCheckBox outlineCheckBox;
 
         public ConfigPanel() {
@@ -78,9 +79,15 @@ public class ConnectedTextures extends Mod {
                 }
             });
 
-            otherCheckBox.addActionListener(new ActionListener() {
+            standardCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(MCPatcherUtils.CONNECTED_TEXTURES, "other", otherCheckBox.isSelected());
+                    MCPatcherUtils.set(MCPatcherUtils.CONNECTED_TEXTURES, "standard", standardCheckBox.isSelected());
+                }
+            });
+
+            nonStandardCheckBox.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    MCPatcherUtils.set(MCPatcherUtils.CONNECTED_TEXTURES, "nonStandard", nonStandardCheckBox.isSelected());
                 }
             });
 
@@ -102,7 +109,8 @@ public class ConnectedTextures extends Mod {
             glassPaneCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "glassPane", true));
             bookshelfCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "bookshelf", true));
             sandstoneCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "sandstone", true));
-            otherCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "other", true));
+            standardCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "standard", true));
+            nonStandardCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "nonStandard", true));
             outlineCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "outline", false));
         }
 

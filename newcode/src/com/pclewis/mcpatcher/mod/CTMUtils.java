@@ -16,7 +16,8 @@ public class CTMUtils {
     private static final boolean enableGlassPane = false;
     private static final boolean enableBookshelf = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "bookshelf", true);
     private static final boolean enableSandstone = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "sandstone", true);
-    private static final boolean enableOther = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "other", true);
+    private static final boolean enableStandard = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "standard", true);
+    private static final boolean enableNonStandard = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "nonStandard", true);
     private static final boolean enableOutline = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "outline", false);
 
     static final int NUM_TILES = 256;
@@ -133,7 +134,7 @@ public class CTMUtils {
     }
 
     public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int face, int origTexture) {
-        if (!active || blockAccess == null || face < 0 || face > 5) {
+        if (!active || !enableStandard || blockAccess == null || face < 0 || face > 5) {
             return false;
         }
         if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, face)) {
@@ -146,7 +147,7 @@ public class CTMUtils {
     }
 
     public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int origTexture) {
-        if (!active || blockAccess == null) {
+        if (!active || !enableNonStandard || blockAccess == null) {
             return false;
         }
         if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, -1)) {
@@ -246,7 +247,7 @@ public class CTMUtils {
                     break;
 
                 default:
-                    if (enableOther) {
+                    if (enableStandard || enableNonStandard) {
                         prefix = "/ctm/block" + i;
                         properties = null;
                     }
@@ -261,7 +262,7 @@ public class CTMUtils {
 
     private static void refreshTileTextures() {
         tileOverrides = new TileOverride[NUM_TILES];
-        if (enableOther) {
+        if (enableStandard || enableNonStandard) {
             for (int i = 0; i < tileOverrides.length; i++) {
                 tileOverrides[i] = TileOverride.create("/ctm/terrain" + i, null, true);
                 if (tileOverrides[i] != null) {
