@@ -23,6 +23,7 @@ public class CTMUtils {
     static final int NUM_TILES = 256;
 
     static final int BLOCK_ID_GLASS = 20;
+    static final int BLOCK_ID_BED = 26;
     static final int BLOCK_ID_GLASS_PANE = 102;
     static final int BLOCK_ID_BOOKSHELF = 47;
     static final int BLOCK_ID_SANDSTONE = 24;
@@ -137,6 +138,9 @@ public class CTMUtils {
         if (!active || !enableStandard || blockAccess == null || face < 0 || face > 5) {
             return false;
         }
+        if (block.blockID == BLOCK_ID_BED) {
+            return false;
+        }
         if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, face)) {
             newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
@@ -148,6 +152,9 @@ public class CTMUtils {
 
     public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int origTexture) {
         if (!active || !enableNonStandard || blockAccess == null) {
+            return false;
+        }
+        if (block.blockID == BLOCK_ID_BED) {
             return false;
         }
         if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, -1)) {
