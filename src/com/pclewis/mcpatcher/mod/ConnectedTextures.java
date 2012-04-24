@@ -428,6 +428,7 @@ public class ConnectedTextures extends Mod {
         private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
         private final FieldRef instance = new FieldRef("Tessellator", "instance", "LTessellator;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
+        private final MethodRef drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDD)V");
         private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)Z");
         private final MethodRef setupNoFace = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIII)Z");
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
@@ -471,6 +472,7 @@ public class ConnectedTextures extends Mod {
 
             memberMappers.add(new FieldMapper(blockAccess));
             memberMappers.add(new MethodMapper(faceMethods));
+            memberMappers.add(new MethodMapper(drawCrossedSquares));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -504,7 +506,7 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public String getDescription() {
-                    return "setup connected textures (other blocks)";
+                    return "override texture (other blocks)";
                 }
 
                 @Override
@@ -571,6 +573,65 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             });
+
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "override texture (crossed squares)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // tessellator = Tessellator.instance;
+                        reference(GETSTATIC, instance),
+                        ASTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                        // i = par1Block.getBlockTextureFromSideAndMetadata(0, par2);
+                        ALOAD_1,
+                        ICONST_0,
+                        ILOAD_2,
+                        BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        // tessellator = Tessellator.instance;
+                        // if (overrideBlockTexture < 0
+                        ALOAD_0,
+                        reference(GETFIELD, overrideBlockTexture),
+                        IFGE, branch("A"),
+
+                        // && CTMUtils.setup(block, blockAccess, (int) x, (int) y, (int) z, texture)) {
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(GETFIELD, blockAccess),
+                        DLOAD_3,
+                        D2I,
+                        DLOAD, 5,
+                        D2I,
+                        DLOAD, 7,
+                        D2I,
+                        ILOAD, getCaptureGroup(2),
+                        reference(INVOKESTATIC, setupNoFace),
+                        IFEQ, branch("A"),
+
+                        // texture = CTMUtils.newTextureIndex;
+                        reference(GETSTATIC, newTextureIndex),
+                        ISTORE, getCaptureGroup(2),
+
+                        // tessellator = CTMUtils.newTessellator;
+                        reference(GETSTATIC, newTessellator),
+                        ASTORE, getCaptureGroup(1),
+
+                        // }
+                        label("A")
+                    );
+                }
+            }.targetMethod(drawCrossedSquares));
         }
 
         private void setupBlockFace(final int face, final String direction) {
@@ -579,7 +640,7 @@ public class ConnectedTextures extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "setup connected textures (" + direction.toLowerCase() + " face)";
+                    return "override texture (" + direction.toLowerCase() + " face)";
                 }
 
                 @Override
