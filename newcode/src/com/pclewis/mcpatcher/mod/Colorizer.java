@@ -134,6 +134,10 @@ public class Colorizer {
         return fixedColorMaps[index].colorize(defaultColor, i, j, k);
     }
 
+    public static int colorizeBiomeWithBlending(int defaultColor, int index, int i, int j, int k) {
+        return colorizeWithBlending(fixedColorMaps[index], defaultColor, i, j, k);
+    }
+
     public static int colorizeWater(Object dummy, int i, int k) {
         return fixedColorMaps[COLOR_MAP_WATER].colorize(BiomeHelper.instance.getWaterColorMultiplier(i, 64, k), i, 64, k);
     }
@@ -146,27 +150,28 @@ public class Colorizer {
         if (colorMap == null && block.blockID >= 0 && block.blockID < blockColorMaps.length) {
             colorMap = blockColorMaps[block.blockID];
         }
-        if (colorMap == null || !colorMap.isCustom()) {
-            return 0xffffff;
-        } else if (!BiomeHelper.instance.useBlockBlending() || blockBlendRadius == 0) {
-            return colorMap.colorize(0xffffff, i, j, k);
-        } else {
-            float[] sum = new float[3];
-            float[] sample = new float[3];
-            for (int di = -blockBlendRadius; di <= blockBlendRadius; di++) {
-                for (int dk = -blockBlendRadius; dk <= blockBlendRadius; dk++) {
-                    int rgb = colorMap.colorize(0xffffff, i + di, j, k + dk);
-                    intToFloat3(rgb, sample);
-                    sum[0] += sample[0];
-                    sum[1] += sample[1];
-                    sum[2] += sample[2];
-                }
-            }
-            sum[0] *= blockBlendScale;
-            sum[1] *= blockBlendScale;
-            sum[2] *= blockBlendScale;
-            return float3ToInt(sum);
+        return colorizeWithBlending(colorMap, 0xffffff, i, j, k);
+    }
+
+    private static int colorizeWithBlending(ColorMap colorMap, int defaultColor, int i, int j, int k) {
+        if (colorMap == null || !colorMap.isCustom() || !BiomeHelper.instance.useBlockBlending() || blockBlendRadius <= 0) {
+            return defaultColor;
         }
+        float[] sum = new float[3];
+        float[] sample = new float[3];
+        for (int di = -blockBlendRadius; di <= blockBlendRadius; di++) {
+            for (int dk = -blockBlendRadius; dk <= blockBlendRadius; dk++) {
+                int rgb = colorMap.colorize(defaultColor, i + di, j, k + dk);
+                intToFloat3(rgb, sample);
+                sum[0] += sample[0];
+                sum[1] += sample[1];
+                sum[2] += sample[2];
+            }
+        }
+        sum[0] *= blockBlendScale;
+        sum[1] *= blockBlendScale;
+        sum[2] *= blockBlendScale;
+        return float3ToInt(sum);
     }
 
     public static int colorizeBlock(Block block) {
