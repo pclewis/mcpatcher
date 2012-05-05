@@ -13,6 +13,8 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class GLSLShader extends Mod {
+    private final boolean haveNewWorld;
+
     public GLSLShader(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.GLSL_SHADERS;
         author = "daxnitro";
@@ -21,7 +23,9 @@ public class GLSLShader extends Mod {
         website = "http://daxnitro.wikia.com/wiki/Shaders_2.0";
         defaultEnabled = false;
 
-        classMods.add(new MinecraftMod());
+        haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
+
+        classMods.add(new MinecraftMod(minecraftVersion));
         classMods.add(new BaseMod.GLAllocationMod());
         classMods.add(new RenderEngineMod());
         classMods.add(new RenderGlobalMod());
@@ -37,13 +41,16 @@ public class GLSLShader extends Mod {
         classMods.add(new InventoryPlayerMod(minecraftVersion));
         classMods.add(new ItemStackMod());
         classMods.add(new WorldMod());
+        if (haveNewWorld) {
+            classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
+        }
         classMods.add(new WorldRendererMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS));
     }
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
-        MinecraftMod() {
+        MinecraftMod(MinecraftVersion minecraftVersion) {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
@@ -65,12 +72,13 @@ public class GLSLShader extends Mod {
                 }
             }.addXref(1, new FieldRef("GameSettings", "thirdPersonView", "I")));
 
+            addWorldGetter(minecraftVersion);
+
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "thePlayer", "LEntityPlayerSP;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "entityRenderer", "LEntityRenderer;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderViewEntity", "LEntityLiving;")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "theWorld", "LWorld;")));
 
             memberMappers.add(new FieldMapper(
                 new FieldRef(getDeobfClass(), "displayWidth", "I"),

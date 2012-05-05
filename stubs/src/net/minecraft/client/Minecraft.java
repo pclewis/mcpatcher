@@ -10,7 +10,6 @@ public class Minecraft {
     public GameSettings gameSettings;
     public FontRenderer fontRenderer;
     public FontRenderer alternateFontRenderer;
-    public World theWorld;
     public EntityPlayerSP thePlayer;
     public EntityLiving renderViewEntity;
     public EntityRenderer entityRenderer;
@@ -30,6 +29,6 @@ public class Minecraft {
     }
 
     public World getWorld() {
-        return theWorld;
+        return null;
     }
 }

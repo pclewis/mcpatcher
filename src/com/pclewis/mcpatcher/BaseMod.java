@@ -166,7 +166,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                });
+                }.allowDuplicate(true));
             } else {
                 final FieldRef theWorld = new FieldRef(getDeobfClass(), "theWorld", "LWorld;");
 
@@ -181,7 +181,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                });
+                }.allowDuplicate(true));
             }
             return this;
         }
