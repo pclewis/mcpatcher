@@ -38,6 +38,9 @@ public class GLSLShader extends Mod {
         classMods.add(new RenderBlocksMod());
         classMods.add(new EntityPlayerMod());
         classMods.add(new EntityPlayerSPMod());
+        if (haveNewWorld) {
+            classMods.add(new EntityPlayerSPSubMod());
+        }
         classMods.add(new InventoryPlayerMod(minecraftVersion));
         classMods.add(new ItemStackMod());
         classMods.add(new WorldMod());
@@ -51,6 +54,10 @@ public class GLSLShader extends Mod {
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod(MinecraftVersion minecraftVersion) {
+            final FieldRef thePlayer = new FieldRef(getDeobfClass(), "thePlayer", "LEntityPlayerSP;");
+            final FieldRef playerSub = new FieldRef(getDeobfClass(), "playerSub", "LEntityPlayerSPSub;");
+            final MethodRef getPlayer = new MethodRef(getDeobfClass(), "getPlayer", "()LEntityPlayerSP;");
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
@@ -76,7 +83,11 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "thePlayer", "LEntityPlayerSP;")));
+            if (haveNewWorld) {
+                memberMappers.add(new FieldMapper(playerSub));
+            } else {
+                memberMappers.add(new FieldMapper(thePlayer));
+            }
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "entityRenderer", "LEntityRenderer;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderViewEntity", "LEntityLiving;")));
 
@@ -93,6 +104,17 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
+
+            patches.add(new AddMethodPatch(getPlayer) {
+                @Override
+                public byte[] generateMethod() throws BadBytecode, IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        reference(GETFIELD, haveNewWorld ? playerSub : thePlayer),
+                        ARETURN
+                    );
+                }
+            }.allowDuplicate(true));
         }
     }
 
@@ -988,6 +1010,22 @@ public class GLSLShader extends Mod {
 
             classSignatures.add(new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"));
             classSignatures.add(new ConstSignature("portal.trigger"));
+        }
+    }
+
+    private class EntityPlayerSPSubMod extends ClassMod {
+        EntityPlayerSPSubMod() {
+            parentClass = "EntityPlayerSP";
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(-999.0),
+                        push(-999.0)
+                    );
+                }
+            });
         }
     }
 

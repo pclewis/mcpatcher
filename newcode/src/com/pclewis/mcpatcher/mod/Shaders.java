@@ -518,7 +518,7 @@ public class Shaders {
                 setProgramUniformMatrix4ARB("shadowModelViewInverse", false, shadowModelViewInverse);
             }
         }
-        ItemStack stack = mc.thePlayer.inventory.getCurrentItem();
+        ItemStack stack = mc.getPlayer().inventory.getCurrentItem();
         setProgramUniform1i("heldItemId", (stack == null ? -1 : stack.itemID));
         setProgramUniform1i("heldBlockLightValue", (stack == null || stack.itemID >= 256 ? 0 : Block.lightValue[stack.itemID]));
         setProgramUniform1i("fogMode", (fogEnabled ? glGetInteger(GL_FOG_MODE) : 0));
