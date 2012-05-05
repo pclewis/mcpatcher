@@ -75,7 +75,7 @@ public class SuperTessellator extends Tessellator {
             try {
                 Class<?> type = f.getType();
                 int modifiers = f.getModifiers();
-                if (!Modifier.isStatic(modifiers) && type.isPrimitive()) {
+                if (!Modifier.isStatic(modifiers) && type.isPrimitive() && !f.getName().equals("rawBufferSize")) {
                     f.setAccessible(true);
                     if (type == Integer.TYPE && MAGIC_VALUE.equals(f.get(this))) {
                         continue;
