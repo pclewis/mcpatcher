@@ -19,6 +19,7 @@ public class CustomColors extends Mod {
     private boolean haveNewBiomes;
     private boolean haveFontColor;
     private boolean renderStringReturnsInt;
+    private boolean haveNewWorld;
     private String getColorFromDamageDescriptor;
     private int getColorFromDamageParams;
 
@@ -36,6 +37,7 @@ public class CustomColors extends Mod {
         haveSpawnerEggs = minecraftVersion.compareTo("12w01a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveNewBiomes = minecraftVersion.compareTo("12w07a") >= 0;
         haveFontColor = minecraftVersion.compareTo("11w49a") >= 0;
+        haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
         renderStringReturnsInt = minecraftVersion.compareTo("1.2.4") >= 0;
 
         configPanel = new ConfigPanel();
@@ -43,7 +45,7 @@ public class CustomColors extends Mod {
         classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
         classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
 
-        classMods.add(new MinecraftMod());
+        classMods.add(new MinecraftMod(minecraftVersion));
         classMods.add(new IBlockAccessMod());
         classMods.add(new BlockMod());
 
@@ -62,6 +64,9 @@ public class CustomColors extends Mod {
         classMods.add(new BlockLeavesMod());
 
         classMods.add(new WorldMod());
+        if (haveNewWorld) {
+            classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
+        }
         classMods.add(new WorldProviderMod());
         classMods.add(new WorldProviderHellMod());
         classMods.add(new WorldProviderEndMod());
@@ -293,7 +298,7 @@ public class CustomColors extends Mod {
     }
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
-        MinecraftMod() {
+        MinecraftMod(MinecraftVersion minecraftVersion) {
             final MethodRef runGameLoop = new MethodRef(getDeobfClass(), "runGameLoop", "()V");
 
             classSignatures.add(new BytecodeSignature() {
@@ -309,7 +314,7 @@ public class CustomColors extends Mod {
             }.setMethod(runGameLoop));
 
             mapTexturePackList();
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "theWorld", "LWorld;")));
+            addWorldGetter(minecraftVersion);
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -328,7 +333,7 @@ public class CustomColors extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef(getDeobfClass(), "theWorld", "LWorld;")),
+                        reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), "getWorld", "()LWorld;")),
                         push(haveNewBiomes),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "setupBlockAccess", "(LIBlockAccess;Z)V"))
                     );

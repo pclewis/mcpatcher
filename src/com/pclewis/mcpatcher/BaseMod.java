@@ -146,6 +146,45 @@ public final class BaseMod extends Mod {
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackList", "LTexturePackList;")));
             return this;
         }
+
+        public MinecraftMod addWorldGetter(MinecraftVersion minecraftVersion) {
+            final MethodRef getWorld = new MethodRef(getDeobfClass(), "getWorld", "()LWorld;");
+
+            if (minecraftVersion.compareTo("12w18a") >= 0) {
+                final FieldRef worldServer = new FieldRef(getDeobfClass(), "worldServer", "LWorldServer;");
+                final FieldRef world = new FieldRef("WorldServer", "world", "LWorld;");
+
+                memberMappers.add(new FieldMapper(worldServer));
+
+                patches.add(new AddMethodPatch(getWorld) {
+                    @Override
+                    public byte[] generateMethod() throws BadBytecode, IOException {
+                        return buildCode(
+                            ALOAD_0,
+                            reference(GETFIELD, worldServer),
+                            reference(GETFIELD, world),
+                            ARETURN
+                        );
+                    }
+                });
+            } else {
+                final FieldRef theWorld = new FieldRef(getDeobfClass(), "theWorld", "LWorld;");
+
+                memberMappers.add(new FieldMapper(theWorld));
+
+                patches.add(new AddMethodPatch(getWorld) {
+                    @Override
+                    public byte[] generateMethod() throws BadBytecode, IOException {
+                        return buildCode(
+                            ALOAD_0,
+                            reference(GETFIELD, theWorld),
+                            ARETURN
+                        );
+                    }
+                });
+            }
+            return this;
+        }
     }
 
     /**
@@ -561,6 +600,23 @@ public final class BaseMod extends Mod {
         public WorldMod() {
             classSignatures.add(new ConstSignature("ambient.cave.cave"));
             classSignatures.add(new ConstSignature(0x3c6ef35f));
+        }
+    }
+
+    /**
+     * Matches WorldServer class and maps world field.
+     */
+    public static class WorldServerMod extends ClassMod {
+        public WorldServerMod(MinecraftVersion minecraftVersion) {
+            final FieldRef world = new FieldRef(getDeobfClass(), "world", "LWorld;");
+
+            classSignatures.add(new ConstSignature("/particles.png"));
+            classSignatures.add(new ConstSignature("/terrain.png"));
+            classSignatures.add(new ConstSignature("/gui/items.png"));
+
+            memberMappers.add(new FieldMapper(world));
+
+            patches.add(new MakeMemberPublicPatch(world));
         }
     }
 

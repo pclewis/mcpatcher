@@ -28,4 +28,8 @@ public class Minecraft {
     public static File getAppDir(String s) {
         return null;
     }
+
+    public World getWorld() {
+        return theWorld;
+    }
 }
