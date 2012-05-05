@@ -178,6 +178,7 @@ public class ConnectedTextures extends Mod {
             final MethodRef startDrawingQuads = new MethodRef(getDeobfClass(), "startDrawingQuads", "()V");
             final MethodRef startDrawing = new MethodRef(getDeobfClass(), "startDrawing", "(I)V");
             final MethodRef constructor = new MethodRef("Tessellator", "<init>", "(I)V");
+            final MethodRef constructor0 = new MethodRef("Tessellator", "<init>", "()V");
             final MethodRef reset = new MethodRef(getDeobfClass(), "reset", "()V");
             final MethodRef addVertex = new MethodRef(getDeobfClass(), "addVertex", "(DDD)V");
             final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
@@ -312,8 +313,11 @@ public class ConnectedTextures extends Mod {
                         return buildExpression(
                             reference(NEW, new ClassRef("Tessellator")),
                             DUP,
-                            BinaryRegex.capture(BytecodeMatcher.anyLDC),
-                            reference(INVOKESPECIAL, constructor)
+                            BinaryRegex.capture(BinaryRegex.optional(BytecodeMatcher.anyLDC)),
+                            BinaryRegex.capture(BinaryRegex.or(
+                                BinaryRegex.build(reference(INVOKESPECIAL, constructor)),
+                                BinaryRegex.build(reference(INVOKESPECIAL, constructor0))
+                            ))
                         );
                     } else {
                         return null;
@@ -322,11 +326,12 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
+                    boolean isForge = getCaptureGroup(1).length == 0;
                     return buildCode(
                         reference(NEW, new ClassRef(MCPatcherUtils.SUPER_TESSELLATOR_CLASS)),
                         DUP,
                         getCaptureGroup(1),
-                        reference(INVOKESPECIAL, new MethodRef(MCPatcherUtils.SUPER_TESSELLATOR_CLASS, "<init>", "(I)V"))
+                        reference(INVOKESPECIAL, new MethodRef(MCPatcherUtils.SUPER_TESSELLATOR_CLASS, "<init>", isForge ? "()V" : "(I)V"))
                     );
                 }
             });
@@ -367,8 +372,13 @@ public class ConnectedTextures extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
+                        BinaryRegex.or(
+                            BinaryRegex.build(
+                                ALOAD_0,
+                                BytecodeMatcher.anyReference(GETFIELD)
+                            ),
+                            BytecodeMatcher.anyReference(GETSTATIC)
+                        ),
                         reference(INVOKEVIRTUAL, new MethodRef("java/nio/IntBuffer", "clear", "()Ljava/nio/Buffer;")),
                         POP
                     );

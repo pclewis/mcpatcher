@@ -13,10 +13,19 @@ public class SuperTessellator extends Tessellator {
 
     private final HashMap<Integer, Tessellator> children = new HashMap<Integer, Tessellator>();
     private final Field[] fieldsToCopy;
+    private final boolean isForge;
 
     public SuperTessellator(int bufferSize) {
         super(bufferSize);
         MCPatcherUtils.info("new %s(%d)", getClass().getSimpleName(), bufferSize);
+        isForge = false;
+        fieldsToCopy = getFieldsToCopy();
+    }
+
+    public SuperTessellator() {
+        super();
+        MCPatcherUtils.info("new %s()", getClass().getSimpleName());
+        isForge = true;
         fieldsToCopy = getFieldsToCopy();
     }
 
@@ -27,7 +36,11 @@ public class SuperTessellator extends Tessellator {
         Tessellator newTessellator = children.get(texture);
         if (newTessellator == null) {
             MCPatcherUtils.info("new tessellator for texture %d", texture);
-            newTessellator = new Tessellator(Math.max(bufferSize / 16, 131072));
+            if (isForge) {
+                newTessellator = new Tessellator();
+            } else {
+                newTessellator = new Tessellator(Math.max(bufferSize / 16, 131072));
+            }
             newTessellator.texture = texture;
             copyFields(newTessellator, true);
             children.put(texture, newTessellator);
@@ -42,12 +55,17 @@ public class SuperTessellator extends Tessellator {
     }
     
     private Field[] getFieldsToCopy() {
-        int saveBufferSize = bufferSize;
+        int saveBufferSize;
+        if (isForge) {
+            saveBufferSize = 0;
+        } else {
+            saveBufferSize = bufferSize;
+            bufferSize = MAGIC_VALUE;
+        }
         int saveVertexCount = vertexCount;
         int saveAddedVertices = addedVertices;
         int saveRawBufferIndex = rawBufferIndex;
         int saveTexture = texture;
-        bufferSize = MAGIC_VALUE;
         vertexCount = MAGIC_VALUE;
         addedVertices = MAGIC_VALUE;
         rawBufferIndex = MAGIC_VALUE;
@@ -69,7 +87,9 @@ public class SuperTessellator extends Tessellator {
                 e.printStackTrace();
             }
         }
-        bufferSize = saveBufferSize;
+        if (!isForge) {
+            bufferSize = saveBufferSize;
+        }
         vertexCount = saveVertexCount;
         addedVertices = saveAddedVertices;
         rawBufferIndex = saveRawBufferIndex;

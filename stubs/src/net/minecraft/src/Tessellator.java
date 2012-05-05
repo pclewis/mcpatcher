@@ -18,6 +18,9 @@ public class Tessellator {
     public Tessellator(int bufferSize) {
     }
 
+    public Tessellator() { // forge replaces 1-arg constructor
+    }
+
     public void reset() {
     }
 
