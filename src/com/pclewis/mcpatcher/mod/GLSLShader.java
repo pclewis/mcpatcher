@@ -46,6 +46,7 @@ public class GLSLShader extends Mod {
         classMods.add(new WorldMod());
         if (haveNewWorld) {
             classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
+            classMods.add(new WorldServerMPMod());
         }
         classMods.add(new WorldRendererMod());
 
@@ -142,6 +143,13 @@ public class GLSLShader extends Mod {
     private class RenderGlobalMod extends ClassMod {
         RenderGlobalMod() {
             final MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
+            final FieldRef worldObj;
+
+            if (haveNewWorld) {
+                worldObj = new FieldRef(getDeobfClass(), "worldObj", "LWorldServerMP;");
+            } else {
+                worldObj = new FieldRef(getDeobfClass(), "worldObj", "LWorld;");
+            }
 
             classSignatures.add(new ConstSignature("smoke"));
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
@@ -172,7 +180,7 @@ public class GLSLShader extends Mod {
 
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "sortAndRender", "(LEntityLiving;ID)I")));
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "worldObj", "LWorld;")));
+            memberMappers.add(new FieldMapper(worldObj));
 
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
@@ -184,7 +192,7 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef("RenderGlobal", "worldObj", "LWorld;")),
+                        reference(GETFIELD, worldObj),
                         FLOAD_1,
                         reference(INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F")),
                         BytecodeMatcher.anyFLOAD,
@@ -1073,7 +1081,10 @@ public class GLSLShader extends Mod {
                         BytecodeMatcher.anyReference(INVOKESTATIC),
                         FCONST_2,
                         FMUL,
-                        push(0.75f),
+                        BinaryRegex.or(
+                            BinaryRegex.build(push(0.75f)), // pre-12w21a
+                            BinaryRegex.build(push(0.25f))  // 12w21a+
+                        ),
                         FADD,
                         FSUB
                     );
@@ -1151,6 +1162,14 @@ public class GLSLShader extends Mod {
             );
 
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getSeed", "()J"), new MethodRef(getDeobfClass(), "getWorldTime", "()J")));
+        }
+    }
+
+    private class WorldServerMPMod extends ClassMod {
+        WorldServerMPMod() {
+            parentClass = "World";
+
+            classSignatures.add(new ConstSignature("MpServer"));
         }
     }
 
