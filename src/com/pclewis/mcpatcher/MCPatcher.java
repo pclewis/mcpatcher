@@ -209,6 +209,7 @@ final public class MCPatcher {
 
         mapModClasses(origJar);
         mapModDependentClasses(origJar);
+        mapAddedClasses();
         checkAllClassesMapped();
         mapModClassMembers(origJar);
         resolveModDependencies();
@@ -352,6 +353,34 @@ final public class MCPatcher {
             }
         }
         return progress && !done;
+    }
+    
+    private static void mapAddedClasses() throws IOException, InterruptedException {
+        for (Mod mod : modList.getAll()) {
+            if (mod.filesToAdd.isEmpty() || mod.classMap.isEmpty())
+                continue;
+            
+            Logger.log(Logger.LOG_MOD, "Mapping added classes for %s", mod.getName());
+            for (String filename : mod.filesToAdd) {
+                DataInputStream dis = null;
+                try {
+                    dis = new DataInputStream(mod.openFile("/" + filename));
+                    ClassMap classMap = mod.classMap;
+                    if (MinecraftJar.isClassFile(filename)) {
+                        ClassFile classFile = new ClassFile(dis);
+                        if (!classFile.getSuperclass().equals("java.lang.Object"))
+                            classMap.addInheritance(classFile.getSuperclass(), classFile.getName());
+                        else
+                            classMap.addClassMap(classFile.getName(), classFile.getName());
+                    }
+                    dis.close();
+                } catch (Throwable t) {
+                    Logger.log(t);
+                } finally {
+                    MCPatcherUtils.close(dis);
+                }
+            }
+        }
     }
 
     private static void checkAllClassesMapped() throws IOException, InterruptedException {
