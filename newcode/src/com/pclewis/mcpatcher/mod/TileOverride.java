@@ -54,6 +54,8 @@ abstract class TileOverride {
             override = new Random1(filePrefix, properties);
         } else if (method.equals("bookshelf") || method.equals("horizontal")) {
             override = new Horizontal(filePrefix, properties);
+        } else if (method.equals("vertical")) {
+            override = new Vertical(filePrefix, properties);
         } else if (method.equals("sandstone") || method.equals("top")) {
             override = new Top(filePrefix, properties);
         } else if (method.equals("repeat") || method.equals("pattern")) {
@@ -330,6 +332,52 @@ abstract class TileOverride {
         }
     }
 
+    final static class Vertical extends TileOverride {
+        private static final int[] defaultTileMap = new int[]{
+            68, 69, 70, 71,
+        };
+
+        // Index into this array is formed from these bit values:
+        // 2
+        // *
+        // 1
+        private static final int[] neighborMap = new int[]{
+            3, 2, 0, 1,
+        };
+
+        private final int[] neighborTileMap;
+
+        private Vertical(String filePrefix, Properties properties) {
+            super(filePrefix, properties);
+            neighborTileMap = compose(tileMap, neighborMap);
+        }
+
+        @Override
+        String getMethod() {
+            return "vertical";
+        }
+
+        @Override
+        int[] getDefaultTileMap() {
+            return defaultTileMap;
+        }
+
+        @Override
+        int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+            if (face < 0) {
+                face = CTMUtils.NORTH_FACE;
+            }
+            int neighborBits = 0;
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, CTMUtils.GO_DOWN)) {
+                neighborBits |= 1;
+            }
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, CTMUtils.GO_UP)) {
+                neighborBits |= 2;
+            }
+            return neighborTileMap[neighborBits];
+        }
+    }
+
     final static class Top extends TileOverride {
         private static final int[] defaultTileMap = new int[]{
             66,
@@ -351,7 +399,9 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            if (face <= CTMUtils.TOP_FACE) {
+            if (face < 0) {
+                face = CTMUtils.NORTH_FACE;
+            } else if (face <= CTMUtils.TOP_FACE) {
                 return -1;
             }
             if (blockAccess.getBlockMetadata(i, j, k) != 0) {
