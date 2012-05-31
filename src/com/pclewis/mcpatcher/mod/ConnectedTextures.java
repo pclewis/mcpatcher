@@ -42,6 +42,8 @@ public class ConnectedTextures extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Vertical"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Top"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Repeat"));
+
+        getClassMap().addInheritance("Tessellator", MCPatcherUtils.SUPER_TESSELLATOR_CLASS);
     }
 
     private class ConfigPanel extends ModConfigPanel {
@@ -425,11 +427,6 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             });
-        }
-
-        @Override
-        public void prePatch(String filename, ClassFile classFile) {
-            getClassMap().addInheritance(getDeobfClass(), MCPatcherUtils.SUPER_TESSELLATOR_CLASS);
         }
     }
 
