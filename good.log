@@ -1,5 +1,5 @@
-MCPatcher version is 2.3.6_03
-OS: Linux 3.3.4-1.fc16.x86_64 amd64
+MCPatcher version is 2.3.7
+OS: Linux 3.3.7-1.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_31 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.2.5 (md5 8e8778078a175a33603a585257f28563)
@@ -913,6 +913,19 @@ Connected Textures
         field selectedTexturePack -> a Lh;
     class WorldRenderer (ct.class)
         method updateRenderer -> a ()V
+    class com.pclewis.mcpatcher.mod.SuperTessellator extends Tessellator
+        method addVertex -> a (DDD)V
+        method draw -> a ()I
+        method reset -> d ()V
+        method startDrawing -> a (I)V
+        method startDrawingQuads -> b ()V
+        field addedVertices -> s I
+        field bufferSize -> E I
+        field drawMode -> u I
+        field instance -> a Ladz;
+        field isDrawing -> z Z
+        field rawBufferIndex -> r I
+        field vertexCount -> i I
     class net.minecraft.client.Minecraft alias for Minecraft
     class net.minecraft.src.Block alias for Block
     class net.minecraft.src.IBlockAccess alias for IBlockAccess
@@ -5584,31 +5597,31 @@ Patching...
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lali;Lpb;IIIII)I
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lali;Lpb;IIIII)I
     field ref com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.mod.CTMUtils.lastTexturePack Lh; create(Ljava/lang/String;Ljava/util/Properties;Z)Lcom/pclewis/mcpatcher/mod/TileOverride;@12
-     GETSTATIC 0x00 0x04       GETSTATIC 0x01 0x60
+     GETSTATIC 0x00 0x04       GETSTATIC 0x01 0x66
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> h.a (Ljava/lang/String;)Ljava/io/InputStream; create(Ljava/lang/String;Ljava/util/Properties;Z)Lcom/pclewis/mcpatcher/mod/TileOverride;@34
-     INVOKEVIRTUAL 0x00 0x0a   INVOKEVIRTUAL 0x01 0x65
+     INVOKEVIRTUAL 0x00 0x0a   INVOKEVIRTUAL 0x01 0x6b
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.p Laaw; <init>(Ljava/awt/image/BufferedImage;)V@18
-     GETFIELD 0x00 0x37        GETFIELD 0x01 0x69
+     GETFIELD 0x00 0x3a        GETFIELD 0x01 0x6f
     method ref net.minecraft.src.RenderEngine.allocateAndSetupTexture (Ljava/awt/image/BufferedImage;)I -> aaw.a (Ljava/awt/image/BufferedImage;)I <init>(Ljava/awt/image/BufferedImage;)V@22
-     INVOKEVIRTUAL 0x00 0x38   INVOKEVIRTUAL 0x01 0x6d
+     INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x01 0x73
     interface method ref net.minecraft.src.IBlockAccess.getBlockId (III)I -> ali.a (III)I shouldConnect(Lali;Lpb;IIIII[I)Z@34
-     INVOKEINTERFACE 0x00 0x59 0x04 0x00  INVOKEINTERFACE 0x01 0x71 0x04 0x00
+     INVOKEINTERFACE 0x00 0x5c 0x04 0x00  INVOKEINTERFACE 0x01 0x77 0x04 0x00
     field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> pb.m [Lpb; shouldConnect(Lali;Lpb;IIIII[I)Z@41
-     GETSTATIC 0x00 0x5a       GETSTATIC 0x01 0x77
+     GETSTATIC 0x00 0x5d       GETSTATIC 0x01 0x7d
     method ref com.pclewis.mcpatcher.mod.TileOverride.exclude (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.TileOverride.exclude (Lali;Lpb;IIIII)Z shouldConnect(Lali;Lpb;IIIII[I)Z@62
-     INVOKEVIRTUAL 0x00 0x5b   INVOKEVIRTUAL 0x01 0x79
+     INVOKEVIRTUAL 0x00 0x5e   INVOKEVIRTUAL 0x01 0x7f
     method ref com.pclewis.mcpatcher.mod.TileOverride.exclude (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.TileOverride.exclude (Lali;Lpb;IIIII)Z getTile(Lali;Lpb;IIIII)I@46
-     INVOKEVIRTUAL 0x00 0x5b   INVOKEVIRTUAL 0x01 0x79
+     INVOKEVIRTUAL 0x00 0x5e   INVOKEVIRTUAL 0x01 0x7f
     method ref net.minecraft.src.Block.getBlockTexture (Lnet/minecraft/src/IBlockAccess;IIII)I -> pb.d (Lali;IIII)I shouldConnect(Lali;Lpb;IIIII[I)Z@88
-     INVOKEVIRTUAL 0x00 0x5c   INVOKEVIRTUAL 0x01 0x7d
+     INVOKEVIRTUAL 0x00 0x5f   INVOKEVIRTUAL 0x01 0x83
     field ref net.minecraft.src.Block.blockID I -> pb.bO I shouldConnect(Lali;Lpb;IIIII[I)Z@104
-     GETFIELD 0x00 0x5d        GETFIELD 0x01 0x80
+     GETFIELD 0x00 0x60        GETFIELD 0x01 0x86
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> ali.e (III)I exclude(Lali;Lpb;IIIII)Z@35
-     INVOKEINTERFACE 0x00 0x5e 0x04 0x00  INVOKEINTERFACE 0x01 0x82 0x04 0x00
+     INVOKEINTERFACE 0x00 0x61 0x04 0x00  INVOKEINTERFACE 0x01 0x88 0x04 0x00
     method ref com.pclewis.mcpatcher.mod.TileOverride.getTileImpl (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> com.pclewis.mcpatcher.mod.TileOverride.getTileImpl (Lali;Lpb;IIIII)I getTile(Lali;Lpb;IIIII)I@66
-     INVOKEVIRTUAL 0x00 0x62   INVOKEVIRTUAL 0x01 0x84
-   string replace Lnet/minecraft/src/Block; -> Lpb; @3324
-   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @3281
+     INVOKEVIRTUAL 0x00 0x65   INVOKEVIRTUAL 0x01 0x8a
+   string replace Lnet/minecraft/src/Block; -> Lpb; @3396
+   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @3353
   adding com/pclewis/mcpatcher/mod/TileOverride$CTM.class for Connected Textures
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lali;Lpb;IIIII)I
     method ref com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Lali;Lpb;IIIII[I)Z getTileImpl(Lali;Lpb;IIIII)I@38
@@ -5627,11 +5640,19 @@ Patching...
      INVOKEVIRTUAL 0x00 0x0a   INVOKEVIRTUAL 0x00 0x55
    string replace Lnet/minecraft/src/Block; -> Lpb; @749
    string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @706
+  adding com/pclewis/mcpatcher/mod/TileOverride$Vertical.class for Connected Textures
+   method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lali;Lpb;IIIII)I
+    method ref com.pclewis.mcpatcher.mod.TileOverride$Vertical.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$Vertical.shouldConnect (Lali;Lpb;IIIII[I)Z getTileImpl(Lali;Lpb;IIIII)I@26
+     INVOKEVIRTUAL 0x00 0x0a   INVOKEVIRTUAL 0x00 0x55
+    method ref com.pclewis.mcpatcher.mod.TileOverride$Vertical.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$Vertical.shouldConnect (Lali;Lpb;IIIII[I)Z getTileImpl(Lali;Lpb;IIIII)I@53
+     INVOKEVIRTUAL 0x00 0x0a   INVOKEVIRTUAL 0x00 0x55
+   string replace Lnet/minecraft/src/Block; -> Lpb; @743
+   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @700
   adding com/pclewis/mcpatcher/mod/TileOverride$Top.class for Connected Textures
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lali;Lpb;IIIII)I
-    interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> ali.e (III)I getTileImpl(Lali;Lpb;IIIII)I@15
+    interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> ali.e (III)I getTileImpl(Lali;Lpb;IIIII)I@26
      INVOKEINTERFACE 0x00 0x05 0x04 0x00  INVOKEINTERFACE 0x00 0x4f 0x04 0x00
-    method ref com.pclewis.mcpatcher.mod.TileOverride$Top.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$Top.shouldConnect (Lali;Lpb;IIIII[I)Z getTileImpl(Lali;Lpb;IIIII)I@40
+    method ref com.pclewis.mcpatcher.mod.TileOverride$Top.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$Top.shouldConnect (Lali;Lpb;IIIII[I)Z getTileImpl(Lali;Lpb;IIIII)I@51
      INVOKEVIRTUAL 0x00 0x07   INVOKEVIRTUAL 0x00 0x52
    string replace Lnet/minecraft/src/Block; -> Lpb; @622
    string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @579
@@ -5944,6 +5965,7 @@ Custom Colors
         [1] override xp orb color
 
 Connected Textures
+    added com/pclewis/mcpatcher/mod/TileOverride$Vertical.class
     added com/pclewis/mcpatcher/mod/TileOverride$Random1.class
     added com/pclewis/mcpatcher/mod/TileOverride$CTM.class
     added com/pclewis/mcpatcher/mod/TileOverride$Repeat.class

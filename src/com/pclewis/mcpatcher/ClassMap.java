@@ -78,7 +78,7 @@ public class ClassMap {
         ClassMapEntry entry = getEntry(descName);
         if (entry == null) {
             entry = new ClassMapEntry(descName, obfName);
-            classMap.put(descName, entry);
+            putEntry(entry);
             if (descName.equals("Minecraft") || descName.equals("MinecraftApplet")) {
                 putEntry(new ClassMapEntry("net.minecraft.client." + descName, entry));
             } else if (!descName.contains(".")) {
@@ -86,7 +86,9 @@ public class ClassMap {
             }
         }
         String oldName = entry.getObfName();
-        if (!oldName.equals(obfName.replace('.', '/'))) {
+        if (oldName == null) {
+            entry.setObfName(obfName);
+        } else if (!oldName.equals(obfName.replace('.', '/'))) {
             throw new RuntimeException(String.format(
                 "cannot add class map %1$s -> %2$s because there is already a class map for %1$s -> %3$s",
                 descName, obfName, oldName
@@ -229,10 +231,8 @@ public class ClassMap {
     public void addInheritance(String parent, String child) {
         ClassMapEntry parentEntry = getEntry(parent);
         if (parentEntry == null) {
-            throw new RuntimeException(String.format(
-                "cannot add inherited class %s because there is no class map for parent %s",
-                child, parent
-            ));
+            parentEntry = new ClassMapEntry(parent);
+            putEntry(parentEntry);
         }
         ClassMapEntry childEntry = getEntry(child);
         if (childEntry == null) {
@@ -635,7 +635,7 @@ public class ClassMap {
                 String oldType = old.substring(i + 1, end).replace('/', '.');
                 String newType = oldType;
                 ClassMapEntry entry = getEntry(oldType);
-                if (entry != null) {
+                if (entry != null && entry.getObfName() != null) {
                     newType = entry.getObfName();
                 }
                 sb.append('L');
@@ -693,6 +693,9 @@ public class ClassMap {
     private ClassMapEntry merge(ClassMapEntry entry) {
         ClassMapEntry newEntry = classMap.get(entry.descName);
         if (newEntry != null) {
+            if (newEntry.obfName == null && entry.obfName != null) {
+                newEntry.setObfName(entry.obfName);
+            }
         } else if (entry.aliasFor != null) {
             newEntry = new ClassMapEntry(entry.descName, merge(entry.aliasFor));
         } else if (entry.parent != null) {
@@ -778,6 +781,10 @@ public class ClassMap {
 
         String getObfName() {
             return getEntry().obfName;
+        }
+
+        void setObfName(String obfName) {
+            getEntry().obfName = obfName.replace('.', '/');
         }
 
         String getMethod(String descName) {

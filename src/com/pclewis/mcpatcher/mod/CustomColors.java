@@ -20,6 +20,7 @@ public class CustomColors extends Mod {
     private boolean haveFontColor;
     private boolean renderStringReturnsInt;
     private boolean haveNewWorld;
+    private boolean renderBlockFallingSandTakes4Ints;
     private String getColorFromDamageDescriptor;
     private int getColorFromDamageParams;
 
@@ -39,6 +40,7 @@ public class CustomColors extends Mod {
         haveFontColor = minecraftVersion.compareTo("11w49a") >= 0;
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
         renderStringReturnsInt = minecraftVersion.compareTo("1.2.4") >= 0;
+        renderBlockFallingSandTakes4Ints = minecraftVersion.compareTo("12w22a") >= 0;
 
         configPanel = new ConfigPanel();
 
@@ -2748,7 +2750,8 @@ public class CustomColors extends Mod {
             classSignatures.add(new ConstSignature(0.1875));
             classSignatures.add(new ConstSignature(0.01));
 
-            final MethodRef renderBlockFallingSand = new MethodRef(getDeobfClass(), "renderBlockFallingSand", "(LBlock;LWorld;III)V");
+            final MethodRef renderBlockFallingSand = new MethodRef(getDeobfClass(), "renderBlockFallingSand", "(LBlock;LWorld;III" + (renderBlockFallingSandTakes4Ints ? "I" : "")  + ")V");
+            final int renderBlockFallingSandOffset = renderBlockFallingSandTakes4Ints ? 1 : 0;
             final MethodRef setColorOpaque_F = new MethodRef("Tessellator", "setColorOpaque_F", "(FFF)V");
             final MethodRef renderBlockFluids = new MethodRef(getDeobfClass(), "renderBlockFluids", "(LBlock;III)Z");
 
@@ -2797,13 +2800,13 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         BinaryRegex.begin(),
                         push(0.5f),
-                        FSTORE, 6,
+                        FSTORE, 6 + renderBlockFallingSandOffset,
                         FCONST_1,
-                        FSTORE, 7,
+                        FSTORE, 7 + renderBlockFallingSandOffset,
                         push(0.8f),
-                        FSTORE, 8,
+                        FSTORE, 8 + renderBlockFallingSandOffset,
                         push(0.6f),
-                        FSTORE, 9
+                        FSTORE, 9 + renderBlockFallingSandOffset
                     );
                 }
             }.setMethod(renderBlockFallingSand));
@@ -2858,15 +2861,15 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // tessellator.setColorOpaque_F($1 * f5, $1 * f5, $1 * f5);
-                        ALOAD, 10,
+                        ALOAD, 10 + renderBlockFallingSandOffset,
                         BinaryRegex.capture(BytecodeMatcher.anyFLOAD),
-                        FLOAD, 12,
+                        FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
                         BinaryRegex.backReference(1),
-                        FLOAD, 12,
+                        FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
                         BinaryRegex.backReference(1),
-                        FLOAD, 12,
+                        FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
                         reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
@@ -2894,21 +2897,21 @@ public class CustomColors extends Mod {
                         extraCode,
 
                         // tessellator.setColorOpaque_F(Colorizer.setColor[0] * f5, Colorizer.setColor[1] * f5, Colorizer.setColor[2] * f5);
-                        ALOAD, 10,
+                        ALOAD, 10 + renderBlockFallingSandOffset,
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_0,
                         FALOAD,
-                        FLOAD, 12,
+                        FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_1,
                         FALOAD,
-                        FLOAD, 12,
+                        FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
                         reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "setColor", "[F")),
                         ICONST_2,
                         FALOAD,
-                        FLOAD, 12,
+                        FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
                         reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
