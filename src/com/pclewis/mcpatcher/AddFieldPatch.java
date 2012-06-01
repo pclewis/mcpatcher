@@ -22,7 +22,7 @@ public class AddFieldPatch extends ClassPatch {
     /**
      * Add a new field.
      *
-     * @param fieldRef new field
+     * @param fieldRef    new field
      * @param accessFlags Java access flags (public, private, etc.).
      * @see javassist.bytecode.AccessFlag
      */
@@ -34,10 +34,10 @@ public class AddFieldPatch extends ClassPatch {
     /**
      * Add a new public, non-static field.
      *
-     * @deprecated
-     * @see #AddFieldPatch(FieldRef)
      * @param name field name
      * @param type field type descriptor
+     * @see #AddFieldPatch(FieldRef)
+     * @deprecated
      */
     public AddFieldPatch(String name, String type) {
         this(new FieldRef(null, name, type));
@@ -52,7 +52,7 @@ public class AddFieldPatch extends ClassPatch {
      * @see javassist.bytecode.AccessFlag
      */
     public AddFieldPatch(String name, String type, int accessFlags) {
-        this(new FieldRef(null, name,  type), accessFlags);
+        this(new FieldRef(null, name, type), accessFlags);
     }
 
     /**

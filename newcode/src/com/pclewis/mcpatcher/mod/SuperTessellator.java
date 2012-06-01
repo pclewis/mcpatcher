@@ -53,7 +53,7 @@ public class SuperTessellator extends Tessellator {
     void clearTessellators() {
         children.clear();
     }
-    
+
     private Field[] getFieldsToCopy() {
         int saveBufferSize;
         if (isForge) {

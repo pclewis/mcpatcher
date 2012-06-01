@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.zip.ZipFile;
 
 /**
@@ -461,7 +460,7 @@ public class MCPatcherUtils {
     /**
      * Parse a comma-separated list of integers/ranges.
      *
-     * @param list comma-separated list, e.g., 2-4,5,8,12-20
+     * @param list     comma-separated list, e.g., 2-4,5,8,12-20
      * @param minValue smallest value allowed in the list
      * @param maxValue largest value allowed in the list
      * @return possibly empty integer array

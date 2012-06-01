@@ -5625,9 +5625,9 @@ Patching...
   adding com/pclewis/mcpatcher/mod/TileOverride$CTM.class for Connected Textures
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lali;Lpb;IIIII)I
     method ref com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Lali;Lpb;IIIII[I)Z getTileImpl(Lali;Lpb;IIIII)I@38
-     INVOKEVIRTUAL 0x00 0x0c   INVOKEVIRTUAL 0x00 0x5e
-   string replace Lnet/minecraft/src/Block; -> Lpb; @903
-   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @860
+     INVOKEVIRTUAL 0x00 0x0c   INVOKEVIRTUAL 0x00 0x60
+   string replace Lnet/minecraft/src/Block; -> Lpb; @924
+   string replace Lnet/minecraft/src/IBlockAccess; -> Lali; @881
   adding com/pclewis/mcpatcher/mod/TileOverride$Random1.class for Connected Textures
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lali;Lpb;IIIII)I
    string replace Lnet/minecraft/src/Block; -> Lpb; @1243
