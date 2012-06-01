@@ -73,6 +73,9 @@ public class FontUtils {
             if (charWidthf[ch] <= 0.0f) {
                 charWidthf[ch] = 2.0f;
             }
+            else if (charWidthf[ch] <= 7.99f) {
+                charWidthf[ch] = 7.99f;	
+            }
         }
         boolean[] isOverride = new boolean[charWidth.length];
         try {
@@ -112,7 +115,7 @@ public class FontUtils {
                     c = s.charAt(i + 1);
                     if (c == 'l' || c == 'L') {
                         isLink = true;
-                    } else if (c == 'r' || c == 'R') {
+                    } else if (c == 'r' || c == 'R' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                         isLink = false;
                     }
                     cWidth = fontRenderer.getCharWidth(c);
@@ -132,7 +135,9 @@ public class FontUtils {
                 return false;
             }
         }
-        return (pixel & 0xff) > 0;
+        pixel >>= 24;
+        pixel &= 0xf0;
+        return (pixel > 0);
     }
 
     private static boolean printThis(int ch) {
