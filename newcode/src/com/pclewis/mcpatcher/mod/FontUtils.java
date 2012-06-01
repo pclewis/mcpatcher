@@ -106,9 +106,9 @@ public class FontUtils {
     public static float getStringWidthf(FontRenderer fontRenderer, String s) {
         float totalWidth = 0.0f;
         if (s != null) {
+            boolean isLink = false;
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
-                boolean isLink = false;
                 float cWidth = fontRenderer.getCharWidth(c);
                 if (cWidth < 0.0f && i < s.length() - 1) {
                     c = s.charAt(i + 1);
