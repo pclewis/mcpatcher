@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.jar.JarOutputStream;
 
@@ -20,8 +19,6 @@ import java.util.jar.JarOutputStream;
  */
 public class ClassMap {
     private HashMap<String, ClassMapEntry> classMap = new HashMap<String, ClassMapEntry>();
-    
-    private HashMap<String, HashSet<ClassMapEntry>> unresolvedInheritanceMap = new HashMap<String, HashSet<ClassMapEntry>>();
 
     ClassMap() {
     }
@@ -66,7 +63,6 @@ public class ClassMap {
 
     private void putEntry(ClassMapEntry entry) {
         classMap.put(entry.descName, entry);
-        checkFixesInheritance(entry);
     }
 
     /**
@@ -82,7 +78,7 @@ public class ClassMap {
         ClassMapEntry entry = getEntry(descName);
         if (entry == null) {
             entry = new ClassMapEntry(descName, obfName);
-            putEntry(entry);
+            classMap.put(descName, entry);
             if (descName.equals("Minecraft") || descName.equals("MinecraftApplet")) {
                 putEntry(new ClassMapEntry("net.minecraft.client." + descName, entry));
             } else if (!descName.contains(".")) {
@@ -226,23 +222,17 @@ public class ClassMap {
 
     /**
      * Copy a parent's class map to a child class.
-     * <p/>
-     * NOTE: If the parent class is not in the ClassMap, the inheritance relationship will be stored.
-     * If the parent class is added later, its method/field mappings will then be added to the child.
      *
-     * @param parent name of parent class in the ClassMap
+     * @param parent name of parent class already in the ClassMap
      * @param child  name of child class that should inherit its method/field mappings
      */
     public void addInheritance(String parent, String child) {
         ClassMapEntry parentEntry = getEntry(parent);
         if (parentEntry == null) {
-            ClassMapEntry childEntry = getEntry(child);
-            if (childEntry == null) {
-                childEntry = new ClassMapEntry(child, child);
-                putEntry(childEntry);
-            }
-            addUnresolvedInheritance(parent, childEntry);
-            return;
+            throw new RuntimeException(String.format(
+                "cannot add inherited class %s because there is no class map for parent %s",
+                child, parent
+            ));
         }
         ClassMapEntry childEntry = getEntry(child);
         if (childEntry == null) {
@@ -250,26 +240,6 @@ public class ClassMap {
             putEntry(childEntry);
         } else {
             childEntry.setParent(parentEntry);
-        }
-    }
-    
-    private void addUnresolvedInheritance(String parentClassName, ClassMapEntry childClass) {
-        parentClassName = parentClassName.replace('.', '/');
-        if (!unresolvedInheritanceMap.containsKey(parentClassName))
-            unresolvedInheritanceMap.put(parentClassName, new HashSet<ClassMapEntry>());
-        unresolvedInheritanceMap.get(parentClassName).add(childClass);
-        Logger.log(Logger.LOG_CLASS, "Unresolved parent %s of %s", parentClassName, childClass.descName);
-    }
-    
-    private void checkFixesInheritance(ClassMapEntry parentClass) {
-        if (unresolvedInheritanceMap.containsKey(parentClass.descName)) {
-            Logger.log(Logger.LOG_CLASS, "Fixing inheritance for children of %s", parentClass.descName);
-            for (ClassMapEntry childClass : unresolvedInheritanceMap.get(parentClass.descName)) {
-                childClass.setParent(parentClass);
-                Logger.log(Logger.LOG_CLASS+1, "Resolved parent of %s", childClass.descName);
-            }
-            unresolvedInheritanceMap.get(parentClass.descName).clear();
-            unresolvedInheritanceMap.remove(parentClass.descName);
         }
     }
 
@@ -755,10 +725,6 @@ public class ClassMap {
             }
             MemberEntry that = (MemberEntry) o;
             return this.name.equals(that.name) && this.type.equals(that.type);
-        }
-        
-        public int hashCode() {
-            return (this.name + this.type).hashCode();
         }
     }
 
