@@ -138,8 +138,6 @@ public class FontUtils {
             }
         }
         return ((pixel >> 24) & 0xf0) > 0;
-        pixel &= 0xf0;
-        return (pixel > 0);
     }
 
     private static boolean printThis(int ch) {
