@@ -72,6 +72,8 @@ public class FontUtils {
         for (int ch = 0; ch < charWidthf.length; ch++) {
             if (charWidthf[ch] <= 0.0f) {
                 charWidthf[ch] = 2.0f;
+            } else if (charWidthf[ch] >= 7.99f) {
+                charWidthf[ch] = 7.99f;
             }
             else if (charWidthf[ch] <= 7.99f) {
                 charWidthf[ch] = 7.99f;	
@@ -107,9 +109,9 @@ public class FontUtils {
     public static float getStringWidthf(FontRenderer fontRenderer, String s) {
         float totalWidth = 0.0f;
         if (s != null) {
+            boolean isLink = false;
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
-                boolean isLink = false;
                 float cWidth = fontRenderer.getCharWidth(c);
                 if (cWidth < 0.0f && i < s.length() - 1) {
                     c = s.charAt(i + 1);
@@ -135,9 +137,7 @@ public class FontUtils {
                 return false;
             }
         }
-        pixel >>= 24;
-        pixel &= 0xf0;
-        return (pixel > 0);
+        return ((pixel >> 24) & 0xf0) > 0;
     }
 
     private static boolean printThis(int ch) {

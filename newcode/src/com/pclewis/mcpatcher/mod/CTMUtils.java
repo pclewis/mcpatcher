@@ -24,7 +24,8 @@ public class CTMUtils {
     static final int BLOCK_ID_BED = 26;
     static final int BLOCK_ID_GLASS_PANE = 102;
     static final int BLOCK_ID_BOOKSHELF = 47;
-    static final int BLOCK_ID_SANDSTONE = 24;
+
+    static final int TERRAIN_ID_SANDSTONE_SIDE = 192;
 
     static final int NUM_TILES = 256;
 
@@ -184,8 +185,8 @@ public class CTMUtils {
     }
 
     private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        return getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, blockOverrides, block.blockID) ||
-            getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, tileOverrides, origTexture);
+        return getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, tileOverrides, origTexture) ||
+            getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, blockOverrides, block.blockID);
     }
 
     private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face, TileOverride[] overrides, int index) {
@@ -227,50 +228,46 @@ public class CTMUtils {
         blockOverrides = new TileOverride[Block.blocksList.length];
         for (int i = 0; i < blockOverrides.length; i++) {
             String prefix = null;
-            Properties properties = new Properties();
-            switch (i) {
-                case BLOCK_ID_GLASS:
-                    if (enableGlass) {
-                        prefix = "/ctm";
-                        properties.setProperty("method", "glass");
-                        properties.setProperty("connect", "block");
-                    }
-                    break;
-
-                case BLOCK_ID_GLASS_PANE:
-                    if (enableGlassPane) {
-                        prefix = "/ctm";
-                        properties.setProperty("method", "glass");
-                        properties.setProperty("connect", "block");
-                    }
-                    break;
-
-                case BLOCK_ID_BOOKSHELF:
-                    if (enableBookshelf) {
-                        prefix = "/ctm";
-                        properties.setProperty("method", "bookshelf");
-                        properties.setProperty("connect", "block");
-                    }
-                    break;
-
-                case BLOCK_ID_SANDSTONE:
-                    if (enableSandstone) {
-                        prefix = "/ctm";
-                        properties.setProperty("method", "sandstone");
-                        properties.setProperty("connect", "block");
-                    }
-                    break;
-
-                default:
-                    if (enableStandard || enableNonStandard) {
-                        prefix = "/ctm/block" + i;
-                        properties = null;
-                    }
-                    break;
+            TileOverride override = null;
+            if (enableStandard || enableNonStandard) {
+                prefix = "/ctm/block" + i;
+                override = TileOverride.create(prefix, null, false);
             }
-            blockOverrides[i] = TileOverride.create(prefix, properties, false);
-            if (blockOverrides[i] != null) {
-                MCPatcherUtils.info("using %s (texture id %d) for block %d", blockOverrides[i].textureName, blockOverrides[i].texture, i);
+            if (override == null) {
+                Properties properties = new Properties();
+                switch (i) {
+                    case BLOCK_ID_GLASS:
+                        if (enableGlass) {
+                            prefix = "/ctm";
+                            properties.setProperty("method", "glass");
+                            properties.setProperty("connect", "block");
+                        }
+                        break;
+
+                    case BLOCK_ID_GLASS_PANE:
+                        if (enableGlassPane) {
+                            prefix = "/ctm";
+                            properties.setProperty("method", "glass");
+                            properties.setProperty("connect", "block");
+                        }
+                        break;
+
+                    case BLOCK_ID_BOOKSHELF:
+                        if (enableBookshelf) {
+                            prefix = "/ctm";
+                            properties.setProperty("method", "bookshelf");
+                            properties.setProperty("connect", "block");
+                        }
+                        break;
+
+                    default:
+                        continue;
+                }
+                override = TileOverride.create(prefix, properties, false);
+            }
+            if (override != null) {
+                MCPatcherUtils.info("using %s (texture id %d) for block %d", override.textureName, override.texture, i);
+                blockOverrides[i] = override;
             }
         }
     }
@@ -279,9 +276,24 @@ public class CTMUtils {
         tileOverrides = new TileOverride[NUM_TILES];
         if (enableStandard || enableNonStandard) {
             for (int i = 0; i < tileOverrides.length; i++) {
-                tileOverrides[i] = TileOverride.create("/ctm/terrain" + i, null, true);
-                if (tileOverrides[i] != null) {
-                    MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", tileOverrides[i].textureName, tileOverrides[i].texture, i);
+                TileOverride override = TileOverride.create("/ctm/terrain" + i, null, true);
+                if (override == null) {
+                    Properties properties = new Properties();
+                    switch (i)
+                    {
+                        case TERRAIN_ID_SANDSTONE_SIDE:
+                            properties.setProperty("method", "sandstone");
+                            properties.setProperty("connect", "tile");
+                            break;
+
+                        default:
+                            continue;
+                    }
+                    override = TileOverride.create("/ctm", properties, true);
+                }
+                if (override != null) {
+                    MCPatcherUtils.info("using %s (texture id %d) for terrain tile %d", override.textureName, override.texture, i);
+                    tileOverrides[i] = override;
                 }
             }
         }
