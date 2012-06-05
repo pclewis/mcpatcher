@@ -150,7 +150,7 @@ abstract class TileOverride {
     }
 
     boolean requiresFace() {
-        return true;
+        return false;
     }
 
     final void error(String format, Object... params) {
@@ -275,6 +275,11 @@ abstract class TileOverride {
         }
 
         @Override
+        boolean requiresFace() {
+            return true;
+        }
+
+        @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
@@ -334,7 +339,7 @@ abstract class TileOverride {
 
     final static class Vertical extends TileOverride {
         private static final int[] defaultTileMap = new int[]{
-            68, 69, 70, 71,
+            48, 32, 16, 0,
         };
 
         // Index into this array is formed from these bit values:

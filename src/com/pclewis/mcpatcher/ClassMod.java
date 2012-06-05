@@ -445,20 +445,20 @@ abstract public class ClassMod implements PatchComponent {
         }
 
         /**
-         * @deprecated
-         * @see #FieldMapper(FieldRef...)
-         * @param names field names
+         * @param names      field names
          * @param descriptor field type
+         * @see #FieldMapper(FieldRef...)
+         * @deprecated
          */
         public FieldMapper(String[] names, String descriptor) {
             super(names, descriptor);
         }
 
         /**
-         * @deprecated
-         * @see #FieldMapper(FieldRef...)
-         * @param name field name
+         * @param name       field name
          * @param descriptor field type
+         * @see #FieldMapper(FieldRef...)
+         * @deprecated
          */
         public FieldMapper(String name, String descriptor) {
             super(name, descriptor);
@@ -487,20 +487,20 @@ abstract public class ClassMod implements PatchComponent {
         }
 
         /**
-         * @deprecated
-         * @see #MethodMapper(MethodRef...)
-         * @param names method names
+         * @param names      method names
          * @param descriptor method type
+         * @see #MethodMapper(MethodRef...)
+         * @deprecated
          */
         public MethodMapper(String[] names, String descriptor) {
             super(names, descriptor);
         }
 
         /**
-         * @deprecated
-         * @see #MethodMapper(MethodRef...)
-         * @param name method name
+         * @param name       method name
          * @param descriptor method type
+         * @see #MethodMapper(MethodRef...)
+         * @deprecated
          */
         public MethodMapper(String name, String descriptor) {
             super(name, descriptor);

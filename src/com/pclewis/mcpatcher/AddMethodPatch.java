@@ -43,7 +43,7 @@ abstract public class AddMethodPatch extends ClassPatch {
     /**
      * Add a new method.
      *
-     * @param methodRef method
+     * @param methodRef   method
      * @param accessFlags Java access flags
      * @see javassist.bytecode.AccessFlag
      */
@@ -55,10 +55,10 @@ abstract public class AddMethodPatch extends ClassPatch {
     /**
      * Create an AddMethodPatch with given name and type.
      *
-     * @deprecated
-     * @see #AddMethodPatch(MethodRef)
      * @param name name of method
      * @param type Java type descriptor of method; may use deobfuscated names
+     * @see #AddMethodPatch(MethodRef)
+     * @deprecated
      */
     public AddMethodPatch(String name, String type) {
         this(new MethodRef(null, name, type), AccessFlag.PUBLIC);
@@ -67,12 +67,12 @@ abstract public class AddMethodPatch extends ClassPatch {
     /**
      * Create an AddMethodPatch with given name, type, and access flags.
      *
-     * @deprecated
-     * @see #AddMethodPatch(MethodRef, int)
      * @param name        name of method
      * @param type        Java type descriptor of method; may use deobfuscated names
      * @param accessFlags method access flags
+     * @see #AddMethodPatch(MethodRef, int)
      * @see javassist.bytecode.AccessFlag
+     * @deprecated
      */
     public AddMethodPatch(String name, String type, int accessFlags) {
         this(new MethodRef(null, name, type), accessFlags);
