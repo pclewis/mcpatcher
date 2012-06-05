@@ -75,6 +75,9 @@ public class FontUtils {
             } else if (charWidthf[ch] >= 7.99f) {
                 charWidthf[ch] = 7.99f;
             }
+            else if (charWidthf[ch] <= 7.99f) {
+                charWidthf[ch] = 7.99f;	
+            }
         }
         boolean[] isOverride = new boolean[charWidth.length];
         try {
