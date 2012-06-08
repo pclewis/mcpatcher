@@ -1484,7 +1484,10 @@ public class CustomColors extends Mod {
         WorldProviderEndMod() {
             parentClass = "WorldProvider";
 
-            classSignatures.add(new ConstSignature(0x8080a0));
+            classSignatures.add(new OrSignature(
+                new ConstSignature(0x8080a0), // pre 12w23a
+                new ConstSignature(0xa080a0)  // 12w23a+
+            ));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -3236,9 +3239,10 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return buildExpression(
-                        push(0x181818)
-                    );
+                    return buildExpression(BinaryRegex.or(
+                        BinaryRegex.build(push(0x181818)), // pre-12w23a
+                        BinaryRegex.build(push(0x282828))  // 12w23a+
+                    ));
                 }
 
                 @Override
