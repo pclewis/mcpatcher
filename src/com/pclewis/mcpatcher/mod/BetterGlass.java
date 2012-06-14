@@ -112,7 +112,7 @@ public class BetterGlass extends Mod {
                         IFEQ, BinaryRegex.any(2),
                         ILOAD, BinaryRegex.backReference(2),
                         push(16),
-                        IF_ICMPNE, BinaryRegex.any(2)
+                        BinaryRegex.subset(new byte[]{(byte) IF_ICMPNE, (byte) IF_ICMPEQ}, true), BinaryRegex.any(2)
                     );
                 }
             }
