@@ -43,6 +43,11 @@ public class TextureUtils {
 
     private static int textureRefreshCount;
 
+    private static final String ALL_ITEMS = "/gui/allitems.png";
+    private static final String ALL_ITEMSX = "/gui/allitemsx.png";
+
+    public static boolean oldCreativeGui;
+
     static {
         animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
         animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedLava", true);
@@ -318,6 +323,12 @@ public class TextureUtils {
 
     public static InputStream getResourceAsStream(TexturePackBase texturePack, String resource) {
         InputStream is = null;
+        if (oldCreativeGui && resource.equals(ALL_ITEMS)) {
+            is = getResourceAsStream(texturePack, ALL_ITEMSX);
+            if (is != null) {
+                return is;
+            }
+        }
         if (texturePack != null) {
             try {
                 is = texturePack.getInputStream(resource);

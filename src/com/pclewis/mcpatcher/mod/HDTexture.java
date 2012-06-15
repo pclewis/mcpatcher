@@ -65,6 +65,10 @@ public class HDTexture extends Mod {
             classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
         }
 
+        if (minecraftVersion.compareTo("12w22a") < 0) {
+            classMods.add(new GuiContainerCreativeMod());
+        }
+
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_SIZE_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$1"));
@@ -1123,6 +1127,36 @@ public class HDTexture extends Mod {
         @Override
         public String getDeobfClass() {
             return name;
+        }
+    }
+
+    private class GuiContainerCreativeMod extends ClassMod {
+        GuiContainerCreativeMod() {
+            global = true;
+
+            classSignatures.add(new ConstSignature("/gui/allitems.png"));
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "use allitemsx.png for creative mode inventory background";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("/gui/allitems.png")
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        push(true),
+                        reference(PUTSTATIC, new FieldRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "oldCreativeGui", "Z"))
+                    );
+                }
+            });
         }
     }
 }
