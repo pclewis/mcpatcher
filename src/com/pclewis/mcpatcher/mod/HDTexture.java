@@ -434,6 +434,8 @@ public class HDTexture extends Mod {
 
     private class TextureFXMod extends ClassMod {
         TextureFXMod() {
+            final MethodRef bindImage = new MethodRef(getDeobfClass(), "bindImage", "(LRenderEngine;)V");
+
             classSignatures.add(new FixedBytecodeSignature(
                 SIPUSH, 0x04, 0x00, // 1024
                 NEWARRAY, T_BYTE
@@ -448,7 +450,56 @@ public class HDTexture extends Mod {
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "imageData", "[B")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "tileNumber", "I"), null, new FieldRef(getDeobfClass(), "tileSize", "I"), new FieldRef(getDeobfClass(), "tileImage", "I")));
 
+            memberMappers.add(new MethodMapper(bindImage));
+
             patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "check for bindImage recursion (end)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        RETURN
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "bindImageEnd", "()V"))
+                    );
+                }
+            }.targetMethod(bindImage));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "check for bindImage recursion (start)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin()
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "bindImageBegin", "()Z")),
+                        IFNE, branch("A"),
+
+                        RETURN,
+
+                        label("A")
+                    );
+                }
+            }.targetMethod(bindImage));
         }
     }
 

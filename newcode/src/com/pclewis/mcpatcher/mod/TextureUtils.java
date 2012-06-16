@@ -48,6 +48,8 @@ public class TextureUtils {
 
     public static boolean oldCreativeGui;
 
+    private static boolean bindImageReentry;
+
     static {
         animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
         animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedLava", true);
@@ -584,5 +586,18 @@ public class TextureUtils {
         MCPatcherUtils.debug("selected texture pack not found after refresh, switching to default");
         list.setTexturePack(list.getDefaultTexturePack());
         minecraft.renderEngine.setTileSize(minecraft);
+    }
+
+    public static boolean bindImageBegin() {
+        if (bindImageReentry) {
+            MCPatcherUtils.warn("caught TextureFX.bindImage recursion");
+            return false;
+        }
+        bindImageReentry = true;
+        return true;
+    }
+
+    public static void bindImageEnd() {
+        bindImageReentry = false;
     }
 }
