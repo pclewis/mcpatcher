@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class AddModDialog extends JDialog {
+class AddModDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -28,11 +28,11 @@ public class AddModDialog extends JDialog {
     private ExternalMod mod;
     private boolean editMode;
 
-    public AddModDialog() {
-        this(null);
+    AddModDialog(JPanel parent) {
+        this(parent, null);
     }
 
-    public AddModDialog(ExternalMod mod) {
+    AddModDialog(final JPanel parent, ExternalMod mod) {
         this.fileMap = new HashMap<String, String>();
         if (mod != null) {
             this.mod = mod;
@@ -78,7 +78,7 @@ public class AddModDialog extends JDialog {
 
         browseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                showBrowseDialog();
+                showBrowseDialog(parent);
             }
         });
 
@@ -143,7 +143,7 @@ public class AddModDialog extends JDialog {
         removeButton.setEnabled(exists);
     }
 
-    boolean showBrowseDialog() {
+    boolean showBrowseDialog(JPanel parent) {
         JFileChooser fd = new JFileChooser();
         fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fd.setFileHidingEnabled(false);
@@ -176,7 +176,7 @@ public class AddModDialog extends JDialog {
                 return "*.zip";
             }
         });
-        if (fd.showOpenDialog(contentPane) == JFileChooser.APPROVE_OPTION) {
+        if (fd.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
             File file = fd.getSelectedFile();
             inputField.setText(file.getPath());
             File lastModDir = file.getParentFile();

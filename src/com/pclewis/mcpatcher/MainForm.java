@@ -238,7 +238,7 @@ class MainForm {
                     model.fireTableRowsUpdated(0, model.getRowCount());
                     if (e.getClickCount() == 2 && mod instanceof ExternalMod) {
                         ExternalMod extMod = (ExternalMod) mod;
-                        addModDialog = new AddModDialog(extMod);
+                        addModDialog = new AddModDialog(mainPanel, extMod);
                         addModDialog.setLocationRelativeTo(frame);
                         addModDialog.setVisible(true);
                         if (addModDialog.getMod() == extMod) {
@@ -286,8 +286,8 @@ class MainForm {
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    addModDialog = new AddModDialog();
-                    if (!addModDialog.showBrowseDialog()) {
+                    addModDialog = new AddModDialog(mainPanel);
+                    if (!addModDialog.showBrowseDialog(mainPanel)) {
                         return;
                     }
                     addModDialog.setLocationRelativeTo(frame);
@@ -346,7 +346,7 @@ class MainForm {
                         HashMap<String, ArrayList<Mod>> conflicts = MCPatcher.getConflicts();
                         if (conflicts.size() > 0) {
                             ConflictDialog dialog = new ConflictDialog(conflicts);
-                            int result = dialog.getResult();
+                            int result = dialog.getResult(mainPanel);
                             if (result != JOptionPane.YES_OPTION) {
                                 patchOk = false;
                             }

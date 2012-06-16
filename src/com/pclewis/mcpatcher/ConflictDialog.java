@@ -57,9 +57,9 @@ class ConflictDialog {
         conflictsText.setText(text);
     }
 
-    int getResult() {
+    int getResult(JPanel parent) {
         JOptionPane pane = new JOptionPane(contentPane, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION);
-        JDialog dialog = pane.createDialog(pane, "Mod conflict detected");
+        JDialog dialog = pane.createDialog(parent, "Mod conflict detected");
         dialog.setModal(true);
         dialog.setResizable(true);
         MainForm.setIconImage(dialog);
