@@ -657,7 +657,7 @@ public class HDTexture extends Mod {
                 memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "alternateFontRenderer", "LFontRenderer;")));
             }
 
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "TextureUtils.setTileSize(), renderEngine.setTileSize() on startup";
@@ -665,22 +665,30 @@ public class HDTexture extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return BinaryRegex.capture(buildExpression(
+                    return buildExpression(
+                        // renderEngine = new RenderEngine(texturePackList, gameSettings);
                         ALOAD_0,
                         reference(NEW, new ClassRef("RenderEngine")),
-                        BinaryRegex.any(0, 18),
-                        PUTFIELD, BinaryRegex.capture(BinaryRegex.any(2))
-                    ));
+                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 18)),
+                        PUTFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
+
+                        // fontRenderer = new FontRenderer(gameSettings, "/font/default.png", renderEngine, false);
+                        // ...
+                        // standardGalacticFontRenderer = new FontRenderer(gameSettings, "/font/alternate.png", renderEngine, false);
+                        BinaryRegex.any(0, 60),
+                        reference(NEW, new ClassRef("FontRenderer")),
+                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
+                        BytecodeMatcher.anyReference(PUTFIELD)
+                    );
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        getCaptureGroup(1),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setTileSize", "()Z")),
                         POP,
                         ALOAD_0,
-                        GETFIELD, getCaptureGroup(2),
+                        GETFIELD, getCaptureGroup(1),
                         ALOAD_0,
                         reference(INVOKEVIRTUAL, new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V"))
                     );
