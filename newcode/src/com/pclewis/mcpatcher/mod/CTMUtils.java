@@ -186,11 +186,15 @@ public class CTMUtils {
     }
 
     private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        return getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, tileOverrides[origTexture]) ||
-            getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, blockOverrides[block.blockID]);
+        return getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, tileOverrides, origTexture) ||
+            getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, blockOverrides, block.blockID);
     }
 
-    private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face, TileOverride[] overrides) {
+    private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face, TileOverride[][] allOverrides, int index) {
+        if (index < 0 || index >= allOverrides.length) {
+            return false;
+        }
+        TileOverride[] overrides = allOverrides[index];
         if (overrides == null) {
             return false;
         }
