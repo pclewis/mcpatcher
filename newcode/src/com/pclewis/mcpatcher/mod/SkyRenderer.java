@@ -65,11 +65,12 @@ public class SkyRenderer {
         if (active) {
             Tessellator tessellator = Tessellator.instance;
 
-            //GL11.glDisable(GL11.GL_FOG);
-            //GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glDisable(GL11.GL_FOG);
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            //GL11.glDepthMask(false);
+            GL11.glDepthMask(false);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
 
             for (int i = 0; i < ROTATIONS.length; i++) {
                 renderEngine.bindTexture(renderEngine.getTexture(getSkyTexture(i)));
@@ -88,9 +89,8 @@ public class SkyRenderer {
                 GL11.glPopMatrix();
             }
 
-            //GL11.glDepthMask(true);
-            //GL11.glEnable(GL11.GL_TEXTURE_2D);
-            //GL11.glEnable(GL11.GL_ALPHA_TEST);
+            GL11.glDepthMask(true);
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         }

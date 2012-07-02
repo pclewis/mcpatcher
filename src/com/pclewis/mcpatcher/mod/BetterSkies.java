@@ -138,13 +138,16 @@ public class BetterSkies extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        // tessellator.startDrawingQuads();
                         ALOAD_2,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
 
+                        // tessellator.setColorOpaque_I(0x...);
                         ALOAD_2,
                         BytecodeMatcher.anyLDC,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
 
+                        // tessellator.addVertexWithUV(-100D, -100D, -100D, 0.0D, 0.0D);
                         ALOAD_2,
                         push(-100.0),
                         push(-100.0),
@@ -153,6 +156,7 @@ public class BetterSkies extends Mod {
                         push(0.0),
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
 
+                        // tessellator.addVertexWithUV(-100D, -100D, 100D, 0.0D, 16D);
                         ALOAD_2,
                         push(-100.0),
                         push(-100.0),
@@ -161,6 +165,7 @@ public class BetterSkies extends Mod {
                         push(16.0),
                         BinaryRegex.backReference(3),
 
+                        // tessellator.addVertexWithUV(100D, -100D, 100D, 16D, 16D);
                         ALOAD_2,
                         push(100.0),
                         push(-100.0),
@@ -169,6 +174,7 @@ public class BetterSkies extends Mod {
                         push(16.0),
                         BinaryRegex.backReference(3),
 
+                        // tessellator.addVertexWithUV(100D, -100D, -100D, 16D, 0.0D);
                         ALOAD_2,
                         push(100.0),
                         push(-100.0),
@@ -177,6 +183,7 @@ public class BetterSkies extends Mod {
                         push(0.0),
                         BinaryRegex.backReference(3),
 
+                        // tessellator.draw();
                         ALOAD_2,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
                         POP
