@@ -31,6 +31,7 @@ public class MCPatcherUtils {
     public static final String RANDOM_MOBS = "Random Mobs";
     public static final String CUSTOM_COLORS = "Custom Colors";
     public static final String CONNECTED_TEXTURES = "Connected Textures";
+    public static final String BETTER_SKIES = "Better Skies";
     public static final String BETTER_GLASS = "Better Glass";
     public static final String GLSL_SHADERS = "GLSL Shaders";
 
@@ -49,6 +50,7 @@ public class MCPatcherUtils {
     public static final String CTM_UTILS_CLASS = "com.pclewis.mcpatcher.mod.CTMUtils";
     public static final String SUPER_TESSELLATOR_CLASS = "com.pclewis.mcpatcher.mod.SuperTessellator";
     public static final String TILE_OVERRIDE_CLASS = "com.pclewis.mcpatcher.mod.TileOverride";
+    public static final String SKY_RENDERER_CLASS = "com.pclewis.mcpatcher.mod.SkyRenderer";
     public static final String SHADERS_CLASS = "com.pclewis.mcpatcher.mod.Shaders";
 
     private MCPatcherUtils() {

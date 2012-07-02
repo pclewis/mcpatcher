@@ -30,4 +30,10 @@ public class Tessellator {
 
     public void startDrawing(int drawMode) {
     }
+
+    public void startDrawingQuads() {
+    }
+
+    public void addVertexWithUV(double x, double y, double z, double u, double v) {
+    }
 }
