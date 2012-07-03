@@ -298,7 +298,7 @@ public class BetterSkies extends Mod {
                         label("A")
                     );
                 }
-            });
+            }.targetMethod(renderSky));
 
             patches.add(new BytecodePatch() {
                 @Override
