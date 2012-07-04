@@ -340,6 +340,71 @@ public final class BaseMod extends Mod {
     }
 
     /**
+     * Matches Tessellator class and instance and maps several commonly used rendering methods.
+     */
+    public static class TessellatorMod extends ClassMod {
+        protected final MethodRef draw = new MethodRef(getDeobfClass(), "draw", "()I");
+        protected final MethodRef startDrawingQuads = new MethodRef(getDeobfClass(), "startDrawingQuads", "()V");
+        protected final MethodRef startDrawing = new MethodRef(getDeobfClass(), "startDrawing", "(I)V");
+        protected final MethodRef addVertexWithUV = new MethodRef(getDeobfClass(), "addVertexWithUV", "(DDDDD)V");
+        protected final MethodRef addVertex = new MethodRef(getDeobfClass(), "addVertex", "(DDD)V");
+        protected final MethodRef setTextureUV = new MethodRef(getDeobfClass(), "setTextureUV", "(DD)V");
+        protected final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
+
+        public TessellatorMod(MinecraftVersion minecraftVersion) {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("Not tesselating!")
+                    );
+                }
+            }.setMethod(draw));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        push(7),
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        RETURN
+                    );
+                }
+            }
+                .setMethod(startDrawingQuads)
+                .addXref(1, startDrawing)
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        DLOAD, 7,
+                        DLOAD, 9,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+
+                        ALOAD_0,
+                        DLOAD_1,
+                        DLOAD_3,
+                        DLOAD, 5,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+
+                        RETURN
+                    );
+                }
+            }
+                .setMethod(addVertexWithUV)
+                .addXref(1, setTextureUV)
+                .addXref(2, addVertex)
+            );
+
+            memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
+        }
+    }
+
+    /**
      * Matches IBlockAccess interface and maps getBlockId, getBlockMetadata methods.
      */
     public static class IBlockAccessMod extends ClassMod {
