@@ -274,8 +274,8 @@ public class CTMUtils {
         if (enableStandard || enableNonStandard) {
             for (int i = 0; i < length; i++) {
                 ArrayList<TileOverride> tmpOverrides = null;
-                for (int j = 0; j <= 26; j++) {
-                    String prefix = "/ctm/" + type + i + (j == 0 ? "" : "" + ('a' + j - 1));
+                for (char c = 'a' - 1; c <= 'z'; c++) {
+                    String prefix = "/ctm/" + type + i + (c >= 'a' ? "" + c : "");
                     TileOverride override = TileOverride.create(prefix, null, connectByTile);
                     if (override == null) {
                         break;
