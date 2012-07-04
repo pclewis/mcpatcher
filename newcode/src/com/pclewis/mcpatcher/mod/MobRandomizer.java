@@ -19,6 +19,7 @@ public class MobRandomizer {
     public static void reset() {
         MCPatcherUtils.debug("reset random mobs list");
         mobHash.clear();
+        MobOverlay.reset(lastTexturePack);
     }
 
     public static String randomTexture(Entity entity) {
