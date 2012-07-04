@@ -24,11 +24,11 @@ public class SkyRenderer {
     private static final HashMap<Integer, Boolean> haveSkyBox = new HashMap<Integer, Boolean>();
     private static TexturePackBase lastTexturePack;
 
-    private static final int shaderProgram;
-    private static final int fragShader;
-    private static final int texture1Location;
-    private static final int texture2Location;
-    private static final int blendLocation;
+    private static int shaderProgram;
+    private static int fragShader;
+    private static int texture1Location;
+    private static int texture2Location;
+    private static int blendLocation;
 
     private static final int SKY_TEXTURE_UNIT = 2;
     private static final int STAR_TEXTURE_UNIT = SKY_TEXTURE_UNIT + 1;
@@ -44,6 +44,7 @@ public class SkyRenderer {
             "}\n";
 
     static {
+        /*
         shaderProgram = GL20.glCreateProgram();
         fragShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
         GL20.glShaderSource(fragShader, SHADER_SOURCE);
@@ -59,6 +60,7 @@ public class SkyRenderer {
             "shaderProgram = %d, fragShader = %d, blendLocation = %d, texture1Location = %d, texture2Location = %d",
             shaderProgram, fragShader, blendLocation, texture1Location, texture2Location
         );
+        */
     }
 
     public static void setup(World world, RenderEngine renderEngine, float partialTick) {
@@ -68,7 +70,7 @@ public class SkyRenderer {
             lastTexturePack = texturePack;
             haveSkyBox.clear();
         }
-        if (texturePack instanceof TexturePackDefault || Keyboard.isKeyDown(Keyboard.KEY_ADD) || shaderProgram <= 0 || fragShader <= 0) {
+        if (texturePack instanceof TexturePackDefault || Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
             active = false;
         } else {
             worldType = minecraft.getWorld().worldProvider.worldType;
@@ -87,6 +89,10 @@ public class SkyRenderer {
     }
 
     public static boolean renderSky() {
+        return active;
+    }
+
+    public static boolean renderStars() {
         if (active) {
             Tessellator tessellator = Tessellator.instance;
 
@@ -97,18 +103,20 @@ public class SkyRenderer {
             GL11.glDepthMask(false);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-            GL13.glActiveTexture(GL13.GL_TEXTURE0 + SKY_TEXTURE_UNIT);
-            renderEngine.bindTexture(renderEngine.getTexture(getSkyTexture()));
-            GL13.glActiveTexture(GL13.GL_TEXTURE0 + STAR_TEXTURE_UNIT);
-            renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
+            if (shaderProgram > 0) {
+                GL13.glActiveTexture(GL13.GL_TEXTURE0 + SKY_TEXTURE_UNIT);
+                renderEngine.bindTexture(renderEngine.getTexture(getSkyTexture()));
+                GL13.glActiveTexture(GL13.GL_TEXTURE0 + STAR_TEXTURE_UNIT);
+                renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
 
-            GL20.glUseProgram(shaderProgram);
+                GL20.glUseProgram(shaderProgram);
 
-            GL20.glUniform1i(texture1Location, SKY_TEXTURE_UNIT);
-            GL20.glUniform1i(texture2Location, STAR_TEXTURE_UNIT);
-            GL20.glUniform1f(blendLocation, celestialAngle);
-
-            //renderEngine.bindTexture(renderEngine.getTexture(getSkyTexture()));
+                GL20.glUniform1i(texture1Location, SKY_TEXTURE_UNIT);
+                GL20.glUniform1i(texture2Location, STAR_TEXTURE_UNIT);
+                GL20.glUniform1f(blendLocation, celestialAngle);
+            } else {
+                renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
+            }
 
             GL11.glPushMatrix();
 
@@ -143,18 +151,16 @@ public class SkyRenderer {
 
             GL11.glPopMatrix();
 
-            GL20.glUseProgram(0);
-            GL13.glActiveTexture(GL13.GL_TEXTURE0);
+            if (shaderProgram > 0) {
+                GL20.glUseProgram(0);
+                GL13.glActiveTexture(GL13.GL_TEXTURE0);
+            }
 
             GL11.glDepthMask(true);
             GL11.glEnable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         }
-        return active;
-    }
-
-    public static boolean renderStars() {
         return active;
     }
 
@@ -184,7 +190,7 @@ public class SkyRenderer {
     }
 
     private static String getStarTexture() {
-        return "/terrain/world" + worldType + "/stars.png";
+        return "/terrain/world" + worldType + "/stars1.png";
     }
 
     private static void checkGLError() {
