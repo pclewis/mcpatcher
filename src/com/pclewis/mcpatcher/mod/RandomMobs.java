@@ -28,6 +28,7 @@ public class RandomMobs extends Mod {
         classMods.add(new NBTTagCompoundMod());
         if (minecraftVersion.compareTo("Beta 1.9") >= 0) {
             classMods.add(new BaseMod.TessellatorMod(minecraftVersion));
+            classMods.add(new RenderMod());
             classMods.add(new RenderSnowmanMod());
             classMods.add(new RenderMooshroomMod());
         }
@@ -39,8 +40,25 @@ public class RandomMobs extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_OVERLAY_CLASS));
     }
 
+    private class RenderMod extends ClassMod {
+        RenderMod() {
+            prerequisiteClasses.add("RenderLiving");
+
+            final MethodRef loadTexture = new MethodRef(getDeobfClass(), "loadTexture", "(Ljava/lang/String;)V");
+
+            memberMappers.add(new MethodMapper(loadTexture)
+                .accessFlag(AccessFlag.PROTECTED, true)
+                .accessFlag(AccessFlag.STATIC, false)
+            );
+
+            patches.add(new MakeMemberPublicPatch(loadTexture));
+        }
+    }
+
     private class RenderLivingMod extends ClassMod {
         RenderLivingMod() {
+            parentClass = "Render";
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
@@ -255,6 +273,38 @@ public class RandomMobs extends Mod {
                     );
                 }
             }.setMethod(renderEquippedItems));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "render snowman overlay";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        ALOAD_1,
+                        ALOAD_3,
+                        ICONST_0,
+                        BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_0,
+                        ALOAD_1,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "renderSnowmanOverlay", "(LRender;LEntity;)Z")),
+                        IFNE, branch("A"),
+                        getMatch(),
+                        label("A")
+                    );
+                }
+            }.targetMethod(renderEquippedItems));
         }
     }
 
@@ -374,7 +424,7 @@ public class RandomMobs extends Mod {
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "finish", "()V"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "finishMooshroom", "()V"))
                     );
                 }
             }.targetMethod(renderEquippedItems));

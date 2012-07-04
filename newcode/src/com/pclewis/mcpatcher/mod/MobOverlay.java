@@ -1,9 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import net.minecraft.src.Entity;
-import net.minecraft.src.Tessellator;
-import net.minecraft.src.TexturePackBase;
+import net.minecraft.src.*;
 
 public class MobOverlay {
     private static final String MOOSHROOM_OVERLAY = "/mob/redcow_overlay.png";
@@ -15,6 +13,13 @@ public class MobOverlay {
     private static final double MOO_Y1 = 0.5;
     private static final double MOO_Z0 = -0.45;
     private static final double MOO_Z1 = 0.45;
+
+    private static final double SNOW_X0 = -0.5;
+    private static final double SNOW_X1 = 0.5;
+    private static final double SNOW_Y0 = -0.5;
+    private static final double SNOW_Y1 = 0.5;
+    private static final double SNOW_Z0 = -0.5;
+    private static final double SNOW_Z1 = 0.5;
 
     private static boolean overlayActive;
     private static int overlayCounter;
@@ -65,8 +70,71 @@ public class MobOverlay {
         return overlayActive;
     }
 
-    public static void finish() {
+    public static void finishMooshroom() {
         overlayCounter = 0;
         overlayActive = false;
+    }
+
+    public static boolean renderSnowmanOverlay(Render render, Entity entity) {
+        if (haveSnowman) {
+            render.loadTexture(MobRandomizer.randomTexture(entity, SNOWMAN_OVERLAY));
+
+            Tessellator tessellator = Tessellator.instance;
+            tessellator.startDrawingQuads();
+
+            double[] c = new double[4];
+
+            // top = y+
+            getTileCoordinates(1, c);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[0], c[2]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[1], c[2]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[1], c[3]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[0], c[3]);
+
+            // left = x-
+            getTileCoordinates(4, c);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[0], c[2]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[1], c[2]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[1], c[3]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[0], c[3]);
+
+            // front = z+
+            getTileCoordinates(5, c);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[0], c[2]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[1], c[2]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[1], c[3]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[0], c[3]);
+
+            // right = x+
+            getTileCoordinates(6, c);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[0], c[2]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[1], c[2]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[1], c[3]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[0], c[3]);
+
+            // back = z-
+            getTileCoordinates(7, c);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[0], c[2]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[1], c[2]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[1], c[3]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[0], c[3]);
+
+            // bottom = y-
+            getTileCoordinates(9, c);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[0], c[2]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[1], c[2]);
+            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[1], c[3]);
+            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[0], c[3]);
+
+            tessellator.draw();
+        }
+        return haveSnowman;
+    }
+
+    private static void getTileCoordinates(int tileNum, double[] c) {
+        c[0] = (tileNum % 4) / 4.0;
+        c[1] = c[0] + 0.25;
+        c[2] = (tileNum / 4) / 3.0;
+        c[3] = c[2] + 1.0 / 3.0;
     }
 }
