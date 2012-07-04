@@ -27,6 +27,7 @@ public class RandomMobs extends Mod {
         classMods.add(new EntityLivingMod());
         classMods.add(new NBTTagCompoundMod());
         if (minecraftVersion.compareTo("Beta 1.9") >= 0) {
+            classMods.add(new BaseMod.TessellatorMod(minecraftVersion));
             classMods.add(new RenderSnowmanMod());
             classMods.add(new RenderMooshroomMod());
         }
