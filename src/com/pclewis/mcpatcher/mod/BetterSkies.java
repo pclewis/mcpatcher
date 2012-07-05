@@ -240,11 +240,8 @@ public class BetterSkies extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD, BinaryRegex.backReference(1),
-                        push(0.0f),
-                        FCMPL,
-                        IFLE, BinaryRegex.any(2)
+                        push(30.0f),
+                        BytecodeMatcher.anyFSTORE
                     );
                 }
 
