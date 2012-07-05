@@ -2,6 +2,7 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 
+import javax.swing.*;
 import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
@@ -15,10 +16,9 @@ public class BetterSkies extends Mod {
         description = "Adds support for custom skyboxes.";
         version = "1.0";
 
-        MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableDayNight", false);
-        MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableStars", true);
-
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
+
+        configPanel = new ConfigPanel();
 
         classMods.add(new BaseMod.MinecraftMod().mapTexturePackList().addWorldGetter(minecraftVersion));
         classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
@@ -32,6 +32,29 @@ public class BetterSkies extends Mod {
         classMods.add(new RenderGlobalMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS));
+    }
+
+    private class ConfigPanel extends ModConfigPanel {
+        private JPanel panel;
+        private JCheckBox dayNightCheckBox;
+        private JCheckBox starsCheckBox;
+
+        @Override
+        public JPanel getPanel() {
+            return panel;
+        }
+
+        @Override
+        public void load() {
+            dayNightCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableDayNight", false));
+            starsCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableStars", true));
+        }
+
+        @Override
+        public void save() {
+            MCPatcherUtils.set(MCPatcherUtils.BETTER_SKIES, "enableDayNight", dayNightCheckBox.isSelected());
+            MCPatcherUtils.set(MCPatcherUtils.BETTER_SKIES, "enableStars", starsCheckBox.isSelected());
+        }
     }
 
     private class RenderGlobalMod extends ClassMod {
