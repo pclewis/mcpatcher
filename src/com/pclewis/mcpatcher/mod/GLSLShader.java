@@ -46,7 +46,7 @@ public class GLSLShader extends Mod {
         classMods.add(new WorldMod());
         if (haveNewWorld) {
             classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
-            classMods.add(new WorldServerMPMod());
+            classMods.add(new BaseMod.WorldServerMPMod(minecraftVersion));
         }
         classMods.add(new WorldRendererMod());
 
@@ -1162,14 +1162,6 @@ public class GLSLShader extends Mod {
             );
 
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getSeed", "()J"), new MethodRef(getDeobfClass(), "getWorldTime", "()J")));
-        }
-    }
-
-    private class WorldServerMPMod extends ClassMod {
-        WorldServerMPMod() {
-            parentClass = "World";
-
-            classSignatures.add(new ConstSignature("MpServer"));
         }
     }
 

@@ -685,6 +685,14 @@ public final class BaseMod extends Mod {
         }
     }
 
+    public static class WorldServerMPMod extends ClassMod {
+        public WorldServerMPMod(MinecraftVersion minecraftVersion) {
+            parentClass = "World";
+
+            classSignatures.add(new ConstSignature("MpServer"));
+        }
+    }
+
     /*
      * Matches FontRenderer class and maps charWidth, fontTextureName, and spaceWidth fields.
      */
