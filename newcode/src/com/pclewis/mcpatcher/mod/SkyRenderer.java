@@ -41,6 +41,7 @@ public class SkyRenderer {
             "    vec4 color1 = texture2D(texture1, gl_TexCoord[0].st);\n" +
             "    vec4 color2 = texture2D(texture2, gl_TexCoord[0].st);\n" +
             "    gl_FragColor = (1.0 - blending) * color1 + blending * color2;\n" +
+            "    gl_FragColor[3] = 0.5;\n" +
             "}\n";
 
     static {
@@ -76,7 +77,7 @@ public class SkyRenderer {
             boolean[] h = haveSkyBox.get(worldType);
             if (h == null) {
                 h = new boolean[2];
-                h[0] = hasTexture(getDayTexture()) & hasTexture(getNightTexture());
+                h[0] = hasTexture(getDayTexture()) & hasTexture(getNightTexture()) & (shaderProgram > 0);
                 h[1] = hasTexture(getStarTexture());
                 haveSkyBox.put(worldType, h);
             }
@@ -98,7 +99,7 @@ public class SkyRenderer {
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glDepthMask(false);
+            //GL11.glDepthMask(false);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
 
             GL13.glActiveTexture(GL13.GL_TEXTURE0 + DAY_TEXTURE_UNIT);
@@ -114,15 +115,14 @@ public class SkyRenderer {
 
             drawBox(tessellator);
 
-            if (shaderProgram > 0) {
-                GL20.glUseProgram(0);
-                GL13.glActiveTexture(GL13.GL_TEXTURE0);
-            }
+            GL20.glUseProgram(0);
+            GL13.glActiveTexture(GL13.GL_TEXTURE0);
 
-            GL11.glDepthMask(true);
+            //GL11.glDepthMask(true);
             GL11.glEnable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            //GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            active[0] = false;
         }
         return active[0];
     }
@@ -135,17 +135,17 @@ public class SkyRenderer {
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glDepthMask(false);
+            //GL11.glDepthMask(false);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
 
             renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
 
             drawBox(tessellator);
 
-            GL11.glDepthMask(true);
+            //GL11.glDepthMask(true);
             GL11.glEnable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         }
         return active[1];
     }
