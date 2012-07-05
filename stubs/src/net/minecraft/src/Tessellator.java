@@ -34,6 +34,9 @@ public class Tessellator {
     public void startDrawingQuads() {
     }
 
+    public void addVertex(double x, double y, double z) {
+    }
+
     public void addVertexWithUV(double x, double y, double z, double u, double v) {
     }
 }
