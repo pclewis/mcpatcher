@@ -7,12 +7,16 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.GLU;
 
 import java.util.HashMap;
 
 public class SkyRenderer {
     private static final double DISTANCE = 100.0;
+
+    private static final boolean enableDayNight = MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableDayNight", false);
+    private static final boolean enableStars = MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableStars", true);
 
     private static RenderEngine renderEngine;
     private static float partialTick;
@@ -45,21 +49,23 @@ public class SkyRenderer {
             "}\n";
 
     static {
-        shaderProgram = GL20.glCreateProgram();
-        fragShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
-        GL20.glShaderSource(fragShader, SHADER_SOURCE);
-        GL20.glCompileShader(fragShader);
-        GL20.glAttachShader(shaderProgram, fragShader);
-        GL20.glLinkProgram(shaderProgram);
+        if (enableDayNight && GLContext.getCapabilities().OpenGL20) {
+            shaderProgram = GL20.glCreateProgram();
+            fragShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
+            GL20.glShaderSource(fragShader, SHADER_SOURCE);
+            GL20.glCompileShader(fragShader);
+            GL20.glAttachShader(shaderProgram, fragShader);
+            GL20.glLinkProgram(shaderProgram);
 
-        texture1Location = GL20.glGetUniformLocation(shaderProgram, "texture1");
-        texture2Location = GL20.glGetUniformLocation(shaderProgram, "texture2");
-        blendLocation = GL20.glGetUniformLocation(shaderProgram, "blending");
+            texture1Location = GL20.glGetUniformLocation(shaderProgram, "texture1");
+            texture2Location = GL20.glGetUniformLocation(shaderProgram, "texture2");
+            blendLocation = GL20.glGetUniformLocation(shaderProgram, "blending");
 
-        MCPatcherUtils.info(
-            "shaderProgram = %d, fragShader = %d, blendLocation = %d, texture1Location = %d, texture2Location = %d",
-            shaderProgram, fragShader, blendLocation, texture1Location, texture2Location
-        );
+            MCPatcherUtils.info(
+                "shaderProgram = %d, fragShader = %d, blendLocation = %d, texture1Location = %d, texture2Location = %d",
+                shaderProgram, fragShader, blendLocation, texture1Location, texture2Location
+            );
+        }
     }
 
     public static void setup(World world, RenderEngine renderEngine, float partialTick) {
@@ -77,8 +83,8 @@ public class SkyRenderer {
             boolean[] h = haveSkyBox.get(worldType);
             if (h == null) {
                 h = new boolean[2];
-                h[0] = hasTexture(getDayTexture()) & hasTexture(getNightTexture()) & (shaderProgram > 0);
-                h[1] = hasTexture(getStarTexture());
+                h[0] = (shaderProgram > 0) && (hasTexture(getDayTexture()) & hasTexture(getNightTexture()));
+                h[1] = enableStars && hasTexture(getStarTexture());
                 haveSkyBox.put(worldType, h);
             }
             active[0] = h[0];
@@ -127,16 +133,21 @@ public class SkyRenderer {
         return active[0];
     }
 
-    public static boolean renderStars() {
+    public static boolean renderStars(float brightness) {
         if (active[1]) {
             Tessellator tessellator = Tessellator.instance;
 
             GL11.glDisable(GL11.GL_FOG);
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             //GL11.glDepthMask(false);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
+            if (Keyboard.isKeyDown(Keyboard.KEY_SUBTRACT)) {
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
+            } else {
+                GL11.glColor4f(brightness, brightness, brightness, brightness);
+            }
 
             renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
 

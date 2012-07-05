@@ -15,6 +15,9 @@ public class BetterSkies extends Mod {
         description = "Adds support for custom skyboxes.";
         version = "1.0";
 
+        MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableDayNight", false);
+        MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableStars", true);
+
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
 
         classMods.add(new BaseMod.MinecraftMod().mapTexturePackList().addWorldGetter(minecraftVersion));
@@ -319,6 +322,12 @@ public class BetterSkies extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, BinaryRegex.backReference(1),
+                        FLOAD, BinaryRegex.backReference(1),
+                        FLOAD, BinaryRegex.backReference(1),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glColor4f", "(FFFF)V")),
+
                         ALOAD_0,
                         reference(GETFIELD, glStarList),
                         reference(INVOKESTATIC, glCallList)
@@ -328,7 +337,8 @@ public class BetterSkies extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.SKY_RENDERER_CLASS, "renderStars", "()Z")),
+                        FLOAD, getCaptureGroup(1),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.SKY_RENDERER_CLASS, "renderStars", "(F)Z")),
                         IFNE, branch("A"),
                         getMatch(),
                         label("A")
