@@ -30,8 +30,8 @@ public class SkyRenderer {
     private static int texture2Location;
     private static int blendLocation;
 
-    private static final int SKY_TEXTURE_UNIT = 2;
-    private static final int STAR_TEXTURE_UNIT = SKY_TEXTURE_UNIT + 1;
+    private static final int DAY_TEXTURE_UNIT = 2;
+    private static final int NIGHT_TEXTURE_UNIT = DAY_TEXTURE_UNIT + 1;
     private static final String SHADER_SOURCE =
         "/* Simple shader to blend two textures */\n" +
             "uniform sampler2D texture1;\n" +
@@ -76,7 +76,7 @@ public class SkyRenderer {
             worldType = minecraft.getWorld().worldProvider.worldType;
             Boolean h = haveSkyBox.get(worldType);
             if (h == null) {
-                h = hasTexture(getSkyTexture()) & hasTexture(getStarTexture());
+                h = hasTexture(getStarTexture());
                 haveSkyBox.put(worldType, h);
             }
             active = h;
@@ -104,15 +104,15 @@ public class SkyRenderer {
             GL11.glEnable(GL11.GL_TEXTURE_2D);
 
             if (shaderProgram > 0) {
-                GL13.glActiveTexture(GL13.GL_TEXTURE0 + SKY_TEXTURE_UNIT);
-                renderEngine.bindTexture(renderEngine.getTexture(getSkyTexture()));
-                GL13.glActiveTexture(GL13.GL_TEXTURE0 + STAR_TEXTURE_UNIT);
+                GL13.glActiveTexture(GL13.GL_TEXTURE0 + DAY_TEXTURE_UNIT);
+                renderEngine.bindTexture(renderEngine.getTexture(getDayTexture()));
+                GL13.glActiveTexture(GL13.GL_TEXTURE0 + NIGHT_TEXTURE_UNIT);
                 renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
 
                 GL20.glUseProgram(shaderProgram);
 
-                GL20.glUniform1i(texture1Location, SKY_TEXTURE_UNIT);
-                GL20.glUniform1i(texture2Location, STAR_TEXTURE_UNIT);
+                GL20.glUniform1i(texture1Location, DAY_TEXTURE_UNIT);
+                GL20.glUniform1i(texture2Location, NIGHT_TEXTURE_UNIT);
                 GL20.glUniform1f(blendLocation, celestialAngle);
             } else {
                 renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
@@ -185,12 +185,16 @@ public class SkyRenderer {
         }
     }
 
-    private static String getSkyTexture() {
-        return "/terrain/world" + worldType + "/sky.png";
+    private static String getDayTexture() {
+        return "/terrain/sky" + worldType + "/day.png";
+    }
+
+    private static String getNightTexture() {
+        return "/terrain/sky" + worldType + "/night.png";
     }
 
     private static String getStarTexture() {
-        return "/terrain/world" + worldType + "/stars1.png";
+        return "/terrain/sky" + worldType + "/stars.png";
     }
 
     private static void checkGLError() {
