@@ -19,9 +19,9 @@ public class SkyRenderer {
     private static float celestialAngle;
     private static int worldType;
 
-    public static boolean active;
+    public static final boolean[] active = new boolean[2];
 
-    private static final HashMap<Integer, Boolean> haveSkyBox = new HashMap<Integer, Boolean>();
+    private static final HashMap<Integer, boolean[]> haveSkyBox = new HashMap<Integer, boolean[]>();
     private static TexturePackBase lastTexturePack;
 
     private static int shaderProgram;
@@ -44,7 +44,6 @@ public class SkyRenderer {
             "}\n";
 
     static {
-        /*
         shaderProgram = GL20.glCreateProgram();
         fragShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
         GL20.glShaderSource(fragShader, SHADER_SOURCE);
@@ -60,7 +59,6 @@ public class SkyRenderer {
             "shaderProgram = %d, fragShader = %d, blendLocation = %d, texture1Location = %d, texture2Location = %d",
             shaderProgram, fragShader, blendLocation, texture1Location, texture2Location
         );
-        */
     }
 
     public static void setup(World world, RenderEngine renderEngine, float partialTick) {
@@ -71,16 +69,20 @@ public class SkyRenderer {
             haveSkyBox.clear();
         }
         if (texturePack instanceof TexturePackDefault || Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
-            active = false;
+            active[0] = false;
+            active[1] = false;
         } else {
             worldType = minecraft.getWorld().worldProvider.worldType;
-            Boolean h = haveSkyBox.get(worldType);
+            boolean[] h = haveSkyBox.get(worldType);
             if (h == null) {
-                h = hasTexture(getStarTexture());
+                h = new boolean[2];
+                h[0] = hasTexture(getDayTexture()) & hasTexture(getNightTexture());
+                h[1] = hasTexture(getStarTexture());
                 haveSkyBox.put(worldType, h);
             }
-            active = h;
-            if (active) {
+            active[0] = h[0];
+            active[1] = h[1];
+            if (active[0] || active[1]) {
                 SkyRenderer.partialTick = partialTick;
                 SkyRenderer.renderEngine = renderEngine;
                 celestialAngle = world.getCelestialAngle(partialTick);
@@ -89,11 +91,7 @@ public class SkyRenderer {
     }
 
     public static boolean renderSky() {
-        return active;
-    }
-
-    public static boolean renderStars() {
-        if (active) {
+        if (active[0]) {
             Tessellator tessellator = Tessellator.instance;
 
             GL11.glDisable(GL11.GL_FOG);
@@ -103,53 +101,18 @@ public class SkyRenderer {
             GL11.glDepthMask(false);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-            if (shaderProgram > 0) {
-                GL13.glActiveTexture(GL13.GL_TEXTURE0 + DAY_TEXTURE_UNIT);
-                renderEngine.bindTexture(renderEngine.getTexture(getDayTexture()));
-                GL13.glActiveTexture(GL13.GL_TEXTURE0 + NIGHT_TEXTURE_UNIT);
-                renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
+            GL13.glActiveTexture(GL13.GL_TEXTURE0 + DAY_TEXTURE_UNIT);
+            renderEngine.bindTexture(renderEngine.getTexture(getDayTexture()));
+            GL13.glActiveTexture(GL13.GL_TEXTURE0 + NIGHT_TEXTURE_UNIT);
+            renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
 
-                GL20.glUseProgram(shaderProgram);
+            GL20.glUseProgram(shaderProgram);
 
-                GL20.glUniform1i(texture1Location, DAY_TEXTURE_UNIT);
-                GL20.glUniform1i(texture2Location, NIGHT_TEXTURE_UNIT);
-                GL20.glUniform1f(blendLocation, celestialAngle);
-            } else {
-                renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
-            }
+            GL20.glUniform1i(texture1Location, DAY_TEXTURE_UNIT);
+            GL20.glUniform1i(texture2Location, NIGHT_TEXTURE_UNIT);
+            GL20.glUniform1f(blendLocation, celestialAngle);
 
-            GL11.glPushMatrix();
-
-            // north
-            GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            GL11.glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 5);
-
-            // top
-            GL11.glPushMatrix();
-            GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            drawTile(tessellator, 1);
-            GL11.glPopMatrix();
-
-            // bottom
-            GL11.glPushMatrix();
-            GL11.glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-            drawTile(tessellator, 9);
-            GL11.glPopMatrix();
-
-            // west
-            GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 6);
-
-            // south
-            GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 7);
-
-            // east
-            GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 4);
-
-            GL11.glPopMatrix();
+            drawBox(tessellator);
 
             if (shaderProgram > 0) {
                 GL20.glUseProgram(0);
@@ -161,7 +124,65 @@ public class SkyRenderer {
             GL11.glEnable(GL11.GL_TEXTURE_2D);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         }
-        return active;
+        return active[0];
+    }
+
+    public static boolean renderStars() {
+        if (active[1]) {
+            Tessellator tessellator = Tessellator.instance;
+
+            GL11.glDisable(GL11.GL_FOG);
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glDepthMask(false);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+            renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
+
+            drawBox(tessellator);
+
+            GL11.glDepthMask(true);
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        }
+        return active[1];
+    }
+
+    private static void drawBox(Tessellator tessellator) {
+        GL11.glPushMatrix();
+
+        // north
+        GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+        GL11.glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+        drawTile(tessellator, 5);
+
+        // top
+        GL11.glPushMatrix();
+        GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+        drawTile(tessellator, 1);
+        GL11.glPopMatrix();
+
+        // bottom
+        GL11.glPushMatrix();
+        GL11.glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        drawTile(tessellator, 9);
+        GL11.glPopMatrix();
+
+        // west
+        GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+        drawTile(tessellator, 6);
+
+        // south
+        GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+        drawTile(tessellator, 7);
+
+        // east
+        GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+        drawTile(tessellator, 4);
+
+        GL11.glPopMatrix();
     }
 
     private static void drawTile(Tessellator tessellator, int tile) {
