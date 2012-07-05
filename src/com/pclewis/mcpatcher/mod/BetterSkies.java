@@ -7,16 +7,25 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class BetterSkies extends Mod {
+    private boolean haveNewWorld;
+
     public BetterSkies(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.BETTER_SKIES;
         author = "MCPatcher";
         description = "Adds support for custom skyboxes.";
         version = "1.0";
 
-        classMods.add(new BaseMod.MinecraftMod().mapTexturePackList());
+        haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
+
+        classMods.add(new BaseMod.MinecraftMod().mapTexturePackList().addWorldGetter(minecraftVersion));
         classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
         classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
         classMods.add(new BaseMod.TexturePackDefaultMod());
+        classMods.add(new BaseMod.WorldMod());
+        if (haveNewWorld) {
+            classMods.add(new BaseMod.WorldServerMPMod(minecraftVersion));
+            classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
+        }
         classMods.add(new RenderGlobalMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS));
@@ -40,11 +49,11 @@ public class BetterSkies extends Mod {
             final FieldRef mc = new FieldRef(getDeobfClass(), "mc", "LMinecraft;");
             final FieldRef worldProvider = new FieldRef("World", "worldProvider", "LWorldProvider;");
             final FieldRef worldType = new FieldRef("WorldProvider", "worldType", "I");
-            final FieldRef worldObj = new FieldRef(getDeobfClass(), "worldObj", "LWorld;");
+            final FieldRef worldObj = new FieldRef(getDeobfClass(), "worldObj", haveNewWorld ? "LWorldServerMP;" : "LWorld;");
             final FieldRef glSkyList = new FieldRef(getDeobfClass(), "glSkyList", "I");
             final FieldRef glSkyList2 = new FieldRef(getDeobfClass(), "glSkyList2", "I");
             final FieldRef glStarList = new FieldRef(getDeobfClass(), "glStarList", "I");
-            final FieldRef active = new FieldRef(MCPatcherUtils.SKY_RENDERER_CLASS, "active", "Z");
+            final FieldRef active = new FieldRef(MCPatcherUtils.SKY_RENDERER_CLASS, "active", "[Z");
 
             classSignatures.add(new ConstSignature("smoke"));
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
@@ -267,6 +276,8 @@ public class BetterSkies extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         reference(GETSTATIC, active),
+                        push(0),
+                        BALOAD,
                         IFNE, branch("A"),
                         getMatch(),
                         label("A")
@@ -293,6 +304,8 @@ public class BetterSkies extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         reference(GETSTATIC, active),
+                        push(0),
+                        BALOAD,
                         IFNE, branch("A"),
                         getMatch(),
                         label("A")
