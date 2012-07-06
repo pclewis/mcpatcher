@@ -5,232 +5,254 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.GLU;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 
 public class SkyRenderer {
     private static final double DISTANCE = 100.0;
 
-    private static final boolean enableDayNight = MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableDayNight", false);
-    private static final boolean enableStars = MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableStars", true);
-
     private static RenderEngine renderEngine;
-    private static float celestialAngle;
-    private static int worldType;
+    private static double worldTime;
 
-    public static final boolean[] active = new boolean[2];
-
-    private static final HashMap<Integer, boolean[]> haveSkyBox = new HashMap<Integer, boolean[]>();
+    private static final HashMap<Integer, ArrayList<Layer>> worldSkies = new HashMap<Integer, ArrayList<Layer>>();
+    private static ArrayList<Layer> currentSkies;
     private static TexturePackBase lastTexturePack;
 
-    private static final int shaderProgram;
-    private static final int texture1Location;
-    private static final int texture2Location;
-    private static final int blendLocation;
-
-    private static final int DAY_TEXTURE_UNIT = 2;
-    private static final int NIGHT_TEXTURE_UNIT = DAY_TEXTURE_UNIT + 1;
-    private static final String SHADER_SOURCE =
-        "/* Simple shader to blend two textures */\n" +
-            "uniform sampler2D texture1;\n" +
-            "uniform sampler2D texture2;\n" +
-            "uniform float blending;\n" +
-            "void main() {\n" +
-            "    vec4 color1 = texture2D(texture1, gl_TexCoord[0].st);\n" +
-            "    vec4 color2 = texture2D(texture2, gl_TexCoord[0].st);\n" +
-            "    gl_FragColor = (1.0 - blending) * color1 + blending * color2;\n" +
-            "    if (gl_FragColor[3] > 0.5) {\n" +
-            "        gl_FragColor[3] = 0.5;\n" +
-            "    }\n" +
-            "}\n";
-
-    static {
-        if (enableDayNight && GLContext.getCapabilities().OpenGL20) {
-            shaderProgram = GL20.glCreateProgram();
-            int fragShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
-            GL20.glShaderSource(fragShader, SHADER_SOURCE);
-            GL20.glCompileShader(fragShader);
-            GL20.glAttachShader(shaderProgram, fragShader);
-            GL20.glLinkProgram(shaderProgram);
-
-            texture1Location = GL20.glGetUniformLocation(shaderProgram, "texture1");
-            texture2Location = GL20.glGetUniformLocation(shaderProgram, "texture2");
-            blendLocation = GL20.glGetUniformLocation(shaderProgram, "blending");
-
-            MCPatcherUtils.info(
-                "shaderProgram = %d, fragShader = %d, blendLocation = %d, texture1Location = %d, texture2Location = %d",
-                shaderProgram, fragShader, blendLocation, texture1Location, texture2Location
-            );
-        } else {
-            shaderProgram = -1;
-            texture1Location = -1;
-            texture2Location = -1;
-            blendLocation = -1;
-        }
-    }
+    public static boolean active;
 
     public static void setup(World world, RenderEngine renderEngine, float partialTick) {
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         TexturePackBase texturePack = minecraft.texturePackList.getSelectedTexturePack();
         if (texturePack != lastTexturePack) {
             lastTexturePack = texturePack;
-            haveSkyBox.clear();
+            worldSkies.clear();
         }
         if (texturePack instanceof TexturePackDefault || Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
-            active[0] = false;
-            active[1] = false;
+            active = false;
         } else {
-            worldType = minecraft.getWorld().worldProvider.worldType;
-            boolean[] h = haveSkyBox.get(worldType);
-            if (h == null) {
-                h = new boolean[2];
-                h[0] = (shaderProgram > 0) && (hasTexture(getDayTexture()) & hasTexture(getNightTexture()));
-                h[1] = enableStars && hasTexture(getStarTexture());
-                haveSkyBox.put(worldType, h);
+            int worldType = minecraft.getWorld().worldProvider.worldType;
+            currentSkies = worldSkies.get(worldType);
+            if (currentSkies == null) {
+                currentSkies = new ArrayList<Layer>();
+                worldSkies.put(worldType, currentSkies);
+                for (int i = 1; ; i++) {
+                    String prefix = "/terrain/sky" + worldType + "/sky" + i;
+                    Layer layer = Layer.create(prefix);
+                    if (layer == null) {
+                        break;
+                    } else {
+                        currentSkies.add(layer);
+                    }
+                }
             }
-            active[0] = h[0];
-            active[1] = h[1];
-            if (active[0] || active[1]) {
+            active = !currentSkies.isEmpty();
+            if (active) {
                 SkyRenderer.renderEngine = renderEngine;
-                celestialAngle = world.getCelestialAngle(partialTick);
+                worldTime = world.getWorldTime() + partialTick;
             }
         }
     }
 
-    public static boolean renderSky() {
-        if (active[0]) {
-            Tessellator tessellator = Tessellator.instance;
-
-            GL11.glDisable(GL11.GL_FOG);
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-            GL13.glActiveTexture(GL13.GL_TEXTURE0 + DAY_TEXTURE_UNIT);
-            renderEngine.bindTexture(renderEngine.getTexture(getDayTexture()));
-            GL13.glActiveTexture(GL13.GL_TEXTURE0 + NIGHT_TEXTURE_UNIT);
-            renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
-
-            GL20.glUseProgram(shaderProgram);
-
-            GL20.glUniform1i(texture1Location, DAY_TEXTURE_UNIT);
-            GL20.glUniform1i(texture2Location, NIGHT_TEXTURE_UNIT);
-            GL20.glUniform1f(blendLocation, celestialAngle);
-
-            drawBox(tessellator);
-
-            GL20.glUseProgram(0);
-            GL13.glActiveTexture(GL13.GL_TEXTURE0);
-
-            GL11.glEnable(GL11.GL_ALPHA_TEST);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            active[0] = false;
-        }
-        return active[0];
-    }
-
-    public static boolean renderStars(float brightness) {
-        if (active[1]) {
-            Tessellator tessellator = Tessellator.instance;
-
-            GL11.glDisable(GL11.GL_FOG);
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            if (Keyboard.isKeyDown(Keyboard.KEY_SUBTRACT)) {
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
-            } else {
-                GL11.glColor4f(brightness, brightness, brightness, brightness);
+    public static void renderSky(boolean rotate) {
+        Tessellator tessellator = Tessellator.instance;
+        for (Layer layer : currentSkies) {
+            if (layer.rotate == rotate) {
+                layer.render(tessellator, worldTime);
             }
-
-            renderEngine.bindTexture(renderEngine.getTexture(getStarTexture()));
-
-            drawBox(tessellator);
-
-            GL11.glEnable(GL11.GL_ALPHA_TEST);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
         }
-        return active[1];
-    }
-
-    private static void drawBox(Tessellator tessellator) {
-        GL11.glPushMatrix();
-
-        // north
-        GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-        GL11.glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-        drawTile(tessellator, 5);
-
-        // top
-        GL11.glPushMatrix();
-        GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-        drawTile(tessellator, 1);
-        GL11.glPopMatrix();
-
-        // bottom
-        GL11.glPushMatrix();
-        GL11.glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        drawTile(tessellator, 9);
-        GL11.glPopMatrix();
-
-        // west
-        GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-        drawTile(tessellator, 6);
-
-        // south
-        GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-        drawTile(tessellator, 7);
-
-        // east
-        GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-        drawTile(tessellator, 4);
-
-        GL11.glPopMatrix();
-    }
-
-    private static void drawTile(Tessellator tessellator, int tile) {
-        double tileX = (tile % 4) / 4.0;
-        double tileY = (tile / 4) / 3.0;
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, -DISTANCE, tileX, tileY);
-        tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, DISTANCE, tileX, tileY + 1.0 / 3.0);
-        tessellator.addVertexWithUV(DISTANCE, -DISTANCE, DISTANCE, tileX + 0.25, tileY + 1.0 / 3.0);
-        tessellator.addVertexWithUV(DISTANCE, -DISTANCE, -DISTANCE, tileX + 0.25, tileY);
-        tessellator.draw();
-    }
-
-    private static boolean hasTexture(String s) {
-        if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(s)) == null) {
-            MCPatcherUtils.info("texture %s NOT FOUND", s);
-            return false;
-        } else {
-            MCPatcherUtils.info("texture %s FOUND", s);
-            return true;
-        }
-    }
-
-    private static String getDayTexture() {
-        return "/terrain/sky" + worldType + "/day.png";
-    }
-
-    private static String getNightTexture() {
-        return "/terrain/sky" + worldType + "/night.png";
-    }
-
-    private static String getStarTexture() {
-        return "/terrain/sky" + worldType + "/stars.png";
     }
 
     private static void checkGLError() {
         int error = GL11.glGetError();
         if (error != 0) {
             throw new RuntimeException("GL error: " + GLU.gluErrorString(error));
+        }
+    }
+
+    private static class Layer {
+        private static final int SECS_PER_DAY = 24 * 60 * 60;
+        private static final int TICKS_PER_DAY = 24000;
+
+        String prefix;
+        String texture;
+        int startFadeIn;
+        int endFadeIn;
+        int startFadeOut;
+        int endFadeOut;
+        boolean rotate;
+        boolean valid;
+
+        double cos1;
+        double sin1;
+        double add1;
+
+        static Layer create(String prefix) {
+            Properties properties = null;
+            InputStream is = null;
+            try {
+                is = lastTexturePack.getInputStream(prefix + ".properties");
+                if (is != null) {
+                    properties = new Properties();
+                    properties.load(is);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                MCPatcherUtils.close(is);
+            }
+            Layer layer = new Layer(prefix, properties);
+            if (layer.valid) {
+                MCPatcherUtils.info("loaded %s.properties", prefix);
+                return layer;
+            } else {
+                return null;
+            }
+        }
+
+        private Layer(String prefix, Properties properties) {
+            this.prefix = prefix;
+            valid = true;
+            if (properties == null) {
+                valid = false;
+                return;
+            }
+            texture = properties.getProperty("source", prefix + ".png");
+            if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(texture)) == null) {
+                addError("texture %s not found", texture);
+                return;
+            }
+            startFadeIn = parseTime(properties.getProperty("startFadeIn", "20:00"));
+            endFadeIn = parseTime(properties.getProperty("endFadeIn", "22:00"));
+            startFadeOut = parseTime(properties.getProperty("startFadeOut", "5:00"));
+            endFadeOut = parseTime(properties.getProperty("endFadeOut", "7:00"));
+            while (endFadeIn <= startFadeIn) {
+                endFadeIn += SECS_PER_DAY;
+            }
+            while (startFadeOut <= endFadeIn) {
+                startFadeOut += SECS_PER_DAY;
+            }
+            while (endFadeOut <= startFadeOut) {
+                endFadeOut += SECS_PER_DAY;
+            }
+            if (endFadeOut - startFadeIn >= SECS_PER_DAY) {
+                addError("%s.properties: fade times are incoherent", prefix);
+                return;
+            }
+            double s0 = normalize(startFadeIn, SECS_PER_DAY);
+            double s1 = normalize(endFadeIn, SECS_PER_DAY);
+            double e1 = normalize(endFadeOut, SECS_PER_DAY);
+            double det = Math.cos(s0) * Math.sin(s1) + Math.cos(e1) * Math.sin(s0) + Math.cos(s1) * Math.sin(e1) -
+                Math.cos(s0) * Math.sin(e1) - Math.cos(s1) * Math.sin(s0) - Math.cos(e1) * Math.sin(s1);
+            if (det == 0.0) {
+                addError("%s.properties: determinant is 0", prefix);
+                return;
+            }
+            cos1 = (Math.sin(e1) - Math.sin(s0)) / det;
+            sin1 = (Math.cos(s0) - Math.cos(e1)) / det;
+            add1 = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
+            MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", cos1, sin1, add1);
+        }
+
+        private void addError(String format, Object... params) {
+            MCPatcherUtils.error(prefix + ".properties: " + format, params);
+            valid = false;
+        }
+
+        private static int parseTime(String s) {
+            String[] t = s.split(":");
+            if (t.length >= 2) {
+                try {
+                    int hh = Integer.parseInt(t[0]);
+                    int mm = Integer.parseInt(t[1]);
+                    int ss;
+                    if (t.length >= 3) {
+                        ss = Integer.parseInt(t[2]);
+                    } else {
+                        ss = 0;
+                    }
+                    return (60 * 60 * hh + 60 * mm + ss) % SECS_PER_DAY;
+                } catch (NumberFormatException e) {
+                    MCPatcherUtils.error("invalid time %s", s);
+                }
+            }
+            return -1;
+        }
+
+        private static double normalize(double t, int d) {
+            return 2.0 * Math.PI * t / d;
+        }
+
+        boolean render(Tessellator tessellator, double worldTime) {
+            double x = normalize(worldTime, TICKS_PER_DAY);
+            float brightness = (float) (cos1 * Math.cos(x) + sin1 * Math.sin(x) + add1);
+            if (brightness <= 0.0) {
+                return false;
+            }
+            GL11.glDisable(GL11.GL_FOG);
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
+
+            renderEngine.bindTexture(renderEngine.getTexture(texture));
+
+            drawBox(tessellator);
+
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            return true;
+        }
+
+        private static void drawBox(Tessellator tessellator) {
+            GL11.glPushMatrix();
+
+            // north
+            GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            GL11.glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+            drawTile(tessellator, 5);
+
+            // top
+            GL11.glPushMatrix();
+            GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            drawTile(tessellator, 1);
+            GL11.glPopMatrix();
+
+            // bottom
+            GL11.glPushMatrix();
+            GL11.glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            drawTile(tessellator, 9);
+            GL11.glPopMatrix();
+
+            // west
+            GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            drawTile(tessellator, 6);
+
+            // south
+            GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            drawTile(tessellator, 7);
+
+            // east
+            GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            drawTile(tessellator, 4);
+
+            GL11.glPopMatrix();
+        }
+
+        private static void drawTile(Tessellator tessellator, int tile) {
+            double tileX = (tile % 4) / 4.0;
+            double tileY = (tile / 4) / 3.0;
+            tessellator.startDrawingQuads();
+            tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, -DISTANCE, tileX, tileY);
+            tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, DISTANCE, tileX, tileY + 1.0 / 3.0);
+            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, DISTANCE, tileX + 0.25, tileY + 1.0 / 3.0);
+            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, -DISTANCE, tileX + 0.25, tileY);
+            tessellator.draw();
         }
     }
 }
