@@ -40,11 +40,13 @@ public class SkyRenderer {
             if (currentSkies == null) {
                 currentSkies = new ArrayList<Layer>();
                 worldSkies.put(worldType, currentSkies);
-                for (int i = 1; ; i++) {
+                for (int i = 0; ; i++) {
                     String prefix = "/terrain/sky" + worldType + "/sky" + i;
                     Layer layer = Layer.create(prefix);
                     if (layer == null) {
-                        break;
+                        if (i > 0) {
+                            break;
+                        }
                     } else {
                         currentSkies.add(layer);
                     }
@@ -121,11 +123,15 @@ public class SkyRenderer {
                 valid = false;
                 return;
             }
+
             texture = properties.getProperty("source", prefix + ".png");
             if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(texture)) == null) {
                 addError("texture %s not found", texture);
                 return;
             }
+
+            rotate = Boolean.parseBoolean(properties.getProperty("rotate", "true"));
+
             startFadeIn = parseTime(properties.getProperty("startFadeIn", "20:00"));
             endFadeIn = parseTime(properties.getProperty("endFadeIn", "22:00"));
             startFadeOut = parseTime(properties.getProperty("startFadeOut", "5:00"));
@@ -140,22 +146,29 @@ public class SkyRenderer {
                 endFadeOut += SECS_PER_DAY;
             }
             if (endFadeOut - startFadeIn >= SECS_PER_DAY) {
-                addError("%s.properties: fade times are incoherent", prefix);
+                addError("fade times are incoherent");
                 return;
             }
-            double s0 = normalize(startFadeIn, SECS_PER_DAY);
-            double s1 = normalize(endFadeIn, SECS_PER_DAY);
-            double e1 = normalize(endFadeOut, SECS_PER_DAY);
+
+            double s0 = normalize(startFadeIn, SECS_PER_DAY, 0.0);
+            double s1 = normalize(endFadeIn, SECS_PER_DAY, 0.0);
+            double e0 = normalize(startFadeOut, SECS_PER_DAY, 0.0);
+            double e1 = normalize(endFadeOut, SECS_PER_DAY, 0.0);
             double det = Math.cos(s0) * Math.sin(s1) + Math.cos(e1) * Math.sin(s0) + Math.cos(s1) * Math.sin(e1) -
                 Math.cos(s0) * Math.sin(e1) - Math.cos(s1) * Math.sin(s0) - Math.cos(e1) * Math.sin(s1);
             if (det == 0.0) {
-                addError("%s.properties: determinant is 0", prefix);
+                addError("determinant is 0");
                 return;
             }
             cos1 = (Math.sin(e1) - Math.sin(s0)) / det;
             sin1 = (Math.cos(s0) - Math.cos(e1)) / det;
             add1 = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
-            MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", cos1, sin1, add1);
+
+            MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", prefix, cos1, sin1, add1);
+            MCPatcherUtils.info("at %f: %f", s0, cos1 * Math.cos(s0) + sin1 * Math.sin(s0) + add1);
+            MCPatcherUtils.info("at %f: %f", s1, cos1 * Math.cos(s1) + sin1 * Math.sin(s1) + add1);
+            MCPatcherUtils.info("at %f: %f", e0, cos1 * Math.cos(e0) + sin1 * Math.sin(e0) + add1);
+            MCPatcherUtils.info("at %f: %f", e1, cos1 * Math.cos(e1) + sin1 * Math.sin(e1) + add1);
         }
 
         private void addError(String format, Object... params) {
@@ -183,16 +196,21 @@ public class SkyRenderer {
             return -1;
         }
 
-        private static double normalize(double t, int d) {
-            return 2.0 * Math.PI * t / d;
+        private static double normalize(double time, int period, double offset) {
+            return 2.0 * Math.PI * (time / period + offset);
         }
 
         boolean render(Tessellator tessellator, double worldTime) {
-            double x = normalize(worldTime, TICKS_PER_DAY);
+            double x = normalize(worldTime, TICKS_PER_DAY, -0.25);
             float brightness = (float) (cos1 * Math.cos(x) + sin1 * Math.sin(x) + add1);
-            if (brightness <= 0.0) {
+            MCPatcherUtils.info("worldTime = %f, brightness = %f", worldTime, brightness);
+            if (brightness <= 0.0f) {
                 return false;
             }
+            if (brightness > 1.0f) {
+                brightness = 1.0f;
+            }
+
             GL11.glDisable(GL11.GL_FOG);
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
@@ -202,14 +220,6 @@ public class SkyRenderer {
 
             renderEngine.bindTexture(renderEngine.getTexture(texture));
 
-            drawBox(tessellator);
-
-            GL11.glEnable(GL11.GL_ALPHA_TEST);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            return true;
-        }
-
-        private static void drawBox(Tessellator tessellator) {
             GL11.glPushMatrix();
 
             // north
@@ -242,6 +252,9 @@ public class SkyRenderer {
             drawTile(tessellator, 4);
 
             GL11.glPopMatrix();
+
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
+            return true;
         }
 
         private static void drawTile(Tessellator tessellator, int tile) {
