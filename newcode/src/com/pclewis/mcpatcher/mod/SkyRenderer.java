@@ -19,7 +19,6 @@ public class SkyRenderer {
     private static final boolean enableStars = MCPatcherUtils.getBoolean(MCPatcherUtils.BETTER_SKIES, "enableStars", true);
 
     private static RenderEngine renderEngine;
-    private static float partialTick;
     private static float celestialAngle;
     private static int worldType;
 
@@ -28,11 +27,10 @@ public class SkyRenderer {
     private static final HashMap<Integer, boolean[]> haveSkyBox = new HashMap<Integer, boolean[]>();
     private static TexturePackBase lastTexturePack;
 
-    private static int shaderProgram;
-    private static int fragShader;
-    private static int texture1Location;
-    private static int texture2Location;
-    private static int blendLocation;
+    private static final int shaderProgram;
+    private static final int texture1Location;
+    private static final int texture2Location;
+    private static final int blendLocation;
 
     private static final int DAY_TEXTURE_UNIT = 2;
     private static final int NIGHT_TEXTURE_UNIT = DAY_TEXTURE_UNIT + 1;
@@ -45,13 +43,15 @@ public class SkyRenderer {
             "    vec4 color1 = texture2D(texture1, gl_TexCoord[0].st);\n" +
             "    vec4 color2 = texture2D(texture2, gl_TexCoord[0].st);\n" +
             "    gl_FragColor = (1.0 - blending) * color1 + blending * color2;\n" +
-            "    gl_FragColor[3] = 0.5;\n" +
+            "    if (gl_FragColor[3] > 0.5) {\n" +
+            "        gl_FragColor[3] = 0.5;\n" +
+            "    }\n" +
             "}\n";
 
     static {
         if (enableDayNight && GLContext.getCapabilities().OpenGL20) {
             shaderProgram = GL20.glCreateProgram();
-            fragShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
+            int fragShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
             GL20.glShaderSource(fragShader, SHADER_SOURCE);
             GL20.glCompileShader(fragShader);
             GL20.glAttachShader(shaderProgram, fragShader);
@@ -65,6 +65,11 @@ public class SkyRenderer {
                 "shaderProgram = %d, fragShader = %d, blendLocation = %d, texture1Location = %d, texture2Location = %d",
                 shaderProgram, fragShader, blendLocation, texture1Location, texture2Location
             );
+        } else {
+            shaderProgram = -1;
+            texture1Location = -1;
+            texture2Location = -1;
+            blendLocation = -1;
         }
     }
 
@@ -90,7 +95,6 @@ public class SkyRenderer {
             active[0] = h[0];
             active[1] = h[1];
             if (active[0] || active[1]) {
-                SkyRenderer.partialTick = partialTick;
                 SkyRenderer.renderEngine = renderEngine;
                 celestialAngle = world.getCelestialAngle(partialTick);
             }
@@ -105,7 +109,6 @@ public class SkyRenderer {
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            //GL11.glDepthMask(false);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
 
             GL13.glActiveTexture(GL13.GL_TEXTURE0 + DAY_TEXTURE_UNIT);
@@ -124,9 +127,7 @@ public class SkyRenderer {
             GL20.glUseProgram(0);
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
 
-            //GL11.glDepthMask(true);
             GL11.glEnable(GL11.GL_ALPHA_TEST);
-            //GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             active[0] = false;
         }
@@ -141,7 +142,6 @@ public class SkyRenderer {
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            //GL11.glDepthMask(false);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
             if (Keyboard.isKeyDown(Keyboard.KEY_SUBTRACT)) {
                 GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
@@ -153,10 +153,8 @@ public class SkyRenderer {
 
             drawBox(tessellator);
 
-            //GL11.glDepthMask(true);
             GL11.glEnable(GL11.GL_ALPHA_TEST);
             GL11.glDisable(GL11.GL_TEXTURE_2D);
-            //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         }
         return active[1];
     }
