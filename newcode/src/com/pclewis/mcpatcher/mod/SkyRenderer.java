@@ -90,19 +90,16 @@ public class SkyRenderer {
         private static final int METHOD_REPLACE = 2;
         private static final int METHOD_MULTIPLY = 3;
 
-        String prefix;
-        String texture;
-        int startFadeIn;
-        int endFadeIn;
-        int startFadeOut;
-        int endFadeOut;
-        boolean rotate;
-        int blendMethod;
-        boolean valid;
+        private String prefix;
+        private String texture;
+        private boolean rotate;
+        private int blendMethod;
 
         private double a;
         private double b;
         private double c;
+
+        boolean valid;
 
         static Layer create(String prefix) {
             Properties properties = null;
@@ -146,9 +143,9 @@ public class SkyRenderer {
                 return;
             }
 
-            startFadeIn = parseTime(properties, "startFadeIn");
-            endFadeIn = parseTime(properties, "endFadeIn");
-            endFadeOut = parseTime(properties, "endFadeOut");
+            int startFadeIn = parseTime(properties, "startFadeIn");
+            int endFadeIn = parseTime(properties, "endFadeIn");
+            int endFadeOut = parseTime(properties, "endFadeOut");
             if (!valid) {
                 return;
             }
@@ -162,7 +159,7 @@ public class SkyRenderer {
                 addError("fade times are incoherent");
                 return;
             }
-            startFadeOut = startFadeIn + endFadeOut - endFadeIn;
+            int startFadeOut = startFadeIn + endFadeOut - endFadeIn;
 
             double s0 = normalize(startFadeIn, SECS_PER_DAY, TOD_OFFSET);
             double s1 = normalize(endFadeIn, SECS_PER_DAY, TOD_OFFSET);
