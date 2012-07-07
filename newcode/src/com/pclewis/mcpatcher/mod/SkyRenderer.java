@@ -79,6 +79,7 @@ public class SkyRenderer {
     private static class Layer {
         private static final int SECS_PER_DAY = 24 * 60 * 60;
         private static final int TICKS_PER_DAY = 24000;
+        public static final double TOD_OFFSET = -0.25;
 
         String prefix;
         String texture;
@@ -132,28 +133,25 @@ public class SkyRenderer {
 
             rotate = Boolean.parseBoolean(properties.getProperty("rotate", "true"));
 
-            startFadeIn = parseTime(properties.getProperty("startFadeIn", "20:00"));
-            endFadeIn = parseTime(properties.getProperty("endFadeIn", "22:00"));
-            startFadeOut = parseTime(properties.getProperty("startFadeOut", "5:00"));
-            endFadeOut = parseTime(properties.getProperty("endFadeOut", "7:00"));
+            startFadeIn = parseTime(properties.getProperty("startFadeIn", "18:00"));
+            endFadeIn = parseTime(properties.getProperty("endFadeIn", "20:00"));
+            endFadeOut = parseTime(properties.getProperty("endFadeOut", "6:00"));
             while (endFadeIn <= startFadeIn) {
                 endFadeIn += SECS_PER_DAY;
             }
-            while (startFadeOut <= endFadeIn) {
-                startFadeOut += SECS_PER_DAY;
-            }
-            while (endFadeOut <= startFadeOut) {
+            while (endFadeOut <= endFadeIn) {
                 endFadeOut += SECS_PER_DAY;
             }
             if (endFadeOut - startFadeIn >= SECS_PER_DAY) {
                 addError("fade times are incoherent");
                 return;
             }
+            startFadeOut = startFadeIn + endFadeOut - endFadeIn;
 
-            double s0 = normalize(startFadeIn, SECS_PER_DAY, 0.0);
-            double s1 = normalize(endFadeIn, SECS_PER_DAY, 0.0);
-            double e0 = normalize(startFadeOut, SECS_PER_DAY, 0.0);
-            double e1 = normalize(endFadeOut, SECS_PER_DAY, 0.0);
+            double s0 = normalize(startFadeIn, SECS_PER_DAY, TOD_OFFSET);
+            double s1 = normalize(endFadeIn, SECS_PER_DAY, TOD_OFFSET);
+            double e0 = normalize(startFadeOut, SECS_PER_DAY, TOD_OFFSET);
+            double e1 = normalize(endFadeOut, SECS_PER_DAY, TOD_OFFSET);
             double det = Math.cos(s0) * Math.sin(s1) + Math.cos(e1) * Math.sin(s0) + Math.cos(s1) * Math.sin(e1) -
                 Math.cos(s0) * Math.sin(e1) - Math.cos(s1) * Math.sin(s0) - Math.cos(e1) * Math.sin(s1);
             if (det == 0.0) {
@@ -165,10 +163,10 @@ public class SkyRenderer {
             add1 = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
 
             MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", prefix, cos1, sin1, add1);
-            MCPatcherUtils.info("at %f: %f", s0, cos1 * Math.cos(s0) + sin1 * Math.sin(s0) + add1);
-            MCPatcherUtils.info("at %f: %f", s1, cos1 * Math.cos(s1) + sin1 * Math.sin(s1) + add1);
-            MCPatcherUtils.info("at %f: %f", e0, cos1 * Math.cos(e0) + sin1 * Math.sin(e0) + add1);
-            MCPatcherUtils.info("at %f: %f", e1, cos1 * Math.cos(e1) + sin1 * Math.sin(e1) + add1);
+            MCPatcherUtils.info("  at %f: %f", s0, cos1 * Math.cos(s0) + sin1 * Math.sin(s0) + add1);
+            MCPatcherUtils.info("  at %f: %f", s1, cos1 * Math.cos(s1) + sin1 * Math.sin(s1) + add1);
+            MCPatcherUtils.info("  at %f: %f", e0, cos1 * Math.cos(e0) + sin1 * Math.sin(e0) + add1);
+            MCPatcherUtils.info("  at %f: %f", e1, cos1 * Math.cos(e1) + sin1 * Math.sin(e1) + add1);
         }
 
         private void addError(String format, Object... params) {
@@ -176,23 +174,23 @@ public class SkyRenderer {
             valid = false;
         }
 
-        private static int parseTime(String s) {
-            String[] t = s.split(":");
+        private int parseTime(String s) {
+            String[] t = s.trim().split(":");
             if (t.length >= 2) {
                 try {
-                    int hh = Integer.parseInt(t[0]);
-                    int mm = Integer.parseInt(t[1]);
+                    int hh = Integer.parseInt(t[0].trim());
+                    int mm = Integer.parseInt(t[1].trim());
                     int ss;
                     if (t.length >= 3) {
-                        ss = Integer.parseInt(t[2]);
+                        ss = Integer.parseInt(t[2].trim());
                     } else {
                         ss = 0;
                     }
                     return (60 * 60 * hh + 60 * mm + ss) % SECS_PER_DAY;
                 } catch (NumberFormatException e) {
-                    MCPatcherUtils.error("invalid time %s", s);
                 }
             }
+            addError("invalid time %s", s);
             return -1;
         }
 
@@ -201,9 +199,8 @@ public class SkyRenderer {
         }
 
         boolean render(Tessellator tessellator, double worldTime) {
-            double x = normalize(worldTime, TICKS_PER_DAY, -0.25);
+            double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
             float brightness = (float) (cos1 * Math.cos(x) + sin1 * Math.sin(x) + add1);
-            MCPatcherUtils.info("worldTime = %f, brightness = %f", worldTime, brightness);
             if (brightness <= 0.0f) {
                 return false;
             }
