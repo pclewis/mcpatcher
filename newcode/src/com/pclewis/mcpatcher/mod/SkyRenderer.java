@@ -67,6 +67,8 @@ public class SkyRenderer {
                 layer.render(tessellator, worldTime);
             }
         }
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
     }
 
     private static void checkGLError() {
@@ -79,7 +81,11 @@ public class SkyRenderer {
     private static class Layer {
         private static final int SECS_PER_DAY = 24 * 60 * 60;
         private static final int TICKS_PER_DAY = 24000;
-        public static final double TOD_OFFSET = -0.25;
+        private static final double TOD_OFFSET = -0.25;
+
+        private static final int METHOD_ADD = 1;
+        private static final int METHOD_REPLACE = 2;
+        private static final int METHOD_MULTIPLY = 3;
 
         String prefix;
         String texture;
@@ -88,11 +94,12 @@ public class SkyRenderer {
         int startFadeOut;
         int endFadeOut;
         boolean rotate;
+        int blendMethod;
         boolean valid;
 
-        double cos1;
-        double sin1;
-        double add1;
+        private double a;
+        private double b;
+        private double c;
 
         static Layer create(String prefix) {
             Properties properties = null;
@@ -133,9 +140,21 @@ public class SkyRenderer {
 
             rotate = Boolean.parseBoolean(properties.getProperty("rotate", "true"));
 
-            startFadeIn = parseTime(properties.getProperty("startFadeIn", "18:00"));
-            endFadeIn = parseTime(properties.getProperty("endFadeIn", "20:00"));
-            endFadeOut = parseTime(properties.getProperty("endFadeOut", "6:00"));
+            String value = properties.getProperty("blend", "add").trim().toLowerCase();
+            if (value.equals("add")) {
+                blendMethod = METHOD_ADD;
+            } else if (value.equals("replace")) {
+                blendMethod = METHOD_REPLACE;
+            } else if (value.equals("multiply")) {
+                blendMethod = METHOD_MULTIPLY;
+            } else {
+                addError("unknown blend method %s", value);
+                return;
+            }
+
+            startFadeIn = parseTime(properties, "startFadeIn");
+            endFadeIn = parseTime(properties, "endFadeIn");
+            endFadeOut = parseTime(properties, "endFadeOut");
             while (endFadeIn <= startFadeIn) {
                 endFadeIn += SECS_PER_DAY;
             }
@@ -158,15 +177,15 @@ public class SkyRenderer {
                 addError("determinant is 0");
                 return;
             }
-            cos1 = (Math.sin(e1) - Math.sin(s0)) / det;
-            sin1 = (Math.cos(s0) - Math.cos(e1)) / det;
-            add1 = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
+            a = (Math.sin(e1) - Math.sin(s0)) / det;
+            b = (Math.cos(s0) - Math.cos(e1)) / det;
+            c = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
 
-            MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", prefix, cos1, sin1, add1);
-            MCPatcherUtils.info("  at %f: %f", s0, cos1 * Math.cos(s0) + sin1 * Math.sin(s0) + add1);
-            MCPatcherUtils.info("  at %f: %f", s1, cos1 * Math.cos(s1) + sin1 * Math.sin(s1) + add1);
-            MCPatcherUtils.info("  at %f: %f", e0, cos1 * Math.cos(e0) + sin1 * Math.sin(e0) + add1);
-            MCPatcherUtils.info("  at %f: %f", e1, cos1 * Math.cos(e1) + sin1 * Math.sin(e1) + add1);
+            MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", prefix, a, b, c);
+            MCPatcherUtils.info("  at %f: %f", s0, a * Math.cos(s0) + b * Math.sin(s0) + c);
+            MCPatcherUtils.info("  at %f: %f", s1, a * Math.cos(s1) + b * Math.sin(s1) + c);
+            MCPatcherUtils.info("  at %f: %f", e0, a * Math.cos(e0) + b * Math.sin(e0) + c);
+            MCPatcherUtils.info("  at %f: %f", e1, a * Math.cos(e1) + b * Math.sin(e1) + c);
         }
 
         private void addError(String format, Object... params) {
@@ -174,8 +193,13 @@ public class SkyRenderer {
             valid = false;
         }
 
-        private int parseTime(String s) {
-            String[] t = s.trim().split(":");
+        private int parseTime(Properties properties, String key) {
+            String s = properties.getProperty(key, "").trim();
+            if ("".equals(s)) {
+                addError("missing value for %s", key);
+                return -1;
+            }
+            String[] t = s.split(":");
             if (t.length >= 2) {
                 try {
                     int hh = Integer.parseInt(t[0].trim());
@@ -190,7 +214,7 @@ public class SkyRenderer {
                 } catch (NumberFormatException e) {
                 }
             }
-            addError("invalid time %s", s);
+            addError("invalid %s time %s", key, s);
             return -1;
         }
 
@@ -200,7 +224,7 @@ public class SkyRenderer {
 
         boolean render(Tessellator tessellator, double worldTime) {
             double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
-            float brightness = (float) (cos1 * Math.cos(x) + sin1 * Math.sin(x) + add1);
+            float brightness = (float) (a * Math.cos(x) + b * Math.sin(x) + c);
             if (brightness <= 0.0f) {
                 return false;
             }
@@ -208,11 +232,7 @@ public class SkyRenderer {
                 brightness = 1.0f;
             }
 
-            GL11.glDisable(GL11.GL_FOG);
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            setBlendingMethod();
             GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
 
             renderEngine.bindTexture(renderEngine.getTexture(texture));
@@ -250,7 +270,7 @@ public class SkyRenderer {
 
             GL11.glPopMatrix();
 
-            GL11.glEnable(GL11.GL_ALPHA_TEST);
+            resetBlendingMethod();
             return true;
         }
 
@@ -263,6 +283,37 @@ public class SkyRenderer {
             tessellator.addVertexWithUV(DISTANCE, -DISTANCE, DISTANCE, tileX + 0.25, tileY + 1.0 / 3.0);
             tessellator.addVertexWithUV(DISTANCE, -DISTANCE, -DISTANCE, tileX + 0.25, tileY);
             tessellator.draw();
+        }
+
+        private void setBlendingMethod() {
+            GL11.glDisable(GL11.GL_FOG);
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+
+            switch (blendMethod)
+            {
+                case METHOD_ADD:
+                    GL11.glEnable(GL11.GL_BLEND);
+                    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+                    break;
+
+                case METHOD_REPLACE:
+                    GL11.glDisable(GL11.GL_BLEND);
+                    break;
+
+                case METHOD_MULTIPLY:
+                    GL11.glEnable(GL11.GL_BLEND);
+                    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                    break;
+
+                default:
+                    break;
+            }
+
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+        }
+
+        private void resetBlendingMethod() {
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
         }
     }
 }
