@@ -9,6 +9,7 @@ import static javassist.bytecode.Opcode.*;
 
 public class BetterSkies extends Mod {
     private boolean haveNewWorld;
+    private String worldObjClass;
 
     public BetterSkies(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.BETTER_SKIES;
@@ -28,6 +29,9 @@ public class BetterSkies extends Mod {
         if (haveNewWorld) {
             classMods.add(new BaseMod.WorldServerMPMod(minecraftVersion));
             classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
+            worldObjClass = "WorldServerMP";
+        } else {
+            worldObjClass = "World";
         }
         classMods.add(new RenderGlobalMod());
 
@@ -72,7 +76,7 @@ public class BetterSkies extends Mod {
             final MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
             final MethodRef getTexture = new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I");
             final MethodRef bindTexture = new MethodRef("RenderEngine", "bindTexture", "(I)V");
-            final MethodRef getCelestialAngle = new MethodRef("World", "getCelestialAngle", "(F)F");
+            final MethodRef getCelestialAngle = new MethodRef(worldObjClass, "getCelestialAngle", "(F)F");
             final MethodRef startDrawingQuads = new MethodRef("Tessellator", "startDrawingQuads", "()V");
             final MethodRef setColorOpaque_I = new MethodRef("Tessellator", "setColorOpaque_I", "(I)V");
             final MethodRef addVertexWithUV = new MethodRef("Tessellator", "addVertexWithUV", "(DDDDD)V");
@@ -84,7 +88,7 @@ public class BetterSkies extends Mod {
             final FieldRef mc = new FieldRef(getDeobfClass(), "mc", "LMinecraft;");
             final FieldRef worldProvider = new FieldRef("World", "worldProvider", "LWorldProvider;");
             final FieldRef worldType = new FieldRef("WorldProvider", "worldType", "I");
-            final FieldRef worldObj = new FieldRef(getDeobfClass(), "worldObj", haveNewWorld ? "LWorldServerMP;" : "LWorld;");
+            final FieldRef worldObj = new FieldRef(getDeobfClass(), "worldObj", "L" + worldObjClass + ";");
             final FieldRef glSkyList = new FieldRef(getDeobfClass(), "glSkyList", "I");
             final FieldRef glSkyList2 = new FieldRef(getDeobfClass(), "glSkyList2", "I");
             final FieldRef glStarList = new FieldRef(getDeobfClass(), "glStarList", "I");
@@ -279,8 +283,7 @@ public class BetterSkies extends Mod {
                         ALOAD_0,
                         reference(GETFIELD, worldObj),
                         FLOAD_1,
-                        //reference(INVOKEVIRTUAL, getCelestialAngle),
-                        BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                        reference(INVOKEVIRTUAL, getCelestialAngle),
                         push(360.0f),
                         FMUL,
                         push(1.0f),
