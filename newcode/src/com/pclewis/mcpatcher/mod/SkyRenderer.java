@@ -41,14 +41,15 @@ public class SkyRenderer {
             if (currentSkies == null) {
                 currentSkies = new ArrayList<Layer>();
                 worldSkies.put(worldType, currentSkies);
-                for (int i = 0; ; i++) {
-                    String prefix = "/terrain/sky" + worldType + "/sky" + i;
+                for (int i = -1; ; i++) {
+                    String prefix = "/terrain/sky" + (i < 0 ? "" : "" + worldType) + "/sky" + i;
                     Layer layer = Layer.create(prefix);
                     if (layer == null) {
                         if (i > 0) {
                             break;
                         }
-                    } else {
+                    } else if (layer.valid) {
+                        MCPatcherUtils.info("loaded %s.properties", prefix);
                         currentSkies.add(layer);
                     }
                 }
@@ -111,28 +112,19 @@ public class SkyRenderer {
                 if (is != null) {
                     properties = new Properties();
                     properties.load(is);
+                    return new Layer(prefix, properties);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 MCPatcherUtils.close(is);
             }
-            Layer layer = new Layer(prefix, properties);
-            if (layer.valid) {
-                MCPatcherUtils.info("loaded %s.properties", prefix);
-                return layer;
-            } else {
-                return null;
-            }
+            return null;
         }
 
         private Layer(String prefix, Properties properties) {
             this.prefix = prefix;
             valid = true;
-            if (properties == null) {
-                valid = false;
-                return;
-            }
 
             texture = properties.getProperty("source", prefix + ".png");
             if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(texture)) == null) {
@@ -157,6 +149,9 @@ public class SkyRenderer {
             startFadeIn = parseTime(properties, "startFadeIn");
             endFadeIn = parseTime(properties, "endFadeIn");
             endFadeOut = parseTime(properties, "endFadeOut");
+            if (!valid) {
+                return;
+            }
             while (endFadeIn <= startFadeIn) {
                 endFadeIn += SECS_PER_DAY;
             }
