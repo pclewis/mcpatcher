@@ -265,15 +265,19 @@ public class BetterSkies extends Mod {
                         ALOAD_0,
                         reference(GETFIELD, renderEngine),
                         FLOAD_1,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.SKY_RENDERER_CLASS, "setup", "(LWorld;LRenderEngine;F)V"))
+                        ALOAD_0,
+                        reference(GETFIELD, worldObj),
+                        FLOAD_1,
+                        reference(INVOKEVIRTUAL, getCelestialAngle),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.SKY_RENDERER_CLASS, "setup", "(LWorld;LRenderEngine;FF)V"))
                     );
                 }
             }.targetMethod(renderSky));
 
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
-                    return "render sky";
+                    return "render custom sky";
                 }
 
                 @Override
@@ -294,19 +298,9 @@ public class BetterSkies extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    final MethodRef renderSky1 = new MethodRef(MCPatcherUtils.SKY_RENDERER_CLASS, "renderSky", "(Z)V");
-
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        // SkyRenderer.renderSky(false);
-                        push(0),
-                        reference(INVOKESTATIC, renderSky1),
-
-                        getMatch(),
-
-                        // SkyRenderer.renderSky(true);
-                        push(1),
-                        reference(INVOKESTATIC, renderSky1)
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.SKY_RENDERER_CLASS, "renderAll", "()V"))
                     );
                 }
             }.targetMethod(renderSky));

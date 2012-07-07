@@ -18,6 +18,7 @@ public class SkyRenderer {
 
     private static RenderEngine renderEngine;
     private static double worldTime;
+    private static float celestialAngle;
 
     private static final HashMap<Integer, ArrayList<Layer>> worldSkies = new HashMap<Integer, ArrayList<Layer>>();
     private static ArrayList<Layer> currentSkies;
@@ -25,7 +26,7 @@ public class SkyRenderer {
 
     public static boolean active;
 
-    public static void setup(World world, RenderEngine renderEngine, float partialTick) {
+    public static void setup(World world, RenderEngine renderEngine, float partialTick, float celestialAngle) {
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         TexturePackBase texturePack = minecraft.texturePackList.getSelectedTexturePack();
         if (texturePack != lastTexturePack) {
@@ -56,19 +57,20 @@ public class SkyRenderer {
             if (active) {
                 SkyRenderer.renderEngine = renderEngine;
                 worldTime = world.getWorldTime() + partialTick;
+                SkyRenderer.celestialAngle = celestialAngle;
             }
         }
     }
 
-    public static void renderSky(boolean rotate) {
-        Tessellator tessellator = Tessellator.instance;
-        for (Layer layer : currentSkies) {
-            if (layer.rotate == rotate) {
-                layer.render(tessellator, worldTime);
+    public static void renderAll() {
+        if (active) {
+            Tessellator tessellator = Tessellator.instance;
+            for (Layer layer : currentSkies) {
+                layer.render(tessellator, worldTime, celestialAngle);
             }
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         }
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
     }
 
     private static void checkGLError() {
@@ -222,7 +224,7 @@ public class SkyRenderer {
             return 2.0 * Math.PI * (time / period + offset);
         }
 
-        boolean render(Tessellator tessellator, double worldTime) {
+        boolean render(Tessellator tessellator, double worldTime, float celestialAngle) {
             double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
             float brightness = (float) (a * Math.cos(x) + b * Math.sin(x) + c);
             if (brightness <= 0.0f) {
@@ -238,6 +240,10 @@ public class SkyRenderer {
             renderEngine.bindTexture(renderEngine.getTexture(texture));
 
             GL11.glPushMatrix();
+
+            if (rotate) {
+                GL11.glRotatef(celestialAngle * 360.0f, 1.0f, 0.0f, 0.0f);
+            }
 
             // north
             GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
@@ -289,8 +295,7 @@ public class SkyRenderer {
             GL11.glDisable(GL11.GL_FOG);
             GL11.glDisable(GL11.GL_ALPHA_TEST);
 
-            switch (blendMethod)
-            {
+            switch (blendMethod) {
                 case METHOD_ADD:
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
@@ -302,7 +307,7 @@ public class SkyRenderer {
 
                 case METHOD_MULTIPLY:
                     GL11.glEnable(GL11.GL_BLEND);
-                    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                    GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
                     break;
 
                 default:
