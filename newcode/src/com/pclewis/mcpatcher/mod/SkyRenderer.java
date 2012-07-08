@@ -310,6 +310,7 @@ public class SkyRenderer {
         }
 
         private void resetBlendingMethod() {
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             GL11.glEnable(GL11.GL_ALPHA_TEST);
         }
     }
