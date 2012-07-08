@@ -71,6 +71,7 @@ public class SkyRenderer {
             }
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
     }
 
@@ -268,7 +269,6 @@ public class SkyRenderer {
 
             GL11.glPopMatrix();
 
-            resetBlendingMethod();
             return true;
         }
 
@@ -284,9 +284,6 @@ public class SkyRenderer {
         }
 
         private void setBlendingMethod() {
-            GL11.glDisable(GL11.GL_FOG);
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-
             switch (blendMethod) {
                 case METHOD_ADD:
                     GL11.glEnable(GL11.GL_BLEND);
@@ -307,11 +304,6 @@ public class SkyRenderer {
             }
 
             GL11.glEnable(GL11.GL_TEXTURE_2D);
-        }
-
-        private void resetBlendingMethod() {
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GL11.glEnable(GL11.GL_ALPHA_TEST);
         }
     }
 }
