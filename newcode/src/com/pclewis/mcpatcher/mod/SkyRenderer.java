@@ -19,6 +19,7 @@ public class SkyRenderer {
     private static RenderEngine renderEngine;
     private static double worldTime;
     private static float celestialAngle;
+    private static float rainStrength;
 
     private static final HashMap<Integer, ArrayList<Layer>> worldSkies = new HashMap<Integer, ArrayList<Layer>>();
     private static ArrayList<Layer> currentSkies;
@@ -58,6 +59,7 @@ public class SkyRenderer {
             if (active) {
                 SkyRenderer.renderEngine = renderEngine;
                 worldTime = world.getWorldTime() + partialTick;
+                rainStrength = 1.0f - world.getRainStrength(partialTick);
                 SkyRenderer.celestialAngle = celestialAngle;
             }
         }
@@ -67,11 +69,11 @@ public class SkyRenderer {
         if (active) {
             Tessellator tessellator = Tessellator.instance;
             for (Layer layer : currentSkies) {
-                layer.render(tessellator, worldTime, celestialAngle);
+                layer.render(tessellator);
             }
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, rainStrength);
         }
     }
 
@@ -217,9 +219,9 @@ public class SkyRenderer {
             return 2.0 * Math.PI * (time / period + offset);
         }
 
-        boolean render(Tessellator tessellator, double worldTime, float celestialAngle) {
+        boolean render(Tessellator tessellator) {
             double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
-            float brightness = (float) (a * Math.cos(x) + b * Math.sin(x) + c);
+            float brightness = (float) (a * Math.cos(x) + b * Math.sin(x) + c) * rainStrength;
             if (brightness <= 0.0f) {
                 return false;
             }

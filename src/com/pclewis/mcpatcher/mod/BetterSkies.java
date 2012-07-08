@@ -51,6 +51,7 @@ public class BetterSkies extends Mod {
             final MethodRef getTexture = new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I");
             final MethodRef bindTexture = new MethodRef("RenderEngine", "bindTexture", "(I)V");
             final MethodRef getCelestialAngle = new MethodRef(worldObjClass, "getCelestialAngle", "(F)F");
+            final MethodRef getRainStrength = new MethodRef("World", "getRainStrength", "(F)F");
             final MethodRef startDrawingQuads = new MethodRef("Tessellator", "startDrawingQuads", "()V");
             final MethodRef setColorOpaque_I = new MethodRef("Tessellator", "setColorOpaque_I", "(I)V");
             final MethodRef addVertexWithUV = new MethodRef("Tessellator", "addVertexWithUV", "(DDDDD)V");
@@ -102,9 +103,29 @@ public class BetterSkies extends Mod {
                         // ...
                         BinaryRegex.any(0, 1000),
 
-                        // GL11.glRotatef(worldObj.getCelestialAngle(par1) * 360F, 1.0F, 0.0F, 0.0F);
+                        // d = 1.0F - worldObj.getRainStrength(par1);
+                        push(1.0f),
                         ALOAD_0,
                         BytecodeMatcher.captureReference(GETFIELD),
+                        FLOAD_1,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        FSUB,
+                        BinaryRegex.or(
+                            BinaryRegex.build(
+                                BytecodeMatcher.anyFSTORE
+                            ),
+                            BinaryRegex.build(
+                                F2D,
+                                BytecodeMatcher.anyDSTORE
+                            )
+                        ),
+
+                        // ..
+                        BinaryRegex.any(0, 500),
+
+                        // GL11.glRotatef(worldObj.getCelestialAngle(par1) * 360F, 1.0F, 0.0F, 0.0F);
+                        ALOAD_0,
+                        BinaryRegex.backReference(8),
                         FLOAD_1,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
                         push(360.0f),
@@ -125,7 +146,8 @@ public class BetterSkies extends Mod {
                 .addXref(6, bindTexture)
                 .addXref(7, tessellator)
                 .addXref(8, worldObj)
-                .addXref(9, getCelestialAngle)
+                .addXref(9, getRainStrength)
+                .addXref(10, getCelestialAngle)
             );
 
             classSignatures.add(new BytecodeSignature() {

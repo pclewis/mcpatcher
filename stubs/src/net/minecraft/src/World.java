@@ -16,6 +16,10 @@ public class World implements IBlockAccess {
         return 1.0f;
     }
 
+    public float getRainStrength(float f) {
+        return 0.0f;
+    }
+
     public long getWorldTime() {
         return 0L;
     }
