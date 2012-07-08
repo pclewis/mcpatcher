@@ -240,7 +240,7 @@ public class SkyRenderer {
             // north
             GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
             GL11.glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 5);
+            drawTile(tessellator, 4);
 
             // top
             GL11.glPushMatrix();
@@ -251,20 +251,20 @@ public class SkyRenderer {
             // bottom
             GL11.glPushMatrix();
             GL11.glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-            drawTile(tessellator, 9);
+            drawTile(tessellator, 0);
             GL11.glPopMatrix();
 
             // west
             GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 6);
+            drawTile(tessellator, 5);
 
             // south
             GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 7);
+            drawTile(tessellator, 2);
 
             // east
             GL11.glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
-            drawTile(tessellator, 4);
+            drawTile(tessellator, 3);
 
             GL11.glPopMatrix();
 
@@ -273,13 +273,13 @@ public class SkyRenderer {
         }
 
         private static void drawTile(Tessellator tessellator, int tile) {
-            double tileX = (tile % 4) / 4.0;
-            double tileY = (tile / 4) / 3.0;
+            double tileX = (tile % 3) / 3.0;
+            double tileY = (tile / 3) / 2.0;
             tessellator.startDrawingQuads();
             tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, -DISTANCE, tileX, tileY);
-            tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, DISTANCE, tileX, tileY + 1.0 / 3.0);
-            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, DISTANCE, tileX + 0.25, tileY + 1.0 / 3.0);
-            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, -DISTANCE, tileX + 0.25, tileY);
+            tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, DISTANCE, tileX, tileY + 0.5);
+            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, DISTANCE, tileX + 1.0 / 3.0, tileY + 0.5);
+            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, -DISTANCE, tileX + 1.0 / 3.0, tileY);
             tessellator.draw();
         }
 
