@@ -67,10 +67,12 @@ public class SkyRenderer {
 
     public static void renderAll() {
         if (active) {
+            //GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
             Tessellator tessellator = Tessellator.instance;
             for (Layer layer : currentSkies) {
                 layer.render(tessellator);
             }
+            //GL11.glPopAttrib();
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, rainStrength);
@@ -90,8 +92,12 @@ public class SkyRenderer {
         private static final double TOD_OFFSET = -0.25;
 
         private static final int METHOD_ADD = 1;
-        private static final int METHOD_REPLACE = 2;
+        private static final int METHOD_SUBTRACT = 2;
         private static final int METHOD_MULTIPLY = 3;
+        private static final int METHOD_DODGE = 4;
+        private static final int METHOD_BURN = 5;
+        private static final int METHOD_SCREEN = 6;
+        private static final int METHOD_REPLACE = 7;
 
         private String prefix;
         private String texture;
@@ -137,10 +143,18 @@ public class SkyRenderer {
             String value = properties.getProperty("blend", "add").trim().toLowerCase();
             if (value.equals("add")) {
                 blendMethod = METHOD_ADD;
-            } else if (value.equals("replace")) {
-                blendMethod = METHOD_REPLACE;
+            } else if (value.equals("subtract")) {
+                blendMethod = METHOD_SUBTRACT;
             } else if (value.equals("multiply")) {
                 blendMethod = METHOD_MULTIPLY;
+            } else if (value.equals("dodge")) {
+                blendMethod = METHOD_DODGE;
+            } else if (value.equals("burn")) {
+                blendMethod = METHOD_BURN;
+            } else if (value.equals("screen")) {
+                blendMethod = METHOD_SCREEN;
+            } else if (value.equals("replace")) {
+                blendMethod = METHOD_REPLACE;
             } else {
                 addError("unknown blend method %s", value);
                 return;
@@ -292,13 +306,33 @@ public class SkyRenderer {
                     GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
                     break;
 
-                case METHOD_REPLACE:
-                    GL11.glDisable(GL11.GL_BLEND);
+                case METHOD_SUBTRACT:
+                    GL11.glEnable(GL11.GL_BLEND);
+                    GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
                     break;
 
                 case METHOD_MULTIPLY:
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
+                    break;
+
+                case METHOD_DODGE:
+                    GL11.glEnable(GL11.GL_BLEND);
+                    GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+                    break;
+
+                case METHOD_BURN:
+                    GL11.glEnable(GL11.GL_BLEND);
+                    GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_COLOR);
+                    break;
+
+                case METHOD_SCREEN:
+                    GL11.glEnable(GL11.GL_BLEND);
+                    GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_COLOR);
+                    break;
+
+                case METHOD_REPLACE:
+                    GL11.glDisable(GL11.GL_BLEND);
                     break;
 
                 default:
