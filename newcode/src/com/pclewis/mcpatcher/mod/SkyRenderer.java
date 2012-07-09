@@ -69,6 +69,7 @@ public class SkyRenderer {
             for (Layer layer : currentSkies) {
                 layer.render(tessellator);
             }
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, rainStrength);
@@ -320,36 +321,43 @@ public class SkyRenderer {
         private void setBlendingMethod() {
             switch (blendMethod) {
                 case METHOD_ADD:
+                    GL11.glDisable(GL11.GL_ALPHA_TEST);
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
                     break;
 
                 case METHOD_SUBTRACT:
+                    GL11.glDisable(GL11.GL_ALPHA_TEST);
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
                     break;
 
                 case METHOD_MULTIPLY:
+                    GL11.glDisable(GL11.GL_ALPHA_TEST);
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
                     break;
 
                 case METHOD_DODGE:
+                    GL11.glDisable(GL11.GL_ALPHA_TEST);
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
                     break;
 
                 case METHOD_BURN:
+                    GL11.glDisable(GL11.GL_ALPHA_TEST);
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_COLOR);
                     break;
 
                 case METHOD_SCREEN:
+                    GL11.glDisable(GL11.GL_ALPHA_TEST);
                     GL11.glEnable(GL11.GL_BLEND);
                     GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_COLOR);
                     break;
 
                 case METHOD_REPLACE:
+                    GL11.glEnable(GL11.GL_ALPHA_TEST);
                     GL11.glDisable(GL11.GL_BLEND);
                     break;
 
