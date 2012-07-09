@@ -59,22 +59,17 @@ public class SkyRenderer {
             Tessellator tessellator = Tessellator.instance;
             for (Layer layer : currentWorld.skies) {
                 layer.render(tessellator);
+                Layer.clearBlendingMethod();
             }
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, rainStrength);
         }
     }
 
     public static String setupCelestialObject(String defaultTexture) {
         if (active) {
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            Layer.clearBlendingMethod();
             Layer layer = currentWorld.objects.get(defaultTexture);
             if (layer != null) {
-                layer.setBlendingMethod();
+                layer.setBlendingMethod(rainStrength);
                 return layer.texture;
             }
         }
@@ -310,21 +305,21 @@ public class SkyRenderer {
         }
 
         boolean render(Tessellator tessellator) {
+            float brightness = rainStrength;
             if (fade) {
                 double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
-                float brightness = (float) f(x) * rainStrength;
-                if (brightness <= 0.0f) {
-                    return false;
-                }
-                if (brightness > 1.0f) {
-                    brightness = 1.0f;
-                }
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
+                brightness *= (float) f(x);
             }
 
-            setBlendingMethod();
+            if (brightness <= 0.0f) {
+                return false;
+            }
+            if (brightness > 1.0f) {
+                brightness = 1.0f;
+            }
 
             renderEngine.bindTexture(renderEngine.getTexture(texture));
+            setBlendingMethod(brightness);
 
             GL11.glPushMatrix();
 
@@ -377,7 +372,9 @@ public class SkyRenderer {
             tessellator.draw();
         }
 
-        void setBlendingMethod() {
+        void setBlendingMethod(float brightness) {
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
+
             switch (blendMethod) {
                 case METHOD_ADD:
                     GL11.glDisable(GL11.GL_ALPHA_TEST);
@@ -425,6 +422,13 @@ public class SkyRenderer {
             }
 
             GL11.glEnable(GL11.GL_TEXTURE_2D);
+        }
+
+        static void clearBlendingMethod() {
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, rainStrength);
         }
     }
 }
