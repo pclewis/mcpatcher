@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.Properties;
 
 public class SkyRenderer {
-    private static final double DISTANCE = 100.0;
-
     private static RenderEngine renderEngine;
     private static double worldTime;
     private static float celestialAngle;
@@ -67,12 +65,10 @@ public class SkyRenderer {
 
     public static void renderAll() {
         if (active) {
-            //GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
             Tessellator tessellator = Tessellator.instance;
             for (Layer layer : currentSkies) {
                 layer.render(tessellator);
             }
-            //GL11.glPopAttrib();
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, rainStrength);
@@ -91,6 +87,8 @@ public class SkyRenderer {
         private static final int TICKS_PER_DAY = 24000;
         private static final double TOD_OFFSET = -0.25;
 
+        private static final double SKY_DISTANCE = 100.0;
+
         private static final int METHOD_ADD = 1;
         private static final int METHOD_SUBTRACT = 2;
         private static final int METHOD_MULTIPLY = 3;
@@ -100,6 +98,7 @@ public class SkyRenderer {
         private static final int METHOD_REPLACE = 7;
 
         private String prefix;
+        private Properties properties;
         private String texture;
         private boolean rotate;
         private int blendMethod;
@@ -111,12 +110,11 @@ public class SkyRenderer {
         boolean valid;
 
         static Layer create(String prefix) {
-            Properties properties = null;
             InputStream is = null;
             try {
                 is = lastTexturePack.getInputStream(prefix + ".properties");
                 if (is != null) {
-                    properties = new Properties();
+                    Properties properties = new Properties();
                     properties.load(is);
                     return new Layer(prefix, properties);
                 }
@@ -130,16 +128,25 @@ public class SkyRenderer {
 
         private Layer(String prefix, Properties properties) {
             this.prefix = prefix;
+            this.properties = properties;
             valid = true;
+            valid = (readTexture() && readRotation() & readBlendingMethod() && readFadeTimers());
+        }
 
+        private boolean readTexture() {
             texture = properties.getProperty("source", prefix + ".png");
             if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(texture)) == null) {
-                addError("texture %s not found", texture);
-                return;
+                return addError("source texture %s not found", texture);
             }
+            return true;
+        }
 
+        private boolean readRotation() {
             rotate = Boolean.parseBoolean(properties.getProperty("rotate", "true"));
+            return true;
+        }
 
+        private boolean readBlendingMethod() {
             String value = properties.getProperty("blend", "add").trim().toLowerCase();
             if (value.equals("add")) {
                 blendMethod = METHOD_ADD;
@@ -156,15 +163,17 @@ public class SkyRenderer {
             } else if (value.equals("replace")) {
                 blendMethod = METHOD_REPLACE;
             } else {
-                addError("unknown blend method %s", value);
-                return;
+                return addError("unknown blend method %s", value);
             }
+            return true;
+        }
 
+        private boolean readFadeTimers() {
             int startFadeIn = parseTime(properties, "startFadeIn");
             int endFadeIn = parseTime(properties, "endFadeIn");
             int endFadeOut = parseTime(properties, "endFadeOut");
             if (!valid) {
-                return;
+                return false;
             }
             while (endFadeIn <= startFadeIn) {
                 endFadeIn += SECS_PER_DAY;
@@ -173,11 +182,15 @@ public class SkyRenderer {
                 endFadeOut += SECS_PER_DAY;
             }
             if (endFadeOut - startFadeIn >= SECS_PER_DAY) {
-                addError("fade times are incoherent");
-                return;
+                return addError("fade times must fall within a 24 hour period");
             }
             int startFadeOut = startFadeIn + endFadeOut - endFadeIn;
 
+            // f(x) = a cos x + b sin x + c
+            // f(s0) = 0
+            // f(s1) = 1
+            // f(e1) = 0
+            // Solve for a, b, c using Cramer's rule.
             double s0 = normalize(startFadeIn, SECS_PER_DAY, TOD_OFFSET);
             double s1 = normalize(endFadeIn, SECS_PER_DAY, TOD_OFFSET);
             double e0 = normalize(startFadeOut, SECS_PER_DAY, TOD_OFFSET);
@@ -185,23 +198,24 @@ public class SkyRenderer {
             double det = Math.cos(s0) * Math.sin(s1) + Math.cos(e1) * Math.sin(s0) + Math.cos(s1) * Math.sin(e1) -
                 Math.cos(s0) * Math.sin(e1) - Math.cos(s1) * Math.sin(s0) - Math.cos(e1) * Math.sin(s1);
             if (det == 0.0) {
-                addError("determinant is 0");
-                return;
+                return addError("determinant is 0");
             }
             a = (Math.sin(e1) - Math.sin(s0)) / det;
             b = (Math.cos(s0) - Math.cos(e1)) / det;
             c = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
 
             MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", prefix, a, b, c);
-            MCPatcherUtils.info("  at %f: %f", s0, a * Math.cos(s0) + b * Math.sin(s0) + c);
-            MCPatcherUtils.info("  at %f: %f", s1, a * Math.cos(s1) + b * Math.sin(s1) + c);
-            MCPatcherUtils.info("  at %f: %f", e0, a * Math.cos(e0) + b * Math.sin(e0) + c);
-            MCPatcherUtils.info("  at %f: %f", e1, a * Math.cos(e1) + b * Math.sin(e1) + c);
+            MCPatcherUtils.info("  at %f: %f", s0, f(s0));
+            MCPatcherUtils.info("  at %f: %f", s1, f(s1));
+            MCPatcherUtils.info("  at %f: %f", e0, f(e0));
+            MCPatcherUtils.info("  at %f: %f", e1, f(e1));
+            return true;
         }
 
-        private void addError(String format, Object... params) {
+        private boolean addError(String format, Object... params) {
             MCPatcherUtils.error(prefix + ".properties: " + format, params);
             valid = false;
+            return false;
         }
 
         private int parseTime(Properties properties, String key) {
@@ -233,9 +247,13 @@ public class SkyRenderer {
             return 2.0 * Math.PI * (time / period + offset);
         }
 
+        private double f(double x) {
+            return a * Math.cos(x) + b * Math.sin(x) + c;
+        }
+
         boolean render(Tessellator tessellator) {
             double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
-            float brightness = (float) (a * Math.cos(x) + b * Math.sin(x) + c) * rainStrength;
+            float brightness = (float) f(x) * rainStrength;
             if (brightness <= 0.0f) {
                 return false;
             }
@@ -292,10 +310,10 @@ public class SkyRenderer {
             double tileX = (tile % 3) / 3.0;
             double tileY = (tile / 3) / 2.0;
             tessellator.startDrawingQuads();
-            tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, -DISTANCE, tileX, tileY);
-            tessellator.addVertexWithUV(-DISTANCE, -DISTANCE, DISTANCE, tileX, tileY + 0.5);
-            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, DISTANCE, tileX + 1.0 / 3.0, tileY + 0.5);
-            tessellator.addVertexWithUV(DISTANCE, -DISTANCE, -DISTANCE, tileX + 1.0 / 3.0, tileY);
+            tessellator.addVertexWithUV(-SKY_DISTANCE, -SKY_DISTANCE, -SKY_DISTANCE, tileX, tileY);
+            tessellator.addVertexWithUV(-SKY_DISTANCE, -SKY_DISTANCE, SKY_DISTANCE, tileX, tileY + 0.5);
+            tessellator.addVertexWithUV(SKY_DISTANCE, -SKY_DISTANCE, SKY_DISTANCE, tileX + 1.0 / 3.0, tileY + 0.5);
+            tessellator.addVertexWithUV(SKY_DISTANCE, -SKY_DISTANCE, -SKY_DISTANCE, tileX + 1.0 / 3.0, tileY);
             tessellator.draw();
         }
 
