@@ -192,7 +192,7 @@ class AddModDialog extends JDialog {
             showZipDialog(false);
         }
         updateControls();
-        return zipFile != null;
+        return zipFile != null && !fileMap.isEmpty();
     }
 
     private void showZipDialog(boolean addMode) {
