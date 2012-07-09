@@ -101,6 +101,7 @@ public class SkyRenderer {
         private String prefix;
         private Properties properties;
         private String texture;
+        private boolean fade;
         private boolean rotate;
         private int blendMethod;
 
@@ -170,6 +171,10 @@ public class SkyRenderer {
         }
 
         private boolean readFadeTimers() {
+            fade = Boolean.parseBoolean(properties.getProperty("fade", "true"));
+            if (!fade) {
+                return true;
+            }
             int startFadeIn = parseTime(properties, "startFadeIn");
             int endFadeIn = parseTime(properties, "endFadeIn");
             int endFadeOut = parseTime(properties, "endFadeOut");
@@ -253,17 +258,19 @@ public class SkyRenderer {
         }
 
         boolean render(Tessellator tessellator) {
-            double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
-            float brightness = (float) f(x) * rainStrength;
-            if (brightness <= 0.0f) {
-                return false;
-            }
-            if (brightness > 1.0f) {
-                brightness = 1.0f;
+            if (fade) {
+                double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
+                float brightness = (float) f(x) * rainStrength;
+                if (brightness <= 0.0f) {
+                    return false;
+                }
+                if (brightness > 1.0f) {
+                    brightness = 1.0f;
+                }
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
             }
 
             setBlendingMethod();
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
 
             renderEngine.bindTexture(renderEngine.getTexture(texture));
 
