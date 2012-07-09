@@ -33,6 +33,7 @@ public class BetterSkies extends Mod {
         classMods.add(new RenderGlobalMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$WorldEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$Layer"));
     }
 
@@ -46,8 +47,9 @@ public class BetterSkies extends Mod {
     }
 
     private class RenderGlobalMod extends ClassMod {
+        private final MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
+
         RenderGlobalMod() {
-            final MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
             final MethodRef getTexture = new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I");
             final MethodRef bindTexture = new MethodRef("RenderEngine", "bindTexture", "(I)V");
             final MethodRef getCelestialAngle = new MethodRef(worldObjClass, "getCelestialAngle", "(F)F");
@@ -329,6 +331,32 @@ public class BetterSkies extends Mod {
                         IFNE, branch("A"),
                         getMatch(),
                         label("A")
+                    );
+                }
+            }.targetMethod(renderSky));
+
+            addCelestialObjectPatch("sun", "/terrain/sun.png");
+            addCelestialObjectPatch("moon", "/terrain/moon_phases.png");
+        }
+
+        private void addCelestialObjectPatch(final String objName, final String textureName) {
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "override " + objName + " texture";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(textureName)
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.SKY_RENDERER_CLASS, "setupCelestialObject", "(Ljava/lang/String;)Ljava/lang/String;"))
                     );
                 }
             }.targetMethod(renderSky));

@@ -19,8 +19,8 @@ public class SkyRenderer {
     private static float celestialAngle;
     private static float rainStrength;
 
-    private static final HashMap<Integer, ArrayList<Layer>> worldSkies = new HashMap<Integer, ArrayList<Layer>>();
-    private static ArrayList<Layer> currentSkies;
+    private static final HashMap<Integer, WorldEntry> worldSkies = new HashMap<Integer, WorldEntry>();
+    private static WorldEntry currentWorld;
     private static TexturePackBase lastTexturePack;
 
     public static boolean active;
@@ -36,24 +36,15 @@ public class SkyRenderer {
             active = false;
         } else {
             int worldType = minecraft.getWorld().worldProvider.worldType;
-            currentSkies = worldSkies.get(worldType);
-            if (currentSkies == null) {
-                currentSkies = new ArrayList<Layer>();
-                worldSkies.put(worldType, currentSkies);
-                for (int i = -1; ; i++) {
-                    String prefix = "/terrain/sky" + (i < 0 ? "" : "" + worldType) + "/sky" + i;
-                    Layer layer = Layer.create(prefix);
-                    if (layer == null) {
-                        if (i > 0) {
-                            break;
-                        }
-                    } else if (layer.valid) {
-                        MCPatcherUtils.info("loaded %s.properties", prefix);
-                        currentSkies.add(layer);
-                    }
-                }
+            currentWorld = worldSkies.get(worldType);
+            if (currentWorld == null) {
+                currentWorld = new WorldEntry();
+                loadSkies(worldType, currentWorld);
+                loadCelestialObject(worldType, currentWorld, "sun", "/terrain/sun.png");
+                loadCelestialObject(worldType, currentWorld, "moon", "/terrain/moon_phases.png");
+                worldSkies.put(worldType, currentWorld);
             }
-            active = !currentSkies.isEmpty();
+            active = currentWorld.active();
             if (active) {
                 SkyRenderer.renderEngine = renderEngine;
                 worldTime = world.getWorldTime() + partialTick;
@@ -66,7 +57,7 @@ public class SkyRenderer {
     public static void renderAll() {
         if (active) {
             Tessellator tessellator = Tessellator.instance;
-            for (Layer layer : currentSkies) {
+            for (Layer layer : currentWorld.skies) {
                 layer.render(tessellator);
             }
             GL11.glDisable(GL11.GL_ALPHA_TEST);
@@ -76,10 +67,71 @@ public class SkyRenderer {
         }
     }
 
+    public static String setupCelestialObject(String defaultTexture) {
+        if (active) {
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            Layer layer = currentWorld.objects.get(defaultTexture);
+            if (layer != null) {
+                layer.setBlendingMethod();
+                return layer.texture;
+            }
+        }
+        return defaultTexture;
+    }
+
+    private static void loadSkies(int worldType, WorldEntry entry) {
+        for (int i = -1; ; i++) {
+            String prefix = "/terrain/sky" + worldType + "/sky" + (i < 0 ? "" : "" + i);
+            Layer layer = Layer.create(prefix);
+            if (layer == null) {
+                if (i > 0) {
+                    break;
+                }
+            } else if (layer.valid) {
+                MCPatcherUtils.info("loaded %s.properties", prefix);
+                entry.skies.add(layer);
+            }
+        }
+    }
+
+    private static void loadCelestialObject(int worldType, WorldEntry entry, String objName, String textureName) {
+        String prefix = "/terrain/sky" + worldType + "/" + objName;
+        InputStream is = null;
+        try {
+            is = lastTexturePack.getInputStream(prefix + ".properties");
+            if (is != null) {
+                Properties properties = new Properties();
+                properties.load(is);
+                properties.setProperty("fade", "false");
+                properties.setProperty("rotate", "true");
+                Layer layer = new Layer(prefix, properties);
+                if (layer.valid) {
+                    MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
+                    entry.objects.put(textureName, layer);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            MCPatcherUtils.close(is);
+        }
+    }
+
     private static void checkGLError() {
         int error = GL11.glGetError();
         if (error != 0) {
             throw new RuntimeException("GL error: " + GLU.gluErrorString(error));
+        }
+    }
+
+    private static class WorldEntry {
+        ArrayList<Layer> skies = new ArrayList<Layer>();
+        HashMap<String, Layer> objects = new HashMap<String, Layer>();
+
+        boolean active() {
+            return !skies.isEmpty() || !objects.isEmpty();
         }
     }
 
@@ -128,7 +180,7 @@ public class SkyRenderer {
             return null;
         }
 
-        private Layer(String prefix, Properties properties) {
+        Layer(String prefix, Properties properties) {
             this.prefix = prefix;
             this.properties = properties;
             valid = true;
@@ -325,7 +377,7 @@ public class SkyRenderer {
             tessellator.draw();
         }
 
-        private void setBlendingMethod() {
+        void setBlendingMethod() {
             switch (blendMethod) {
                 case METHOD_ADD:
                     GL11.glDisable(GL11.GL_ALPHA_TEST);
