@@ -373,7 +373,14 @@ public class SkyRenderer {
         }
 
         void setBlendingMethod(float brightness) {
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
+            if (blendMethod == METHOD_ADD || blendMethod == METHOD_REPLACE) {
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
+            } else if (blendMethod == METHOD_MULTIPLY) {
+                brightness = 1.0f - brightness;
+                GL11.glColor4f(brightness, brightness, brightness, 1.0f);
+            } else {
+                GL11.glColor4f(brightness, brightness, brightness, 1.0f);
+            }
 
             switch (blendMethod) {
                 case METHOD_ADD:
