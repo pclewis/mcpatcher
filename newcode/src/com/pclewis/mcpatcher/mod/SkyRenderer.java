@@ -32,7 +32,7 @@ public class SkyRenderer {
             lastTexturePack = texturePack;
             worldSkies.clear();
         }
-        if (texturePack instanceof TexturePackDefault || Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
+        if (texturePack instanceof TexturePackDefault || Keyboard.isKeyDown(Keyboard.KEY_MULTIPLY)) {
             active = false;
         } else {
             int worldType = minecraft.getWorld().worldProvider.worldType;
@@ -149,6 +149,7 @@ public class SkyRenderer {
         private Properties properties;
         private String texture;
         private boolean fade;
+        private boolean debug;
         private boolean rotate;
         private int blendMethod;
 
@@ -218,6 +219,7 @@ public class SkyRenderer {
         }
 
         private boolean readFadeTimers() {
+            debug = Boolean.parseBoolean(properties.getProperty("debug", "false"));
             fade = Boolean.parseBoolean(properties.getProperty("fade", "true"));
             if (!fade) {
                 return true;
@@ -373,6 +375,13 @@ public class SkyRenderer {
         }
 
         void setBlendingMethod(float brightness) {
+            if (debug) {
+                if (Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
+                    brightness = 1.0f;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_SUBTRACT)) {
+                    brightness = 0.0f;
+                }
+            }
             if (blendMethod == METHOD_ADD || blendMethod == METHOD_REPLACE) {
                 GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
             } else if (blendMethod == METHOD_MULTIPLY) {
