@@ -384,6 +384,8 @@ public class SkyRenderer {
             }
             if (blendMethod == METHOD_ADD || blendMethod == METHOD_REPLACE) {
                 GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
+            } else if (blendMethod == METHOD_MULTIPLY) {
+                GL11.glColor4f(brightness, brightness, brightness, brightness);
             } else {
                 GL11.glColor4f(brightness, brightness, brightness, 1.0f);
             }
@@ -404,7 +406,7 @@ public class SkyRenderer {
                 case METHOD_MULTIPLY:
                     GL11.glDisable(GL11.GL_ALPHA_TEST);
                     GL11.glEnable(GL11.GL_BLEND);
-                    GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
+                    GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_ONE_MINUS_SRC_ALPHA);
                     break;
 
                 case METHOD_DODGE:
