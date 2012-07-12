@@ -278,12 +278,15 @@ public class CTMUtils {
                     String prefix = "/ctm/" + type + i + (c >= 'a' ? "" + c : "");
                     TileOverride override = TileOverride.create(prefix, null, connectByTile);
                     if (override == null) {
-                        break;
+                        if (c >= 'a') {
+                            break;
+                        }
+                    } else {
+                        if (tmpOverrides == null) {
+                            tmpOverrides = new ArrayList<TileOverride>();
+                        }
+                        tmpOverrides.add(override);
                     }
-                    if (tmpOverrides == null) {
-                        tmpOverrides = new ArrayList<TileOverride>();
-                    }
-                    tmpOverrides.add(override);
                 }
                 if (tmpOverrides != null) {
                     allOverrides[i] = new TileOverride[tmpOverrides.size()];
