@@ -3297,20 +3297,9 @@ public class CustomColors extends Mod {
         EntityListMod() {
             classSignatures.add(new ConstSignature("Skipping Entity with id "));
 
-            MethodRef addMapping = new MethodRef(getDeobfClass(), "addMapping", "(Ljava/lang/Class;Ljava/lang/String;III)V");
+            final MethodRef addMapping = new MethodRef(getDeobfClass(), "addMapping", "(Ljava/lang/Class;Ljava/lang/String;III)V");
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin(),
-                        BytecodeMatcher.anyReference(GETSTATIC),
-                        ALOAD_1,
-                        ALOAD_0,
-                        reference(INVOKEINTERFACE, new InterfaceMethodRef("java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
-                    );
-                }
-            }.setMethod(addMapping));
+            memberMappers.add(new MethodMapper(addMapping).accessFlag(AccessFlag.STATIC, true));
 
             patches.add(new BytecodePatch() {
                 @Override
