@@ -13,7 +13,7 @@ import java.util.Map;
  * ClassSignature that matches a particular bytecode sequence.
  */
 abstract public class BytecodeSignature extends ClassSignature {
-    MethodRef methodRef;
+    MethodRef deobfMethod;
     /**
      * Matcher object.
      *
@@ -37,43 +37,79 @@ abstract public class BytecodeSignature extends ClassSignature {
         return matcher.match(getMethodInfo());
     }
 
+    @Override
+    void setClassMod(ClassMod classMod) {
+        super.setClassMod(classMod);
+        if (deobfMethod != null && deobfMethod.getClassName() == null) {
+            deobfMethod = new MethodRef(classMod.getDeobfClass(), deobfMethod.getName(), deobfMethod.getType());
+        }
+    }
+
     public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+        method:
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
             classMod.methodInfo = methodInfo;
             CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
-            if (codeAttribute != null && match()) {
-                if (methodRef != null) {
-                    String deobfName = classMod.getDeobfClass();
-                    tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
-                    tempClassMap.addMethodMap(deobfName, methodRef.getName(), methodInfo.getName(), methodInfo.getDescriptor());
-                    if (methodRef.getType() != null) {
-                        ArrayList<String> descTypes = ConstPoolUtils.parseDescriptor(methodRef.getType());
-                        ArrayList<String> obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
-                        if (descTypes.size() == obfTypes.size()) {
-                            for (int i = 0; i < descTypes.size(); i++) {
-                                String desc = ClassMap.descriptorToClassName(descTypes.get(i));
-                                String obf = ClassMap.descriptorToClassName(obfTypes.get(i));
-                                if (!obf.equals(desc)) {
-                                    tempClassMap.addClassMap(desc, obf);
-                                }
-                            }
+            if (codeAttribute == null) {
+                continue;
+            }
+            if (getClassMap().hasMap(deobfMethod)) {
+                MethodRef obfTarget = (MethodRef) getClassMap().map(deobfMethod);
+                if (!methodInfo.getName().equals(obfTarget.getName())) {
+                    continue;
+                }
+            }
+            if (!match()) {
+                continue;
+            }
+            ArrayList<String> deobfTypes = null;
+            ArrayList<String> obfTypes = null;
+            if (deobfMethod != null && deobfMethod.getType() != null) {
+                deobfTypes = ConstPoolUtils.parseDescriptor(deobfMethod.getType());
+                obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
+                if (deobfTypes.size() != obfTypes.size()) {
+                    continue;
+                }
+                for (int i = 0; i < deobfTypes.size(); i++) {
+                    String t1 = deobfTypes.get(i);
+                    String t2 = obfTypes.get(i);
+                    String t1a = t1.replaceFirst("^[\\[]+", "");
+                    String t2a = t2.replaceFirst("^[\\[]+", "");
+                    if (t1.length() - t1a.length() != t2.length() - t2a.length()) {
+                        continue method;
+                    }
+                    if ((t1a.charAt(0) != 'L' || t2a.charAt(0) != 'L') && !t1a.equals(t2a)) {
+                        continue method;
+                    }
+                }
+            }
+            if (deobfMethod != null) {
+                String deobfName = classMod.getDeobfClass();
+                tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
+                tempClassMap.addMethodMap(deobfName, deobfMethod.getName(), methodInfo.getName(), methodInfo.getDescriptor());
+                if (deobfTypes != null && obfTypes != null) {
+                    for (int i = 0; i < deobfTypes.size(); i++) {
+                        String desc = ClassMap.descriptorToClassName(deobfTypes.get(i));
+                        String obf = ClassMap.descriptorToClassName(obfTypes.get(i));
+                        if (!obf.equals(desc)) {
+                            tempClassMap.addClassMap(desc, obf);
                         }
                     }
                 }
-                ConstPool constPool = methodInfo.getConstPool();
-                for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
-                    int captureGroup = entry.getKey();
-                    JavaRef xref = entry.getValue();
-                    byte[] code = matcher.getCaptureGroup(captureGroup);
-                    int index = Util.demarshal(code, 1, 2);
-                    ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
-                    ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
-                    tempClassMap.addMap(xref, ConstPoolUtils.getRefForIndex(constPool, index));
-                }
-                afterMatch(classFile, methodInfo);
-                return true;
             }
+            ConstPool constPool = methodInfo.getConstPool();
+            for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
+                int captureGroup = entry.getKey();
+                JavaRef xref = entry.getValue();
+                byte[] code = matcher.getCaptureGroup(captureGroup);
+                int index = Util.demarshal(code, 1, 2);
+                ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
+                ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
+                tempClassMap.addMap(xref, ConstPoolUtils.getRefForIndex(constPool, index));
+            }
+            afterMatch(classFile, methodInfo);
+            return true;
         }
         classMod.methodInfo = null;
         return false;
@@ -98,7 +134,7 @@ abstract public class BytecodeSignature extends ClassSignature {
      * @return this
      */
     public BytecodeSignature setMethod(MethodRef methodRef) {
-        this.methodRef = methodRef;
+        this.deobfMethod = methodRef;
         return this;
     }
 
