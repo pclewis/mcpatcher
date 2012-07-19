@@ -130,6 +130,13 @@ public abstract class Mod {
         return classMap;
     }
 
+    /**
+     * @return current minecraft version
+     */
+    public static MinecraftVersion getMinecraftVersion() {
+        return (MCPatcher.minecraft == null ? null : MCPatcher.minecraft.getVersion());
+    }
+
     void setRefs() {
         for (ClassMod classMod : getClassMods()) {
             classMod.mod = this;
