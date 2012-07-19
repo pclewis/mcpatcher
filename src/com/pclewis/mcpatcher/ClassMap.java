@@ -616,6 +616,69 @@ public class ClassMap {
         return new ClassRef(newClass);
     }
 
+    public boolean hasMap(JavaRef javaRef) {
+        if (javaRef instanceof MethodRef) {
+            return hasMap((MethodRef) javaRef);
+        } else if (javaRef instanceof InterfaceMethodRef) {
+            return hasMap((InterfaceMethodRef) javaRef);
+        } else if (javaRef instanceof FieldRef) {
+            return hasMap((FieldRef) javaRef);
+        } else if (javaRef instanceof ClassRef) {
+            return hasMap((ClassRef) javaRef);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean hasMap(MethodRef methodRef) {
+        String oldClass = methodRef.getClassName();
+        String oldName = methodRef.getName();
+
+        ClassMapEntry entry = getEntry(oldClass);
+        if (entry != null) {
+            HashMap<String, MemberEntry> map = entry.getMethodMap();
+            if (map.containsKey(oldName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasMap(InterfaceMethodRef methodRef) {
+        String oldClass = methodRef.getClassName();
+        String oldName = methodRef.getName();
+
+        ClassMapEntry entry = getEntry(oldClass);
+        if (entry != null) {
+            HashMap<String, MemberEntry> map = entry.getMethodMap();
+            if (map.containsKey(oldName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasMap(FieldRef fieldRef) {
+        String oldClass = fieldRef.getClassName();
+        String oldName = fieldRef.getName();
+
+        ClassMapEntry entry = getEntry(oldClass);
+        if (entry != null) {
+            HashMap<String, MemberEntry> map = entry.getFieldMap();
+            if (map.containsKey(oldName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasMap(ClassRef classRef) {
+        return getEntry(classRef.getClassName()) != null;
+    }
+
     /**
      * Maps a Java type descriptor.  Can be used for both fields and methods.
      * <p/>
@@ -627,6 +690,9 @@ public class ClassMap {
      * @return mapped Java type descriptor
      */
     public String mapTypeString(String old) {
+        if (old == null) {
+            return null;
+        }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < old.length(); i++) {
             char c = old.charAt(i);
