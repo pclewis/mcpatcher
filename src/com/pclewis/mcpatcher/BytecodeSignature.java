@@ -72,14 +72,24 @@ abstract public class BytecodeSignature extends ClassSignature {
                     continue;
                 }
                 for (int i = 0; i < deobfTypes.size(); i++) {
-                    String t1 = deobfTypes.get(i);
-                    String t2 = obfTypes.get(i);
-                    String t1a = t1.replaceFirst("^[\\[]+", "");
-                    String t2a = t2.replaceFirst("^[\\[]+", "");
-                    if (t1.length() - t1a.length() != t2.length() - t2a.length()) {
+                    String deobfType = deobfTypes.get(i);
+                    String obfType = obfTypes.get(i);
+                    String deobfClass = deobfType.replaceFirst("^[\\[]+", "");
+                    String obfClass = obfType.replaceFirst("^[\\[]+", "");
+                    if (deobfType.length() - deobfClass.length() != obfType.length() - obfClass.length()) {
                         continue method;
                     }
-                    if ((t1a.charAt(0) != 'L' || t2a.charAt(0) != 'L') && !t1a.equals(t2a)) {
+                    if (deobfClass.charAt(0) == 'L' && obfClass.charAt(0) == 'L') {
+                        deobfClass = ClassMap.descriptorToClassName(deobfClass);
+                        obfClass = ClassMap.descriptorToClassName(obfClass);
+                        boolean deobfIsMC = !deobfClass.contains(".") || deobfClass.startsWith("net.minecraft.");
+                        boolean obfIsMC = !obfClass.matches(".*[^a-z].*") || obfClass.startsWith("net.minecraft.");
+                        if (deobfIsMC != obfIsMC) {
+                            continue method;
+                        } else if (!deobfIsMC && !obfIsMC && !deobfClass.equals(obfClass)) {
+                            continue method;
+                        }
+                    } else if (!deobfClass.equals(obfClass)) {
                         continue method;
                     }
                 }
