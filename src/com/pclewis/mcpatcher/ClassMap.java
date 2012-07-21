@@ -521,6 +521,17 @@ public class ClassMap {
     }
 
     /**
+     * Maps a class to its obfuscated name.
+     *
+     * @param className
+     * @return obfuscated name
+     */
+    public String map(String className) {
+        ClassMapEntry entry = getEntry(className);
+        return entry == null ? className : entry.getObfName();
+    }
+
+    /**
      * Maps a class, method, or field reference to obfuscated names.
      *
      * @param javaRef input reference using descriptive names
@@ -616,6 +627,22 @@ public class ClassMap {
         return new ClassRef(newClass);
     }
 
+    /**
+     * Returns whether a mapping exists for a given class.
+     *
+     * @param className
+     * @return true if className is in the class map
+     */
+    public boolean hasMap(String className) {
+        return getEntry(className) != null;
+    }
+
+    /**
+     * Returns whether a mapping exists for a given class, method, or field.
+     *
+     * @param javaRef
+     * @return true if reference is in the class map
+     */
     public boolean hasMap(JavaRef javaRef) {
         if (javaRef instanceof MethodRef) {
             return hasMap((MethodRef) javaRef);
