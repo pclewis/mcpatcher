@@ -1,5 +1,5 @@
-MCPatcher version is 2.4.0
-OS: Linux 3.4.4-4.fc16.x86_64 amd64
+MCPatcher version is 2.4.0_01
+OS: Linux 3.3.8-1.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_33 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.2.5 (md5 8e8778078a175a33603a585257f28563)
@@ -49,7 +49,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.2.5.jar (1524 files)
    updateFogColor matches g (F)V
    updateLightmap matches e ()V
   RenderEngine matches aaw.class
-   updateDynamicTextures matches a ([IIII)V
+   updateDynamicTextures matches a ()V
    refreshTextures matches b ()V
   RenderEngine matches aaw.class
   Tessellator matches adz.class
@@ -121,7 +121,6 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.2.5.jar (1524 files)
   Entity matches nn.class
    setPositionAndRotation matches b (DDDFF)V
   EntityList matches aao.class
-   addMapping matches a (Ljava/lang/Class;Ljava/lang/String;I)V
   EntityLiving matches acq.class
   EntityLiving matches acq.class
    setPositionAndRotation matches b (DDDFF)V
@@ -357,6 +356,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.2.5.jar (methods and fields)
   EntitySheep (cu.class)
    field fleeceColorTable matches a [[F
   EntityList (aao.class)
+   method addMapping matches a (Ljava/lang/Class;Ljava/lang/String;III)V
   ItemSpawnerEgg (acv.class)
   FontRenderer (nl.class)
   TileEntitySignRenderer (ll.class)
@@ -449,7 +449,7 @@ HD Textures
         method refreshTextures -> b ()V
         method registerTextureFX -> a (Ltt;)V
         method setupTexture -> a (Ljava/awt/image/BufferedImage;I)V
-        method updateDynamicTextures -> a ([IIII)V
+        method updateDynamicTextures -> a ()V
         field imageData -> h Ljava/nio/ByteBuffer;
         field textureList -> i Ljava/util/List;
     class StillLava (bv.class)
@@ -735,7 +735,7 @@ Custom Colors
         field prevPosZ -> n D
         field worldObj -> k Lxd;
     class EntityList (aao.class)
-        method addMapping -> a (Ljava/lang/Class;Ljava/lang/String;I)V
+        method addMapping -> a (Ljava/lang/Class;Ljava/lang/String;III)V
         method getEntityString -> a (I)Ljava/lang/String;
     class EntityLiving (acq.class) extends Entity
         method setPositionAndRotation -> b (DDDFF)V

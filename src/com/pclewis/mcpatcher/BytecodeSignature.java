@@ -45,6 +45,40 @@ abstract public class BytecodeSignature extends ClassSignature {
         }
     }
 
+    private static boolean isPotentialTypeMatch(ArrayList<String> deobfTypes, ArrayList<String> obfTypes) {
+        if (deobfTypes.size() != obfTypes.size()) {
+            return false;
+        }
+        for (int i = 0; i < deobfTypes.size(); i++) {
+            String deobfType = deobfTypes.get(i);
+            String obfType = obfTypes.get(i);
+            String deobfClass = deobfType.replaceFirst("^\\[+", "");
+            String obfClass = obfType.replaceFirst("^\\[+", "");
+            if (deobfType.length() - deobfClass.length() != obfType.length() - obfClass.length()) {
+                return false;
+            }
+            if (deobfClass.charAt(0) == 'L' && obfClass.charAt(0) == 'L') {
+                deobfClass = ClassMap.descriptorToClassName(deobfClass);
+                obfClass = ClassMap.descriptorToClassName(obfClass);
+                boolean deobfIsMC = !deobfClass.contains(".") || deobfClass.startsWith("net.minecraft.");
+                boolean obfIsMC = !obfClass.matches(".*[^a-z].*") || obfClass.startsWith("net.minecraft.");
+                if (deobfIsMC != obfIsMC) {
+                    return false;
+                }
+                if (!deobfIsMC && !deobfClass.equals(obfClass)) {
+                    return false;
+                }
+            } else if (!deobfClass.equals(obfClass)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isPotentialTypeMatch(String deobfDesc, String obfDesc) {
+        return isPotentialTypeMatch(ConstPoolUtils.parseDescriptor(deobfDesc), ConstPoolUtils.parseDescriptor(obfDesc));
+    }
+
     public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
         method:
         for (Object o : classFile.getMethods()) {
@@ -68,30 +102,8 @@ abstract public class BytecodeSignature extends ClassSignature {
             if (deobfMethod != null && deobfMethod.getType() != null) {
                 deobfTypes = ConstPoolUtils.parseDescriptor(deobfMethod.getType());
                 obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
-                if (deobfTypes.size() != obfTypes.size()) {
+                if (!isPotentialTypeMatch(deobfTypes, obfTypes)) {
                     continue;
-                }
-                for (int i = 0; i < deobfTypes.size(); i++) {
-                    String deobfType = deobfTypes.get(i);
-                    String obfType = obfTypes.get(i);
-                    String deobfClass = deobfType.replaceFirst("^[\\[]+", "");
-                    String obfClass = obfType.replaceFirst("^[\\[]+", "");
-                    if (deobfType.length() - deobfClass.length() != obfType.length() - obfClass.length()) {
-                        continue method;
-                    }
-                    if (deobfClass.charAt(0) == 'L' && obfClass.charAt(0) == 'L') {
-                        deobfClass = ClassMap.descriptorToClassName(deobfClass);
-                        obfClass = ClassMap.descriptorToClassName(obfClass);
-                        boolean deobfIsMC = !deobfClass.contains(".") || deobfClass.startsWith("net.minecraft.");
-                        boolean obfIsMC = !obfClass.matches(".*[^a-z].*") || obfClass.startsWith("net.minecraft.");
-                        if (deobfIsMC != obfIsMC) {
-                            continue method;
-                        } else if (!deobfIsMC && !obfIsMC && !deobfClass.equals(obfClass)) {
-                            continue method;
-                        }
-                    } else if (!deobfClass.equals(obfClass)) {
-                        continue method;
-                    }
                 }
             }
             if (deobfMethod != null) {
@@ -109,6 +121,7 @@ abstract public class BytecodeSignature extends ClassSignature {
                 }
             }
             ConstPool constPool = methodInfo.getConstPool();
+            ArrayList<JavaRef> tempMappings = new ArrayList<JavaRef>();
             for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
                 int captureGroup = entry.getKey();
                 JavaRef xref = entry.getValue();
@@ -116,7 +129,15 @@ abstract public class BytecodeSignature extends ClassSignature {
                 int index = Util.demarshal(code, 1, 2);
                 ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
                 ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
-                tempClassMap.addMap(xref, ConstPoolUtils.getRefForIndex(constPool, index));
+                JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
+                if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
+                    continue method;
+                }
+                tempMappings.add(xref);
+                tempMappings.add(newRef);
+            }
+            for (int i = 0; i + 1 < tempMappings.size(); i += 2) {
+                tempClassMap.addMap(tempMappings.get(i), tempMappings.get(i + 1));
             }
             afterMatch(classFile, methodInfo);
             return true;
