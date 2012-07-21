@@ -346,6 +346,15 @@ class ModList {
                 disableMod(inst, dmod, true);
             }
         }
+        for (Mod dmod : modsByIndex) {
+            if (dmod != mod) {
+                for (Mod.Dependency dep : dmod.dependencies) {
+                    if (dep.name.equals(mod.getName()) && !dep.required) {
+                        disableMod(inst, dmod, true);
+                    }
+                }
+            }
+        }
     }
 
     private void disableMod(HashMap<Mod, Boolean> inst, Mod mod, boolean recursive) throws ModDependencyException {
@@ -366,7 +375,6 @@ class ModList {
                 for (Mod.Dependency dep : dmod.dependencies) {
                     if (dep.name.equals(mod.getName()) && dep.required) {
                         disableMod(inst, dmod, true);
-                        break;
                     }
                 }
             }
