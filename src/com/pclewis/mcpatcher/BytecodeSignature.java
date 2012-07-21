@@ -45,7 +45,7 @@ abstract public class BytecodeSignature extends ClassSignature {
         }
     }
 
-    private static boolean isPotentialTypeMatch(ArrayList<String> deobfTypes, ArrayList<String> obfTypes) {
+    private boolean isPotentialTypeMatch(ArrayList<String> deobfTypes, ArrayList<String> obfTypes) {
         if (deobfTypes.size() != obfTypes.size()) {
             return false;
         }
@@ -64,8 +64,14 @@ abstract public class BytecodeSignature extends ClassSignature {
                 boolean obfIsMC = !obfClass.matches(".*[^a-z].*") || obfClass.startsWith("net.minecraft.");
                 if (deobfIsMC != obfIsMC) {
                     return false;
-                }
-                if (!deobfIsMC && !deobfClass.equals(obfClass)) {
+                } else if (deobfIsMC) {
+                    if (classMod.getClassMap().hasMap(deobfClass)) {
+                        String deobfMapping = classMod.getClassMap().map(deobfClass).replace('/', '.');
+                        if (!deobfMapping.equals(obfClass)) {
+                            return false;
+                        }
+                    }
+                } else if (!deobfClass.equals(obfClass)) {
                     return false;
                 }
             } else if (!deobfClass.equals(obfClass)) {
@@ -75,7 +81,7 @@ abstract public class BytecodeSignature extends ClassSignature {
         return true;
     }
 
-    private static boolean isPotentialTypeMatch(String deobfDesc, String obfDesc) {
+    private boolean isPotentialTypeMatch(String deobfDesc, String obfDesc) {
         return isPotentialTypeMatch(ConstPoolUtils.parseDescriptor(deobfDesc), ConstPoolUtils.parseDescriptor(obfDesc));
     }
 
