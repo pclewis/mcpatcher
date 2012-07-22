@@ -750,14 +750,14 @@ public class ClassMap {
         for (Entry<String, ClassMapEntry> e : classMap.entrySet()) {
             String oldClass = e.getKey();
             String newClass = e.getValue().getObfName().replace('.', '/');
-            data = stringReplace(data, oldClass, newClass);
-            data = stringReplace(data, "L" + oldClass + ";", "L" + newClass + ";");
+            data = stringReplace1(data, oldClass, newClass);
+            data = stringReplace2(data, oldClass, newClass);
         }
 
         jar.write(data);
     }
 
-    private byte[] stringReplace(byte[] data, String oldString, String newString) throws IOException {
+    private byte[] stringReplace1(byte[] data, String oldString, String newString) throws IOException {
         if (oldString.equals(newString)) {
             return data;
         }
@@ -773,6 +773,44 @@ public class ClassMap {
             baos2.write(data, bm.getEnd(), data.length - bm.getEnd());
             offset = bm.getStart() + newData.length;
             data = baos2.toByteArray();
+        }
+        return data;
+    }
+
+    private byte[] stringReplace2(byte[] data, String oldString, String newString) throws IOException {
+        if (oldString.equals(newString)) {
+            return data;
+        }
+        BinaryMatcher bm = new BinaryMatcher(BinaryRegex.build(
+            0,
+            BinaryRegex.any(),
+            BinaryRegex.nonGreedy(BinaryRegex.repeat(BinaryRegex.subset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$/.[<>;".getBytes(), true), 0, 255 - oldString.length())),
+            'L',
+            oldString.getBytes(),
+            ';'
+        ));
+        int offset = 0;
+        while (bm.match(data, offset)) {
+            int start = bm.getStart();
+            int length = Util.demarshal(data, bm.getStart(), 2);
+            if (start + length + 2 >= data.length || length + 2 < bm.getMatchLength()) {
+                offset++;
+                continue;
+            }
+            String oldStringFull = new String(data, start + 2, length, "UTF-8");
+            String newStringFull = oldStringFull.replaceAll("\\b(L?)" + oldString + "\\b", "$1" + newString);
+            if (oldStringFull.equals(newStringFull) || newStringFull.matches(".*net/minecraft.*net/minecraft.*")) {
+                offset = bm.getEnd();
+            } else {
+                Logger.log(Logger.LOG_METHOD, "string replace %s -> %s @%d", oldStringFull, newStringFull, start);
+                byte[] newData = Util.marshalString(newStringFull);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                baos.write(data, 0, bm.getStart());
+                baos.write(newData);
+                baos.write(data, bm.getEnd(), data.length - bm.getEnd());
+                offset = bm.getStart() + newData.length;
+                data = baos.toByteArray();
+            }
         }
         return data;
     }
