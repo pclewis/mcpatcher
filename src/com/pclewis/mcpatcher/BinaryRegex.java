@@ -34,6 +34,10 @@ public class BinaryRegex {
                 sb.append(literal((int[]) o));
             } else if (o instanceof String) {
                 sb.append((String) o);
+            } else if (o instanceof Character) {
+                sb.append(literal((int) (Character) o));
+            } else {
+                throw new IllegalArgumentException("unknown binary regex type: " + o.getClass().getSimpleName() + " " + o);
             }
         }
         return sb.toString();
