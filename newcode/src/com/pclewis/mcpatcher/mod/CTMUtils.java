@@ -21,6 +21,7 @@ public class CTMUtils {
     private static final boolean enableNonStandard = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "nonStandard", true);
     private static final boolean enableOutline = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "outline", false);
 
+    static final int BLOCK_ID_LOG = 17;
     static final int BLOCK_ID_GLASS = 20;
     static final int BLOCK_ID_BED = 26;
     static final int BLOCK_ID_GLASS_PANE = 102;
@@ -44,6 +45,9 @@ public class CTMUtils {
     static final int SOUTH_FACE = 3; // 0, 0, 1
     static final int WEST_FACE = 4; // -1, 0, 0
     static final int EAST_FACE = 5; // 1, 0, 0
+
+    static final int[] REORIENT_E_W = new int[]{WEST_FACE, EAST_FACE, NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE};
+    static final int[] REORIENT_N_S = new int[]{NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE, WEST_FACE, EAST_FACE};
 
     static final int[] GO_DOWN = new int[]{0, -1, 0};
     static final int[] GO_UP = new int[]{0, 1, 0};

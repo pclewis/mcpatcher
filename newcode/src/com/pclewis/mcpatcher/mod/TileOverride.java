@@ -19,6 +19,8 @@ abstract class TileOverride {
     final int[] tileMap;
 
     boolean disabled;
+    int[] reorient;
+    int metamask;
 
     static TileOverride create(String filePrefix, Properties properties, boolean connectByTile) {
         if (filePrefix == null) {
@@ -163,12 +165,15 @@ abstract class TileOverride {
     }
 
     final boolean shouldConnect(IBlockAccess blockAccess, Block block, int tileNum, int i, int j, int k, int face, int[] offset) {
+        int meta = blockAccess.getBlockMetadata(i, j, k);
         i += offset[0];
         j += offset[1];
         k += offset[2];
         int neighborID = blockAccess.getBlockId(i, j, k);
         Block neighbor = Block.blocksList[neighborID];
         if (exclude(blockAccess, neighbor, tileNum, i, j, k, face)) {
+            return false;
+        } else if (metamask != -1 && (blockAccess.getBlockMetadata(i, j, k) & ~metamask) != (meta & ~metamask)) {
             return false;
         } else if (connectByTile) {
             return neighbor.getBlockTexture(blockAccess, i, j, k, face) == tileNum;
@@ -177,14 +182,22 @@ abstract class TileOverride {
         }
     }
 
+    final int reorient(int face) {
+        if (face < 0 || face > 5 || reorient == null) {
+            return face;
+        } else {
+            return reorient[face];
+        }
+    }
+
     final boolean exclude(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
         if (block == null) {
             return true;
-        } else if ((faces & (1 << face)) == 0) {
+        } else if ((faces & (1 << reorient(face))) == 0) {
             return true;
         } else if (metadata != -1) {
             int meta = blockAccess.getBlockMetadata(i, j, k);
-            if (meta >= 0 && meta < 32 && (metadata & (1 << meta)) == 0) {
+            if (meta >= 0 && meta < 32 && (metadata & ((1 << meta) | (1 << (meta & metamask)))) == 0) {
                 return true;
             }
         }
@@ -198,6 +211,17 @@ abstract class TileOverride {
                 return -1;
             } else {
                 face = 0;
+            }
+        }
+        reorient = null;
+        metamask = -1;
+        if (block.blockID == CTMUtils.BLOCK_ID_LOG) {
+            metamask = ~0xc;
+            int orientation = blockAccess.getBlockMetadata(i, j, k) & 0xc;
+            if (orientation == 4) {
+                reorient = CTMUtils.REORIENT_E_W;
+            } else if (orientation == 8) {
+                reorient = CTMUtils.REORIENT_N_S;
             }
         }
         if (exclude(blockAccess, block, origTexture, i, j, k, face)) {
@@ -322,15 +346,23 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            if (face <= CTMUtils.TOP_FACE) {
+            if (reorient(face) <= CTMUtils.TOP_FACE) {
                 return -1;
             }
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[0])) {
+            int shift = 0;
+            if (reorient == CTMUtils.REORIENT_E_W) {
+                if (face == CTMUtils.TOP_FACE) {
+                    shift = -2;
+                } else if (face == CTMUtils.BOTTOM_FACE) {
+                    shift = 2;
+                }
+            }
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[shift & 7])) {
                 neighborBits |= 1;
             }
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[4])) {
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[(shift + 4) & 7])) {
                 neighborBits |= 2;
             }
             return neighborTileMap[neighborBits];
@@ -369,14 +401,15 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            if (face < 0) {
-                face = CTMUtils.NORTH_FACE;
+            if (reorient(face) < 0) {
+                face = reorient(CTMUtils.NORTH_FACE);
             }
+            int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, CTMUtils.GO_DOWN)) {
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[2])) {
                 neighborBits |= 1;
             }
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, CTMUtils.GO_UP)) {
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[6])) {
                 neighborBits |= 2;
             }
             return neighborTileMap[neighborBits];
@@ -405,8 +438,8 @@ abstract class TileOverride {
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             if (face < 0) {
-                face = CTMUtils.NORTH_FACE;
-            } else if (face <= CTMUtils.TOP_FACE) {
+                face = reorient(CTMUtils.NORTH_FACE);
+            } else if (reorient(face) <= CTMUtils.TOP_FACE) {
                 return -1;
             }
             if (blockAccess.getBlockMetadata(i, j, k) != 0) {
@@ -486,7 +519,7 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            face /= symmetry;
+            face = reorient(face) / symmetry;
             long n = P1 * i * (i + ADDEND) + P2 * j * (j + ADDEND) + P3 * k * (k + ADDEND) + P4 * face * (face + ADDEND);
             n = MULTIPLIER * (n + i + j + k + face) + ADDEND;
             int index = (int) ((n >> 32) ^ n) & 0x7fffffff;
@@ -551,7 +584,7 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            face &= symmetry;
+            face = reorient(face) & symmetry;
             int x;
             int y;
             switch (face) {
