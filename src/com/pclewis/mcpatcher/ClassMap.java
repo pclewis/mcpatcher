@@ -18,6 +18,8 @@ import java.util.jar.JarOutputStream;
  * names in minecraft.jar.  Each Mod has its own ClassMap that is maintained by MCPatcher.
  */
 public class ClassMap {
+    private static final String DESCRIPTOR_CHARS = BinaryRegex.subset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$/.[<>;".getBytes(), true);
+
     private HashMap<String, ClassMapEntry> classMap = new HashMap<String, ClassMapEntry>();
 
     ClassMap() {
@@ -781,33 +783,45 @@ public class ClassMap {
         if (oldString.equals(newString)) {
             return data;
         }
-        BinaryMatcher bm = new BinaryMatcher(BinaryRegex.build(
-            0,
-            BinaryRegex.any(),
-            BinaryRegex.nonGreedy(BinaryRegex.repeat(BinaryRegex.subset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$/.[<>;".getBytes(), true), 0, 255 - oldString.length())),
+        String fastExpr = BinaryRegex.build(
             'L',
             oldString.getBytes(),
             ';'
+        );
+        BinaryMatcher bmFast = new BinaryMatcher(fastExpr);
+        BinaryMatcher bm = new BinaryMatcher(BinaryRegex.build(
+            0,
+            BinaryRegex.any(),
+            BinaryRegex.nonGreedy(BinaryRegex.repeat(DESCRIPTOR_CHARS, 0, 255 - oldString.length())),
+            fastExpr
         ));
         int offset = 0;
-        while (bm.match(data, offset)) {
+        while (bmFast.match(data, offset) && bm.match(data, offset)) {
             int start = bm.getStart();
             int length = Util.demarshal(data, bm.getStart(), 2);
-            if (start + length + 2 >= data.length || length + 2 < bm.getMatchLength()) {
+            int end = start + length + 2;
+            if (end >= data.length || length + 2 < bm.getMatchLength()) {
                 offset++;
                 continue;
             }
-            String oldStringFull = new String(data, start + 2, length, "UTF-8");
+            String oldStringFull;
+            try {
+                oldStringFull = new String(data, start + 2, length, "UTF-8");
+            } catch (Throwable e) {
+                Logger.log(e);
+                offset++;
+                continue;
+            }
             String newStringFull = oldStringFull.replaceAll("\\b(L?)" + oldString + "\\b", "$1" + newString);
             if (oldStringFull.equals(newStringFull) || newStringFull.matches(".*net/minecraft.*net/minecraft.*")) {
-                offset = bm.getEnd();
+                offset = end;
             } else {
                 Logger.log(Logger.LOG_METHOD, "string replace %s -> %s @%d", oldStringFull, newStringFull, start);
                 byte[] newData = Util.marshalString(newStringFull);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 baos.write(data, 0, bm.getStart());
                 baos.write(newData);
-                baos.write(data, bm.getEnd(), data.length - bm.getEnd());
+                baos.write(data, end, data.length - end);
                 offset = bm.getStart() + newData.length;
                 data = baos.toByteArray();
             }
