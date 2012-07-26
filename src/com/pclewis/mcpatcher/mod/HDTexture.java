@@ -18,8 +18,8 @@ public class HDTexture extends Mod {
     public HDTexture(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
-        description = "Provides support for texture packs of size 32x32 and higher.";
-        version = "1.3";
+        description = "Provides support for high-resolution texture packs and custom animations.";
+        version = "1.4";
         configPanel = new HDTextureConfig();
 
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
@@ -55,15 +55,9 @@ public class HDTexture extends Mod {
         classMods.add(new FontRendererMod());
         classMods.add(new GameSettingsMod());
         classMods.add(new GetResourceMod());
-        if (haveColorizerWater) {
-            classMods.add(new ColorizerMod("ColorizerWater", false, false));
-            classMods.add(new ColorizerMod("ColorizerGrass", true, false));
-            classMods.add(new ColorizerMod("ColorizerFoliage", true, true));
-        } else {
-            classMods.add(new ColorizerMod("ColorizerWater", "/misc/foliagecolor.png"));
-            classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
-            classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
-        }
+        classMods.add(new ColorizerMod("ColorizerWater", haveColorizerWater ? "/misc/watercolor.png" : "/misc/foliagecolor.png"));
+        classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
+        classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
 
         if (minecraftVersion.compareTo("12w22a") < 0) {
             classMods.add(new GuiContainerCreativeMod());
@@ -699,6 +693,12 @@ public class HDTexture extends Mod {
                 }
             }.setMethodName("runTick"));
 
+            if (haveColorizerWater) {
+                addColorizerSignature("Water");
+                addColorizerSignature("Grass");
+                addColorizerSignature("Foliage");
+            }
+
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
             if (haveAlternateFont) {
@@ -792,6 +792,19 @@ public class HDTexture extends Mod {
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "runTick", "()V")));
+        }
+
+        private void addColorizerSignature(final String name) {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("/misc/" + name.toLowerCase() + "color.png"),
+                        BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                        BytecodeMatcher.captureReference(INVOKESTATIC)
+                    );
+                }
+            }.addXref(1, new MethodRef("Colorizer" + name, "loadColorBuffer", "([I)V")));
         }
     }
 
@@ -1142,45 +1155,20 @@ public class HDTexture extends Mod {
     }
 
     private class ColorizerMod extends ClassMod {
-        private String name;
+        private final String name;
 
-        private ColorizerMod(String name) {
+        ColorizerMod(String name, String resource) {
             this.name = name;
 
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "colorBuffer", "[I")));
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(name, "colorBuffer", "[I")));
-        }
 
-        ColorizerMod(String name, String resource) {
-            this(name);
-
-            classSignatures.add(new ConstSignature(resource));
-        }
-
-        ColorizerMod(String name, boolean has255, boolean has6396257) {
-            this(name);
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    if (getMethodInfo().isStaticInitializer()) {
-                        return buildExpression(
-                            BinaryRegex.begin(),
-                            push(65536),
-                            NEWARRAY, T_INT,
-                            PUTSTATIC, BinaryRegex.any(2),
-                            RETURN,
-                            BinaryRegex.end()
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            });
-
-            classSignatures.add(new ConstSignature(6396257).negate(!has6396257));
-            classSignatures.add(new ConstSignature(255.0).negate(!has255));
+            if (haveColorizerWater) {
+                prerequisiteClasses.add("Minecraft");
+            } else {
+                classSignatures.add(new ConstSignature(resource));
+            }
         }
 
         @Override
