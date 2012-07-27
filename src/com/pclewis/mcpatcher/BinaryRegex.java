@@ -204,14 +204,34 @@ public class BinaryRegex {
      * @return String regex
      */
     public static String subset(byte[] byteList, boolean positive) {
+        int[] intList;
+        if (byteList == null) {
+            intList = null;
+        } else {
+            intList = new int[byteList.length];
+            for (int i = 0; i < byteList.length; i++) {
+                intList[i] = byteList[i];
+            }
+        }
+        return subset(intList, positive);
+    }
+
+    /**
+     * Matches a specified set of bytes: [...] or [^...]
+     *
+     * @param intList array of bytes to match
+     * @param positive if true, match bytes; if false, match complement
+     * @return String regex
+     */
+    public static String subset(int[] intList, boolean positive) {
         boolean[] allowed = new boolean[256];
         int i;
         for (i = 0; i < allowed.length; i++) {
             allowed[i] = !positive;
         }
-        if (byteList != null) {
-            for (i = 0; i < byteList.length; i++) {
-                allowed[(int) byteList[i] & 0xff] = positive;
+        if (intList != null) {
+            for (i = 0; i < intList.length; i++) {
+                allowed[intList[i] & 0xff] = positive;
             }
         }
 
