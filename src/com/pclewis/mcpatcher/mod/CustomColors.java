@@ -885,10 +885,40 @@ public class CustomColors extends Mod {
 
     private class ItemRendererMod extends ClassMod {
         ItemRendererMod() {
+            final FieldRef itemID = new FieldRef("ItemStack", "itemID", "I");
+            final MethodRef renderItem = new MethodRef(getDeobfClass(), "renderItem", "(LEntityLiving;LItemStack;I)V");
+
             classSignatures.add(new ConstSignature("/terrain.png"));
             classSignatures.add(new ConstSignature("/gui/items.png"));
             classSignatures.add(new ConstSignature("%blur%/misc/glint.png"));
             classSignatures.add(new ConstSignature("/misc/mapbg.png"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // par2ItemStack.itemID
+                        ALOAD_2,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        BinaryRegex.or(
+                            BinaryRegex.build(push(256)),
+                            BinaryRegex.build(AALOAD)
+                        ),
+
+                        // ...
+                        BinaryRegex.any(0, 400),
+
+                        // GL11.glTranslatef(-0.9375f, -0.0625f, 0.0f);
+                        push(-0.9375f),
+                        push(-0.0625f),
+                        FCONST_0,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glTranslatef", "(FFF)V"))
+                    );
+                }
+            }
+                .addXref(1, itemID)
+                .setMethod(renderItem)
+            );
 
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
@@ -899,17 +929,6 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.lookBehind(BinaryRegex.build(
-                            // if (itemstack.itemID > 256) {
-                            ALOAD_2,
-                            BytecodeMatcher.captureReference(GETFIELD),
-                            push(256),
-                            IF_ICMPGE, BinaryRegex.any(2),
-
-                            // ...
-                            BinaryRegex.any(0, 300)
-                        ), true),
-
                         // GL11.glTranslatef(-0.9375f, -0.0625f, 0.0f);
                         push(-0.9375f),
                         push(-0.0625f),
@@ -921,12 +940,20 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
+                        // if (par2ItemStack != null) {
                         ALOAD_2,
-                        getCaptureGroup(1),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWaterBlockGL", "(I)V"))
+                        IFNULL, branch("A"),
+
+                        // Colorizer.colorizeWaterBlockGL(par2ItemStack.itemID)
+                        ALOAD_2,
+                        reference(GETFIELD, itemID),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeWaterBlockGL", "(I)V")),
+
+                        // }
+                        label("A")
                     );
                 }
-            });
+            }.targetMethod(renderItem));
         }
     }
 
