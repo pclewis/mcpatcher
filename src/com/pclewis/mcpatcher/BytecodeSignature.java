@@ -83,7 +83,8 @@ abstract public class BytecodeSignature extends ClassSignature {
     }
 
     private boolean isPotentialTypeMatch(String deobfDesc, String obfDesc) {
-        return isPotentialTypeMatch(ConstPoolUtils.parseDescriptor(deobfDesc), ConstPoolUtils.parseDescriptor(obfDesc));
+        return (deobfDesc == null && obfDesc == null) ||
+            isPotentialTypeMatch(ConstPoolUtils.parseDescriptor(deobfDesc), ConstPoolUtils.parseDescriptor(obfDesc));
     }
 
     public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
