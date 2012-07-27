@@ -1,9 +1,6 @@
 package com.pclewis.mcpatcher;
 
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.CodeAttribute;
-import javassist.bytecode.ConstPool;
-import javassist.bytecode.MethodInfo;
+import javassist.bytecode.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +32,10 @@ abstract public class BytecodeSignature extends ClassSignature {
     boolean match() {
         matcher = new BytecodeMatcher(getMatchExpression());
         return matcher.match(getMethodInfo());
+    }
+
+    void initMatcher() {
+        matcher = new BytecodeMatcher(getMatchExpression());
     }
 
     @Override
@@ -86,7 +87,6 @@ abstract public class BytecodeSignature extends ClassSignature {
     }
 
     public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
-        method:
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
             classMod.methodInfo = methodInfo;
@@ -100,9 +100,6 @@ abstract public class BytecodeSignature extends ClassSignature {
                     continue;
                 }
             }
-            if (!match()) {
-                continue;
-            }
             ArrayList<String> deobfTypes = null;
             ArrayList<String> obfTypes = null;
             if (deobfMethod != null && deobfMethod.getType() != null) {
@@ -112,41 +109,52 @@ abstract public class BytecodeSignature extends ClassSignature {
                     continue;
                 }
             }
-            if (deobfMethod != null) {
-                String deobfName = classMod.getDeobfClass();
-                tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
-                tempClassMap.addMethodMap(deobfName, deobfMethod.getName(), methodInfo.getName(), methodInfo.getDescriptor());
-                if (deobfTypes != null && obfTypes != null) {
-                    for (int i = 0; i < deobfTypes.size(); i++) {
-                        String desc = ClassMap.descriptorToClassName(deobfTypes.get(i));
-                        String obf = ClassMap.descriptorToClassName(obfTypes.get(i));
-                        if (!obf.equals(desc)) {
-                            tempClassMap.addClassMap(desc, obf);
+            ConstPool constPool = methodInfo.getConstPool();
+            CodeIterator codeIterator = codeAttribute.iterator();
+            initMatcher();
+            ArrayList<JavaRef> tempMappings = new ArrayList<JavaRef>();
+            try {
+                match:
+                for (int offset = 0; offset < codeIterator.getCodeLength() && matcher.match(methodInfo, offset); offset = codeIterator.next()) {
+                    tempMappings.clear();
+                    for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
+                        int captureGroup = entry.getKey();
+                        JavaRef xref = entry.getValue();
+                        byte[] code = matcher.getCaptureGroup(captureGroup);
+                        int index = Util.demarshal(code, 1, 2);
+                        ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
+                        ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
+                        JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
+                        if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
+                            continue match;
+                        }
+                        tempMappings.add(xref);
+                        tempMappings.add(newRef);
+                    }
+                    for (int i = 0; i + 1 < tempMappings.size(); i += 2) {
+                        tempClassMap.addMap(tempMappings.get(i), tempMappings.get(i + 1));
+                    }
+                    if (deobfMethod != null) {
+                        String deobfName = classMod.getDeobfClass();
+                        tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
+                        tempClassMap.addMethodMap(deobfName, deobfMethod.getName(), methodInfo.getName(), methodInfo.getDescriptor());
+                        if (deobfTypes != null && obfTypes != null) {
+                            for (int i = 0; i < deobfTypes.size(); i++) {
+                                String desc = ClassMap.descriptorToClassName(deobfTypes.get(i));
+                                String obf = ClassMap.descriptorToClassName(obfTypes.get(i));
+                                if (!obf.equals(desc)) {
+                                    tempClassMap.addClassMap(desc, obf);
+                                }
+                            }
                         }
                     }
+                    afterMatch(classFile, methodInfo);
+                    classMod.methodInfo = null;
+                    return true;
                 }
+            } catch (BadBytecode e) {
+                Logger.log(e);
             }
-            ConstPool constPool = methodInfo.getConstPool();
-            ArrayList<JavaRef> tempMappings = new ArrayList<JavaRef>();
-            for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
-                int captureGroup = entry.getKey();
-                JavaRef xref = entry.getValue();
-                byte[] code = matcher.getCaptureGroup(captureGroup);
-                int index = Util.demarshal(code, 1, 2);
-                ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
-                ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
-                JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
-                if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
-                    continue method;
-                }
-                tempMappings.add(xref);
-                tempMappings.add(newRef);
-            }
-            for (int i = 0; i + 1 < tempMappings.size(); i += 2) {
-                tempClassMap.addMap(tempMappings.get(i), tempMappings.get(i + 1));
-            }
-            afterMatch(classFile, methodInfo);
-            return true;
         }
         classMod.methodInfo = null;
         return false;
