@@ -209,8 +209,6 @@ abstract class TileOverride {
             if (requiresFace()) {
                 error("method=%s is not supported for non-standard blocks", getMethod());
                 return -1;
-            } else {
-                face = 0;
             }
         }
         reorient = null;
@@ -513,12 +511,10 @@ abstract class TileOverride {
         }
 
         @Override
-        boolean requiresFace() {
-            return false;
-        }
-
-        @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+            if (face < 0) {
+                face = 0;
+            }
             face = reorient(face) / symmetry;
             long n = P1 * i * (i + ADDEND) + P2 * j * (j + ADDEND) + P3 * k * (k + ADDEND) + P4 * face * (face + ADDEND);
             n = MULTIPLIER * (n + i + j + k + face) + ADDEND;
@@ -578,12 +574,10 @@ abstract class TileOverride {
         }
 
         @Override
-        boolean requiresFace() {
-            return false;
-        }
-
-        @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+            if (face < 0) {
+                face = 0;
+            }
             face = reorient(face) & symmetry;
             int x;
             int y;
