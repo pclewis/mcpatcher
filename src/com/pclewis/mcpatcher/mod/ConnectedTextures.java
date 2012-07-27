@@ -433,6 +433,12 @@ public class ConnectedTextures extends Mod {
         private final FieldRef overrideBlockTexture = new FieldRef(getDeobfClass(), "overrideBlockTexture", "I");
         private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
         private final FieldRef instance = new FieldRef("Tessellator", "instance", "LTessellator;");
+        private final FieldRef uvRotateEast = new FieldRef(getDeobfClass(), "uvRotateEast", "I");
+        private final FieldRef uvRotateWest = new FieldRef(getDeobfClass(), "uvRotateWest", "I");
+        private final FieldRef uvRotateSouth = new FieldRef(getDeobfClass(), "uvRotateSouth", "I");
+        private final FieldRef uvRotateNorth = new FieldRef(getDeobfClass(), "uvRotateNorth", "I");
+        private final FieldRef uvRotateTop = new FieldRef(getDeobfClass(), "uvRotateTop", "I");
+        private final FieldRef uvRotateBottom = new FieldRef(getDeobfClass(), "uvRotateBottom", "I");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
         private final MethodRef drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDD)V");
         private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)Z");
@@ -476,9 +482,39 @@ public class ConnectedTextures extends Mod {
                 .addXref(2, overrideBlockTexture)
             );
 
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        String s = buildExpression(
+                            ALOAD_0,
+                            push(0),
+                            BytecodeMatcher.captureReference(PUTFIELD)
+                        );
+                        return s + s + s + s + s + s;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+                .addXref(1, uvRotateEast)
+                .addXref(2, uvRotateWest)
+                .addXref(3, uvRotateSouth)
+                .addXref(4, uvRotateNorth)
+                .addXref(5, uvRotateTop)
+                .addXref(6, uvRotateBottom)
+            );
+
             memberMappers.add(new FieldMapper(blockAccess));
             memberMappers.add(new MethodMapper(faceMethods));
             memberMappers.add(new MethodMapper(drawCrossedSquares));
+
+            patches.add(new MakeMemberPublicPatch(uvRotateEast));
+            patches.add(new MakeMemberPublicPatch(uvRotateWest));
+            patches.add(new MakeMemberPublicPatch(uvRotateSouth));
+            patches.add(new MakeMemberPublicPatch(uvRotateNorth));
+            patches.add(new MakeMemberPublicPatch(uvRotateTop));
+            patches.add(new MakeMemberPublicPatch(uvRotateBottom));
 
             patches.add(new BytecodePatch() {
                 @Override
