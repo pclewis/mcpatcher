@@ -129,27 +129,28 @@ abstract class TileOverride {
         connectByTile = connectType.equals("tile");
 
         String tileList = properties.getProperty("tiles", "");
-        int[] defaultTileMap = getDefaultTileMap();
-        if (defaultTileMap == null) {
-            if (tileList.equals("")) {
-                error("no tile map given");
-                tileMap = null;
-            } else {
-                tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
-                if (tileMap.length == 0) {
-                    error("no tile map given");
-                }
-            }
+        if (tileList.equals("")) {
+            tileMap = getDefaultTileMap();
         } else {
-            if (tileList.equals("")) {
-                tileMap = defaultTileMap;
-            } else {
-                tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
-                if (tileMap.length != defaultTileMap.length) {
-                    error("tile map requires %d entries, got %d", defaultTileMap.length, tileMap.length);
-                }
+            tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
+        }
+        if (disabled) {
+        } else if (tileMap == null || tileMap.length == 0) {
+            error("no tile map given");
+        } else {
+            String status = checkTileMap();
+            if (status != null) {
+                error("invalid %s tile map: %s", getMethod(), status);
             }
         }
+    }
+
+    int[] getDefaultTileMap() {
+        return null;
+    }
+
+    String checkTileMap() {
+        return null;
     }
 
     boolean requiresFace() {
@@ -240,8 +241,6 @@ abstract class TileOverride {
 
     abstract String getMethod();
 
-    abstract int[] getDefaultTileMap();
-
     abstract int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face);
 
     final static class CTM extends TileOverride {
@@ -298,6 +297,15 @@ abstract class TileOverride {
         }
 
         @Override
+        String checkTileMap() {
+            if (tileMap.length >= 47) {
+                return null;
+            } else {
+                return "requires at least 47 tiles";
+            }
+        }
+
+        @Override
         boolean requiresFace() {
             return true;
         }
@@ -341,6 +349,15 @@ abstract class TileOverride {
         @Override
         int[] getDefaultTileMap() {
             return defaultTileMap;
+        }
+
+        @Override
+        String checkTileMap() {
+            if (tileMap.length == 4) {
+                return null;
+            } else {
+                return "requires exactly 4 tiles";
+            }
         }
 
         @Override
@@ -399,6 +416,15 @@ abstract class TileOverride {
         }
 
         @Override
+        String checkTileMap() {
+            if (tileMap.length == 4) {
+                return null;
+            } else {
+                return "requires exactly 4 tiles";
+            }
+        }
+
+        @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             if (reorient(face) < 0) {
                 face = reorient(CTMUtils.NORTH_FACE);
@@ -432,6 +458,15 @@ abstract class TileOverride {
         @Override
         int[] getDefaultTileMap() {
             return defaultTileMap;
+        }
+
+        @Override
+        String checkTileMap() {
+            if (tileMap.length == 1) {
+                return null;
+            } else {
+                return "requires exactly 1 tile";
+            }
         }
 
         @Override
@@ -504,11 +539,6 @@ abstract class TileOverride {
         }
 
         @Override
-        int[] getDefaultTileMap() {
-            return null;
-        }
-
-        @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             if (face < 0) {
                 face = 0;
@@ -549,8 +579,6 @@ abstract class TileOverride {
             height = h;
             if (width <= 0 || height <= 0 || width * height > CTMUtils.NUM_TILES) {
                 error("invalid width and height (%dx%d)", width, height);
-            } else if (tileMap.length != width * height) {
-                error("must have exactly width * height (=%d) tiles, got %d", width * height, tileMap.length);
             }
 
             String sym = properties.getProperty("symmetry", "none");
@@ -567,8 +595,12 @@ abstract class TileOverride {
         }
 
         @Override
-        int[] getDefaultTileMap() {
-            return null;
+        String checkTileMap() {
+            if (tileMap.length == width * height) {
+                return null;
+            } else {
+                return String.format("requires exactly %dx%d tiles", width, height);
+            }
         }
 
         @Override
