@@ -219,9 +219,9 @@ abstract class TileOverride {
             metamask = ~0xc;
             int orientation = blockAccess.getBlockMetadata(i, j, k) & 0xc;
             if (orientation == 4) {
-                reorient = CTMUtils.REORIENT_E_W;
+                reorient = CTMUtils.ROTATE_90_N_S;
             } else if (orientation == 8) {
-                reorient = CTMUtils.REORIENT_N_S;
+                reorient = CTMUtils.ROTATE_90_E_W;
             }
         }
         if (exclude(blockAccess, block, origTexture, i, j, k, face)) {
@@ -368,7 +368,7 @@ abstract class TileOverride {
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
             int shift = 0;
-            if (reorient == CTMUtils.REORIENT_E_W) {
+            if (reorient == CTMUtils.ROTATE_90_N_S) {
                 if (face == CTMUtils.TOP_FACE) {
                     shift = -2;
                 } else if (face == CTMUtils.BOTTOM_FACE) {
