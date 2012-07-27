@@ -143,13 +143,8 @@ public class GLSLShader extends Mod {
     private class RenderGlobalMod extends ClassMod {
         RenderGlobalMod() {
             final MethodRef renderSky = new MethodRef(getDeobfClass(), "renderSky", "(F)V");
-            final FieldRef worldObj;
-
-            if (haveNewWorld) {
-                worldObj = new FieldRef(getDeobfClass(), "worldObj", "LWorldServerMP;");
-            } else {
-                worldObj = new FieldRef(getDeobfClass(), "worldObj", "LWorld;");
-            }
+            final String worldClass = haveNewWorld ? "WorldServerMP" : "World";
+            final FieldRef worldObj = new FieldRef(getDeobfClass(), "worldObj", "L" + worldClass + ";");
 
             classSignatures.add(new ConstSignature("smoke"));
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
@@ -191,10 +186,11 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        // f18 = (float)(worldObj.getStarBrightness(par1) * d);
                         ALOAD_0,
                         reference(GETFIELD, worldObj),
                         FLOAD_1,
-                        reference(INVOKEVIRTUAL, new MethodRef("World", "getStarBrightness", "(F)F")),
+                        reference(INVOKEVIRTUAL, new MethodRef(worldClass, "getStarBrightness", "(F)F")),
                         BytecodeMatcher.anyFLOAD,
                         FMUL,
                         BytecodeMatcher.anyFSTORE
@@ -474,8 +470,16 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        // (vanilla) renderglobal.renderAllRenderLists(1, par1);
+                        // (w/ Better Glass) renderglobal.renderAllRenderLists(this.loop, par1);
                         BytecodeMatcher.anyALOAD,
-                        ICONST_1,
+                        BinaryRegex.or(
+                            BinaryRegex.build(ICONST_1),
+                            BinaryRegex.build(
+                                ALOAD_0,
+                                BytecodeMatcher.anyReference(GETFIELD)
+                            )
+                        ),
                         FLOAD_1,
                         F2D,
                         reference(INVOKEVIRTUAL, new MethodRef("RenderGlobal", "renderAllRenderLists", "(ID)V"))
@@ -1016,7 +1020,10 @@ public class GLSLShader extends Mod {
         EntityPlayerSPMod() {
             parentClass = "EntityPlayer";
 
-            classSignatures.add(new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"));
+            classSignatures.add(new OrSignature(
+                new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"), // 1.2
+                new ConstSignature("http://skins.minecraft.net/MinecraftSkins/") // 1.3
+            ));
             classSignatures.add(new ConstSignature("portal.trigger"));
         }
     }
