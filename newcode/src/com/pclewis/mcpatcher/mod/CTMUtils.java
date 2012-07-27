@@ -56,6 +56,9 @@ public class CTMUtils {
     // NEIGHBOR_OFFSETS[a][b][c] = offset from starting block
     // a: face 0-5
     // b: neighbor 0-7
+    //    7   6   5
+    //    0   *   4
+    //    1   2   3
     // c: coordinate (x,y,z) 0-2
     static final int[][][] NEIGHBOR_OFFSET = new int[][][]{
         // BOTTOM_FACE
