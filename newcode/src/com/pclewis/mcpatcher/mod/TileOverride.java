@@ -441,9 +441,6 @@ abstract class TileOverride {
             } else if (reorient(face) <= CTMUtils.TOP_FACE) {
                 return -1;
             }
-            if (blockAccess.getBlockMetadata(i, j, k) != 0) {
-                return -1;
-            }
             if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, CTMUtils.GO_UP)) {
                 return tileMap[0];
             }
