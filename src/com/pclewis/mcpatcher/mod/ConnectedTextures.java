@@ -441,8 +441,8 @@ public class ConnectedTextures extends Mod {
         private final FieldRef uvRotateBottom = new FieldRef(getDeobfClass(), "uvRotateBottom", "I");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
         private final MethodRef drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDD)V");
-        private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIIII)Z");
-        private final MethodRef setupNoFace = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LBlock;LIBlockAccess;IIII)Z");
+        private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LRenderBlocks;LBlock;IIIII)Z");
+        private final MethodRef setupNoFace = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LRenderBlocks;LBlock;IIII)Z");
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
         private final FieldRef newTextureIndex = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTextureIndex", "I");
         private final FieldRef newTessellator = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTessellator", "LTessellator;");
@@ -591,10 +591,9 @@ public class ConnectedTextures extends Mod {
                         reference(GETFIELD, overrideBlockTexture),
                         IFGE, branch("A"),
 
-                        // && CTMUtils.setup(block, blockAccess, i, j, k, texture)) {
-                        ALOAD_1,
+                        // && CTMUtils.setup(this, block, i, j, k, texture)) {
                         ALOAD_0,
-                        reference(GETFIELD, blockAccess),
+                        ALOAD_1,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
@@ -647,10 +646,9 @@ public class ConnectedTextures extends Mod {
                         reference(GETFIELD, overrideBlockTexture),
                         IFGE, branch("A"),
 
-                        // && CTMUtils.setup(block, blockAccess, (int) x, (int) y, (int) z, texture)) {
-                        ALOAD_1,
+                        // && CTMUtils.setup(this, block, (int) x, (int) y, (int) z, texture)) {
                         ALOAD_0,
-                        reference(GETFIELD, blockAccess),
+                        ALOAD_1,
                         DLOAD_3,
                         D2I,
                         DLOAD, 5,
@@ -723,11 +721,10 @@ public class ConnectedTextures extends Mod {
                         reference(INVOKESTATIC, reset),
                         GOTO, branch("B"),
 
-                        // } else if (CTMUtils.setup(block, blockAccess, (int) x, (int) y, (int) z, face, texture)) {
+                        // } else if (CTMUtils.setup(this, block, (int) x, (int) y, (int) z, face, texture)) {
                         label("A"),
-                        ALOAD_1,
                         ALOAD_0,
-                        reference(GETFIELD, blockAccess),
+                        ALOAD_1,
                         DLOAD_2,
                         D2I,
                         DLOAD, 4,

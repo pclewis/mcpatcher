@@ -3,6 +3,7 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.Block;
 import net.minecraft.src.IBlockAccess;
+import net.minecraft.src.RenderBlocks;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -204,7 +205,7 @@ abstract class TileOverride {
         return false;
     }
 
-    final int getTile(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+    final int getTile(RenderBlocks renderBlocks, IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
         if (face < 0) {
             if (requiresFace()) {
                 error("method=%s is not supported for non-standard blocks", getMethod());

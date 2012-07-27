@@ -1,10 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import net.minecraft.src.Block;
-import net.minecraft.src.IBlockAccess;
-import net.minecraft.src.Tessellator;
-import net.minecraft.src.TexturePackBase;
+import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -148,14 +145,15 @@ public class CTMUtils {
         }
     }
 
-    public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int face, int origTexture) {
+    public static boolean setup(RenderBlocks renderBlocks, Block block, int i, int j, int k, int face, int origTexture) {
+        IBlockAccess blockAccess = renderBlocks.blockAccess;
         if (!active || !enableStandard || blockAccess == null || face < 0 || face > 5) {
             return false;
         }
         if (block.blockID == BLOCK_ID_BED) {
             return false;
         }
-        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, face)) {
+        if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face)) {
             newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
@@ -164,14 +162,15 @@ public class CTMUtils {
         }
     }
 
-    public static boolean setup(Block block, IBlockAccess blockAccess, int i, int j, int k, int origTexture) {
+    public static boolean setup(RenderBlocks renderBlocks, Block block, int i, int j, int k, int origTexture) {
+        IBlockAccess blockAccess = renderBlocks.blockAccess;
         if (!active || !enableNonStandard || blockAccess == null) {
             return false;
         }
         if (block.blockID == BLOCK_ID_BED) {
             return false;
         }
-        if (getConnectedTexture(blockAccess, block, origTexture, i, j, k, -1)) {
+        if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, -1)) {
             newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
@@ -189,12 +188,12 @@ public class CTMUtils {
         active = false;
     }
 
-    private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-        return getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, tileOverrides, origTexture) ||
-            getConnectedTexture(blockAccess, block, origTexture, i, j, k, face, blockOverrides, block.blockID);
+    private static boolean getConnectedTexture(RenderBlocks renderBlocks, IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+        return getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face, tileOverrides, origTexture) ||
+            getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face, blockOverrides, block.blockID);
     }
 
-    private static boolean getConnectedTexture(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face, TileOverride[][] allOverrides, int index) {
+    private static boolean getConnectedTexture(RenderBlocks renderBlocks, IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face, TileOverride[][] allOverrides, int index) {
         if (index < 0 || index >= allOverrides.length) {
             return false;
         }
@@ -212,7 +211,7 @@ public class CTMUtils {
                 continue;
             }
             newTexture = override.texture;
-            newTextureIndex = override.getTile(blockAccess, block, origTexture, i, j, k, face);
+            newTextureIndex = override.getTile(renderBlocks, blockAccess, block, origTexture, i, j, k, face);
             if (newTextureIndex >= 0) {
                 return true;
             }
