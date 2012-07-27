@@ -699,10 +699,15 @@ final public class MCPatcher {
                 }
             }
         }
-        for (Mod mod : modList.getSelected()) {
-            for (String name : mod.filesToAdd) {
-                if (mod == allFilesToAdd.get(name)) {
-                    addFile(mod, name, outputJar);
+        if (!allFilesToAdd.isEmpty()) {
+            ui.setStatusText("Adding files to %s...", minecraft.getOutputFile().getName());
+            int filesAdded = 0;
+            for (Mod mod : modList.getSelected()) {
+                for (String name : mod.filesToAdd) {
+                    if (mod == allFilesToAdd.get(name)) {
+                        addFile(mod, name, outputJar);
+                        ui.updateProgress(++filesAdded, allFilesToAdd.size());
+                    }
                 }
             }
         }
