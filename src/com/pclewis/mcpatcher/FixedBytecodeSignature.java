@@ -1,7 +1,5 @@
 package com.pclewis.mcpatcher;
 
-import javassist.bytecode.MethodInfo;
-
 /**
  * Fixed BytecodeSignature that does not require any method information.  Offers better
  * performance when the target bytecode sequence does not contain any references.

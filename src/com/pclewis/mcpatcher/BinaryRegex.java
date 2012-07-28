@@ -219,7 +219,7 @@ public class BinaryRegex {
     /**
      * Matches a specified set of bytes: [...] or [^...]
      *
-     * @param intList array of bytes to match
+     * @param intList  array of bytes to match
      * @param positive if true, match bytes; if false, match complement
      * @return String regex
      */

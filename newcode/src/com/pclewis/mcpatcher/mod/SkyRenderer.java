@@ -3,7 +3,6 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
