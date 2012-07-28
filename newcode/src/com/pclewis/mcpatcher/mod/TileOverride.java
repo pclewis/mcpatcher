@@ -22,6 +22,7 @@ abstract class TileOverride {
     boolean disabled;
     int[] reorient;
     int metamask;
+    int rotateUV;
 
     static TileOverride create(String filePrefix, Properties properties, boolean connectByTile) {
         if (filePrefix == null) {
@@ -216,13 +217,16 @@ abstract class TileOverride {
         }
         reorient = null;
         metamask = -1;
+        rotateUV = 0;
         if (block.blockID == CTMUtils.BLOCK_ID_LOG) {
             metamask = ~0xc;
             int orientation = blockAccess.getBlockMetadata(i, j, k) & 0xc;
-            if (orientation == 4) {
-                reorient = CTMUtils.ROTATE_90_N_S;
-            } else if (orientation == 8) {
-                reorient = CTMUtils.ROTATE_90_E_W;
+            if (orientation == 4) { // east/west cut
+                reorient = CTMUtils.ROTATE_UV_MAP[0];
+                rotateUV = CTMUtils.ROTATE_UV_MAP[0][face + 6];
+            } else if (orientation == 8) { // north/south cut
+                reorient = CTMUtils.ROTATE_UV_MAP[1];
+                rotateUV = CTMUtils.ROTATE_UV_MAP[1][face + 6];
             }
         }
         if (exclude(blockAccess, block, origTexture, i, j, k, face)) {
@@ -230,6 +234,10 @@ abstract class TileOverride {
         } else {
             return getTileImpl(blockAccess, block, origTexture, i, j, k, face);
         }
+    }
+
+    final int rotateUV(int neighbor) {
+        return (neighbor + rotateUV) & 7;
     }
 
     private static int[] compose(int[] map1, int[] map2) {
@@ -363,23 +371,17 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            if (reorient(face) <= CTMUtils.TOP_FACE) {
+            if (face < 0) {
+                face = CTMUtils.NORTH_FACE;
+            } else if (reorient(face) <= CTMUtils.TOP_FACE) {
                 return -1;
             }
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
-            int shift = 0;
-            if (reorient == CTMUtils.ROTATE_90_N_S) {
-                if (face == CTMUtils.TOP_FACE) {
-                    shift = -2;
-                } else if (face == CTMUtils.BOTTOM_FACE) {
-                    shift = 2;
-                }
-            }
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[shift & 7])) {
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(0)])) {
                 neighborBits |= 1;
             }
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[(shift + 4) & 7])) {
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(4)])) {
                 neighborBits |= 2;
             }
             return neighborTileMap[neighborBits];
@@ -427,15 +429,17 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            if (reorient(face) < 0) {
-                face = reorient(CTMUtils.NORTH_FACE);
+            if (face < 0) {
+                face = CTMUtils.NORTH_FACE;
+            } else if (reorient(face) <= CTMUtils.TOP_FACE) {
+                return -1;
             }
             int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[2])) {
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(2)])) {
                 neighborBits |= 1;
             }
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[6])) {
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(6)])) {
                 neighborBits |= 2;
             }
             return neighborTileMap[neighborBits];
@@ -473,11 +477,12 @@ abstract class TileOverride {
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             if (face < 0) {
-                face = reorient(CTMUtils.NORTH_FACE);
+                face = CTMUtils.NORTH_FACE;
             } else if (reorient(face) <= CTMUtils.TOP_FACE) {
                 return -1;
             }
-            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, CTMUtils.GO_UP)) {
+            int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
+            if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(6)])) {
                 return tileMap[0];
             }
             return -1;

@@ -43,8 +43,10 @@ public class CTMUtils {
     static final int WEST_FACE = 4; // -1, 0, 0
     static final int EAST_FACE = 5; // 1, 0, 0
 
-    static final int[] ROTATE_90_N_S = new int[]{WEST_FACE, EAST_FACE, NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE};
-    static final int[] ROTATE_90_E_W = new int[]{NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE, WEST_FACE, EAST_FACE};
+    static final int[][] ROTATE_UV_MAP = new int[][]{
+        {WEST_FACE, EAST_FACE, NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE, 2, -2, 2, -2, 0, 0},
+        {NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE, WEST_FACE, EAST_FACE, 0, 0, 0, 0, -2, 2},
+    };
 
     static final int[] GO_DOWN = new int[]{0, -1, 0};
     static final int[] GO_UP = new int[]{0, 1, 0};
