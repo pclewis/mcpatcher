@@ -11,6 +11,101 @@ import java.io.InputStream;
 import java.util.Properties;
 
 abstract class TileOverride {
+    private static final int BOTTOM_FACE = 0; // 0, -1, 0
+    private static final int TOP_FACE = 1; // 0, 1, 0
+    private static final int NORTH_FACE = 2; // 0, 0, -1
+    private static final int SOUTH_FACE = 3; // 0, 0, 1
+    private static final int WEST_FACE = 4; // -1, 0, 0
+    private static final int EAST_FACE = 5; // 1, 0, 0
+
+    private static final int[][] ROTATE_UV_MAP = new int[][]{
+        {WEST_FACE, EAST_FACE, NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE, 2, -2, 2, -2, 0, 0},
+        {NORTH_FACE, SOUTH_FACE, TOP_FACE, BOTTOM_FACE, WEST_FACE, EAST_FACE, 0, 0, 0, 0, -2, 2},
+    };
+
+    private static final int[] GO_DOWN = new int[]{0, -1, 0};
+    private static final int[] GO_UP = new int[]{0, 1, 0};
+    private static final int[] GO_NORTH = new int[]{0, 0, -1};
+    private static final int[] GO_SOUTH = new int[]{0, 0, 1};
+    private static final int[] GO_WEST = new int[]{-1, 0, 0};
+    private static final int[] GO_EAST = new int[]{1, 0, 0};
+
+    // NEIGHBOR_OFFSETS[a][b][c] = offset from starting block
+    // a: face 0-5
+    // b: neighbor 0-7
+    //    7   6   5
+    //    0   *   4
+    //    1   2   3
+    // c: coordinate (x,y,z) 0-2
+    private static final int[][][] NEIGHBOR_OFFSET = new int[][][]{
+        // BOTTOM_FACE
+        {
+            GO_WEST,
+            add(GO_WEST, GO_SOUTH),
+            GO_SOUTH,
+            add(GO_EAST, GO_SOUTH),
+            GO_EAST,
+            add(GO_EAST, GO_NORTH),
+            GO_NORTH,
+            add(GO_WEST, GO_NORTH),
+        },
+        // TOP_FACE
+        {
+            GO_WEST,
+            add(GO_WEST, GO_SOUTH),
+            GO_SOUTH,
+            add(GO_EAST, GO_SOUTH),
+            GO_EAST,
+            add(GO_EAST, GO_NORTH),
+            GO_NORTH,
+            add(GO_WEST, GO_NORTH),
+        },
+        // NORTH_FACE
+        {
+            GO_EAST,
+            add(GO_EAST, GO_DOWN),
+            GO_DOWN,
+            add(GO_WEST, GO_DOWN),
+            GO_WEST,
+            add(GO_WEST, GO_UP),
+            GO_UP,
+            add(GO_EAST, GO_UP),
+        },
+        // SOUTH_FACE
+        {
+            GO_WEST,
+            add(GO_WEST, GO_DOWN),
+            GO_DOWN,
+            add(GO_EAST, GO_DOWN),
+            GO_EAST,
+            add(GO_EAST, GO_UP),
+            GO_UP,
+            add(GO_WEST, GO_UP),
+        },
+        // WEST_FACE
+        {
+            GO_NORTH,
+            add(GO_NORTH, GO_DOWN),
+            GO_DOWN,
+            add(GO_SOUTH, GO_DOWN),
+            GO_SOUTH,
+            add(GO_SOUTH, GO_UP),
+            GO_UP,
+            add(GO_NORTH, GO_UP),
+        },
+        // EAST_FACE
+        {
+            GO_SOUTH,
+            add(GO_SOUTH, GO_DOWN),
+            GO_DOWN,
+            add(GO_NORTH, GO_DOWN),
+            GO_NORTH,
+            add(GO_NORTH, GO_UP),
+            GO_UP,
+            add(GO_SOUTH, GO_UP),
+        },
+    };
+
     final String filePrefix;
     final String textureName;
     final int texture;
@@ -111,19 +206,19 @@ abstract class TileOverride {
         int flags = 0;
         for (String val : properties.getProperty("faces", "all").trim().toLowerCase().split("\\s+")) {
             if (val.equals("bottom")) {
-                flags |= (1 << CTMUtils.BOTTOM_FACE);
+                flags |= (1 << BOTTOM_FACE);
             } else if (val.equals("top")) {
-                flags |= (1 << CTMUtils.TOP_FACE);
+                flags |= (1 << TOP_FACE);
             } else if (val.equals("north")) {
-                flags |= (1 << CTMUtils.NORTH_FACE);
+                flags |= (1 << NORTH_FACE);
             } else if (val.equals("south")) {
-                flags |= (1 << CTMUtils.SOUTH_FACE);
+                flags |= (1 << SOUTH_FACE);
             } else if (val.equals("east")) {
-                flags |= (1 << CTMUtils.EAST_FACE);
+                flags |= (1 << EAST_FACE);
             } else if (val.equals("west")) {
-                flags |= (1 << CTMUtils.WEST_FACE);
+                flags |= (1 << WEST_FACE);
             } else if (val.equals("side") || val.equals("sides")) {
-                flags |= (1 << CTMUtils.NORTH_FACE) | (1 << CTMUtils.SOUTH_FACE) | (1 << CTMUtils.EAST_FACE) | (1 << CTMUtils.WEST_FACE);
+                flags |= (1 << NORTH_FACE) | (1 << SOUTH_FACE) | (1 << EAST_FACE) | (1 << WEST_FACE);
             } else if (val.equals("all")) {
                 flags = -1;
             }
@@ -145,6 +240,17 @@ abstract class TileOverride {
         } else {
             tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
         }
+    }
+
+    private static int[] add(int[] a, int[] b) {
+        if (a.length != b.length) {
+            throw new RuntimeException("arrays to add are not same length");
+        }
+        int[] c = new int[a.length];
+        for (int i = 0; i < c.length; i++) {
+            c[i] = a[i] + b[i];
+        }
+        return c;
     }
 
     int[] getDefaultTileMap() {
@@ -222,11 +328,11 @@ abstract class TileOverride {
             metamask = ~0xc;
             int orientation = blockAccess.getBlockMetadata(i, j, k) & 0xc;
             if (orientation == 4) { // east/west cut
-                reorient = CTMUtils.ROTATE_UV_MAP[0];
-                rotateUV = CTMUtils.ROTATE_UV_MAP[0][face + 6];
+                reorient = ROTATE_UV_MAP[0];
+                rotateUV = ROTATE_UV_MAP[0][face + 6];
             } else if (orientation == 8) { // north/south cut
-                reorient = CTMUtils.ROTATE_UV_MAP[1];
-                rotateUV = CTMUtils.ROTATE_UV_MAP[1][face + 6];
+                reorient = ROTATE_UV_MAP[1];
+                rotateUV = ROTATE_UV_MAP[1][face + 6];
             }
         }
         if (exclude(blockAccess, block, origTexture, i, j, k, face)) {
@@ -321,7 +427,7 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
-            int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
+            int[][] offsets = NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
             for (int bit = 0; bit < 8; bit++) {
                 if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[bit])) {
@@ -372,11 +478,11 @@ abstract class TileOverride {
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             if (face < 0) {
-                face = CTMUtils.NORTH_FACE;
-            } else if (reorient(face) <= CTMUtils.TOP_FACE) {
+                face = NORTH_FACE;
+            } else if (reorient(face) <= TOP_FACE) {
                 return -1;
             }
-            int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
+            int[][] offsets = NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
             if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(0)])) {
                 neighborBits |= 1;
@@ -430,11 +536,11 @@ abstract class TileOverride {
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             if (face < 0) {
-                face = CTMUtils.NORTH_FACE;
-            } else if (reorient(face) <= CTMUtils.TOP_FACE) {
+                face = NORTH_FACE;
+            } else if (reorient(face) <= TOP_FACE) {
                 return -1;
             }
-            int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
+            int[][] offsets = NEIGHBOR_OFFSET[face];
             int neighborBits = 0;
             if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(2)])) {
                 neighborBits |= 1;
@@ -477,11 +583,11 @@ abstract class TileOverride {
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
             if (face < 0) {
-                face = CTMUtils.NORTH_FACE;
-            } else if (reorient(face) <= CTMUtils.TOP_FACE) {
+                face = NORTH_FACE;
+            } else if (reorient(face) <= TOP_FACE) {
                 return -1;
             }
-            int[][] offsets = CTMUtils.NEIGHBOR_OFFSET[face];
+            int[][] offsets = NEIGHBOR_OFFSET[face];
             if (shouldConnect(blockAccess, block, origTexture, i, j, k, face, offsets[rotateUV(6)])) {
                 return tileMap[0];
             }
@@ -618,28 +724,28 @@ abstract class TileOverride {
             int x;
             int y;
             switch (face) {
-                case CTMUtils.TOP_FACE:
-                case CTMUtils.BOTTOM_FACE:
+                case TOP_FACE:
+                case BOTTOM_FACE:
                     x = i;
                     y = k;
                     break;
 
-                case CTMUtils.NORTH_FACE:
+                case NORTH_FACE:
                     x = -i - 1;
                     y = -j;
                     break;
 
-                case CTMUtils.SOUTH_FACE:
+                case SOUTH_FACE:
                     x = i;
                     y = -j;
                     break;
 
-                case CTMUtils.WEST_FACE:
+                case WEST_FACE:
                     x = k;
                     y = -j;
                     break;
 
-                case CTMUtils.EAST_FACE:
+                case EAST_FACE:
                     x = -k - 1;
                     y = -j;
                     break;
