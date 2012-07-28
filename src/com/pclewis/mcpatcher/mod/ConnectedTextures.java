@@ -17,7 +17,7 @@ public class ConnectedTextures extends Mod {
         name = MCPatcherUtils.CONNECTED_TEXTURES;
         author = "MCPatcher";
         description = "Connects adjacent blocks of the same type.";
-        version = "1.2";
+        version = "1.3";
 
         configPanel = new ConfigPanel();
 
