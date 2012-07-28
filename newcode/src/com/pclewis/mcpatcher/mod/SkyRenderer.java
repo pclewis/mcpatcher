@@ -32,7 +32,7 @@ public class SkyRenderer {
             lastTexturePack = texturePack;
             worldSkies.clear();
         }
-        if (texturePack instanceof TexturePackDefault || Keyboard.isKeyDown(Keyboard.KEY_MULTIPLY)) {
+        if (texturePack instanceof TexturePackDefault) {
             active = false;
         } else {
             int worldType = minecraft.getWorld().worldProvider.worldType;
@@ -149,7 +149,6 @@ public class SkyRenderer {
         private Properties properties;
         private String texture;
         private boolean fade;
-        private boolean debug;
         private boolean rotate;
         private int blendMethod;
 
@@ -219,7 +218,6 @@ public class SkyRenderer {
         }
 
         private boolean readFadeTimers() {
-            debug = Boolean.parseBoolean(properties.getProperty("debug", "false"));
             fade = Boolean.parseBoolean(properties.getProperty("fade", "true"));
             if (!fade) {
                 return true;
@@ -259,11 +257,11 @@ public class SkyRenderer {
             b = (Math.cos(s0) - Math.cos(e1)) / det;
             c = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
 
-            MCPatcherUtils.info("%s.properties: y = %f cos x + %f sin x + %f", prefix, a, b, c);
-            MCPatcherUtils.info("  at %f: %f", s0, f(s0));
-            MCPatcherUtils.info("  at %f: %f", s1, f(s1));
-            MCPatcherUtils.info("  at %f: %f", e0, f(e0));
-            MCPatcherUtils.info("  at %f: %f", e1, f(e1));
+            MCPatcherUtils.debug("%s.properties: y = %f cos x + %f sin x + %f", prefix, a, b, c);
+            MCPatcherUtils.debug("  at %f: %f", s0, f(s0));
+            MCPatcherUtils.debug("  at %f: %f", s1, f(s1));
+            MCPatcherUtils.debug("  at %f: %f", e0, f(e0));
+            MCPatcherUtils.debug("  at %f: %f", e1, f(e1));
             return true;
         }
 
@@ -375,13 +373,6 @@ public class SkyRenderer {
         }
 
         void setBlendingMethod(float brightness) {
-            if (debug) {
-                if (Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
-                    brightness = 1.0f;
-                } else if (Keyboard.isKeyDown(Keyboard.KEY_SUBTRACT)) {
-                    brightness = 0.0f;
-                }
-            }
             if (blendMethod == METHOD_ADD || blendMethod == METHOD_REPLACE) {
                 GL11.glColor4f(1.0f, 1.0f, 1.0f, brightness);
             } else if (blendMethod == METHOD_MULTIPLY) {
