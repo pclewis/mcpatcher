@@ -67,6 +67,16 @@ abstract class TileOverride {
             MCPatcherUtils.error("%s.properties: unknown method \"%s\"", filePrefix, method);
         }
 
+        if (override == null || override.disabled) {
+        } else if (override.tileMap == null || override.tileMap.length == 0) {
+            override.error("no tile map given");
+        } else {
+            String status = override.checkTileMap();
+            if (status != null) {
+                override.error("invalid %s tile map: %s", override.getMethod(), status);
+            }
+        }
+
         return override == null || override.disabled ? null : override;
     }
 
@@ -133,15 +143,6 @@ abstract class TileOverride {
             tileMap = getDefaultTileMap();
         } else {
             tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
-        }
-        if (disabled) {
-        } else if (tileMap == null || tileMap.length == 0) {
-            error("no tile map given");
-        } else {
-            String status = checkTileMap();
-            if (status != null) {
-                error("invalid %s tile map: %s", getMethod(), status);
-            }
         }
     }
 
