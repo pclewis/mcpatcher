@@ -2,8 +2,6 @@ package net.minecraft.src;
 
 public abstract class Entity {
     public int entityId;
-    public long randomMobsSkin;
-    public boolean randomMobsSkinSet;
     public double posX;
     public double posY;
     public double posZ;
@@ -19,6 +17,13 @@ public abstract class Entity {
     public float fallDistance;
     public final AxisAlignedBB boundingBox = null;
     public net.minecraft.src.World worldObj;
+
+    // added by Random Mobs
+    public long randomMobsSkin;
+    public boolean randomMobsSkinSet;
+    public int origX;
+    public int origY;
+    public int origZ;
 
     public Entity(World worldObj) {
     }

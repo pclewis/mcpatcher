@@ -10,6 +10,9 @@ import static javassist.bytecode.Opcode.*;
 public class RandomMobs extends Mod {
     private static final String ENTITY_SKIN_FIELD = "randomMobsSkin";
     private static final String ENTITY_SKIN_SET_FIELD = "randomMobsSkinSet";
+    public static final String ENTITY_ORIG_X_FIELD = "origX";
+    public static final String ENTITY_ORIG_Y_FIELD = "origY";
+    public static final String ENTITY_ORIG_Z_FIELD = "origZ";
 
     public RandomMobs(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.RANDOM_MOBS;
@@ -37,6 +40,9 @@ public class RandomMobs extends Mod {
         classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$GenericEntry"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$HeightEntry"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$BiomeEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_OVERLAY_CLASS));
     }
 
@@ -142,9 +148,60 @@ public class RandomMobs extends Mod {
 
     private class EntityMod extends ClassMod {
         EntityMod() {
+            final MethodRef getLong = new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J");
+            final MethodRef setLong = new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V");
+            final MethodRef getInteger = new MethodRef("NBTTagCompound", "getInteger", "(Ljava/lang/String;)I");
+            final MethodRef setInteger = new MethodRef("NBTTagCompound", "setInteger", "(Ljava/lang/String;I)V");
+            final FieldRef skin = new FieldRef(getDeobfClass(), ENTITY_SKIN_FIELD, "J");
+            final FieldRef skinSet = new FieldRef(getDeobfClass(), ENTITY_SKIN_SET_FIELD, "Z");
+            final FieldRef origX = new FieldRef(getDeobfClass(), ENTITY_ORIG_X_FIELD, "I");
+            final FieldRef origY = new FieldRef(getDeobfClass(), ENTITY_ORIG_Y_FIELD, "I");
+            final FieldRef origZ = new FieldRef(getDeobfClass(), ENTITY_ORIG_Z_FIELD, "I");
+
             classSignatures.add(new ConstSignature("Pos"));
             classSignatures.add(new ConstSignature("Motion"));
             classSignatures.add(new ConstSignature("Rotation"));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        BinaryRegex.begin(),
+
+                        // prevPosX = posX = d;
+                        ALOAD_0,
+                        ALOAD_0,
+                        DLOAD_1,
+                        DUP2_X1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        // prevPosY = posY = d1;
+                        ALOAD_0,
+                        ALOAD_0,
+                        DLOAD_3,
+                        DUP2_X1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+                        BytecodeMatcher.captureReference(PUTFIELD),
+
+                        // prevPosZ = posZ = d2;
+                        ALOAD_0,
+                        ALOAD_0,
+                        DLOAD, 5,
+                        DUP2_X1,
+                        BytecodeMatcher.captureReference(PUTFIELD),
+                        BytecodeMatcher.captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .setMethod(new MethodRef(getDeobfClass(), "setPositionAndRotation", "(DDDFF)V"))
+                .addXref(1, new FieldRef(getDeobfClass(), "posX", "D"))
+                .addXref(2, new FieldRef(getDeobfClass(), "prevPosX", "D"))
+                .addXref(3, new FieldRef(getDeobfClass(), "posY", "D"))
+                .addXref(4, new FieldRef(getDeobfClass(), "prevPosY", "D"))
+                .addXref(5, new FieldRef(getDeobfClass(), "posZ", "D"))
+                .addXref(6, new FieldRef(getDeobfClass(), "prevPosZ", "D"))
+            );
 
             memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "entityId", "I"))
                 .accessFlag(AccessFlag.PUBLIC, true)
@@ -159,8 +216,11 @@ public class RandomMobs extends Mod {
                 .accessFlag(AccessFlag.PUBLIC, true)
             );
 
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), ENTITY_SKIN_FIELD, "J")));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), ENTITY_SKIN_SET_FIELD, "Z")));
+            patches.add(new AddFieldPatch(skin));
+            patches.add(new AddFieldPatch(skinSet));
+            patches.add(new AddFieldPatch(origX));
+            patches.add(new AddFieldPatch(origY));
+            patches.add(new AddFieldPatch(origZ));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -182,8 +242,29 @@ public class RandomMobs extends Mod {
                         ALOAD_1,
                         push(ENTITY_SKIN_FIELD),
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
-                        reference(INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V"))
+                        reference(GETFIELD, skin),
+                        reference(INVOKEVIRTUAL, setLong),
+
+                        // nbttagcompound.setInteger(origX);
+                        ALOAD_1,
+                        push(ENTITY_ORIG_X_FIELD),
+                        ALOAD_0,
+                        reference(GETFIELD, origX),
+                        reference(INVOKEVIRTUAL, setInteger),
+
+                        // nbttagcompound.setInteger(origY);
+                        ALOAD_1,
+                        push(ENTITY_ORIG_Y_FIELD),
+                        ALOAD_0,
+                        reference(GETFIELD, origY),
+                        reference(INVOKEVIRTUAL, setInteger),
+
+                        // nbttagcompound.setInteger(origZ);
+                        ALOAD_1,
+                        push(ENTITY_ORIG_Z_FIELD),
+                        ALOAD_0,
+                        reference(GETFIELD, origZ),
+                        reference(INVOKEVIRTUAL, setInteger)
                     );
                 }
             }.targetMethod(new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V")));
@@ -208,12 +289,33 @@ public class RandomMobs extends Mod {
                         ALOAD_0,
                         ALOAD_1,
                         push(ENTITY_SKIN_FIELD),
-                        reference(INVOKEVIRTUAL, new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J")),
-                        reference(PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
+                        reference(INVOKEVIRTUAL, getLong),
+                        reference(PUTFIELD, skin),
+
+                        // origX = nbttagcompound.getInteger(ENTITY_ORIG_X);
+                        ALOAD_0,
+                        ALOAD_1,
+                        push(ENTITY_ORIG_X_FIELD),
+                        reference(INVOKEVIRTUAL, getInteger),
+                        reference(PUTFIELD, origX),
+
+                        // origY = nbttagcompound.getInteger(ENTITY_ORIG_Y);
+                        ALOAD_0,
+                        ALOAD_1,
+                        push(ENTITY_ORIG_Y_FIELD),
+                        reference(INVOKEVIRTUAL, getInteger),
+                        reference(PUTFIELD, origY),
+
+                        // origZ = nbttagcompound.getInteger(ENTITY_ORIG_Z);
+                        ALOAD_0,
+                        ALOAD_1,
+                        push(ENTITY_ORIG_Z_FIELD),
+                        reference(INVOKEVIRTUAL, getInteger),
+                        reference(PUTFIELD, origZ),
 
                         // if (skin != 0L) {
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef("Entity", ENTITY_SKIN_FIELD, "J")),
+                        reference(GETFIELD, skin),
                         LCONST_0,
                         LCMP,
                         IFEQ, branch("A"),
@@ -221,7 +323,7 @@ public class RandomMobs extends Mod {
                         // skinSet = true;
                         ALOAD_0,
                         ICONST_1,
-                        reference(PUTFIELD, new FieldRef("Entity", ENTITY_SKIN_SET_FIELD, "Z")),
+                        reference(PUTFIELD, skinSet),
 
                         // }
                         label("A")
@@ -247,6 +349,8 @@ public class RandomMobs extends Mod {
 
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getLong", "(Ljava/lang/String;)J")));
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "setLong", "(Ljava/lang/String;J)V")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getInteger", "(Ljava/lang/String;)I")));
+            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "setInteger", "(Ljava/lang/String;I)V")));
         }
     }
 
