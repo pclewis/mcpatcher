@@ -59,7 +59,7 @@ public class CTMUtils {
         if (!active || !enableStandard || blockAccess == null || face < 0 || face > 5) {
             return false;
         }
-        if (block.blockID == BLOCK_ID_BED) {
+        if (block.blockID == BLOCK_ID_BED || block.blockID == BLOCK_ID_GLASS_PANE) {
             return false;
         }
         if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face)) {
@@ -76,7 +76,7 @@ public class CTMUtils {
         if (!active || !enableNonStandard || blockAccess == null) {
             return false;
         }
-        if (block.blockID == BLOCK_ID_BED) {
+        if (block.blockID == BLOCK_ID_BED || block.blockID == BLOCK_ID_GLASS_PANE) {
             return false;
         }
         if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, -1)) {
