@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.zip.ZipFile;
 
 /**
@@ -440,6 +441,42 @@ public class MCPatcherUtils {
             }
         }
         return image;
+    }
+
+    /**
+     * Attempts to read a properties file.  Closes input stream regardless of success or failure.
+     *
+     * @param input open input stream
+     * @return properties object or null
+     */
+    public static Properties readProperties(InputStream input) {
+        Properties properties = new Properties();
+        if (readProperties(input, properties)) {
+            return properties;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Attempts to read a properties file.  Closes input stream regardless of success or failure.
+     *
+     * @param input open input stream
+     * @param properties initial properties object
+     * @return true if properties were successfully read
+     */
+    public static boolean readProperties(InputStream input, Properties properties) {
+        if (input != null && properties != null) {
+            try {
+                properties.load(input);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                close(input);
+            }
+        }
+        return false;
     }
 
     /**
