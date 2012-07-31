@@ -1,27 +1,21 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import net.minecraft.src.Entity;
+import net.minecraft.src.EntityLiving;
 import net.minecraft.src.TexturePackBase;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class MobRandomizer {
-    private static final HashMap<String, ArrayList<GenericEntry>> mobHash = new HashMap<String, ArrayList<GenericEntry>>();
+    private static final HashMap<String, MobInfo> mobHash = new HashMap<String, MobInfo>();
     private static TexturePackBase lastTexturePack;
 
     private static final long MULTIPLIER = 0x5deece66dL;
     private static final long ADDEND = 0xbL;
     private static final long MASK = (1L << 48) - 1;
 
-    private static final Method getBiomeNameAt;
+    private static Method getBiomeNameAt;
 
     static {
         Method method = null;
@@ -39,11 +33,11 @@ public class MobRandomizer {
         MobOverlay.reset(lastTexturePack);
     }
 
-    public static String randomTexture(Entity entity) {
+    public static String randomTexture(EntityLiving entity) {
         return randomTexture(entity, entity.getEntityTexture());
     }
 
-    public static String randomTexture(Entity entity, String texture) {
+    public static String randomTexture(EntityLiving entity, String texture) {
         TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack();
         if (lastTexturePack != selectedTexturePack) {
             lastTexturePack = selectedTexturePack;
@@ -59,16 +53,23 @@ public class MobRandomizer {
             entity.origZ = (int) entity.posZ;
             entity.randomMobsSkinSet = true;
         }
-        for (GenericEntry entry : getEntries(texture)) {
-            if (entry.match(entity.origX, entity.origY, entity.origZ)) {
-                int index = (int) (entity.randomMobsSkin % entry.variations.size());
-                if (index < 0) {
-                    index += entry.variations.size();
-                }
-                return entry.variations.get(index);
+        if (entity.origBiome == null && getBiomeNameAt != null) {
+            try {
+                entity.origBiome = (String) getBiomeNameAt.invoke(null, entity.origX, entity.origY, entity.origZ);
+            } catch (Throwable e) {
+                getBiomeNameAt = null;
+                e.printStackTrace();
+            }
+            if (entity.origBiome != null) {
+                entity.origBiome = entity.origBiome.toLowerCase();
             }
         }
-        return texture;
+        MobInfo mobInfo = mobHash.get(texture);
+        if (mobInfo == null) {
+            mobInfo = new MobInfo(texture);
+            mobHash.put(texture, mobInfo);
+        }
+        return mobInfo.getSkin(entity.randomMobsSkin, entity.origX, entity.origY, entity.origZ, entity.origBiome);
     }
 
     private static long getSkinId(int entityId) {
@@ -80,119 +81,129 @@ public class MobRandomizer {
         return (n >> 32) ^ n;
     }
 
-    private static ArrayList<GenericEntry> getEntries(String texture) {
-        ArrayList<GenericEntry> entries = mobHash.get(texture);
-        if (entries != null) {
-            return entries;
-        }
-        entries = new ArrayList<GenericEntry>();
-        GenericEntry genericEntry = new GenericEntry(texture);
-        int count = genericEntry.variations.size();
+    private static class MobInfo {
+        final String baseSkin;
+        final ArrayList<String> allSkins;
+        final int skinCount;
+        final ArrayList<SkinEntry> entries;
 
-        InputStream is = null;
-        try {
-            is = lastTexturePack.getInputStream(texture.replace(".png", ".properties"));
-            if (is != null) {
-                Properties properties = new Properties();
-                properties.load(is);
-                for (Map.Entry<Object, Object> property : properties.entrySet()) {
-                    String k = property.getKey().toString();
-                    String v = property.getValue().toString();
-                    if (k.startsWith("height.")) {
-                        String[] tokens = k.substring(7).split("\\s*-\\s*");
-                        if (tokens.length == 2) {
-                            try {
-                                int min = Integer.parseInt(tokens[0]);
-                                int max = Integer.parseInt(tokens[1]);
-                                entries.add(new HeightEntry(texture, count, v, min, max));
-                            } catch (NumberFormatException e) {
-                            }
+        MobInfo(String baseSkin) {
+            this.baseSkin = baseSkin;
+            allSkins = new ArrayList<String>();
+            allSkins.add(baseSkin);
+            for (int i = 2; ; i++) {
+                final String skin = baseSkin.replace(".png", "" + i + ".png");
+                if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(skin)) == null) {
+                    break;
+                }
+                allSkins.add(skin);
+            }
+            skinCount = allSkins.size();
+            if (skinCount > 1) {
+                MCPatcherUtils.debug("found %d variations for %s", skinCount, baseSkin);
+            }
+
+            String filename = baseSkin.replace(".png", ".properties");
+            Properties properties = MCPatcherUtils.readProperties(lastTexturePack.getInputStream(filename));
+            if (properties == null && (filename.contains("_eyes") || filename.contains("_overlay"))) {
+                filename = filename.replace("_eyes", "").replace("_overlay", "");
+                properties = MCPatcherUtils.readProperties(lastTexturePack.getInputStream(filename));
+                if (properties != null) {
+                    MCPatcherUtils.debug("using %s for %s", filename, baseSkin);
+                }
+            }
+            ArrayList<SkinEntry> tmpEntries = new ArrayList<SkinEntry>();
+            if (properties != null) {
+                for (int i = 0; ; i++) {
+                    SkinEntry entry = SkinEntry.load(properties, i, skinCount);
+                    if (entry == null) {
+                        break;
+                    }
+                    tmpEntries.add(entry);
+                }
+            }
+            entries = tmpEntries.isEmpty() ? null : tmpEntries;
+        }
+
+        String getSkin(long key, int i, int j, int k, String biome) {
+            if (entries == null) {
+                int index = (int) (key % skinCount);
+                if (index < 0) {
+                    index += skinCount;
+                }
+                return allSkins.get(index);
+            } else {
+                for (SkinEntry entry : entries) {
+                    if (entry.match(i, j, k, biome)) {
+                        int n = entry.skins.length;
+                        int index = (int) (key % n);
+                        if (index < 0) {
+                            index += n;
                         }
-                    } else if (k.startsWith("biome.")) {
-                        entries.add(new BiomeEntry(texture, count, v, k.substring(6)));
+                        return allSkins.get(entry.skins[index]);
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            MCPatcherUtils.close(is);
+            return baseSkin;
         }
-
-        entries.add(genericEntry);
-        if (count > 1) {
-            MCPatcherUtils.debug("found %d variations for %s", count, texture);
-        }
-        mobHash.put(texture, entries);
-        return entries;
     }
 
-    private static class GenericEntry {
-        final ArrayList<String> variations;
+    private static class SkinEntry {
+        final int[] skins;
+        final HashSet<String> biomes;
+        final int minHeight;
+        final int maxHeight;
 
-        GenericEntry(String baseTexture) {
-            variations = new ArrayList<String>();
-            variations.add(baseTexture);
-            for (int i = 2; ; i++) {
-                final String t = baseTexture.replace(".png", "" + i + ".png");
-                if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(t)) != null) {
-                    variations.add(t);
-                } else {
-                    break;
-                }
+        static SkinEntry load(Properties properties, int index, int limit) {
+            String skinList = properties.getProperty("skins." + index, "").trim();
+            int[] skins = MCPatcherUtils.parseIntegerList(skinList, 1, limit);
+            if (skins.length <= 0) {
+                return null;
             }
+            for (int i = 0; i < skins.length; i++) {
+                skins[i]--;
+            }
+
+            String[] biomes = properties.getProperty("biomes." + index, "").trim().toLowerCase().split("\\s+");
+            if (biomes.length <= 0) {
+                biomes = null;
+            }
+
+            int maxHeight = -1;
+            int minHeight = -1;
+            try {
+                maxHeight = Integer.parseInt(properties.getProperty("maxHeight." + index, "-1").trim());
+                minHeight = Integer.parseInt(properties.getProperty("minHeight." + index, "-1").trim());
+                if (minHeight < 0 || minHeight > maxHeight) {
+                    minHeight = -1;
+                    maxHeight = -1;
+                }
+            } catch (NumberFormatException e) {
+            }
+
+            return new SkinEntry(skins, biomes, minHeight, maxHeight);
         }
 
-        GenericEntry(String baseTexture, int n, String list) {
-            int[] l = MCPatcherUtils.parseIntegerList(list, 1, n);
-            variations = new ArrayList<String>();
-            for (int i : l) {
-                if (i <= 1) {
-                    variations.add(baseTexture);
-                } else {
-                    variations.add(baseTexture.replace(".png", "" + i + ".png"));
-                }
-            }
+        SkinEntry(int[] skins, String[] biomes, int minHeight, int maxHeight) {
+            this.skins = skins;
+            this.biomes = new HashSet<String>();
+            Collections.addAll(this.biomes, biomes);
+            this.minHeight = minHeight;
+            this.maxHeight = maxHeight;
         }
 
-        boolean match(int i, int j, int k) {
+        boolean match(int i, int j, int k, String biome) {
+            if (biomes != null) {
+                if (biome == null || !biomes.contains(biome.toLowerCase())) {
+                    return false;
+                }
+            }
+            if (minHeight >= 0) {
+                if (j < minHeight || j > maxHeight) {
+                    return false;
+                }
+            }
             return true;
-        }
-    }
-
-    private static class HeightEntry extends GenericEntry {
-        final int min;
-        final int max;
-
-        HeightEntry(String baseTexture, int n, String list, int min, int max) {
-            super(baseTexture, n, list);
-            this.min = min;
-            this.max = max;
-        }
-
-        @Override
-        boolean match(int i, int j, int k) {
-            return j >= min && j <= max;
-        }
-    }
-
-    private static class BiomeEntry extends GenericEntry {
-        final String biome;
-
-        BiomeEntry(String baseTexture, int n, String list, String biome) {
-            super(baseTexture, n, list);
-            this.biome = biome;
-        }
-
-        @Override
-        boolean match(int i, int j, int k) {
-            if (getBiomeNameAt != null) {
-                try {
-                    return biome.equals(getBiomeNameAt.invoke(null, i, j, k));
-                } catch (Throwable e) {
-                }
-            }
-            return false;
         }
     }
 }

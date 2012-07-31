@@ -1,10 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import net.minecraft.src.Entity;
-import net.minecraft.src.Render;
-import net.minecraft.src.Tessellator;
-import net.minecraft.src.TexturePackBase;
+import net.minecraft.src.*;
 
 public class MobOverlay {
     private static final String MOOSHROOM_OVERLAY = "/mob/redcow_overlay.png";
@@ -29,12 +26,14 @@ public class MobOverlay {
     private static boolean haveMooshroom;
     private static boolean haveSnowman;
 
+    public static String snowmanOverlayTexture;
+
     static void reset(TexturePackBase texturePack) {
         haveMooshroom = MCPatcherUtils.readImage(texturePack.getInputStream(MOOSHROOM_OVERLAY)) != null;
         haveSnowman = MCPatcherUtils.readImage(texturePack.getInputStream(SNOWMAN_OVERLAY)) != null;
     }
 
-    public static String setupMooshroom(Entity entity, String defaultTexture) {
+    public static String setupMooshroom(EntityLiving entity, String defaultTexture) {
         overlayCounter = 0;
         if (haveMooshroom) {
             overlayActive = true;
@@ -78,60 +77,65 @@ public class MobOverlay {
         overlayActive = false;
     }
 
-    public static boolean renderSnowmanOverlay(Render render, Entity entity) {
+    public static boolean setupSnowman(EntityLiving entity) {
         if (haveSnowman) {
-            render.loadTexture(MobRandomizer.randomTexture(entity, SNOWMAN_OVERLAY));
-
-            Tessellator tessellator = Tessellator.instance;
-            tessellator.startDrawingQuads();
-
-            double[] c = new double[4];
-
-            // bottom = y-
-            getTileCoordinates(0, c);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[0], c[2]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[1], c[2]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[1], c[3]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[0], c[3]);
-
-            // top = y+
-            getTileCoordinates(1, c);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[0], c[2]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[1], c[2]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[1], c[3]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[0], c[3]);
-
-            // back = x-
-            getTileCoordinates(2, c);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[0], c[2]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[1], c[2]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[1], c[3]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[0], c[3]);
-
-            // right = z-
-            getTileCoordinates(3, c);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[0], c[2]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[1], c[2]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[1], c[3]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[0], c[3]);
-
-            // front = x+
-            getTileCoordinates(4, c);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[0], c[2]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[1], c[2]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[1], c[3]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[0], c[3]);
-
-            // left = z+
-            getTileCoordinates(5, c);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[0], c[2]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[1], c[2]);
-            tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[1], c[3]);
-            tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[0], c[3]);
-
-            tessellator.draw();
+            snowmanOverlayTexture = MobRandomizer.randomTexture(entity, SNOWMAN_OVERLAY);
+            return true;
+        } else {
+            snowmanOverlayTexture = null;
+            return false;
         }
-        return haveSnowman;
+    }
+
+    public static void renderSnowmanOverlay() {
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+
+        double[] c = new double[4];
+
+        // bottom = y-
+        getTileCoordinates(0, c);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[0], c[2]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[1], c[2]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[1], c[3]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[0], c[3]);
+
+        // top = y+
+        getTileCoordinates(1, c);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[0], c[2]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[1], c[2]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[1], c[3]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[0], c[3]);
+
+        // back = x-
+        getTileCoordinates(2, c);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[0], c[2]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[1], c[2]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[1], c[3]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[0], c[3]);
+
+        // right = z-
+        getTileCoordinates(3, c);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z0, c[0], c[2]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[1], c[2]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[1], c[3]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z0, c[0], c[3]);
+
+        // front = x+
+        getTileCoordinates(4, c);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z0, c[0], c[2]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[1], c[2]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[1], c[3]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z0, c[0], c[3]);
+
+        // left = z+
+        getTileCoordinates(5, c);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y1, SNOW_Z1, c[0], c[2]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y1, SNOW_Z1, c[1], c[2]);
+        tessellator.addVertexWithUV(SNOW_X0, SNOW_Y0, SNOW_Z1, c[1], c[3]);
+        tessellator.addVertexWithUV(SNOW_X1, SNOW_Y0, SNOW_Z1, c[0], c[3]);
+
+        tessellator.draw();
     }
 
     private static void getTileCoordinates(int tileNum, double[] c) {

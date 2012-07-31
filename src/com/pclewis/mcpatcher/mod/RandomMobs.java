@@ -13,6 +13,7 @@ public class RandomMobs extends Mod {
     public static final String ENTITY_ORIG_X_FIELD = "origX";
     public static final String ENTITY_ORIG_Y_FIELD = "origY";
     public static final String ENTITY_ORIG_Z_FIELD = "origZ";
+    public static final String ENTITY_ORIG_BIOME_FIELD = "origBiome";
 
     public RandomMobs(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.RANDOM_MOBS;
@@ -40,15 +41,16 @@ public class RandomMobs extends Mod {
         classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$GenericEntry"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$HeightEntry"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$BiomeEntry"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$MobInfo"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$SkinEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_OVERLAY_CLASS));
     }
 
     private class RenderMod extends ClassMod {
         RenderMod() {
-            prerequisiteClasses.add("RenderLiving");
+            classSignatures.add(new ConstSignature("/terrain.png"));
+            classSignatures.add(new ConstSignature("%clamp%/misc/shadow.png"));
+            classSignatures.add(new ConstSignature(15.99f));
 
             final MethodRef loadTexture = new MethodRef(getDeobfClass(), "loadTexture", "(Ljava/lang/String;)V");
 
@@ -56,14 +58,15 @@ public class RandomMobs extends Mod {
                 .accessFlag(AccessFlag.PROTECTED, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
-
-            patches.add(new MakeMemberPublicPatch(loadTexture));
         }
     }
 
     private class RenderLivingMod extends ClassMod {
         RenderLivingMod() {
             parentClass = "Render";
+
+            classSignatures.add(new ConstSignature(180.0f));
+            classSignatures.add(new ConstSignature(360.0f));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -148,16 +151,6 @@ public class RandomMobs extends Mod {
 
     private class EntityMod extends ClassMod {
         EntityMod() {
-            final MethodRef getLong = new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J");
-            final MethodRef setLong = new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V");
-            final MethodRef getInteger = new MethodRef("NBTTagCompound", "getInteger", "(Ljava/lang/String;)I");
-            final MethodRef setInteger = new MethodRef("NBTTagCompound", "setInteger", "(Ljava/lang/String;I)V");
-            final FieldRef skin = new FieldRef(getDeobfClass(), ENTITY_SKIN_FIELD, "J");
-            final FieldRef skinSet = new FieldRef(getDeobfClass(), ENTITY_SKIN_SET_FIELD, "Z");
-            final FieldRef origX = new FieldRef(getDeobfClass(), ENTITY_ORIG_X_FIELD, "I");
-            final FieldRef origY = new FieldRef(getDeobfClass(), ENTITY_ORIG_Y_FIELD, "I");
-            final FieldRef origZ = new FieldRef(getDeobfClass(), ENTITY_ORIG_Z_FIELD, "I");
-
             classSignatures.add(new ConstSignature("Pos"));
             classSignatures.add(new ConstSignature("Motion"));
             classSignatures.add(new ConstSignature("Rotation"));
@@ -211,8 +204,32 @@ public class RandomMobs extends Mod {
                 .accessFlag(AccessFlag.PRIVATE, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getEntityTexture", "()Ljava/lang/String;")));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V"), new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V"))
+        }
+    }
+
+    private class EntityLivingMod extends ClassMod {
+        EntityLivingMod() {
+            final MethodRef getEntityTexture = new MethodRef(getDeobfClass(), "getEntityTexture", "()Ljava/lang/String;");
+            final MethodRef writeToNBT = new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V");
+            final MethodRef readFromNBT = new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V");
+            final MethodRef getLong = new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J");
+            final MethodRef setLong = new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V");
+            final MethodRef getInteger = new MethodRef("NBTTagCompound", "getInteger", "(Ljava/lang/String;)I");
+            final MethodRef setInteger = new MethodRef("NBTTagCompound", "setInteger", "(Ljava/lang/String;I)V");
+            final FieldRef skin = new FieldRef(getDeobfClass(), ENTITY_SKIN_FIELD, "J");
+            final FieldRef skinSet = new FieldRef(getDeobfClass(), ENTITY_SKIN_SET_FIELD, "Z");
+            final FieldRef origX = new FieldRef(getDeobfClass(), ENTITY_ORIG_X_FIELD, "I");
+            final FieldRef origY = new FieldRef(getDeobfClass(), ENTITY_ORIG_Y_FIELD, "I");
+            final FieldRef origZ = new FieldRef(getDeobfClass(), ENTITY_ORIG_Z_FIELD, "I");
+            final FieldRef origBiome = new FieldRef(getDeobfClass(), ENTITY_ORIG_BIOME_FIELD, "Ljava/lang/String;");
+
+            parentClass = "Entity";
+
+            classSignatures.add(new ConstSignature("/mob/char.png"));
+            classSignatures.add(new ConstSignature("Health"));
+
+            memberMappers.add(new MethodMapper(getEntityTexture));
+            memberMappers.add(new MethodMapper(writeToNBT, readFromNBT)
                 .accessFlag(AccessFlag.PUBLIC, true)
             );
 
@@ -221,6 +238,7 @@ public class RandomMobs extends Mod {
             patches.add(new AddFieldPatch(origX));
             patches.add(new AddFieldPatch(origY));
             patches.add(new AddFieldPatch(origZ));
+            patches.add(new AddFieldPatch(origBiome));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -267,7 +285,7 @@ public class RandomMobs extends Mod {
                         reference(INVOKEVIRTUAL, setInteger)
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V")));
+            }.targetMethod(writeToNBT));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -329,16 +347,7 @@ public class RandomMobs extends Mod {
                         label("A")
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V")));
-        }
-    }
-
-    private class EntityLivingMod extends ClassMod {
-        EntityLivingMod() {
-            parentClass = "Entity";
-
-            classSignatures.add(new ConstSignature("/mob/char.png"));
-            classSignatures.add(new ConstSignature("Health"));
+            }.targetMethod(readFromNBT));
         }
     }
 
@@ -359,7 +368,11 @@ public class RandomMobs extends Mod {
             parentClass = "RenderLiving";
 
             final MethodRef renderEquippedItems = new MethodRef(getDeobfClass(), "renderEquippedItems1", "(LEntitySnowman;F)V");
+            final MethodRef loadTexture = new MethodRef(getDeobfClass(), "loadTexture", "(Ljava/lang/String;)V");
             final MethodRef glTranslatef = new MethodRef(MCPatcherUtils.GL11_CLASS, "glTranslatef", "(FFF)V");
+            final FieldRef snowmanOverlayTexture = new FieldRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "snowmanOverlayTexture", "Ljava/lang/String;");
+            final MethodRef setupSnowman = new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "setupSnowman", "(LEntityLiving;)Z");
+            final MethodRef renderSnowmanOverlay = new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "renderSnowmanOverlay", "()V");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -387,6 +400,7 @@ public class RandomMobs extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        // renderManager.itemRenderer.renderItem(par1EntitySnowman, itemstack, 0);
                         ALOAD_0,
                         BytecodeMatcher.anyReference(GETFIELD),
                         BytecodeMatcher.anyReference(GETFIELD),
@@ -400,12 +414,28 @@ public class RandomMobs extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        ALOAD_0,
+                        // if (setupSnowman(entityLiving)) {
                         ALOAD_1,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "renderSnowmanOverlay", "(LRender;LEntity;)Z")),
-                        IFNE, branch("A"),
+                        reference(INVOKESTATIC, setupSnowman),
+                        IFEQ, branch("A"),
+
+                        // loadTexture(MobOverlay.snowmanOverlayTexture);
+                        ALOAD_0,
+                        reference(GETSTATIC, snowmanOverlayTexture),
+                        reference(INVOKEVIRTUAL, loadTexture),
+
+                        // MobOverlay.renderSnowmanOverlay();
+                        reference(INVOKESTATIC, renderSnowmanOverlay),
+
+                        // } else {
+                        GOTO, branch("B"),
+                        label("A"),
+
+                        // ...
                         getMatch(),
-                        label("A")
+
+                        // }
+                        label("B")
                     );
                 }
             }.targetMethod(renderEquippedItems));
@@ -478,7 +508,7 @@ public class RandomMobs extends Mod {
                     return buildCode(
                         ALOAD_1,
                         push("/terrain.png"),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "setupMooshroom", "(LEntity;Ljava/lang/String;)Ljava/lang/String;"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "setupMooshroom", "(LEntityLiving;Ljava/lang/String;)Ljava/lang/String;"))
                     );
                 }
             }.targetMethod(renderEquippedItems));
@@ -492,6 +522,7 @@ public class RandomMobs extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
+                        // renderBlocks.renderBlockAsItem(Block.mushroomRed, 0, 1.0f);
                         ALOAD_0,
                         reference(GETFIELD, renderBlocks),
                         reference(GETSTATIC, mushroomRed),
@@ -504,9 +535,14 @@ public class RandomMobs extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
+                        // if (!MobOverlay.renderMooshroomOverlay()) {
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MOB_OVERLAY_CLASS, "renderMooshroomOverlay", "()Z")),
                         IFNE, branch("A"),
+
+                        // ...
                         getMatch(),
+
+                        // }
                         label("A")
                     );
                 }

@@ -18,13 +18,6 @@ public abstract class Entity {
     public final AxisAlignedBB boundingBox = null;
     public net.minecraft.src.World worldObj;
 
-    // added by Random Mobs
-    public long randomMobsSkin;
-    public boolean randomMobsSkinSet;
-    public int origX;
-    public int origY;
-    public int origZ;
-
     public Entity(World worldObj) {
     }
 
