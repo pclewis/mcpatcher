@@ -337,6 +337,12 @@ class MinecraftJar {
             if (origMD5 == null) {
                 return MODDED_OR_UNMODDED_JAR;
             }
+            if (MinecraftVersion.isKnownMD5(md5)) {
+                return UNMODDED_JAR;
+            }
+            if (version.isNewerThanAnyKnownVersion()) {
+                return MODDED_OR_UNMODDED_JAR;
+            }
             if (origMD5.equals(md5)) {
                 return UNMODDED_JAR;
             }
