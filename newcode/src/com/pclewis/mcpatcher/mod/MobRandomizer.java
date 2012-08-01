@@ -99,17 +99,19 @@ public class MobRandomizer {
                 allSkins.add(skin);
             }
             skinCount = allSkins.size();
-            if (skinCount > 1) {
-                MCPatcherUtils.debug("found %d variations for %s", skinCount, baseSkin);
+            if (skinCount <= 1) {
+                entries = null;
+                return;
             }
+            MCPatcherUtils.debug("found %d variations for %s", skinCount, baseSkin);
 
             String filename = baseSkin.replace(".png", ".properties");
+            String altFilename = filename.replaceFirst("_(eyes|overlay|tame|angry)\\.properties$", ".properties");
             Properties properties = MCPatcherUtils.readProperties(lastTexturePack.getInputStream(filename));
-            if (properties == null && (filename.contains("_eyes") || filename.contains("_overlay"))) {
-                filename = filename.replace("_eyes", "").replace("_overlay", "");
-                properties = MCPatcherUtils.readProperties(lastTexturePack.getInputStream(filename));
+            if (properties == null && !filename.equals(altFilename)) {
+                properties = MCPatcherUtils.readProperties(lastTexturePack.getInputStream(altFilename));
                 if (properties != null) {
-                    MCPatcherUtils.debug("using %s for %s", filename, baseSkin);
+                    MCPatcherUtils.debug("using %s for %s", altFilename, baseSkin);
                 }
             }
             ArrayList<SkinEntry> tmpEntries = new ArrayList<SkinEntry>();
@@ -117,9 +119,13 @@ public class MobRandomizer {
                 for (int i = 0; ; i++) {
                     SkinEntry entry = SkinEntry.load(properties, i, skinCount);
                     if (entry == null) {
-                        break;
+                        if (i > 0) {
+                            break;
+                        }
+                    } else {
+                        MCPatcherUtils.debug("  %s", entry.toString());
+                        tmpEntries.add(entry);
                     }
-                    tmpEntries.add(entry);
                 }
             }
             entries = tmpEntries.isEmpty() ? null : tmpEntries;
@@ -155,17 +161,29 @@ public class MobRandomizer {
         final int maxHeight;
 
         static SkinEntry load(Properties properties, int index, int limit) {
-            String skinList = properties.getProperty("skins." + index, "").trim();
-            int[] skins = MCPatcherUtils.parseIntegerList(skinList, 1, limit);
-            if (skins.length <= 0) {
-                return null;
-            }
-            for (int i = 0; i < skins.length; i++) {
-                skins[i]--;
+            String skinList = properties.getProperty("skins." + index, "").trim().toLowerCase();
+            int[] skins;
+            if (skinList.equals("*") || skinList.equals("all") || skinList.equals("any")) {
+                skins = new int[limit];
+                for (int i = 0; i < skins.length; i++) {
+                    skins[i] = i;
+                }
+            } else {
+                skins = MCPatcherUtils.parseIntegerList(skinList, 1, limit);
+                if (skins.length <= 0) {
+                    return null;
+                }
+                for (int i = 0; i < skins.length; i++) {
+                    skins[i]--;
+                }
             }
 
-            String[] biomes = properties.getProperty("biomes." + index, "").trim().toLowerCase().split("\\s+");
-            if (biomes.length <= 0) {
+            HashSet<String> biomes = new HashSet<String>();
+            String biomeList = properties.getProperty("biomes." + index, "").trim().toLowerCase();
+            if (!biomeList.equals("")) {
+                Collections.addAll(biomes, biomeList.split("\\s+"));
+            }
+            if (biomes.isEmpty()) {
                 biomes = null;
             }
 
@@ -184,17 +202,16 @@ public class MobRandomizer {
             return new SkinEntry(skins, biomes, minHeight, maxHeight);
         }
 
-        SkinEntry(int[] skins, String[] biomes, int minHeight, int maxHeight) {
+        SkinEntry(int[] skins, HashSet<String> biomes, int minHeight, int maxHeight) {
             this.skins = skins;
-            this.biomes = new HashSet<String>();
-            Collections.addAll(this.biomes, biomes);
+            this.biomes = biomes;
             this.minHeight = minHeight;
             this.maxHeight = maxHeight;
         }
 
         boolean match(int i, int j, int k, String biome) {
             if (biomes != null) {
-                if (biome == null || !biomes.contains(biome.toLowerCase())) {
+                if (biomes.contains(biome)) {
                     return false;
                 }
             }
@@ -204,6 +221,25 @@ public class MobRandomizer {
                 }
             }
             return true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("skins:");
+            for (int i : skins) {
+                sb.append(' ').append(i + 1);
+            }
+            if (biomes != null) {
+                sb.append(", biomes:");
+                for (String s : biomes) {
+                    sb.append(' ').append(s);
+                }
+            }
+            if (minHeight >= 0) {
+                sb.append(", height: ").append(minHeight).append('-').append(maxHeight);
+            }
+            return sb.toString();
         }
     }
 }
