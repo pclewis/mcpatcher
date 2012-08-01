@@ -102,7 +102,7 @@ public class RandomMobs extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntity;)Ljava/lang/String;"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntityLiving;)Ljava/lang/String;"))
                     );
                 }
             });
@@ -137,7 +137,7 @@ public class RandomMobs extends Mod {
                     return buildCode(
                         ALOAD_1,
                         push(eyeTexture),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntity;Ljava/lang/String;)Ljava/lang/String;"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(LEntityLiving;Ljava/lang/String;)Ljava/lang/String;"))
                     );
                 }
             });
