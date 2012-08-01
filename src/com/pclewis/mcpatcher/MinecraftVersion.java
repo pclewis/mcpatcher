@@ -384,4 +384,16 @@ final public class MinecraftVersion {
         }
         return compareTo(parseVersion(versionString));
     }
+
+    boolean isNewerThanAnyKnownVersion() {
+        if (versionOrdering.isEmpty()) {
+            return true;
+        }
+        MinecraftVersion highestVersion = versionOrdering.get(versionOrdering.size() - 1);
+        return compareTo(highestVersion) > 0;
+    }
+
+    static boolean isKnownMD5(String md5) {
+        return knownMD5s.containsValue(md5);
+    }
 }
