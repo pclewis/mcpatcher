@@ -20,7 +20,7 @@ public class RandomMobs extends Mod {
         author = "Balthichou";
         description = "Randomize mob skins if texture pack supports it. Based on Balthichou's mod.";
         website = "http://www.minecraftforum.net/topic/244172-";
-        version = "1.2";
+        version = "1.3";
 
         classMods.add(new RenderLivingMod());
         classMods.add(new RenderEyesMod("Spider"));
