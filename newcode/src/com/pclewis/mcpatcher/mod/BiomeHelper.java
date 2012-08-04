@@ -10,6 +10,15 @@ abstract class BiomeHelper {
 
     IBlockAccess blockAccess;
 
+    static String getBiomeNameAt(int i, int j, int k) {
+        if (instance == null) {
+            return null;
+        } else {
+            BiomeGenBase biome = instance.getBiomeGenAt(i, j, k);
+            return biome == null ? null : biome.biomeName;
+        }
+    }
+
     BiomeHelper(IBlockAccess blockAccess) {
         this.blockAccess = blockAccess;
     }
