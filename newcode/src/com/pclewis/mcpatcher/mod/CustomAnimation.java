@@ -90,6 +90,10 @@ public class CustomAnimation {
     }
 
     private static CustomAnimation newStrip(String textureName, int tileCount, String srcName, BufferedImage srcImage, int x, int y, int w, int h, Properties properties) throws IOException {
+        if (srcImage == null) {
+            MCPatcherUtils.error("%s: image %s not found in texture pack", CLASS_NAME, srcName);
+            return null;
+        }
         if (x < 0 || y < 0 || w <= 0 || h <= 0 || tileCount <= 0) {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;

@@ -122,6 +122,14 @@ public class Colorizer {
     private static final int[] textCodeColors = new int[32]; // text.code.*
     private static int signTextColor; // text.sign
 
+    static {
+        try {
+            reset();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
         return fixedColorMaps[index].colorize(defaultColor, temperature, rainfall);
     }
