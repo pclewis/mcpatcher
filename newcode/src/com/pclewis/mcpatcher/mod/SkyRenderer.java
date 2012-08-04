@@ -149,6 +149,8 @@ public class SkyRenderer {
         private String texture;
         private boolean fade;
         private boolean rotate;
+        private float[] axis;
+        private float speed;
         private int blendMethod;
 
         private double a;
@@ -191,6 +193,34 @@ public class SkyRenderer {
 
         private boolean readRotation() {
             rotate = Boolean.parseBoolean(properties.getProperty("rotate", "true"));
+            if (rotate) {
+                try {
+                    speed = Float.parseFloat(properties.getProperty("speed", "1.0"));
+                } catch (NumberFormatException e) {
+                    return addError("invalid rotation speed");
+                }
+
+                String value = properties.getProperty("axis", "1.0 0.0 0.0").trim().toLowerCase();
+                String[] tokens = value.split("\\s+");
+                if (tokens.length == 3) {
+                    float x;
+                    float y;
+                    float z;
+                    try {
+                        x = Float.parseFloat(tokens[0]);
+                        y = Float.parseFloat(tokens[1]);
+                        z = Float.parseFloat(tokens[2]);
+                    } catch (NumberFormatException e) {
+                        return addError("invalid rotation axis");
+                    }
+                    if (x * x + y * y + z * z == 0.0f) {
+                        return addError("rotation axis cannot be 0");
+                    }
+                    axis = new float[]{x, y, z};
+                } else {
+                    return addError("invalid rotate value %s", value);
+                }
+            }
             return true;
         }
 
@@ -323,7 +353,7 @@ public class SkyRenderer {
             GL11.glPushMatrix();
 
             if (rotate) {
-                GL11.glRotatef(celestialAngle * 360.0f, 1.0f, 0.0f, 0.0f);
+                GL11.glRotatef(celestialAngle * 360.0f * speed, axis[0], axis[1], axis[2]);
             }
 
             // north
