@@ -428,6 +428,10 @@ public class HDTexture extends Mod {
 
     private class TextureFXMod extends ClassMod {
         TextureFXMod() {
+            final FieldRef imageData = new FieldRef(getDeobfClass(), "imageData", "[B");
+            final FieldRef tileNumber = new FieldRef(getDeobfClass(), "tileNumber", "I");
+            final FieldRef tileSize = new FieldRef(getDeobfClass(), "tileSize", "I");
+            final FieldRef tileImage = new FieldRef(getDeobfClass(), "tileImage", "I");
             final MethodRef bindImage = new MethodRef(getDeobfClass(), "bindImage", "(LRenderEngine;)V");
 
             classSignatures.add(new FixedBytecodeSignature(
@@ -441,8 +445,8 @@ public class HDTexture extends Mod {
                 BinaryRegex.end()
             ).setMethodName("onTick"));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "imageData", "[B")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "tileNumber", "I"), null, new FieldRef(getDeobfClass(), "tileSize", "I"), new FieldRef(getDeobfClass(), "tileImage", "I")));
+            memberMappers.add(new FieldMapper(imageData));
+            memberMappers.add(new FieldMapper(tileNumber, null, tileSize, tileImage));
 
             memberMappers.add(new MethodMapper(bindImage));
 
@@ -682,6 +686,16 @@ public class HDTexture extends Mod {
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
+            final FieldRef renderEngine = new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;");
+            final FieldRef gameSettings = new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;");
+            final FieldRef fontRenderer = new FieldRef(getDeobfClass(), "fontRenderer", "LFontRenderer;");
+            final FieldRef alternateFontRenderer = new FieldRef(getDeobfClass(), "alternateFontRenderer", "LFontRenderer;");
+            final MethodRef runTick = new MethodRef(getDeobfClass(), "runTick", "()V");
+            final MethodRef setTileSize = new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V");
+            final MethodRef registerTextureFX = new MethodRef("RenderEngine", "registerTextureFX", "(LTextureFX;)V");
+            final ClassRef renderEngineClass = new ClassRef("RenderEngine");
+            final ClassRef fontRendererClass = new ClassRef("FontRenderer");
+
             mapTexturePackList();
 
             classSignatures.add(new BytecodeSignature() {
@@ -691,7 +705,7 @@ public class HDTexture extends Mod {
                         push("/terrain.png")
                     );
                 }
-            }.setMethodName("runTick"));
+            }.setMethod(runTick));
 
             if (haveColorizerWater) {
                 addColorizerSignature("Water");
@@ -699,13 +713,13 @@ public class HDTexture extends Mod {
                 addColorizerSignature("Foliage");
             }
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
+            memberMappers.add(new FieldMapper(renderEngine));
+            memberMappers.add(new FieldMapper(gameSettings));
             if (haveAlternateFont) {
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "fontRenderer", "LFontRenderer;"), new FieldRef(getDeobfClass(), "alternateFontRenderer", "LFontRenderer;")));
+                memberMappers.add(new FieldMapper(fontRenderer, alternateFontRenderer));
             } else {
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "fontRenderer", "LFontRenderer;")));
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "alternateFontRenderer", "LFontRenderer;")));
+                memberMappers.add(new FieldMapper(fontRenderer));
+                memberMappers.add(new FieldMapper(alternateFontRenderer));
             }
 
             patches.add(new BytecodePatch.InsertAfter() {
@@ -719,7 +733,7 @@ public class HDTexture extends Mod {
                     return buildExpression(
                         // renderEngine = new RenderEngine(texturePackList, gameSettings);
                         ALOAD_0,
-                        reference(NEW, new ClassRef("RenderEngine")),
+                        reference(NEW, renderEngineClass),
                         BinaryRegex.nonGreedy(BinaryRegex.any(0, 18)),
                         PUTFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
 
@@ -727,7 +741,7 @@ public class HDTexture extends Mod {
                         // ...
                         // standardGalacticFontRenderer = new FontRenderer(gameSettings, "/font/alternate.png", renderEngine, false);
                         BinaryRegex.any(0, 60),
-                        reference(NEW, new ClassRef("FontRenderer")),
+                        reference(NEW, fontRendererClass),
                         BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
                         BytecodeMatcher.anyReference(PUTFIELD)
                     );
@@ -741,14 +755,12 @@ public class HDTexture extends Mod {
                         ALOAD_0,
                         GETFIELD, getCaptureGroup(1),
                         ALOAD_0,
-                        reference(INVOKEVIRTUAL, new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V"))
+                        reference(INVOKEVIRTUAL, setTileSize)
                     );
                 }
             });
 
             patches.add(new BytecodePatch() {
-                private JavaRef renderEngine = new FieldRef("Minecraft", "renderEngine", "LRenderEngine;");
-                private JavaRef registerTextureFX = new MethodRef("RenderEngine", "registerTextureFX", "(LTextureFX;)V");
 
                 @Override
                 public String getDescription() {
@@ -791,7 +803,7 @@ public class HDTexture extends Mod {
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "checkTexturePackChange", "(LMinecraft;)V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "runTick", "()V")));
+            }.targetMethod(runTick));
         }
 
         private void addColorizerSignature(final String name) {
@@ -819,9 +831,15 @@ public class HDTexture extends Mod {
     private class TexturePackListMod extends BaseMod.TexturePackListMod {
         TexturePackListMod(MinecraftVersion minecraftVersion) {
             super(minecraftVersion);
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "updateAvailableTexturePacks", "()V")));
+
             final String texturePackType = useITexturePack ? "LITexturePack;" : "LTexturePackBase;";
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "setTexturePack", "(" + texturePackType + ")Z")));
+            final FieldRef renderEngine = new FieldRef("Minecraft", "renderEngine", "LRenderEngine;");
+            final MethodRef updateAvailableTexturePacks = new MethodRef(getDeobfClass(), "updateAvailableTexturePacks", "()V");
+            final MethodRef setTexturePack = new MethodRef(getDeobfClass(), "setTexturePack", "(" + texturePackType + ")Z");
+            final MethodRef setTileSize = new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V");
+
+            memberMappers.add(new MethodMapper(updateAvailableTexturePacks));
+            memberMappers.add(new MethodMapper(setTexturePack));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -844,13 +862,13 @@ public class HDTexture extends Mod {
                         POP,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "getMinecraft", "()LMinecraft;")),
                         DUP,
-                        reference(GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
+                        reference(GETFIELD, renderEngine),
                         SWAP,
-                        reference(INVOKEVIRTUAL, new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V")),
+                        reference(INVOKEVIRTUAL, setTileSize),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setFontRenderer", "()V"))
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "setTexturePack", "(" + texturePackType + ")Z")));
+            }.targetMethod(setTexturePack));
 
             if (useITexturePack) {
                 patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setTexturePack", "(LTexturePackBase;)Z")) {
@@ -859,7 +877,7 @@ public class HDTexture extends Mod {
                         return buildCode(
                             ALOAD_0,
                             ALOAD_1,
-                            reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), "setTexturePack", "(LITexturePack;)Z")),
+                            reference(INVOKEVIRTUAL, setTexturePack),
                             IRETURN
                         );
                     }
@@ -978,9 +996,12 @@ public class HDTexture extends Mod {
 
     private class TexturePackFolderMod extends ClassMod {
         TexturePackFolderMod() {
-            parentClass = "TexturePackBase";
+            final String fileFieldName = haveITexturePack ? "file" : "folder";
+            final FieldRef file = new FieldRef(getDeobfClass(), fileFieldName, "Ljava/io/File;");
+            final MethodRef getFolder = new MethodRef(getDeobfClass(), "getFolder", "()Ljava/io/File;");
+            final MethodRef substring = new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;");
 
-            final String fileField;
+            parentClass = "TexturePackBase";
 
             if (haveITexturePack) {
                 classSignatures.add(new BytecodeSignature() {
@@ -989,27 +1010,24 @@ public class HDTexture extends Mod {
                         return buildExpression(
                             ALOAD_1,
                             push(1),
-                            reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;"))
+                            reference(INVOKEVIRTUAL, substring)
                         );
                     }
                 });
-
-                fileField = "file";
             } else {
                 classSignatures.add(new ConstSignature("pack.txt"));
                 classSignatures.add(new ConstSignature("pack.png"));
 
-                fileField = "folder";
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), fileField, "Ljava/io/File;")));
+                memberMappers.add(new FieldMapper(file));
             }
             classSignatures.add(new ConstSignature(new ClassRef("java.io.FileInputStream")));
 
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getFolder", "()Ljava/io/File;")) {
+            patches.add(new AddMethodPatch(getFolder) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef(getDeobfClass(), fileField, "Ljava/io/File;")),
+                        reference(GETFIELD, file),
                         ARETURN
                     );
                 }
@@ -1160,9 +1178,11 @@ public class HDTexture extends Mod {
         ColorizerMod(String name, String resource) {
             this.name = name;
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "colorBuffer", "[I")));
+            final FieldRef colorBuffer = new FieldRef(getDeobfClass(), "colorBuffer", "[I");
 
-            patches.add(new MakeMemberPublicPatch(new FieldRef(name, "colorBuffer", "[I")));
+            memberMappers.add(new FieldMapper(colorBuffer));
+
+            patches.add(new MakeMemberPublicPatch(colorBuffer));
 
             if (haveColorizerWater) {
                 prerequisiteClasses.add("Minecraft");
