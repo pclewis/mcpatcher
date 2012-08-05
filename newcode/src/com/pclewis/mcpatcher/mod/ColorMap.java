@@ -23,7 +23,7 @@ final class ColorMap {
 
     ColorMap(boolean useCustom, String filename, int defaultColor) {
         mapDefault = defaultColor;
-        if (!useCustom) {
+        if (!useCustom || Colorizer.lastTexturePack == null) {
             return;
         }
         map = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(Colorizer.lastTexturePack.getInputStream(filename)));
