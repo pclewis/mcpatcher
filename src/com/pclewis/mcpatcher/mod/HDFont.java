@@ -25,9 +25,30 @@ public class HDFont extends Mod {
     private class FontRendererMod extends BaseMod.FontRendererMod {
         private final FieldRef charWidth = new FieldRef(getDeobfClass(), "charWidth", "[I");
         private final FieldRef charWidthf = new FieldRef(getDeobfClass(), "charWidthf", "[F");
+        private final FieldRef fontHeight = new FieldRef(getDeobfClass(), "FONT_HEIGHT", "I");
         private final MethodRef getStringWidth = new MethodRef(getDeobfClass(), "getStringWidth", "(Ljava/lang/String;)I");
 
         FontRendererMod() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            ALOAD_0,
+                            BinaryRegex.or(
+                                BinaryRegex.build(push(8)),
+                                BinaryRegex.build(push(9))
+                            ),
+                            BytecodeMatcher.captureReference(PUTFIELD)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }
+                .addXref(1, fontHeight)
+            );
+
             memberMappers.add(new MethodMapper(getStringWidth));
 
             patches.add(new AddFieldPatch(charWidthf));
@@ -62,7 +83,9 @@ public class HDFont extends Mod {
                         ALOAD, 7 + registerOffset,
                         ALOAD_0,
                         reference(GETFIELD, charWidth),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F")),
+                        ALOAD_0,
+                        reference(GETFIELD, fontHeight),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[II)[F")),
                         reference(PUTFIELD, charWidthf)
                     );
                 }

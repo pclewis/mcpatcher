@@ -34,7 +34,7 @@ public class FontUtils {
         }
     }
 
-    public static float[] computeCharWidths(String filename, BufferedImage image, int[] rgb, int[] charWidth) {
+    public static float[] computeCharWidths(String filename, BufferedImage image, int[] rgb, int[] charWidth, int fontHeight) {
         MCPatcherUtils.debug("computeCharWidths(%s)", filename);
         float[] charWidthf = new float[charWidth.length];
         int width = image.getWidth();
@@ -85,8 +85,10 @@ public class FontUtils {
         if (!isOverride[32]) {
             charWidthf[32] = defaultSpaceWidth(charWidthf);
         }
+        float fontScale = (float) fontHeight / 8.0f;
         for (int ch = 0; ch < charWidth.length; ch++) {
             charWidth[ch] = Math.round(charWidthf[ch]);
+            charWidthf[ch] *= fontScale;
             if (printThis(ch)) {
                 MCPatcherUtils.debug("charWidth['%c'] = %f", (char) ch, charWidthf[ch]);
             }

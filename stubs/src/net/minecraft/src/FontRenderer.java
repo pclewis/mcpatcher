@@ -3,6 +3,7 @@ package net.minecraft.src;
 public class FontRenderer {
     public boolean isUnicode;
     public float[] charWidthf;
+    public int FONT_HEIGHT;
 
     public int getCharWidth(char c) { // 1.2.4 and up
         return 0;
