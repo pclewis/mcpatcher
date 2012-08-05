@@ -208,7 +208,7 @@ public final class BaseMod extends Mod {
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
                 );
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "defaultTexturePackStatic", "LITexturePack;"))
+                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;"))
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, true)
                     .accessFlag(AccessFlag.FINAL, true)
