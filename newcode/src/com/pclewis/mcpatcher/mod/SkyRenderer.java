@@ -200,7 +200,7 @@ public class SkyRenderer {
                     return addError("invalid rotation speed");
                 }
 
-                String value = properties.getProperty("axis", "1.0 0.0 0.0").trim().toLowerCase();
+                String value = properties.getProperty("axis", "0.0 0.0 1.0").trim().toLowerCase();
                 String[] tokens = value.split("\\s+");
                 if (tokens.length == 3) {
                     float x;
@@ -216,7 +216,7 @@ public class SkyRenderer {
                     if (x * x + y * y + z * z == 0.0f) {
                         return addError("rotation axis cannot be 0");
                     }
-                    axis = new float[]{x, y, z};
+                    axis = new float[]{z, y, -x};
                 } else {
                     return addError("invalid rotate value %s", value);
                 }
