@@ -870,6 +870,29 @@ public class HDTexture extends Mod {
                 }
             }.targetMethod(setTexturePack));
 
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "report supported resolutions to server";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("X-Minecraft-Supported-Resolutions"),
+                        push("16")
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        push("X-Minecraft-Supported-Resolutions"),
+                        push("16 32 64 128 256 512")
+                    );
+                }
+            });
+
             if (useITexturePack) {
                 patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setTexturePack", "(LTexturePackBase;)Z")) {
                     @Override
