@@ -192,6 +192,11 @@ public final class BaseMod extends Mod {
      */
     public static class TexturePackListMod extends ClassMod {
         protected final boolean useITexturePack;
+        protected final String texturePackType;
+        protected final FieldRef selectedTexturePack;
+        protected final FieldRef defaultTexturePack;
+        protected final MethodRef getDefaultTexturePack = new MethodRef(getDeobfClass(), "getDefaultTexturePack", "()LTexturePackBase;");
+        protected final MethodRef getSelectedTexturePack = new MethodRef(getDeobfClass(), "getSelectedTexturePack", "()LTexturePackBase;");
 
         public TexturePackListMod(MinecraftVersion minecraftVersion) {
             classSignatures.add(new ConstSignature(".zip"));
@@ -199,22 +204,23 @@ public final class BaseMod extends Mod {
 
             if (minecraftVersion.compareTo("12w15a") >= 0) {
                 useITexturePack = true;
+                texturePackType = "LITexturePack;";
 
-                final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;");
-                final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;");
+                selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", texturePackType);
+                defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", texturePackType);
 
                 memberMappers.add(new FieldMapper(selectedTexturePack)
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
                 );
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;"))
+                memberMappers.add(new FieldMapper(defaultTexturePack)
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, true)
                     .accessFlag(AccessFlag.FINAL, true)
                 );
 
-                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getDefaultTexturePack", "()LTexturePackBase;")) {
+                patches.add(new AddMethodPatch(getDefaultTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -225,7 +231,7 @@ public final class BaseMod extends Mod {
                     }
                 }.allowDuplicate(true));
 
-                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getSelectedTexturePack", "()LTexturePackBase;")) {
+                patches.add(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -238,14 +244,15 @@ public final class BaseMod extends Mod {
                 }.allowDuplicate(true));
             } else {
                 useITexturePack = false;
+                texturePackType = "LTexturePackBase;";
 
-                final FieldRef selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LTexturePackBase;");
-                final FieldRef defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;");
+                selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", texturePackType);
+                defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", texturePackType);
 
                 memberMappers.add(new FieldMapper(selectedTexturePack).accessFlag(AccessFlag.PUBLIC, true));
                 memberMappers.add(new FieldMapper(defaultTexturePack).accessFlag(AccessFlag.PRIVATE, true));
 
-                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getDefaultTexturePack", "()LTexturePackBase;")) {
+                patches.add(new AddMethodPatch(getDefaultTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -256,7 +263,7 @@ public final class BaseMod extends Mod {
                     }
                 }.allowDuplicate(true));
 
-                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getSelectedTexturePack", "()LTexturePackBase;")) {
+                patches.add(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
