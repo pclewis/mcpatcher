@@ -166,7 +166,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                }.allowDuplicate(true));
+                });
             } else {
                 final FieldRef theWorld = new FieldRef(getDeobfClass(), "theWorld", "LWorld;");
 
@@ -181,7 +181,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                }.allowDuplicate(true));
+                });
             }
             return this;
         }
@@ -229,7 +229,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                }.allowDuplicate(true));
+                });
 
                 patches.add(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
@@ -241,7 +241,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                }.allowDuplicate(true));
+                });
             } else {
                 useITexturePack = false;
                 texturePackType = "LTexturePackBase;";
@@ -261,7 +261,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                }.allowDuplicate(true));
+                });
 
                 patches.add(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
@@ -272,7 +272,7 @@ public final class BaseMod extends Mod {
                             ARETURN
                         );
                     }
-                }.allowDuplicate(true));
+                });
             }
         }
     }

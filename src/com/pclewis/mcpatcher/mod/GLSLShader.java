@@ -115,7 +115,7 @@ public class GLSLShader extends Mod {
                         ARETURN
                     );
                 }
-            }.allowDuplicate(true));
+            });
         }
     }
 
