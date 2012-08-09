@@ -29,6 +29,7 @@ public class AddFieldPatch extends ClassPatch {
     public AddFieldPatch(FieldRef fieldRef, int accessFlags) {
         this.fieldRef = fieldRef;
         this.accessFlags = accessFlags;
+        allowDuplicate(true);
     }
 
     /**

@@ -51,6 +51,7 @@ abstract public class AddMethodPatch extends ClassPatch {
     public AddMethodPatch(MethodRef methodRef, int accessFlags) {
         this.methodRef = methodRef;
         this.accessFlags = accessFlags;
+        allowDuplicate(true);
     }
 
     /**
