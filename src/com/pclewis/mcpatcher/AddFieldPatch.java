@@ -111,7 +111,17 @@ public class AddFieldPatch extends ClassPatch {
             recordPatch();
         } catch (DuplicateMemberException e) {
             if (allowDuplicate) {
-                return false;
+                for (Object o : classFile.getFields()) {
+                    FieldInfo conflictField = (FieldInfo) o;
+                    if (conflictField.getName().equals(fieldInfo.getName())) {
+                        if (conflictField.getDescriptor().equals(fieldInfo.getDescriptor()) &&
+                            conflictField.getAccessFlags() == fieldInfo.getAccessFlags()) {
+                            return false;
+                        }
+                        break;
+                    }
+                }
+                throw e;
             } else {
                 throw e;
             }

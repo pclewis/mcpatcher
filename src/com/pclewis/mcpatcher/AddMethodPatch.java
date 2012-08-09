@@ -3,6 +3,7 @@ package com.pclewis.mcpatcher;
 import javassist.bytecode.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * ClassPatch that adds a new method to a class file.  The added method is made public by default.
@@ -160,7 +161,24 @@ abstract public class AddMethodPatch extends ClassPatch {
                     recordPatch(String.format("stack size %d, local vars %d", newStackSize, newMaxLocals));
                 } catch (DuplicateMemberException e) {
                     if (!allowDuplicate) {
-                        throw e;
+                        boolean foundIdentical = false;
+                        for (Object o : classFile.getMethods()) {
+                            MethodInfo conflictMethod = (MethodInfo) o;
+                            if (conflictMethod.getCodeAttribute() != null &&
+                                conflictMethod.getName().equals(methodInfo.getName()) &&
+                                conflictMethod.getDescriptor().equals(methodInfo.getDescriptor()) &&
+                                conflictMethod.getAccessFlags() == methodInfo.getAccessFlags()) {
+                                byte[] code1 = methodInfo.getCodeAttribute().getCode();
+                                byte[] code2 = conflictMethod.getCodeAttribute().getCode();
+                                if (Arrays.equals(code1, code2)) {
+                                    foundIdentical = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!foundIdentical) {
+                            throw e;
+                        }
                     }
                 }
             }
