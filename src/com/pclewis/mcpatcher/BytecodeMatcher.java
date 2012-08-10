@@ -142,6 +142,17 @@ public class BytecodeMatcher extends BinaryMatcher {
     public static final String IF_ICMPLE_or_IF_ICMPGT = BinaryRegex.subset(new int[]{IF_ICMPLE, IF_ICMPGT}, true);
     public static final String IF_ICMPGT_or_IF_ICMPLE = IF_ICMPLE_or_IF_ICMPGT;
 
+    private static final int[] ALOAD_OPCODES = {ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3};
+    private static final int[] ASTORE_OPCODES = {ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3};
+    private static final int[] ILOAD_OPCODES = {ILOAD_0, ILOAD_1, ILOAD_2, ILOAD_3};
+    private static final int[] ISTORE_OPCODES = {ISTORE_0, ISTORE_1, ISTORE_2, ISTORE_3};
+    private static final int[] LLOAD_OPCODES = {LLOAD_0, LLOAD_1, LLOAD_2, LLOAD_3};
+    private static final int[] LSTORE_OPCODES = {LSTORE_0, LSTORE_1, LSTORE_2, LSTORE_3};
+    private static final int[] FLOAD_OPCODES = {FLOAD_0, FLOAD_1, FLOAD_2, FLOAD_3};
+    private static final int[] FSTORE_OPCODES = {FSTORE_0, FSTORE_1, FSTORE_2, FSTORE_3};
+    private static final int[] DLOAD_OPCODES = {DLOAD_0, DLOAD_1, DLOAD_2, DLOAD_3};
+    private static final int[] DSTORE_OPCODES = {DSTORE_0, DSTORE_1, DSTORE_2, DSTORE_3};
+
     /**
      * Regex that matches any opcode+16-bit const pool index
      *
@@ -160,6 +171,61 @@ public class BytecodeMatcher extends BinaryMatcher {
      */
     public static String captureReference(int opcode) {
         return BinaryRegex.capture(anyReference(opcode));
+    }
+
+    private static byte[] registerLoadStore(int[] x, int y, int register) {
+        if (register < 0 || register > 255) {
+            throw new IllegalArgumentException("invalid register " + register);
+        } else if (register < x.length) {
+            return new byte[]{(byte) x[register]};
+        } else {
+            return new byte[]{(byte) y, (byte) register};
+        }
+    }
+
+    /**
+     * Returns bytecode to load/store the given register.  Useful when the register number
+     * itself is not constant.
+     *
+     * @param opcode   base opcode: ALOAD, ASTORE, etc.
+     * @param register register number
+     * @return bytecode
+     */
+    public static byte[] registerLoadStore(int opcode, int register) {
+        switch (opcode) {
+            case ALOAD:
+                return registerLoadStore(ALOAD_OPCODES, ALOAD, register);
+
+            case ASTORE:
+                return registerLoadStore(ASTORE_OPCODES, ASTORE, register);
+
+            case ILOAD:
+                return registerLoadStore(ILOAD_OPCODES, ILOAD, register);
+
+            case ISTORE:
+                return registerLoadStore(ISTORE_OPCODES, ISTORE, register);
+
+            case LLOAD:
+                return registerLoadStore(LLOAD_OPCODES, LLOAD, register);
+
+            case LSTORE:
+                return registerLoadStore(LSTORE_OPCODES, LSTORE, register);
+
+            case FLOAD:
+                return registerLoadStore(FLOAD_OPCODES, FLOAD, register);
+
+            case FSTORE:
+                return registerLoadStore(FSTORE_OPCODES, FSTORE, register);
+
+            case DLOAD:
+                return registerLoadStore(DLOAD_OPCODES, DLOAD, register);
+
+            case DSTORE:
+                return registerLoadStore(DSTORE_OPCODES, DSTORE, register);
+
+            default:
+                throw new IllegalArgumentException("invalid opcode " + opcode);
+        }
     }
 
     /**
