@@ -2338,6 +2338,17 @@ public class CustomColors extends Mod {
 
     private class EntityRendererMod extends ClassMod {
         EntityRendererMod() {
+            final boolean updateLightmapTakesFloat = getMinecraftVersion().compareTo("12w32a") >= 0;
+            final MethodRef updateLightmap;
+            final int updateLightmapOffset;
+            if (updateLightmapTakesFloat) {
+                updateLightmap = new MethodRef(getDeobfClass(), "updateLightmap", "(F)V");
+                updateLightmapOffset = 1;
+            } else {
+                updateLightmap = new MethodRef(getDeobfClass(), "updateLightmap", "()V");
+                updateLightmapOffset = 0;
+            }
+
             classSignatures.add(new ConstSignature("ambient.weather.rain"));
             classSignatures.add(new ConstSignature("/terrain.png"));
 
@@ -2346,30 +2357,30 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // sun = world.func_35464_b(1.0F) * 0.95F + 0.05F;
-                        ALOAD_1,
+                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
                         FCONST_1,
                         BytecodeMatcher.captureReference(INVOKEVIRTUAL),
                         push(0.95f),
                         FMUL,
                         push(0.05f),
                         FADD,
-                        FSTORE_3,
+                        BytecodeMatcher.registerLoadStore(FSTORE, 3 + updateLightmapOffset),
 
                         // lightsun = world.worldProvider.lightBrightnessTable[i / 16] * sun;
-                        ALOAD_1,
+                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
                         BytecodeMatcher.captureReference(GETFIELD),
                         BytecodeMatcher.captureReference(GETFIELD),
-                        ILOAD_2,
+                        BytecodeMatcher.registerLoadStore(ILOAD, 2 + updateLightmapOffset),
                         BIPUSH, 16,
                         IDIV,
                         FALOAD,
-                        FLOAD_3,
+                        BytecodeMatcher.registerLoadStore(FLOAD, 3 + updateLightmapOffset),
                         FMUL,
-                        FSTORE, 4,
+                        BytecodeMatcher.registerLoadStore(FSTORE, 4 + updateLightmapOffset),
 
                         // lighttorch = world.worldProvider.lightBrightnessTable[i % 16] * (torchFlickerX * 0.1F + 1.5F);
                         BinaryRegex.any(0, 20),
-                        ILOAD_2,
+                        BytecodeMatcher.registerLoadStore(ILOAD, 2 + updateLightmapOffset),
                         BIPUSH, 16,
                         IREM,
                         FALOAD,
@@ -2380,7 +2391,7 @@ public class CustomColors extends Mod {
                         BinaryRegex.any(0, 200),
 
                         // if (world.lightningFlash > 0)
-                        ALOAD_1,
+                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
                         BytecodeMatcher.captureReference(GETFIELD),
                         IFLE, BinaryRegex.any(2),
 
@@ -2388,21 +2399,21 @@ public class CustomColors extends Mod {
                         BinaryRegex.any(0, 200),
 
                         // if (world.worldProvider.worldType == 1) {
-                        ALOAD_1,
+                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
                         BinaryRegex.backReference(2),
                         BytecodeMatcher.captureReference(GETFIELD),
                         ICONST_1,
                         IF_ICMPNE, BinaryRegex.any(2),
 
                         // ...
-                        BinaryRegex.any(0, 50),
+                        BinaryRegex.any(0, 200),
 
                         // gamma = mc.gameSettings.gammaSetting;
                         ALOAD_0,
                         BytecodeMatcher.captureReference(GETFIELD),
                         BytecodeMatcher.captureReference(GETFIELD),
                         BytecodeMatcher.captureReference(GETFIELD),
-                        FSTORE, 15,
+                        BytecodeMatcher.registerLoadStore(FSTORE, 15 + updateLightmapOffset),
 
                         // ...
                         BinaryRegex.any(0, 300),
@@ -2422,7 +2433,7 @@ public class CustomColors extends Mod {
                     );
                 }
             }
-                .setMethodName("updateLightmap")
+                .setMethod(updateLightmap)
                 .addXref(1, new MethodRef("World", "getSunAngle", "(F)F"))
                 .addXref(2, new FieldRef("World", "worldProvider", "LWorldProvider;"))
                 .addXref(3, new FieldRef("WorldProvider", "lightBrightnessTable", "[F"))
@@ -2472,7 +2483,7 @@ public class CustomColors extends Mod {
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "torchFlickerX", "F")));
 
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "override lightmap";
@@ -2481,18 +2492,16 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        ASTORE_1
+                        BytecodeMatcher.registerLoadStore(ASTORE, 1 + updateLightmapOffset)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        ASTORE_1,
-
                         // if (Colorizer.computeLightmap(this, world)) {
                         ALOAD_0,
-                        ALOAD_1,
+                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLightmap", "(LEntityRenderer;LWorld;)Z")),
                         IFEQ, branch("A"),
 
@@ -2503,7 +2512,7 @@ public class CustomColors extends Mod {
                         label("A")
                     );
                 }
-            }.targetMethod(new MethodRef(getDeobfClass(), "updateLightmap", "()V")));
+            }.targetMethod(updateLightmap));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
