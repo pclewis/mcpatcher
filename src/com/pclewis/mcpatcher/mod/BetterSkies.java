@@ -7,8 +7,9 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class BetterSkies extends Mod {
-    private boolean haveNewWorld;
-    private String worldObjClass;
+    private final boolean haveNewWorld;
+    private final boolean haveNewWorldTime;
+    private final String worldObjClass;
 
     public BetterSkies(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.BETTER_SKIES;
@@ -17,6 +18,7 @@ public class BetterSkies extends Mod {
         version = "1.0";
 
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
+        haveNewWorldTime = minecraftVersion.compareTo("12w32a") >= 0;
 
         classMods.add(new BaseMod.MinecraftMod().mapTexturePackList().addWorldGetter(minecraftVersion));
         classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
@@ -39,10 +41,13 @@ public class BetterSkies extends Mod {
 
     private class WorldMod extends BaseMod.WorldMod {
         WorldMod() {
-            final MethodRef getSeed = new MethodRef(getDeobfClass(), "getSeed", "()J");
             final MethodRef getWorldTime = new MethodRef(getDeobfClass(), "getWorldTime", "()J");
 
-            memberMappers.add(new MethodMapper(getSeed, getWorldTime));
+            if (haveNewWorldTime) {
+                memberMappers.add(new MethodMapper(null, null, getWorldTime));
+            } else {
+               memberMappers.add(new MethodMapper(null, getWorldTime));
+            }
         }
     }
 
