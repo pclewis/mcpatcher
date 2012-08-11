@@ -46,7 +46,7 @@ public class BetterSkies extends Mod {
             if (haveNewWorldTime) {
                 memberMappers.add(new MethodMapper(null, null, getWorldTime));
             } else {
-               memberMappers.add(new MethodMapper(null, getWorldTime));
+                memberMappers.add(new MethodMapper(null, getWorldTime));
             }
         }
     }

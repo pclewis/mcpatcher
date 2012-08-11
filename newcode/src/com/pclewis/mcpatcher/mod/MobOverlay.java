@@ -1,7 +1,9 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import net.minecraft.src.*;
+import net.minecraft.src.EntityLiving;
+import net.minecraft.src.Tessellator;
+import net.minecraft.src.TexturePackBase;
 
 public class MobOverlay {
     private static final String MOOSHROOM_OVERLAY = "/mob/redcow_overlay.png";

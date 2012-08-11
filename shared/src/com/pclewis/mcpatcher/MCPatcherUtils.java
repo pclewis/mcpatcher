@@ -461,7 +461,7 @@ public class MCPatcherUtils {
     /**
      * Attempts to read a properties file.  Closes input stream regardless of success or failure.
      *
-     * @param input open input stream
+     * @param input      open input stream
      * @param properties initial properties object
      * @return true if properties were successfully read
      */
