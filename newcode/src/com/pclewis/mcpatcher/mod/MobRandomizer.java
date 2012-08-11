@@ -61,7 +61,7 @@ public class MobRandomizer {
                 e.printStackTrace();
             }
             if (entity.origBiome != null) {
-                entity.origBiome = entity.origBiome.toLowerCase();
+                entity.origBiome = entity.origBiome.toLowerCase().replace(" ", "");
             }
         }
         MobInfo mobInfo = mobHash.get(texture);
