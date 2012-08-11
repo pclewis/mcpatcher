@@ -15,7 +15,7 @@ public class BetterSkies extends Mod {
         name = MCPatcherUtils.BETTER_SKIES;
         author = "MCPatcher";
         description = "Adds support for custom skyboxes.";
-        version = "1.0";
+        version = "1.1";
 
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
         haveNewWorldTime = minecraftVersion.compareTo("12w32a") >= 0;
