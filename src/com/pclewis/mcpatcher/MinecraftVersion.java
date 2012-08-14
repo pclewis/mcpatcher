@@ -104,6 +104,8 @@ final public class MinecraftVersion {
 
             addKnownVersion("1.3", "a6effac1eaccf5d429aae340cf95ed5d");
             addKnownVersion("1.3.1", "266ccbc9798afd2eadf3d6c01b4c562a");
+            addKnownVersion("1.3.2", "969699f13e5bbe7f12e40ac4f32b7d9a");
+            addKnownVersion("1.3.9999", null); // ensures that any 1.3.x is considered < the 1.4 snapshots
 
             addKnownVersion("12w32a", "0de5595692a736307e96e3fec050a98e");
 
@@ -138,7 +140,7 @@ final public class MinecraftVersion {
             if (version == null) {
                 throw new IllegalArgumentException("bad known version " + version);
             }
-            if (!md5.matches("\\p{XDigit}{32}")) {
+            if (md5 != null && !md5.matches("\\p{XDigit}{32}")) {
                 throw new IllegalArgumentException("bad md5 sum for known version " + version);
             }
             versionOrdering.add(version);
@@ -396,6 +398,6 @@ final public class MinecraftVersion {
     }
 
     static boolean isKnownMD5(String md5) {
-        return knownMD5s.containsValue(md5);
+        return md5 != null && knownMD5s.containsValue(md5);
     }
 }
