@@ -11,7 +11,7 @@ import java.util.Properties;
 
 public class CTMUtils {
     private static final boolean enableGlass = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "glass", true);
-    private static final boolean enableGlassPane = false;
+    private static final boolean enableGlassPane = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "pane", true);
     private static final boolean enableBookshelf = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "bookshelf", true);
     private static final boolean enableSandstone = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "sandstone", true);
     private static final boolean enableStandard = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "standard", true);
@@ -34,13 +34,16 @@ public class CTMUtils {
     static final int TILE_NUM_FIRE_N_S = 2 * 16 + 15;
     static final int TILE_NUM_PORTAL = 0 * 16 + 14;
     static final int TILE_NUM_SANDSTONE_SIDE = 192;
+    static final int TILE_NUM_GLASS = 49;
+    static final int TILE_NUM_GLASS_PANE_SIDE = 148;
 
     static TexturePackBase lastTexturePack;
     static int terrainTexture;
+    static TileOverride lastOverride;
     private static TileOverride blockOverrides[][];
     private static TileOverride tileOverrides[][];
 
-    private static boolean active;
+    static boolean active;
     private static int newTexture;
 
     public static int newTextureIndex;
@@ -63,7 +66,6 @@ public class CTMUtils {
             return false;
         }
         if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face)) {
-            newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
             reset();
@@ -80,7 +82,6 @@ public class CTMUtils {
             return false;
         }
         if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, -1)) {
-            newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
             return true;
         } else {
             reset();
@@ -94,10 +95,12 @@ public class CTMUtils {
     public static void finish() {
         reset();
         Tessellator.instance.texture = -1;
+        lastOverride = null;
         active = false;
     }
 
-    private static boolean getConnectedTexture(RenderBlocks renderBlocks, IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+    static boolean getConnectedTexture(RenderBlocks renderBlocks, IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+        lastOverride = null;
         return getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face, tileOverrides, origTexture) ||
             getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face, blockOverrides, block.blockID);
     }
@@ -119,9 +122,11 @@ public class CTMUtils {
                 overrides[n] = null;
                 continue;
             }
+            lastOverride = override;
             newTexture = override.texture;
             newTextureIndex = override.getTile(renderBlocks, blockAccess, block, origTexture, i, j, k, face);
             if (newTextureIndex >= 0) {
+                newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
                 return true;
             }
         }

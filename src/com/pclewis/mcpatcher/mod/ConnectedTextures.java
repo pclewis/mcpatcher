@@ -17,7 +17,7 @@ public class ConnectedTextures extends Mod {
         name = MCPatcherUtils.CONNECTED_TEXTURES;
         author = "MCPatcher";
         description = "Connects adjacent blocks of the same type.";
-        version = "1.3";
+        version = "1.4";
 
         configPanel = new ConfigPanel();
 
@@ -27,7 +27,7 @@ public class ConnectedTextures extends Mod {
         classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
         classMods.add(new BaseMod.IBlockAccessMod());
         classMods.add(new BlockMod());
-        classMods.add(new TessellatorMod());
+        classMods.add(new TessellatorMod(minecraftVersion));
         classMods.add(new RenderBlocksMod());
         classMods.add(new WorldRendererMod());
 
@@ -40,6 +40,7 @@ public class ConnectedTextures extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Vertical"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Top"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Repeat"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.GLASS_PANE_RENDERER_CLASS));
 
         getClassMap().addInheritance("Tessellator", MCPatcherUtils.SUPER_TESSELLATOR_CLASS);
     }
@@ -124,20 +125,28 @@ public class ConnectedTextures extends Mod {
         MinecraftMod() {
             mapTexturePackList();
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
+            final FieldRef renderEngine = new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;");
+
+            memberMappers.add(new FieldMapper(renderEngine));
         }
     }
 
     private class RenderEngineMod extends ClassMod {
         RenderEngineMod() {
-            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
+            final MethodRef glTexSubImage2D = new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
+            final MethodRef allocateAndSetupTexture = new MethodRef(getDeobfClass(), "allocateAndSetupTexture", "(Ljava/awt/image/BufferedImage;)I");
+            final MethodRef getTexture = new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I");
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I"))
+            classSignatures.add(new ConstSignature("%clamp%"));
+            classSignatures.add(new ConstSignature("%blur%"));
+            classSignatures.add(new ConstSignature(glTexSubImage2D));
+
+            memberMappers.add(new MethodMapper(getTexture)
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "allocateAndSetupTexture", "(Ljava/awt/image/BufferedImage;)I"))
+            memberMappers.add(new MethodMapper(allocateAndSetupTexture)
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
@@ -147,6 +156,8 @@ public class ConnectedTextures extends Mod {
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
             final MethodRef getBlockTexture = new MethodRef(getDeobfClass(), "getBlockTexture", "(LIBlockAccess;IIII)I");
+            final InterfaceMethodRef getBlockMetadata = new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I");
+            final MethodRef getBlockTextureFromSideAndMetadata = new MethodRef(getDeobfClass(), "getBlockTextureFromSideAndMetadata", "(II)I");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -167,22 +178,19 @@ public class ConnectedTextures extends Mod {
                 }
             }
                 .setMethod(getBlockTexture)
-                .addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I"))
-                .addXref(2, new MethodRef(getDeobfClass(), "getBlockTextureFromSideAndMetadata", "(II)I"))
+                .addXref(1, getBlockMetadata)
+                .addXref(2, getBlockTextureFromSideAndMetadata)
             );
         }
     }
 
-    private class TessellatorMod extends ClassMod {
-        TessellatorMod() {
-            final MethodRef draw = new MethodRef(getDeobfClass(), "draw", "()I");
-            final MethodRef startDrawingQuads = new MethodRef(getDeobfClass(), "startDrawingQuads", "()V");
-            final MethodRef startDrawing = new MethodRef(getDeobfClass(), "startDrawing", "(I)V");
-            final MethodRef constructor = new MethodRef("Tessellator", "<init>", "(I)V");
-            final MethodRef constructor0 = new MethodRef("Tessellator", "<init>", "()V");
+    private class TessellatorMod extends BaseMod.TessellatorMod {
+        TessellatorMod(MinecraftVersion minecraftVersion) {
+            super(minecraftVersion);
+
+            final MethodRef constructor = new MethodRef(getDeobfClass(), "<init>", "(I)V");
+            final MethodRef constructor0 = new MethodRef(getDeobfClass(), "<init>", "()V");
             final MethodRef reset = new MethodRef(getDeobfClass(), "reset", "()V");
-            final MethodRef addVertex = new MethodRef(getDeobfClass(), "addVertex", "(DDD)V");
-            final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
             final FieldRef isDrawing = new FieldRef(getDeobfClass(), "isDrawing", "Z");
             final FieldRef drawMode = new FieldRef(getDeobfClass(), "drawMode", "I");
             final FieldRef texture = new FieldRef(getDeobfClass(), "texture", "I");
@@ -190,15 +198,6 @@ public class ConnectedTextures extends Mod {
             final FieldRef addedVertices = new FieldRef(getDeobfClass(), "addedVertices", "I");
             final FieldRef vertexCount = new FieldRef(getDeobfClass(), "vertexCount", "I");
             final FieldRef rawBufferIndex = new FieldRef(getDeobfClass(), "rawBufferIndex", "I");
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        push("Not tesselating!")
-                    );
-                }
-            }.setMethod(draw));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -435,6 +434,8 @@ public class ConnectedTextures extends Mod {
         private final FieldRef instance = new FieldRef("Tessellator", "instance", "LTessellator;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
         private final MethodRef drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDD)V");
+        private final MethodRef renderBlockPane = new MethodRef(getDeobfClass(), "renderBlockPane", "(LBlockPane;III)Z");
+        private final MethodRef addVertexWithUV = new MethodRef("Tessellator", "addVertexWithUV", "(DDDDD)V");
         private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LRenderBlocks;LBlock;IIIII)Z");
         private final MethodRef setupNoFace = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LRenderBlocks;LBlock;IIII)Z");
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
@@ -443,6 +444,7 @@ public class ConnectedTextures extends Mod {
 
         private ArrayList<MethodInfo> renderMethods = new ArrayList<MethodInfo>();
         private ArrayList<Integer> tessellatorRegisters = new ArrayList<Integer>();
+        private int[] sideUVRegisters;
 
         RenderBlocksMod() {
             setupBlockFace(0, "Bottom");
@@ -476,11 +478,35 @@ public class ConnectedTextures extends Mod {
                 .addXref(2, overrideBlockTexture)
             );
 
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ILOAD, 5,
+                        push(18),
+                        BytecodeMatcher.IF_ICMPNE_or_IF_ICMPEQ, BinaryRegex.any(2),
+
+                        ALOAD_0,
+                        ALOAD_1,
+                        BytecodeMatcher.anyReference(CHECKCAST),
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        IRETURN
+                    );
+                }
+            }
+                .addXref(1, renderBlockPane)
+            );
+
             memberMappers.add(new FieldMapper(blockAccess));
             memberMappers.add(new MethodMapper(faceMethods));
             memberMappers.add(new MethodMapper(drawCrossedSquares));
 
             patches.add(new BytecodePatch() {
+                private JavaRef ref;
+
                 @Override
                 public String getDescription() {
                     return "find potential render methods";
@@ -488,7 +514,11 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
-                    return methodInfo.getDescriptor().matches("^\\(L[a-z]+;III.*");
+                    if (ref == null) {
+                        ref = map(renderBlockPane);
+                    }
+                    return methodInfo.getDescriptor().matches("^\\(L[a-z]+;III.*") &&
+                        (!methodInfo.getDescriptor().equals(ref.getType()) || !methodInfo.getName().equals(ref.getName()));
                 }
 
                 @Override
@@ -636,6 +666,124 @@ public class ConnectedTextures extends Mod {
                     );
                 }
             }.targetMethod(drawCrossedSquares));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "determine glass side texture uv registers";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // sideU0 = (sideU + 7) / 256.0f;
+                        BytecodeMatcher.anyILOAD,
+                        push(7),
+                        IADD,
+                        I2F,
+                        push(256.0f),
+                        FDIV,
+                        F2D,
+                        DSTORE, BinaryRegex.capture(BinaryRegex.any())
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    int reg = getCaptureGroup(1)[0] & 0xff;
+                    sideUVRegisters = new int[]{reg, reg + 2, reg + 4, reg + 6, reg + 8};
+                    Logger.log(Logger.LOG_CONST, "glass side texture uv registers (%d %d %d %d %d)",
+                        reg, reg + 2, reg + 4, reg + 6, reg + 8
+                    );
+                    return null;
+                }
+            }.targetMethod(renderBlockPane));
+
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "override texture (glass pane)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    if (sideUVRegisters == null) {
+                        return null;
+                    } else {
+                        return buildExpression(
+                            // connectEast = par1BlockPane.canThisPaneConnectToThisBlockID(this.blockAccess.getBlockId(i + 1, j, k));
+                            ALOAD_1,
+                            ALOAD_0,
+                            reference(GETFIELD, blockAccess),
+                            ILOAD_2,
+                            push(1),
+                            IADD,
+                            ILOAD_3,
+                            ILOAD, 4,
+                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                            ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                        );
+                    }
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    int reg = getCaptureGroup(1)[0] & 0xff;
+                    return buildCode(
+                        // GlassPaneRenderer.render(renderBlocks, overrideBlockTexture, blockPane, i, j, k, connectNorth, ...);
+                        ALOAD_0,
+                        ALOAD_0,
+                        reference(GETFIELD, overrideBlockTexture),
+                        ALOAD_1,
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        ILOAD, reg - 3,
+                        ILOAD, reg - 2,
+                        ILOAD, reg - 1,
+                        ILOAD, reg,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GLASS_PANE_RENDERER_CLASS, "render", "(LRenderBlocks;ILBlock;IIIZZZZ)V"))
+                    );
+                }
+            }.targetMethod(renderBlockPane));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "disable default rendering (glass pane faces)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    if (sideUVRegisters == null) {
+                        return null;
+                    } else {
+                        return buildExpression(BinaryRegex.repeat(BinaryRegex.build(
+                            ALOAD, BinaryRegex.any(),
+                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 30)),
+                            DLOAD, BinaryRegex.subset(sideUVRegisters, false),
+                            DLOAD, BinaryRegex.subset(sideUVRegisters, false),
+                            reference(INVOKEVIRTUAL, addVertexWithUV)
+                        ), 8));
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        // if (!GlassPaneRenderer.active) {
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.GLASS_PANE_RENDERER_CLASS, "active", "Z")),
+                        IFNE, branch("A"),
+
+                        // ...
+                        getMatch(),
+
+                        // }
+                        label("A")
+                    );
+                }
+            }.targetMethod(renderBlockPane));
         }
 
         private void setupBlockFace(final int face, final String direction) {
@@ -652,7 +800,7 @@ public class ConnectedTextures extends Mod {
                     return buildExpression(
                         BinaryRegex.capture(BinaryRegex.build(
                             // tessellator = Tessellator.instance;
-                            reference(GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
+                            reference(GETSTATIC, instance),
                             ASTORE, BinaryRegex.capture(BinaryRegex.any()),
 
                             // if (overrideBlockTexture >= 0) {

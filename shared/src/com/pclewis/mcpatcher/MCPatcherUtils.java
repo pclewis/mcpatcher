@@ -52,6 +52,7 @@ public class MCPatcherUtils {
     public static final String CTM_UTILS_CLASS = "com.pclewis.mcpatcher.mod.CTMUtils";
     public static final String SUPER_TESSELLATOR_CLASS = "com.pclewis.mcpatcher.mod.SuperTessellator";
     public static final String TILE_OVERRIDE_CLASS = "com.pclewis.mcpatcher.mod.TileOverride";
+    public static final String GLASS_PANE_RENDERER_CLASS = "com.pclewis.mcpatcher.mod.GlassPaneRenderer";
     public static final String SKY_RENDERER_CLASS = "com.pclewis.mcpatcher.mod.SkyRenderer";
     public static final String SHADERS_CLASS = "com.pclewis.mcpatcher.mod.Shaders";
 
