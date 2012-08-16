@@ -211,7 +211,7 @@ public class MobRandomizer {
 
         boolean match(int i, int j, int k, String biome) {
             if (biomes != null) {
-                if (biomes.contains(biome)) {
+                if (!biomes.contains(biome)) {
                     return false;
                 }
             }
