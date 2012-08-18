@@ -1,7 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.*;
+import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
