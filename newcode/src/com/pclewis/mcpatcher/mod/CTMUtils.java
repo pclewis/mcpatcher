@@ -46,7 +46,6 @@ public class CTMUtils {
     private static final TileOverride tileOverrides[][] = new TileOverride[NUM_TILES][];
 
     static boolean active;
-    private static int newTexture;
 
     public static int newTextureIndex;
     public static Tessellator newTessellator;
@@ -190,10 +189,9 @@ public class CTMUtils {
                 continue;
             }
             lastOverride = override;
-            newTexture = override.texture;
             newTextureIndex = override.getTile(renderBlocks, blockAccess, block, origTexture, i, j, k, face);
             if (newTextureIndex >= 0) {
-                newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(newTexture);
+                newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(override.texture);
                 return true;
             }
         }
