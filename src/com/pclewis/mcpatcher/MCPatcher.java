@@ -464,7 +464,7 @@ final public class MCPatcher {
             out.println("Click Browse to choose the input file.");
             out.println();
         } else {
-            for (Mod mod : modList.getVisible()) {
+            for (Mod mod : modList.getAll()) {
                 if (!mod.getClassMap().getClassMap().isEmpty()) {
                     out.printf("%s\n", mod.getName());
                     mod.getClassMap().print(out, "    ");
