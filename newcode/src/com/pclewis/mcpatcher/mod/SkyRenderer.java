@@ -29,6 +29,7 @@ public class SkyRenderer {
             @Override
             protected void onChange() {
                 worldSkies.clear();
+                getWorldEntry(0);
             }
         });
     }
@@ -39,14 +40,7 @@ public class SkyRenderer {
             active = false;
         } else {
             int worldType = minecraft.getWorld().worldProvider.worldType;
-            currentWorld = worldSkies.get(worldType);
-            if (currentWorld == null) {
-                currentWorld = new WorldEntry();
-                loadSkies(worldType, currentWorld);
-                loadCelestialObject(worldType, currentWorld, "sun", "/terrain/sun.png");
-                loadCelestialObject(worldType, currentWorld, "moon", "/terrain/moon_phases.png");
-                worldSkies.put(worldType, currentWorld);
-            }
+            currentWorld = getWorldEntry(worldType);
             active = currentWorld.active();
             if (active) {
                 SkyRenderer.renderEngine = renderEngine;
@@ -77,6 +71,18 @@ public class SkyRenderer {
             }
         }
         return defaultTexture;
+    }
+
+    private static WorldEntry getWorldEntry(int worldType) {
+        WorldEntry entry = worldSkies.get(worldType);
+        if (entry == null) {
+            entry = new WorldEntry();
+            loadSkies(worldType, entry);
+            loadCelestialObject(worldType, entry, "sun", "/terrain/sun.png");
+            loadCelestialObject(worldType, entry, "moon", "/terrain/moon_phases.png");
+            worldSkies.put(worldType, entry);
+        }
+        return entry;
     }
 
     private static void loadSkies(int worldType, WorldEntry entry) {
