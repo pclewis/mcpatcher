@@ -1,9 +1,8 @@
 package com.pclewis.mcpatcher.mod;
 
-import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.Tessellator;
-import net.minecraft.src.TexturePackBase;
 
 public class MobOverlay {
     private static final String MOOSHROOM_OVERLAY = "/mob/redcow_overlay.png";
@@ -30,9 +29,9 @@ public class MobOverlay {
 
     public static String snowmanOverlayTexture;
 
-    static void reset(TexturePackBase texturePack) {
-        haveMooshroom = MCPatcherUtils.readImage(texturePack.getInputStream(MOOSHROOM_OVERLAY)) != null;
-        haveSnowman = MCPatcherUtils.readImage(texturePack.getInputStream(SNOWMAN_OVERLAY)) != null;
+    static void reset() {
+        haveMooshroom = TexturePackAPI.hasResource(MOOSHROOM_OVERLAY);
+        haveSnowman = TexturePackAPI.hasResource(SNOWMAN_OVERLAY);
     }
 
     public static String setupMooshroom(EntityLiving entity, String defaultTexture) {

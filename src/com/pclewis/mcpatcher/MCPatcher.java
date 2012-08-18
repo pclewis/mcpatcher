@@ -26,11 +26,11 @@ final public class MCPatcher {
     /**
      * MCPatcher release number
      */
-    public static final int RELEASE_VERSION = 1;
+    public static final int RELEASE_VERSION = 2;
     /**
      * MCPatcher patch level
      */
-    public static final int PATCH_VERSION = 3;
+    public static final int PATCH_VERSION = 0;
     /**
      * MCPatcher beta version if > 0
      */
@@ -440,7 +440,7 @@ final public class MCPatcher {
     private static void printModList() {
         Logger.log(Logger.LOG_MAIN);
         Logger.log(Logger.LOG_MAIN, "%d available mods:", modList.getVisible().size());
-        for (Mod mod : modList.getVisible()) {
+        for (Mod mod : modList.getAll()) {
             Logger.log(Logger.LOG_MAIN, "[%3s] %s %s - %s", (mod.okToApply() ? "YES" : "NO"), mod.getName(), mod.getVersion(), mod.getDescription());
             for (ClassMod cm : mod.classMods) {
                 if (cm.okToApply()) {

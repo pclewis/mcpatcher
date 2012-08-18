@@ -19,12 +19,12 @@ public class ConnectedTextures extends Mod {
         description = "Connects adjacent blocks of the same type.";
         version = "1.4";
 
+        addDependency(BaseTexturePackMod.NAME);
+
         configPanel = new ConfigPanel();
 
         classMods.add(new MinecraftMod());
         classMods.add(new RenderEngineMod());
-        classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
-        classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
         classMods.add(new BaseMod.IBlockAccessMod());
         classMods.add(new BlockMod());
         classMods.add(new TessellatorMod(minecraftVersion));
@@ -32,6 +32,7 @@ public class ConnectedTextures extends Mod {
         classMods.add(new WorldRendererMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SUPER_TESSELLATOR_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$CTM"));
@@ -123,8 +124,6 @@ public class ConnectedTextures extends Mod {
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
-            mapTexturePackList();
-
             final FieldRef renderEngine = new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;");
 
             memberMappers.add(new FieldMapper(renderEngine));

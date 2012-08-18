@@ -1,14 +1,15 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.Block;
 import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.RenderBlocks;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 abstract class TileOverride {
     static final int BOTTOM_FACE = 0; // 0, -1, 0
@@ -109,6 +110,8 @@ abstract class TileOverride {
     final String filePrefix;
     final String textureName;
     final int texture;
+    final int[] blockIDs;
+    final int[] tileIDs;
     final int faces;
     final int metadata;
     final boolean connectByTile;
@@ -119,31 +122,17 @@ abstract class TileOverride {
     int metamask;
     int rotateUV;
 
-    static TileOverride create(String filePrefix, Properties properties, boolean connectByTile) {
+    static TileOverride create(String filePrefix, Properties properties) {
         if (filePrefix == null) {
             return null;
         }
         if (properties == null) {
-            InputStream is = null;
-            try {
-                is = CTMUtils.lastTexturePack.getInputStream(filePrefix + ".properties");
-                if (is != null) {
-                    properties = new Properties();
-                    properties.load(is);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                MCPatcherUtils.close(is);
-            }
+            properties = TexturePackAPI.getProperties(filePrefix + ".properties");
         }
         if (properties == null) {
             return null;
         }
 
-        if (connectByTile && !properties.contains("connect")) {
-            properties.setProperty("connect", "tile");
-        }
         String method = properties.getProperty("method", "default").trim().toLowerCase();
         TileOverride override = null;
 
@@ -176,15 +165,17 @@ abstract class TileOverride {
         return override == null || override.disabled ? null : override;
     }
 
-    static TileOverride create(BufferedImage image) {
-        TileOverride override = new CTM(image);
+    static TileOverride create(BufferedImage image, int tileID) {
+        TileOverride override = new CTM(image, tileID);
         return override.disabled ? null : override;
     }
 
-    private TileOverride(BufferedImage image) {
+    private TileOverride(BufferedImage image, int tileID) {
         filePrefix = null;
         textureName = null;
         texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
+        blockIDs = new int[0];
+        tileIDs = new int[]{tileID};
         faces = -1;
         metadata = -1;
         connectByTile = true;
@@ -201,6 +192,12 @@ abstract class TileOverride {
             } else {
                 disabled = true;
             }
+        }
+
+        blockIDs = getIDList(properties, "blockIDs", "block", Block.blocksList.length - 1);
+        tileIDs = getIDList(properties, "tileIDs", "terrain", CTMUtils.NUM_TILES - 1);
+        if (blockIDs.length == 0 && tileIDs.length == 0) {
+            error("no block or tile IDs matched");
         }
 
         int flags = 0;
@@ -231,8 +228,12 @@ abstract class TileOverride {
         }
         metadata = meta;
 
-        String connectType = properties.getProperty("connect", "tile").trim().toLowerCase();
-        connectByTile = connectType.equals("tile");
+        String connectType = properties.getProperty("connect", "").trim().toLowerCase();
+        if ("".equals(connectType)) {
+            connectByTile = tileIDs.length > 0;
+        } else {
+            connectByTile = connectType.equals("tile");
+        }
 
         String tileList = properties.getProperty("tiles", "");
         if (tileList.equals("")) {
@@ -240,6 +241,22 @@ abstract class TileOverride {
         } else {
             tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
         }
+    }
+
+    private int[] getIDList(Properties properties, String key, String type, int maxID) {
+        int[] list = MCPatcherUtils.parseIntegerList(properties.getProperty(key, "").trim(), 0, maxID);
+        if (list.length > 0) {
+            return list;
+        }
+        Matcher m = Pattern.compile("/" + type + "(\\d+)").matcher(filePrefix);
+        if (m.find()) {
+            try {
+                list = new int[]{Integer.parseInt(m.group(1))};
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
 
     private static int[] add(int[] a, int[] b) {
@@ -391,8 +408,8 @@ abstract class TileOverride {
 
         private final int[] neighborTileMap;
 
-        private CTM(BufferedImage image) {
-            super(image);
+        private CTM(BufferedImage image, int tileID) {
+            super(image, tileID);
             neighborTileMap = compose(defaultTileMap, neighborMap);
         }
 

@@ -30,6 +30,8 @@ public class CustomColors extends Mod {
         description = "Gives texture packs control over hardcoded colors in the game.";
         version = "1.4";
 
+        addDependency(BaseTexturePackMod.NAME);
+
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") < 0) {
             addError("Requires Minecraft Beta 1.9 or newer.");
             return;
@@ -43,9 +45,6 @@ public class CustomColors extends Mod {
         renderBlockFallingSandTakes4Ints = minecraftVersion.compareTo("12w22a") >= 0;
 
         configPanel = new ConfigPanel();
-
-        classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
-        classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
 
         classMods.add(new MinecraftMod(minecraftVersion));
         classMods.add(new IBlockAccessMod());
@@ -114,6 +113,7 @@ public class CustomColors extends Mod {
         classMods.add(new RenderXPOrbMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS + "$Stub"));
@@ -315,7 +315,6 @@ public class CustomColors extends Mod {
                 }
             }.setMethod(runGameLoop));
 
-            mapTexturePackList();
             addWorldGetter(minecraftVersion);
 
             patches.add(new BytecodePatch() {

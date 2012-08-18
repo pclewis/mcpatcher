@@ -22,12 +22,15 @@ import static javassist.bytecode.Opcode.*;
  * can be instantiated or extended as needed.
  */
 public final class BaseMod extends Mod {
+    public static final String NAME = "__Base";
+
     BaseMod(MinecraftVersion minecraftVersion) {
-        name = "__Base";
+        name = NAME;
         author = "MCPatcher";
         description = "Internal mod required by the patcher.";
         version = "1.0";
         configPanel = new ConfigPanel();
+        dependencies.clear();
 
         classMods.add(new XMinecraftMod());
 
@@ -39,11 +42,18 @@ public final class BaseMod extends Mod {
         private JPanel panel;
         private JTextField heapSizeText;
         private JCheckBox debugCheckBox;
+        private JCheckBox autoRefreshTexturesCheckBox;
 
         ConfigPanel() {
             debugCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     MCPatcherUtils.set(com.pclewis.mcpatcher.Config.TAG_DEBUG, debugCheckBox.isSelected());
+                }
+            });
+
+            autoRefreshTexturesCheckBox.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    MCPatcherUtils.set("autoRefreshTextures", autoRefreshTexturesCheckBox.isSelected());
                 }
             });
         }
@@ -62,6 +72,7 @@ public final class BaseMod extends Mod {
         public void load() {
             heapSizeText.setText("" + MCPatcherUtils.getInt(com.pclewis.mcpatcher.Config.TAG_JAVA_HEAP_SIZE, 1024));
             debugCheckBox.setSelected(MCPatcherUtils.getBoolean(com.pclewis.mcpatcher.Config.TAG_DEBUG, false));
+            autoRefreshTexturesCheckBox.setSelected(MCPatcherUtils.getBoolean("autoRefreshTextures", false));
         }
 
         @Override
@@ -753,7 +764,11 @@ public final class BaseMod extends Mod {
      */
     public static class GameSettingsMod extends ClassMod {
         public GameSettingsMod() {
-            classSignatures.add(new ConstSignature("key.forward"));
+            classSignatures.add(new ConstSignature("options.txt"));
+            classSignatures.add(new OrSignature(
+                new ConstSignature("key.forward"),
+                new ConstSignature("Forward")
+            ));
         }
 
         /**

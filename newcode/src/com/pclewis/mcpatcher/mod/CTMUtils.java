@@ -1,12 +1,15 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
-import net.minecraft.src.*;
+import com.pclewis.mcpatcher.TexturePackAPI;
+import net.minecraft.src.Block;
+import net.minecraft.src.IBlockAccess;
+import net.minecraft.src.RenderBlocks;
+import net.minecraft.src.Tessellator;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Properties;
 
 public class CTMUtils {
@@ -37,11 +40,10 @@ public class CTMUtils {
     static final int TILE_NUM_GLASS = 49;
     static final int TILE_NUM_GLASS_PANE_SIDE = 148;
 
-    static TexturePackBase lastTexturePack;
-    static int terrainTexture;
     static TileOverride lastOverride;
-    private static TileOverride blockOverrides[][];
-    private static TileOverride tileOverrides[][];
+    static int terrainTexture = -1;
+    private static final TileOverride blockOverrides[][] = new TileOverride[Block.blocksList.length][];
+    private static final TileOverride tileOverrides[][] = new TileOverride[NUM_TILES][];
 
     static boolean active;
     private static int newTexture;
@@ -49,10 +51,75 @@ public class CTMUtils {
     public static int newTextureIndex;
     public static Tessellator newTessellator;
 
+    static {
+        TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.CONNECTED_TEXTURES, 2) {
+            @Override
+            protected void onChange() {
+                terrainTexture = getTexture("/terrain.png");
+                if (Tessellator.instance instanceof SuperTessellator) {
+                    ((SuperTessellator) Tessellator.instance).clearTessellators();
+                }
+
+                for (int i = 0; i < blockOverrides.length; i++) {
+                    blockOverrides[i] = null;
+                }
+                for (int i = 0; i < tileOverrides.length; i++) {
+                    tileOverrides[i] = null;
+                }
+
+                if (enableStandard || enableNonStandard) {
+                    for (String s : TexturePackAPI.listResources("/ctm", ".properties")) {
+                        registerOverride(TileOverride.create(s.replace(".properties", ""), null));
+                    }
+                }
+
+                Properties properties = new Properties();
+
+                if (enableGlass) {
+                    properties.clear();
+                    properties.setProperty("method", "glass");
+                    properties.setProperty("connect", "block");
+                    properties.setProperty("blockIDs", "" + BLOCK_ID_GLASS);
+                    registerOverride(TileOverride.create("/ctm", properties));
+                }
+
+                if (enableGlassPane) {
+                    properties.clear();
+                    properties.setProperty("method", "glass");
+                    properties.setProperty("connect", "block");
+                    properties.setProperty("blockIDs", "" + BLOCK_ID_GLASS_PANE);
+                    registerOverride(TileOverride.create("/ctm", properties));
+                }
+
+                if (enableBookshelf) {
+                    properties.clear();
+                    properties.setProperty("method", "bookshelf");
+                    properties.setProperty("connect", "block");
+                    properties.setProperty("blockIDs", "" + BLOCK_ID_BOOKSHELF);
+                    registerOverride(TileOverride.create("/ctm", properties));
+                }
+
+                if (enableSandstone) {
+                    properties.clear();
+                    properties.setProperty("method", "sandstone");
+                    properties.setProperty("connect", "tile");
+                    properties.setProperty("tileIDs", "" + TILE_NUM_SANDSTONE_SIDE);
+                    properties.setProperty("metadata", "0");
+                    registerOverride(TileOverride.create("/ctm", properties));
+                }
+
+                if (enableOutline) {
+                    setupOutline();
+                }
+
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrainTexture);
+            }
+        });
+    }
+
     public static void start() {
-        checkUpdate();
         Tessellator.instance.texture = terrainTexture;
-        if (Tessellator.instance instanceof SuperTessellator) {
+        if (Tessellator.instance instanceof SuperTessellator && terrainTexture >= 0) {
             active = true;
         }
     }
@@ -133,109 +200,36 @@ public class CTMUtils {
         return false;
     }
 
-    private static void checkUpdate() {
-        TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack();
-        if (selectedTexturePack == lastTexturePack) {
-            return;
+    private static void registerOverride(TileOverride override) {
+        if (override != null) {
+            registerOverride(override, override.blockIDs, blockOverrides);
+            registerOverride(override, override.tileIDs, tileOverrides);
         }
-        MCPatcherUtils.info("refreshing connected textures");
-        lastTexturePack = selectedTexturePack;
-        terrainTexture = getTexture("/terrain.png");
-        if (Tessellator.instance instanceof SuperTessellator) {
-            ((SuperTessellator) Tessellator.instance).clearTessellators();
-        }
-
-        blockOverrides = loadOverrides("block", Block.blocksList.length, false);
-        tileOverrides = loadOverrides("terrain", NUM_TILES, true);
-
-        Properties properties = new Properties();
-
-        if (enableGlass) {
-            properties.clear();
-            properties.setProperty("method", "glass");
-            properties.setProperty("connect", "block");
-            loadBasicOverride(properties, blockOverrides, BLOCK_ID_GLASS);
-        }
-
-        if (enableGlassPane) {
-            properties.clear();
-            properties.setProperty("method", "glass");
-            properties.setProperty("connect", "block");
-            loadBasicOverride(properties, blockOverrides, BLOCK_ID_GLASS_PANE);
-        }
-
-        if (enableBookshelf) {
-            properties.clear();
-            properties.setProperty("method", "bookshelf");
-            properties.setProperty("connect", "block");
-            loadBasicOverride(properties, blockOverrides, BLOCK_ID_BOOKSHELF);
-        }
-
-        if (enableSandstone) {
-            properties.clear();
-            properties.setProperty("method", "sandstone");
-            properties.setProperty("connect", "tile");
-            properties.setProperty("metadata", "0");
-            loadBasicOverride(properties, tileOverrides, TILE_NUM_SANDSTONE_SIDE);
-        }
-
-        if (enableOutline) {
-            setupOutline();
-        }
-
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrainTexture);
     }
 
-    private static TileOverride[][] loadOverrides(String type, int length, boolean connectByTile) {
-        TileOverride[][] allOverrides = new TileOverride[length][];
-        if (enableStandard || enableNonStandard) {
-            for (int i = 0; i < length; i++) {
-                ArrayList<TileOverride> tmpOverrides = null;
-                for (char c = 'a' - 1; c <= 'z'; c++) {
-                    String prefix = "/ctm/" + type + i + (c >= 'a' ? "" + c : "");
-                    TileOverride override = TileOverride.create(prefix, null, connectByTile);
-                    if (override == null) {
-                        if (c >= 'a') {
-                            break;
-                        }
-                    } else {
-                        if (tmpOverrides == null) {
-                            tmpOverrides = new ArrayList<TileOverride>();
-                        }
-                        tmpOverrides.add(override);
-                    }
-                }
-                if (tmpOverrides != null) {
-                    allOverrides[i] = new TileOverride[tmpOverrides.size()];
-                    tmpOverrides.toArray(allOverrides[i]);
-                }
+    private static void registerOverride(TileOverride override, int[] ids, TileOverride[][] allOverrides) {
+        if (override == null || ids == null || allOverrides == null) {
+            return;
+        }
+        for (int index : ids) {
+            TileOverride[] oldList = allOverrides[index];
+            if (oldList == null) {
+                allOverrides[index] = new TileOverride[]{override};
+            } else {
+                TileOverride[] newList = new TileOverride[oldList.length + 1];
+                System.arraycopy(oldList, 0, newList, 0, oldList.length);
+                newList[oldList.length] = override;
+                allOverrides[index] = newList;
             }
-        }
-        return allOverrides;
-    }
-
-    private static void loadBasicOverride(Properties properties, TileOverride[][] allOverrides, int index) {
-        TileOverride override = TileOverride.create("/ctm", properties, false);
-        if (override == null || allOverrides == null || index < 0 || index >= allOverrides.length) {
-            return;
-        }
-        TileOverride[] oldList = allOverrides[index];
-        if (oldList == null) {
-            allOverrides[index] = new TileOverride[]{override};
-        } else {
-            TileOverride[] newList = new TileOverride[oldList.length + 1];
-            System.arraycopy(oldList, 0, newList, 0, oldList.length);
-            newList[oldList.length] = override;
-            allOverrides[index] = newList;
         }
     }
 
     private static void setupOutline() {
-        BufferedImage terrain = MCPatcherUtils.readImage(lastTexturePack.getInputStream("/terrain.png"));
+        BufferedImage terrain = TexturePackAPI.getImage("/terrain.png");
         if (terrain == null) {
             return;
         }
-        BufferedImage template = MCPatcherUtils.readImage(lastTexturePack.getInputStream("/ctm/template.png"));
+        BufferedImage template = TexturePackAPI.getImage("/ctm/template.png");
         if (template == null) {
             return;
         }
@@ -295,18 +289,17 @@ public class CTMUtils {
             }
         }
 
-        return TileOverride.create(newImage);
+        return TileOverride.create(newImage, tileNum);
     }
 
     static int getTexture(String name) {
         if (name == null) {
             return -1;
         }
-        BufferedImage image = MCPatcherUtils.readImage(lastTexturePack.getInputStream(name));
-        if (image == null) {
-            return -1;
-        } else {
+        if (TexturePackAPI.hasResource(name)) {
             return MCPatcherUtils.getMinecraft().renderEngine.getTexture(name);
+        } else {
+            return -1;
         }
     }
 }

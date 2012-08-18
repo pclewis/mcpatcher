@@ -1,13 +1,14 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.client.Minecraft;
-import net.minecraft.src.*;
+import net.minecraft.src.RenderEngine;
+import net.minecraft.src.Tessellator;
+import net.minecraft.src.World;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -20,18 +21,21 @@ public class SkyRenderer {
 
     private static final HashMap<Integer, WorldEntry> worldSkies = new HashMap<Integer, WorldEntry>();
     private static WorldEntry currentWorld;
-    private static TexturePackBase lastTexturePack;
 
     public static boolean active;
 
+    static {
+        TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.BETTER_SKIES, 2) {
+            @Override
+            protected void onChange() {
+                worldSkies.clear();
+            }
+        });
+    }
+
     public static void setup(World world, RenderEngine renderEngine, float partialTick, float celestialAngle) {
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
-        TexturePackBase texturePack = minecraft.texturePackList.getSelectedTexturePack();
-        if (texturePack != lastTexturePack) {
-            lastTexturePack = texturePack;
-            worldSkies.clear();
-        }
-        if (texturePack instanceof TexturePackDefault) {
+        if (TexturePackAPI.isDefaultTexturePack()) {
             active = false;
         } else {
             int worldType = minecraft.getWorld().worldProvider.worldType;
@@ -92,24 +96,15 @@ public class SkyRenderer {
 
     private static void loadCelestialObject(int worldType, WorldEntry entry, String objName, String textureName) {
         String prefix = "/terrain/sky" + worldType + "/" + objName;
-        InputStream is = null;
-        try {
-            is = lastTexturePack.getInputStream(prefix + ".properties");
-            if (is != null) {
-                Properties properties = new Properties();
-                properties.load(is);
-                properties.setProperty("fade", "false");
-                properties.setProperty("rotate", "true");
-                Layer layer = new Layer(prefix, properties);
-                if (layer.valid) {
-                    MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
-                    entry.objects.put(textureName, layer);
-                }
+        Properties properties = TexturePackAPI.getProperties(prefix + ".properties");
+        if (properties != null) {
+            properties.setProperty("fade", "false");
+            properties.setProperty("rotate", "true");
+            Layer layer = new Layer(prefix, properties);
+            if (layer.valid) {
+                MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
+                entry.objects.put(textureName, layer);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            MCPatcherUtils.close(is);
         }
     }
 
@@ -160,20 +155,12 @@ public class SkyRenderer {
         boolean valid;
 
         static Layer create(String prefix) {
-            InputStream is = null;
-            try {
-                is = lastTexturePack.getInputStream(prefix + ".properties");
-                if (is != null) {
-                    Properties properties = new Properties();
-                    properties.load(is);
-                    return new Layer(prefix, properties);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                MCPatcherUtils.close(is);
+            Properties properties = TexturePackAPI.getProperties(prefix + ".properties");
+            if (properties == null) {
+                return null;
+            } else {
+                return new Layer(prefix, properties);
             }
-            return null;
         }
 
         Layer(String prefix, Properties properties) {
@@ -185,10 +172,11 @@ public class SkyRenderer {
 
         private boolean readTexture() {
             texture = properties.getProperty("source", prefix + ".png");
-            if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(texture)) == null) {
+            if (TexturePackAPI.hasResource(texture)) {
+                return true;
+            } else {
                 return addError("source texture %s not found", texture);
             }
-            return true;
         }
 
         private boolean readRotation() {

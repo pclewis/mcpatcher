@@ -22,6 +22,8 @@ public class RandomMobs extends Mod {
         website = "http://www.minecraftforum.net/topic/244172-";
         version = "1.3";
 
+        addDependency(BaseTexturePackMod.NAME);
+
         classMods.add(new RenderLivingMod());
         classMods.add(new RenderEyesMod("Spider"));
         if (minecraftVersion.compareTo("Beta 1.8 Prerelease 1") >= 0) {
@@ -36,11 +38,9 @@ public class RandomMobs extends Mod {
             classMods.add(new RenderSnowmanMod());
             classMods.add(new RenderMooshroomMod());
         }
-        classMods.add(new BaseMod.MinecraftMod().mapTexturePackList());
-        classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
-        classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$MobInfo"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$SkinEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_OVERLAY_CLASS));

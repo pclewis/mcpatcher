@@ -13,7 +13,7 @@ abstract public class RenderEngine {
 
     abstract public void createTextureFromBytes(int[] rgb, int width, int height, int texture);
 
-    abstract public void setTileSize(Minecraft minecraft);
-
     abstract public int allocateAndSetupTexture(BufferedImage image);
+
+    abstract public void reloadTextures(Minecraft minecraft);
 }

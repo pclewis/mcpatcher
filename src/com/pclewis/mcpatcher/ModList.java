@@ -20,7 +20,7 @@ import java.util.zip.ZipFile;
 class ModList {
     private Vector<Mod> modsByIndex = new Vector<Mod>();
     private HashMap<String, Mod> modsByName = new HashMap<String, Mod>();
-    private boolean applied = false;
+    private boolean applied;
 
     private static BuiltInMod[] builtInMods = new BuiltInMod[]{
         new BuiltInMod(MCPatcherUtils.HD_TEXTURES, HDTexture.class, false),
@@ -35,20 +35,25 @@ class ModList {
     };
 
     Mod baseMod;
+    Mod texturePackMod;
 
-    public ModList() {
-        baseMod = new BaseMod(MCPatcher.minecraft.getVersion());
+    ModList() {
+        MinecraftVersion version = MCPatcher.minecraft.getVersion();
+        baseMod = new BaseMod(version);
         baseMod.internal = true;
+        texturePackMod = new BaseTexturePackMod(version);
+        texturePackMod.internal = true;
         addNoReplace(baseMod);
+        addNoReplace(texturePackMod);
     }
 
-    protected void close() {
+    void close() {
         for (Mod mod : modsByIndex) {
             mod.close();
         }
     }
 
-    public void loadBuiltInMods() {
+    void loadBuiltInMods() {
         for (BuiltInMod builtInMod : builtInMods) {
             if (!modsByName.containsKey(builtInMod.name) && (MCPatcher.experimentalMods || !builtInMod.experimental)) {
                 addNoReplace(newModInstance(builtInMod.modClass));
@@ -56,7 +61,7 @@ class ModList {
         }
     }
 
-    public void loadCustomMods(File directory) {
+    void loadCustomMods(File directory) {
         if (directory.isDirectory()) {
             for (File f : directory.listFiles(new FileFilter() {
                 public boolean accept(File pathname) {
@@ -114,11 +119,11 @@ class ModList {
         return null;
     }
 
-    public Vector<Mod> getAll() {
+    Vector<Mod> getAll() {
         return modsByIndex;
     }
 
-    public Vector<Mod> getVisible() {
+    Vector<Mod> getVisible() {
         Vector<Mod> visibleMods = new Vector<Mod>();
         for (Mod mod : modsByIndex) {
             if (!mod.internal) {
@@ -128,7 +133,7 @@ class ModList {
         return visibleMods;
     }
 
-    public ArrayList<Mod> getSelected() {
+    ArrayList<Mod> getSelected() {
         ArrayList<Mod> list = new ArrayList<Mod>();
         for (Mod mod : modsByIndex) {
             if (mod.okToApply() && mod.isEnabled()) {
@@ -138,19 +143,19 @@ class ModList {
         return list;
     }
 
-    public Mod get(String name) {
+    Mod get(String name) {
         return modsByName.get(name);
     }
 
-    public Mod get(int index) {
+    Mod get(int index) {
         return modsByIndex.get(index);
     }
 
-    public int size() {
+    int size() {
         return modsByIndex.size();
     }
 
-    public void enableValidMods(boolean enableAll) {
+    void enableValidMods(boolean enableAll) {
         for (int i = modsByIndex.size() - 1; i >= 0; i--) {
             Mod mod = modsByIndex.get(i);
             boolean enabled = mod.okToApply();
@@ -164,15 +169,15 @@ class ModList {
         }
     }
 
-    public boolean isApplied() {
+    boolean isApplied() {
         return applied;
     }
 
-    public void setApplied(boolean applied) {
+    void setApplied(boolean applied) {
         this.applied = applied;
     }
 
-    public void remove(Mod mod) {
+    void remove(Mod mod) {
         String name = mod.getName();
         for (int i = 0; i < modsByIndex.size(); i++) {
             if (modsByIndex.get(i) == mod) {
@@ -183,25 +188,19 @@ class ModList {
         mod.close();
     }
 
-    public int addFirst(Mod mod) {
+    int addFirst(Mod mod) {
         String name = mod.getName();
         Mod oldMod = modsByName.get(name);
         if (oldMod != null) {
             remove(oldMod);
         }
-        for (int i = 0; i < modsByIndex.size(); i++) {
-            oldMod = modsByIndex.get(i);
-            if (!oldMod.internal && !(oldMod instanceof ExternalMod)) {
-                modsByIndex.add(i, mod);
-                break;
-            }
-        }
+        modsByIndex.add(0, mod);
         modsByName.put(name, mod);
         mod.setRefs();
         return indexOfVisible(mod);
     }
 
-    public int addLast(Mod mod) {
+    int addLast(Mod mod) {
         String name = mod.getName();
         Mod oldMod = modsByName.get(name);
         if (oldMod != null) {
@@ -213,11 +212,11 @@ class ModList {
         return indexOfVisible(mod);
     }
 
-    public int moveUp(int index, boolean toTop) {
+    int moveUp(int index, boolean toTop) {
         return move(index, -1, toTop);
     }
 
-    public int moveDown(int index, boolean toBottom) {
+    int moveDown(int index, boolean toBottom) {
         return move(index, 1, toBottom);
     }
 
@@ -246,7 +245,7 @@ class ModList {
         return index;
     }
 
-    public int replace(Mod oldMod, Mod newMod) {
+    int replace(Mod oldMod, Mod newMod) {
         int index = indexOf(oldMod);
         if (index >= 0 && oldMod.getName().equals(newMod.getName())) {
             modsByIndex.set(index, newMod);
@@ -276,7 +275,7 @@ class ModList {
         return true;
     }
 
-    public int indexOf(Mod mod) {
+    int indexOf(Mod mod) {
         for (int i = 0; i < modsByIndex.size(); i++) {
             if (mod == modsByIndex.get(i)) {
                 return i;
@@ -285,7 +284,7 @@ class ModList {
         return -1;
     }
 
-    public int indexOfVisible(Mod mod) {
+    int indexOfVisible(Mod mod) {
         Vector<Mod> visible = getVisible();
         for (int i = 0; i < visible.size(); i++) {
             if (mod == visible.get(i)) {
@@ -301,21 +300,80 @@ class ModList {
         }
     }
 
-    public void selectMod(Mod mod, boolean enabled) {
-        HashMap<Mod, Boolean> inst = new HashMap<Mod, Boolean>();
+    void selectMod(Mod mod, boolean enable) {
+        HashMap<Mod, Boolean> changes = new HashMap<Mod, Boolean>();
         try {
-            if (enabled) {
-                enableMod(inst, mod, false);
+            if (enable) {
+                enableMod(changes, mod, false);
             } else {
-                disableMod(inst, mod, false);
+                disableMod(changes, mod, false);
             }
         } catch (ModDependencyException e) {
             Logger.log(e);
         }
-        for (Map.Entry<Mod, Boolean> entry : inst.entrySet()) {
+        for (Map.Entry<Mod, Boolean> entry : changes.entrySet()) {
             mod = entry.getKey();
             mod.setEnabled(entry.getValue());
         }
+        refreshInternalMods();
+    }
+
+    private void refreshInternalMods() {
+        modsByIndex.remove(baseMod);
+        modsByIndex.remove(texturePackMod);
+        modsByIndex.add(0, baseMod);
+        modsByIndex.add(1, texturePackMod);
+        outer:
+        while (true) {
+            for (int i = 0; i < modsByIndex.size() - 1; i++) {
+                Mod mod1 = modsByIndex.get(i);
+                Mod mod2 = modsByIndex.get(i + 1);
+                if (mod1.internal && !dependsOn(mod2, mod1)) {
+                    modsByIndex.set(i, mod2);
+                    modsByIndex.set(i + 1, mod1);
+                    continue outer;
+                }
+            }
+            break;
+        }
+        for (Mod mod : modsByIndex) {
+            if (mod.internal) {
+                mod.setEnabled(false);
+            }
+        }
+        HashMap<Mod, Boolean> changes = new HashMap<Mod, Boolean>();
+        for (Mod mod : modsByIndex) {
+            try {
+                if (mod.internal) {
+                    // nothing
+                } else if (mod.isEnabled()) {
+                    enableMod(changes, mod, false);
+                } else {
+                    disableMod(changes, mod, false);
+                }
+            } catch (ModDependencyException e) {
+                Logger.log(e);
+            }
+        }
+        for (Map.Entry<Mod, Boolean> entry : changes.entrySet()) {
+            Mod mod = entry.getKey();
+            mod.setEnabled(entry.getValue());
+        }
+    }
+
+    private boolean dependsOn(Mod mod1, Mod mod2) {
+        if (mod1 == null || mod2 == null) {
+            return false;
+        }
+        if (mod1 == mod2) {
+            return true;
+        }
+        for (Mod.Dependency dep : mod1.dependencies) {
+            if (dep.required && !dep.name.equals(mod1.getName()) && dependsOn(modsByName.get(dep.name), mod2)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void enableMod(HashMap<Mod, Boolean> inst, Mod mod, boolean recursive) throws ModDependencyException {
@@ -381,7 +439,7 @@ class ModList {
         }
     }
 
-    public void loadSavedMods() {
+    void loadSavedMods() {
         Config config = MCPatcherUtils.config;
         Element mods = config.getMods();
         if (mods == null) {
@@ -459,6 +517,7 @@ class ModList {
         for (Element element : invalidEntries) {
             mods.removeChild(element);
         }
+        refreshInternalMods();
     }
 
     private void updateModElement(Mod mod, Element element) {
@@ -536,7 +595,7 @@ class ModList {
         }
     }
 
-    public static boolean isExperimental(String name) {
+    static boolean isExperimental(String name) {
         for (BuiltInMod builtInMod : builtInMods) {
             if (builtInMod.name.equals(name)) {
                 return builtInMod.experimental;
@@ -545,7 +604,7 @@ class ModList {
         return false;
     }
 
-    public static Mod newModInstance(Class<? extends Mod> modClass) {
+    static Mod newModInstance(Class<? extends Mod> modClass) {
         Mod mod = null;
         try {
             mod = modClass.getConstructor(MinecraftVersion.class).newInstance(MCPatcher.minecraft.getVersion());

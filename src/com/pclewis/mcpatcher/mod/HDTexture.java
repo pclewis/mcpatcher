@@ -7,27 +7,24 @@ import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
 
-public class HDTexture extends Mod {
+public class HDTexture extends BaseTexturePackMod {
     private final boolean haveColorizerWater;
-    private final boolean haveAlternateFont;
-    private final boolean haveUnicode;
     private final boolean haveGetImageRGB;
-    private final boolean haveFolderTexturePacks;
-    private final boolean haveITexturePack;
 
     public HDTexture(MinecraftVersion minecraftVersion) {
+        super(minecraftVersion);
+        clearPatches();
+
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for high-resolution texture packs and custom animations.";
         version = "1.4";
         configPanel = new HDTextureConfig();
 
+        addDependency(BaseTexturePackMod.NAME);
+
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
-        haveAlternateFont = minecraftVersion.compareTo("Beta 1.9 Prerelease 3") >= 0;
-        haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveGetImageRGB = minecraftVersion.compareTo("Beta 1.6") >= 0;
-        haveFolderTexturePacks = minecraftVersion.compareTo("12w08a") >= 0;
-        haveITexturePack = minecraftVersion.compareTo("12w15a") >= 0;
 
         classMods.add(new RenderEngineMod());
         classMods.add(new TextureFXMod());
@@ -42,19 +39,6 @@ public class HDTexture extends Mod {
         classMods.add(new PortalMod());
         classMods.add(new MinecraftMod());
         classMods.add(new BaseMod.GLAllocationMod());
-        if (haveITexturePack) {
-            classMods.add(new ITexturePackMod());
-        }
-        classMods.add(new TexturePackListMod(minecraftVersion));
-        classMods.add(new TexturePackBaseMod(minecraftVersion));
-        classMods.add(new TexturePackCustomMod());
-        classMods.add(new BaseMod.TexturePackDefaultMod());
-        if (haveFolderTexturePacks) {
-            classMods.add(new TexturePackFolderMod());
-        }
-        classMods.add(new FontRendererMod());
-        classMods.add(new GameSettingsMod());
-        classMods.add(new GetResourceMod());
         classMods.add(new ColorizerMod("ColorizerWater", haveColorizerWater ? "/misc/watercolor.png" : "/misc/foliagecolor.png"));
         classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
         classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
@@ -66,6 +50,7 @@ public class HDTexture extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_SIZE_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$1"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$2"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Delegate"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Tile"));
@@ -78,6 +63,7 @@ public class HDTexture extends Mod {
             final MethodRef readTextureImage = new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
             final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
             final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
+            final MethodRef refreshTextures = new MethodRef(getDeobfClass(), "refreshTextures", "()V");
             final MethodRef glTexSubImage2D = new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
             final FieldRef imageData = new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;");
             final FieldRef textureList = new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;");
@@ -100,15 +86,11 @@ public class HDTexture extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().getDescriptor().equals("()V")) {
-                        return buildExpression(
-                            push("%clamp%")
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        push("%clamp%")
+                    );
                 }
-            }.setMethodName("refreshTextures"));
+            }.setMethod(refreshTextures));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -196,7 +178,7 @@ public class HDTexture extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "readTextureImage(getInputStream(...)) -> getResourceAsBufferedImage(...)";
+                    return "readTextureImage(getInputStream(...)) -> getImage(...)";
                 }
 
                 @Override
@@ -210,7 +192,7 @@ public class HDTexture extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getImage", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
                     );
                 }
             });
@@ -218,7 +200,7 @@ public class HDTexture extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "getInputStream(...), readTextureImage -> getResourceAsBufferedImage(...)";
+                    return "getInputStream(...), readTextureImage -> getImage(...)";
                 }
 
                 @Override
@@ -248,7 +230,7 @@ public class HDTexture extends Mod {
                     return buildCode(
                         ALOAD_0,
                         ALOAD_1,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_PACK_API_CLASS, "getImage", "(Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
                     );
                 }
             });
@@ -379,7 +361,7 @@ public class HDTexture extends Mod {
 
             patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
 
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setTileSize", "(Lnet/minecraft/client/Minecraft;)V")) {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "reloadTextures", "(Lnet/minecraft/client/Minecraft;)V")) {
                 @Override
                 public byte[] generateMethod() throws IOException {
                     return buildCode(
@@ -687,25 +669,6 @@ public class HDTexture extends Mod {
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
             final FieldRef renderEngine = new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;");
-            final FieldRef gameSettings = new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;");
-            final FieldRef fontRenderer = new FieldRef(getDeobfClass(), "fontRenderer", "LFontRenderer;");
-            final FieldRef alternateFontRenderer = new FieldRef(getDeobfClass(), "alternateFontRenderer", "LFontRenderer;");
-            final MethodRef runTick = new MethodRef(getDeobfClass(), "runTick", "()V");
-            final MethodRef setTileSize = new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V");
-            final MethodRef registerTextureFX = new MethodRef("RenderEngine", "registerTextureFX", "(LTextureFX;)V");
-            final ClassRef renderEngineClass = new ClassRef("RenderEngine");
-            final ClassRef fontRendererClass = new ClassRef("FontRenderer");
-
-            mapTexturePackList();
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        push("/terrain.png")
-                    );
-                }
-            }.setMethod(runTick));
 
             if (haveColorizerWater) {
                 addColorizerSignature("Water");
@@ -714,96 +677,6 @@ public class HDTexture extends Mod {
             }
 
             memberMappers.add(new FieldMapper(renderEngine));
-            memberMappers.add(new FieldMapper(gameSettings));
-            if (haveAlternateFont) {
-                memberMappers.add(new FieldMapper(fontRenderer, alternateFontRenderer));
-            } else {
-                memberMappers.add(new FieldMapper(fontRenderer));
-                memberMappers.add(new FieldMapper(alternateFontRenderer));
-            }
-
-            patches.add(new BytecodePatch.InsertAfter() {
-                @Override
-                public String getDescription() {
-                    return "TextureUtils.setTileSize(), renderEngine.setTileSize() on startup";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        // renderEngine = new RenderEngine(texturePackList, gameSettings);
-                        ALOAD_0,
-                        reference(NEW, renderEngineClass),
-                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 18)),
-                        PUTFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
-
-                        // fontRenderer = new FontRenderer(gameSettings, "/font/default.png", renderEngine, false);
-                        // ...
-                        // standardGalacticFontRenderer = new FontRenderer(gameSettings, "/font/alternate.png", renderEngine, false);
-                        BinaryRegex.any(0, 60),
-                        reference(NEW, fontRendererClass),
-                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
-                        BytecodeMatcher.anyReference(PUTFIELD)
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes() throws IOException {
-                    return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setTileSize", "()Z")),
-                        POP,
-                        ALOAD_0,
-                        GETFIELD, getCaptureGroup(1),
-                        ALOAD_0,
-                        reference(INVOKEVIRTUAL, setTileSize)
-                    );
-                }
-            });
-
-            patches.add(new BytecodePatch() {
-
-                @Override
-                public String getDescription() {
-                    return "remove registerTextureFX call";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        ALOAD_0,
-                        reference(GETFIELD, renderEngine),
-                        BinaryRegex.any(0, 10),
-                        reference(INVOKEVIRTUAL, registerTextureFX)
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return new byte[0];
-                }
-            });
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "check for texture pack change on each tick";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin()
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        ALOAD_0,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "checkTexturePackChange", "(LMinecraft;)V"))
-                    );
-                }
-            }.targetMethod(runTick));
         }
 
         private void addColorizerSignature(final String name) {
@@ -817,381 +690,6 @@ public class HDTexture extends Mod {
                     );
                 }
             }.addXref(1, new MethodRef("Colorizer" + name, "loadColorBuffer", "([I)V")));
-        }
-    }
-
-    private class ITexturePackMod extends ClassMod {
-        ITexturePackMod() {
-            prerequisiteClasses.add("TexturePackBase");
-
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
-        }
-    }
-
-    private class TexturePackListMod extends BaseMod.TexturePackListMod {
-        TexturePackListMod(MinecraftVersion minecraftVersion) {
-            super(minecraftVersion);
-
-            final String texturePackType = useITexturePack ? "LITexturePack;" : "LTexturePackBase;";
-            final FieldRef renderEngine = new FieldRef("Minecraft", "renderEngine", "LRenderEngine;");
-            final MethodRef updateAvailableTexturePacks = new MethodRef(getDeobfClass(), "updateAvailableTexturePacks", "()V");
-            final MethodRef setTexturePack = new MethodRef(getDeobfClass(), "setTexturePack", "(" + texturePackType + ")Z");
-            final MethodRef setTileSize = new MethodRef("RenderEngine", "setTileSize", "(LMinecraft;)V");
-
-            memberMappers.add(new MethodMapper(updateAvailableTexturePacks));
-            memberMappers.add(new MethodMapper(setTexturePack));
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "TexturePackList.setTileSize(selectedTexturePack) on texture pack change";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        ICONST_1,
-                        IRETURN
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes() throws IOException {
-                    return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setTileSize", "()Z")),
-                        POP,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "getMinecraft", "()LMinecraft;")),
-                        DUP,
-                        reference(GETFIELD, renderEngine),
-                        SWAP,
-                        reference(INVOKEVIRTUAL, setTileSize),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "setFontRenderer", "()V"))
-                    );
-                }
-            }.targetMethod(setTexturePack));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "report supported resolutions to server";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        push("X-Minecraft-Supported-Resolutions"),
-                        push("16")
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        push("X-Minecraft-Supported-Resolutions"),
-                        push("16 32 64 128 256 512")
-                    );
-                }
-            });
-
-            if (useITexturePack) {
-                patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setTexturePack", "(LTexturePackBase;)Z")) {
-                    @Override
-                    public byte[] generateMethod() throws BadBytecode, IOException {
-                        return buildCode(
-                            ALOAD_0,
-                            ALOAD_1,
-                            reference(INVOKEVIRTUAL, setTexturePack),
-                            IRETURN
-                        );
-                    }
-                });
-            }
-        }
-    }
-
-    private class TexturePackBaseMod extends BaseMod.TexturePackBaseMod {
-        TexturePackBaseMod(MinecraftVersion minecraftVersion) {
-            super(minecraftVersion);
-
-            final String[] names = {"openTexturePackFile", "closeTexturePackFile"};
-            if (useITexturePack) {
-                memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), names[0] + "1", "(LRenderEngine;)V"), new MethodRef(getDeobfClass(), names[1] + "1", "(LRenderEngine;)V")));
-
-                for (final String n : names) {
-                    patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), n, "()V")) {
-                        @Override
-                        public byte[] generateMethod() throws BadBytecode, IOException {
-                            return buildCode(
-                                ALOAD_0,
-                                reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.UTILS_CLASS, "getMinecraft", "()LMinecraft;")),
-                                reference(GETFIELD, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;")),
-                                reference(INVOKEVIRTUAL, new MethodRef(getDeobfClass(), n + "1", "(LRenderEngine;)V")),
-                                RETURN
-                            );
-                        }
-                    });
-                }
-
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
-
-                patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")) {
-                    @Override
-                    public int getNewFlags(int oldFlags) {
-                        return (oldFlags & ~(AccessFlag.PRIVATE | AccessFlag.PROTECTED | AccessFlag.FINAL)) | AccessFlag.PUBLIC;
-                    }
-                });
-            } else {
-                memberMappers.add(new MethodMapper(null, new MethodRef(getDeobfClass(), names[0], "()V"), new MethodRef(getDeobfClass(), names[1], "()V")));
-            }
-        }
-    }
-
-    private class TexturePackCustomMod extends ClassMod {
-        TexturePackCustomMod() {
-            parentClass = "TexturePackBase";
-
-            classSignatures.add(new ConstSignature(new ClassRef("java.util.zip.ZipFile")));
-            if (!haveITexturePack) {
-                classSignatures.add(new ConstSignature("pack.txt"));
-                classSignatures.add(new ConstSignature("pack.png"));
-
-                memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
-
-                patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "file", "Ljava/io/File;")));
-            }
-
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "zipFile", "Ljava/util/zip/ZipFile;")));
-
-            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "zipFile", "Ljava/util/zip/ZipFile;")));
-
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origZip", "Ljava/util/zip/ZipFile;")));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "tmpFile", "Ljava/io/File;")));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "lastModified", "J")));
-
-            String methodDescriptor = haveITexturePack ? "(LRenderEngine;)V" : "()V";
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "openTexturePackFile(this)";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        RETURN,
-                        BinaryRegex.end()
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes() throws IOException {
-                    return buildCode(
-                        ALOAD_0,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "openTexturePackFile", "(LTexturePackCustom;)V"))
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "openTexturePackFile", methodDescriptor)));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "closeTexturePackFile(this)";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin()
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        ALOAD_0,
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "closeTexturePackFile", "(LTexturePackCustom;)V"))
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "closeTexturePackFile", methodDescriptor)));
-        }
-    }
-
-    private class TexturePackFolderMod extends ClassMod {
-        TexturePackFolderMod() {
-            final String fileFieldName = haveITexturePack ? "file" : "folder";
-            final FieldRef file = new FieldRef(getDeobfClass(), fileFieldName, "Ljava/io/File;");
-            final MethodRef getFolder = new MethodRef(getDeobfClass(), "getFolder", "()Ljava/io/File;");
-            final MethodRef substring = new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;");
-
-            parentClass = "TexturePackBase";
-
-            if (haveITexturePack) {
-                classSignatures.add(new BytecodeSignature() {
-                    @Override
-                    public String getMatchExpression() {
-                        return buildExpression(
-                            ALOAD_1,
-                            push(1),
-                            reference(INVOKEVIRTUAL, substring)
-                        );
-                    }
-                });
-            } else {
-                classSignatures.add(new ConstSignature("pack.txt"));
-                classSignatures.add(new ConstSignature("pack.png"));
-
-                memberMappers.add(new FieldMapper(file));
-            }
-            classSignatures.add(new ConstSignature(new ClassRef("java.io.FileInputStream")));
-
-            patches.add(new AddMethodPatch(getFolder) {
-                @Override
-                public byte[] generateMethod() throws BadBytecode, IOException {
-                    return buildCode(
-                        ALOAD_0,
-                        reference(GETFIELD, file),
-                        ARETURN
-                    );
-                }
-            });
-        }
-    }
-
-    private class FontRendererMod extends BaseMod.FontRendererMod {
-        FontRendererMod() {
-            final FieldRef isUnicode = new FieldRef(getDeobfClass(), "isUnicode", "Z");
-
-            if (haveUnicode) {
-                classSignatures.add(new BytecodeSignature() {
-                    @Override
-                    public String getMatchExpression() {
-                        if (getMethodInfo().isConstructor()) {
-                            return buildExpression(
-                                ALOAD_0,
-                                ILOAD, 4,
-                                BytecodeMatcher.captureReference(PUTFIELD)
-                            );
-                        } else {
-                            return null;
-                        }
-                    }
-                }.addXref(1, isUnicode));
-
-                patches.add(new MakeMemberPublicPatch(isUnicode));
-            } else {
-                patches.add(new AddFieldPatch(isUnicode));
-            }
-
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "initialize", "()V")) {
-                MethodInfo constructor;
-
-                @Override
-                public void prePatch(ClassFile classFile) {
-                    constructor = null;
-                }
-
-                @Override
-                public byte[] generateMethod() {
-                    getDescriptor();
-                    CodeAttribute ca = constructor.getCodeAttribute();
-                    getMethodInfo().setDescriptor(constructor.getDescriptor().replace("Z)", ")"));
-                    maxStackSize = ca.getMaxStack();
-                    numLocals = ca.getMaxLocals();
-                    exceptionTable = ca.getExceptionTable();
-                    byte[] code = ca.getCode().clone();
-                    if (haveUnicode) {  // remove java.lang.Object<init> call
-                        code[0] = ICONST_0;
-                        code[1] = ISTORE;
-                        code[2] = 4;
-                    } else {
-                        code[0] = NOP;
-                        code[1] = NOP;
-                        code[2] = NOP;
-                    }
-                    code[3] = NOP;
-                    return code;
-                }
-
-                @Override
-                public String getDescriptor() {
-                    if (constructor == null) {
-                        for (Object o : getClassFile().getMethods()) {
-                            MethodInfo method = (MethodInfo) o;
-                            if (method.isConstructor() &&
-                                ((haveUnicode && method.getDescriptor().contains("Z)")) ||
-                                    (!haveUnicode && !method.getDescriptor().equals("()V")))) {
-                                constructor = method;
-                                break;
-                            }
-                        }
-                        if (constructor == null) {
-                            throw new RuntimeException("could not find FontRenderer constructor");
-                        }
-                    }
-                    return constructor.getDescriptor().replace("Z)", ")");
-                }
-            });
-        }
-    }
-
-    private class GameSettingsMod extends ClassMod {
-        GameSettingsMod() {
-            classSignatures.add(new ConstSignature("options.txt"));
-            classSignatures.add(new OrSignature(
-                new ConstSignature("key.forward"),
-                new ConstSignature("Forward")
-            ));
-        }
-    }
-
-    private class GetResourceMod extends ClassMod {
-        GetResourceMod() {
-            global = true;
-
-            final MethodRef getResource = new MethodRef("java.lang.Class", "getResource", "(Ljava/lang/String;)Ljava/net/URL;");
-            final MethodRef readURL = new MethodRef("javax.imageio.ImageIO", "read", "(Ljava/net/URL;)Ljava/awt/image/BufferedImage;");
-            final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
-            final MethodRef readStream = new MethodRef("javax.imageio.ImageIO", "read", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
-
-            classSignatures.add(new OrSignature(
-                new ConstSignature(getResource),
-                new ConstSignature(getResourceAsStream)
-            ));
-            classSignatures.add(new OrSignature(
-                new ConstSignature(readURL),
-                new ConstSignature(readStream)
-            ));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "ImageIO.read(getResource(...)) -> getResourceAsBufferedImage(...)";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.or(
-                            buildExpression(
-                                reference(INVOKEVIRTUAL, getResource),
-                                reference(INVOKESTATIC, readURL)
-                            ),
-                            buildExpression(
-                                reference(INVOKEVIRTUAL, getResourceAsStream),
-                                reference(INVOKESTATIC, readStream)
-                            )
-                        )
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getResourceAsBufferedImage", "(Ljava/lang/Object;Ljava/lang/String;)Ljava/awt/image/BufferedImage;"))
-                    );
-                }
-            });
         }
     }
 

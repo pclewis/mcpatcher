@@ -1,15 +1,14 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.EntityLiving;
-import net.minecraft.src.TexturePackBase;
 
 import java.lang.reflect.Method;
 import java.util.*;
 
 public class MobRandomizer {
     private static final HashMap<String, MobInfo> mobHash = new HashMap<String, MobInfo>();
-    private static TexturePackBase lastTexturePack;
 
     private static final long MULTIPLIER = 0x5deece66dL;
     private static final long ADDEND = 0xbL;
@@ -25,12 +24,14 @@ public class MobRandomizer {
         } catch (Throwable e) {
         }
         getBiomeNameAt = method;
-    }
 
-    public static void reset() {
-        MCPatcherUtils.debug("reset random mobs list");
-        mobHash.clear();
-        MobOverlay.reset(lastTexturePack);
+        TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.RANDOM_MOBS, 2) {
+            @Override
+            protected void onChange() {
+                mobHash.clear();
+                MobOverlay.reset();
+            }
+        });
     }
 
     public static String randomTexture(EntityLiving entity) {
@@ -38,12 +39,7 @@ public class MobRandomizer {
     }
 
     public static String randomTexture(EntityLiving entity, String texture) {
-        TexturePackBase selectedTexturePack = MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack();
-        if (lastTexturePack != selectedTexturePack) {
-            lastTexturePack = selectedTexturePack;
-            reset();
-        }
-        if (lastTexturePack == null || !texture.startsWith("/mob/") || !texture.endsWith(".png")) {
+        if (!texture.startsWith("/mob/") || !texture.endsWith(".png")) {
             return texture;
         }
         if (!entity.randomMobsSkinSet) {
@@ -93,7 +89,7 @@ public class MobRandomizer {
             allSkins.add(baseSkin);
             for (int i = 2; ; i++) {
                 final String skin = baseSkin.replace(".png", "" + i + ".png");
-                if (MCPatcherUtils.readImage(lastTexturePack.getInputStream(skin)) == null) {
+                if (!TexturePackAPI.hasResource(skin)) {
                     break;
                 }
                 allSkins.add(skin);
@@ -107,9 +103,9 @@ public class MobRandomizer {
 
             String filename = baseSkin.replace(".png", ".properties");
             String altFilename = filename.replaceFirst("_(eyes|overlay|tame|angry)\\.properties$", ".properties");
-            Properties properties = MCPatcherUtils.readProperties(lastTexturePack.getInputStream(filename));
+            Properties properties = TexturePackAPI.getProperties(filename);
             if (properties == null && !filename.equals(altFilename)) {
-                properties = MCPatcherUtils.readProperties(lastTexturePack.getInputStream(altFilename));
+                properties = TexturePackAPI.getProperties(altFilename);
                 if (properties != null) {
                     MCPatcherUtils.debug("using %s for %s", altFilename, baseSkin);
                 }

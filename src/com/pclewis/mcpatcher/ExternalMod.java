@@ -15,6 +15,7 @@ class ExternalMod extends Mod {
     private String defaultDescription;
 
     public ExternalMod(ZipFile zipFile, HashMap<String, String> fileMap) {
+        dependencies.clear();
         this.zipFile = zipFile;
         setFileMap(fileMap);
         name = new File(zipFile.getName()).getName().replaceFirst("\\.[^.]+$", "");

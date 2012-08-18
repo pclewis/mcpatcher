@@ -1,12 +1,11 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
+import net.minecraft.client.Minecraft;
 import net.minecraft.src.FontRenderer;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 
@@ -19,18 +18,24 @@ public class FontUtils {
 
     private static final boolean showLines = false;
 
-    private static Method getResource;
-
     static {
-        Class<?> utils;
-        try {
-            utils = Class.forName(MCPatcherUtils.TEXTURE_UTILS_CLASS);
-            try {
-                getResource = utils.getDeclaredMethod("getResourceAsStream", String.class);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+        TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.HD_FONT, 2) {
+            @Override
+            protected void onChange() {
+                Minecraft minecraft = MCPatcherUtils.getMinecraft();
+                setFontRenderer(minecraft, minecraft.fontRenderer, "/font/default.png");
+                if (minecraft.alternateFontRenderer != minecraft.fontRenderer) {
+                    setFontRenderer(minecraft, minecraft.alternateFontRenderer, "/font/alternate.png");
+                }
             }
-        } catch (ClassNotFoundException e) {
+        });
+    }
+
+    private static void setFontRenderer(Minecraft minecraft, FontRenderer fontRenderer, String filename) {
+        if (fontRenderer != null) {
+            boolean saveUnicode = fontRenderer.isUnicode;
+            fontRenderer.initialize(minecraft.gameSettings, filename, minecraft.renderEngine);
+            fontRenderer.isUnicode = saveUnicode;
         }
     }
 
@@ -85,10 +90,8 @@ public class FontUtils {
         if (!isOverride[32]) {
             charWidthf[32] = defaultSpaceWidth(charWidthf);
         }
-        float fontScale = (float) fontHeight / 8.0f;
         for (int ch = 0; ch < charWidth.length; ch++) {
             charWidth[ch] = Math.round(charWidthf[ch]);
-            charWidthf[ch] *= fontScale;
             if (printThis(ch)) {
                 MCPatcherUtils.debug("charWidth['%c'] = %f", (char) ch, charWidthf[ch]);
             }
@@ -96,12 +99,12 @@ public class FontUtils {
         return charWidthf;
     }
 
-    public static float getCharWidthf(FontRenderer fontRenderer, char ch) {
+    private static float getCharWidthf(FontRenderer fontRenderer, char ch) {
         float width = fontRenderer.getCharWidth(ch);
         if (width < 0 || ch >= fontRenderer.charWidthf.length || ch < 0) {
             return width;
         } else {
-            return fontRenderer.charWidthf[ch];
+            return fontRenderer.charWidthf[ch] * fontRenderer.FONT_HEIGHT / 8.0f;
         }
     }
 
@@ -111,15 +114,16 @@ public class FontUtils {
             boolean isLink = false;
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
-                float cWidth = fontRenderer.getCharWidth(c);
+                float cWidth = getCharWidthf(fontRenderer, c);
                 if (cWidth < 0.0f && i < s.length() - 1) {
-                    c = s.charAt(i + 1);
+                    i++;
+                    c = s.charAt(i);
                     if (c == 'l' || c == 'L') {
                         isLink = true;
                     } else if (c == 'r' || c == 'R' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                         isLink = false;
                     }
-                    cWidth = fontRenderer.getCharWidth(c);
+                    cWidth = getCharWidthf(fontRenderer, c);
                 }
                 totalWidth += cWidth;
                 if (isLink) {
@@ -144,6 +148,9 @@ public class FontUtils {
     }
 
     private static float defaultSpaceWidth(float[] charWidthf) {
+        if (TexturePackAPI.isDefaultTexturePack()) {
+            return 4.0f;
+        }
         float sum = 0.0f;
         int n = 0;
         for (char ch : AVERAGE_CHARS) {
@@ -153,53 +160,34 @@ public class FontUtils {
             }
         }
         if (n > 0) {
-            return sum / (float) n * 0.5f;
+            return sum / (float) n * 7.0f / 12.0f;
         } else {
             return 4.0f;
         }
     }
 
     private static void getCharWidthOverrides(String font, float[] charWidthf, boolean[] isOverride) {
-        if (getResource == null) {
-            return;
-        }
         String textFile = font.replace(".png", ".properties");
-        InputStream is;
-        try {
-            Object o = getResource.invoke(null, textFile);
-            if (!(o instanceof InputStream)) {
-                return;
-            }
-            is = (InputStream) o;
-        } catch (Exception e) {
-            e.printStackTrace();
+        Properties props = TexturePackAPI.getProperties(textFile);
+        if (props == null) {
             return;
         }
-
         MCPatcherUtils.debug("reading character widths from %s", textFile);
-        try {
-            Properties props = new Properties();
-            props.load(is);
-            for (Map.Entry entry : props.entrySet()) {
-                String key = entry.getKey().toString().trim();
-                String value = entry.getValue().toString().trim();
-                if (key.matches("^width\\.\\d+$") && !value.equals("")) {
-                    try {
-                        int ch = Integer.parseInt(key.substring(6));
-                        float width = Float.parseFloat(value);
-                        if (ch >= 0 && ch < charWidthf.length) {
-                            MCPatcherUtils.debug("    setting charWidthf[%d] to %f", ch, width);
-                            charWidthf[ch] = width;
-                            isOverride[ch] = true;
-                        }
-                    } catch (NumberFormatException e) {
+        for (Map.Entry entry : props.entrySet()) {
+            String key = entry.getKey().toString().trim();
+            String value = entry.getValue().toString().trim();
+            if (key.matches("^width\\.\\d+$") && !value.equals("")) {
+                try {
+                    int ch = Integer.parseInt(key.substring(6));
+                    float width = Float.parseFloat(value);
+                    if (ch >= 0 && ch < charWidthf.length) {
+                        MCPatcherUtils.debug("    setting charWidthf[%d] to %f", ch, width);
+                        charWidthf[ch] = width;
+                        isOverride[ch] = true;
                     }
+                } catch (NumberFormatException e) {
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            MCPatcherUtils.close(is);
         }
     }
 }

@@ -1,12 +1,11 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 public class Colorizer {
@@ -86,8 +85,6 @@ public class Colorizer {
     private static final int blockBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1);
     private static final float blockBlendScale = getBlendScale(blockBlendRadius);
 
-    static TexturePackBase lastTexturePack;
-
     private static final int LIGHTMAP_SIZE = 16;
     private static final float LIGHTMAP_SCALE = LIGHTMAP_SIZE - 1;
     private static HashMap<Integer, BufferedImage> lightmaps = new HashMap<Integer, BufferedImage>();
@@ -128,6 +125,49 @@ public class Colorizer {
         } catch (Throwable e) {
             e.printStackTrace();
         }
+        TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.CUSTOM_COLORS, 2) {
+            @Override
+            protected void onChange() {
+                reset();
+                reloadColorProperties();
+                if (useFogColors) {
+                    reloadFogColors();
+                }
+                if (usePotionColors) {
+                    reloadPotionColors();
+                }
+                if (useSwampColors) {
+                    reloadSwampColors();
+                }
+                if (useBlockColors) {
+                    reloadBlockColors();
+                }
+                if (useParticleColors) {
+                    reloadParticleColors();
+                }
+                if (useRedstoneColors) {
+                    reloadRedstoneColors();
+                }
+                if (useStemColors) {
+                    reloadStemColors();
+                }
+                if (useCloudType) {
+                    reloadCloudType();
+                }
+                if (useMapColors) {
+                    reloadMapColors();
+                }
+                if (useSheepColors) {
+                    reloadSheepColors();
+                }
+                if (useTextColors) {
+                    reloadTextColors();
+                }
+                if (useXPOrbColors) {
+                    reloadXPOrbColors();
+                }
+            }
+        });
     }
 
     public static int colorizeBiome(int defaultColor, int index, double temperature, double rainfall) {
@@ -276,7 +316,7 @@ public class Colorizer {
         if (lightmaps.containsKey(worldType)) {
             image = lightmaps.get(worldType);
         } else {
-            image = MCPatcherUtils.readImage(lastTexturePack.getInputStream(name));
+            image = TexturePackAPI.getImage(name);
             lightmaps.put(worldType, image);
             if (image == null) {
                 MCPatcherUtils.debug("using default lighting for world %d", worldType);
@@ -381,7 +421,6 @@ public class Colorizer {
     }
 
     public static void setupBlockAccess(IBlockAccess blockAccess, boolean newBiomes) {
-        checkUpdate();
         if (blockAccess == null) {
             BiomeHelper.instance = new BiomeHelper.Stub();
         } else if (newBiomes) {
@@ -500,52 +539,6 @@ public class Colorizer {
         }
     }
 
-    private static void checkUpdate() {
-        if (lastTexturePack == MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack()) {
-            return;
-        }
-        lastTexturePack = MCPatcherUtils.getMinecraft().texturePackList.getSelectedTexturePack();
-
-        reset();
-        reloadColorProperties();
-        if (useFogColors) {
-            reloadFogColors();
-        }
-        if (usePotionColors) {
-            reloadPotionColors();
-        }
-        if (useSwampColors) {
-            reloadSwampColors();
-        }
-        if (useBlockColors) {
-            reloadBlockColors();
-        }
-        if (useParticleColors) {
-            reloadParticleColors();
-        }
-        if (useRedstoneColors) {
-            reloadRedstoneColors();
-        }
-        if (useStemColors) {
-            reloadStemColors();
-        }
-        if (useCloudType) {
-            reloadCloudType();
-        }
-        if (useMapColors) {
-            reloadMapColors();
-        }
-        if (useSheepColors) {
-            reloadSheepColors();
-        }
-        if (useTextColors) {
-            reloadTextColors();
-        }
-        if (useXPOrbColors) {
-            reloadXPOrbColors();
-        }
-    }
-
     private static void reset() {
         properties = new Properties();
 
@@ -598,17 +591,8 @@ public class Colorizer {
     }
 
     private static void reloadColorProperties() {
-        InputStream inputStream = null;
-        try {
-            inputStream = lastTexturePack.getInputStream(COLOR_PROPERTIES);
-            if (inputStream != null) {
-                MCPatcherUtils.debug("reloading %s", COLOR_PROPERTIES);
-                properties.load(inputStream);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            MCPatcherUtils.close(inputStream);
+        if (TexturePackAPI.getProperties(COLOR_PROPERTIES, properties)) {
+            MCPatcherUtils.debug("reloading %s", COLOR_PROPERTIES);
         }
     }
 
@@ -682,18 +666,18 @@ public class Colorizer {
         loadFloatColor("drop.water", waterBaseColor);
         loadFloatColor("particle.water", waterBaseColor);
         loadFloatColor("particle.portal", portalColor);
-        int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(LAVA_DROP_COLORS)));
+        int[] rgb = MCPatcherUtils.getImageRGB(TexturePackAPI.getImage(LAVA_DROP_COLORS));
         if (rgb != null) {
             lavaDropColors = new float[3 * rgb.length];
             for (int i = 0; i < rgb.length; i++) {
                 intToFloat3(rgb[i], lavaDropColors, 3 * i);
             }
         }
-        myceliumColors = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(MYCELIUM_COLORS)));
+        myceliumColors = MCPatcherUtils.getImageRGB(TexturePackAPI.getImage(MYCELIUM_COLORS));
     }
 
     private static void reloadRedstoneColors() {
-        int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(REDSTONE_COLORS)));
+        int[] rgb = MCPatcherUtils.getImageRGB(TexturePackAPI.getImage(REDSTONE_COLORS));
         if (rgb != null && rgb.length >= 16) {
             redstoneColor = new float[16][];
             for (int i = 0; i < 16; i++) {
@@ -705,7 +689,7 @@ public class Colorizer {
     }
 
     private static void reloadStemColors() {
-        int[] rgb = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(STEM_COLORS)));
+        int[] rgb = MCPatcherUtils.getImageRGB(TexturePackAPI.getImage(STEM_COLORS));
         if (rgb != null && rgb.length >= 8) {
             stemColors = rgb;
         }
@@ -772,7 +756,7 @@ public class Colorizer {
     }
 
     private static void reloadXPOrbColors() {
-        xpOrbColors = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(lastTexturePack.getInputStream(XPORB_COLORS)));
+        xpOrbColors = MCPatcherUtils.getImageRGB(TexturePackAPI.getImage(XPORB_COLORS));
     }
 
     private static String getStringKey(String[] keys, int index) {

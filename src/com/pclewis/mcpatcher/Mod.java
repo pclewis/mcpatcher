@@ -95,6 +95,7 @@ public abstract class Mod {
      * See HDFont.java (simple) and HDTexture.java (much more complex) for full examples.
      */
     public Mod() {
+        addDependency(BaseMod.NAME);
     }
 
     public String getName() {
@@ -176,6 +177,20 @@ public abstract class Mod {
      */
     protected final void addError(String error) {
         errors.add(error);
+    }
+
+    /**
+     * Remove all patches and files to add leaving only signatures and mappings.  Useful for
+     * inheriting another mod's ClassMap without also getting its patches.
+     *
+     * @return this
+     */
+    protected Mod clearPatches() {
+        for (ClassMod classMod : classMods) {
+            classMod.patches.clear();
+        }
+        filesToAdd.clear();
+        return this;
     }
 
     ArrayList<String> getErrors() {

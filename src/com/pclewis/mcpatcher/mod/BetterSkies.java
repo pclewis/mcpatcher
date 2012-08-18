@@ -17,13 +17,12 @@ public class BetterSkies extends Mod {
         description = "Adds support for custom skyboxes.";
         version = "1.1";
 
+        addDependency(BaseTexturePackMod.NAME);
+
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
         haveNewWorldTime = minecraftVersion.compareTo("12w32a") >= 0;
 
-        classMods.add(new BaseMod.MinecraftMod().mapTexturePackList().addWorldGetter(minecraftVersion));
-        classMods.add(new BaseMod.TexturePackListMod(minecraftVersion));
-        classMods.add(new BaseMod.TexturePackBaseMod(minecraftVersion));
-        classMods.add(new BaseMod.TexturePackDefaultMod());
+        classMods.add(new BaseMod.MinecraftMod().addWorldGetter(minecraftVersion));
         classMods.add(new WorldMod());
         if (haveNewWorld) {
             classMods.add(new BaseMod.WorldServerMPMod(minecraftVersion));
@@ -35,6 +34,7 @@ public class BetterSkies extends Mod {
         classMods.add(new RenderGlobalMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$WorldEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$Layer"));
     }

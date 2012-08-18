@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.image.BufferedImage;
@@ -44,6 +45,9 @@ public class CustomAnimation {
     }
 
     static void addStrip(Properties properties) {
+        if (properties == null) {
+            return;
+        }
         try {
             String textureName = properties.getProperty("to", "");
             String srcName = properties.getProperty("from", "");
@@ -53,7 +57,7 @@ public class CustomAnimation {
             int w = Integer.parseInt(properties.getProperty("w", ""));
             int h = Integer.parseInt(properties.getProperty("h", ""));
             if (!"".equals(textureName) && !"".equals(srcName)) {
-                add(newStrip(textureName, tileCount, srcName, TextureUtils.getResourceAsBufferedImage(srcName), x, y, w, h, properties));
+                add(newStrip(textureName, tileCount, srcName, TexturePackAPI.getImage(srcName), x, y, w, h, properties));
             }
         } catch (IOException e) {
         } catch (NumberFormatException e) {
@@ -68,9 +72,9 @@ public class CustomAnimation {
 
     static boolean addStrip(String textureName, String name, int tileNumber, int tileCount) {
         String srcName = "/anim/custom_" + name + ".png";
-        if (TextureUtils.hasResource(srcName)) {
+        if (TexturePackAPI.hasResource(srcName)) {
             try {
-                BufferedImage srcImage = TextureUtils.getResourceAsBufferedImage(srcName);
+                BufferedImage srcImage = TexturePackAPI.getImage(srcName);
                 if (srcImage != null) {
                     add(newStrip(textureName, tileCount, srcName, srcImage, (tileNumber % 16) * TileSize.int_size, (tileNumber / 16) * TileSize.int_size, TileSize.int_size, TileSize.int_size, null));
                     return true;
@@ -221,7 +225,7 @@ public class CustomAnimation {
             this.minScrollDelay = minScrollDelay;
             this.maxScrollDelay = maxScrollDelay;
             isScrolling = (this.minScrollDelay >= 0);
-            BufferedImage tiles = TextureUtils.getResourceAsBufferedImage(textureName);
+            BufferedImage tiles = TexturePackAPI.getImage(textureName);
             int rgbInt[] = new int[w * h];
             byte rgbByte[] = new byte[4 * w * h];
             tiles.getRGB(x, y, w, h, rgbInt, 0, w);
@@ -254,19 +258,8 @@ public class CustomAnimation {
 
         Strip(Properties properties) {
             numTiles = numFrames;
-            InputStream inputStream = null;
             if (properties == null) {
-                try {
-                    inputStream = TextureUtils.getResourceAsStream(srcName.replaceFirst("\\.png$", ".properties"));
-                    if (inputStream != null) {
-                        properties = new Properties();
-                        properties.load(inputStream);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    MCPatcherUtils.close(inputStream);
-                }
+                properties = TexturePackAPI.getProperties(srcName.replace(".png", ".properties"));
             }
             loadProperties(properties);
         }

@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
+import com.pclewis.mcpatcher.TexturePackAPI;
 
 final class ColorMap {
     private static final int COLORMAP_SIZE = 256;
@@ -23,10 +24,10 @@ final class ColorMap {
 
     ColorMap(boolean useCustom, String filename, int defaultColor) {
         mapDefault = defaultColor;
-        if (!useCustom || Colorizer.lastTexturePack == null) {
+        if (!useCustom) {
             return;
         }
-        map = MCPatcherUtils.getImageRGB(MCPatcherUtils.readImage(Colorizer.lastTexturePack.getInputStream(filename)));
+        map = MCPatcherUtils.getImageRGB(TexturePackAPI.getImage(filename));
         if (map == null) {
             return;
         }
