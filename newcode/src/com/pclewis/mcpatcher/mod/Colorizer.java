@@ -76,7 +76,7 @@ public class Colorizer {
     private static final boolean useStemColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "stem", true);
     private static final boolean useEggColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true);
     private static final boolean useMapColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "map", true);
-    private static final boolean useSheepColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true);
+    private static final boolean useDyeColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "dye", true);
     private static final boolean useBlockColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true);
     private static final boolean useTextColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "text", true);
     private static final boolean useXPOrbColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "xporb", true);
@@ -119,6 +119,9 @@ public class Colorizer {
     private static final int[] textCodeColors = new int[32]; // text.code.*
     private static int signTextColor; // text.sign
 
+    private static final float[][] origFleeceColors = EntitySheep.fleeceColorTable.clone(); // sheep.*
+    private static final int[] origDyeColors = ItemDye.dyeColors.clone(); // dye.*
+
     static {
         try {
             reset();
@@ -157,8 +160,8 @@ public class Colorizer {
                 if (useMapColors) {
                     reloadMapColors();
                 }
-                if (useSheepColors) {
-                    reloadSheepColors();
+                if (useDyeColors) {
+                    reloadDyeColors();
                 }
                 if (useTextColors) {
                     reloadTextColors();
@@ -580,7 +583,8 @@ public class Colorizer {
                 mapColor.colorValue = mapColor.origColorValue;
             }
         }
-        EntitySheep.fleeceColorTable = EntitySheep.origFleeceColorTable.clone();
+        System.arraycopy(origFleeceColors, 0, EntitySheep.fleeceColorTable, 0, origFleeceColors.length);
+        System.arraycopy(origDyeColors, 0, ItemDye.dyeColors, 0, origDyeColors.length);
         myceliumColors = null;
         xpOrbColors = null;
         textColorMap.clear();
@@ -714,7 +718,10 @@ public class Colorizer {
         }
     }
 
-    private static void reloadSheepColors() {
+    private static void reloadDyeColors() {
+        for (int i = 0; i < ItemDye.dyeColors.length; i++) {
+            loadIntColor("dye." + getStringKey(ItemDye.dyeColorNames, i), ItemDye.dyeColors, i);
+        }
         for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
             loadFloatColor("sheep." + getStringKey(ItemDye.dyeColorNames, EntitySheep.fleeceColorTable.length - 1 - i), EntitySheep.fleeceColorTable[i]);
         }

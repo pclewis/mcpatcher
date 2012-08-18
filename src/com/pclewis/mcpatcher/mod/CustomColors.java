@@ -136,7 +136,7 @@ public class CustomColors extends Mod {
         private JCheckBox fogCheckBox;
         private JCheckBox cloudsCheckBox;
         private JCheckBox mapCheckBox;
-        private JCheckBox sheepCheckBox;
+        private JCheckBox dyeCheckBox;
         private JSpinner fogBlendRadiusSpinner;
         private JSpinner blockBlendRadiusSpinner;
         private JCheckBox textCheckBox;
@@ -209,9 +209,9 @@ public class CustomColors extends Mod {
                 }
             });
 
-            sheepCheckBox.addActionListener(new ActionListener() {
+            dyeCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "sheep", sheepCheckBox.isSelected());
+                    MCPatcherUtils.set(MCPatcherUtils.CUSTOM_COLORS, "dye", dyeCheckBox.isSelected());
                 }
             });
 
@@ -284,7 +284,7 @@ public class CustomColors extends Mod {
             stemCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "stem", true));
             eggCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "egg", true));
             mapCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "map", true));
-            sheepCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "sheep", true));
+            dyeCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "dye", true));
             fogCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true));
             otherBlockCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "otherBlocks", true));
             textCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "text", true));
@@ -3502,55 +3502,37 @@ public class CustomColors extends Mod {
 
     private class ItemDyeMod extends ClassMod {
         ItemDyeMod() {
+            final FieldRef dyeColorNames = new FieldRef(getDeobfClass(), "dyeColorNames", "[Ljava/lang/String;");
+            final FieldRef dyeColors = new FieldRef(getDeobfClass(), "dyeColors", "[I");
+
             parentClass = "Item";
 
             classSignatures.add(new ConstSignature("black"));
             classSignatures.add(new ConstSignature("purple"));
             classSignatures.add(new ConstSignature("cyan"));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "dyeColorNames", "[Ljava/lang/String;")).accessFlag(AccessFlag.STATIC, true));
+            memberMappers.add(new FieldMapper(dyeColorNames)
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, true)
+            );
+            memberMappers.add(new FieldMapper(dyeColors)
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, true)
+            );
         }
     }
 
     private class EntitySheepMod extends ClassMod {
         EntitySheepMod() {
+            final FieldRef fleeceColorTable = new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F");
+
             classSignatures.add(new ConstSignature("/mob/sheep.png"));
             classSignatures.add(new ConstSignature("mob.sheep"));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")).accessFlag(AccessFlag.STATIC, true));
-
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origFleeceColorTable", "[[F"), AccessFlag.PUBLIC | AccessFlag.STATIC));
-
-            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")) {
-                @Override
-                public int getNewFlags(int oldFlags) {
-                    return oldFlags & ~AccessFlag.FINAL;
-                }
-            });
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "clone fleeceColorTable";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        RETURN
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes() throws IOException {
-                    return buildCode(
-                        reference(GETSTATIC, new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F")),
-                        reference(INVOKEVIRTUAL, new MethodRef("java/lang/Object", "clone", "()Ljava/lang/Object;")),
-                        reference(CHECKCAST, new ClassRef("[[F")),
-                        reference(PUTSTATIC, new FieldRef(getDeobfClass(), "origFleeceColorTable", "[[F"))
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "<clinit>", "()V")));
+            memberMappers.add(new FieldMapper(fleeceColorTable)
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, true)
+            );
         }
     }
 

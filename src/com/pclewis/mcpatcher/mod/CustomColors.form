@@ -111,12 +111,12 @@
           <text value="Held maps"/>
         </properties>
       </component>
-      <component id="a7c5" class="javax.swing.JCheckBox" binding="sheepCheckBox">
+      <component id="a7c5" class="javax.swing.JCheckBox" binding="dyeCheckBox">
         <constraints>
           <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Sheep"/>
+          <text value="Sheep and dyes"/>
         </properties>
       </component>
       <grid id="af0f1" layout-manager="GridLayoutManager" row-count="2" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
