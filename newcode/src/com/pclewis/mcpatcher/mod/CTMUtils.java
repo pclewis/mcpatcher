@@ -14,7 +14,7 @@ import java.util.Properties;
 
 public class CTMUtils {
     private static final boolean enableGlass = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "glass", true);
-    private static final boolean enableGlassPane = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "pane", true);
+    private static final boolean enableGlassPane = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "glassPane", true);
     private static final boolean enableBookshelf = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "bookshelf", true);
     private static final boolean enableSandstone = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "sandstone", true);
     private static final boolean enableStandard = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "standard", true);

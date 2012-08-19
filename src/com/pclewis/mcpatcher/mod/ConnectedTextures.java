@@ -63,7 +63,6 @@ public class ConnectedTextures extends Mod {
                 }
             });
 
-            glassPaneCheckBox.setVisible(false);
             glassPaneCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     MCPatcherUtils.set(MCPatcherUtils.CONNECTED_TEXTURES, "glassPane", glassPaneCheckBox.isSelected());
