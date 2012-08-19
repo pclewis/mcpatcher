@@ -37,12 +37,39 @@ final public class MinecraftVersion {
 
     static {
         try {
+            addKnownVersion("alpha-1.2.6", "ddd5e39467f28d1ea1a03b4d9e790867");
+
+            addKnownVersion("beta-1.0.2", "d200c465b8c167cc8df6537531fc9a48");
+
+            addKnownVersion("beta-1.1_02", "7d547e495a770c62054ef136add43034");
+
+            addKnownVersion("beta-1.2", "6426223efe23c3931a4ef89685be3349");
+            addKnownVersion("beta-1.2_01", "486d83ec00554b45ffa21af2faa0116a");
+            addKnownVersion("beta-1.2_02", "6d0d87905008db07bb80c61d7e8f9fb6");
+
+            addKnownVersion("beta-1.3", "de2164df461d028229ed2e101181bbd4");
+            addKnownVersion("beta-1.3_01", "4203826f35e1036f089919032c3d19d1");
+
+            addKnownVersion("beta-1.4", "71e64b61175b371ed148b385f2d14ebf");
+            addKnownVersion("beta-1.4_01", "9379e54b581ba4ef3acc3e326e87db91");
+
+            addKnownVersion("beta-1.5", "24289130902822d73f8722b52bc07cdb");
+            addKnownVersion("beta-1.5_01", "d02fa9998e30693d8d989d5f88cf0040");
+
+            addKnownVersion("beta-1.6", "d531e221227a65392259d3141893280d");
+            addKnownVersion("beta-1.6.1", "a7e82c441a57ef4068c533f4d777336a");
+            addKnownVersion("beta-1.6.2", "01330b1c930102a683a4dd8d792e632e");
+            addKnownVersion("beta-1.6.4", "5c4df6f120336f113180698613853dba");
+            addKnownVersion("beta-1.6.5", "2aba888864b32038c8d22ee5df71b7c8");
             addKnownVersion("beta-1.6.6", "ce80072464433cd5b05d505aa8ff29d1");
 
+            addKnownVersion("beta-1.7_01", "defc33265dfbb21afb37da7c400800e9");
+            addKnownVersion("beta-1.7.2", "dd9215ab1141170d4871f42bff4ab302");
             addKnownVersion("beta-1.7.3", "eae3353fdaa7e10a59b4cb5b45bfa10d");
 
             addKnownVersion("beta-1.8pre1", "7ce3238b148bb67a3b84cf59b7516f55");
             addKnownVersion("beta-1.8pre2", "bff1cf2e4586012ac8907b8e7945d4c3");
+            addKnownVersion("beta-1.8", "a59a9fd4c726a573b0a2bdd10d857f59");
             addKnownVersion("beta-1.8.1", "f8c5a2ccd3bc996792bbe436d8cc08bc");
 
             addKnownVersion("beta-1.9pre1", "b4d9681a1118949d7753e19c35c61ec7");
