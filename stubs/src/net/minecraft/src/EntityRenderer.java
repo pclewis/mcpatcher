@@ -6,4 +6,8 @@ public class EntityRenderer {
 
     public void renderWorld(float f, long l) {
     }
+
+    public float getNightVisionStrength(float f) { // added by Custom Colors
+        return 0.0f;
+    }
 }

@@ -342,6 +342,7 @@ public class Colorizer {
         int[] newMap = new int[LIGHTMAP_SIZE * LIGHTMAP_SIZE];
         float sun = clamp(world.lightningFlash > 0 ? 1.0f : 7.0f / 6.0f * (world.getSunAngle(1.0f) - 0.2f)) * (width - 1);
         float torch = clamp(renderer.torchFlickerX + 0.5f) * (width - 1);
+        float nightVisionStrength = renderer.getNightVisionStrength(0.0f);
         float gamma = clamp(MCPatcherUtils.getMinecraft().gameSettings.gammaSetting);
         float[] sunrgb = new float[3 * LIGHTMAP_SIZE];
         float[] torchrgb = new float[3 * LIGHTMAP_SIZE];
@@ -354,6 +355,15 @@ public class Colorizer {
             for (int t = 0; t < LIGHTMAP_SIZE; t++) {
                 for (int k = 0; k < 3; k++) {
                     rgb[k] = clamp(sunrgb[3 * s + k] + torchrgb[3 * t + k]);
+                }
+                if (nightVisionStrength > 0.0f) {
+                    float nightVisionMultiplier = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]);
+                    if (nightVisionMultiplier > 0.0f) {
+                        nightVisionMultiplier = (1.0f - nightVisionStrength) + nightVisionStrength / nightVisionMultiplier;
+                        for (int k = 0; k < 3; k++) {
+                            rgb[k] = clamp(rgb[k] * nightVisionMultiplier);
+                        }
+                    }
                 }
                 if (gamma != 0.0f) {
                     for (int k = 0; k < 3; k++) {

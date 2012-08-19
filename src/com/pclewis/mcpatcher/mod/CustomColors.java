@@ -4,6 +4,7 @@ import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
+import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -21,6 +22,7 @@ public class CustomColors extends Mod {
     private boolean renderStringReturnsInt;
     private boolean haveNewWorld;
     private boolean renderBlockFallingSandTakes4Ints;
+    private boolean haveNightVision;
     private String getColorFromDamageDescriptor;
     private int getColorFromDamageParams;
 
@@ -43,6 +45,7 @@ public class CustomColors extends Mod {
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
         renderStringReturnsInt = minecraftVersion.compareTo("1.2.4") >= 0;
         renderBlockFallingSandTakes4Ints = minecraftVersion.compareTo("12w22a") >= 0;
+        haveNightVision = minecraftVersion.compareTo("12w32a") >= 0;
 
         configPanel = new ConfigPanel();
 
@@ -2336,6 +2339,9 @@ public class CustomColors extends Mod {
     }
 
     private class EntityRendererMod extends ClassMod {
+        private byte[] isNightVisionActive = new byte[]{(byte) ICONST_0};
+        private byte[] getNightVisionCode = new byte[]{(byte) FCONST_0};
+
         EntityRendererMod() {
             final boolean updateLightmapTakesFloat = getMinecraftVersion().compareTo("12w32a") >= 0;
             final MethodRef updateLightmap;
@@ -2452,6 +2458,8 @@ public class CustomColors extends Mod {
             final FieldRef fogColorRed = new FieldRef(getDeobfClass(), "fogColorRed", "F");
             final FieldRef fogColorGreen = new FieldRef(getDeobfClass(), "fogColorGreen", "F");
             final FieldRef fogColorBlue = new FieldRef(getDeobfClass(), "fogColorBlue", "F");
+            final MethodRef getNightVisionStrength1 = new MethodRef(getDeobfClass(), "getNightVisionStrength1", "(LEntityPlayer;F)F");
+            final MethodRef getNightVisionStrength = new MethodRef(getDeobfClass(), "getNightVisionStrength", "(F)F");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -2479,6 +2487,66 @@ public class CustomColors extends Mod {
                 .addXref(2, fogColorGreen)
                 .addXref(3, fogColorBlue)
             );
+
+            if (haveNightVision) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            // if (mc.thePlayer.isPotionActive(Potion.nightVision)) {
+                            BinaryRegex.capture(BinaryRegex.build(
+                                ALOAD_0,
+                                BytecodeMatcher.captureReference(GETFIELD),
+                                BytecodeMatcher.captureReference(GETFIELD),
+                                BytecodeMatcher.captureReference(GETSTATIC),
+                                BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                            )),
+                            IFEQ, BinaryRegex.any(2),
+
+                            // var16 = getNightVisionStrength1(mc.thePlayer, var1);
+                            BinaryRegex.capture(BinaryRegex.build(
+                                ALOAD_0,
+                                ALOAD_0,
+                                BinaryRegex.backReference(2),
+                                BinaryRegex.backReference(3),
+                                FLOAD_1,
+                                BytecodeMatcher.captureReference(INVOKESPECIAL)
+                            )),
+                            FSTORE, BinaryRegex.any()
+                        );
+                    }
+
+                    @Override
+                    public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                        isNightVisionActive = matcher.getCaptureGroup(1);
+                        getNightVisionCode = matcher.getCaptureGroup(6);
+                    }
+                }
+                    .setMethod(updateLightmap)
+                    .addXref(2, new FieldRef(getDeobfClass(), "mc", "LMinecraft;"))
+                    .addXref(3, new FieldRef("Minecraft", "thePlayer", "LEntityClientPlayerMP;"))
+                    .addXref(4, new FieldRef("Potion", "nightVision", "LPotion;"))
+                    .addXref(5, new MethodRef("EntityClientPlayerMP", "isPotionActive", "(LPotion;)Z"))
+                    .addXref(7, getNightVisionStrength1)
+                );
+            }
+
+            patches.add(new AddMethodPatch(getNightVisionStrength) {
+                @Override
+                public byte[] generateMethod() throws BadBytecode, IOException {
+                    return buildCode(
+                        isNightVisionActive,
+                        IFEQ, branch("A"),
+
+                        getNightVisionCode,
+                        FRETURN,
+
+                        label("A"),
+                        push(0.0f),
+                        FRETURN
+                    );
+                }
+            });
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "torchFlickerX", "F")));
 
