@@ -57,14 +57,13 @@ public class HDTexture extends BaseTexturePackMod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Strip"));
     }
 
-    private class RenderEngineMod extends ClassMod {
+    private class RenderEngineMod extends BaseMod.RenderEngineMod {
         RenderEngineMod() {
             final MethodRef updateDynamicTextures = new MethodRef(getDeobfClass(), "updateDynamicTextures", "()V");
             final MethodRef readTextureImage = new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
             final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
             final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
             final MethodRef refreshTextures = new MethodRef(getDeobfClass(), "refreshTextures", "()V");
-            final MethodRef glTexSubImage2D = new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
             final FieldRef imageData = new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;");
             final FieldRef textureList = new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;");
             final MethodRef getTexture = new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I");
@@ -80,8 +79,6 @@ public class HDTexture extends BaseTexturePackMod {
                 getInputStreamOpcode = INVOKEVIRTUAL;
                 getInputStream = new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
             }
-
-            classSignatures.add(new ConstSignature(glTexSubImage2D));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override

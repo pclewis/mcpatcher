@@ -39,7 +39,7 @@ public class FontUtils {
         }
     }
 
-    public static float[] computeCharWidths(String filename, BufferedImage image, int[] rgb, int[] charWidth, int fontHeight) {
+    public static float[] computeCharWidths(String filename, BufferedImage image, int[] rgb, int[] charWidth) {
         MCPatcherUtils.debug("computeCharWidths(%s)", filename);
         float[] charWidthf = new float[charWidth.length];
         int width = image.getWidth();
@@ -100,6 +100,9 @@ public class FontUtils {
     }
 
     private static float getCharWidthf(FontRenderer fontRenderer, char ch) {
+        if (fontRenderer.FONT_HEIGHT == 0) {
+            fontRenderer.FONT_HEIGHT = 8;
+        }
         float width = fontRenderer.getCharWidth(ch);
         if (width < 0 || ch >= fontRenderer.charWidthf.length || ch < 0) {
             return width;

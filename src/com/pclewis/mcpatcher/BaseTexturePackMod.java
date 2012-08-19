@@ -43,7 +43,7 @@ public class BaseTexturePackMod extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_PACK_API_CLASS + "$ChangeHandler$1"));
     }
 
-    private class MinecraftMod extends ClassMod {
+    private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
             final MethodRef startGame = new MethodRef(getDeobfClass(), "startGame", "()V");
             final MethodRef runGameLoop = new MethodRef(getDeobfClass(), "runGameLoop", "()V");
@@ -61,7 +61,7 @@ public class BaseTexturePackMod extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glFlush", "()V"))
+                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/Display", "isCloseRequested", "()Z"))
                     );
                 }
             }.setMethod(runGameLoop));

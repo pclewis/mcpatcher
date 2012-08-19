@@ -11,6 +11,7 @@ import static javassist.bytecode.Opcode.*;
 
 public class HDFont extends Mod {
     private final boolean haveAlternateFont;
+    private final boolean haveFontHeight;
     private final boolean haveUnicode;
     private final boolean haveGetCharWidth;
 
@@ -23,11 +24,14 @@ public class HDFont extends Mod {
         addDependency(BaseTexturePackMod.NAME);
 
         haveAlternateFont = minecraftVersion.compareTo("Beta 1.9 Prerelease 3") >= 0;
+        haveFontHeight =  minecraftVersion.compareTo("Beta 1.9 Prerelease 6") >= 0;
         haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveGetCharWidth = minecraftVersion.compareTo("1.2.4") >= 0;
 
         classMods.add(new MinecraftMod());
         classMods.add(new FontRendererMod());
+        classMods.add(new BaseMod.RenderEngineMod());
+        classMods.add(new BaseMod.GameSettingsMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.FONT_UTILS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.FONT_UTILS_CLASS + "$1"));
@@ -60,26 +64,30 @@ public class HDFont extends Mod {
         private final MethodRef constructor = new MethodRef(getDeobfClass(), "<init>", "(LGameSettings;Ljava/lang/String;LRenderEngine;" + (haveUnicode ? "Z" : "") + ")V");
 
         FontRendererMod() {
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            BinaryRegex.or(
-                                BinaryRegex.build(push(8)),
-                                BinaryRegex.build(push(9))
-                            ),
-                            BytecodeMatcher.captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
+            if (haveFontHeight) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        if (getMethodInfo().isConstructor()) {
+                            return buildExpression(
+                                ALOAD_0,
+                                BinaryRegex.or(
+                                    BinaryRegex.build(push(8)),
+                                    BinaryRegex.build(push(9))
+                                ),
+                                BytecodeMatcher.captureReference(PUTFIELD)
+                            );
+                        } else {
+                            return null;
+                        }
                     }
                 }
+                    .setMethod(constructor)
+                    .addXref(1, fontHeight)
+                );
+            } else {
+                patches.add(new AddFieldPatch(fontHeight));
             }
-                .setMethod(constructor)
-                .addXref(1, fontHeight)
-            );
 
             if (haveUnicode) {
                 classSignatures.add(new BytecodeSignature() {
@@ -136,9 +144,7 @@ public class HDFont extends Mod {
                         ALOAD, 7 + registerOffset,
                         ALOAD_0,
                         reference(GETFIELD, charWidth),
-                        ALOAD_0,
-                        reference(GETFIELD, fontHeight),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[II)[F")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F")),
                         reference(PUTFIELD, charWidthf)
                     );
                 }

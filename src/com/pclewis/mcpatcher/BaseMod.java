@@ -370,6 +370,25 @@ public final class BaseMod extends Mod {
         protected final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LTessellator;");
 
         public TessellatorMod(MinecraftVersion minecraftVersion) {
+            final MethodRef draw1;
+            if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") >= 0) {
+                draw1 = draw;
+            } else {
+                draw1 = new MethodRef(getDeobfClass(), "draw1", "()V");
+
+                patches.add(new AddMethodPatch(draw) {
+                    @Override
+                    public byte[] generateMethod() throws BadBytecode, IOException {
+                        return buildCode(
+                            ALOAD_0,
+                            reference(INVOKEVIRTUAL, draw1),
+                            push(0),
+                            IRETURN
+                        );
+                    }
+                });
+            }
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
@@ -377,7 +396,7 @@ public final class BaseMod extends Mod {
                         push("Not tesselating!")
                     );
                 }
-            }.setMethod(draw));
+            }.setMethod(draw1));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -756,6 +775,19 @@ public final class BaseMod extends Mod {
         public RenderBlocksMod() {
             classSignatures.add(new ConstSignature(0.1875));
             classSignatures.add(new ConstSignature(0.01));
+        }
+    }
+
+    /**
+     * Maps RenderEngine class.
+     */
+    public static class RenderEngineMod extends ClassMod {
+        protected final MethodRef glTexSubImage2D = new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
+
+        public RenderEngineMod() {
+            classSignatures.add(new ConstSignature("%clamp%"));
+            classSignatures.add(new ConstSignature("%blur%"));
+            classSignatures.add(new ConstSignature(glTexSubImage2D));
         }
     }
 

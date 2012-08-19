@@ -66,7 +66,6 @@ public class RandomMobs extends Mod {
             parentClass = "Render";
 
             classSignatures.add(new ConstSignature(180.0f));
-            classSignatures.add(new ConstSignature(360.0f));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
