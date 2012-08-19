@@ -24,7 +24,7 @@ public class HDFont extends Mod {
         addDependency(BaseTexturePackMod.NAME);
 
         haveAlternateFont = minecraftVersion.compareTo("Beta 1.9 Prerelease 3") >= 0;
-        haveFontHeight =  minecraftVersion.compareTo("Beta 1.9 Prerelease 6") >= 0;
+        haveFontHeight = minecraftVersion.compareTo("Beta 1.9 Prerelease 6") >= 0;
         haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveGetCharWidth = minecraftVersion.compareTo("1.2.4") >= 0;
 
