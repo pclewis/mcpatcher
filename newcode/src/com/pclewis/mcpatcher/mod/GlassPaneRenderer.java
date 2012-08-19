@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCPatcherUtils;
 import net.minecraft.src.Block;
 import net.minecraft.src.RenderBlocks;
 import net.minecraft.src.Tessellator;
@@ -20,9 +21,24 @@ public class GlassPaneRenderer {
     private static double v0; // top edge
     private static double v1; // bottom edge
 
+    private static final boolean forceDisable;
+
+    static {
+        boolean forgeDetected = false;
+        try {
+            Class<?> cl = Class.forName("net.minecraftforge.client.MinecraftForgeClient");
+            if (cl != null) {
+                MCPatcherUtils.warn("disabling glass pane ctm due to conflict with forge");
+                forgeDetected = true;
+            }
+        } catch (ClassNotFoundException e) {
+        }
+        forceDisable = forgeDetected;
+    }
+
     public static void render(RenderBlocks renderBlocks, int overrideBlockTexture, Block blockPane, int i, int j, int k,
                               boolean connectNorth, boolean connectSouth, boolean connectWest, boolean connectEast) {
-        if (!CTMUtils.active || overrideBlockTexture >= 0 ||
+        if (forceDisable || !CTMUtils.active || overrideBlockTexture >= 0 ||
             !CTMUtils.getConnectedTexture(renderBlocks, renderBlocks.blockAccess, blockPane, CTMUtils.TILE_NUM_GLASS_PANE_SIDE, i, j, k, 0)) {
             active = false;
             GlassPaneRenderer.renderBlocks = null;
