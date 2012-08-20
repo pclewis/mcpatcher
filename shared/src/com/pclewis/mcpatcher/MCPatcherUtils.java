@@ -18,6 +18,7 @@ import java.util.zip.ZipFile;
  */
 public class MCPatcherUtils {
     private static File minecraftDir = null;
+    private static String directoryStr = "";
     private static boolean debug = false;
     private static boolean isGame;
     static Config config = null;
@@ -73,9 +74,9 @@ public class MCPatcherUtils {
 
         if (isGame) {
             if (setGameDir(new File(".")) || setGameDir(getDefaultGameDir())) {
-                System.out.println("MCPatcherUtils initialized. Directory " + minecraftDir.getPath());
+                directoryStr = " Directory " + minecraftDir.getPath();
             } else {
-                System.out.println("MCPatcherUtils initialized. Current directory " + new File(".").getAbsolutePath());
+                directoryStr = " Current directory " + new File(".").getAbsolutePath();
             }
         }
     }
@@ -396,6 +397,7 @@ public class MCPatcherUtils {
     public static void setVersions(String minecraftVersion, String patcherVersion) {
         MCPatcherUtils.minecraftVersion = minecraftVersion;
         MCPatcherUtils.patcherVersion = patcherVersion;
+        info("MCPatcherUtils v%s initialized.%s", patcherVersion, directoryStr);
     }
 
     /**
