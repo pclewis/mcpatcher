@@ -133,6 +133,7 @@ public class Colorizer {
             protected void onChange() {
                 reset();
                 reloadColorProperties();
+                reloadColorMaps();
                 if (useFogColors) {
                     reloadFogColors();
                 }
@@ -555,16 +556,15 @@ public class Colorizer {
     private static void reset() {
         properties = new Properties();
 
-        fixedColorMaps[COLOR_MAP_SWAMP_GRASS] = new ColorMap(useSwampColors, "/misc/swampgrasscolor.png", 0x4e4e4e);
-        fixedColorMaps[COLOR_MAP_SWAMP_FOLIAGE] = new ColorMap(useSwampColors, "/misc/swampfoliagecolor.png", 0x4e4e4e);
-        fixedColorMaps[COLOR_MAP_PINE] = new ColorMap(useTreeColors, "/misc/pinecolor.png", 0x619961);
-        fixedColorMaps[COLOR_MAP_BIRCH] = new ColorMap(useTreeColors, "/misc/birchcolor.png", 0x80a755);
-        fixedColorMaps[COLOR_MAP_FOLIAGE] = new ColorMap(useTreeColors, "/misc/foliagecolor.png", 0x48b518);
-        fixedColorMaps[COLOR_MAP_FOLIAGE].clear();
-        fixedColorMaps[COLOR_MAP_WATER] = new ColorMap(useWaterColors, "/misc/watercolorX.png", 0xffffff);
-        fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(useWaterColors, "/misc/underwatercolor.png", 0x050533);
-        fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(useFogColors, "/misc/fogcolor0.png", 0xc0d8ff);
-        fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(useFogColors, "/misc/skycolor0.png", 0xffffff);
+        fixedColorMaps[COLOR_MAP_SWAMP_GRASS] = new ColorMap(0x4e4e4e);
+        fixedColorMaps[COLOR_MAP_SWAMP_FOLIAGE] = new ColorMap(0x4e4e4e);
+        fixedColorMaps[COLOR_MAP_PINE] = new ColorMap(0x619961);
+        fixedColorMaps[COLOR_MAP_BIRCH] = new ColorMap(0x80a755);
+        fixedColorMaps[COLOR_MAP_FOLIAGE] = new ColorMap(0x48b518);
+        fixedColorMaps[COLOR_MAP_WATER] = new ColorMap(0xffffff);
+        fixedColorMaps[COLOR_MAP_UNDERWATER] = new ColorMap(0x050533);
+        fixedColorMaps[COLOR_MAP_FOG0] = new ColorMap(0xc0d8ff);
+        fixedColorMaps[COLOR_MAP_SKY0] = new ColorMap(0xffffff);
 
         netherFogColor = new float[]{0.2f, 0.03f, 0.03f};
         endFogColor = new float[]{0.075f, 0.075f, 0.094f};
@@ -609,6 +609,19 @@ public class Colorizer {
             MCPatcherUtils.debug("reloading %s", COLOR_PROPERTIES);
         }
     }
+    
+    private static void reloadColorMaps() {
+        fixedColorMaps[COLOR_MAP_SWAMP_GRASS].loadColorMap(useSwampColors, "/misc/swampgrasscolor.png");
+        fixedColorMaps[COLOR_MAP_SWAMP_FOLIAGE].loadColorMap(useSwampColors, "/misc/swampfoliagecolor.png");
+        fixedColorMaps[COLOR_MAP_PINE].loadColorMap(useTreeColors, "/misc/pinecolor.png");
+        fixedColorMaps[COLOR_MAP_BIRCH].loadColorMap(useTreeColors, "/misc/birchcolor.png");
+        fixedColorMaps[COLOR_MAP_FOLIAGE].loadColorMap(useTreeColors, "/misc/foliagecolor.png");
+        fixedColorMaps[COLOR_MAP_FOLIAGE].clear();
+        fixedColorMaps[COLOR_MAP_WATER].loadColorMap(useWaterColors, "/misc/watercolorX.png");
+        fixedColorMaps[COLOR_MAP_UNDERWATER].loadColorMap(useWaterColors, "/misc/underwatercolor.png");
+        fixedColorMaps[COLOR_MAP_FOG0].loadColorMap(useFogColors, "/misc/fogcolor0.png");
+        fixedColorMaps[COLOR_MAP_SKY0].loadColorMap(useFogColors, "/misc/skycolor0.png");
+    }
 
     private static void reloadFogColors() {
         loadFloatColor("fog.nether", netherFogColor);
@@ -642,7 +655,8 @@ public class Colorizer {
                 continue;
             }
             key = key.substring(PALETTE_BLOCK_KEY.length()).trim();
-            ColorMap colorMap = new ColorMap(true, key, 0xffffff);
+            ColorMap colorMap = new ColorMap(0xffffff);
+            colorMap.loadColorMap(true, key);
             if (!colorMap.isCustom()) {
                 continue;
             }

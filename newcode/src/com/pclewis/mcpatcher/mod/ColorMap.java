@@ -22,8 +22,11 @@ final class ColorMap {
         return blockID + (metadata & 0xff) / 256.0f;
     }
 
-    ColorMap(boolean useCustom, String filename, int defaultColor) {
+    ColorMap(int defaultColor) {
         mapDefault = defaultColor;
+    }
+
+    void loadColorMap(boolean useCustom, String filename) {
         if (!useCustom) {
             return;
         }
