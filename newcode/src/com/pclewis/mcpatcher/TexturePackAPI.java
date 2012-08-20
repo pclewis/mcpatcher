@@ -22,6 +22,18 @@ public class TexturePackAPI {
         return texturePack;
     }
 
+    static TexturePackBase getCurrentTexturePack() {
+        Minecraft minecraft = MCPatcherUtils.getMinecraft();
+        if (minecraft == null) {
+            return null;
+        }
+        TexturePackList texturePackList = minecraft.texturePackList;
+        if (texturePackList == null) {
+            return null;
+        }
+        return texturePackList.getSelectedTexturePack();
+    }
+
     public static boolean isDefaultTexturePack() {
         return getTexturePack() instanceof TexturePackDefault;
     }
@@ -104,7 +116,15 @@ public class TexturePackAPI {
 
     protected InputStream getInputStreamImpl(String s) {
         if (texturePack == null) {
-            return TexturePackAPI.class.getResourceAsStream(s);
+            MCPatcherUtils.debug("early reading %s", s);
+            TexturePackBase currentTexturePack = getCurrentTexturePack();
+            if (currentTexturePack == null) {
+                MCPatcherUtils.debug("early reading %s failed!");
+                return TexturePackAPI.class.getResourceAsStream(s);
+            } else {
+                MCPatcherUtils.debug("early reading %s succeeded %s", currentTexturePack.texturePackFileName);
+                return currentTexturePack.getInputStream(s);
+            }
         } else {
             return texturePack.getInputStream(s);
         }
