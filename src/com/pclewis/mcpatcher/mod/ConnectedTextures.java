@@ -431,7 +431,7 @@ public class ConnectedTextures extends Mod {
         private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
         private final FieldRef instance = new FieldRef("Tessellator", "instance", "LTessellator;");
         private final MethodRef renderStandardBlock = new MethodRef(getDeobfClass(), "renderStandardBlock", "(LBlock;III)Z");
-        private final MethodRef drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDD)V");
+        private final MethodRef drawCrossedSquares;
         private final MethodRef renderBlockPane = new MethodRef(getDeobfClass(), "renderBlockPane", "(LBlockPane;III)Z");
         private final MethodRef addVertexWithUV = new MethodRef("Tessellator", "addVertexWithUV", "(DDDDD)V");
         private final MethodRef setup = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "setup", "(LRenderBlocks;LBlock;IIIII)Z");
@@ -445,6 +445,12 @@ public class ConnectedTextures extends Mod {
         private int[] sideUVRegisters;
 
         RenderBlocksMod() {
+            if (getMinecraftVersion().compareTo("12w34a") >= 0) {
+                drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDDF)V");
+            } else {
+                drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDD)V");
+            }
+
             setupBlockFace(0, "Bottom");
             setupBlockFace(1, "Top");
             setupBlockFace(2, "North");
