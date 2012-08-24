@@ -16,15 +16,15 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class CustomColors extends Mod {
-    private boolean haveSpawnerEggs;
-    private boolean haveNewBiomes;
-    private boolean haveFontColor;
-    private boolean renderStringReturnsInt;
-    private boolean haveNewWorld;
-    private boolean renderBlockFallingSandTakes4Ints;
-    private boolean haveNightVision;
-    private String getColorFromDamageDescriptor;
-    private int getColorFromDamageParams;
+    private final boolean haveSpawnerEggs;
+    private final boolean haveNewBiomes;
+    private final boolean haveFontColor;
+    private final boolean renderStringReturnsInt;
+    private final boolean haveNewWorld;
+    private final boolean renderBlockFallingSandTakes4Ints;
+    private final boolean haveNightVision;
+    private final MethodRef getColorFromDamage;
+    private final int getColorFromDamageVer;
 
     public CustomColors(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.CUSTOM_COLORS;
@@ -34,11 +34,6 @@ public class CustomColors extends Mod {
 
         addDependency(BaseTexturePackMod.NAME);
 
-        if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") < 0) {
-            addError("Requires Minecraft Beta 1.9 or newer.");
-            return;
-        }
-
         haveSpawnerEggs = minecraftVersion.compareTo("12w01a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveNewBiomes = minecraftVersion.compareTo("12w07a") >= 0;
         haveFontColor = minecraftVersion.compareTo("11w49a") >= 0;
@@ -46,6 +41,21 @@ public class CustomColors extends Mod {
         renderStringReturnsInt = minecraftVersion.compareTo("1.2.4") >= 0;
         renderBlockFallingSandTakes4Ints = minecraftVersion.compareTo("12w22a") >= 0;
         haveNightVision = minecraftVersion.compareTo("12w32a") >= 0;
+        if (minecraftVersion.compareTo("12w34a") >= 0) {
+            getColorFromDamage = new MethodRef("Item", "getColorFromDamage", "(LItemStack;I)I");
+            getColorFromDamageVer = 3;
+        } else if (minecraftVersion.compareTo("1.1") >= 0) {
+            getColorFromDamage = new MethodRef("Item", "getColorFromDamage", "(II)I");
+            getColorFromDamageVer = 2;
+        } else {
+            getColorFromDamage = new MethodRef("Item", "getColorFromDamage", "(I)I");
+            getColorFromDamageVer = 1;
+        }
+
+        if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") < 0) {
+            addError("Requires Minecraft Beta 1.9 or newer.");
+            return;
+        }
 
         configPanel = new ConfigPanel();
 
@@ -808,38 +818,25 @@ public class CustomColors extends Mod {
     }
 
     private class ItemMod extends BaseMod.ItemMod {
-        private String lastDescriptor;
-
         ItemMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    String descriptor = getMethodInfo().getDescriptor();
-                    if (descriptor.equals("(I)I") || descriptor.equals("(II)I")) {
-                        lastDescriptor = descriptor;
-                        return buildExpression(
-                            BinaryRegex.begin(),
-                            push(0xffffff),
-                            IRETURN,
-                            BinaryRegex.end()
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        BinaryRegex.begin(),
+                        push(0xffffff),
+                        IRETURN,
+                        BinaryRegex.end()
+                    );
                 }
-
-                @Override
-                public void afterMatch(ClassFile classFile) {
-                    getColorFromDamageParams = lastDescriptor.length() - 3;
-                    getColorFromDamageDescriptor = lastDescriptor;
-                    Logger.log(Logger.LOG_CONST, "getColorFromDamage%s has %d params", getColorFromDamageDescriptor, getColorFromDamageParams);
-                }
-            }.setMethodName("getColorFromDamage"));
+            }.setMethod(getColorFromDamage));
         }
     }
 
     private class ItemBlockMod extends ClassMod {
         ItemBlockMod() {
+            final FieldRef blockID = new FieldRef(getDeobfClass(), "blockID", "I");
+
             parentClass = "Item";
 
             classSignatures.add(new BytecodeSignature() {
@@ -859,27 +856,35 @@ public class CustomColors extends Mod {
                 }
             });
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockID", "I")).accessFlag(AccessFlag.PRIVATE, true));
+            memberMappers.add(new FieldMapper(blockID).accessFlag(AccessFlag.PRIVATE, true));
 
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getColorFromDamage", null)) {
+            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), getColorFromDamage.getName(), getColorFromDamage.getType())) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
+                    byte[] code;
+                    switch (getColorFromDamageVer) {
+                        case 1:
+                            code = buildCode(ILOAD_1, ICONST_0);
+                            break;
+
+                        case 2:
+                            code = buildCode(ILOAD_1, ILOAD_2);
+                            break;
+
+                        default:
+                            code = buildCode(ALOAD_1, ILOAD_2);
+                            break;
+                    }
                     return buildCode(
                         ALOAD_0,
-                        ILOAD_1,
-                        (getColorFromDamageParams >= 2 ? new byte[]{ILOAD_2} : new byte[0]),
-                        reference(INVOKESPECIAL, new MethodRef("Item", "getColorFromDamage", getColorFromDamageDescriptor)),
+                        code,
+                        reference(INVOKESPECIAL, getColorFromDamage),
                         ALOAD_0,
-                        reference(GETFIELD, new FieldRef(getDeobfClass(), "blockID", "I")),
-                        ILOAD_1,
+                        reference(GETFIELD, blockID),
+                        ILOAD_2,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "getItemColorFromDamage", "(III)I")),
                         IRETURN
                     );
-                }
-
-                @Override
-                public String getDescriptor() {
-                    return getColorFromDamageDescriptor;
                 }
             });
         }
@@ -3433,12 +3438,13 @@ public class CustomColors extends Mod {
 
     private class ItemSpawnerEggMod extends ClassMod {
         ItemSpawnerEggMod() {
+            final MethodRef getColorFromDamage2 = new MethodRef(getDeobfClass(), getColorFromDamage.getName(), getColorFromDamage.getType());
+            final MethodRef getItemNameIS = new MethodRef(getDeobfClass(), "getItemNameIS", "(LItemStack;)Ljava/lang/String;");
+
             parentClass = "Item";
 
             classSignatures.add(new ConstSignature(".name"));
             classSignatures.add(new ConstSignature("entity."));
-
-            MethodRef getItemNameIS = new MethodRef(getDeobfClass(), "getItemNameIS", "(LItemStack;)Ljava/lang/String;");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -3473,7 +3479,7 @@ public class CustomColors extends Mod {
                             IADD
                         );
                     }
-                }.setMethodName("getColorFromDamage"),
+                }.setMethod(getColorFromDamage),
 
                 new BytecodeSignature() {
                     @Override
@@ -3483,12 +3489,10 @@ public class CustomColors extends Mod {
                             IRETURN
                         );
                     }
-                }.setMethodName("getColorFromDamage")
+                }.setMethod(getColorFromDamage)
             ));
 
             patches.add(new BytecodePatch.InsertBefore() {
-                private MethodRef getColorFromDamage;
-
                 @Override
                 public String getDescription() {
                     return "override spawner egg color";
@@ -3503,21 +3507,26 @@ public class CustomColors extends Mod {
 
                 @Override
                 public byte[] getInsertBytes() throws IOException {
+                    byte[] code;
+                    switch (getColorFromDamageVer) {
+                        case 1:
+                            code = buildCode(ILOAD_1, ICONST_0);
+                            break;
+
+                        case 2:
+                            code = buildCode(ILOAD_1, ILOAD_2);
+                            break;
+
+                        default:
+                            code = buildCode(ALOAD_1, reference(GETFIELD, new FieldRef("ItemStack", "itemID", "I")), ILOAD_2);
+                            break;
+                    }
                     return buildCode(
-                        ILOAD_1,
-                        (getColorFromDamageParams >= 2 ? ILOAD_2 : ICONST_0),
+                        code,
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "colorizeSpawnerEgg", "(III)I"))
                     );
                 }
-
-                @Override
-                public MethodRef getTargetMethod() {
-                    if (getColorFromDamage == null) {
-                        getColorFromDamage = new MethodRef(getDeobfClass(), "getColorFromDamage", getColorFromDamageDescriptor);
-                    }
-                    return getColorFromDamage;
-                }
-            });
+            }.targetMethod(getColorFromDamage2));
         }
     }
 
