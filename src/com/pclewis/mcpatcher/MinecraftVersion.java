@@ -135,6 +135,7 @@ final public class MinecraftVersion {
             addKnownVersion("1.3.9999", null); // ensures that any 1.3.x is considered < the 1.4 snapshots
 
             addKnownVersion("12w32a", "0de5595692a736307e96e3fec050a98e");
+            addKnownVersion("12w34a", "562b82c59fa6870c10e79d9474edb356");
 
             for (int i = 0; i < versionOrdering.size(); i++) {
                 MinecraftVersion a = versionOrdering.get(i);
