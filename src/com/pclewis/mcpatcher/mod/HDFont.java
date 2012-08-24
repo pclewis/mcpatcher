@@ -139,12 +139,13 @@ public class HDFont extends Mod {
                     int registerOffset = getCaptureGroup(1)[0] - 8;
                     return buildCode(
                         ALOAD_0,
+                        ALOAD_0,
                         ALOAD_2,
                         ALOAD, 4 + registerOffset,
                         ALOAD, 7 + registerOffset,
                         ALOAD_0,
                         reference(GETFIELD, charWidth),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "computeCharWidths", "(Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F")),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "computeCharWidths", "(LFontRenderer;Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F")),
                         reference(PUTFIELD, charWidthf)
                     );
                 }
@@ -153,7 +154,7 @@ public class HDFont extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "use charWidthf in glTranslatef call";
+                    return "use charWidthf intead of charWidth";
                 }
 
                 @Override
@@ -163,7 +164,8 @@ public class HDFont extends Mod {
                         reference(GETFIELD, charWidth),
                         BinaryRegex.capture(BinaryRegex.any(1, 4)),
                         IALOAD,
-                        I2F
+                        I2F,
+                        FRETURN
                     );
                 }
 
@@ -173,7 +175,14 @@ public class HDFont extends Mod {
                         ALOAD_0,
                         reference(GETFIELD, charWidthf),
                         getCaptureGroup(1),
-                        FALOAD
+                        FALOAD,
+                        ALOAD_0,
+                        reference(GETFIELD, fontHeight),
+                        I2F,
+                        FMUL,
+                        push(8.0f),
+                        FDIV,
+                        FRETURN
                     );
                 }
             });
