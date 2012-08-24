@@ -93,7 +93,10 @@ public class HDTexture extends BaseTexturePackMod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        reference(INVOKESTATIC, glTexSubImage2D)
+                        // var1 = -1;
+                        BinaryRegex.begin(),
+                        push(-1),
+                        ISTORE_1
                     );
                 }
             }.setMethod(updateDynamicTextures));
