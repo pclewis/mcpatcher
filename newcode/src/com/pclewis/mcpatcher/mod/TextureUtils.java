@@ -28,7 +28,8 @@ public class TextureUtils {
 
     private static final boolean useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", false);
     private static final boolean reclaimGLMemory = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false);
-    private static final boolean useZombieHack;
+    private static final boolean useZombieHack = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true);
+    private static final int zombieAspectRatio;
 
     private static final int LAVA_STILL_TEXTURE_INDEX = 14 * 16 + 13;  // Block.lavaStill.blockIndexInTexture
     private static final int LAVA_FLOWING_TEXTURE_INDEX = LAVA_STILL_TEXTURE_INDEX + 1; // Block.lavaMoving.blockIndexInTexture
@@ -55,15 +56,20 @@ public class TextureUtils {
         expectedColumns.put("/gui/items.png", 16);
         expectedColumns.put("/misc/dial.png", 1);
 
-        if (MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true)) {
-            BufferedImage zombieTexture = MCPatcherUtils.readImage(TextureUtils.class.getResourceAsStream("/mob/zombie.png"));
-            useZombieHack = zombieTexture != null && zombieTexture.getWidth() == zombieTexture.getHeight();
-        } else {
-            useZombieHack = false;
-        }
+        int ratio = 0;
         if (useZombieHack) {
-            MCPatcherUtils.warn("zombie texture hack enabled");
+            BufferedImage zombieTexture = MCPatcherUtils.readImage(TextureUtils.class.getResourceAsStream("/mob/zombie.png"));
+            if (zombieTexture != null) {
+                int width = zombieTexture.getWidth();
+                int height = zombieTexture.getHeight();
+                if (width == 2 * height) {
+                    ratio = 2;
+                } else if (width == height) {
+                    ratio = 1;
+                }
+            }
         }
+        zombieAspectRatio = ratio;
 
         TexturePackAPI.instance = new TexturePackAPI() {
             @Override
@@ -122,12 +128,20 @@ public class TextureUtils {
                     }
                 }
 
-                if (useZombieHack && s.matches("/mob/zombie\\d*\\.png") && width == 2 * height) {
-                    MCPatcherUtils.info("resizing %s to %dx%d", s, width, 2 * height);
-                    BufferedImage newImage = new BufferedImage(width, 2 * height, BufferedImage.TYPE_INT_ARGB);
-                    Graphics2D graphics2D = newImage.createGraphics();
-                    graphics2D.drawImage(image, 0, 0, width, height, 0, 0, width, height, null);
-                    image = newImage;
+                if (zombieAspectRatio != 0 && s.matches("/mob/zombie\\d*\\.png")) {
+                    if (zombieAspectRatio == 1 && width == 2 * height) {
+                        MCPatcherUtils.info("  resizing %s to %dx%d", s, width, 2 * height);
+                        BufferedImage newImage = new BufferedImage(width, 2 * height, BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D graphics2D = newImage.createGraphics();
+                        graphics2D.drawImage(image, 0, 0, width, height, 0, 0, width, height, null);
+                        image = newImage;
+                    } else if (zombieAspectRatio == 2 && width == height) {
+                        MCPatcherUtils.info("  resizing %s to %dx%d", s, width, height / 2);
+                        BufferedImage newImage = new BufferedImage(width, height / 2, BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D graphics2D = newImage.createGraphics();
+                        graphics2D.drawImage(image, 0, 0, width, height / 2, 0, 0, width, height / 2, null);
+                        image = newImage;
+                    }
                 }
 
                 if (useTextureCache && enableResizing) {
