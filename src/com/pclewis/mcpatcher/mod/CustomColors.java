@@ -3440,6 +3440,8 @@ public class CustomColors extends Mod {
         ItemSpawnerEggMod() {
             final MethodRef getColorFromDamage2 = new MethodRef(getDeobfClass(), getColorFromDamage.getName(), getColorFromDamage.getType());
             final MethodRef getItemNameIS = new MethodRef(getDeobfClass(), "getItemNameIS", "(LItemStack;)Ljava/lang/String;");
+            final MethodRef getItemDamage = new MethodRef("ItemStack", "getItemDamage", "()I");
+            final MethodRef getEntityString = new MethodRef("EntityList", "getEntityString", "(I)Ljava/lang/String;");
 
             parentClass = "Item";
 
@@ -3460,8 +3462,8 @@ public class CustomColors extends Mod {
                 }
             }
                 .setMethod(getItemNameIS)
-                .addXref(1, new MethodRef("ItemStack", "getItemDamage", "()I"))
-                .addXref(2, new MethodRef("EntityList", "getEntityString", "(I)Ljava/lang/String;"))
+                .addXref(1, getItemDamage)
+                .addXref(2, getEntityString)
             );
 
             classSignatures.add(new OrSignature(
@@ -3518,7 +3520,7 @@ public class CustomColors extends Mod {
                             break;
 
                         default:
-                            code = buildCode(ALOAD_1, reference(GETFIELD, new FieldRef("ItemStack", "itemID", "I")), ILOAD_2);
+                            code = buildCode(ALOAD_1, reference(INVOKEVIRTUAL, getItemDamage), ILOAD_2);
                             break;
                     }
                     return buildCode(
