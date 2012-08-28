@@ -104,7 +104,7 @@ public class TexturePackAPI {
             if (folder != null && folder.isDirectory()) {
                 for (String s : new File(folder, directory).list()) {
                     if (s.endsWith(suffix)) {
-                        resources.add("/" + s);
+                        resources.add("/" + new File(new File(directory), s).getPath());
                     }
                 }
             }
