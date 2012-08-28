@@ -116,13 +116,10 @@ public class TexturePackAPI {
 
     protected InputStream getInputStreamImpl(String s) {
         if (texturePack == null) {
-            MCPatcherUtils.debug("early reading %s", s);
             TexturePackBase currentTexturePack = getCurrentTexturePack();
             if (currentTexturePack == null) {
-                MCPatcherUtils.debug("early reading %s failed!");
                 return TexturePackAPI.class.getResourceAsStream(s);
             } else {
-                MCPatcherUtils.debug("early reading %s succeeded %s", currentTexturePack.texturePackFileName);
                 return currentTexturePack.getInputStream(s);
             }
         } else {
