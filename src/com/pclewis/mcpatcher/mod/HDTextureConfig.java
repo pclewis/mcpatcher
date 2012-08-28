@@ -18,6 +18,7 @@ public class HDTextureConfig extends ModConfigPanel {
     private JCheckBox textureCacheCheckBox;
     private JCheckBox shrinkGLMemoryCheckBox;
     private JComboBox otherCombo;
+    private JCheckBox zombieHackCheckBox;
 
     private AnimationComboListener[] comboListeners;
 
@@ -65,6 +66,12 @@ public class HDTextureConfig extends ModConfigPanel {
                 MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", shrinkGLMemoryCheckBox.isSelected());
             }
         });
+
+        zombieHackCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "zombieHack", zombieHackCheckBox.isSelected());
+            }
+        });
     }
 
     @Override
@@ -93,6 +100,7 @@ public class HDTextureConfig extends ModConfigPanel {
         }
         textureCacheCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", is64bit));
         shrinkGLMemoryCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false));
+        zombieHackCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true));
     }
 
     @Override
