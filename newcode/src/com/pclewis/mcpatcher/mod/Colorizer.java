@@ -333,8 +333,11 @@ public class Colorizer {
         }
         int width = image.getWidth();
         int height = image.getHeight();
-        if (height != 2 * LIGHTMAP_SIZE) {
-            MCPatcherUtils.error("%s must be exactly %d pixels high", name, 2 * LIGHTMAP_SIZE);
+        boolean customNightvision = false;
+        if (height == 4 * LIGHTMAP_SIZE) {
+            customNightvision = true;
+        } else if (height != 2 * LIGHTMAP_SIZE) {
+            MCPatcherUtils.error("%s must be exactly %d or %d pixels high", name, 2 * LIGHTMAP_SIZE, 4 * LIGHTMAP_SIZE);
             lightmaps.put(worldType, null);
             return false;
         }
@@ -347,10 +350,16 @@ public class Colorizer {
         float gamma = clamp(MCPatcherUtils.getMinecraft().gameSettings.gammaSetting);
         float[] sunrgb = new float[3 * LIGHTMAP_SIZE];
         float[] torchrgb = new float[3 * LIGHTMAP_SIZE];
+        float[] sunrgbnv = new float[3 * LIGHTMAP_SIZE];
+        float[] torchrgbnv = new float[3 * LIGHTMAP_SIZE];
         float[] rgb = new float[3];
         for (int i = 0; i < LIGHTMAP_SIZE; i++) {
             interpolate(origMap, i * width, sun, sunrgb, 3 * i);
             interpolate(origMap, (i + LIGHTMAP_SIZE) * width, torch, torchrgb, 3 * i);
+            if (customNightvision && nightVisionStrength > 0.0f) {
+                interpolate(origMap, (i + 2 * LIGHTMAP_SIZE) * width, sun, sunrgbnv, 3 * i);
+                interpolate(origMap, (i + 3 * LIGHTMAP_SIZE) * width, torch, torchrgbnv, 3 * i);
+            }
         }
         for (int s = 0; s < LIGHTMAP_SIZE; s++) {
             for (int t = 0; t < LIGHTMAP_SIZE; t++) {
@@ -358,11 +367,17 @@ public class Colorizer {
                     rgb[k] = clamp(sunrgb[3 * s + k] + torchrgb[3 * t + k]);
                 }
                 if (nightVisionStrength > 0.0f) {
-                    float nightVisionMultiplier = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]);
-                    if (nightVisionMultiplier > 0.0f) {
-                        nightVisionMultiplier = (1.0f - nightVisionStrength) + nightVisionStrength / nightVisionMultiplier;
+                    if (customNightvision) {
                         for (int k = 0; k < 3; k++) {
-                            rgb[k] = clamp(rgb[k] * nightVisionMultiplier);
+                            rgb[k] = clamp((1.0f - nightVisionStrength) * rgb[k] + nightVisionStrength * (sunrgbnv[3 * s + k] + torchrgbnv[3 * t + k]));
+                        }
+                    } else {
+                        float nightVisionMultiplier = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]);
+                        if (nightVisionMultiplier > 0.0f) {
+                            nightVisionMultiplier = (1.0f - nightVisionStrength) + nightVisionStrength / nightVisionMultiplier;
+                            for (int k = 0; k < 3; k++) {
+                                rgb[k] = clamp(rgb[k] * nightVisionMultiplier);
+                            }
                         }
                     }
                 }
