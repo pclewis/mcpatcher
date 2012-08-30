@@ -140,6 +140,8 @@ abstract class TileOverride {
             override = new CTM(filePrefix, properties);
         } else if (method.equals("random")) {
             override = new Random1(filePrefix, properties);
+        } else if (method.equals("fixed") || method.equals("static")) {
+            override = new Fixed(filePrefix, properties);
         } else if (method.equals("bookshelf") || method.equals("horizontal")) {
             override = new Horizontal(filePrefix, properties);
         } else if (method.equals("vertical")) {
@@ -669,6 +671,9 @@ abstract class TileOverride {
 
         @Override
         int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+            if (tileMap.length == 1) {
+                return tileMap[0];
+            }
             if (face < 0) {
                 face = 0;
             }
@@ -779,6 +784,31 @@ abstract class TileOverride {
                 y += height;
             }
             return tileMap[width * y + x];
+        }
+    }
+
+    final static class Fixed extends TileOverride {
+        private Fixed(String filePrefix, Properties properties) {
+            super(filePrefix, properties);
+        }
+
+        @Override
+        String getMethod() {
+            return "fixed";
+        }
+
+        @Override
+        String checkTileMap() {
+            if (tileMap.length == 1) {
+                return null;
+            } else {
+                return "requires exactly 1 tile";
+            }
+        }
+
+        @Override
+        int getTileImpl(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
+            return tileMap[0];
         }
     }
 }
