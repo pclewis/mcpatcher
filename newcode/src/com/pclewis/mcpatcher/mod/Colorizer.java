@@ -351,7 +351,7 @@ public class Colorizer {
         if (lavaDropColors == null) {
             return false;
         } else {
-            int offset = 3 * Math.max(Math.min(lavaDropColors.length / 3 - 1, age), 0);
+            int offset = 3 * Math.max(Math.min(lavaDropColors.length / 3 - 1, age - 20), 0);
             System.arraycopy(lavaDropColors, offset, setColor, 0, 3);
             return true;
         }
