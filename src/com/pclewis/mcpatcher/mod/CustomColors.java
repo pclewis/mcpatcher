@@ -128,6 +128,7 @@ public class CustomColors extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLORIZER_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.COLOR_MAP_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.LIGHTMAP_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS + "$Stub"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.BIOME_HELPER_CLASS + "$Old"));
@@ -2571,10 +2572,11 @@ public class CustomColors extends Mod {
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        // if (Colorizer.computeLightmap(this, world)) {
+                        // if (Lightmap.computeLightmap(this, world, partialTick)) {
                         ALOAD_0,
                         BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.COLORIZER_CLASS, "computeLightmap", "(LEntityRenderer;LWorld;)Z")),
+                        updateLightmapTakesFloat ? buildCode(FLOAD_1) : push(0.0f),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.LIGHTMAP_CLASS, "computeLightmap", "(LEntityRenderer;LWorld;F)Z")),
                         IFEQ, branch("A"),
 
                         // return;

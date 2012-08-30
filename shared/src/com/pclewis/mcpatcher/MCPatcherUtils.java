@@ -51,6 +51,7 @@ public class MCPatcherUtils {
     public static final String COLORIZER_CLASS = "com.pclewis.mcpatcher.mod.Colorizer";
     public static final String COLOR_MAP_CLASS = "com.pclewis.mcpatcher.mod.ColorMap";
     public static final String BIOME_HELPER_CLASS = "com.pclewis.mcpatcher.mod.BiomeHelper";
+    public static final String LIGHTMAP_CLASS = "com.pclewis.mcpatcher.mod.Lightmap";
     public static final String CTM_UTILS_CLASS = "com.pclewis.mcpatcher.mod.CTMUtils";
     public static final String SUPER_TESSELLATOR_CLASS = "com.pclewis.mcpatcher.mod.SuperTessellator";
     public static final String TILE_OVERRIDE_CLASS = "com.pclewis.mcpatcher.mod.TileOverride";

@@ -5,12 +5,10 @@ import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.image.BufferedImage;
 import java.util.*;
 
 public class Colorizer {
     private static final String COLOR_PROPERTIES = "/color.properties";
-    private static final String LIGHTMAP_FORMAT = "/environment/lightmap%d.png";
     private static final String REDSTONE_COLORS = "/misc/redstonecolor.png";
     private static final String STEM_COLORS = "/misc/stemcolor.png";
     private static final String LAVA_DROP_COLORS = "/misc/lavadropcolor.png";
@@ -69,7 +67,6 @@ public class Colorizer {
     private static final boolean useTreeColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "tree", true);
     private static final boolean usePotionColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "potion", true);
     private static final boolean useParticleColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "particle", true);
-    private static final boolean useLightmaps = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "lightmaps", true);
     private static final boolean useFogColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "fog", true);
     private static final boolean useCloudType = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "clouds", true);
     private static final boolean useRedstoneColors = MCPatcherUtils.getBoolean(MCPatcherUtils.CUSTOM_COLORS, "redstone", true);
@@ -84,10 +81,6 @@ public class Colorizer {
     private static final float fogBlendScale = getBlendScale(fogBlendRadius);
     private static final int blockBlendRadius = MCPatcherUtils.getInt(MCPatcherUtils.CUSTOM_COLORS, "blockBlendRadius", 1);
     private static final float blockBlendScale = getBlendScale(blockBlendRadius);
-
-    private static final int LIGHTMAP_SIZE = 16;
-    private static final float LIGHTMAP_SCALE = LIGHTMAP_SIZE - 1;
-    private static HashMap<Integer, BufferedImage> lightmaps = new HashMap<Integer, BufferedImage>();
 
     public static final float[] setColor = new float[3];
     public static float[] waterColor;
@@ -310,91 +303,6 @@ public class Colorizer {
         }
     }
 
-    public static boolean computeLightmap(EntityRenderer renderer, World world) {
-        if (world == null || !useLightmaps) {
-            return false;
-        }
-        int worldType = world.worldProvider.worldType;
-        String name = String.format(LIGHTMAP_FORMAT, worldType);
-        BufferedImage image;
-        if (lightmaps.containsKey(worldType)) {
-            image = lightmaps.get(worldType);
-        } else {
-            image = TexturePackAPI.getImage(name);
-            lightmaps.put(worldType, image);
-            if (image == null) {
-                MCPatcherUtils.debug("using default lighting for world %d", worldType);
-            } else {
-                MCPatcherUtils.debug("using %s", name);
-            }
-        }
-        if (image == null) {
-            return false;
-        }
-        int width = image.getWidth();
-        int height = image.getHeight();
-        boolean customNightvision = false;
-        if (height == 4 * LIGHTMAP_SIZE) {
-            customNightvision = true;
-        } else if (height != 2 * LIGHTMAP_SIZE) {
-            MCPatcherUtils.error("%s must be exactly %d or %d pixels high", name, 2 * LIGHTMAP_SIZE, 4 * LIGHTMAP_SIZE);
-            lightmaps.put(worldType, null);
-            return false;
-        }
-        int[] origMap = new int[width * height];
-        image.getRGB(0, 0, width, height, origMap, 0, width);
-        int[] newMap = new int[LIGHTMAP_SIZE * LIGHTMAP_SIZE];
-        float sun = clamp(world.lightningFlash > 0 ? 1.0f : 7.0f / 6.0f * (world.getSunAngle(1.0f) - 0.2f)) * (width - 1);
-        float torch = clamp(renderer.torchFlickerX + 0.5f) * (width - 1);
-        float nightVisionStrength = renderer.getNightVisionStrength(0.0f);
-        float gamma = clamp(MCPatcherUtils.getMinecraft().gameSettings.gammaSetting);
-        float[] sunrgb = new float[3 * LIGHTMAP_SIZE];
-        float[] torchrgb = new float[3 * LIGHTMAP_SIZE];
-        float[] sunrgbnv = new float[3 * LIGHTMAP_SIZE];
-        float[] torchrgbnv = new float[3 * LIGHTMAP_SIZE];
-        float[] rgb = new float[3];
-        for (int i = 0; i < LIGHTMAP_SIZE; i++) {
-            interpolate(origMap, i * width, sun, sunrgb, 3 * i);
-            interpolate(origMap, (i + LIGHTMAP_SIZE) * width, torch, torchrgb, 3 * i);
-            if (customNightvision && nightVisionStrength > 0.0f) {
-                interpolate(origMap, (i + 2 * LIGHTMAP_SIZE) * width, sun, sunrgbnv, 3 * i);
-                interpolate(origMap, (i + 3 * LIGHTMAP_SIZE) * width, torch, torchrgbnv, 3 * i);
-            }
-        }
-        for (int s = 0; s < LIGHTMAP_SIZE; s++) {
-            for (int t = 0; t < LIGHTMAP_SIZE; t++) {
-                for (int k = 0; k < 3; k++) {
-                    rgb[k] = clamp(sunrgb[3 * s + k] + torchrgb[3 * t + k]);
-                }
-                if (nightVisionStrength > 0.0f) {
-                    if (customNightvision) {
-                        for (int k = 0; k < 3; k++) {
-                            rgb[k] = clamp((1.0f - nightVisionStrength) * rgb[k] + nightVisionStrength * (sunrgbnv[3 * s + k] + torchrgbnv[3 * t + k]));
-                        }
-                    } else {
-                        float nightVisionMultiplier = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]);
-                        if (nightVisionMultiplier > 0.0f) {
-                            nightVisionMultiplier = (1.0f - nightVisionStrength) + nightVisionStrength / nightVisionMultiplier;
-                            for (int k = 0; k < 3; k++) {
-                                rgb[k] = clamp(rgb[k] * nightVisionMultiplier);
-                            }
-                        }
-                    }
-                }
-                if (gamma != 0.0f) {
-                    for (int k = 0; k < 3; k++) {
-                        float tmp = 1.0f - rgb[k];
-                        tmp = 1.0f - tmp * tmp * tmp * tmp;
-                        rgb[k] = gamma * tmp + (1.0f - gamma) * rgb[k];
-                    }
-                }
-                newMap[s * LIGHTMAP_SIZE + t] = 0xff000000 | float3ToInt(rgb);
-            }
-        }
-        MCPatcherUtils.getMinecraft().renderEngine.createTextureFromBytes(newMap, LIGHTMAP_SIZE, LIGHTMAP_SIZE, renderer.lightmapTexture);
-        return true;
-    }
-
     public static boolean computeRedstoneWireColor(int current) {
         if (redstoneColor == null) {
             return false;
@@ -596,7 +504,7 @@ public class Colorizer {
         waterBottleColor = 0x385dc6;
         redstoneColor = null;
         stemColors = null;
-        lightmaps.clear();
+        Lightmap.clear();
         spawnerEggShellColors.clear();
         spawnerEggSpotColors.clear();
         cloudType = CLOUDS_DEFAULT;
@@ -624,7 +532,7 @@ public class Colorizer {
             MCPatcherUtils.debug("reloading %s", COLOR_PROPERTIES);
         }
     }
-    
+
     private static void reloadColorMaps() {
         fixedColorMaps[COLOR_MAP_SWAMP_GRASS].loadColorMap(useSwampColors, "/misc/swampgrasscolor.png");
         fixedColorMaps[COLOR_MAP_SWAMP_FOLIAGE].loadColorMap(useSwampColors, "/misc/swampfoliagecolor.png");
@@ -871,25 +779,25 @@ public class Colorizer {
         return null;
     }
 
-    private static void intToFloat3(int rgb, float[] f, int offset) {
+    static void intToFloat3(int rgb, float[] f, int offset) {
         f[offset] = (float) (rgb & 0xff0000) / (float) 0xff0000;
         f[offset + 1] = (float) (rgb & 0xff00) / (float) 0xff00;
         f[offset + 2] = (float) (rgb & 0xff) / (float) 0xff;
     }
 
-    private static void intToFloat3(int rgb, float[] f) {
+    static void intToFloat3(int rgb, float[] f) {
         intToFloat3(rgb, f, 0);
     }
 
-    private static int float3ToInt(float[] f, int offset) {
+    static int float3ToInt(float[] f, int offset) {
         return ((int) (255.0f * f[offset])) << 16 | ((int) (255.0f * f[offset + 1])) << 8 | (int) (255.0f * f[offset + 2]);
     }
 
-    private static int float3ToInt(float[] f) {
+    static int float3ToInt(float[] f) {
         return float3ToInt(f, 0);
     }
 
-    private static float clamp(float f) {
+    static float clamp(float f) {
         if (f < 0.0f) {
             return 0.0f;
         } else if (f > 1.0f) {
@@ -909,7 +817,7 @@ public class Colorizer {
         }
     }
 
-    private static void clamp(float[] f) {
+    static void clamp(float[] f) {
         for (int i = 0; i < f.length; i++) {
             f[i] = clamp(f[i]);
         }
