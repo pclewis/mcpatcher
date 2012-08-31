@@ -19,8 +19,6 @@ public class Colorizer {
     private static final String TEXT_KEY = "text.";
     private static final String TEXT_CODE_KEY = TEXT_KEY + "code.";
 
-    private static final int COLOR_CODE_UNSET = -2;
-
     public static final int COLOR_MAP_SWAMP_GRASS = 0;
     public static final int COLOR_MAP_SWAMP_FOLIAGE = 1;
     public static final int COLOR_MAP_PINE = 2;
@@ -110,6 +108,7 @@ public class Colorizer {
 
     private static final HashMap<Integer, Integer> textColorMap = new HashMap<Integer, Integer>(); // text.*
     private static final int[] textCodeColors = new int[32]; // text.code.*
+    private static final boolean[] textCodeColorSet = new boolean[32];
     private static int signTextColor; // text.sign
 
     private static final float[][] origFleeceColors = EntitySheep.fleeceColorTable.clone(); // sheep.*
@@ -268,7 +267,7 @@ public class Colorizer {
     }
 
     public static int colorizeText(int defaultColor, int index) {
-        if (index < 0 || index >= textCodeColors.length || textCodeColors[index] == COLOR_CODE_UNSET) {
+        if (index < 0 || index >= textCodeColors.length || !textCodeColorSet[index]) {
             return defaultColor;
         } else {
             return (defaultColor & 0xff000000) | textCodeColors[index];
@@ -521,8 +520,8 @@ public class Colorizer {
         myceliumColors = null;
         xpOrbColors = null;
         textColorMap.clear();
-        for (int i = 0; i < textCodeColors.length; i++) {
-            textCodeColors[i] = COLOR_CODE_UNSET;
+        for (int i = 0; i < textCodeColorSet.length; i++) {
+            textCodeColorSet[i] = false;
         }
         signTextColor = 0;
     }
@@ -676,9 +675,10 @@ public class Colorizer {
 
     private static void reloadTextColors() {
         for (int i = 0; i < textCodeColors.length; i++) {
-            loadIntColor(TEXT_CODE_KEY + i, textCodeColors, i);
-            if (textCodeColors[i] != COLOR_CODE_UNSET && i + 16 < textCodeColors.length) {
+            textCodeColorSet[i] = loadIntColor(TEXT_CODE_KEY + i, textCodeColors, i);
+            if (textCodeColorSet[i] && i + 16 < textCodeColors.length) {
                 textCodeColors[i + 16] = (textCodeColors[i] & 0xfcfcfc) >> 2;
+                textCodeColorSet[i + 16] = true;
             }
         }
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -732,15 +732,17 @@ public class Colorizer {
         }
     }
 
-    private static void loadIntColor(String key, int[] color, int index) {
+    private static boolean loadIntColor(String key, int[] color, int index) {
         //System.out.printf("%s=%06x\n", key, color[index]);
         String value = properties.getProperty(key, "");
         if (!value.equals("")) {
             try {
                 color[index] = Integer.parseInt(value, 16);
+                return true;
             } catch (NumberFormatException e) {
             }
         }
+        return false;
     }
 
     private static int loadIntColor(String key, int color) {
