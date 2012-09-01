@@ -110,16 +110,16 @@ public class GlassPaneRenderer {
         if ((connectNorth && connectSouth) || !connectAny) {
             // full north-south pane
             setupTileCoords(TileOverride.WEST_FACE);
-            tessellator.addVertexWithUV(iM, j1, k1, u0, v0);
-            tessellator.addVertexWithUV(iM, j0, k1, u0, v1);
-            tessellator.addVertexWithUV(iM, j0, k0, u1, v1);
-            tessellator.addVertexWithUV(iM, j1, k0, u1, v0);
-
-            setupTileCoords(TileOverride.EAST_FACE);
             tessellator.addVertexWithUV(iM, j1, k0, u0, v0);
             tessellator.addVertexWithUV(iM, j0, k0, u0, v1);
             tessellator.addVertexWithUV(iM, j0, k1, u1, v1);
             tessellator.addVertexWithUV(iM, j1, k1, u1, v0);
+
+            setupTileCoords(TileOverride.EAST_FACE);
+            tessellator.addVertexWithUV(iM, j1, k1, u0, v0);
+            tessellator.addVertexWithUV(iM, j0, k1, u0, v1);
+            tessellator.addVertexWithUV(iM, j0, k0, u1, v1);
+            tessellator.addVertexWithUV(iM, j1, k0, u1, v0);
         } else if (connectNorth && !connectSouth) {
             // north half-pane
             setupTileCoords(TileOverride.WEST_FACE);
