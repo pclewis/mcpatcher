@@ -3,28 +3,19 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.EntityLiving;
+import net.minecraft.src.NBTTagCompound;
 
 import java.lang.reflect.Method;
 import java.util.*;
 
 public class MobRandomizer {
-    private static final HashMap<String, MobInfo> mobHash = new HashMap<String, MobInfo>();
+    private static final HashMap<String, MobEntry> mobHash = new HashMap<String, MobEntry>();
 
     private static final long MULTIPLIER = 0x5deece66dL;
     private static final long ADDEND = 0xbL;
     private static final long MASK = (1L << 48) - 1;
 
-    private static Method getBiomeNameAt;
-
     static {
-        Method method = null;
-        try {
-            Class<?> biomeHelperClass = Class.forName(MCPatcherUtils.BIOME_HELPER_CLASS);
-            method = biomeHelperClass.getDeclaredMethod("getBiomeNameAt", Integer.TYPE, Integer.TYPE, Integer.TYPE);
-        } catch (Throwable e) {
-        }
-        getBiomeNameAt = method;
-
         TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.RANDOM_MOBS, 2) {
             @Override
             protected void onChange() {
@@ -42,48 +33,103 @@ public class MobRandomizer {
         if (!texture.startsWith("/mob/") || !texture.endsWith(".png")) {
             return texture;
         }
-        if (!entity.randomMobsSkinSet) {
-            entity.randomMobsSkin = getSkinId(entity.entityId);
-            entity.origX = (int) entity.posX;
-            entity.origY = (int) entity.posY;
-            entity.origZ = (int) entity.posZ;
-            entity.randomMobsSkinSet = true;
+        if (entity.randomMobsInfo == null) {
+            entity.randomMobsInfo = new ExtraInfo(entity);
         }
-        if (entity.origBiome == null && getBiomeNameAt != null) {
+        ExtraInfo info = entity.randomMobsInfo;
+        MobEntry mobEntry = mobHash.get(texture);
+        if (mobEntry == null) {
+            mobEntry = new MobEntry(texture);
+            mobHash.put(texture, mobEntry);
+        }
+        return mobEntry.getSkin(info.skin, info.origX, info.origY, info.origZ, info.origBiome);
+    }
+
+    public static final class ExtraInfo {
+        private static Method getBiomeNameAt;
+
+        public final long skin;
+        public final int origX;
+        public final int origY;
+        public final int origZ;
+        public final String origBiome;
+
+        static {
+            Method method = null;
             try {
-                entity.origBiome = (String) getBiomeNameAt.invoke(null, entity.origX, entity.origY, entity.origZ);
+                Class<?> biomeHelperClass = Class.forName(MCPatcherUtils.BIOME_HELPER_CLASS);
+                method = biomeHelperClass.getDeclaredMethod("getBiomeNameAt", Integer.TYPE, Integer.TYPE, Integer.TYPE);
             } catch (Throwable e) {
-                getBiomeNameAt = null;
-                e.printStackTrace();
             }
-            if (entity.origBiome != null) {
-                entity.origBiome = entity.origBiome.toLowerCase().replace(" ", "");
+            getBiomeNameAt = method;
+        }
+
+        ExtraInfo(EntityLiving entity) {
+            skin = getSkinId(entity.entityId);
+            origX = (int) entity.posX;
+            origY = (int) entity.posY;
+            origZ = (int) entity.posZ;
+            origBiome = getBiome(origX, origY, origZ);
+        }
+
+        ExtraInfo(long skin, int origX, int origY, int origZ) {
+            this.skin = skin;
+            this.origX = origX;
+            this.origY = origY;
+            this.origZ = origZ;
+            origBiome = getBiome(origX, origY, origZ);
+        }
+
+        private static long getSkinId(int entityId) {
+            long n = entityId;
+            n = n ^ (n << 16) ^ (n << 32) ^ (n << 48);
+            n = MULTIPLIER * n + ADDEND;
+            n = MULTIPLIER * n + ADDEND;
+            n &= MASK;
+            return (n >> 32) ^ n;
+        }
+
+        private static String getBiome(int x, int y, int z) {
+            if (getBiomeNameAt != null) {
+                try {
+                    String biome = (String) getBiomeNameAt.invoke(null, x, y, z);
+                    if (biome != null) {
+                        return biome.toLowerCase().replace(" ", "");
+                    }
+                } catch (Throwable e) {
+                    getBiomeNameAt = null;
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        public static ExtraInfo readFromNBT(NBTTagCompound nbt) {
+            long skin = nbt.getLong("randomMobsSkin");
+            if (skin == 0) {
+                return null;
+            } else {
+                return new ExtraInfo(skin, nbt.getInteger("origX"), nbt.getInteger("origY"), nbt.getInteger("origZ"));
             }
         }
-        MobInfo mobInfo = mobHash.get(texture);
-        if (mobInfo == null) {
-            mobInfo = new MobInfo(texture);
-            mobHash.put(texture, mobInfo);
+
+        public static void writeToNBT(NBTTagCompound nbt, ExtraInfo info) {
+            if (info != null) {
+                nbt.setLong("randomMobsSkin", info.skin);
+                nbt.setInteger("origX", info.origX);
+                nbt.setInteger("origY", info.origY);
+                nbt.setInteger("origZ", info.origZ);
+            }
         }
-        return mobInfo.getSkin(entity.randomMobsSkin, entity.origX, entity.origY, entity.origZ, entity.origBiome);
     }
 
-    private static long getSkinId(int entityId) {
-        long n = entityId;
-        n = n ^ (n << 16) ^ (n << 32) ^ (n << 48);
-        n = MULTIPLIER * n + ADDEND;
-        n = MULTIPLIER * n + ADDEND;
-        n &= MASK;
-        return (n >> 32) ^ n;
-    }
-
-    private static class MobInfo {
+    private static class MobEntry {
         final String baseSkin;
         final ArrayList<String> allSkins;
         final int skinCount;
         final ArrayList<SkinEntry> entries;
 
-        MobInfo(String baseSkin) {
+        MobEntry(String baseSkin) {
             this.baseSkin = baseSkin;
             allSkins = new ArrayList<String>();
             allSkins.add(baseSkin);

@@ -1,15 +1,12 @@
 package net.minecraft.src;
 
+import com.pclewis.mcpatcher.mod.MobRandomizer;
+
 public class EntityLiving extends Entity {
     protected int health;
 
     // added by Random Mobs
-    public long randomMobsSkin;
-    public boolean randomMobsSkinSet;
-    public int origX;
-    public int origY;
-    public int origZ;
-    public String origBiome;
+    public MobRandomizer.ExtraInfo randomMobsInfo;
 
     public EntityLiving(World worldObj) {
         super(worldObj);

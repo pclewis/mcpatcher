@@ -8,6 +8,7 @@ import java.io.IOException;
 import static javassist.bytecode.Opcode.*;
 
 public class RandomMobs extends Mod {
+    private static final String EXTRA_INFO_CLASS = MCPatcherUtils.RANDOM_MOBS_CLASS + "$ExtraInfo";
     private static final String ENTITY_SKIN_FIELD = "randomMobsSkin";
     private static final String ENTITY_SKIN_SET_FIELD = "randomMobsSkinSet";
     public static final String ENTITY_ORIG_X_FIELD = "origX";
@@ -20,7 +21,7 @@ public class RandomMobs extends Mod {
         author = "Balthichou";
         description = "Randomize mob skins if texture pack supports it. Based on Balthichou's mod.";
         website = "http://www.minecraftforum.net/topic/244172-";
-        version = "1.3";
+        version = "1.4";
 
         addDependency(BaseTexturePackMod.NAME);
 
@@ -41,7 +42,8 @@ public class RandomMobs extends Mod {
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$MobInfo"));
+        filesToAdd.add(ClassMap.classNameToFilename(EXTRA_INFO_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$MobEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$SkinEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_OVERLAY_CLASS));
     }
@@ -208,6 +210,7 @@ public class RandomMobs extends Mod {
 
     private class EntityLivingMod extends ClassMod {
         EntityLivingMod() {
+            final FieldRef info = new FieldRef(getDeobfClass(), "randomMobsInfo", "L" + EXTRA_INFO_CLASS + ";");
             final MethodRef getEntityTexture = new MethodRef(getDeobfClass(), "getEntityTexture", "()Ljava/lang/String;");
             final MethodRef writeToNBT = new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V");
             final MethodRef readFromNBT = new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V");
@@ -215,12 +218,6 @@ public class RandomMobs extends Mod {
             final MethodRef setLong = new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V");
             final MethodRef getInteger = new MethodRef("NBTTagCompound", "getInteger", "(Ljava/lang/String;)I");
             final MethodRef setInteger = new MethodRef("NBTTagCompound", "setInteger", "(Ljava/lang/String;I)V");
-            final FieldRef skin = new FieldRef(getDeobfClass(), ENTITY_SKIN_FIELD, "J");
-            final FieldRef skinSet = new FieldRef(getDeobfClass(), ENTITY_SKIN_SET_FIELD, "Z");
-            final FieldRef origX = new FieldRef(getDeobfClass(), ENTITY_ORIG_X_FIELD, "I");
-            final FieldRef origY = new FieldRef(getDeobfClass(), ENTITY_ORIG_Y_FIELD, "I");
-            final FieldRef origZ = new FieldRef(getDeobfClass(), ENTITY_ORIG_Z_FIELD, "I");
-            final FieldRef origBiome = new FieldRef(getDeobfClass(), ENTITY_ORIG_BIOME_FIELD, "Ljava/lang/String;");
 
             parentClass = "Entity";
 
@@ -232,12 +229,7 @@ public class RandomMobs extends Mod {
                 .accessFlag(AccessFlag.PUBLIC, true)
             );
 
-            patches.add(new AddFieldPatch(skin));
-            patches.add(new AddFieldPatch(skinSet));
-            patches.add(new AddFieldPatch(origX));
-            patches.add(new AddFieldPatch(origY));
-            patches.add(new AddFieldPatch(origZ));
-            patches.add(new AddFieldPatch(origBiome));
+            patches.add(new AddFieldPatch(info));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -255,33 +247,11 @@ public class RandomMobs extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // nbttagcompound.setLong(skin);
+                        // MobRandomizer.ExtraInfo.writeToNBT(nbttagcompound, randomMobsInfo);
                         ALOAD_1,
-                        push(ENTITY_SKIN_FIELD),
                         ALOAD_0,
-                        reference(GETFIELD, skin),
-                        reference(INVOKEVIRTUAL, setLong),
-
-                        // nbttagcompound.setInteger(origX);
-                        ALOAD_1,
-                        push(ENTITY_ORIG_X_FIELD),
-                        ALOAD_0,
-                        reference(GETFIELD, origX),
-                        reference(INVOKEVIRTUAL, setInteger),
-
-                        // nbttagcompound.setInteger(origY);
-                        ALOAD_1,
-                        push(ENTITY_ORIG_Y_FIELD),
-                        ALOAD_0,
-                        reference(GETFIELD, origY),
-                        reference(INVOKEVIRTUAL, setInteger),
-
-                        // nbttagcompound.setInteger(origZ);
-                        ALOAD_1,
-                        push(ENTITY_ORIG_Z_FIELD),
-                        ALOAD_0,
-                        reference(GETFIELD, origZ),
-                        reference(INVOKEVIRTUAL, setInteger)
+                        reference(GETFIELD, info),
+                        reference(INVOKESTATIC, new MethodRef(EXTRA_INFO_CLASS, "writeToNBT", "(LNBTTagCompound;L" + EXTRA_INFO_CLASS + ";)V"))
                     );
                 }
             }.targetMethod(writeToNBT));
@@ -302,48 +272,11 @@ public class RandomMobs extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // skin = nbttagcompound.getLong("skin");
+                        // randomMobsInfo = MobRandomizer.ExtraInfo.readFromNBT(nbttagcompound);
                         ALOAD_0,
                         ALOAD_1,
-                        push(ENTITY_SKIN_FIELD),
-                        reference(INVOKEVIRTUAL, getLong),
-                        reference(PUTFIELD, skin),
-
-                        // origX = nbttagcompound.getInteger(ENTITY_ORIG_X);
-                        ALOAD_0,
-                        ALOAD_1,
-                        push(ENTITY_ORIG_X_FIELD),
-                        reference(INVOKEVIRTUAL, getInteger),
-                        reference(PUTFIELD, origX),
-
-                        // origY = nbttagcompound.getInteger(ENTITY_ORIG_Y);
-                        ALOAD_0,
-                        ALOAD_1,
-                        push(ENTITY_ORIG_Y_FIELD),
-                        reference(INVOKEVIRTUAL, getInteger),
-                        reference(PUTFIELD, origY),
-
-                        // origZ = nbttagcompound.getInteger(ENTITY_ORIG_Z);
-                        ALOAD_0,
-                        ALOAD_1,
-                        push(ENTITY_ORIG_Z_FIELD),
-                        reference(INVOKEVIRTUAL, getInteger),
-                        reference(PUTFIELD, origZ),
-
-                        // if (skin != 0L) {
-                        ALOAD_0,
-                        reference(GETFIELD, skin),
-                        LCONST_0,
-                        LCMP,
-                        IFEQ, branch("A"),
-
-                        // skinSet = true;
-                        ALOAD_0,
-                        ICONST_1,
-                        reference(PUTFIELD, skinSet),
-
-                        // }
-                        label("A")
+                        reference(INVOKESTATIC, new MethodRef(EXTRA_INFO_CLASS, "readFromNBT", "(LNBTTagCompound;)L" + EXTRA_INFO_CLASS + ";")),
+                        reference(PUTFIELD, info)
                     );
                 }
             }.targetMethod(readFromNBT));
