@@ -113,7 +113,7 @@ public class BetterGlass extends Mod {
                         BinaryRegex.any(0, 20),
                         ILOAD, BinaryRegex.backReference(2),
                         push(16),
-                        BinaryRegex.subset(new byte[]{(byte) IF_ICMPNE, (byte) IF_ICMPEQ}, true), BinaryRegex.any(2)
+                        BytecodeMatcher.IF_ICMPNE_or_IF_ICMPEQ, BinaryRegex.any(2)
                     );
                 }
             }
@@ -559,7 +559,15 @@ public class BetterGlass extends Mod {
     private class RenderItemMod extends ClassMod {
         RenderItemMod() {
             final MethodRef doRenderItem = new MethodRef(getDeobfClass(), "doRenderItem", "(LEntityItem;DDDFF)V");
-            final MethodRef drawItemIntoGui = new MethodRef(getDeobfClass(), "drawItemIntoGui", "(LFontRenderer;LRenderEngine;IIIII)V");
+            final MethodRef drawItemIntoGui;
+            final boolean useItemStack = getMinecraftVersion().compareTo("12w34a") >= 0;
+            if (useItemStack) {
+                drawItemIntoGui = new MethodRef(getDeobfClass(), "drawItemIntoGui", "(LFontRenderer;LRenderEngine;LItemStack;II)V");
+            } else {
+                drawItemIntoGui = new MethodRef(getDeobfClass(), "drawItemIntoGui", "(LFontRenderer;LRenderEngine;IIIII)V");
+            }
+            final FieldRef blocksList = new FieldRef("Block", "blocksList", "[LBlock;");
+            final FieldRef itemID = new FieldRef("ItemStack", "itemID", "I");
 
             classSignatures.add(new ConstSignature("/terrain.png"));
             classSignatures.add(new ConstSignature("/gui/items.png"));
@@ -610,9 +618,9 @@ public class BetterGlass extends Mod {
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
                         // if (Block.blocksList[itemstack.itemID].getRenderBlockPass() != 0) {
-                        reference(GETSTATIC, new FieldRef("Block", "blocksList", "[LBlock;")),
+                        reference(GETSTATIC, blocksList),
                         ALOAD, 10,
-                        reference(GETFIELD, new FieldRef("ItemStack", "itemID", "I")),
+                        reference(GETFIELD, itemID),
                         AALOAD,
                         reference(INVOKEVIRTUAL, getRenderBlockPass),
                         IFEQ, branch("A"),
@@ -642,10 +650,19 @@ public class BetterGlass extends Mod {
 
                 @Override
                 public byte[] getInsertBytes() throws IOException {
+                    byte[] code;
+                    if (useItemStack) {
+                        code = buildCode(
+                            ALOAD_3,
+                            reference(GETFIELD, itemID)
+                        );
+                    } else {
+                        code = buildCode(ILOAD_3);
+                    }
                     return buildCode(
                         // if (Block.blocksList[i].getRenderBlockPass() != 0) {
-                        reference(GETSTATIC, new FieldRef("Block", "blocksList", "[LBlock;")),
-                        ILOAD_3,
+                        reference(GETSTATIC, blocksList),
+                        code,
                         AALOAD,
                         reference(INVOKEVIRTUAL, getRenderBlockPass),
                         IFEQ, branch("A"),
