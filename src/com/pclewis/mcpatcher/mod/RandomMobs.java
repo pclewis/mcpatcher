@@ -247,11 +247,10 @@ public class RandomMobs extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // MobRandomizer.ExtraInfo.writeToNBT(nbttagcompound, randomMobsInfo);
-                        ALOAD_1,
+                        // MobRandomizer.ExtraInfo.writeToNBT(this, nbttagcompound);
                         ALOAD_0,
-                        reference(GETFIELD, info),
-                        reference(INVOKESTATIC, new MethodRef(EXTRA_INFO_CLASS, "writeToNBT", "(LNBTTagCompound;L" + EXTRA_INFO_CLASS + ";)V"))
+                        ALOAD_1,
+                        reference(INVOKESTATIC, new MethodRef(EXTRA_INFO_CLASS, "writeToNBT", "(LEntityLiving;LNBTTagCompound;)V"))
                     );
                 }
             }.targetMethod(writeToNBT));
@@ -272,11 +271,10 @@ public class RandomMobs extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // randomMobsInfo = MobRandomizer.ExtraInfo.readFromNBT(nbttagcompound);
+                        // MobRandomizer.ExtraInfo.readFromNBT(this, nbttagcompound);
                         ALOAD_0,
                         ALOAD_1,
-                        reference(INVOKESTATIC, new MethodRef(EXTRA_INFO_CLASS, "readFromNBT", "(LNBTTagCompound;)L" + EXTRA_INFO_CLASS + ";")),
-                        reference(PUTFIELD, info)
+                        reference(INVOKESTATIC, new MethodRef(EXTRA_INFO_CLASS, "readFromNBT", "(LEntityLiving;LNBTTagCompound;)V"))
                     );
                 }
             }.targetMethod(readFromNBT));

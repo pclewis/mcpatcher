@@ -33,10 +33,7 @@ public class MobRandomizer {
         if (!texture.startsWith("/mob/") || !texture.endsWith(".png")) {
             return texture;
         }
-        if (entity.randomMobsInfo == null) {
-            entity.randomMobsInfo = new ExtraInfo(entity);
-        }
-        ExtraInfo info = entity.randomMobsInfo;
+        ExtraInfo info = ExtraInfo.getInfo(entity);
         MobEntry mobEntry = mobHash.get(texture);
         if (mobEntry == null) {
             mobEntry = new MobEntry(texture);
@@ -47,6 +44,7 @@ public class MobRandomizer {
 
     public static final class ExtraInfo {
         private static Method getBiomeNameAt;
+        private static final HashMap<Integer, ExtraInfo> allInfo = new HashMap<Integer, ExtraInfo>();
 
         public final long skin;
         public final int origX;
@@ -55,13 +53,11 @@ public class MobRandomizer {
         public final String origBiome;
 
         static {
-            Method method = null;
             try {
                 Class<?> biomeHelperClass = Class.forName(MCPatcherUtils.BIOME_HELPER_CLASS);
-                method = biomeHelperClass.getDeclaredMethod("getBiomeNameAt", Integer.TYPE, Integer.TYPE, Integer.TYPE);
+                getBiomeNameAt = biomeHelperClass.getDeclaredMethod("getBiomeNameAt", Integer.TYPE, Integer.TYPE, Integer.TYPE);
             } catch (Throwable e) {
             }
-            getBiomeNameAt = method;
         }
 
         ExtraInfo(EntityLiving entity) {
@@ -78,6 +74,36 @@ public class MobRandomizer {
             this.origY = origY;
             this.origZ = origZ;
             origBiome = getBiome(origX, origY, origZ);
+        }
+
+        static ExtraInfo getInfo(EntityLiving entity) {
+            synchronized (allInfo) {
+                if (entity.randomMobsInfo == null) {
+                    entity.randomMobsInfo = allInfo.get(entity.entityId);
+                    if (entity.randomMobsInfo == null) {
+                        entity.randomMobsInfo = new ExtraInfo(entity);
+                        putInfo(entity);
+                    }
+                }
+            }
+            return entity.randomMobsInfo;
+        }
+
+        static void putInfo(EntityLiving entity) {
+            synchronized (allInfo) {
+                allInfo.put(entity.entityId, entity.randomMobsInfo);
+            }
+        }
+
+        static void clearInfo() {
+            synchronized (allInfo) {
+                allInfo.clear();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s{%d, %d, %d, %d, %s}", getClass().getName(), skin, origX, origY, origZ, origBiome);
         }
 
         private static long getSkinId(int entityId) {
@@ -104,16 +130,18 @@ public class MobRandomizer {
             return null;
         }
 
-        public static ExtraInfo readFromNBT(NBTTagCompound nbt) {
+        public static void readFromNBT(EntityLiving entity, NBTTagCompound nbt) {
             long skin = nbt.getLong("randomMobsSkin");
             if (skin == 0) {
-                return null;
+                entity.randomMobsInfo = new ExtraInfo(entity);
             } else {
-                return new ExtraInfo(skin, nbt.getInteger("origX"), nbt.getInteger("origY"), nbt.getInteger("origZ"));
+                entity.randomMobsInfo = new ExtraInfo(skin, nbt.getInteger("origX"), nbt.getInteger("origY"), nbt.getInteger("origZ"));
             }
+            putInfo(entity);
         }
 
-        public static void writeToNBT(NBTTagCompound nbt, ExtraInfo info) {
+        public static void writeToNBT(EntityLiving entity, NBTTagCompound nbt) {
+            ExtraInfo info = getInfo(entity);
             if (info != null) {
                 nbt.setLong("randomMobsSkin", info.skin);
                 nbt.setInteger("origX", info.origX);
