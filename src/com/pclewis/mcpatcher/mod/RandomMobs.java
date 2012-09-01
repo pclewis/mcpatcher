@@ -9,12 +9,6 @@ import static javassist.bytecode.Opcode.*;
 
 public class RandomMobs extends Mod {
     private static final String EXTRA_INFO_CLASS = MCPatcherUtils.RANDOM_MOBS_CLASS + "$ExtraInfo";
-    private static final String ENTITY_SKIN_FIELD = "randomMobsSkin";
-    private static final String ENTITY_SKIN_SET_FIELD = "randomMobsSkinSet";
-    public static final String ENTITY_ORIG_X_FIELD = "origX";
-    public static final String ENTITY_ORIG_Y_FIELD = "origY";
-    public static final String ENTITY_ORIG_Z_FIELD = "origZ";
-    public static final String ENTITY_ORIG_BIOME_FIELD = "origBiome";
 
     public RandomMobs(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.RANDOM_MOBS;

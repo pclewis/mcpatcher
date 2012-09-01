@@ -11,10 +11,6 @@ import java.util.*;
 public class MobRandomizer {
     private static final HashMap<String, MobEntry> mobHash = new HashMap<String, MobEntry>();
 
-    private static final long MULTIPLIER = 0x5deece66dL;
-    private static final long ADDEND = 0xbL;
-    private static final long MASK = (1L << 48) - 1;
-
     static {
         TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.RANDOM_MOBS, 2) {
             @Override
@@ -43,6 +39,15 @@ public class MobRandomizer {
     }
 
     public static final class ExtraInfo {
+        private static final String SKIN_TAG = "randomMobsSkin";
+        private static final String ORIG_X_TAG = "origX";
+        private static final String ORIG_Y_TAG = "origY";
+        private static final String ORIG_Z_TAG = "origZ";
+
+        private static final long MULTIPLIER = 0x5deece66dL;
+        private static final long ADDEND = 0xbL;
+        private static final long MASK = (1L << 48) - 1;
+
         private static Method getBiomeNameAt;
         private static final HashMap<Integer, ExtraInfo> allInfo = new HashMap<Integer, ExtraInfo>();
 
@@ -131,7 +136,7 @@ public class MobRandomizer {
         }
 
         public static void readFromNBT(EntityLiving entity, NBTTagCompound nbt) {
-            long skin = nbt.getLong("randomMobsSkin");
+            long skin = nbt.getLong(SKIN_TAG);
             if (skin == 0) {
                 entity.randomMobsInfo = new ExtraInfo(entity);
             } else {
@@ -143,10 +148,10 @@ public class MobRandomizer {
         public static void writeToNBT(EntityLiving entity, NBTTagCompound nbt) {
             ExtraInfo info = getInfo(entity);
             if (info != null) {
-                nbt.setLong("randomMobsSkin", info.skin);
-                nbt.setInteger("origX", info.origX);
-                nbt.setInteger("origY", info.origY);
-                nbt.setInteger("origZ", info.origZ);
+                nbt.setLong(SKIN_TAG, info.skin);
+                nbt.setInteger(ORIG_X_TAG, info.origX);
+                nbt.setInteger(ORIG_Y_TAG, info.origY);
+                nbt.setInteger(ORIG_Z_TAG, info.origZ);
             }
         }
     }
