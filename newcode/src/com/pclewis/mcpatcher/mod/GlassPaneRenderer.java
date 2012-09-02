@@ -22,7 +22,7 @@ public class GlassPaneRenderer {
 
     public static void render(RenderBlocks renderBlocks, int overrideBlockTexture, Block blockPane, int i, int j, int k,
                               boolean connectNorth, boolean connectSouth, boolean connectWest, boolean connectEast) {
-        if (!CTMUtils.active || overrideBlockTexture >= 0 ||
+        if (!CTMUtils.active || overrideBlockTexture >= 0 || !(Tessellator.instance instanceof SuperTessellator) ||
             !CTMUtils.getConnectedTexture(renderBlocks, renderBlocks.blockAccess, blockPane, CTMUtils.TILE_NUM_GLASS_PANE_SIDE, i, j, k, 0)) {
             active = false;
             GlassPaneRenderer.renderBlocks = null;

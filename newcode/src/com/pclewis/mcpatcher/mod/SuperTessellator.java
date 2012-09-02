@@ -11,6 +11,8 @@ import java.util.HashMap;
 public class SuperTessellator extends Tessellator {
     private static final Integer MAGIC_VALUE = 0x12345678;
 
+    static SuperTessellator instance;
+
     private final HashMap<Integer, Tessellator> children = new HashMap<Integer, Tessellator>();
     private final Field[] fieldsToCopy;
     private final boolean isForge;
@@ -20,6 +22,7 @@ public class SuperTessellator extends Tessellator {
         MCPatcherUtils.info("new %s(%d)", getClass().getSimpleName(), bufferSize);
         isForge = false;
         fieldsToCopy = getFieldsToCopy();
+        SuperTessellator.instance = this;
     }
 
     public SuperTessellator() {
@@ -27,6 +30,7 @@ public class SuperTessellator extends Tessellator {
         MCPatcherUtils.info("new %s()", getClass().getSimpleName());
         isForge = true;
         fieldsToCopy = getFieldsToCopy();
+        SuperTessellator.instance = this;
     }
 
     Tessellator getTessellator(int texture) {

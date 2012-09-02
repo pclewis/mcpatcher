@@ -55,9 +55,7 @@ public class CTMUtils {
             @Override
             protected void onChange() {
                 terrainTexture = getTexture("/terrain.png");
-                if (Tessellator.instance instanceof SuperTessellator) {
-                    ((SuperTessellator) Tessellator.instance).clearTessellators();
-                }
+                SuperTessellator.instance.clearTessellators();
 
                 for (int i = 0; i < blockOverrides.length; i++) {
                     blockOverrides[i] = null;
@@ -117,21 +115,21 @@ public class CTMUtils {
     }
 
     public static void start() {
-        Tessellator.instance.texture = terrainTexture;
-        if (Tessellator.instance instanceof SuperTessellator && terrainTexture >= 0) {
+        if (terrainTexture >= 0) {
+            SuperTessellator.instance.texture = terrainTexture;
             active = true;
         }
     }
 
+    private static boolean check(IBlockAccess blockAccess, int blockID) {
+        return active && blockAccess != null && blockID != BLOCK_ID_BED && blockID != BLOCK_ID_GLASS_PANE && Tessellator.instance instanceof SuperTessellator;
+    }
+
     public static boolean setup(RenderBlocks renderBlocks, Block block, int i, int j, int k, int face, int origTexture) {
         IBlockAccess blockAccess = renderBlocks.blockAccess;
-        if (!active || !enableStandard || blockAccess == null || face < 0 || face > 5) {
+        if (!enableStandard || !check(blockAccess, block.blockID) || face < 0 || face > 5) {
             return false;
-        }
-        if (block.blockID == BLOCK_ID_BED || block.blockID == BLOCK_ID_GLASS_PANE) {
-            return false;
-        }
-        if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face)) {
+        } else if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, face)) {
             return true;
         } else {
             reset();
@@ -141,13 +139,9 @@ public class CTMUtils {
 
     public static boolean setup(RenderBlocks renderBlocks, Block block, int i, int j, int k, int origTexture) {
         IBlockAccess blockAccess = renderBlocks.blockAccess;
-        if (!active || !enableNonStandard || blockAccess == null) {
+        if (!enableNonStandard || !check(blockAccess, block.blockID)) {
             return false;
-        }
-        if (block.blockID == BLOCK_ID_BED || block.blockID == BLOCK_ID_GLASS_PANE) {
-            return false;
-        }
-        if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, -1)) {
+        } else if (getConnectedTexture(renderBlocks, blockAccess, block, origTexture, i, j, k, -1)) {
             return true;
         } else {
             reset();
@@ -160,7 +154,7 @@ public class CTMUtils {
 
     public static void finish() {
         reset();
-        Tessellator.instance.texture = -1;
+        SuperTessellator.instance.texture = -1;
         lastOverride = null;
         active = false;
     }
@@ -191,7 +185,7 @@ public class CTMUtils {
             lastOverride = override;
             newTextureIndex = override.getTile(renderBlocks, blockAccess, block, origTexture, i, j, k, face);
             if (newTextureIndex >= 0) {
-                newTessellator = ((SuperTessellator) Tessellator.instance).getTessellator(override.texture);
+                newTessellator = SuperTessellator.instance.getTessellator(override.texture);
                 return true;
             }
         }
