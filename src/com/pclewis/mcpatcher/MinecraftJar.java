@@ -5,11 +5,14 @@ import javassist.bytecode.ConstPool;
 
 import java.io.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.jar.JarException;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
@@ -250,9 +253,19 @@ class MinecraftJar {
             Process p = pb.start();
             if (p != null) {
                 BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                Pattern stackDump = Pattern.compile("^\tat ([a-z]+)\\.\\w+\\(\\S+:\\d+\\)$");
+                HashMap<String, String> reverseMap = MCPatcher.modList.getReverseMap();
                 String line;
                 while ((line = input.readLine()) != null) {
                     MCPatcher.checkInterrupt();
+                    Matcher matcher = stackDump.matcher(line);
+                    if (matcher.find()) {
+                        String obfName = matcher.group(1);
+                        String deobfName = reverseMap.get(obfName);
+                        if (deobfName != null && !deobfName.equals(obfName)) {
+                            line += " [" + deobfName + "]";
+                        }
+                    }
                     Logger.log(Logger.LOG_MAIN, "%s", line);
                 }
                 p.waitFor();

@@ -263,6 +263,21 @@ public class ClassMap {
     }
 
     /**
+     * Get the reverse mapping from obfuscated class names to descriptive class names.
+     *
+     * @return HashMap of obfuscated name -> descriptive name
+     */
+    public HashMap<String, String> getReverseClassMap() {
+        HashMap<String, String> map = new HashMap<String, String>();
+        for (Entry<String, ClassMapEntry> e : classMap.entrySet()) {
+            if (e.getValue().aliasFor == null) {
+                map.put(e.getValue().getObfName(), e.getKey());
+            }
+        }
+        return map;
+    }
+
+    /**
      * Get the mapping between descriptive and obfuscated method names for a class.
      *
      * @param classDescName descriptive class name

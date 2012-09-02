@@ -143,6 +143,16 @@ class ModList {
         return list;
     }
 
+    HashMap<String, String> getReverseMap() {
+        HashMap<String, String> map = new HashMap<String, String>();
+        for (Mod mod : modsByIndex) {
+            for (Map.Entry<String, String> entry : mod.getClassMap().getReverseClassMap().entrySet()) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return map;
+    }
+
     Mod get(String name) {
         return modsByName.get(name);
     }
