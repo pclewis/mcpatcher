@@ -24,16 +24,16 @@ public class GlassPaneRenderer {
     private static final boolean forceDisable;
 
     static {
-        boolean forgeDetected = false;
+        boolean detected = false;
         try {
-            Class<?> cl = Class.forName("net.minecraftforge.client.MinecraftForgeClient");
+            Class<?> cl = Class.forName("BaseMod");
             if (cl != null) {
-                MCPatcherUtils.warn("disabling glass pane ctm due to conflict with forge");
-                forgeDetected = true;
+                MCPatcherUtils.warn("disabling glass pane ctm due to conflict with ModLoader");
+                detected = true;
             }
         } catch (ClassNotFoundException e) {
         }
-        forceDisable = forgeDetected;
+        forceDisable = detected;
     }
 
     public static void render(RenderBlocks renderBlocks, int overrideBlockTexture, Block blockPane, int i, int j, int k,
