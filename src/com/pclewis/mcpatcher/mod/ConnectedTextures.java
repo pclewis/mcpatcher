@@ -766,7 +766,7 @@ public class ConnectedTextures extends Mod {
                     } else {
                         return buildExpression(BinaryRegex.repeat(BinaryRegex.build(
                             ALOAD, BinaryRegex.any(),
-                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 30)),
+                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 15)),
                             DLOAD, BinaryRegex.subset(sideUVRegisters, false),
                             DLOAD, BinaryRegex.subset(sideUVRegisters, false),
                             reference(INVOKEVIRTUAL, addVertexWithUV)
