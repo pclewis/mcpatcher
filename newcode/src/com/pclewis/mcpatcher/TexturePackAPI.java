@@ -102,9 +102,12 @@ public class TexturePackAPI {
         } else if (texturePack instanceof TexturePackFolder) {
             File folder = ((TexturePackFolder) texturePack).getFolder();
             if (folder != null && folder.isDirectory()) {
-                for (String s : new File(folder, directory).list()) {
-                    if (s.endsWith(suffix)) {
-                        resources.add("/" + new File(new File(directory), s).getPath());
+                String[] list = new File(folder, directory).list();
+                if (list != null) {
+                    for (String s : list) {
+                        if (s.endsWith(suffix)) {
+                            resources.add("/" + new File(new File(directory), s).getPath());
+                        }
                     }
                 }
             }
