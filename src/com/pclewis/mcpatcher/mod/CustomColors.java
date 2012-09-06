@@ -2407,7 +2407,7 @@ public class CustomColors extends Mod {
                         IFLE, BinaryRegex.any(2),
 
                         // ...
-                        BinaryRegex.any(0, 200),
+                        BinaryRegex.any(0, 300),
 
                         // if (world.worldProvider.worldType == 1) {
                         BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
