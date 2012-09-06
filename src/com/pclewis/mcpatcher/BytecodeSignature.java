@@ -127,6 +127,15 @@ abstract public class BytecodeSignature extends ClassSignature {
                         ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
                         JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
                         if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
+                            if (deobfMethod != null) {
+                                Logger.log(Logger.LOG_METHOD, "method %s %s matches %s %s, but",
+                                    methodInfo.getName(), methodInfo.getDescriptor(), deobfMethod.getName(), deobfMethod.getType()
+                                );
+                            }
+                            Logger.log(Logger.LOG_METHOD, "method %s %s failed xref #%d %s %s -> %s %s",
+                                methodInfo.getName(), methodInfo.getDescriptor(), captureGroup,
+                                xref.getName(), xref.getType(), newRef.getName(), newRef.getType()
+                            );
                             continue match;
                         }
                         tempMappings.add(xref);
