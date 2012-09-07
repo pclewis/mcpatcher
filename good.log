@@ -1,6 +1,6 @@
-MCPatcher version is 2.4.2_02
+MCPatcher version is 2.4.2_03
 OS: Linux 3.4.9-2.fc16.x86_64 amd64
-JVM: Sun Microsystems Inc. 1.6.0_34 (64 bit)
+JVM: Sun Microsystems Inc. 1.6.0_35 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.3.2 (md5 969699f13e5bbe7f12e40ac4f32b7d9a)
 
@@ -5440,88 +5440,88 @@ Patching...
    method signature (Ljava/util/List;Lnet/minecraft/src/TextureFX;)V -> (Ljava/util/List;Laxe;)V
    method signature (Lnet/minecraft/src/TextureFX;)Lnet/minecraft/src/TextureFX; -> (Laxe;)Laxe;
     method ref com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lnet/minecraft/src/TextureFX;)Lnet/minecraft/src/TextureFX; -> com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Laxe;)Laxe; registerTextureFX(Ljava/util/List;Laxe;)V@1
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x02 0x67
+     INVOKESTATIC 0x00 0x10    INVOKESTATIC 0x02 0x71
     method ref com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Lnet/minecraft/src/TextureFX;)Lnet/minecraft/src/TextureFX; -> com.pclewis.mcpatcher.mod.TextureUtils.refreshTextureFX (Laxe;)Laxe; refreshTextureFX(Ljava/util/List;)V@35
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x02 0x67
+     INVOKESTATIC 0x00 0x10    INVOKESTATIC 0x02 0x71
     method ref net.minecraft.src.TextureFX.onTick ()V -> axe.a ()V registerTextureFX(Ljava/util/List;Laxe;)V@37
-     INVOKEVIRTUAL 0x00 0x10   INVOKEVIRTUAL 0x02 0x6c
+     INVOKEVIRTUAL 0x00 0x17   INVOKEVIRTUAL 0x02 0x76
     method ref net.minecraft.src.TextureFX.onTick ()V -> axe.a ()V refreshTextureFX(Ljava/util/List;)V@533
-     INVOKEVIRTUAL 0x00 0x10   INVOKEVIRTUAL 0x02 0x6c
+     INVOKEVIRTUAL 0x00 0x17   INVOKEVIRTUAL 0x02 0x76
     class ref net.minecraft.src.Compass -> axd refreshTextureFX(Laxe;)Laxe;@1
-     INSTANCEOF 0x00 0x11      INSTANCEOF 0x02 0x6e
+     INSTANCEOF 0x00 0x18      INSTANCEOF 0x02 0x78
     class ref net.minecraft.src.Compass -> axd refreshTextureFX(Ljava/util/List;)V@69
-     NEW 0x00 0x11             NEW 0x02 0x6e
+     NEW 0x00 0x18             NEW 0x02 0x78
     class ref net.minecraft.src.Watch -> axc refreshTextureFX(Laxe;)Laxe;@8
-     INSTANCEOF 0x00 0x12      INSTANCEOF 0x02 0x70
+     INSTANCEOF 0x00 0x19      INSTANCEOF 0x02 0x7a
     class ref net.minecraft.src.Watch -> axc refreshTextureFX(Ljava/util/List;)V@84
-     NEW 0x00 0x12             NEW 0x02 0x70
+     NEW 0x00 0x19             NEW 0x02 0x7a
     class ref net.minecraft.src.StillLava -> axh refreshTextureFX(Laxe;)Laxe;@15
-     INSTANCEOF 0x00 0x13      INSTANCEOF 0x02 0x72
+     INSTANCEOF 0x00 0x1a      INSTANCEOF 0x02 0x7c
     class ref net.minecraft.src.StillLava -> axh refreshTextureFX(Ljava/util/List;)V@149
-     NEW 0x00 0x13             NEW 0x02 0x72
+     NEW 0x00 0x1a             NEW 0x02 0x7c
     class ref net.minecraft.src.FlowLava -> axg refreshTextureFX(Laxe;)Laxe;@22
-     INSTANCEOF 0x00 0x14      INSTANCEOF 0x02 0x74
+     INSTANCEOF 0x00 0x1b      INSTANCEOF 0x02 0x7e
     class ref net.minecraft.src.FlowLava -> axg refreshTextureFX(Ljava/util/List;)V@163
-     NEW 0x00 0x14             NEW 0x02 0x74
+     NEW 0x00 0x1b             NEW 0x02 0x7e
     class ref net.minecraft.src.StillWater -> axk refreshTextureFX(Laxe;)Laxe;@29
-     INSTANCEOF 0x00 0x15      INSTANCEOF 0x02 0x76
+     INSTANCEOF 0x00 0x1c      INSTANCEOF 0x02 0x80
     class ref net.minecraft.src.StillWater -> axk refreshTextureFX(Ljava/util/List;)V@222
-     NEW 0x00 0x15             NEW 0x02 0x76
+     NEW 0x00 0x1c             NEW 0x02 0x80
     class ref net.minecraft.src.FlowWater -> axj refreshTextureFX(Laxe;)Laxe;@36
-     INSTANCEOF 0x00 0x16      INSTANCEOF 0x02 0x78
+     INSTANCEOF 0x00 0x1d      INSTANCEOF 0x02 0x82
     class ref net.minecraft.src.FlowWater -> axj refreshTextureFX(Ljava/util/List;)V@236
-     NEW 0x00 0x16             NEW 0x02 0x78
+     NEW 0x00 0x1d             NEW 0x02 0x82
     class ref net.minecraft.src.Fire -> axf refreshTextureFX(Laxe;)Laxe;@43
-     INSTANCEOF 0x00 0x17      INSTANCEOF 0x02 0x7a
+     INSTANCEOF 0x00 0x1e      INSTANCEOF 0x02 0x84
     class ref net.minecraft.src.Fire -> axf refreshTextureFX(Ljava/util/List;)V@307
-     NEW 0x00 0x17             NEW 0x02 0x7a
+     NEW 0x00 0x1e             NEW 0x02 0x84
     class ref net.minecraft.src.Fire -> axf refreshTextureFX(Ljava/util/List;)V@322
-     NEW 0x00 0x17             NEW 0x02 0x7a
+     NEW 0x00 0x1e             NEW 0x02 0x84
     class ref net.minecraft.src.Portal -> axi refreshTextureFX(Laxe;)Laxe;@50
-     INSTANCEOF 0x00 0x18      INSTANCEOF 0x02 0x7c
+     INSTANCEOF 0x00 0x1f      INSTANCEOF 0x02 0x86
     class ref net.minecraft.src.Portal -> axi refreshTextureFX(Ljava/util/List;)V@375
-     NEW 0x00 0x18             NEW 0x02 0x7c
+     NEW 0x00 0x1f             NEW 0x02 0x86
     class ref net.minecraft.src.TextureFX -> axe refreshTextureFX(Laxe;)Laxe;@164
-     CHECKCAST 0x00 0x23       CHECKCAST 0x02 0x69
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x02 0x73
     class ref net.minecraft.src.TextureFX -> axe refreshTextureFX(Laxe;)Laxe;@197
-     CHECKCAST 0x00 0x23       CHECKCAST 0x02 0x69
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x02 0x73
     class ref net.minecraft.src.TextureFX -> axe refreshTextureFX(Laxe;)Laxe;@220
-     CHECKCAST 0x00 0x23       CHECKCAST 0x02 0x69
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x02 0x73
     class ref net.minecraft.src.TextureFX -> axe refreshTextureFX(Ljava/util/List;)V@30
-     CHECKCAST 0x00 0x23       CHECKCAST 0x02 0x69
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x02 0x73
     class ref net.minecraft.src.TextureFX -> axe refreshTextureFX(Ljava/util/List;)V@484
-     CHECKCAST 0x00 0x23       CHECKCAST 0x02 0x69
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x02 0x73
     class ref net.minecraft.src.TextureFX -> axe refreshTextureFX(Ljava/util/List;)V@526
-     CHECKCAST 0x00 0x23       CHECKCAST 0x02 0x69
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x02 0x73
     field ref net.minecraft.src.TextureFX.imageData [B -> axe.a [B refreshTextureFX(Laxe;)Laxe;@251
-     GETFIELD 0x00 0x28        GETFIELD 0x02 0x7e
+     GETFIELD 0x00 0x2f        GETFIELD 0x02 0x88
     field ref net.minecraft.src.TextureFX.imageData [B -> axe.a [B refreshTextureFX(Laxe;)Laxe;@277
-     GETFIELD 0x00 0x28        GETFIELD 0x02 0x7e
+     GETFIELD 0x00 0x2f        GETFIELD 0x02 0x88
     field ref net.minecraft.src.TextureFX.imageData [B -> axe.a [B refreshTextureFX(Laxe;)Laxe;@303
-     PUTFIELD 0x00 0x28        PUTFIELD 0x02 0x7e
+     PUTFIELD 0x00 0x2f        PUTFIELD 0x02 0x88
     method ref net.minecraft.src.Compass.<init> (Lnet/minecraft/client/Minecraft;)V -> axd.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@74
-     INVOKESPECIAL 0x00 0x33   INVOKESPECIAL 0x02 0x7f
+     INVOKESPECIAL 0x00 0x3a   INVOKESPECIAL 0x02 0x89
     method ref net.minecraft.src.Watch.<init> (Lnet/minecraft/client/Minecraft;)V -> axc.<init> (Lnet/minecraft/client/Minecraft;)V refreshTextureFX(Ljava/util/List;)V@89
-     INVOKESPECIAL 0x00 0x34   INVOKESPECIAL 0x02 0x80
+     INVOKESPECIAL 0x00 0x3b   INVOKESPECIAL 0x02 0x8a
     method ref net.minecraft.src.StillLava.<init> ()V -> axh.<init> ()V refreshTextureFX(Ljava/util/List;)V@153
-     INVOKESPECIAL 0x00 0x3c   INVOKESPECIAL 0x02 0x81
+     INVOKESPECIAL 0x00 0x43   INVOKESPECIAL 0x02 0x8b
     method ref net.minecraft.src.FlowLava.<init> ()V -> axg.<init> ()V refreshTextureFX(Ljava/util/List;)V@167
-     INVOKESPECIAL 0x00 0x3d   INVOKESPECIAL 0x02 0x82
+     INVOKESPECIAL 0x00 0x44   INVOKESPECIAL 0x02 0x8c
     method ref net.minecraft.src.StillWater.<init> ()V -> axk.<init> ()V refreshTextureFX(Ljava/util/List;)V@226
-     INVOKESPECIAL 0x00 0x42   INVOKESPECIAL 0x02 0x83
+     INVOKESPECIAL 0x00 0x49   INVOKESPECIAL 0x02 0x8d
     method ref net.minecraft.src.FlowWater.<init> ()V -> axj.<init> ()V refreshTextureFX(Ljava/util/List;)V@240
-     INVOKESPECIAL 0x00 0x43   INVOKESPECIAL 0x02 0x84
+     INVOKESPECIAL 0x00 0x4a   INVOKESPECIAL 0x02 0x8e
     method ref net.minecraft.src.Fire.<init> (I)V -> axf.<init> (I)V refreshTextureFX(Ljava/util/List;)V@312
-     INVOKESPECIAL 0x00 0x4c   INVOKESPECIAL 0x02 0x85
+     INVOKESPECIAL 0x00 0x53   INVOKESPECIAL 0x02 0x8f
     method ref net.minecraft.src.Fire.<init> (I)V -> axf.<init> (I)V refreshTextureFX(Ljava/util/List;)V@327
-     INVOKESPECIAL 0x00 0x4c   INVOKESPECIAL 0x02 0x85
+     INVOKESPECIAL 0x00 0x53   INVOKESPECIAL 0x02 0x8f
     method ref net.minecraft.src.Portal.<init> ()V -> axi.<init> ()V refreshTextureFX(Ljava/util/List;)V@379
-     INVOKESPECIAL 0x00 0x51   INVOKESPECIAL 0x02 0x86
+     INVOKESPECIAL 0x00 0x58   INVOKESPECIAL 0x02 0x90
     method ref net.minecraft.src.GLAllocation.createDirectByteBuffer (I)Ljava/nio/ByteBuffer; -> anh.c (I)Ljava/nio/ByteBuffer; getByteBuffer(Ljava/nio/ByteBuffer;[B)Ljava/nio/ByteBuffer;@32
-     INVOKESTATIC 0x00 0x6a    INVOKESTATIC 0x02 0x8b
-   string replace Lnet/minecraft/src/TextureFX; -> Laxe; @290
-   string replace Ljava/util/List<Lnet/minecraft/src/TextureFX;>; -> Ljava/util/List<Laxe;>; @328
-   string replace Ljava/util/ArrayList<Lnet/minecraft/src/TextureFX;>; -> Ljava/util/ArrayList<Laxe;>; @2134
+     INVOKESTATIC 0x00 0x71    INVOKESTATIC 0x02 0x95
+   string replace Lnet/minecraft/src/TextureFX; -> Laxe; @762
+   string replace Ljava/util/List<Lnet/minecraft/src/TextureFX;>; -> Ljava/util/List<Laxe;>; @800
+   string replace Ljava/util/ArrayList<Lnet/minecraft/src/TextureFX;>; -> Ljava/util/ArrayList<Laxe;>; @2514
   adding com/pclewis/mcpatcher/mod/TextureUtils$1.class for HD Textures
   adding com/pclewis/mcpatcher/mod/TextureUtils$2.class for HD Textures
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lavf; onChange()V@15
