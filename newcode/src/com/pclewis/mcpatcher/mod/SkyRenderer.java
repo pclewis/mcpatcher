@@ -41,7 +41,11 @@ public class SkyRenderer {
             active = false;
         } else {
             int worldType = MCPatcherUtils.getMinecraft().getWorld().worldProvider.worldType;
-            currentWorld = getWorldEntry(worldType);
+            WorldEntry newEntry = getWorldEntry(worldType);
+            if (newEntry != currentWorld && currentWorld != null) {
+                currentWorld.unloadTextures();
+            }
+            currentWorld = newEntry;
             active = currentWorld.active();
             if (active) {
                 SkyRenderer.renderEngine = renderEngine;
@@ -77,13 +81,6 @@ public class SkyRenderer {
             worldSkies.put(worldType, entry);
         }
         return entry;
-    }
-
-    private static void checkGLError() {
-        int error = GL11.glGetError();
-        if (error != 0) {
-            throw new RuntimeException("GL error: " + GLU.gluErrorString(error));
-        }
     }
 
     private static class WorldEntry {
@@ -135,13 +132,24 @@ public class SkyRenderer {
 
         void renderAll(Tessellator tessellator) {
             for (Layer layer : skies) {
-                layer.render(tessellator);
-                Layer.clearBlendingMethod();
+                layer.prepare();
+            }
+            for (Layer layer : skies) {
+                if (layer.brightness > 0.0f) {
+                    layer.render(tessellator);
+                    Layer.clearBlendingMethod();
+                }
             }
         }
 
         Layer getCelestialObject(String defaultTexture) {
             return objects.get(defaultTexture);
+        }
+
+        void unloadTextures() {
+            for (Layer layer : skies) {
+                TexturePackAPI.unloadTexture(layer.texture);
+            }
         }
     }
 
@@ -174,6 +182,8 @@ public class SkyRenderer {
         private double c;
 
         boolean valid;
+
+        float brightness;
 
         static Layer create(String prefix) {
             Properties properties = TexturePackAPI.getProperties(prefix + ".properties");
@@ -342,8 +352,8 @@ public class SkyRenderer {
             return a * Math.cos(x) + b * Math.sin(x) + c;
         }
 
-        boolean render(Tessellator tessellator) {
-            float brightness = rainStrength;
+        boolean prepare() {
+            brightness = rainStrength;
             if (fade) {
                 double x = normalize(worldTime, TICKS_PER_DAY, 0.0);
                 brightness *= (float) f(x);
@@ -356,7 +366,10 @@ public class SkyRenderer {
             if (brightness > 1.0f) {
                 brightness = 1.0f;
             }
+            return true;
+        }
 
+        boolean render(Tessellator tessellator) {
             renderEngine.bindTexture(renderEngine.getTexture(texture));
             setBlendingMethod(brightness);
 
