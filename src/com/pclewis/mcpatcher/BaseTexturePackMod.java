@@ -19,13 +19,14 @@ public class BaseTexturePackMod extends Mod {
         name = NAME;
         author = "MCPatcher";
         description = "Internal mod required by the patcher.";
-        version = "1.0";
+        version = "1.1";
 
         haveFolderTexturePacks = minecraftVersion.compareTo("12w08a") >= 0;
         haveITexturePack = minecraftVersion.compareTo("12w15a") >= 0;
         texturePackType = haveITexturePack ? "LITexturePack;" : "LTexturePackBase;";
 
         classMods.add(new MinecraftMod());
+        classMods.add(new RenderEngineMod());
         classMods.add(new TexturePackListMod());
         if (haveITexturePack) {
             classMods.add(new ITexturePackMod());
@@ -45,6 +46,8 @@ public class BaseTexturePackMod extends Mod {
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
+            final FieldRef texturePackList = new FieldRef(getDeobfClass(), "texturePackList", "LTexturePackList;");
+            final FieldRef renderEngine = new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;");
             final MethodRef startGame = new MethodRef(getDeobfClass(), "startGame", "()V");
             final MethodRef runGameLoop = new MethodRef(getDeobfClass(), "runGameLoop", "()V");
 
@@ -66,7 +69,8 @@ public class BaseTexturePackMod extends Mod {
                 }
             }.setMethod(runGameLoop));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackList", "LTexturePackList;")));
+            memberMappers.add(new FieldMapper(texturePackList));
+            memberMappers.add(new FieldMapper(renderEngine));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -109,6 +113,21 @@ public class BaseTexturePackMod extends Mod {
                     );
                 }
             }.targetMethod(runGameLoop));
+        }
+    }
+
+    private class RenderEngineMod extends BaseMod.RenderEngineMod {
+        RenderEngineMod() {
+            final MethodRef deleteTexture = new MethodRef(getDeobfClass(), "deleteTexture", "(I)V");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glDeleteTextures", "(Ljava/nio/IntBuffer;)V"))
+                    );
+                }
+            }.setMethod(deleteTexture));
         }
     }
 

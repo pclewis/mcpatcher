@@ -4,16 +4,26 @@ import net.minecraft.client.Minecraft;
 
 import java.awt.image.BufferedImage;
 
-abstract public class RenderEngine {
+public class RenderEngine {
     public TexturePackList texturePackList;
 
-    abstract public int getTexture(String s);
+    public int getTexture(String s) {
+        return -1;
+    }
 
-    abstract public void bindTexture(int texture);
+    public void bindTexture(int texture) {
+    }
 
-    abstract public void createTextureFromBytes(int[] rgb, int width, int height, int texture);
+    public void deleteTexture(int texture) {
+    }
 
-    abstract public int allocateAndSetupTexture(BufferedImage image);
+    public void createTextureFromBytes(int[] rgb, int width, int height, int texture) {
+    }
 
-    abstract public void reloadTextures(Minecraft minecraft);
+    public int allocateAndSetupTexture(BufferedImage image) {
+        return -1;
+    }
+
+    public void reloadTextures(Minecraft minecraft) {
+    }
 }
