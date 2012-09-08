@@ -199,11 +199,13 @@ public class TexturePackAPI {
     }
 
     protected boolean getPropertiesImpl(String s, Properties properties) {
-        InputStream input = getInputStream(s);
-        if (input != null && properties != null) {
+        if (properties != null) {
+            InputStream input = getInputStream(s);
             try {
-                properties.load(input);
-                return true;
+                if (input != null) {
+                    properties.load(input);
+                    return true;
+                }
             } catch (IOException e) {
                 MCPatcherUtils.error("could not read %s");
                 e.printStackTrace();
