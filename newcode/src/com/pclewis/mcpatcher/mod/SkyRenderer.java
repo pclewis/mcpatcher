@@ -2,7 +2,6 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
-import net.minecraft.client.Minecraft;
 import net.minecraft.src.RenderEngine;
 import net.minecraft.src.Tessellator;
 import net.minecraft.src.World;
@@ -29,17 +28,19 @@ public class SkyRenderer {
             @Override
             protected void onChange() {
                 worldSkies.clear();
-                getWorldEntry(0);
+                World world = MCPatcherUtils.getMinecraft().getWorld();
+                if (world != null) {
+                    getWorldEntry(world.worldProvider.worldType);
+                }
             }
         });
     }
 
     public static void setup(World world, RenderEngine renderEngine, float partialTick, float celestialAngle) {
-        Minecraft minecraft = MCPatcherUtils.getMinecraft();
         if (TexturePackAPI.isDefaultTexturePack()) {
             active = false;
         } else {
-            int worldType = minecraft.getWorld().worldProvider.worldType;
+            int worldType = MCPatcherUtils.getMinecraft().getWorld().worldProvider.worldType;
             currentWorld = getWorldEntry(worldType);
             active = currentWorld.active();
             if (active) {
@@ -53,18 +54,14 @@ public class SkyRenderer {
 
     public static void renderAll() {
         if (active) {
-            Tessellator tessellator = Tessellator.instance;
-            for (Layer layer : currentWorld.skies) {
-                layer.render(tessellator);
-                Layer.clearBlendingMethod();
-            }
+            currentWorld.renderAll(Tessellator.instance);
         }
     }
 
     public static String setupCelestialObject(String defaultTexture) {
         if (active) {
             Layer.clearBlendingMethod();
-            Layer layer = currentWorld.objects.get(defaultTexture);
+            Layer layer = currentWorld.getCelestialObject(defaultTexture);
             if (layer != null) {
                 layer.setBlendingMethod(rainStrength);
                 return layer.texture;
@@ -76,42 +73,10 @@ public class SkyRenderer {
     private static WorldEntry getWorldEntry(int worldType) {
         WorldEntry entry = worldSkies.get(worldType);
         if (entry == null) {
-            entry = new WorldEntry();
-            loadSkies(worldType, entry);
-            loadCelestialObject(worldType, entry, "sun", "/terrain/sun.png");
-            loadCelestialObject(worldType, entry, "moon", "/terrain/moon_phases.png");
+            entry = new WorldEntry(worldType);
             worldSkies.put(worldType, entry);
         }
         return entry;
-    }
-
-    private static void loadSkies(int worldType, WorldEntry entry) {
-        for (int i = -1; ; i++) {
-            String prefix = "/terrain/sky" + worldType + "/sky" + (i < 0 ? "" : "" + i);
-            Layer layer = Layer.create(prefix);
-            if (layer == null) {
-                if (i > 0) {
-                    break;
-                }
-            } else if (layer.valid) {
-                MCPatcherUtils.info("loaded %s.properties", prefix);
-                entry.skies.add(layer);
-            }
-        }
-    }
-
-    private static void loadCelestialObject(int worldType, WorldEntry entry, String objName, String textureName) {
-        String prefix = "/terrain/sky" + worldType + "/" + objName;
-        Properties properties = TexturePackAPI.getProperties(prefix + ".properties");
-        if (properties != null) {
-            properties.setProperty("fade", "false");
-            properties.setProperty("rotate", "true");
-            Layer layer = new Layer(prefix, properties);
-            if (layer.valid) {
-                MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
-                entry.objects.put(textureName, layer);
-            }
-        }
     }
 
     private static void checkGLError() {
@@ -122,11 +87,61 @@ public class SkyRenderer {
     }
 
     private static class WorldEntry {
-        ArrayList<Layer> skies = new ArrayList<Layer>();
-        HashMap<String, Layer> objects = new HashMap<String, Layer>();
+        private final int worldType;
+        private final ArrayList<Layer> skies;
+        private final HashMap<String, Layer> objects;
+
+        WorldEntry(int worldType) {
+            this.worldType = worldType;
+            skies = new ArrayList<Layer>();
+            objects = new HashMap<String, Layer>();
+            loadSkies();
+            loadCelestialObject("sun", "/terrain/sun.png");
+            loadCelestialObject("moon", "/terrain/moon_phases.png");
+        }
+
+        private void loadSkies() {
+            for (int i = -1; ; i++) {
+                String prefix = "/terrain/sky" + worldType + "/sky" + (i < 0 ? "" : "" + i);
+                Layer layer = Layer.create(prefix);
+                if (layer == null) {
+                    if (i > 0) {
+                        break;
+                    }
+                } else if (layer.valid) {
+                    MCPatcherUtils.info("loaded %s.properties", prefix);
+                    skies.add(layer);
+                }
+            }
+        }
+
+        private void loadCelestialObject(String objName, String textureName) {
+            String prefix = "/terrain/sky" + worldType + "/" + objName;
+            Properties properties = TexturePackAPI.getProperties(prefix + ".properties");
+            if (properties != null) {
+                properties.setProperty("fade", "false");
+                properties.setProperty("rotate", "true");
+                Layer layer = new Layer(prefix, properties);
+                if (layer.valid) {
+                    MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
+                    objects.put(textureName, layer);
+                }
+            }
+        }
 
         boolean active() {
             return !skies.isEmpty() || !objects.isEmpty();
+        }
+
+        void renderAll(Tessellator tessellator) {
+            for (Layer layer : skies) {
+                layer.render(tessellator);
+                Layer.clearBlendingMethod();
+            }
+        }
+
+        Layer getCelestialObject(String defaultTexture) {
+            return objects.get(defaultTexture);
         }
     }
 
@@ -335,6 +350,7 @@ public class SkyRenderer {
             }
 
             if (brightness <= 0.0f) {
+                TexturePackAPI.unloadTexture(texture);
                 return false;
             }
             if (brightness > 1.0f) {
