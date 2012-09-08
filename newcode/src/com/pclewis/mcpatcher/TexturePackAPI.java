@@ -6,17 +6,30 @@ import net.minecraft.src.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Properties;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class TexturePackAPI {
     public static TexturePackAPI instance = new TexturePackAPI();
 
+    private static final ArrayList<Field> textureMapFields = new ArrayList<Field>();
+
     private static TexturePackBase texturePack;
+
+    static {
+        try {
+            for (Field field : RenderEngine.class.getDeclaredFields()) {
+                if (HashMap.class.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    textureMapFields.add(field);
+                }
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
 
     public static TexturePackBase getTexturePack() {
         return texturePack;
@@ -115,6 +128,45 @@ public class TexturePackAPI {
 
         Collections.sort(resources);
         return resources.toArray(new String[resources.size()]);
+    }
+
+    public static int getTextureIfLoaded(String s) {
+        RenderEngine renderEngine = MCPatcherUtils.getMinecraft().renderEngine;
+        for (Field field : textureMapFields) {
+            try {
+                HashMap map = (HashMap) field.get(renderEngine);
+                if (map != null) {
+                    Object value = map.get(s);
+                    if (value instanceof Integer) {
+                        return (Integer) value;
+                    }
+                }
+            } catch (IllegalAccessException e) {
+            }
+        }
+        return -1;
+    }
+
+    public static boolean isTextureLoaded(String s) {
+        return getTextureIfLoaded(s) >= 0;
+    }
+
+    public static int unloadTexture(String s) {
+        int texture = getTextureIfLoaded(s);
+        if (texture >= 0) {
+            RenderEngine renderEngine = MCPatcherUtils.getMinecraft().renderEngine;
+            renderEngine.deleteTexture(texture);
+            for (Field field : textureMapFields) {
+                try {
+                    HashMap map = (HashMap) field.get(renderEngine);
+                    if (map != null) {
+                        map.remove(s);
+                    }
+                } catch (IllegalAccessException e) {
+                }
+            }
+        }
+        return texture;
     }
 
     protected InputStream getInputStreamImpl(String s) {
