@@ -18,6 +18,7 @@ public class Minecraft {
     public RenderGlobal renderGlobal;
     public GuiScreen currentScreen;
     public Timer timer;
+    public Profiler mcProfiler;
 
     public static File getMinecraftDir() {
         return null;

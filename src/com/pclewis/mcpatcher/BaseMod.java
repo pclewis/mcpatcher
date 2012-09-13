@@ -831,4 +831,35 @@ public final class BaseMod extends Mod {
             }.addXref(1, new FieldRef(getDeobfClass(), field, descriptor)));
         }
     }
+
+    /**
+     * Maps Profiler class and start/endSection methods.
+     */
+    public static class ProfilerMod extends ClassMod {
+        public ProfilerMod() {
+            classSignatures.add(new ConstSignature("[UNKNOWN]"));
+            classSignatures.add(new ConstSignature(100.0));
+
+            final MethodRef startSection = new MethodRef(getDeobfClass(), "startSection", "(Ljava/lang/String;)V");
+            final MethodRef endSection = new MethodRef(getDeobfClass(), "endSection", "()V");
+            final MethodRef endStartSection = new MethodRef(getDeobfClass(), "endStartSection", "(Ljava/lang/String;)V");
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        ALOAD_0,
+                        ALOAD_1,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                    );
+                }
+            }
+                .setMethod(endStartSection)
+                .addXref(1, endSection)
+                .addXref(2, startSection)
+            );
+        }
+    }
 }
