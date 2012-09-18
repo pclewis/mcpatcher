@@ -25,6 +25,9 @@ public class CustomColors extends Mod {
     private final boolean haveNightVision;
     private final MethodRef getColorFromDamage;
     private final int getColorFromDamageVer;
+    private final boolean haveArmorDye;
+
+    private static final FieldRef fleeceColorTable = new FieldRef("EntitySheep", "fleeceColorTable", "[[F");
 
     public CustomColors(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.CUSTOM_COLORS;
@@ -51,6 +54,7 @@ public class CustomColors extends Mod {
             getColorFromDamage = new MethodRef("Item", "getColorFromDamage", "(I)I");
             getColorFromDamageVer = 1;
         }
+        haveArmorDye = minecraftVersion.compareTo("12w37a") >= 0;
 
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 4") < 0) {
             addError("Requires Minecraft Beta 1.9 or newer.");
@@ -112,6 +116,12 @@ public class CustomColors extends Mod {
 
         classMods.add(new ItemDyeMod());
         classMods.add(new EntitySheepMod());
+
+        if (haveArmorDye) {
+            classMods.add(new ItemArmorMod());
+            classMods.add(new RenderWolfMod());
+            classMods.add(new RecipesDyedArmorMod());
+        }
 
         if (haveSpawnerEggs) {
             classMods.add(new EntityListMod());
@@ -3606,10 +3616,39 @@ public class CustomColors extends Mod {
         }
     }
 
+    private class ItemArmorMod extends ClassMod {
+        private final int DEFAULT_LEATHER_COLOR = 0xa06540;
+
+        ItemArmorMod() {
+            classSignatures.add(new ConstSignature("display"));
+            classSignatures.add(new ConstSignature("color"));
+            classSignatures.add(new ConstSignature(DEFAULT_LEATHER_COLOR));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override default leather armor color";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(DEFAULT_LEATHER_COLOR)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "undyedLeatherColor", "I"))
+                    );
+                }
+            });
+        }
+    }
+
     private class EntitySheepMod extends ClassMod {
         EntitySheepMod() {
-            final FieldRef fleeceColorTable = new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F");
-
             classSignatures.add(new ConstSignature("/mob/sheep.png"));
             classSignatures.add(new OrSignature(
                 new ConstSignature("mob.sheep"),
@@ -3620,6 +3659,105 @@ public class CustomColors extends Mod {
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
+        }
+    }
+
+    private class RenderWolfMod extends ClassMod {
+        RenderWolfMod() {
+            final MethodRef glColor3f = new MethodRef(MCPatcherUtils.GL11_CLASS, "glColor3f", "(FFF)V");
+            final FieldRef collarColors = new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "collarColors", "[[F");
+
+            parentClass = "RenderLiving";
+
+            classSignatures.add(new ConstSignature("/mob/wolf_collar.png"));
+            classSignatures.add(new ConstSignature(glColor3f));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override wolf collar colors";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(GETSTATIC, fleeceColorTable)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, collarColors)
+                    );
+                }
+            });
+        }
+    }
+
+    private class RecipesDyedArmorMod extends ClassMod {
+        RecipesDyedArmorMod() {
+            final FieldRef armorColors = new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "armorColors", "[[F");
+
+            classSignatures.add(new ConstSignature(255.0f));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // var7 = (int)((float)var7 * var10 / var11);
+                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        I2F,
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FMUL,
+                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FDIV,
+                        F2I,
+                        ISTORE, BinaryRegex.backReference(1),
+
+                        // var8 = (int)((float)var8 * var10 / var11);
+                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        I2F,
+                        FLOAD, BinaryRegex.backReference(2),
+                        FMUL,
+                        FLOAD, BinaryRegex.backReference(3),
+                        FDIV,
+                        F2I,
+                        ISTORE, BinaryRegex.backReference(4),
+
+                        // var9 = (int)((float)var9 * var10 / var11);
+                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        I2F,
+                        FLOAD, BinaryRegex.backReference(2),
+                        FMUL,
+                        FLOAD, BinaryRegex.backReference(3),
+                        FDIV,
+                        F2I,
+                        ISTORE, BinaryRegex.backReference(5)
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override armor dye colors";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(GETSTATIC, fleeceColorTable)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, armorColors)
+                    );
+                }
+            });
         }
     }
 
