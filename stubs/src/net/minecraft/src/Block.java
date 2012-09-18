@@ -14,6 +14,10 @@ public class Block {
         return false;
     }
 
+    public int getRenderBlockPass() {
+        return 0;
+    }
+
     public float blockStrength(EntityPlayer thePlayer) {
         return 0;
     }

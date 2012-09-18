@@ -1,158 +1,52 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.BadBytecode;
 
 import java.io.IOException;
 
 import static javassist.bytecode.Opcode.*;
 
 public class BetterGlass extends Mod {
+    private static final int EXTRA_PASSES = 2;
+
     private static final MethodRef glEnable = new MethodRef(MCPatcherUtils.GL11_CLASS, "glEnable", "(I)V");
+    private static final MethodRef glDisable = new MethodRef(MCPatcherUtils.GL11_CLASS, "glDisable", "(I)V");
+    private static final MethodRef glDepthMask = new MethodRef(MCPatcherUtils.GL11_CLASS, "glDepthMask", "(Z)V");
+    private static final MethodRef glShadeModel = new MethodRef(MCPatcherUtils.GL11_CLASS, "glShadeModel", "(I)V");
+    private static final MethodRef glCallList = new MethodRef(MCPatcherUtils.GL11_CLASS, "glCallList", "(I)V");
     private static final MethodRef getRenderBlockPass = new MethodRef("Block", "getRenderBlockPass", "()I");
+    private static final MethodRef enableLightmap = new MethodRef("EntityRenderer", "enableLightmap", "(D)V");
+    private static final MethodRef disableLightmap = new MethodRef("EntityRenderer", "disableLightmap", "(D)V");
 
     public BetterGlass(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.BETTER_GLASS;
         author = "MCPatcher";
         description = "Enables partial transparency for glass blocks.";
-        version = "1.0";
-        defaultEnabled = false;
+        version = "1.9";
 
-        classMods.add(new BlockMod());
-        classMods.add(new BlockBreakableMod());
-        classMods.add(new BlockGlassMod());
-        classMods.add(new BlockPaneMod());
-        classMods.add(new RenderBlocksMod());
+        addDependency(BaseTexturePackMod.NAME);
+        addDependency(MCPatcherUtils.CONNECTED_TEXTURES);
+
+        classMods.add(new BaseMod.MinecraftMod());
+        classMods.add(new BaseMod.BlockMod());
         classMods.add(new WorldRendererMod());
         classMods.add(new EntityRendererMod());
         classMods.add(new RenderGlobalMod());
-        classMods.add(new ItemRendererMod());
-        classMods.add(new RenderItemMod());
-    }
+        classMods.add(new RenderBlocksMod());
 
-    private class BlockMod extends BaseMod.BlockMod {
-        BlockMod() {
-            addBlockSignature("BlockGlass");
-            addBlockSignature("BlockPane");
-        }
-    }
-
-    private class BlockBreakableMod extends ClassMod {
-        BlockBreakableMod() {
-            parentClass = "Block";
-            prerequisiteClasses.add("BlockGlass");
-        }
-    }
-
-    private class BlockGlassMod extends ClassMod {
-        BlockGlassMod() {
-            parentClass = "BlockBreakable";
-            prerequisiteClasses.add("Block");
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "change glass block render pass";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    if (getMethodInfo().getDescriptor().equals("()I")) {
-                        return buildExpression(
-                            ICONST_0
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        ICONST_2
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "getRenderBlockPass", "()I")));
-        }
-    }
-
-    private class BlockPaneMod extends ClassMod {
-        BlockPaneMod() {
-            parentClass = "Block";
-            prerequisiteClasses.add(parentClass);
-
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "getRenderBlockPass", "()I")) {
-                @Override
-                public byte[] generateMethod() throws BadBytecode, IOException {
-                    return buildCode(
-                        ICONST_2,
-                        IRETURN
-                    );
-                }
-            });
-        }
-    }
-
-    private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
-        RenderBlocksMod() {
-            final MethodRef renderBlockAsItem = new MethodRef(getDeobfClass(), "renderBlockAsItem", "(LBlock;IF)V");
-            final MethodRef getRenderType = new MethodRef("Block", "getRenderType", "()I");
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        // k = block.getRenderType();
-                        ALOAD_1,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
-
-                        // if (k == 0 || k == 16)
-                        ILOAD, BinaryRegex.backReference(2),
-                        IFEQ, BinaryRegex.any(2),
-                        BinaryRegex.any(0, 20),
-                        ILOAD, BinaryRegex.backReference(2),
-                        push(16),
-                        BytecodeMatcher.IF_ICMPNE_or_IF_ICMPEQ, BinaryRegex.any(2)
-                    );
-                }
-            }
-                .setMethod(renderBlockAsItem)
-                .addXref(1, getRenderType)
-            );
-
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderBlockPane", "(LBlockPane;III)Z")));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "enable culling on glass panes";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BinaryRegex.begin()
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        push(2884), /*GL_CULL_FACE*/
-                        reference(INVOKESTATIC, glEnable)
-                    );
-                }
-            }.targetMethod(new MethodRef(getDeobfClass(), "renderBlockPane", "(LBlockPane;III)Z")));
-        }
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_CLASS + "$1"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_CLASS + "$2"));
     }
 
     private class WorldRendererMod extends ClassMod {
+        private int loopRegister;
+
         WorldRendererMod() {
             final MethodRef updateRenderer = new MethodRef(getDeobfClass(), "updateRenderer", "()V");
+            final FieldRef glRenderList = new FieldRef(getDeobfClass(), "glRenderList", "I");
             final FieldRef skipRenderPass = new FieldRef(getDeobfClass(), "skipRenderPass", "[Z");
-
-            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
+            final MethodRef startPass = new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "start", "(I)V");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -172,7 +66,7 @@ public class BetterGlass extends Mod {
                         IF_ICMPEQ, BinaryRegex.any(2),
 
                         // flag = true;
-                        ICONST_1,
+                        push(1),
                         ISTORE, BinaryRegex.any()
                     );
                 }
@@ -181,22 +75,27 @@ public class BetterGlass extends Mod {
                 .addXref(1, getRenderBlockPass)
             );
 
-            memberMappers.add(new FieldMapper(skipRenderPass));
-
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "increase render passes from 2 to 3 (init)";
-                }
-
+            classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        push(2),
+                        IADD,
+                        reference(INVOKESTATIC, glCallList)
+                    );
+                }
+            }.addXref(1, glRenderList));
+
+            memberMappers.add(new FieldMapper(skipRenderPass));
+
+            patches.add(new RenderPassPatch("init") {
+                @Override
+                protected String getPrefix() {
                     if (getMethodInfo().isConstructor()) {
                         return buildExpression(
-                            ALOAD_0,
-                            ICONST_2,
-                            NEWARRAY, T_BOOLEAN,
-                            reference(PUTFIELD, skipRenderPass)
+                            ALOAD_0
                         );
                     } else {
                         return null;
@@ -204,72 +103,131 @@ public class BetterGlass extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    return buildCode(
-                        ALOAD_0,
-                        ICONST_3,
+                protected String getSuffix() {
+                    return buildExpression(
                         NEWARRAY, T_BOOLEAN,
                         reference(PUTFIELD, skipRenderPass)
                     );
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            patches.add(new RenderPassPatch("loop") {
+                @Override
+                protected String getPrefix() {
+                    return buildExpression(
+                        BytecodeMatcher.anyILOAD
+                    );
+                }
+
+                @Override
+                protected String getSuffix() {
+                    return buildExpression(
+                        BytecodeMatcher.IF_ICMPLT_or_IF_ICMPGE, BinaryRegex.any(2)
+                    );
+                }
+            });
+
+            patches.add(new RenderPassPatch("occlusion") {
+                @Override
+                protected String getPrefix() {
+                    return buildExpression(
+                        ALOAD_0,
+                        reference(GETFIELD, glRenderList)
+                    );
+                }
+
+                @Override
+                protected String getSuffix() {
+                    return buildExpression(
+                        IADD
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
-                    return "increase render passes from 2 to 3 (loop)";
+                    return "pre render pass";
                 }
 
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
-                        ICONST_2,
-                        BinaryRegex.capture(BinaryRegex.build(
-                            BinaryRegex.subset(new byte[]{(byte) IF_ICMPLT, (byte) IF_ICMPGE}, true),
-                            BinaryRegex.any(2)
-                        ))
+                        push(0),
+                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        push(0),
+                        ISTORE, BinaryRegex.any(),
+                        push(0),
+                        ISTORE, BinaryRegex.any()
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    loopRegister = (getCaptureGroup(1)[0] & 0xff) - 1;
+                    Logger.log(Logger.LOG_CONST, "loop register %d", loopRegister);
+                    return buildCode(
+                        ILOAD, loopRegister,
+                        reference(INVOKESTATIC, startPass)
+                    );
+                }
+            }.targetMethod(updateRenderer));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "prevent early loop exit";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // if (!var12) {
+                        ILOAD, loopRegister + 1,
+                        IFNE, BinaryRegex.any(2),
+
+                        // break;
+                        GOTO, BinaryRegex.any(2)
+
+                        // }
                     );
                 }
 
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        getCaptureGroup(1),
-                        ICONST_3,
-                        getCaptureGroup(2)
                     );
                 }
-            });
+            }.targetMethod(updateRenderer));
 
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "increase render passes from 2 to 3 (&&)";
+                    return "increase render passes from 2 to " + (2 + EXTRA_PASSES) + " (&&)";
                 }
 
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        // return skipRenderPass[0] && skipRenderPass[1]; 
+                        // return skipRenderPass[0] && skipRenderPass[1];
                         ALOAD_0,
                         reference(GETFIELD, skipRenderPass),
-                        ICONST_0,
+                        push(0),
                         BALOAD,
                         IFEQ, BinaryRegex.any(2),
                         ALOAD_0,
                         reference(GETFIELD, skipRenderPass),
-                        ICONST_1,
+                        push(1),
                         BALOAD,
                         IFEQ, BinaryRegex.any(2),
-                        ICONST_1,
+                        push(1),
                         BinaryRegex.or(
                             BinaryRegex.build(IRETURN),
                             BinaryRegex.build(
                                 GOTO, BinaryRegex.any(2)
                             )
                         ),
-                        ICONST_0,
+                        push(0),
                         IRETURN
                     );
                 }
@@ -277,42 +235,76 @@ public class BetterGlass extends Mod {
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // return skipRenderPass[0] && skipRenderPass[1] && skipRenderPass[2]; 
+                        // return RenderPass.skipAllRenderPasses(skipRenderPass);
                         ALOAD_0,
                         reference(GETFIELD, skipRenderPass),
-                        ICONST_0,
-                        BALOAD,
-                        IFEQ, branch("A"),
-                        ALOAD_0,
-                        reference(GETFIELD, skipRenderPass),
-                        ICONST_1,
-                        BALOAD,
-                        IFEQ, branch("A"),
-                        ALOAD_0,
-                        reference(GETFIELD, skipRenderPass),
-                        ICONST_2,
-                        BALOAD,
-                        IFEQ, branch("A"),
-                        ICONST_1,
-                        IRETURN,
-                        label("A"),
-                        ICONST_0,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "skipAllRenderPasses", "([Z)Z")),
                         IRETURN
                     );
                 }
             });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "set up extra render pass";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKEVIRTUAL, getRenderBlockPass)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "getBlockRenderPass", "(LBlock;)I"))
+                    );
+                }
+            }.targetMethod(updateRenderer));
+        }
+
+        abstract private class RenderPassPatch extends BytecodePatch {
+            private final String tag;
+
+            RenderPassPatch(String tag) {
+                this.tag = tag;
+            }
+
+            @Override
+            public String getDescription() {
+                return "increase render passes from 2 to " + (2 + EXTRA_PASSES) + " (" + tag + ")";
+            }
+
+            @Override
+            public final String getMatchExpression() {
+                return buildExpression(
+                    BinaryRegex.lookBehind(getPrefix(), true),
+                    push(2),
+                    BinaryRegex.lookAhead(getSuffix(), true)
+                );
+            }
+
+            @Override
+            public final byte[] getReplacementBytes() throws IOException {
+                return buildCode(
+                    push(2 + EXTRA_PASSES)
+                );
+            }
+
+            abstract protected String getPrefix();
+
+            abstract protected String getSuffix();
         }
     }
 
     private class EntityRendererMod extends ClassMod {
-        final MethodRef renderWorld = new MethodRef(getDeobfClass(), "renderWorld", "(FJ)V");
-        final FieldRef loop = new FieldRef(getDeobfClass(), "betterGrassLoop", "I");
-
         EntityRendererMod() {
-            final MethodRef glBlendFunc = new MethodRef(MCPatcherUtils.GL11_CLASS, "glBlendFunc", "(II)V");
-            final MethodRef glDisable = new MethodRef(MCPatcherUtils.GL11_CLASS, "glDisable", "(I)V");
+            final MethodRef renderWorld = new MethodRef(getDeobfClass(), "renderWorld", "(FJ)V");
             final MethodRef sortAndRender = new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I");
-            final MethodRef renderAllRenderLists = new MethodRef("RenderGlobal", "renderAllRenderLists", "(ID)V");
+            final MethodRef doRenderPass = new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "doRenderPass", "(LRenderGlobal;LEntityLiving;ID)V");
 
             classSignatures.add(new ConstSignature("/terrain.png"));
             classSignatures.add(new ConstSignature("/environment/snow.png"));
@@ -322,118 +314,131 @@ public class BetterGlass extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        push(770),
-                        push(771),
-                        reference(INVOKESTATIC, glBlendFunc)
+                        ALOAD, 5,
+                        ALOAD, 4,
+                        push(1),
+                        FLOAD_1,
+                        F2D,
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        ISTORE, BinaryRegex.any()
                     );
                 }
-            }.setMethod(renderWorld));
+            }
+                .setMethod(renderWorld)
+                .addXref(1, sortAndRender)
+            );
 
-            patches.add(new AddFieldPatch(loop));
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(3553), // GL_TEXTURE_2D,
+                        reference(INVOKESTATIC, glDisable)
+                    );
+                }
+            }.setMethod(disableLightmap));
 
-            addRenderPassPatch(renderAllRenderLists);
-            addRenderPassPatch(sortAndRender);
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(3553), // GL_TEXTURE_2D,
+                        reference(INVOKESTATIC, glEnable)
+                    );
+                }
+            }.setMethod(enableLightmap));
 
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
-                    return "add new render pass";
+                    return "set gl shade model";
                 }
 
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(BinaryRegex.build(
-                            // GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                            push(770),
-                            push(771),
-                            reference(INVOKESTATIC, glBlendFunc)
-                        )),
+                        // if (...)
+                        IFEQ, BinaryRegex.any(2),
 
-                        // ...
-                        BinaryRegex.capture(BinaryRegex.build(
-                            BinaryRegex.any(0, 1000)
-                        )),
-
-                        // setupFog(f);
-                        // GL11.glDisable(GL_FOG);
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD_0,
-                            FLOAD_1,
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                            push(2912),
-                            reference(INVOKESTATIC, glDisable)
-                        ))
+                        // GL11.glShadeModel(GL11.GL_SMOOTH);
+                        push(7425),
+                        reference(INVOKESTATIC, glShadeModel)
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        getCaptureGroup(1),
-
-                        // loop = 1;
-                        ALOAD_0,
-                        ICONST_1,
-                        reference(PUTFIELD, loop),
-
-                        // if (loop >= 3) goto B;
-                        label("A"),
-                        ALOAD_0,
-                        reference(GETFIELD, loop),
-                        ICONST_3,
-                        IF_ICMPGE, branch("B"),
-
-                        // ...
-                        getCaptureGroup(2),
-
-                        // loop++;
-                        ALOAD_0,
-                        DUP,
-                        reference(GETFIELD, loop),
-                        ICONST_1,
-                        IADD,
-                        reference(PUTFIELD, loop),
-
-                        GOTO, branch("A"),
-
-                        label("B"),
-                        getCaptureGroup(3)
+                        // if (RenderPass.setAmbientOcclusion(...))
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "setAmbientOcclusion", "(Z)Z"))
                     );
                 }
-            }.targetMethod(renderWorld));
-        }
+            });
 
-        private void addRenderPassPatch(final MethodRef method) {
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
-                    return "render pass 1 -> i (" + method.getName() + ")";
+                    return "do extra render pass 2";
                 }
 
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD, 5,
-                            BinaryRegex.any(0, 2)
-                        )),
-                        ICONST_1,
-                        BinaryRegex.capture(BinaryRegex.build(
-                            FLOAD_1,
-                            F2D,
-                            reference(INVOKEVIRTUAL, method)
-                        ))
+                        ALOAD, 5,
+                        ALOAD, 4,
+                        push(0),
+                        FLOAD_1,
+                        F2D,
+                        reference(INVOKEVIRTUAL, sortAndRender),
+                        POP
                     );
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        getCaptureGroup(1),
-                        ALOAD_0,
-                        reference(GETFIELD, loop),
-                        getCaptureGroup(2)
+                        ALOAD, 5,
+                        ALOAD, 4,
+                        push(2),
+                        FLOAD_1,
+                        F2D,
+                        reference(INVOKESTATIC, doRenderPass)
+                    );
+                }
+            });
+
+            patches.add(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "do extra render pass 3";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // GL11.glDepthMask(true);
+                        push(1),
+                        reference(INVOKESTATIC, glDepthMask),
+
+                        // GL11.glEnable(GL11.GL_CULL_FACE);
+                        push(2884), // GL_CULL_FACE
+                        reference(INVOKESTATIC, glEnable),
+
+                        // GL11.glDisable(GL11.GL_BLEND);
+                        push(3042), // GL_BLEND
+                        reference(INVOKESTATIC, glDisable)
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        ALOAD, 5,
+                        ALOAD, 4,
+                        push(3),
+                        FLOAD_1,
+                        F2D,
+                        reference(INVOKESTATIC, doRenderPass)
                     );
                 }
             }.targetMethod(renderWorld));
@@ -442,8 +447,10 @@ public class BetterGlass extends Mod {
 
     private class RenderGlobalMod extends ClassMod {
         RenderGlobalMod() {
-            final MethodRef sortAndRender = new MethodRef(getDeobfClass(), "sortAndRender", "(LEntityLiving;ID)I");
+            final FieldRef glRenderListBase = new FieldRef(getDeobfClass(), "glRenderListBase", "I");
+            final MethodRef loadRenderers = new MethodRef(getDeobfClass(), "loadRenderers", "()V");
             final MethodRef renderAllRenderLists = new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V");
+            final MethodRef generateDisplayLists = new MethodRef("GLAllocation", "generateDisplayLists", "(I)I");
 
             classSignatures.add(new ConstSignature("smoke"));
             classSignatures.add(new ConstSignature("/environment/clouds.png"));
@@ -451,231 +458,186 @@ public class BetterGlass extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().getDescriptor().equals("()V")) {
-                        return null;
-                    } else {
+                    if (getMethodInfo().isConstructor()) {
                         return buildExpression(
-                            reference(INVOKESTATIC, new MethodRef("java/util/Arrays", "sort", "([Ljava/lang/Object;Ljava/util/Comparator;)V"))
+                            push(3),
+                            IMUL,
+                            BytecodeMatcher.captureReference(INVOKESTATIC),
+                            BytecodeMatcher.captureReference(PUTFIELD)
                         );
+                    } else {
+                        return null;
                     }
                 }
-            }.setMethod(sortAndRender));
-
-            memberMappers.add(new MethodMapper(renderAllRenderLists));
-        }
-    }
-
-    private class ItemRendererMod extends ClassMod {
-        ItemRendererMod() {
-            final MethodRef renderItem = new MethodRef(getDeobfClass(), "renderItem", "(LEntityLiving;LItemStack;I)V");
-            final FieldRef mc = new FieldRef(getDeobfClass(), "mc", "LMinecraft;");
-            final FieldRef renderEngine = new FieldRef("Minecraft", "renderEngine", "LRenderEngine;");
-            final MethodRef getTexture = new MethodRef("RenderEngine", "getTexture", "(Ljava/lang/String;)I");
-            final FieldRef itemID = new FieldRef("ItemStack", "itemID", "I");
-            final MethodRef glBindTexture = new MethodRef(MCPatcherUtils.GL11_CLASS, "glBindTexture", "(II)V");
-
-            classSignatures.add(new ConstSignature("/terrain.png"));
-            classSignatures.add(new ConstSignature("/gui/items.png"));
-            classSignatures.add(new ConstSignature("%blur%/misc/glint.png"));
-            classSignatures.add(new ConstSignature("/misc/water.png"));
+            }
+                .addXref(1, generateDisplayLists)
+                .addXref(2, glRenderListBase)
+            );
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        push(3553), // GL_TEXTURE_2D
+                        BytecodeMatcher.anyILOAD,
+                        push(16),
+                        IDIV,
+                        push(1),
+                        IADD
+                    );
+                }
+            }.setMethod(loadRenderers));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // var4 = this.allRenderLists;
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        push("/terrain.png"),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        reference(INVOKESTATIC, glBindTexture)
+                        BytecodeMatcher.anyReference(GETFIELD),
+                        ASTORE, BinaryRegex.capture(BinaryRegex.any()),
+
+                        // var5 = var4.length;
+                        ALOAD, BinaryRegex.backReference(1),
+                        ARRAYLENGTH,
+                        ISTORE, BinaryRegex.any()
                     );
                 }
-            }
-                .setMethod(renderItem)
-                .addXref(1, mc)
-                .addXref(2, renderEngine)
-                .addXref(3, getTexture)
-            );
+            }.setMethod(renderAllRenderLists));
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        BytecodeMatcher.anyReference(GETSTATIC),
-                        ALOAD_2,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        AALOAD
-                    );
-                }
-            }
-                .setMethod(renderItem)
-                .addXref(1, itemID)
-            );
-
-            patches.add(new BytecodePatch.InsertBefore() {
+            patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "enable alpha transparency for held items";
+                    return "increase gl render lists per chunk from 3 to " + (3 + EXTRA_PASSES) + " (init)";
                 }
 
                 @Override
                 public String getMatchExpression() {
-                    return buildExpression(
-                        push(3553), // GL_TEXTURE_2D
-                        ALOAD_0,
-                        reference(GETFIELD, mc),
-                        reference(GETFIELD, renderEngine),
-                        push("/terrain.png"),
-                        reference(INVOKEVIRTUAL, getTexture),
-                        reference(INVOKESTATIC, glBindTexture)
-                    );
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            push(3),
+                            BinaryRegex.lookAhead(BinaryRegex.build(
+                                IMUL,
+                                reference(INVOKESTATIC, generateDisplayLists)
+                            ), true)
+                        );
+                    } else {
+                        return null;
+                    }
                 }
 
                 @Override
-                public byte[] getInsertBytes() throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // if (Block.blocksList[itemstack.itemID].getRenderBlockPass() != 0) {
-                        reference(GETSTATIC, new FieldRef("Block", "blocksList", "[LBlock;")),
-                        ALOAD_2,
-                        reference(GETFIELD, itemID),
-                        AALOAD,
-                        reference(INVOKEVIRTUAL, getRenderBlockPass),
-                        IFEQ, branch("A"),
-
-                        // GL11.glEnable(3042 /*GL_BLEND*/);
-                        push(3042), // GL_BLEND
-                        reference(INVOKESTATIC, glEnable),
-
-                        // }
-                        label("A")
+                        push(3 + EXTRA_PASSES)
                     );
                 }
             });
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "increase gl render lists per chunk from 3 to " + (3 + EXTRA_PASSES) + " (loop)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        IINC, BinaryRegex.capture(BinaryRegex.any()), 3
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        IINC, getCaptureGroup(1), 3 + EXTRA_PASSES
+                    );
+                }
+            }.targetMethod(loadRenderers));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "disable lightmap on render pass 3";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // mc.entityRenderer.enableLightmap(par2);
+                        BinaryRegex.lookBehind(BinaryRegex.build(
+                            ALOAD_0,
+                            BytecodeMatcher.anyReference(GETFIELD),
+                            BytecodeMatcher.anyReference(GETFIELD),
+                            DLOAD_2
+                        ), true),
+                        reference(INVOKEVIRTUAL, enableLightmap)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ILOAD_1,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "enableDisableLightmap", "(LEntityRenderer;DI)V"))
+                    );
+                }
+            }.targetMethod(renderAllRenderLists));
         }
     }
 
-    private class RenderItemMod extends ClassMod {
-        RenderItemMod() {
-            final MethodRef doRenderItem = new MethodRef(getDeobfClass(), "doRenderItem", "(LEntityItem;DDDFF)V");
-            final MethodRef drawItemIntoGui;
-            final boolean useItemStack = getMinecraftVersion().compareTo("12w34a") >= 0;
-            if (useItemStack) {
-                drawItemIntoGui = new MethodRef(getDeobfClass(), "drawItemIntoGui", "(LFontRenderer;LRenderEngine;LItemStack;II)V");
-            } else {
-                drawItemIntoGui = new MethodRef(getDeobfClass(), "drawItemIntoGui", "(LFontRenderer;LRenderEngine;IIIII)V");
-            }
-            final FieldRef blocksList = new FieldRef("Block", "blocksList", "[LBlock;");
-            final FieldRef itemID = new FieldRef("ItemStack", "itemID", "I");
-
-            classSignatures.add(new ConstSignature("/terrain.png"));
-            classSignatures.add(new ConstSignature("/gui/items.png"));
-            classSignatures.add(new ConstSignature("%blur%/misc/glint.png"));
-            classSignatures.add(new ConstSignature("/misc/water.png").negate(true));
+    private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
+        RenderBlocksMod() {
+            final MethodRef renderStandardBlockWithAmbientOcclusion = new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
-                        ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
-                        push(187L),
-                        reference(INVOKEVIRTUAL, new MethodRef("java/util/Random", "setSeed", "(J)V"))
+                        push(0x0f000f)
                     );
                 }
-            }.setMethod(doRenderItem));
+            }.setMethod(renderStandardBlockWithAmbientOcclusion));
 
-            classSignatures.add(new BytecodeSignature() {
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override AO block brightness for extra render passes";
+                }
+
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        push(210.0f),
+                        // (flag ? f : 1.0f) * ...
+                        IFEQ, BinaryRegex.any(2),
+                        BinaryRegex.capture(BytecodeMatcher.anyFLOAD),
+                        GOTO, BinaryRegex.any(2),
                         push(1.0f),
-                        push(0.0f),
-                        push(0.0f),
-                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glRotatef", "(FFFF)V"))
-                    );
-                }
-            }.setMethod(drawItemIntoGui));
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "enable alpha transparency for glass item entities";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        push("/terrain.png"),
-                        BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                        BinaryRegex.capture(BinaryRegex.or(
+                            BinaryRegex.build(push(0.5f)),
+                            BinaryRegex.build(push(0.6f)),
+                            BinaryRegex.build(push(0.8f))
+                        )),
+                        FMUL
                     );
                 }
 
                 @Override
-                public byte[] getInsertBytes() throws IOException {
+                public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
-                        // if (Block.blocksList[itemstack.itemID].getRenderBlockPass() != 0) {
-                        reference(GETSTATIC, blocksList),
-                        ALOAD, 10,
-                        reference(GETFIELD, itemID),
-                        AALOAD,
-                        reference(INVOKEVIRTUAL, getRenderBlockPass),
+                        // (flag ? f : 1.0f) * RenderPass.getAOBaseMultiplier(...)
                         IFEQ, branch("A"),
-
-                        // GL11.glEnable(3042);
-                        push(3042), // GL_BLEND
-                        reference(INVOKESTATIC, glEnable),
-
-                        // }
-                        label("A")
+                        getCaptureGroup(1),
+                        GOTO, branch("B"),
+                        label("A"),
+                        push(1.0f),
+                        label("B"),
+                        getCaptureGroup(2),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "getAOBaseMultiplier", "(F)F")),
+                        FMUL
                     );
                 }
-            }.targetMethod(doRenderItem));
-
-            patches.add(new BytecodePatch.InsertBefore() {
-                @Override
-                public String getDescription() {
-                    return "enable alpha transparency for glass blocks in gui";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        push("/terrain.png")
-                    );
-                }
-
-                @Override
-                public byte[] getInsertBytes() throws IOException {
-                    byte[] code;
-                    if (useItemStack) {
-                        code = buildCode(
-                            ALOAD_3,
-                            reference(GETFIELD, itemID)
-                        );
-                    } else {
-                        code = buildCode(ILOAD_3);
-                    }
-                    return buildCode(
-                        // if (Block.blocksList[i].getRenderBlockPass() != 0) {
-                        reference(GETSTATIC, blocksList),
-                        code,
-                        AALOAD,
-                        reference(INVOKEVIRTUAL, getRenderBlockPass),
-                        IFEQ, branch("A"),
-
-                        // GL11.glEnable(3042);
-                        push(3042), // GL_BLEND
-                        reference(INVOKESTATIC, glEnable),
-
-                        // }
-                        label("A")
-                    );
-                }
-            }.targetMethod(drawItemIntoGui));
+            }.targetMethod(renderStandardBlockWithAmbientOcclusion));
         }
     }
 }

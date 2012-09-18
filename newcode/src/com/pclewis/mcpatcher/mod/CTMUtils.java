@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class CTMUtils {
@@ -57,12 +58,8 @@ public class CTMUtils {
                 terrainTexture = getTexture("/terrain.png");
                 SuperTessellator.instance.clearTessellators();
 
-                for (int i = 0; i < blockOverrides.length; i++) {
-                    blockOverrides[i] = null;
-                }
-                for (int i = 0; i < tileOverrides.length; i++) {
-                    tileOverrides[i] = null;
-                }
+                Arrays.fill(blockOverrides, null);
+                Arrays.fill(tileOverrides, null);
 
                 if (enableStandard || enableNonStandard) {
                     for (String s : TexturePackAPI.listResources("/ctm", ".properties")) {
@@ -109,15 +106,30 @@ public class CTMUtils {
                     setupOutline();
                 }
 
+                RenderPassAPI.instance.clear();
+                for (int i = 0; i < blockOverrides.length; i++) {
+                    if (blockOverrides[i] != null && Block.blocksList[i] != null) {
+                        for (TileOverride override : blockOverrides[i]) {
+                            if (override != null && !override.disabled && override.renderPass >= 0) {
+                                RenderPassAPI.instance.setRenderPassForBlock(Block.blocksList[i], override.renderPass);
+                            }
+                        }
+                    }
+                }
+
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrainTexture);
             }
         });
     }
 
     public static void start() {
+        lastOverride = null;
         if (terrainTexture >= 0) {
             SuperTessellator.instance.texture = terrainTexture;
             active = true;
+        } else {
+            SuperTessellator.instance.texture = -1;
+            active = false;
         }
     }
 
@@ -154,9 +166,14 @@ public class CTMUtils {
 
     public static void finish() {
         reset();
+        RenderPassAPI.instance.finish();
         SuperTessellator.instance.texture = -1;
         lastOverride = null;
         active = false;
+    }
+
+    public static boolean skipDefaultRendering(Block block) {
+        return RenderPassAPI.instance.skipDefaultRendering(block);
     }
 
     static boolean getConnectedTexture(RenderBlocks renderBlocks, IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {

@@ -30,7 +30,7 @@ class ModList {
         new BuiltInMod(MCPatcherUtils.CUSTOM_COLORS, CustomColors.class, false),
         new BuiltInMod(MCPatcherUtils.CONNECTED_TEXTURES, ConnectedTextures.class, false),
         new BuiltInMod(MCPatcherUtils.BETTER_SKIES, BetterSkies.class, false),
-        new BuiltInMod(MCPatcherUtils.BETTER_GLASS, BetterGlass.class, true),
+        new BuiltInMod(MCPatcherUtils.BETTER_GLASS, BetterGlass.class, false),
         new BuiltInMod(MCPatcherUtils.GLSL_SHADERS, GLSLShader.class, true),
     };
 

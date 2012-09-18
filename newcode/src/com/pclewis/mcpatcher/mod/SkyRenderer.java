@@ -6,7 +6,6 @@ import net.minecraft.src.RenderEngine;
 import net.minecraft.src.Tessellator;
 import net.minecraft.src.World;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -110,6 +110,7 @@ abstract class TileOverride {
     final String filePrefix;
     final String textureName;
     final int texture;
+    final int renderPass;
     final int[] blockIDs;
     final int[] tileIDs;
     final int faces;
@@ -176,6 +177,7 @@ abstract class TileOverride {
         filePrefix = null;
         textureName = null;
         texture = MCPatcherUtils.getMinecraft().renderEngine.allocateAndSetupTexture(image);
+        renderPass = -1;
         blockIDs = new int[0];
         tileIDs = new int[]{tileID};
         faces = -1;
@@ -195,6 +197,13 @@ abstract class TileOverride {
                 disabled = true;
             }
         }
+
+        int pass = 0;
+        try {
+            pass = Integer.parseInt(properties.getProperty("renderPass", "-1"));
+        } catch (NumberFormatException e) {
+        }
+        renderPass = pass;
 
         blockIDs = getIDList(properties, "blockIDs", "block", Block.blocksList.length - 1);
         tileIDs = getIDList(properties, "tileIDs", "terrain", CTMUtils.NUM_TILES - 1);
@@ -242,6 +251,10 @@ abstract class TileOverride {
             tileMap = getDefaultTileMap();
         } else {
             tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
+        }
+
+        if (renderPass >= 0 && tileIDs.length > 0) {
+            error("renderPass=%d must be block-based not tile-based", renderPass);
         }
     }
 
@@ -321,6 +334,8 @@ abstract class TileOverride {
 
     final boolean exclude(IBlockAccess blockAccess, Block block, int origTexture, int i, int j, int k, int face) {
         if (block == null) {
+            return true;
+        } else if (RenderPassAPI.instance.skipThisRenderPass(block, renderPass)) {
             return true;
         } else if ((faces & (1 << reorient(face))) == 0) {
             return true;

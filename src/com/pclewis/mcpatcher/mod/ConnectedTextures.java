@@ -17,7 +17,7 @@ public class ConnectedTextures extends Mod {
         name = MCPatcherUtils.CONNECTED_TEXTURES;
         author = "MCPatcher";
         description = "Connects adjacent blocks of the same type.";
-        version = "1.4";
+        version = "1.5";
 
         addDependency(BaseTexturePackMod.NAME);
 
@@ -43,6 +43,7 @@ public class ConnectedTextures extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Top"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Repeat"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.GLASS_PANE_RENDERER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_API_CLASS));
 
         getClassMap().addInheritance("Tessellator", MCPatcherUtils.SUPER_TESSELLATOR_CLASS);
     }
@@ -440,6 +441,7 @@ public class ConnectedTextures extends Mod {
         private final MethodRef reset = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "reset", "()V");
         private final FieldRef newTextureIndex = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTextureIndex", "I");
         private final FieldRef newTessellator = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTessellator", "LTessellator;");
+        private final MethodRef skipDefaultRendering = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "skipDefaultRendering", "(LBlock;)Z");
 
         private ArrayList<MethodInfo> renderMethods = new ArrayList<MethodInfo>();
         private ArrayList<Integer> tessellatorRegisters = new ArrayList<Integer>();
@@ -607,9 +609,20 @@ public class ConnectedTextures extends Mod {
                         // tessellator = CTMUtils.newTessellator;
                         reference(GETSTATIC, newTessellator),
                         ASTORE, tessellatorRegister,
+                        GOTO, branch("B"),
+
+                        // } else if (CTMUtils.skipDefaultRendering(block)) {
+                        label("A"),
+                        ALOAD_1,
+                        reference(INVOKESTATIC, skipDefaultRendering),
+                        IFEQ, branch("B"),
+
+                        // return false;
+                        push(0),
+                        IRETURN,
 
                         // }
-                        label("A")
+                        label("B")
                     );
                 }
             });
@@ -665,9 +678,19 @@ public class ConnectedTextures extends Mod {
                         // tessellator = CTMUtils.newTessellator;
                         reference(GETSTATIC, newTessellator),
                         ASTORE, getCaptureGroup(1),
+                        GOTO, branch("B"),
+
+                        // } else if (CTMUtils.skipDefaultRendering(block)) {
+                        label("A"),
+                        ALOAD_1,
+                        reference(INVOKESTATIC, skipDefaultRendering),
+                        IFEQ, branch("B"),
+
+                        // return;
+                        RETURN,
 
                         // }
-                        label("A")
+                        label("B")
                     );
                 }
             }.targetMethod(drawCrossedSquares));
@@ -836,7 +859,7 @@ public class ConnectedTextures extends Mod {
 
                         // CTMUtils.reset();
                         reference(INVOKESTATIC, reset),
-                        GOTO, branch("B"),
+                        GOTO, branch("C"),
 
                         // } else if (CTMUtils.setup(this, block, (int) x, (int) y, (int) z, face, texture)) {
                         label("A"),
@@ -860,9 +883,19 @@ public class ConnectedTextures extends Mod {
                         // tessellator = CTMUtils.newTessellator;
                         reference(GETSTATIC, newTessellator),
                         ASTORE, getCaptureGroup(2),
+                        GOTO, branch("C"),
+
+                        // } else if (CTMUtils.skipDefaultRendering(block)) {
+                        label("B"),
+                        ALOAD_1,
+                        reference(INVOKESTATIC, skipDefaultRendering),
+                        IFEQ, branch("C"),
+
+                        // return;
+                        RETURN,
 
                         // }
-                        label("B")
+                        label("C")
                     );
                 }
             }.targetMethod(faceMethods[face]));
@@ -907,7 +940,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.targetMethod(updateRenderer));
 
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "post render world";
@@ -921,10 +954,9 @@ public class ConnectedTextures extends Mod {
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
+                public byte[] getInsertBytes() throws IOException {
                     return buildCode(
-                        reference(INVOKESTATIC, finish),
-                        RETURN
+                        reference(INVOKESTATIC, finish)
                     );
                 }
             }.targetMethod(updateRenderer));
