@@ -26,11 +26,11 @@ final public class MCPatcher {
     /**
      * MCPatcher release number
      */
-    public static final int RELEASE_VERSION = 2;
+    public static final int RELEASE_VERSION = 3;
     /**
      * MCPatcher patch level
      */
-    public static final int PATCH_VERSION = 3;
+    public static final int PATCH_VERSION = 0;
     /**
      * MCPatcher beta version if > 0
      */
