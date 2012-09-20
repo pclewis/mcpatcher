@@ -485,7 +485,33 @@ final public class MCPatcher {
                     continue;
                 }
                 out.printf("%s\n", mod.getName());
-                for (Map.Entry<String, String> entry : mod.filesAdded.entrySet()) {
+                ArrayList<Map.Entry<String, String>> filesAdded = new ArrayList<Map.Entry<String, String>>();
+                filesAdded.addAll(mod.filesAdded.entrySet());
+                Collections.sort(filesAdded, new Comparator<Map.Entry<String, String>>() {
+                    private void split(String s, String[] v) {
+                        int slash = s.lastIndexOf('/');
+                        if (slash >= 0) {
+                            v[0] = s.substring(0, slash);
+                            v[1] = s.substring(slash + 1);
+                        } else {
+                            v[0] = "";
+                            v[1] = s;
+                        }
+                    }
+
+                    public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
+                        String[] s1 = new String[2];
+                        String[] s2 = new String[2];
+                        split(o1.getKey(), s1);
+                        split(o2.getKey(), s2);
+                        int result = s1[0].compareTo(s2[0]);
+                        if (result != 0) {
+                            return result;
+                        }
+                        return s1[1].compareTo(s2[1]);
+                    }
+                });
+                for (Map.Entry<String, String> entry : filesAdded) {
                     out.printf("    %s %s\n", entry.getValue(), entry.getKey());
                 }
                 for (String name : mod.filesToAdd) {
@@ -493,7 +519,14 @@ final public class MCPatcher {
                         out.printf("    WARNING: %s not added (possible conflict)\n", name);
                     }
                 }
-                for (ClassMod classMod : mod.getClassMods()) {
+                ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
+                classMods.addAll(mod.getClassMods());
+                Collections.sort(classMods, new Comparator<ClassMod>() {
+                    public int compare(ClassMod o1, ClassMod o2) {
+                        return o1.getDeobfClass().compareTo(o2.getDeobfClass());
+                    }
+                });
+                for (ClassMod classMod : classMods) {
                     ArrayList<String> tc = classMod.targetClasses;
                     out.printf("    %s", classMod.getDeobfClass());
                     if (tc.size() == 0) {
