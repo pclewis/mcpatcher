@@ -1616,7 +1616,10 @@ public class CustomColors extends Mod {
     private class EntityMod extends ClassMod {
         EntityMod() {
             classSignatures.add(new ConstSignature("tilecrack_"));
-            classSignatures.add(new ConstSignature("random.splash"));
+            classSignatures.add(new OrSignature(
+                new ConstSignature("random.splash"),
+                new ConstSignature("liquid.splash") // 12w38a+
+            ));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -3608,7 +3611,10 @@ public class CustomColors extends Mod {
             final FieldRef fleeceColorTable = new FieldRef(getDeobfClass(), "fleeceColorTable", "[[F");
 
             classSignatures.add(new ConstSignature("/mob/sheep.png"));
-            classSignatures.add(new ConstSignature("mob.sheep"));
+            classSignatures.add(new OrSignature(
+                new ConstSignature("mob.sheep"),
+                new ConstSignature("mob.sheep.say") // 12w38a+
+            ));
 
             memberMappers.add(new FieldMapper(fleeceColorTable)
                 .accessFlag(AccessFlag.PUBLIC, true)
