@@ -1,4 +1,4 @@
-MCPatcher version is 2.4.2_03
+MCPatcher version is 2.4.3
 OS: Linux 3.4.9-2.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_35 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
@@ -21,6 +21,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (1761 files)
   Minecraft matches net/minecraft/client/Minecraft.class
   Minecraft matches net/minecraft/client/Minecraft.class
    runGameLoop matches J ()V
+  Minecraft matches net/minecraft/client/Minecraft.class
   Minecraft matches net/minecraft/client/Minecraft.class
   Minecraft matches net/minecraft/client/Minecraft.class
   TexturePackList matches ayj.class
@@ -73,9 +74,15 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (1761 files)
   RenderBlocks matches avg.class
    renderBlockPane matches a (Laif;III)Z
    renderStandardBlock matches q (Laig;III)Z
+  RenderBlocks matches avg.class
+   renderStandardBlockWithAmbientOcclusion matches a (Laig;IIIFFF)Z
   EntityRenderer matches auw.class
    updateFogColor matches h (F)V
    updateLightmap matches g ()V
+  EntityRenderer matches auw.class
+   disableLightmap matches a (D)V
+   renderWorld matches a (FJ)V
+   enableLightmap matches b (D)V
   Tessellator matches ave.class
    draw matches a ()I
    addVertexWithUV matches a (DDDDD)V
@@ -92,6 +99,11 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (1761 files)
    startDrawing matches b (I)V
    setTextureUV matches a (DD)V
   RenderEngine matches avf.class
+   deleteTexture matches a (I)V
+  RenderEngine matches avf.class
+   deleteTexture matches a (I)V
+  RenderEngine matches avf.class
+   deleteTexture matches a (I)V
    updateDynamicTextures matches a ()V
    refreshTextures matches b ()V
   RenderEngine matches avf.class
@@ -101,6 +113,12 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (1761 files)
    renderClouds matches b (F)V
   RenderGlobal matches avb.class
    renderSky matches a (F)V
+  RenderGlobal matches avb.class
+   sortAndRender matches a (Ljw;ID)I
+   loadRenderers matches a ()V
+   renderAllRenderLists matches a (ID)V
+  WorldRenderer matches aus.class
+   updateRenderer matches a ()V
   WorldRenderer matches aus.class
    updateRenderer matches a ()V
   TileEntitySignRenderer matches axq.class
@@ -199,6 +217,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (1761 files)
   Block matches aig.class
    getBlockTextureFromSideAndMetadata matches a (II)I
    getBlockTexture matches b (Luz;IIII)I
+  Block matches aig.class
+   getRenderBlockPass matches s_ ()I
   BlockLilyPad matches ait.class
 
 Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (5 dependent classes)
@@ -215,6 +235,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (methods and fields)
   Minecraft (net/minecraft/client/Minecraft.class)
   Minecraft (net/minecraft/client/Minecraft.class)
    field texturePackList matches C Layj;
+   field renderEngine matches o Lavf;
+  RenderEngine (avf.class)
   TexturePackList (ayj.class)
    method setTexturePack matches a (Layi;)Z
    field selectedTexturePack matches g Layi;
@@ -230,6 +252,8 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (methods and fields)
   TexturePackFolder (ayh.class)
   Minecraft (net/minecraft/client/Minecraft.class)
    field texturePackList matches C Layj;
+   field renderEngine matches o Lavf;
+  RenderEngine (avf.class)
   TexturePackList (ayj.class)
    method setTexturePack matches a (Layi;)Z
    field selectedTexturePack matches g Layi;
@@ -420,17 +444,27 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.3.2.jar (methods and fields)
   WorldServer (aub.class)
    field world matches a Lup;
   RenderGlobal (avb.class)
+  Minecraft (net/minecraft/client/Minecraft.class)
+  Block (aig.class)
+   field blockID matches ca I
+   field blocksList matches m [Laig;
+  WorldRenderer (aus.class)
+   field skipRenderPass matches m [Z
+  EntityRenderer (auw.class)
+  RenderGlobal (avb.class)
+  RenderBlocks (avg.class)
 
-7 available mods:
+8 available mods:
 [YES] __Base 1.0 - Internal mod required by the patcher.
-[YES] __TexturePackBase 1.0 - Internal mod required by the patcher.
+[YES] __TexturePackBase 1.1 - Internal mod required by the patcher.
 [YES] HD Textures 1.4 - Provides support for high-resolution texture packs and custom animations.
 [YES] HD Font 1.4 - Provides support for higher resolution fonts.
 [YES] Better Grass 1.0 - Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.
 [YES] Random Mobs 1.4 - Randomize mob skins if texture pack supports it. Based on Balthichou's mod.
 [YES] Custom Colors 1.4 - Gives texture packs control over hardcoded colors in the game.
-[YES] Connected Textures 1.4 - Connects adjacent blocks of the same type.
+[YES] Connected Textures 1.5 - Connects adjacent blocks of the same type.
 [YES] Better Skies 1.1 - Adds support for custom skyboxes.
+[YES] Better Glass 1.9 - Enables partial transparency for glass blocks.
 
 #### Class map:
 __Base
@@ -443,7 +477,10 @@ __TexturePackBase
     class Minecraft (net/minecraft/client/Minecraft.class)
         method runGameLoop -> J ()V
         method startGame -> a ()V
+        field renderEngine -> o Lavf;
         field texturePackList -> C Layj;
+    class RenderEngine (avf.class)
+        method deleteTexture -> a (I)V
     class TexturePackBase (aye.class) extends ITexturePack
         method getInputStream -> a (Ljava/lang/String;)Ljava/io/InputStream;
         field file -> a Ljava/io/File;
@@ -468,6 +505,7 @@ __TexturePackBase
         field selectedTexturePack -> g Layi;
     class net.minecraft.client.Minecraft alias for Minecraft
     class net.minecraft.src.ITexturePack alias for ITexturePack
+    class net.minecraft.src.RenderEngine alias for RenderEngine
     class net.minecraft.src.TexturePackBase alias for TexturePackBase
     class net.minecraft.src.TexturePackCustom alias for TexturePackCustom
     class net.minecraft.src.TexturePackDefault alias for TexturePackDefault
@@ -500,6 +538,7 @@ HD Textures
         field texturePackList -> C Layj;
     class Portal (axi.class)
     class RenderEngine (avf.class)
+        method deleteTexture -> a (I)V
         method getImageRGB -> a (Ljava/awt/image/BufferedImage;[I)[I
         method getTexture -> b (Ljava/lang/String;)I
         method readTextureImage -> a (Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;
@@ -1123,6 +1162,39 @@ Better Skies
     class net.minecraft.src.WorldProvider alias for WorldProvider
     class net.minecraft.src.WorldServer alias for WorldServer
     class net.minecraft.src.WorldServerMP alias for WorldServerMP
+
+Better Glass
+    class Block (aig.class)
+        method getRenderBlockPass -> s_ ()I
+        field blockID -> ca I
+        field blocksList -> m [Laig;
+    class EntityLiving (jw.class)
+    class EntityRenderer (auw.class)
+        method disableLightmap -> a (D)V
+        method enableLightmap -> b (D)V
+        method renderWorld -> a (FJ)V
+    class GLAllocation (anh.class)
+        method generateDisplayLists -> a (I)I
+    class Minecraft (net/minecraft/client/Minecraft.class)
+    class RenderBlocks (avg.class)
+        method renderStandardBlockWithAmbientOcclusion -> a (Laig;IIIFFF)Z
+    class RenderGlobal (avb.class)
+        method loadRenderers -> a ()V
+        method renderAllRenderLists -> a (ID)V
+        method sortAndRender -> a (Ljw;ID)I
+        field glRenderListBase -> p I
+    class WorldRenderer (aus.class)
+        method updateRenderer -> a ()V
+        field glRenderList -> y I
+        field skipRenderPass -> m [Z
+    class net.minecraft.client.Minecraft alias for Minecraft
+    class net.minecraft.src.Block alias for Block
+    class net.minecraft.src.EntityLiving alias for EntityLiving
+    class net.minecraft.src.EntityRenderer alias for EntityRenderer
+    class net.minecraft.src.GLAllocation alias for GLAllocation
+    class net.minecraft.src.RenderBlocks alias for RenderBlocks
+    class net.minecraft.src.RenderGlobal alias for RenderGlobal
+    class net.minecraft.src.WorldRenderer alias for WorldRenderer
 
 
 Patching...
@@ -2412,10 +2484,13 @@ Patching...
  applying RenderBlocks patch to avg.class for mod Connected Textures
     override texture (bottom face) a(Laig;DDDI)V@0
      label A -> instruction 24
-     label B -> instruction 53
+     label B -> instruction 56
+     label C -> instruction 64
      branch offset IFLT A -> +15 @9
-     branch offset GOTO B -> +32 @21
-     branch offset IFEQ B -> +13 @40
+     branch offset GOTO C -> +43 @21
+     branch offset IFEQ B -> +16 @40
+     branch offset GOTO C -> +11 @53
+     branch offset IFEQ C -> +4 @60
      GETSTATIC 0x00 0xe4       GETSTATIC 0x00 0xe4
      ASTORE 0x09               ASTORE 0x09
      ALOAD_0                   ALOAD_0
@@ -2425,7 +2500,7 @@ Patching...
      GETFIELD 0x01 0x27        GETFIELD 0x01 0x27
      ISTORE 0x08               ISTORE 0x08
                                INVOKESTATIC 0x03 0x9c
-                               GOTO 0x00 0x20
+                               GOTO 0x00 0x2b
                                ALOAD_0
                                ALOAD_1
                                DLOAD_2
@@ -2437,17 +2512,25 @@ Patching...
                                ICONST_0
                                ILOAD 0x08
                                INVOKESTATIC 0x03 0xa0
-                               IFEQ 0x00 0x0d
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x08
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x09
+                               GOTO 0x00 0x0b
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x04
+                               RETURN
     override texture (top face) b(Laig;DDDI)V@0
      label A -> instruction 24
-     label B -> instruction 53
+     label B -> instruction 56
+     label C -> instruction 64
      branch offset IFLT A -> +15 @9
-     branch offset GOTO B -> +32 @21
-     branch offset IFEQ B -> +13 @40
+     branch offset GOTO C -> +43 @21
+     branch offset IFEQ B -> +16 @40
+     branch offset GOTO C -> +11 @53
+     branch offset IFEQ C -> +4 @60
      GETSTATIC 0x00 0xe4       GETSTATIC 0x00 0xe4
      ASTORE 0x09               ASTORE 0x09
      ALOAD_0                   ALOAD_0
@@ -2457,7 +2540,7 @@ Patching...
      GETFIELD 0x01 0x27        GETFIELD 0x01 0x27
      ISTORE 0x08               ISTORE 0x08
                                INVOKESTATIC 0x03 0x9c
-                               GOTO 0x00 0x20
+                               GOTO 0x00 0x2b
                                ALOAD_0
                                ALOAD_1
                                DLOAD_2
@@ -2469,17 +2552,25 @@ Patching...
                                ICONST_1
                                ILOAD 0x08
                                INVOKESTATIC 0x03 0xa0
-                               IFEQ 0x00 0x0d
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x08
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x09
+                               GOTO 0x00 0x0b
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x04
+                               RETURN
     override texture (north face) c(Laig;DDDI)V@0
      label A -> instruction 24
-     label B -> instruction 53
+     label B -> instruction 56
+     label C -> instruction 64
      branch offset IFLT A -> +15 @9
-     branch offset GOTO B -> +32 @21
-     branch offset IFEQ B -> +13 @40
+     branch offset GOTO C -> +43 @21
+     branch offset IFEQ B -> +16 @40
+     branch offset GOTO C -> +11 @53
+     branch offset IFEQ C -> +4 @60
      GETSTATIC 0x00 0xe4       GETSTATIC 0x00 0xe4
      ASTORE 0x09               ASTORE 0x09
      ALOAD_0                   ALOAD_0
@@ -2489,7 +2580,7 @@ Patching...
      GETFIELD 0x01 0x27        GETFIELD 0x01 0x27
      ISTORE 0x08               ISTORE 0x08
                                INVOKESTATIC 0x03 0x9c
-                               GOTO 0x00 0x20
+                               GOTO 0x00 0x2b
                                ALOAD_0
                                ALOAD_1
                                DLOAD_2
@@ -2501,17 +2592,25 @@ Patching...
                                ICONST_2
                                ILOAD 0x08
                                INVOKESTATIC 0x03 0xa0
-                               IFEQ 0x00 0x0d
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x08
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x09
+                               GOTO 0x00 0x0b
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x04
+                               RETURN
     override texture (south face) d(Laig;DDDI)V@0
      label A -> instruction 24
-     label B -> instruction 53
+     label B -> instruction 56
+     label C -> instruction 64
      branch offset IFLT A -> +15 @9
-     branch offset GOTO B -> +32 @21
-     branch offset IFEQ B -> +13 @40
+     branch offset GOTO C -> +43 @21
+     branch offset IFEQ B -> +16 @40
+     branch offset GOTO C -> +11 @53
+     branch offset IFEQ C -> +4 @60
      GETSTATIC 0x00 0xe4       GETSTATIC 0x00 0xe4
      ASTORE 0x09               ASTORE 0x09
      ALOAD_0                   ALOAD_0
@@ -2521,7 +2620,7 @@ Patching...
      GETFIELD 0x01 0x27        GETFIELD 0x01 0x27
      ISTORE 0x08               ISTORE 0x08
                                INVOKESTATIC 0x03 0x9c
-                               GOTO 0x00 0x20
+                               GOTO 0x00 0x2b
                                ALOAD_0
                                ALOAD_1
                                DLOAD_2
@@ -2533,17 +2632,25 @@ Patching...
                                ICONST_3
                                ILOAD 0x08
                                INVOKESTATIC 0x03 0xa0
-                               IFEQ 0x00 0x0d
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x08
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x09
+                               GOTO 0x00 0x0b
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x04
+                               RETURN
     override texture (west face) e(Laig;DDDI)V@0
      label A -> instruction 24
-     label B -> instruction 53
+     label B -> instruction 56
+     label C -> instruction 64
      branch offset IFLT A -> +15 @9
-     branch offset GOTO B -> +32 @21
-     branch offset IFEQ B -> +13 @40
+     branch offset GOTO C -> +43 @21
+     branch offset IFEQ B -> +16 @40
+     branch offset GOTO C -> +11 @53
+     branch offset IFEQ C -> +4 @60
      GETSTATIC 0x00 0xe4       GETSTATIC 0x00 0xe4
      ASTORE 0x09               ASTORE 0x09
      ALOAD_0                   ALOAD_0
@@ -2553,7 +2660,7 @@ Patching...
      GETFIELD 0x01 0x27        GETFIELD 0x01 0x27
      ISTORE 0x08               ISTORE 0x08
                                INVOKESTATIC 0x03 0x9c
-                               GOTO 0x00 0x20
+                               GOTO 0x00 0x2b
                                ALOAD_0
                                ALOAD_1
                                DLOAD_2
@@ -2565,17 +2672,25 @@ Patching...
                                ICONST_4
                                ILOAD 0x08
                                INVOKESTATIC 0x03 0xa0
-                               IFEQ 0x00 0x0d
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x08
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x09
+                               GOTO 0x00 0x0b
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x04
+                               RETURN
     override texture (east face) f(Laig;DDDI)V@0
      label A -> instruction 24
-     label B -> instruction 53
+     label B -> instruction 56
+     label C -> instruction 64
      branch offset IFLT A -> +15 @9
-     branch offset GOTO B -> +32 @21
-     branch offset IFEQ B -> +13 @40
+     branch offset GOTO C -> +43 @21
+     branch offset IFEQ B -> +16 @40
+     branch offset GOTO C -> +11 @53
+     branch offset IFEQ C -> +4 @60
      GETSTATIC 0x00 0xe4       GETSTATIC 0x00 0xe4
      ASTORE 0x09               ASTORE 0x09
      ALOAD_0                   ALOAD_0
@@ -2585,7 +2700,7 @@ Patching...
      GETFIELD 0x01 0x27        GETFIELD 0x01 0x27
      ISTORE 0x08               ISTORE 0x08
                                INVOKESTATIC 0x03 0x9c
-                               GOTO 0x00 0x20
+                               GOTO 0x00 0x2b
                                ALOAD_0
                                ALOAD_1
                                DLOAD_2
@@ -2597,11 +2712,16 @@ Patching...
                                ICONST_5
                                ILOAD 0x08
                                INVOKESTATIC 0x03 0xa0
-                               IFEQ 0x00 0x0d
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x08
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x09
+                               GOTO 0x00 0x0b
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x04
+                               RETURN
     find potential render methods w(Laig;III)Z@0
     find potential render methods a(Laey;III)Z@111
     find potential render methods a(Lafd;III)Z@10
@@ -2626,25 +2746,34 @@ Patching...
     find potential render methods d(Laig;IIIFFF)Z@0
     find potential render methods u(Laig;III)Z@0
     override texture (other blocks) w(Laig;III)Z@144
-     label A -> instruction 176
-     branch offset IFGE A -> +27 @149
-     branch offset IFEQ A -> +13 @163
+     label A -> instruction 179
+     label B -> instruction 188
+     branch offset IFGE A -> +30 @149
+     branch offset IFEQ A -> +16 @163
+     branch offset GOTO B -> +12 @176
+     branch offset IFEQ B -> +5 @183
      ILOAD 0x1b                NOP
      BIPUSH 0x0f               ALOAD_0
      IAND                      GETFIELD 0x01 0x27
-     ICONST_4                  IFGE 0x00 0x1b
+     ICONST_4                  IFGE 0x00 0x1e
      ISHL                      ALOAD_0
      ISTORE 0x1c               ALOAD_1
      ILOAD 0x1b                ILOAD_2
      SIPUSH 0x00 0xf0          ILOAD_3
      IAND                      ILOAD 0x04
      ISTORE 0x1d               ILOAD 0x1b
-                               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+                               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x1b
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x1b
                                BIPUSH 0x0f
                                IAND
@@ -2655,26 +2784,35 @@ Patching...
                                SIPUSH 0x00 0xf0
                                IAND
                                ISTORE 0x1d
-    override texture (other blocks) w(Laig;III)Z@399
-     label A -> instruction 431
-     branch offset IFGE A -> +27 @404
-     branch offset IFEQ A -> +13 @418
+    override texture (other blocks) w(Laig;III)Z@411
+     label A -> instruction 446
+     label B -> instruction 455
+     branch offset IFGE A -> +30 @416
+     branch offset IFEQ A -> +16 @430
+     branch offset GOTO B -> +12 @443
+     branch offset IFEQ B -> +5 @450
      ILOAD 0x1b                NOP
      BIPUSH 0x0f               ALOAD_0
      IAND                      GETFIELD 0x01 0x27
-     ICONST_4                  IFGE 0x00 0x1b
+     ICONST_4                  IFGE 0x00 0x1e
      ISHL                      ALOAD_0
      ISTORE 0x1c               ALOAD_1
      ILOAD 0x1b                ILOAD_2
      SIPUSH 0x00 0xf0          ILOAD_3
      IAND                      ILOAD 0x04
      ISTORE 0x1d               ILOAD 0x1b
-                               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+                               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x1b
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x1b
                                BIPUSH 0x0f
                                IAND
@@ -2686,24 +2824,33 @@ Patching...
                                IAND
                                ISTORE 0x1d
     override texture (other blocks) a(Laey;III)Z@305
-     label A -> instruction 336
-     branch offset IFGE A -> +27 @309
-     branch offset IFEQ A -> +13 @323
+     label A -> instruction 339
+     label B -> instruction 348
+     branch offset IFGE A -> +30 @309
+     branch offset IFEQ A -> +16 @323
+     branch offset GOTO B -> +12 @336
+     branch offset IFEQ B -> +5 @343
      ILOAD 0x0b                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x0c               ILOAD_2
      ILOAD 0x0b                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x0b
-     ISTORE 0x0d               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x0d               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x0b
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x0b
                                BIPUSH 0x0f
                                IAND
@@ -2715,24 +2862,33 @@ Patching...
                                IAND
                                ISTORE 0x0d
     override texture (other blocks) x(Laig;III)Z@236
-     label A -> instruction 267
-     branch offset IFGE A -> +27 @240
-     branch offset IFEQ A -> +13 @254
+     label A -> instruction 270
+     label B -> instruction 279
+     branch offset IFGE A -> +30 @240
+     branch offset IFEQ A -> +16 @254
+     branch offset GOTO B -> +12 @267
+     branch offset IFEQ B -> +5 @274
      ILOAD 0x13                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x14               ILOAD_2
      ILOAD 0x13                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x13
-     ISTORE 0x15               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x15               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x13
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x08
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x13
                                BIPUSH 0x0f
                                IAND
@@ -2744,24 +2900,33 @@ Patching...
                                IAND
                                ISTORE 0x15
     override texture (other blocks) e(Laig;III)Z@462
-     label A -> instruction 493
-     branch offset IFGE A -> +27 @466
-     branch offset IFEQ A -> +13 @480
+     label A -> instruction 496
+     label B -> instruction 505
+     branch offset IFGE A -> +30 @466
+     branch offset IFEQ A -> +16 @480
+     branch offset GOTO B -> +12 @493
+     branch offset IFEQ B -> +5 @500
      ILOAD 0x0e                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x0f               ILOAD_2
      ILOAD 0x0e                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x0e
-     ISTORE 0x10               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x10               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x0e
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x08
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x0e
                                BIPUSH 0x0f
                                IAND
@@ -2773,24 +2938,33 @@ Patching...
                                IAND
                                ISTORE 0x10
     override texture (other blocks) f(Laig;III)Z@343
-     label A -> instruction 374
-     branch offset IFGE A -> +27 @347
-     branch offset IFEQ A -> +13 @361
+     label A -> instruction 377
+     label B -> instruction 386
+     branch offset IFGE A -> +30 @347
+     branch offset IFEQ A -> +16 @361
+     branch offset GOTO B -> +12 @374
+     branch offset IFEQ B -> +5 @381
      ILOAD 0x12                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x13               ILOAD_2
      ILOAD 0x12                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x12
-     ISTORE 0x14               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x14               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x12
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x12
                                BIPUSH 0x0f
                                IAND
@@ -2802,24 +2976,33 @@ Patching...
                                IAND
                                ISTORE 0x14
     override texture (other blocks) g(Laig;III)Z@115
-     label A -> instruction 146
-     branch offset IFGE A -> +27 @119
-     branch offset IFEQ A -> +13 @133
+     label A -> instruction 149
+     label B -> instruction 158
+     branch offset IFGE A -> +30 @119
+     branch offset IFEQ A -> +16 @133
+     branch offset GOTO B -> +12 @146
+     branch offset IFEQ B -> +5 @153
      ILOAD 0x06                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x0b               ILOAD_2
      ILOAD 0x06                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x06
-     ISTORE 0x0c               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x0c               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x06
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x06
                                BIPUSH 0x0f
                                IAND
@@ -2831,24 +3014,33 @@ Patching...
                                IAND
                                ISTORE 0x0c
     override texture (other blocks) h(Laig;III)Z@50
-     label A -> instruction 81
-     branch offset IFGE A -> +27 @54
-     branch offset IFEQ A -> +13 @68
+     label A -> instruction 84
+     label B -> instruction 93
+     branch offset IFGE A -> +30 @54
+     branch offset IFEQ A -> +16 @68
+     branch offset GOTO B -> +12 @81
+     branch offset IFEQ B -> +5 @88
      ILOAD 0x06                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x07               ILOAD_2
      ILOAD 0x06                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x06
-     ISTORE 0x08               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x08               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x06
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x06
                                BIPUSH 0x0f
                                IAND
@@ -2860,24 +3052,33 @@ Patching...
                                IAND
                                ISTORE 0x08
     override texture (other blocks) i(Laig;III)Z@178
-     label A -> instruction 209
-     branch offset IFGE A -> +27 @182
-     branch offset IFEQ A -> +13 @196
+     label A -> instruction 212
+     label B -> instruction 221
+     branch offset IFGE A -> +30 @182
+     branch offset IFEQ A -> +16 @196
+     branch offset GOTO B -> +12 @209
+     branch offset IFEQ B -> +5 @216
      ILOAD 0x07                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x0d               ILOAD_2
      ILOAD 0x07                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x07
-     ISTORE 0x0e               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x0e               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x07
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x07
                                BIPUSH 0x0f
                                IAND
@@ -2889,24 +3090,33 @@ Patching...
                                IAND
                                ISTORE 0x0e
     override texture (other blocks) a(Lahh;III)Z@81
-     label A -> instruction 112
-     branch offset IFGE A -> +27 @85
-     branch offset IFEQ A -> +13 @99
+     label A -> instruction 115
+     label B -> instruction 124
+     branch offset IFGE A -> +30 @85
+     branch offset IFEQ A -> +16 @99
+     branch offset GOTO B -> +12 @112
+     branch offset IFEQ B -> +5 @119
      ILOAD 0x07                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x08               ILOAD_2
      ILOAD 0x07                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x07
-     ISTORE 0x09               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x09               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x07
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x07
                                BIPUSH 0x0f
                                IAND
@@ -2918,24 +3128,33 @@ Patching...
                                IAND
                                ISTORE 0x09
     override texture (other blocks) j(Laig;III)Z@56
-     label A -> instruction 87
-     branch offset IFGE A -> +27 @60
-     branch offset IFEQ A -> +13 @74
+     label A -> instruction 90
+     label B -> instruction 99
+     branch offset IFGE A -> +30 @60
+     branch offset IFEQ A -> +16 @74
+     branch offset GOTO B -> +12 @87
+     branch offset IFEQ B -> +5 @94
      ILOAD 0x06                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x07               ILOAD_2
      ILOAD 0x06                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x06
-     ISTORE 0x08               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x08               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x06
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x06
                                BIPUSH 0x0f
                                IAND
@@ -2947,24 +3166,33 @@ Patching...
                                IAND
                                ISTORE 0x08
     override texture (other blocks) k(Laig;III)Z@121
-     label A -> instruction 152
-     branch offset IFGE A -> +27 @125
-     branch offset IFEQ A -> +13 @139
+     label A -> instruction 155
+     label B -> instruction 164
+     branch offset IFGE A -> +30 @125
+     branch offset IFEQ A -> +16 @139
+     branch offset GOTO B -> +12 @152
+     branch offset IFEQ B -> +5 @159
      ILOAD 0x06                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x08               ILOAD_2
      ILOAD 0x06                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x06
-     ISTORE 0x09               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x09               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x06
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x06
                                BIPUSH 0x0f
                                IAND
@@ -2976,24 +3204,33 @@ Patching...
                                IAND
                                ISTORE 0x09
     override texture (other blocks) o(Laig;III)Z@24
-     label A -> instruction 55
-     branch offset IFGE A -> +27 @28
-     branch offset IFEQ A -> +13 @42
+     label A -> instruction 58
+     label B -> instruction 67
+     branch offset IFGE A -> +30 @28
+     branch offset IFEQ A -> +16 @42
+     branch offset GOTO B -> +12 @55
+     branch offset IFEQ B -> +5 @62
      ILOAD 0x06                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x07               ILOAD_2
      ILOAD 0x06                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x06
-     ISTORE 0x08               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x08               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x06
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x06
                                BIPUSH 0x0f
                                IAND
@@ -3005,24 +3242,33 @@ Patching...
                                IAND
                                ISTORE 0x08
     override texture (other blocks) p(Laig;III)Z@411
-     label A -> instruction 442
-     branch offset IFGE A -> +27 @415
-     branch offset IFEQ A -> +13 @429
+     label A -> instruction 445
+     label B -> instruction 454
+     branch offset IFGE A -> +30 @415
+     branch offset IFEQ A -> +16 @429
+     branch offset GOTO B -> +12 @442
+     branch offset IFEQ B -> +5 @449
      ILOAD 0x22                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x24               ILOAD_2
      ILOAD 0x22                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x22
-     ISTORE 0x25               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x25               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x22
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x22
                                BIPUSH 0x0f
                                IAND
@@ -3033,25 +3279,34 @@ Patching...
                                SIPUSH 0x00 0xf0
                                IAND
                                ISTORE 0x25
-    override texture (other blocks) p(Laig;III)Z@894
-     label A -> instruction 925
-     branch offset IFGE A -> +27 @898
-     branch offset IFEQ A -> +13 @912
+    override texture (other blocks) p(Laig;III)Z@906
+     label A -> instruction 940
+     label B -> instruction 949
+     branch offset IFGE A -> +30 @910
+     branch offset IFEQ A -> +16 @924
+     branch offset GOTO B -> +12 @937
+     branch offset IFEQ B -> +5 @944
      ILOAD 0x26                ALOAD_0
      BIPUSH 0x0f               GETFIELD 0x01 0x27
-     IAND                      IFGE 0x00 0x1b
+     IAND                      IFGE 0x00 0x1e
      ICONST_4                  ALOAD_0
      ISHL                      ALOAD_1
      ISTORE 0x27               ILOAD_2
      ILOAD 0x26                ILOAD_3
      SIPUSH 0x00 0xf0          ILOAD 0x04
      IAND                      ILOAD 0x26
-     ISTORE 0x28               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+     ISTORE 0x28               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x26
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x26
                                BIPUSH 0x0f
                                IAND
@@ -3063,25 +3318,34 @@ Patching...
                                IAND
                                ISTORE 0x28
     override texture (other blocks) a(Lafh;III)Z@91
-     label A -> instruction 123
-     branch offset IFGE A -> +27 @96
-     branch offset IFEQ A -> +13 @110
+     label A -> instruction 126
+     label B -> instruction 135
+     branch offset IFGE A -> +30 @96
+     branch offset IFEQ A -> +16 @110
+     branch offset GOTO B -> +12 @123
+     branch offset IFEQ B -> +5 @130
      ILOAD 0x07                NOP
      BIPUSH 0x0f               ALOAD_0
      IAND                      GETFIELD 0x01 0x27
-     ICONST_4                  IFGE 0x00 0x1b
+     ICONST_4                  IFGE 0x00 0x1e
      ISHL                      ALOAD_0
      ISTORE 0x0c               ALOAD_1
      ILOAD 0x07                ILOAD_2
      SIPUSH 0x00 0xf0          ILOAD_3
      IAND                      ILOAD 0x04
      ISTORE 0x0d               ILOAD 0x07
-                               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+                               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x07
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x05
+                               GOTO 0x00 0x0c
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x05
+                               ICONST_0
+                               IRETURN
                                ILOAD 0x07
                                BIPUSH 0x0f
                                IAND
@@ -3093,9 +3357,12 @@ Patching...
                                IAND
                                ISTORE 0x0d
     override texture (crossed squares) a(Laig;IDDD)V@0
-     label A -> instruction 35
-     branch offset IFGE A -> +31 @4
-     branch offset IFEQ A -> +13 @22
+     label A -> instruction 38
+     label B -> instruction 46
+     branch offset IFGE A -> +34 @4
+     branch offset IFEQ A -> +16 @22
+     branch offset GOTO B -> +11 @35
+     branch offset IFEQ B -> +4 @42
      GETSTATIC 0x00 0xe4       GETSTATIC 0x00 0xe4
      ASTORE 0x09               ASTORE 0x09
      ALOAD_1                   ALOAD_1
@@ -3105,7 +3372,7 @@ Patching...
      ISTORE 0x0a               ISTORE 0x0a
                                ALOAD_0
                                GETFIELD 0x01 0x27
-                               IFGE 0x00 0x1f
+                               IFGE 0x00 0x22
                                ALOAD_0
                                ALOAD_1
                                DLOAD_3
@@ -3115,12 +3382,17 @@ Patching...
                                DLOAD 0x07
                                D2I
                                ILOAD 0x0a
-                               INVOKESTATIC 0x03 0xa9
-                               IFEQ 0x00 0x0d
+                               INVOKESTATIC 0x03 0xad
+                               IFEQ 0x00 0x10
                                GETSTATIC 0x03 0xa3
                                ISTORE 0x0a
                                GETSTATIC 0x03 0xa6
                                ASTORE 0x09
+                               GOTO 0x00 0x0b
+                               ALOAD_1
+                               INVOKESTATIC 0x03 0xaa
+                               IFEQ 0x00 0x04
+                               RETURN
     determine glass side texture uv registers a(Laif;III)Z@330
    glass side texture uv registers (28 30 32 34 36)
     override texture (glass pane) a(Laif;III)Z@539
@@ -3146,11 +3418,11 @@ Patching...
                                ILOAD 0x3b
                                ILOAD 0x3c
                                ILOAD 0x3d
-                               INVOKESTATIC 0x03 0xaf
+                               INVOKESTATIC 0x03 0xb3
     disable default rendering (glass pane faces) a(Laif;III)Z@645
      label A -> instruction 787
      branch offset IFNE A -> +139 @648
-     ALOAD 0x06                GETSTATIC 0x03 0xb2
+     ALOAD 0x06                GETSTATIC 0x03 0xb6
      DLOAD 0x26                IFNE 0x00 0x8b
      ILOAD_3                   ALOAD 0x06
      ICONST_1                  DLOAD 0x26
@@ -3235,7 +3507,7 @@ Patching...
     disable default rendering (glass pane faces) a(Laif;III)Z@1882
      label A -> instruction 2024
      branch offset IFNE A -> +139 @1885
-     ALOAD 0x06                GETSTATIC 0x03 0xb2
+     ALOAD 0x06                GETSTATIC 0x03 0xb6
      DLOAD 0x26                IFNE 0x00 0x8b
      ILOAD_3                   ALOAD 0x06
      ICONST_1                  DLOAD 0x26
@@ -3320,7 +3592,7 @@ Patching...
     disable default rendering (glass pane faces) a(Laif;III)Z@2566
      label A -> instruction 2708
      branch offset IFNE A -> +139 @2569
-     ALOAD 0x06                GETSTATIC 0x03 0xb2
+     ALOAD 0x06                GETSTATIC 0x03 0xb6
      DLOAD 0x28                IFNE 0x00 0x8b
      ILOAD_3                   ALOAD 0x06
      ICONST_1                  DLOAD 0x28
@@ -3405,7 +3677,7 @@ Patching...
     disable default rendering (glass pane faces) a(Laif;III)Z@3267
      label A -> instruction 3409
      branch offset IFNE A -> +139 @3270
-     ALOAD 0x06                GETSTATIC 0x03 0xb2
+     ALOAD 0x06                GETSTATIC 0x03 0xb6
      DLOAD 0x28                IFNE 0x00 0x8b
      ILOAD_3                   ALOAD 0x06
      ICONST_1                  DLOAD 0x28
@@ -3490,7 +3762,7 @@ Patching...
     disable default rendering (glass pane faces) a(Laif;III)Z@4312
      label A -> instruction 4454
      branch offset IFNE A -> +139 @4315
-     ALOAD 0x06                GETSTATIC 0x03 0xb2
+     ALOAD 0x06                GETSTATIC 0x03 0xb6
      DLOAD 0x28                IFNE 0x00 0x8b
      ILOAD_3                   ALOAD 0x06
      ICONST_1                  DLOAD 0x28
@@ -3575,7 +3847,7 @@ Patching...
     disable default rendering (glass pane faces) a(Laif;III)Z@4932
      label A -> instruction 5074
      branch offset IFNE A -> +139 @4935
-     ALOAD 0x06                GETSTATIC 0x03 0xb2
+     ALOAD 0x06                GETSTATIC 0x03 0xb6
      DLOAD 0x28                IFNE 0x00 0x8b
      ILOAD_3                   ALOAD 0x06
      ICONST_1                  DLOAD 0x28
@@ -3657,6 +3929,187 @@ Patching...
      INVOKEVIRTUAL 0x01 0x7e   DLOAD 0x14
                                DLOAD 0x16
                                INVOKEVIRTUAL 0x01 0x7e
+ applying RenderBlocks patch to avg.class for mod Better Glass
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@1594
+     label A -> instruction 1602
+     label B -> instruction 1603
+     branch offset IFEQ A -> +8 @1594
+     branch offset GOTO B -> +4 @1599
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x05                FLOAD 0x05
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x1f                  LDC 0x1f
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@1630
+     label A -> instruction 1638
+     label B -> instruction 1639
+     branch offset IFEQ A -> +8 @1630
+     branch offset GOTO B -> +4 @1635
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x06                FLOAD 0x06
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x1f                  LDC 0x1f
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@1666
+     label A -> instruction 1674
+     label B -> instruction 1675
+     branch offset IFEQ A -> +8 @1666
+     branch offset GOTO B -> +4 @1671
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x07                FLOAD 0x07
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x1f                  LDC 0x1f
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@3542
+     label A -> instruction 3550
+     label B -> instruction 3551
+     branch offset IFEQ A -> +8 @3542
+     branch offset GOTO B -> +4 @3547
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x05                FLOAD 0x05
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x28                  LDC 0x28
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@3578
+     label A -> instruction 3586
+     label B -> instruction 3587
+     branch offset IFEQ A -> +8 @3578
+     branch offset GOTO B -> +4 @3583
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x06                FLOAD 0x06
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x28                  LDC 0x28
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@3614
+     label A -> instruction 3622
+     label B -> instruction 3623
+     branch offset IFEQ A -> +8 @3614
+     branch offset GOTO B -> +4 @3619
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x07                FLOAD 0x07
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x28                  LDC 0x28
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@4694
+     label A -> instruction 4702
+     label B -> instruction 4703
+     branch offset IFEQ A -> +8 @4694
+     branch offset GOTO B -> +4 @4699
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x05                FLOAD 0x05
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x28                  LDC 0x28
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@4730
+     label A -> instruction 4738
+     label B -> instruction 4739
+     branch offset IFEQ A -> +8 @4730
+     branch offset GOTO B -> +4 @4735
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x06                FLOAD 0x06
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x28                  LDC 0x28
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@4766
+     label A -> instruction 4774
+     label B -> instruction 4775
+     branch offset IFEQ A -> +8 @4766
+     branch offset GOTO B -> +4 @4771
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x07                FLOAD 0x07
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x28                  LDC 0x28
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@5857
+     label A -> instruction 5865
+     label B -> instruction 5866
+     branch offset IFEQ A -> +8 @5857
+     branch offset GOTO B -> +4 @5862
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x05                FLOAD 0x05
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x22                  LDC 0x22
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@5893
+     label A -> instruction 5901
+     label B -> instruction 5902
+     branch offset IFEQ A -> +8 @5893
+     branch offset GOTO B -> +4 @5898
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x06                FLOAD 0x06
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x22                  LDC 0x22
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@5929
+     label A -> instruction 5937
+     label B -> instruction 5938
+     branch offset IFEQ A -> +8 @5929
+     branch offset GOTO B -> +4 @5934
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x07                FLOAD 0x07
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x22                  LDC 0x22
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@7009
+     label A -> instruction 7017
+     label B -> instruction 7018
+     branch offset IFEQ A -> +8 @7009
+     branch offset GOTO B -> +4 @7014
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x05                FLOAD 0x05
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x22                  LDC 0x22
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@7045
+     label A -> instruction 7053
+     label B -> instruction 7054
+     branch offset IFEQ A -> +8 @7045
+     branch offset GOTO B -> +4 @7050
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x06                FLOAD 0x06
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x22                  LDC 0x22
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
+    override AO block brightness for extra render passes a(Laig;IIIFFF)Z@7081
+     label A -> instruction 7089
+     label B -> instruction 7090
+     branch offset IFEQ A -> +8 @7081
+     branch offset GOTO B -> +4 @7086
+     IFEQ 0x00 0x08            IFEQ 0x00 0x08
+     FLOAD 0x07                FLOAD 0x07
+     GOTO 0x00 0x04            GOTO 0x00 0x04
+     FCONST_1                  FCONST_1
+     LDC 0x22                  LDC 0x22
+     FMUL                      INVOKESTATIC 0x03 0xbb
+                               FMUL
  applying EntityRenderer patch to auw.class for mod Custom Colors
      label A -> instruction 6
      branch offset IFEQ A -> +5 @1
@@ -3772,6 +4225,44 @@ Patching...
                                ICONST_2
                                FALOAD
                                PUTFIELD 0x00 0xff
+ applying EntityRenderer patch to auw.class for mod Better Glass
+    set gl shade model a(FJ)V@403
+     IFEQ 0x00 0x09            INVOKESTATIC 0x04 0x98
+     SIPUSH 0x1d 0x01          IFEQ 0x00 0x09
+     INVOKESTATIC 0x01 0xe2    SIPUSH 0x1d 0x01
+                               INVOKESTATIC 0x01 0xe2
+    set gl shade model a(FJ)V@915
+     IFEQ 0x00 0x09            INVOKESTATIC 0x04 0x98
+     SIPUSH 0x1d 0x01          IFEQ 0x00 0x09
+     INVOKESTATIC 0x01 0xe2    SIPUSH 0x1d 0x01
+                               INVOKESTATIC 0x01 0xe2
+    do extra render pass 2 a(FJ)V@584
+     ALOAD 0x05                ALOAD 0x05
+     ALOAD 0x04                ALOAD 0x04
+     ICONST_0                  ICONST_0
+     FLOAD_1                   FLOAD_1
+     F2D                       F2D
+     INVOKEVIRTUAL 0x01 0x8d   INVOKEVIRTUAL 0x01 0x8d
+     POP                       POP
+                               ALOAD 0x05
+                               ALOAD 0x04
+                               ICONST_2
+                               FLOAD_1
+                               F2D
+                               INVOKESTATIC 0x04 0x9c
+    do extra render pass 3 a(FJ)V@1047
+     ICONST_1                  ALOAD 0x05
+     INVOKESTATIC 0x01 0xd3    ALOAD 0x04
+     SIPUSH 0x0b 0x44          ICONST_3
+     INVOKESTATIC 0x01 0xd5    FLOAD_1
+     SIPUSH 0x0b 0xe2          F2D
+     INVOKESTATIC 0x01 0xd4    INVOKESTATIC 0x04 0x9c
+                               ICONST_1
+                               INVOKESTATIC 0x01 0xd3
+                               SIPUSH 0x0b 0x44
+                               INVOKESTATIC 0x01 0xd5
+                               SIPUSH 0x0b 0xe2
+                               INVOKESTATIC 0x01 0xd4
  applying Tessellator patch to ave.class for mod Connected Textures
     make method <init> public
     make field isDrawing public
@@ -4142,6 +4633,15 @@ Patching...
     override moon texture a(F)V@997
      LDC 0x3f                  LDC 0x3f
                                INVOKESTATIC 0x05 0x47
+ applying RenderGlobal patch to avb.class for mod Better Glass
+    increase gl render lists per chunk from 3 to 5 (init) <init>(Lnet/minecraft/client/Minecraft;Lavf;)V@183
+     ICONST_3                  ICONST_5
+    increase gl render lists per chunk from 3 to 5 (loop) a()V@620
+     IINC 0x02 0x03            IINC 0x02 0x05
+    disable lightmap on render pass 3 a(ID)V@8
+     INVOKEVIRTUAL 0x01 0xe1   ILOAD_1
+                               INVOKESTATIC 0x05 0x4d
+   increasing stack size from 3 to 4
  applying WorldRenderer patch to aus.class for mod Connected Textures
     pre render world a()V@0
                                INVOKESTATIC 0x01 0x06
@@ -4150,6 +4650,60 @@ Patching...
                                RETURN
     post render world a()V@629
                                INVOKESTATIC 0x01 0x09
+ applying WorldRenderer patch to aus.class for mod Better Glass
+    increase render passes from 2 to 4 (init) <init>(Lup;Ljava/util/List;IIII)V@15
+     ICONST_2                  ICONST_4
+    increase render passes from 2 to 4 (loop) a()V@66
+     ICONST_2                  ICONST_4
+    increase render passes from 2 to 4 (loop) a()V@200
+     ICONST_2                  ICONST_4
+    increase render passes from 2 to 4 (loop) b()V@3
+     ICONST_2                  ICONST_4
+    increase render passes from 2 to 4 (occlusion) a(III)V@181
+     ICONST_2                  ICONST_4
+    increase render passes from 2 to 4 (occlusion) d()V@4
+     ICONST_2                  ICONST_4
+    pre render pass a()V@204
+   loop register 11
+     ICONST_0                  ICONST_0
+     ISTORE 0x0c               ISTORE 0x0c
+     ICONST_0                  ICONST_0
+     ISTORE 0x0d               ISTORE 0x0d
+     ICONST_0                  ICONST_0
+     ISTORE 0x0e               ISTORE 0x0e
+                               ILOAD 0x0b
+                               INVOKESTATIC 0x01 0x0d
+    prevent early loop exit a()V@541
+     ILOAD 0x0c                NOP
+     IFNE 0x00 0x06            NOP
+     GOTO 0x00 0x09            NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+                               NOP
+    increase render passes from 2 to 4 (&&) e()Z@9
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x28        NOP
+     ICONST_0                  NOP
+     BALOAD                    NOP
+     IFEQ 0x00 0x10            NOP
+     ALOAD_0                   NOP
+     GETFIELD 0x00 0x28        NOP
+     ICONST_1                  NOP
+     BALOAD                    NOP
+     IFEQ 0x00 0x07            NOP
+     ICONST_1                  NOP
+     GOTO 0x00 0x04            NOP
+     ICONST_0                  NOP
+                               NOP
+                               NOP
+                               NOP
+                               ALOAD_0
+                               GETFIELD 0x00 0x28
+                               INVOKESTATIC 0x01 0x11
+    set up extra render pass a()V@426
+     INVOKEVIRTUAL 0x00 0x3a   INVOKESTATIC 0x01 0x15
  applying TileEntitySignRenderer patch to axq.class for mod Custom Colors
     override sign text color a(Lajg;DDDF)V@248
      ICONST_0                  ICONST_0
@@ -4229,6 +4783,11 @@ Patching...
                                RETURN
     finish mooshroom overlay a(Lmr;F)V@183
                                INVOKESTATIC 0x00 0x74
+ applying RenderSheep patch to aws.class for mod Random Mobs
+    randomize /mob/sheep_fur.png a(Lmu;IF)I@12
+     LDC 0x01                  ALOAD_1
+                               LDC 0x01
+                               INVOKESTATIC 0x00 0x3a
  applying RenderXPOrb patch to awa.class for mod Custom Colors
     override xp orb color a(Lju;DDDFF)V@273
      ILOAD 0x18                ILOAD 0x18
@@ -5279,54 +5838,62 @@ Patching...
    method signature (Lnet/minecraft/src/TexturePackBase;)Lnet/minecraft/src/TexturePackBase; -> (Laye;)Laye;
    field signature Lnet/minecraft/src/TexturePackBase; -> Laye;
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; getTexturePack()Laye;@0
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@37
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@49
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@58
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@162
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@171
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@0
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@28
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; access$000()Laye;@0
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x11
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x55
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Laye; access$002(Laye;)Laye;@2
-     PUTSTATIC 0x00 0x01       PUTSTATIC 0x01 0x11
+     PUTSTATIC 0x00 0x01       PUTSTATIC 0x01 0x55
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.C Layj; getCurrentTexturePack()Laye;@11
-     GETFIELD 0x00 0x04        GETFIELD 0x01 0x15
+     GETFIELD 0x00 0x04        GETFIELD 0x01 0x59
     method ref net.minecraft.src.TexturePackList.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> ayj.getSelectedTexturePack ()Laye; getCurrentTexturePack()Laye;@22
-     INVOKEVIRTUAL 0x00 0x05   INVOKEVIRTUAL 0x01 0x19
+     INVOKEVIRTUAL 0x00 0x05   INVOKEVIRTUAL 0x01 0x5d
     method ref com.pclewis.mcpatcher.TexturePackAPI.getTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.getTexturePack ()Laye; isDefaultTexturePack()Z@0
-     INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0x1b
+     INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0x5f
     class ref net.minecraft.src.TexturePackDefault -> ayf isDefaultTexturePack()Z@3
-     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x1d
+     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x61
     class ref net.minecraft.src.TexturePackDefault -> ayf listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@40
-     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x1d
+     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x61
     class ref net.minecraft.src.TexturePackCustom -> ayg listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@52
-     INSTANCEOF 0x00 0x1c      INSTANCEOF 0x01 0x1f
+     INSTANCEOF 0x00 0x1c      INSTANCEOF 0x01 0x63
     class ref net.minecraft.src.TexturePackCustom -> ayg listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@61
-     CHECKCAST 0x00 0x1c       CHECKCAST 0x01 0x1f
+     CHECKCAST 0x00 0x1c       CHECKCAST 0x01 0x63
     field ref net.minecraft.src.TexturePackCustom.zipFile Ljava/util/zip/ZipFile; -> ayg.e Ljava/util/zip/ZipFile; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@64
-     GETFIELD 0x00 0x1d        GETFIELD 0x01 0x21
+     GETFIELD 0x00 0x1d        GETFIELD 0x01 0x65
     class ref net.minecraft.src.TexturePackFolder -> ayh listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@165
-     INSTANCEOF 0x00 0x2a      INSTANCEOF 0x01 0x23
+     INSTANCEOF 0x00 0x2a      INSTANCEOF 0x01 0x67
     class ref net.minecraft.src.TexturePackFolder -> ayh listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@174
-     CHECKCAST 0x00 0x2a       CHECKCAST 0x01 0x23
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x01 0x67
     method ref net.minecraft.src.TexturePackFolder.getFolder ()Ljava/io/File; -> ayh.getFolder ()Ljava/io/File; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@177
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x01 0x24
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x01 0x68
+    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lavf; getTextureIfLoaded(Ljava/lang/String;)I@3
+     GETFIELD 0x00 0x37        GETFIELD 0x01 0x6b
+    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lavf; unloadTexture(Ljava/lang/String;)I@12
+     GETFIELD 0x00 0x37        GETFIELD 0x01 0x6b
+    method ref net.minecraft.src.RenderEngine.deleteTexture (I)V -> avf.a (I)V unloadTexture(Ljava/lang/String;)I@18
+     INVOKEVIRTUAL 0x00 0x41   INVOKEVIRTUAL 0x01 0x70
     method ref com.pclewis.mcpatcher.TexturePackAPI.getCurrentTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.getCurrentTexturePack ()Laye; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@6
-     INVOKESTATIC 0x00 0x37    INVOKESTATIC 0x01 0x26
+     INVOKESTATIC 0x00 0x43    INVOKESTATIC 0x01 0x72
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> aye.a (Ljava/lang/String;)Ljava/io/InputStream; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@24
-     INVOKEVIRTUAL 0x00 0x3a   INVOKEVIRTUAL 0x01 0x2b
+     INVOKEVIRTUAL 0x00 0x46   INVOKEVIRTUAL 0x01 0x76
     method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> aye.a (Ljava/lang/String;)Ljava/io/InputStream; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@32
-     INVOKEVIRTUAL 0x00 0x3a   INVOKEVIRTUAL 0x01 0x2b
-   string replace Lnet/minecraft/src/TexturePackBase; -> Laye; @2800
+     INVOKEVIRTUAL 0x00 0x46   INVOKEVIRTUAL 0x01 0x76
+   string replace net/minecraft/src/RenderEngine -> avf @3964
+   string replace Lnet/minecraft/src/RenderEngine; -> Lavf; @2986
+   string replace Lnet/minecraft/src/TexturePackBase; -> Laye; @3323
    string replace Lnet/minecraft/src/TexturePackList; -> Layj; @342
   adding com/pclewis/mcpatcher/TexturePackAPI$ChangeHandler.class for __TexturePackBase
    method signature (Lnet/minecraft/src/TexturePackBase;)V -> (Laye;)V
@@ -5540,13 +6107,9 @@ Patching...
      GETSTATIC 0x00 0x0c       GETSTATIC 0x00 0x66
   adding com/pclewis/mcpatcher/mod/CustomAnimation.class for HD Textures
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lavf; newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@114
-     GETFIELD 0x00 0x39        GETFIELD 0x01 0x63
-    field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lavf; newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@139
-     GETFIELD 0x00 0x39        GETFIELD 0x01 0x63
+     GETFIELD 0x00 0x38        GETFIELD 0x01 0x65
     method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> avf.b (Ljava/lang/String;)I newStrip(Ljava/lang/String;ILjava/lang/String;Ljava/awt/image/BufferedImage;IIIILjava/util/Properties;)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@118
-     INVOKEVIRTUAL 0x00 0x3a   INVOKEVIRTUAL 0x01 0x68
-    method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> avf.b (Ljava/lang/String;)I newTile(Ljava/lang/String;IIII)Lcom/pclewis/mcpatcher/mod/CustomAnimation;@143
-     INVOKEVIRTUAL 0x00 0x3a   INVOKEVIRTUAL 0x01 0x68
+     INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x6a
   adding com/pclewis/mcpatcher/mod/CustomAnimation$Delegate.class for HD Textures
   adding com/pclewis/mcpatcher/mod/CustomAnimation$Tile.class for HD Textures
   adding com/pclewis/mcpatcher/mod/CustomAnimation$Strip.class for HD Textures
@@ -5600,11 +6163,17 @@ Patching...
    method signature (Lnet/minecraft/src/EntityLiving;)Ljava/lang/String; -> (Ljw;)Ljava/lang/String;
    method signature (Lnet/minecraft/src/EntityLiving;Ljava/lang/String;)Ljava/lang/String; -> (Ljw;Ljava/lang/String;)Ljava/lang/String;
     method ref net.minecraft.src.EntityLiving.getEntityTexture ()Ljava/lang/String; -> jw.O ()Ljava/lang/String; randomTexture(Ljw;)Ljava/lang/String;@2
-     INVOKEVIRTUAL 0x00 0x03   INVOKEVIRTUAL 0x00 0x81
+     INVOKEVIRTUAL 0x00 0x03   INVOKEVIRTUAL 0x00 0x83
     method ref com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Lnet/minecraft/src/EntityLiving;Ljava/lang/String;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Ljw;Ljava/lang/String;)Ljava/lang/String; randomTexture(Ljw;)Ljava/lang/String;@5
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x00 0x83
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x00 0x85
+    method ref com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Lnet/minecraft/src/EntityLiving;Ljava/lang/String;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Ljw;Ljava/lang/String;)Ljava/lang/String; randomTexture(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;@12
+     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x00 0x85
     method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.getInfo (Lnet/minecraft/src/EntityLiving;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.getInfo (Ljw;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; randomTexture(Ljw;Ljava/lang/String;)Ljava/lang/String;@21
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x86
+     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x88
+    class ref net.minecraft.src.EntityLiving -> jw randomTexture(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;@1
+     INSTANCEOF 0x00 0x14      INSTANCEOF 0x00 0x80
+    class ref net.minecraft.src.EntityLiving -> jw randomTexture(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;@8
+     CHECKCAST 0x00 0x14       CHECKCAST 0x00 0x80
    string replace Lnet/minecraft/src/EntityLiving; -> Ljw; @252
   adding com/pclewis/mcpatcher/mod/MobRandomizer$1.class for Random Mobs
   adding com/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo.class for Random Mobs
@@ -5786,145 +6355,153 @@ Patching...
    method signature (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> (Ljava/lang/String;Lji;)V
    field signature Lnet/minecraft/src/Entity; -> Ljn;
     field ref net.minecraft.src.Block.blockID I -> aig.ca I colorizeBlock(Laig;IIII)I@16
-     GETFIELD 0x00 0x26        GETFIELD 0x04 0x27
+     GETFIELD 0x00 0x26        GETFIELD 0x04 0x3b
     field ref net.minecraft.src.Block.blockID I -> aig.ca I colorizeBlock(Laig;IIII)I@41
-     GETFIELD 0x00 0x26        GETFIELD 0x04 0x27
+     GETFIELD 0x00 0x26        GETFIELD 0x04 0x3b
     field ref net.minecraft.src.Block.blockID I -> aig.ca I colorizeBlock(Laig;IIII)I@48
-     GETFIELD 0x00 0x26        GETFIELD 0x04 0x27
+     GETFIELD 0x00 0x26        GETFIELD 0x04 0x3b
     field ref net.minecraft.src.Block.blockID I -> aig.ca I colorizeBlock(Laig;IIII)I@62
-     GETFIELD 0x00 0x26        GETFIELD 0x04 0x27
+     GETFIELD 0x00 0x26        GETFIELD 0x04 0x3b
     field ref net.minecraft.src.Block.blockID I -> aig.ca I colorizeBlock(Laig;)I@4
-     GETFIELD 0x00 0x26        GETFIELD 0x04 0x27
+     GETFIELD 0x00 0x26        GETFIELD 0x04 0x3b
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> uz.g (III)I colorizeRedstoneWire(Luz;IIII)I@13
-     INVOKEINTERFACE 0x00 0x58 0x04 0x00  INVOKEINTERFACE 0x04 0x2c 0x04 0x00
+     INVOKEINTERFACE 0x00 0x58 0x04 0x00  INVOKEINTERFACE 0x04 0x40 0x04 0x00
     method ref com.pclewis.mcpatcher.mod.BiomeHelper$New.<init> (Lnet/minecraft/src/IBlockAccess;)V -> com.pclewis.mcpatcher.mod.BiomeHelper$New.<init> (Luz;)V setupBlockAccess(Luz;Z)V@26
-     INVOKESPECIAL 0x00 0x62   INVOKESPECIAL 0x04 0x2f
+     INVOKESPECIAL 0x00 0x62   INVOKESPECIAL 0x04 0x43
     method ref com.pclewis.mcpatcher.mod.BiomeHelper$Old.<init> (Lnet/minecraft/src/IBlockAccess;)V -> com.pclewis.mcpatcher.mod.BiomeHelper$Old.<init> (Luz;)V setupBlockAccess(Luz;Z)V@40
-     INVOKESPECIAL 0x00 0x64   INVOKESPECIAL 0x04 0x30
+     INVOKESPECIAL 0x00 0x64   INVOKESPECIAL 0x04 0x44
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Ljn; setupForFog(Ljn;)V@1
-     PUTSTATIC 0x00 0x65       PUTSTATIC 0x04 0x32
+     PUTSTATIC 0x00 0x65       PUTSTATIC 0x04 0x46
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Ljn; computeFogColor(I)Z@12
-     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x32
+     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x46
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Ljn; computeFogColor(I)Z@35
-     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x32
+     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x46
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Ljn; computeFogColor(I)Z@43
-     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x32
+     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x46
     field ref com.pclewis.mcpatcher.mod.Colorizer.fogCamera Lnet/minecraft/src/Entity; -> com.pclewis.mcpatcher.mod.Colorizer.fogCamera Ljn; computeFogColor(I)Z@51
-     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x32
+     GETSTATIC 0x00 0x65       GETSTATIC 0x04 0x46
     class ref net.minecraft.src.BiomeGenBase -> vk setupForFog(Ljn;)V@36
-     CHECKCAST 0x00 0x6b       CHECKCAST 0x04 0x34
+     CHECKCAST 0x00 0x6b       CHECKCAST 0x04 0x48
     field ref net.minecraft.src.BiomeGenBase.temperature F -> vk.F F setupForFog(Ljn;)V@41
-     GETFIELD 0x00 0x6c        GETFIELD 0x04 0x36
+     GETFIELD 0x00 0x6c        GETFIELD 0x04 0x4a
     field ref net.minecraft.src.BiomeGenBase.temperature F -> vk.F F setupForFog(Ljn;)V@55
-     GETFIELD 0x00 0x6c        GETFIELD 0x04 0x36
+     GETFIELD 0x00 0x6c        GETFIELD 0x04 0x4a
     field ref net.minecraft.src.BiomeGenBase.rainfall F -> vk.G F setupForFog(Ljn;)V@46
-     GETFIELD 0x00 0x6d        GETFIELD 0x04 0x39
+     GETFIELD 0x00 0x6d        GETFIELD 0x04 0x4d
     field ref net.minecraft.src.BiomeGenBase.rainfall F -> vk.G F setupForFog(Ljn;)V@60
-     GETFIELD 0x00 0x6d        GETFIELD 0x04 0x39
+     GETFIELD 0x00 0x6d        GETFIELD 0x04 0x4d
     field ref net.minecraft.src.BiomeGenBase.biomeID I -> vk.M I setupForFog(Ljn;)V@78
-     GETFIELD 0x00 0x72        GETFIELD 0x04 0x3c
+     GETFIELD 0x00 0x72        GETFIELD 0x04 0x50
     field ref net.minecraft.src.BiomeGenBase.biomeName Ljava/lang/String; -> vk.y Ljava/lang/String; setupForFog(Ljn;)V@88
-     GETFIELD 0x00 0x73        GETFIELD 0x04 0x3e
+     GETFIELD 0x00 0x73        GETFIELD 0x04 0x52
     field ref net.minecraft.src.BiomeGenBase.waterColorMultiplier I -> vk.H I setupForFog(Ljn;)V@95
-     GETFIELD 0x00 0x74        GETFIELD 0x04 0x41
+     GETFIELD 0x00 0x74        GETFIELD 0x04 0x55
     field ref net.minecraft.src.Entity.posX D -> jn.t D computeFogColor(I)Z@38
-     GETFIELD 0x00 0x76        GETFIELD 0x04 0x46
+     GETFIELD 0x00 0x76        GETFIELD 0x04 0x5a
     field ref net.minecraft.src.Entity.posY D -> jn.u D computeFogColor(I)Z@46
-     GETFIELD 0x00 0x77        GETFIELD 0x04 0x49
+     GETFIELD 0x00 0x77        GETFIELD 0x04 0x5d
     field ref net.minecraft.src.Entity.posZ D -> jn.v D computeFogColor(I)Z@54
-     GETFIELD 0x00 0x78        GETFIELD 0x04 0x4c
+     GETFIELD 0x00 0x78        GETFIELD 0x04 0x60
     field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> up.w Lxc; computeFogColor(Lup;F)Z@1
-     GETFIELD 0x00 0x7b        GETFIELD 0x04 0x52
+     GETFIELD 0x00 0x7b        GETFIELD 0x04 0x66
     field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> up.w Lxc; computeSkyColor(Lup;F)Z@1
-     GETFIELD 0x00 0x7b        GETFIELD 0x04 0x52
+     GETFIELD 0x00 0x7b        GETFIELD 0x04 0x66
     field ref net.minecraft.src.WorldProvider.worldType I -> xc.g I computeFogColor(Lup;F)Z@4
-     GETFIELD 0x00 0x7c        GETFIELD 0x04 0x56
+     GETFIELD 0x00 0x7c        GETFIELD 0x04 0x6a
     field ref net.minecraft.src.WorldProvider.worldType I -> xc.g I computeSkyColor(Lup;F)Z@4
-     GETFIELD 0x00 0x7c        GETFIELD 0x04 0x56
+     GETFIELD 0x00 0x7c        GETFIELD 0x04 0x6a
     method ref com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lnet/minecraft/src/World;F)V -> com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lup;F)V computeFogColor(Lup;F)Z@20
-     INVOKESTATIC 0x00 0x7e    INVOKESTATIC 0x04 0x58
+     INVOKESTATIC 0x00 0x7e    INVOKESTATIC 0x04 0x6c
     method ref com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lnet/minecraft/src/World;F)V -> com.pclewis.mcpatcher.mod.Colorizer.computeLightningFlash (Lup;F)V computeSkyColor(Lup;F)Z@20
-     INVOKESTATIC 0x00 0x7e    INVOKESTATIC 0x04 0x58
+     INVOKESTATIC 0x00 0x7e    INVOKESTATIC 0x04 0x6c
     field ref net.minecraft.src.World.lightningFlash I -> up.s I computeLightningFlash(Lup;F)V@1
-     GETFIELD 0x00 0x7f        GETFIELD 0x04 0x5b
+     GETFIELD 0x00 0x7f        GETFIELD 0x04 0x6f
     field ref net.minecraft.src.World.lightningFlash I -> up.s I computeLightningFlash(Lup;F)V@10
-     GETFIELD 0x00 0x7f        GETFIELD 0x04 0x5b
+     GETFIELD 0x00 0x7f        GETFIELD 0x04 0x6f
     field ref net.minecraft.src.Potion.id I -> ji.H I setupPotion(Lji;)V@9
-     GETFIELD 0x00 0x89        GETFIELD 0x04 0x5e
+     GETFIELD 0x00 0x89        GETFIELD 0x04 0x72
     field ref net.minecraft.src.Potion.name Ljava/lang/String; -> ji.I Ljava/lang/String; setupPotion(Lji;)V@19
-     GETFIELD 0x00 0x8a        GETFIELD 0x04 0x60
+     GETFIELD 0x00 0x8a        GETFIELD 0x04 0x74
     field ref net.minecraft.src.Potion.name Ljava/lang/String; -> ji.I Ljava/lang/String; reloadPotionColors()V@27
-     GETFIELD 0x00 0x8a        GETFIELD 0x04 0x60
+     GETFIELD 0x00 0x8a        GETFIELD 0x04 0x74
     field ref net.minecraft.src.Potion.color I -> ji.N I setupPotion(Lji;)V@26
-     GETFIELD 0x00 0x8b        GETFIELD 0x04 0x63
+     GETFIELD 0x00 0x8b        GETFIELD 0x04 0x77
     field ref net.minecraft.src.Potion.color I -> ji.N I setupPotion(Lji;)V@38
-     GETFIELD 0x00 0x8b        GETFIELD 0x04 0x63
+     GETFIELD 0x00 0x8b        GETFIELD 0x04 0x77
     field ref net.minecraft.src.Potion.color I -> ji.N I reset()V@337
-     PUTFIELD 0x00 0x8b        PUTFIELD 0x04 0x63
+     PUTFIELD 0x00 0x8b        PUTFIELD 0x04 0x77
     field ref net.minecraft.src.Potion.color I -> ji.N I loadIntColor(Ljava/lang/String;Lji;)V@26
-     PUTFIELD 0x00 0x8b        PUTFIELD 0x04 0x63
+     PUTFIELD 0x00 0x8b        PUTFIELD 0x04 0x77
     field ref net.minecraft.src.Potion.origColor I -> ji.origColor I setupPotion(Lji;)V@41
-     PUTFIELD 0x00 0x8c        PUTFIELD 0x04 0x64
+     PUTFIELD 0x00 0x8c        PUTFIELD 0x04 0x78
     field ref net.minecraft.src.Potion.origColor I -> ji.origColor I reset()V@334
-     GETFIELD 0x00 0x8c        GETFIELD 0x04 0x64
+     GETFIELD 0x00 0x8c        GETFIELD 0x04 0x78
     field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; reset()V@186
-     GETSTATIC 0x00 0xa2       GETSTATIC 0x04 0x68
+     GETSTATIC 0x00 0xa2       GETSTATIC 0x04 0x7c
     class ref net.minecraft.src.Potion -> ji reset()V@328
-     CHECKCAST 0x00 0xab       CHECKCAST 0x04 0x5d
+     CHECKCAST 0x00 0xab       CHECKCAST 0x04 0x71
     class ref net.minecraft.src.Potion -> ji reloadPotionColors()V@22
-     CHECKCAST 0x00 0xab       CHECKCAST 0x04 0x5d
+     CHECKCAST 0x00 0xab       CHECKCAST 0x04 0x71
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> acq.a [Lacq; reset()V@343
-     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x6e
+     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x82
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> acq.a [Lacq; reloadMapColors()V@3
-     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x6e
+     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x82
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> acq.a [Lacq; reloadMapColors()V@10
-     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x6e
+     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x82
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> acq.a [Lacq; reloadMapColors()V@23
-     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x6e
+     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x82
     field ref net.minecraft.src.MapColor.mapColorArray [Lnet/minecraft/src/MapColor; -> acq.a [Lacq; reloadMapColors()V@64
-     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x6e
+     GETSTATIC 0x00 0xac       GETSTATIC 0x04 0x82
     field ref net.minecraft.src.MapColor.origColorValue I -> acq.origColorValue I reset()V@367
-     GETFIELD 0x00 0xad        GETFIELD 0x04 0x6f
+     GETFIELD 0x00 0xad        GETFIELD 0x04 0x83
     field ref net.minecraft.src.MapColor.origColorValue I -> acq.origColorValue I reloadMapColors()V@28
-     GETFIELD 0x00 0xad        GETFIELD 0x04 0x6f
+     GETFIELD 0x00 0xad        GETFIELD 0x04 0x83
     field ref net.minecraft.src.MapColor.colorValue I -> acq.p I reset()V@370
-     PUTFIELD 0x00 0xae        PUTFIELD 0x04 0x72
+     PUTFIELD 0x00 0xae        PUTFIELD 0x04 0x86
     field ref net.minecraft.src.MapColor.colorValue I -> acq.p I reloadMapColors()V@72
-     PUTFIELD 0x00 0xae        PUTFIELD 0x04 0x72
+     PUTFIELD 0x00 0xae        PUTFIELD 0x04 0x86
     field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F reset()V@383
-     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x76
+     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x8a
     field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F reloadDyeColors()V@52
-     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x76
-    field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F reloadDyeColors()V@74
-     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x76
-    field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F reloadDyeColors()V@91
-     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x76
+     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x8a
+    field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F reloadDyeColors()V@59
+     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x8a
+    field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F reloadDyeColors()V@93
+     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x8a
     field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F <clinit>()V@471
-     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x76
+     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x8a
+    field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F <clinit>()V@495
+     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x8a
+    field ref net.minecraft.src.EntitySheep.fleeceColorTable [[F -> mu.d [[F <clinit>()V@507
+     GETSTATIC 0x00 0xb0       GETSTATIC 0x04 0x8a
     field ref net.minecraft.src.ItemDye.dyeColors [I -> qv.b [I reset()V@398
-     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x7b
+     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x8f
     field ref net.minecraft.src.ItemDye.dyeColors [I -> qv.b [I reloadDyeColors()V@3
-     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x7b
+     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x8f
     field ref net.minecraft.src.ItemDye.dyeColors [I -> qv.b [I reloadDyeColors()V@35
-     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x7b
+     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x8f
     field ref net.minecraft.src.ItemDye.dyeColors [I -> qv.b [I <clinit>()V@483
-     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x7b
+     GETSTATIC 0x00 0xb2       GETSTATIC 0x04 0x8f
     method ref com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Lnet/minecraft/src/Potion;)V -> com.pclewis.mcpatcher.mod.Colorizer.loadIntColor (Ljava/lang/String;Lji;)V reloadPotionColors()V@31
-     INVOKESTATIC 0x00 0xc8    INVOKESTATIC 0x04 0x7d
+     INVOKESTATIC 0x00 0xcc    INVOKESTATIC 0x04 0x91
     field ref net.minecraft.src.ItemDye.dyeColorNames [Ljava/lang/String; -> qv.a [Ljava/lang/String; reloadDyeColors()V@22
-     GETSTATIC 0x00 0xf2       GETSTATIC 0x04 0x7f
-    field ref net.minecraft.src.ItemDye.dyeColorNames [Ljava/lang/String; -> qv.a [Ljava/lang/String; reloadDyeColors()V@71
-     GETSTATIC 0x00 0xf2       GETSTATIC 0x04 0x7f
+     GETSTATIC 0x00 0xf6       GETSTATIC 0x04 0x93
+    field ref net.minecraft.src.ItemDye.dyeColorNames [Ljava/lang/String; -> qv.a [Ljava/lang/String; reloadDyeColors()V@80
+     GETSTATIC 0x00 0xf6       GETSTATIC 0x04 0x93
+    field ref net.minecraft.src.ItemDye.dyeColorNames [Ljava/lang/String; -> qv.a [Ljava/lang/String; reloadDyeColors()V@113
+     GETSTATIC 0x00 0xf6       GETSTATIC 0x04 0x93
+    field ref net.minecraft.src.ItemDye.dyeColorNames [Ljava/lang/String; -> qv.a [Ljava/lang/String; reloadDyeColors()V@146
+     GETSTATIC 0x00 0xf6       GETSTATIC 0x04 0x93
    string replace Lnet/minecraft/src/MapColor; -> Lacq; @5177
    string replace [Lnet/minecraft/src/MapColor; -> [Lacq; @5192
    string replace Lnet/minecraft/src/IBlockAccess; -> Luz; @3031
    string replace Lnet/minecraft/src/BiomeGenBase; -> Lvk; @3614
-   string replace Ljava/util/ArrayList<Lnet/minecraft/src/BiomeGenBase;>; -> Ljava/util/ArrayList<Lvk;>; @10658
+   string replace Ljava/util/ArrayList<Lnet/minecraft/src/BiomeGenBase;>; -> Ljava/util/ArrayList<Lvk;>; @10787
    string replace Lnet/minecraft/src/Block; -> Laig; @847
    string replace Lnet/minecraft/src/World; -> Lup; @4316
    string replace Lnet/minecraft/src/Entity; -> Ljn; @3638
    string replace Lnet/minecraft/src/Potion; -> Lji; @4712
-   string replace Ljava/util/ArrayList<Lnet/minecraft/src/Potion;>; -> Ljava/util/ArrayList<Lji;>; @10414
+   string replace Ljava/util/ArrayList<Lnet/minecraft/src/Potion;>; -> Ljava/util/ArrayList<Lji;>; @10543
   adding com/pclewis/mcpatcher/mod/Colorizer$1.class for Custom Colors
   adding com/pclewis/mcpatcher/mod/ColorMap.class for Custom Colors
   adding com/pclewis/mcpatcher/mod/Lightmap.class for Custom Colors
@@ -6032,65 +6609,78 @@ Patching...
    method signature (Lnet/minecraft/src/IBlockAccess;I)Z -> (Luz;I)Z
    method signature (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/Block;IIIII)Z -> (Lavg;Laig;IIIII)Z
    method signature (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/Block;IIII)Z -> (Lavg;Laig;IIII)Z
+   method signature (Lnet/minecraft/src/Block;)Z -> (Laig;)Z
    method signature (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> (Lavg;Luz;Laig;IIIII)Z
    method signature (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z -> (Lavg;Luz;Laig;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z
    field signature Lnet/minecraft/src/Tessellator; -> Lave;
-    field ref com.pclewis.mcpatcher.mod.SuperTessellator.instance Lcom/pclewis/mcpatcher/mod/SuperTessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.a Lcom/pclewis/mcpatcher/mod/SuperTessellator; start()V@6
-     GETSTATIC 0x00 0x0e       GETSTATIC 0x01 0x58
-    field ref com.pclewis.mcpatcher.mod.SuperTessellator.instance Lcom/pclewis/mcpatcher/mod/SuperTessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.a Lcom/pclewis/mcpatcher/mod/SuperTessellator; finish()V@3
-     GETSTATIC 0x00 0x0e       GETSTATIC 0x01 0x58
+    field ref com.pclewis.mcpatcher.mod.SuperTessellator.instance Lcom/pclewis/mcpatcher/mod/SuperTessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.a Lcom/pclewis/mcpatcher/mod/SuperTessellator; start()V@10
+     GETSTATIC 0x00 0x0f       GETSTATIC 0x01 0x64
+    field ref com.pclewis.mcpatcher.mod.SuperTessellator.instance Lcom/pclewis/mcpatcher/mod/SuperTessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.a Lcom/pclewis/mcpatcher/mod/SuperTessellator; start()V@26
+     GETSTATIC 0x00 0x0f       GETSTATIC 0x01 0x64
+    field ref com.pclewis.mcpatcher.mod.SuperTessellator.instance Lcom/pclewis/mcpatcher/mod/SuperTessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.a Lcom/pclewis/mcpatcher/mod/SuperTessellator; finish()V@9
+     GETSTATIC 0x00 0x0f       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.mod.SuperTessellator.instance Lcom/pclewis/mcpatcher/mod/SuperTessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.a Lcom/pclewis/mcpatcher/mod/SuperTessellator; getConnectedTexture(Lavg;Luz;Laig;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z@103
-     GETSTATIC 0x00 0x0e       GETSTATIC 0x01 0x58
-    field ref com.pclewis.mcpatcher.mod.SuperTessellator.texture I -> com/pclewis/mcpatcher/mod/SuperTessellator.texture I start()V@12
-     PUTFIELD 0x00 0x0f        PUTFIELD 0x00 0x0f
-    field ref com.pclewis.mcpatcher.mod.SuperTessellator.texture I -> com/pclewis/mcpatcher/mod/SuperTessellator.texture I finish()V@7
-     PUTFIELD 0x00 0x0f        PUTFIELD 0x00 0x0f
+     GETSTATIC 0x00 0x0f       GETSTATIC 0x01 0x64
+    field ref com.pclewis.mcpatcher.mod.SuperTessellator.texture I -> com/pclewis/mcpatcher/mod/SuperTessellator.texture I start()V@16
+     PUTFIELD 0x00 0x10        PUTFIELD 0x00 0x10
+    field ref com.pclewis.mcpatcher.mod.SuperTessellator.texture I -> com/pclewis/mcpatcher/mod/SuperTessellator.texture I start()V@30
+     PUTFIELD 0x00 0x10        PUTFIELD 0x00 0x10
+    field ref com.pclewis.mcpatcher.mod.SuperTessellator.texture I -> com/pclewis/mcpatcher/mod/SuperTessellator.texture I finish()V@13
+     PUTFIELD 0x00 0x10        PUTFIELD 0x00 0x10
     field ref net.minecraft.src.Tessellator.instance Lnet/minecraft/src/Tessellator; -> ave.a Lave; check(Luz;I)Z@22
-     GETSTATIC 0x00 0x11       GETSTATIC 0x01 0x5c
+     GETSTATIC 0x00 0x12       GETSTATIC 0x01 0x68
     class ref com.pclewis.mcpatcher.mod.SuperTessellator -> com/pclewis/mcpatcher/mod/SuperTessellator check(Luz;I)Z@25
-     INSTANCEOF 0x00 0x12      INSTANCEOF 0x00 0x12
+     INSTANCEOF 0x00 0x13      INSTANCEOF 0x00 0x13
     field ref net.minecraft.src.RenderBlocks.blockAccess Lnet/minecraft/src/IBlockAccess; -> avg.a Luz; setup(Lavg;Laig;IIIII)Z@1
-     GETFIELD 0x00 0x13        GETFIELD 0x01 0x61
+     GETFIELD 0x00 0x14        GETFIELD 0x01 0x6d
     field ref net.minecraft.src.RenderBlocks.blockAccess Lnet/minecraft/src/IBlockAccess; -> avg.a Luz; setup(Lavg;Laig;IIII)Z@1
-     GETFIELD 0x00 0x13        GETFIELD 0x01 0x61
+     GETFIELD 0x00 0x14        GETFIELD 0x01 0x6d
     field ref net.minecraft.src.Block.blockID I -> aig.ca I setup(Lavg;Laig;IIIII)Z@15
-     GETFIELD 0x00 0x14        GETFIELD 0x01 0x66
+     GETFIELD 0x00 0x15        GETFIELD 0x01 0x72
     field ref net.minecraft.src.Block.blockID I -> aig.ca I setup(Lavg;Laig;IIII)Z@15
-     GETFIELD 0x00 0x14        GETFIELD 0x01 0x66
+     GETFIELD 0x00 0x15        GETFIELD 0x01 0x72
     field ref net.minecraft.src.Block.blockID I -> aig.ca I getConnectedTexture(Lavg;Luz;Laig;IIIII)Z@42
-     GETFIELD 0x00 0x14        GETFIELD 0x01 0x66
+     GETFIELD 0x00 0x15        GETFIELD 0x01 0x72
     method ref com.pclewis.mcpatcher.mod.CTMUtils.check (Lnet/minecraft/src/IBlockAccess;I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.check (Luz;I)Z setup(Lavg;Laig;IIIII)Z@18
-     INVOKESTATIC 0x00 0x15    INVOKESTATIC 0x01 0x68
+     INVOKESTATIC 0x00 0x16    INVOKESTATIC 0x01 0x74
     method ref com.pclewis.mcpatcher.mod.CTMUtils.check (Lnet/minecraft/src/IBlockAccess;I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.check (Luz;I)Z setup(Lavg;Laig;IIII)Z@18
-     INVOKESTATIC 0x00 0x15    INVOKESTATIC 0x01 0x68
+     INVOKESTATIC 0x00 0x16    INVOKESTATIC 0x01 0x74
     method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lavg;Luz;Laig;IIIII)Z setup(Lavg;Laig;IIIII)Z@49
-     INVOKESTATIC 0x00 0x16    INVOKESTATIC 0x01 0x6a
+     INVOKESTATIC 0x00 0x17    INVOKESTATIC 0x01 0x76
     method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lavg;Luz;Laig;IIIII)Z setup(Lavg;Laig;IIII)Z@37
-     INVOKESTATIC 0x00 0x16    INVOKESTATIC 0x01 0x6a
+     INVOKESTATIC 0x00 0x17    INVOKESTATIC 0x01 0x76
+    method ref com.pclewis.mcpatcher.mod.RenderPassAPI.skipDefaultRendering (Lnet/minecraft/src/Block;)Z -> com.pclewis.mcpatcher.mod.RenderPassAPI.skipDefaultRendering (Laig;)Z skipDefaultRendering(Laig;)Z@4
+     INVOKEVIRTUAL 0x00 0x1b   INVOKEVIRTUAL 0x01 0x78
     method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lavg;Luz;Laig;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z getConnectedTexture(Lavg;Luz;Laig;IIIII)Z@20
-     INVOKESTATIC 0x00 0x19    INVOKESTATIC 0x01 0x6c
+     INVOKESTATIC 0x00 0x1c    INVOKESTATIC 0x01 0x7a
     method ref com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z -> com.pclewis.mcpatcher.mod.CTMUtils.getConnectedTexture (Lavg;Luz;Laig;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z getConnectedTexture(Lavg;Luz;Laig;IIIII)Z@45
-     INVOKESTATIC 0x00 0x19    INVOKESTATIC 0x01 0x6c
+     INVOKESTATIC 0x00 0x1c    INVOKESTATIC 0x01 0x7a
     method ref com.pclewis.mcpatcher.mod.TileOverride.getTile (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> com.pclewis.mcpatcher.mod.TileOverride.getTile (Lavg;Luz;Laig;IIIII)I getConnectedTexture(Lavg;Luz;Laig;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z@91
-     INVOKEVIRTUAL 0x00 0x1b   INVOKEVIRTUAL 0x01 0x6f
+     INVOKEVIRTUAL 0x00 0x1e   INVOKEVIRTUAL 0x01 0x7d
     method ref com.pclewis.mcpatcher.mod.SuperTessellator.getTessellator (I)Lnet/minecraft/src/Tessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.getTessellator (I)Lave; getConnectedTexture(Lavg;Luz;Laig;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z@111
-     INVOKEVIRTUAL 0x00 0x1e   INVOKEVIRTUAL 0x01 0x72
+     INVOKEVIRTUAL 0x00 0x21   INVOKEVIRTUAL 0x01 0x80
     field ref com.pclewis.mcpatcher.mod.CTMUtils.newTessellator Lnet/minecraft/src/Tessellator; -> com.pclewis.mcpatcher.mod.CTMUtils.newTessellator Lave; getConnectedTexture(Lavg;Luz;Laig;IIIII[[Lcom/pclewis/mcpatcher/mod/TileOverride;I)Z@114
-     PUTSTATIC 0x00 0x1f       PUTSTATIC 0x01 0x74
+     PUTSTATIC 0x00 0x22       PUTSTATIC 0x01 0x82
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lavf; getTexture(Ljava/lang/String;)I@16
-     GETFIELD 0x00 0x35        GETFIELD 0x01 0x78
+     GETFIELD 0x00 0x38        GETFIELD 0x01 0x86
     method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> avf.b (Ljava/lang/String;)I getTexture(Ljava/lang/String;)I@20
-     INVOKEVIRTUAL 0x00 0x36   INVOKEVIRTUAL 0x01 0x7d
+     INVOKEVIRTUAL 0x00 0x39   INVOKEVIRTUAL 0x01 0x8b
     field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; <clinit>()V@81
-     GETSTATIC 0x00 0x40       GETSTATIC 0x01 0x81
-   string replace Lnet/minecraft/src/Block; -> Laig; @573
-   string replace Lnet/minecraft/src/RenderBlocks; -> Lavg; @530
-   string replace Lnet/minecraft/src/IBlockAccess; -> Luz; @414
+     GETSTATIC 0x00 0x43       GETSTATIC 0x01 0x8f
+   string replace Lnet/minecraft/src/Block; -> Laig; @641
+   string replace Lnet/minecraft/src/RenderBlocks; -> Lavg; @598
+   string replace Lnet/minecraft/src/IBlockAccess; -> Luz; @482
   adding com/pclewis/mcpatcher/mod/CTMUtils$1.class for Connected Textures
     field ref com.pclewis.mcpatcher.mod.SuperTessellator.instance Lcom/pclewis/mcpatcher/mod/SuperTessellator; -> com/pclewis/mcpatcher/mod/SuperTessellator.a Lcom/pclewis/mcpatcher/mod/SuperTessellator; onChange()V@8
-     GETSTATIC 0x00 0x05       GETSTATIC 0x00 0xa2
+     GETSTATIC 0x00 0x05       GETSTATIC 0x00 0xc2
     method ref com.pclewis.mcpatcher.mod.SuperTessellator.clearTessellators ()V -> com/pclewis/mcpatcher/mod/SuperTessellator.clearTessellators ()V onChange()V@11
      INVOKEVIRTUAL 0x00 0x06   INVOKEVIRTUAL 0x00 0x06
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; onChange()V@319
+     GETSTATIC 0x00 0x2e       GETSTATIC 0x00 0xc8
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; onChange()V@377
+     GETSTATIC 0x00 0x2e       GETSTATIC 0x00 0xc8
+    method ref com.pclewis.mcpatcher.mod.RenderPassAPI.setRenderPassForBlock (Lnet/minecraft/src/Block;I)V -> com.pclewis.mcpatcher.mod.RenderPassAPI.setRenderPassForBlock (Laig;I)V onChange()V@387
+     INVOKEVIRTUAL 0x00 0x31   INVOKEVIRTUAL 0x00 0xcb
   adding com/pclewis/mcpatcher/mod/SuperTessellator.class for Connected Textures
    method signature (I)Lnet/minecraft/src/Tessellator; -> (I)Lave;
    method signature (Lnet/minecraft/src/Tessellator;Z)V -> (Lave;Z)V
@@ -6245,38 +6835,40 @@ Patching...
    method signature (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lavg;Luz;Laig;IIIII)I
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Luz;Laig;IIIII)I
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lavf; <init>(Ljava/awt/image/BufferedImage;I)V@18
-     GETFIELD 0x00 0x3a        GETFIELD 0x01 0xd7
+     GETFIELD 0x00 0x3a        GETFIELD 0x01 0xee
     method ref net.minecraft.src.RenderEngine.allocateAndSetupTexture (Ljava/awt/image/BufferedImage;)I -> avf.a (Ljava/awt/image/BufferedImage;)I <init>(Ljava/awt/image/BufferedImage;I)V@22
-     INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x01 0xdb
-    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; <init>(Ljava/lang/String;Ljava/util/Properties;)V@97
-     GETSTATIC 0x00 0x49       GETSTATIC 0x01 0xe0
+     INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x01 0xf2
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; <init>(Ljava/lang/String;Ljava/util/Properties;)V@121
+     GETSTATIC 0x00 0x4e       GETSTATIC 0x01 0xf7
     field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; shouldConnect(Luz;Laig;IIIII[I)Z@55
-     GETSTATIC 0x00 0x49       GETSTATIC 0x01 0xe0
+     GETSTATIC 0x00 0x4e       GETSTATIC 0x01 0xf7
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> uz.g (III)I shouldConnect(Luz;Laig;IIIII[I)Z@7
-     INVOKEINTERFACE 0x00 0x6f 0x04 0x00  INVOKEINTERFACE 0x01 0xe5 0x04 0x00
+     INVOKEINTERFACE 0x00 0x74 0x04 0x00  INVOKEINTERFACE 0x01 0xfc 0x04 0x00
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> uz.g (III)I shouldConnect(Luz;Laig;IIIII[I)Z@99
-     INVOKEINTERFACE 0x00 0x6f 0x04 0x00  INVOKEINTERFACE 0x01 0xe5 0x04 0x00
-    interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> uz.g (III)I exclude(Luz;Laig;IIIII)Z@39
-     INVOKEINTERFACE 0x00 0x6f 0x04 0x00  INVOKEINTERFACE 0x01 0xe5 0x04 0x00
+     INVOKEINTERFACE 0x00 0x74 0x04 0x00  INVOKEINTERFACE 0x01 0xfc 0x04 0x00
+    interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> uz.g (III)I exclude(Luz;Laig;IIIII)Z@55
+     INVOKEINTERFACE 0x00 0x74 0x04 0x00  INVOKEINTERFACE 0x01 0xfc 0x04 0x00
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> uz.g (III)I getTile(Lavg;Luz;Laig;IIIII)I@68
-     INVOKEINTERFACE 0x00 0x6f 0x04 0x00  INVOKEINTERFACE 0x01 0xe5 0x04 0x00
+     INVOKEINTERFACE 0x00 0x74 0x04 0x00  INVOKEINTERFACE 0x01 0xfc 0x04 0x00
     interface method ref net.minecraft.src.IBlockAccess.getBlockId (III)I -> uz.a (III)I shouldConnect(Luz;Laig;IIIII[I)Z@48
-     INVOKEINTERFACE 0x00 0x70 0x04 0x00  INVOKEINTERFACE 0x01 0xe7 0x04 0x00
+     INVOKEINTERFACE 0x00 0x75 0x04 0x00  INVOKEINTERFACE 0x01 0xfe 0x04 0x00
     method ref com.pclewis.mcpatcher.mod.TileOverride.exclude (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.TileOverride.exclude (Luz;Laig;IIIII)Z shouldConnect(Luz;Laig;IIIII[I)Z@76
-     INVOKEVIRTUAL 0x00 0x71   INVOKEVIRTUAL 0x01 0xe9
+     INVOKEVIRTUAL 0x00 0x76   INVOKEVIRTUAL 0x02 0x00
     method ref com.pclewis.mcpatcher.mod.TileOverride.exclude (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.TileOverride.exclude (Luz;Laig;IIIII)Z getTile(Lavg;Luz;Laig;IIIII)I@155
-     INVOKEVIRTUAL 0x00 0x71   INVOKEVIRTUAL 0x01 0xe9
+     INVOKEVIRTUAL 0x00 0x76   INVOKEVIRTUAL 0x02 0x00
     method ref net.minecraft.src.Block.getBlockTexture (Lnet/minecraft/src/IBlockAccess;IIII)I -> aig.b (Luz;IIII)I shouldConnect(Luz;Laig;IIIII[I)Z@143
-     INVOKEVIRTUAL 0x00 0x73   INVOKEVIRTUAL 0x01 0xec
+     INVOKEVIRTUAL 0x00 0x78   INVOKEVIRTUAL 0x02 0x03
     field ref net.minecraft.src.Block.blockID I -> aig.ca I shouldConnect(Luz;Laig;IIIII[I)Z@159
-     GETFIELD 0x00 0x74        GETFIELD 0x01 0xef
+     GETFIELD 0x00 0x79        GETFIELD 0x02 0x06
     field ref net.minecraft.src.Block.blockID I -> aig.ca I getTile(Lavg;Luz;Laig;IIIII)I@47
-     GETFIELD 0x00 0x74        GETFIELD 0x01 0xef
+     GETFIELD 0x00 0x79        GETFIELD 0x02 0x06
+    method ref com.pclewis.mcpatcher.mod.RenderPassAPI.skipThisRenderPass (Lnet/minecraft/src/Block;I)Z -> com.pclewis.mcpatcher.mod.RenderPassAPI.skipThisRenderPass (Laig;I)Z exclude(Luz;Laig;IIIII)Z@14
+     INVOKEVIRTUAL 0x00 0x7c   INVOKEVIRTUAL 0x02 0x09
     method ref com.pclewis.mcpatcher.mod.TileOverride.getTileImpl (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> com.pclewis.mcpatcher.mod.TileOverride.getTileImpl (Luz;Laig;IIIII)I getTile(Lavg;Luz;Laig;IIIII)I@176
-     INVOKEVIRTUAL 0x00 0x7b   INVOKEVIRTUAL 0x01 0xf1
-   string replace Lnet/minecraft/src/Block; -> Laig; @4005
-   string replace Lnet/minecraft/src/RenderBlocks; -> Lavg; @4328
-   string replace Lnet/minecraft/src/IBlockAccess; -> Luz; @3970
+     INVOKEVIRTUAL 0x00 0x82   INVOKEVIRTUAL 0x02 0x0b
+   string replace Lnet/minecraft/src/Block; -> Laig; @4145
+   string replace Lnet/minecraft/src/RenderBlocks; -> Lavg; @4621
+   string replace Lnet/minecraft/src/IBlockAccess; -> Luz; @4110
   adding com/pclewis/mcpatcher/mod/TileOverride$CTM.class for Connected Textures
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Luz;Laig;IIIII)I
     method ref com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Luz;Laig;IIIII[I)Z getTileImpl(Luz;Laig;IIIII)I@38
@@ -6448,140 +7040,179 @@ Patching...
    string replace Lnet/minecraft/src/Block; -> Laig; @330
    string replace Lnet/minecraft/src/Tessellator; -> Lave; @470
    string replace Lnet/minecraft/src/RenderBlocks; -> Lavg; @256
+  adding com/pclewis/mcpatcher/mod/RenderPassAPI.class for Connected Textures
+   method signature (Lnet/minecraft/src/Block;)Z -> (Laig;)Z
+   method signature (Lnet/minecraft/src/Block;I)Z -> (Laig;I)Z
+   method signature (Lnet/minecraft/src/Block;I)V -> (Laig;I)V
+   string replace Lnet/minecraft/src/Block; -> Laig; @242
   adding com/pclewis/mcpatcher/mod/SkyRenderer.class for Better Skies
    method signature (Lnet/minecraft/src/World;Lnet/minecraft/src/RenderEngine;FF)V -> (Lup;Lavf;FF)V
    method signature ()Lnet/minecraft/src/RenderEngine; -> ()Lavf;
    field signature Lnet/minecraft/src/RenderEngine; -> Lavf;
-    field ref com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lavf; setup(Lup;Lavf;FF)V@55
-     PUTSTATIC 0x00 0x02       PUTSTATIC 0x01 0x3a
-    field ref com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lavf; access$600()Lavf;@0
-     GETSTATIC 0x00 0x02       GETSTATIC 0x01 0x3a
-    method ref net.minecraft.client.Minecraft.getWorld ()Lnet/minecraft/src/World; -> net/minecraft/client/Minecraft.getWorld ()Lup; setup(Lup;Lavf;FF)V@20
-     INVOKEVIRTUAL 0x00 0x0b   INVOKEVIRTUAL 0x01 0x3d
-    field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> up.w Lxc; setup(Lup;Lavf;FF)V@23
-     GETFIELD 0x00 0x0c        GETFIELD 0x01 0x43
-    field ref net.minecraft.src.WorldProvider.worldType I -> xc.g I setup(Lup;Lavf;FF)V@26
-     GETFIELD 0x00 0x0d        GETFIELD 0x01 0x48
-    method ref net.minecraft.src.World.getWorldTime ()J -> up.D ()J setup(Lup;Lavf;FF)V@59
-     INVOKEVIRTUAL 0x00 0x10   INVOKEVIRTUAL 0x01 0x4a
-    method ref net.minecraft.src.World.getRainStrength (F)F -> up.j (F)F setup(Lup;Lavf;FF)V@72
-     INVOKEVIRTUAL 0x00 0x11   INVOKEVIRTUAL 0x01 0x4d
-    field ref net.minecraft.src.Tessellator.instance Lnet/minecraft/src/Tessellator; -> ave.a Lave; renderAll()V@6
-     GETSTATIC 0x00 0x12       GETSTATIC 0x01 0x53
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lnet/minecraft/src/Tessellator;)Z -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lave;)Z renderAll()V@41
-     INVOKEVIRTUAL 0x00 0x18   INVOKEVIRTUAL 0x01 0x56
-   string replace Lnet/minecraft/src/RenderEngine; -> Lavf; @288
-   string replace Lnet/minecraft/src/Tessellator; -> Lave; @1153
-   string replace Lnet/minecraft/src/World; -> Lup; @245
+    field ref com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lavf; setup(Lup;Lavf;FF)V@75
+     PUTSTATIC 0x00 0x02       PUTSTATIC 0x00 0xbc
+    field ref com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.renderEngine Lavf; access$500()Lavf;@0
+     GETSTATIC 0x00 0x02       GETSTATIC 0x00 0xbc
+    method ref net.minecraft.client.Minecraft.getWorld ()Lnet/minecraft/src/World; -> net/minecraft/client/Minecraft.getWorld ()Lup; setup(Lup;Lavf;FF)V@16
+     INVOKEVIRTUAL 0x00 0x0b   INVOKEVIRTUAL 0x00 0xbf
+    field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> up.w Lxc; setup(Lup;Lavf;FF)V@19
+     GETFIELD 0x00 0x0c        GETFIELD 0x00 0xc5
+    field ref net.minecraft.src.WorldProvider.worldType I -> xc.g I setup(Lup;Lavf;FF)V@22
+     GETFIELD 0x00 0x0d        GETFIELD 0x00 0xca
+    method ref net.minecraft.src.World.getWorldTime ()J -> up.D ()J setup(Lup;Lavf;FF)V@79
+     INVOKEVIRTUAL 0x00 0x11   INVOKEVIRTUAL 0x00 0xcc
+    method ref net.minecraft.src.World.getRainStrength (F)F -> up.j (F)F setup(Lup;Lavf;FF)V@92
+     INVOKEVIRTUAL 0x00 0x12   INVOKEVIRTUAL 0x00 0xcf
+    field ref net.minecraft.src.Tessellator.instance Lnet/minecraft/src/Tessellator; -> ave.a Lave; renderAll()V@9
+     GETSTATIC 0x00 0x13       GETSTATIC 0x00 0xd5
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$WorldEntry.renderAll (Lnet/minecraft/src/Tessellator;)V -> com.pclewis.mcpatcher.mod.SkyRenderer$WorldEntry.renderAll (Lave;)V renderAll()V@12
+     INVOKEVIRTUAL 0x00 0x14   INVOKEVIRTUAL 0x00 0xd8
+   string replace Lnet/minecraft/src/RenderEngine; -> Lavf; @352
+   string replace Lnet/minecraft/src/World; -> Lup; @309
   adding com/pclewis/mcpatcher/mod/SkyRenderer$1.class for Better Skies
+    method ref net.minecraft.client.Minecraft.getWorld ()Lnet/minecraft/src/World; -> net/minecraft/client/Minecraft.getWorld ()Lup; onChange()V@9
+     INVOKEVIRTUAL 0x00 0x05   INVOKEVIRTUAL 0x00 0x49
+    field ref net.minecraft.src.World.worldProvider Lnet/minecraft/src/WorldProvider; -> up.w Lxc; onChange()V@18
+     GETFIELD 0x00 0x06        GETFIELD 0x00 0x4f
+    field ref net.minecraft.src.WorldProvider.worldType I -> xc.g I onChange()V@21
+     GETFIELD 0x00 0x07        GETFIELD 0x00 0x54
+   string replace Lnet/minecraft/src/World; -> Lup; @313
   adding com/pclewis/mcpatcher/mod/SkyRenderer$WorldEntry.class for Better Skies
+   method signature (Lnet/minecraft/src/Tessellator;)V -> (Lave;)V
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lnet/minecraft/src/Tessellator;)Z -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lave;)Z renderAll(Lave;)V@73
+     INVOKEVIRTUAL 0x00 0x31   INVOKEVIRTUAL 0x00 0xc7
+   string replace Lnet/minecraft/src/Tessellator; -> Lave; @1915
   adding com/pclewis/mcpatcher/mod/SkyRenderer$Layer.class for Better Skies
    method signature (Lnet/minecraft/src/Tessellator;)Z -> (Lave;)Z
    method signature (Lnet/minecraft/src/Tessellator;I)V -> (Lave;I)V
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer.access$600 ()Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.access$600 ()Lavf; render(Lave;)Z@47
-     INVOKESTATIC 0x00 0x59    INVOKESTATIC 0x01 0x94
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer.access$600 ()Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.access$600 ()Lavf; render(Lave;)Z@50
-     INVOKESTATIC 0x00 0x59    INVOKESTATIC 0x01 0x94
-    method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> avf.b (Ljava/lang/String;)I render(Lave;)Z@57
-     INVOKEVIRTUAL 0x00 0x5a   INVOKEVIRTUAL 0x01 0x98
-    method ref net.minecraft.src.RenderEngine.bindTexture (I)V -> avf.b (I)V render(Lave;)Z@60
-     INVOKEVIRTUAL 0x00 0x5b   INVOKEVIRTUAL 0x01 0x9a
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@128
-     INVOKESTATIC 0x00 0x63    INVOKESTATIC 0x01 0x9c
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@144
-     INVOKESTATIC 0x00 0x63    INVOKESTATIC 0x01 0x9c
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@163
-     INVOKESTATIC 0x00 0x63    INVOKESTATIC 0x01 0x9c
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@179
-     INVOKESTATIC 0x00 0x63    INVOKESTATIC 0x01 0x9c
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@192
-     INVOKESTATIC 0x00 0x63    INVOKESTATIC 0x01 0x9c
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@205
-     INVOKESTATIC 0x00 0x63    INVOKESTATIC 0x01 0x9c
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer.access$500 ()Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.access$500 ()Lavf; render(Lave;)Z@0
+     INVOKESTATIC 0x00 0x5b    INVOKESTATIC 0x01 0x9a
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer.access$500 ()Lnet/minecraft/src/RenderEngine; -> com.pclewis.mcpatcher.mod.SkyRenderer.access$500 ()Lavf; render(Lave;)Z@3
+     INVOKESTATIC 0x00 0x5b    INVOKESTATIC 0x01 0x9a
+    method ref net.minecraft.src.RenderEngine.getTexture (Ljava/lang/String;)I -> avf.b (Ljava/lang/String;)I render(Lave;)Z@10
+     INVOKEVIRTUAL 0x00 0x5c   INVOKEVIRTUAL 0x01 0x9e
+    method ref net.minecraft.src.RenderEngine.bindTexture (I)V -> avf.b (I)V render(Lave;)Z@13
+     INVOKEVIRTUAL 0x00 0x5d   INVOKEVIRTUAL 0x01 0xa0
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@84
+     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x01 0xa2
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@100
+     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x01 0xa2
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@119
+     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x01 0xa2
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@135
+     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x01 0xa2
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@148
+     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x01 0xa2
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lnet/minecraft/src/Tessellator;I)V -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.drawTile (Lave;I)V render(Lave;)Z@161
+     INVOKESTATIC 0x00 0x65    INVOKESTATIC 0x01 0xa2
     method ref net.minecraft.src.Tessellator.startDrawingQuads ()V -> ave.b ()V drawTile(Lave;I)V@20
-     INVOKEVIRTUAL 0x00 0x69   INVOKEVIRTUAL 0x01 0xa0
+     INVOKEVIRTUAL 0x00 0x6b   INVOKEVIRTUAL 0x01 0xa6
     method ref net.minecraft.src.Tessellator.addVertexWithUV (DDDDD)V -> ave.a (DDDDD)V drawTile(Lave;I)V@36
-     INVOKEVIRTUAL 0x00 0x6c   INVOKEVIRTUAL 0x01 0xa2
+     INVOKEVIRTUAL 0x00 0x6e   INVOKEVIRTUAL 0x01 0xa8
     method ref net.minecraft.src.Tessellator.addVertexWithUV (DDDDD)V -> ave.a (DDDDD)V drawTile(Lave;I)V@56
-     INVOKEVIRTUAL 0x00 0x6c   INVOKEVIRTUAL 0x01 0xa2
+     INVOKEVIRTUAL 0x00 0x6e   INVOKEVIRTUAL 0x01 0xa8
     method ref net.minecraft.src.Tessellator.addVertexWithUV (DDDDD)V -> ave.a (DDDDD)V drawTile(Lave;I)V@80
-     INVOKEVIRTUAL 0x00 0x6c   INVOKEVIRTUAL 0x01 0xa2
+     INVOKEVIRTUAL 0x00 0x6e   INVOKEVIRTUAL 0x01 0xa8
     method ref net.minecraft.src.Tessellator.addVertexWithUV (DDDDD)V -> ave.a (DDDDD)V drawTile(Lave;I)V@100
-     INVOKEVIRTUAL 0x00 0x6c   INVOKEVIRTUAL 0x01 0xa2
+     INVOKEVIRTUAL 0x00 0x6e   INVOKEVIRTUAL 0x01 0xa8
     method ref net.minecraft.src.Tessellator.draw ()I -> ave.a ()I drawTile(Lave;I)V@104
-     INVOKEVIRTUAL 0x00 0x73   INVOKEVIRTUAL 0x01 0xa4
-   string replace Lnet/minecraft/src/Tessellator; -> Lave; @2881
+     INVOKEVIRTUAL 0x00 0x75   INVOKEVIRTUAL 0x01 0xaa
+   string replace Lnet/minecraft/src/Tessellator; -> Lave; @3041
+  adding com/pclewis/mcpatcher/mod/RenderPass.class for Better Glass
+   method signature (Lnet/minecraft/src/Block;)I -> (Laig;)I
+   method signature (Lnet/minecraft/src/RenderGlobal;Lnet/minecraft/src/EntityLiving;ID)V -> (Lavb;Ljw;ID)V
+   method signature (Lnet/minecraft/src/EntityRenderer;DI)V -> (Lauw;DI)V
+    field ref net.minecraft.src.Block.blockID I -> aig.ca I getBlockRenderPass(Laig;)I@11
+     GETFIELD 0x00 0x09        GETFIELD 0x00 0xaf
+    field ref net.minecraft.src.Block.blockID I -> aig.ca I getBlockRenderPass(Laig;)I@20
+     GETFIELD 0x00 0x09        GETFIELD 0x00 0xaf
+    method ref net.minecraft.src.RenderGlobal.sortAndRender (Lnet/minecraft/src/EntityLiving;ID)I -> avb.a (Ljw;ID)I doRenderPass(Lavb;Ljw;ID)V@46
+     INVOKEVIRTUAL 0x00 0x0c   INVOKEVIRTUAL 0x00 0xb5
+    method ref net.minecraft.src.RenderGlobal.sortAndRender (Lnet/minecraft/src/EntityLiving;ID)I -> avb.a (Ljw;ID)I doRenderPass(Lavb;Ljw;ID)V@115
+     INVOKEVIRTUAL 0x00 0x0c   INVOKEVIRTUAL 0x00 0xb5
+    method ref net.minecraft.src.EntityRenderer.disableLightmap (D)V -> auw.a (D)V enableDisableLightmap(Lauw;DI)V@7
+     INVOKEVIRTUAL 0x00 0x14   INVOKEVIRTUAL 0x00 0xb9
+    method ref net.minecraft.src.EntityRenderer.enableLightmap (D)V -> auw.b (D)V enableDisableLightmap(Lauw;DI)V@15
+     INVOKEVIRTUAL 0x00 0x15   INVOKEVIRTUAL 0x00 0xbb
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; <clinit>()V@0
+     GETSTATIC 0x00 0x16       GETSTATIC 0x00 0xbf
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; <clinit>()V@9
+     GETSTATIC 0x00 0x16       GETSTATIC 0x00 0xbf
+   string replace Lnet/minecraft/src/Block; -> Laig; @381
+   string replace Lnet/minecraft/src/EntityRenderer; -> Lauw; @1062
+   string replace Lnet/minecraft/src/RenderGlobal; -> Lavb; @620
+   string replace Lnet/minecraft/src/EntityLiving; -> Ljw; @637
+  adding com/pclewis/mcpatcher/mod/RenderPass$1.class for Better Glass
+   method signature (Lnet/minecraft/src/Block;)Z -> (Laig;)Z
+   method signature (Lnet/minecraft/src/Block;I)Z -> (Laig;I)Z
+   method signature (Lnet/minecraft/src/Block;I)V -> (Laig;I)V
+    method ref net.minecraft.src.Block.getRenderBlockPass ()I -> aig.s_ ()I skipThisRenderPass(Laig;I)Z@5
+     INVOKEVIRTUAL 0x00 0x03   INVOKEVIRTUAL 0x00 0x55
+    method ref net.minecraft.src.Block.getRenderBlockPass ()I -> aig.s_ ()I clear()V@44
+     INVOKEVIRTUAL 0x00 0x03   INVOKEVIRTUAL 0x00 0x55
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; clear()V@22
+     GETSTATIC 0x00 0x08       GETSTATIC 0x00 0x59
+    field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> aig.m [Laig; clear()V@29
+     GETSTATIC 0x00 0x08       GETSTATIC 0x00 0x59
+    field ref net.minecraft.src.Block.blockID I -> aig.ca I setRenderPassForBlock(Laig;I)V@14
+     GETFIELD 0x00 0x09        GETFIELD 0x00 0x5c
+    field ref net.minecraft.src.Block.blockID I -> aig.ca I setRenderPassForBlock(Laig;I)V@26
+     GETFIELD 0x00 0x09        GETFIELD 0x00 0x5c
+   string replace Lnet/minecraft/src/Block; -> Laig; @263
+  adding com/pclewis/mcpatcher/mod/RenderPass$2.class for Better Glass
 
 Done!
 
 #### Patch summary:
 __Base
-    added com/pclewis/mcpatcher/MCPatcherUtils.class
     added com/pclewis/mcpatcher/Config.class
+    added com/pclewis/mcpatcher/MCPatcherUtils.class
     Minecraft (net/minecraft/client/Minecraft.class)
         [1] MCPatcherUtils.setMinecraft(this)
 
 __TexturePackBase
     added com/pclewis/mcpatcher/TexturePackAPI$ChangeHandler$1.class
-    added com/pclewis/mcpatcher/TexturePackAPI.class
     added com/pclewis/mcpatcher/TexturePackAPI$ChangeHandler.class
+    added com/pclewis/mcpatcher/TexturePackAPI.class
+    GetResource (multiple matches: anc aye aov axd axc)
+        [6] ImageIO.read(getResource(...)) -> getImage(...)
+    ITexturePack (ayi.class)
     Minecraft (net/minecraft/client/Minecraft.class)
         [1] check for texture pack change
         [1] init texture pack handlers on startup
-    TexturePackList (ayj.class)
-        [1] handle texture pack change
-        [1] handle texture pack list change
-        [1] insert method getDefaultTexturePack ()LTexturePackBase;
-        [1] insert method getSelectedTexturePack ()LTexturePackBase;
-    ITexturePack (ayi.class)
+    RenderEngine (avf.class)
     TexturePackBase (aye.class)
         [1] make field file public
         [1] make field texturePackFileName public
-    TexturePackDefault (ayf.class)
     TexturePackCustom (ayg.class)
         [1] insert field lastModified J
         [1] insert field origZip Ljava/util/zip/ZipFile;
         [1] insert field tmpFile Ljava/io/File;
         [1] make field zipFile public
+    TexturePackDefault (ayf.class)
     TexturePackFolder (ayh.class)
         [1] insert method getFolder ()Ljava/io/File;
-    GetResource (multiple matches: anc aye aov axd axc)
-        [6] ImageIO.read(getResource(...)) -> getImage(...)
+    TexturePackList (ayj.class)
+        [1] handle texture pack change
+        [1] handle texture pack list change
+        [1] insert method getDefaultTexturePack ()LTexturePackBase;
+        [1] insert method getSelectedTexturePack ()LTexturePackBase;
 
 HD Textures
-    added com/pclewis/mcpatcher/mod/TextureUtils.class
+    added com/pclewis/mcpatcher/mod/CustomAnimation$Delegate.class
     added com/pclewis/mcpatcher/mod/CustomAnimation$Strip.class
     added com/pclewis/mcpatcher/mod/CustomAnimation$Tile.class
-    added com/pclewis/mcpatcher/mod/CustomAnimation$Delegate.class
-    added com/pclewis/mcpatcher/mod/TileSize.class
     added com/pclewis/mcpatcher/mod/CustomAnimation.class
-    added com/pclewis/mcpatcher/mod/TextureUtils$2.class
     added com/pclewis/mcpatcher/mod/TextureUtils$1.class
-    Minecraft (net/minecraft/client/Minecraft.class)
-    TexturePackList (ayj.class)
-    ITexturePack (ayi.class)
-    TexturePackBase (aye.class)
-    TexturePackDefault (ayf.class)
-    TexturePackCustom (ayg.class)
-    TexturePackFolder (ayh.class)
-    GetResource (multiple matches: anc aye aov axd axc)
-    RenderEngine (avf.class)
-        [1] (i % 16) * 16 + j * 16 -> (i % 16) * int_size + j * int_size
-        [1] (i / 16) * 16 + j * 16 -> (i / 16) * int_size + j * int_size
-        [0] 1048576 -> int_glBufferSize
-        [1] call TextureUtils.registerTextureFX
-        [1] getInputStream(...), readTextureImage -> getImage(...)
-        [1] glTexSubImage2D(...,16,16) -> glTexSubImage2D(...,int_size,int_size)
-        [3] imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()
-        [1] insert method reloadTextures (Lnet/minecraft/client/Minecraft;)V
-        [1] null check in getImageRGB
-        [1] null check in setupTexture
-        [16] readTextureImage(getInputStream(...)) -> getImage(...)
-        [1] update custom animations
-    TextureFX (axe.class)
-        [1] array size 1024 -> int_numBytes
-        [1] check for bindImage recursion (end)
-        [1] check for bindImage recursion (start)
+    added com/pclewis/mcpatcher/mod/TextureUtils$2.class
+    added com/pclewis/mcpatcher/mod/TextureUtils.class
+    added com/pclewis/mcpatcher/mod/TileSize.class
+    ColorizerFoliage (un.class)
+        [1] make field colorBuffer public
+    ColorizerGrass (uo.class)
+        [1] make field colorBuffer public
+    ColorizerWater (vi.class)
+        [1] make field colorBuffer public
     Compass (axd.class)
         [4] * 16 -> int_size
         [1] -4 -> int_compassCrossMin
@@ -6603,17 +7234,57 @@ HD Textures
         [2] while i < 16 -> int_size
         [2] while i < 20 -> int_flameHeight
         [1] while i < 256 -> int_numPixels
-    StillLava (axh.class)
-        [10] & 15 -> int_sizeMinus1
-        [0] & 255 -> int_numPixelsMinus1
-        [12] * 16 -> int_size
-        [4] array size 256 -> int_numPixels
-        [2] while i < 16 -> int_size
-        [1] while i < 256 -> int_numPixels
     FlowLava (axg.class)
         [10] & 15 -> int_sizeMinus1
         [1] & 255 -> int_numPixelsMinus1
         [13] * 16 -> int_size
+        [4] array size 256 -> int_numPixels
+        [2] while i < 16 -> int_size
+        [1] while i < 256 -> int_numPixels
+    FlowWater (axj.class)
+        [2] & 15 -> int_sizeMinus1
+        [1] & 255 -> int_numPixelsMinus1
+        [10] * 16 -> int_size
+        [4] array size 256 -> int_numPixels
+        [4] while i < 16 -> int_size
+        [1] while i < 256 -> int_numPixels
+    GLAllocation (anh.class)
+    GetResource (multiple matches: anc aye aov axd axc)
+    ITexturePack (ayi.class)
+    ItemRenderer (ava.class)
+        [4] 0.001953125F -> float_texNudge
+        [4] 16.0F -> float_size
+        [2] tool pixel top
+        [4] tool tex calculation
+        [4] while i < 16 -> int_size
+    Minecraft (net/minecraft/client/Minecraft.class)
+    Minecraft (net/minecraft/client/Minecraft.class)
+    Portal (axi.class)
+        [3] * 16 -> int_size
+        [0] * 8 -> int_sizeHalf
+        [2] 16.0F -> float_size
+        [1] array size 32x1024 -> int_numBytes
+        [0] if i < 256 -> int_numPixels
+        [2] while i < 16 -> int_size
+        [1] while i < 256 -> int_numPixels
+    RenderEngine (avf.class)
+    RenderEngine (avf.class)
+        [1] (i % 16) * 16 + j * 16 -> (i % 16) * int_size + j * int_size
+        [1] (i / 16) * 16 + j * 16 -> (i / 16) * int_size + j * int_size
+        [0] 1048576 -> int_glBufferSize
+        [1] call TextureUtils.registerTextureFX
+        [1] getInputStream(...), readTextureImage -> getImage(...)
+        [1] glTexSubImage2D(...,16,16) -> glTexSubImage2D(...,int_size,int_size)
+        [3] imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()
+        [1] insert method reloadTextures (Lnet/minecraft/client/Minecraft;)V
+        [1] null check in getImageRGB
+        [1] null check in setupTexture
+        [16] readTextureImage(getInputStream(...)) -> getImage(...)
+        [1] update custom animations
+    StillLava (axh.class)
+        [10] & 15 -> int_sizeMinus1
+        [0] & 255 -> int_numPixelsMinus1
+        [12] * 16 -> int_size
         [4] array size 256 -> int_numPixels
         [2] while i < 16 -> int_size
         [1] while i < 256 -> int_numPixels
@@ -6624,19 +7295,15 @@ HD Textures
         [4] array size 256 -> int_numPixels
         [4] while i < 16 -> int_size
         [1] while i < 256 -> int_numPixels
-    FlowWater (axj.class)
-        [2] & 15 -> int_sizeMinus1
-        [1] & 255 -> int_numPixelsMinus1
-        [10] * 16 -> int_size
-        [4] array size 256 -> int_numPixels
-        [4] while i < 16 -> int_size
-        [1] while i < 256 -> int_numPixels
-    ItemRenderer (ava.class)
-        [4] 0.001953125F -> float_texNudge
-        [4] 16.0F -> float_size
-        [2] tool pixel top
-        [4] tool tex calculation
-        [4] while i < 16 -> int_size
+    TextureFX (axe.class)
+        [1] array size 1024 -> int_numBytes
+        [1] check for bindImage recursion (end)
+        [1] check for bindImage recursion (start)
+    TexturePackBase (aye.class)
+    TexturePackCustom (ayg.class)
+    TexturePackDefault (ayf.class)
+    TexturePackFolder (ayh.class)
+    TexturePackList (ayj.class)
     Watch (axc.class)
         [1] % 16 -> int_size
         [2] & 15 -> int_sizeMinus1
@@ -6647,27 +7314,10 @@ HD Textures
         [2] array size 256 -> int_numPixels
         [2] getRGB(...16,16,...16) -> getRGB(...int_size,int_size,...int_size)
         [1] while i < 256 -> int_numPixels
-    Portal (axi.class)
-        [3] * 16 -> int_size
-        [0] * 8 -> int_sizeHalf
-        [2] 16.0F -> float_size
-        [1] array size 32x1024 -> int_numBytes
-        [0] if i < 256 -> int_numPixels
-        [2] while i < 16 -> int_size
-        [1] while i < 256 -> int_numPixels
-    Minecraft (net/minecraft/client/Minecraft.class)
-    GLAllocation (anh.class)
-    ColorizerWater (vi.class)
-        [1] make field colorBuffer public
-    ColorizerGrass (uo.class)
-        [1] make field colorBuffer public
-    ColorizerFoliage (un.class)
-        [1] make field colorBuffer public
 
 HD Font
     added com/pclewis/mcpatcher/mod/FontUtils$1.class
     added com/pclewis/mcpatcher/mod/FontUtils.class
-    Minecraft (net/minecraft/client/Minecraft.class)
     FontRenderer (aov.class)
         [1] 4.0f -> charWidthf[32]
         [1] FontUtils.computeCharWidths on init
@@ -6676,11 +7326,11 @@ HD Font
         [1] make field isUnicode public
         [1] replace getStringWidth
         [1] use charWidthf intead of charWidth
-    RenderEngine (avf.class)
     GameSettings (anz.class)
+    Minecraft (net/minecraft/client/Minecraft.class)
+    RenderEngine (avf.class)
 
 Better Grass
-    Material (aco.class)
     Block (aig.class)
     BlockGrass (agb.class)
         [1] check surrounding blocks in getBlockTexture
@@ -6691,68 +7341,129 @@ Better Grass
         [1] initialize grassMatrix
         [1] insert field grassMatrix [[I
     IBlockAccess (uz.class)
+    Material (aco.class)
     RenderBlocks (avg.class)
         [2] if (getBlockTexture == 0) useBiomeColor = true (AO)
         [4] if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8)
         [0] if (getBlockTexture == 0) useBiomeColor = true (non-AO pre-1.8)
 
 Random Mobs
-    added com/pclewis/mcpatcher/mod/MobRandomizer.class
-    added com/pclewis/mcpatcher/mod/MobRandomizer$1.class
-    added com/pclewis/mcpatcher/mod/MobRandomizer$SkinEntry.class
-    added com/pclewis/mcpatcher/mod/MobRandomizer$MobEntry.class
-    added com/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo.class
     added com/pclewis/mcpatcher/mod/MobOverlay.class
-    RenderLiving (awm.class)
-        [1] replace mob textures
-    RenderSpider (aww.class)
-        [1] override spider eye texture
-    RenderEnderman (avx.class)
-        [1] override enderman eye texture
+    added com/pclewis/mcpatcher/mod/MobRandomizer$1.class
+    added com/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo.class
+    added com/pclewis/mcpatcher/mod/MobRandomizer$MobEntry.class
+    added com/pclewis/mcpatcher/mod/MobRandomizer$SkinEntry.class
+    added com/pclewis/mcpatcher/mod/MobRandomizer.class
     Entity (jn.class)
     EntityLiving (jw.class)
         [1] insert field randomMobsInfo Lcom.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo;
         [1] read skin from nbt
         [1] write skin to nbt
     NBTTagCompound (an.class)
-    Tessellator (ave.class)
     Render (avz.class)
-    RenderSnowman (awv.class)
-        [1] render snowman overlay
+    RenderEnderman (avx.class)
+        [1] override enderman eye texture
+    RenderLiving (awm.class)
+        [1] replace mob textures
     RenderMooshroom (awn.class)
         [2] finish mooshroom overlay
         [3] render mooshroom overlay
         [1] set up custom mooshroom overlay
+    RenderSheep (aws.class)
+        [1] randomize /mob/sheep_fur.png
+    RenderSnowman (awv.class)
+        [1] render snowman overlay
+    RenderSpider (aww.class)
+        [1] override spider eye texture
+    RenderWolf
+        [0] randomize /mob/wolf_collar.png
+    Tessellator (ave.class)
 
 Custom Colors
-    added com/pclewis/mcpatcher/mod/Colorizer.class
-    added com/pclewis/mcpatcher/mod/Colorizer$1.class
+    added com/pclewis/mcpatcher/mod/BiomeHelper$New.class
     added com/pclewis/mcpatcher/mod/BiomeHelper$Old.class
     added com/pclewis/mcpatcher/mod/BiomeHelper$Stub.class
-    added com/pclewis/mcpatcher/mod/BiomeHelper$New.class
     added com/pclewis/mcpatcher/mod/BiomeHelper.class
-    added com/pclewis/mcpatcher/mod/Lightmap.class
     added com/pclewis/mcpatcher/mod/ColorMap.class
-    Minecraft (net/minecraft/client/Minecraft.class)
-        [1] insert method getWorld ()LWorld;
-        [1] set up block access
-    IBlockAccess (uz.class)
-    Block (aig.class)
-        [1] override color multiplier for all blocks
-        [1] override default color for all blocks
+    added com/pclewis/mcpatcher/mod/Colorizer$1.class
+    added com/pclewis/mcpatcher/mod/Colorizer.class
+    added com/pclewis/mcpatcher/mod/Lightmap.class
     BiomeGenBase (vk.class)
         [1] map biomes by name
     BiomeGenSwamp (wc.class)
         [1] override swamp foliage color
         [1] override swamp grass color
+    Block (aig.class)
+        [1] override color multiplier for all blocks
+        [1] override default color for all blocks
+    BlockCauldron (afd.class)
     BlockFluid (ago.class)
         [1] override water color
-    BlockCauldron (afd.class)
+    BlockLeaves (agk.class)
+        [1] override biome birch foliage color
+        [1] override biome pine foliage color
+    BlockLilyPad (ait.class)
+        [3] override lily pad color
+    BlockRedstoneWire (ahl.class)
+        [1] override redstone color multiplier
+        [1] override redstone wire particle color
+    BlockStem (ahy.class)
+        [1] override pumpkin and melon stem color
+    ColorizerFoliage (un.class)
+        [1] override default basic foliage color
+        [1] override default birch foliage color
+        [1] override default pine foliage color
+    Entity (jn.class)
+    EntityAuraFX (auk.class)
+        [1] insert method colorize ()LEntityAuraFX;
+    EntityBubbleFX (atn.class)
+        [1] override bubble color
+    EntityDropParticleFX (atq.class)
+        [1] override lava drop color
+        [1] override water drop color
+        [1] remove water drop color update
+    EntityFX (aua.class)
+    EntityList (jr.class)
+        [1] set up mapping for spawnable entities
+    EntityLiving (jw.class)
+    EntityPortalFX (aud.class)
+        [1] override portal particle color (blue)
+        [1] override portal particle color (green)
+        [1] override portal particle color (red)
+    EntityRainFX (aun.class)
+        [1] override rain drop color
+    EntityReddustFX (aue.class)
+        [1] override redstone particle color
+    EntityRenderer (auw.class)
+        [1] insert method getNightVisionStrength (F)F
+        [1] make field torchFlickerX public
+        [1] override fog color
+        [1] override lightmap
+        [1] override underwater ambient color
+    EntitySheep (mu.class)
+    EntitySplashFX (aui.class)
+        [1] override splash color
+    EntitySuspendFX (auj.class)
+        [1] override underwater suspend particle color
+    FontRenderer (aov.class)
+        [1] override text color
+        [1] override text color codes
+    IBlockAccess (uz.class)
     Item (rh.class)
     ItemBlock (si.class)
         [1] insert method getColorFromDamage (II)I
+    ItemDye (qv.class)
     ItemRenderer (ava.class)
         [1] override water block color in third person
+    ItemSpawnerEgg (ro.class)
+        [3] override spawner egg color
+    MapColor (acq.class)
+        [1] insert field origColorValue I
+        [1] make field colorValue not final
+        [1] set map origColorValue
+    Minecraft (net/minecraft/client/Minecraft.class)
+        [1] insert method getWorld ()LWorld;
+        [1] set up block access
     Potion (ji.class)
         [1] insert field origColor I
         [1] make field color not final, public
@@ -6760,105 +7471,63 @@ Custom Colors
         [1] map potions by name
     PotionHelper (sr.class)
         [1] override water bottle color
-    ColorizerFoliage (un.class)
-        [1] override default basic foliage color
-        [1] override default birch foliage color
-        [1] override default pine foliage color
-    BlockLeaves (agk.class)
-        [1] override biome birch foliage color
-        [1] override biome pine foliage color
-    World (up.class)
-        [1] override sky color
-    WorldServer (aub.class)
-        [1] make field world public
-    WorldProvider (xc.class)
-        [1] override fog color
-    WorldProviderHell (xd.class)
-        [1] override nether fog color
-    WorldProviderEnd (xf.class)
-        [1] override end fog color
-    WorldChunkManager (vp.class)
-    Entity (jn.class)
-    EntityFX (aua.class)
-    EntityRainFX (aun.class)
-        [1] override rain drop color
-    EntityDropParticleFX (atq.class)
-        [1] override lava drop color
-        [1] override water drop color
-        [1] remove water drop color update
-    EntitySplashFX (aui.class)
-        [1] override splash color
-    EntityBubbleFX (atn.class)
-        [1] override bubble color
-    EntitySuspendFX (auj.class)
-        [1] override underwater suspend particle color
-    EntityPortalFX (aud.class)
-        [1] override portal particle color (blue)
-        [1] override portal particle color (green)
-        [1] override portal particle color (red)
-    EntityAuraFX (auk.class)
-        [1] insert method colorize ()LEntityAuraFX;
-    EntityLiving (jw.class)
-    EntityRenderer (auw.class)
-        [1] insert method getNightVisionStrength (F)F
-        [1] make field torchFlickerX public
-        [1] override fog color
-        [1] override lightmap
-        [1] override underwater ambient color
-    BlockLilyPad (ait.class)
-        [3] override lily pad color
-    BlockRedstoneWire (ahl.class)
-        [1] override redstone color multiplier
-        [1] override redstone wire particle color
     RenderBlocks (avg.class)
         [1] colorize bottom of water block
         [1] colorize cauldron water color
         [6] colorize falling sand and gravel
         [1] override redstone wire color
         [1] save water color registers
-    EntityReddustFX (aue.class)
-        [1] override redstone particle color
     RenderGlobal (avb.class)
         [1] override cloud type
         [1] override end sky color
         [1] override mycelium particle color
-    BlockStem (ahy.class)
-        [1] override pumpkin and melon stem color
-    MapColor (acq.class)
-        [1] insert field origColorValue I
-        [1] make field colorValue not final
-        [1] set map origColorValue
-    ItemDye (qv.class)
-    EntitySheep (mu.class)
-    EntityList (jr.class)
-        [1] set up mapping for spawnable entities
-    ItemSpawnerEgg (ro.class)
-        [3] override spawner egg color
-    FontRenderer (aov.class)
-        [1] override text color
-        [1] override text color codes
-    TileEntitySignRenderer (axq.class)
-        [1] override sign text color
     RenderXPOrb (awa.class)
         [1] override xp orb color
+    TileEntitySignRenderer (axq.class)
+        [1] override sign text color
+    World (up.class)
+        [1] override sky color
+    WorldChunkManager (vp.class)
+    WorldProvider (xc.class)
+        [1] override fog color
+    WorldProviderEnd (xf.class)
+        [1] override end fog color
+    WorldProviderHell (xd.class)
+        [1] override nether fog color
+    WorldServer (aub.class)
+        [1] make field world public
 
 Connected Textures
-    added com/pclewis/mcpatcher/mod/GlassPaneRenderer.class
-    added com/pclewis/mcpatcher/mod/TileOverride$Vertical.class
-    added com/pclewis/mcpatcher/mod/TileOverride$Random1.class
-    added com/pclewis/mcpatcher/mod/TileOverride$CTM.class
-    added com/pclewis/mcpatcher/mod/TileOverride$Repeat.class
     added com/pclewis/mcpatcher/mod/CTMUtils$1.class
-    added com/pclewis/mcpatcher/mod/SuperTessellator.class
-    added com/pclewis/mcpatcher/mod/TileOverride.class
     added com/pclewis/mcpatcher/mod/CTMUtils.class
-    added com/pclewis/mcpatcher/mod/TileOverride$Horizontal.class
-    added com/pclewis/mcpatcher/mod/TileOverride$Top.class
+    added com/pclewis/mcpatcher/mod/GlassPaneRenderer.class
+    added com/pclewis/mcpatcher/mod/RenderPassAPI.class
+    added com/pclewis/mcpatcher/mod/SuperTessellator.class
+    added com/pclewis/mcpatcher/mod/TileOverride$CTM.class
     added com/pclewis/mcpatcher/mod/TileOverride$Fixed.class
-    Minecraft (net/minecraft/client/Minecraft.class)
-    RenderEngine (avf.class)
-    IBlockAccess (uz.class)
+    added com/pclewis/mcpatcher/mod/TileOverride$Horizontal.class
+    added com/pclewis/mcpatcher/mod/TileOverride$Random1.class
+    added com/pclewis/mcpatcher/mod/TileOverride$Repeat.class
+    added com/pclewis/mcpatcher/mod/TileOverride$Top.class
+    added com/pclewis/mcpatcher/mod/TileOverride$Vertical.class
+    added com/pclewis/mcpatcher/mod/TileOverride.class
     Block (aig.class)
+    IBlockAccess (uz.class)
+    Minecraft (net/minecraft/client/Minecraft.class)
+    RenderBlocks (avg.class)
+        [1] determine glass side texture uv registers
+        [6] disable default rendering (glass pane faces)
+        [23] find potential render methods
+        [1] override texture (bottom face)
+        [1] override texture (crossed squares)
+        [1] override texture (east face)
+        [1] override texture (glass pane)
+        [1] override texture (north face)
+        [16] override texture (other blocks)
+        [1] override texture (south face)
+        [1] override texture (top face)
+        [1] override texture (west face)
+    RenderEngine (avf.class)
     Tessellator (ave.class)
         [1] bind texture before drawing
         [2] fix references to reset method
@@ -6873,19 +7542,6 @@ Connected Textures
         [1] make method <init> public
         [1] make method reset public
         [1] replace tessellator instance
-    RenderBlocks (avg.class)
-        [1] determine glass side texture uv registers
-        [6] disable default rendering (glass pane faces)
-        [23] find potential render methods
-        [1] override texture (bottom face)
-        [1] override texture (crossed squares)
-        [1] override texture (east face)
-        [1] override texture (glass pane)
-        [1] override texture (north face)
-        [16] override texture (other blocks)
-        [1] override texture (south face)
-        [1] override texture (top face)
-        [1] override texture (west face)
     WorldRenderer (aus.class)
         [2] post render world
         [1] pre render world
@@ -6896,13 +7552,38 @@ Better Skies
     added com/pclewis/mcpatcher/mod/SkyRenderer$WorldEntry.class
     added com/pclewis/mcpatcher/mod/SkyRenderer.class
     Minecraft (net/minecraft/client/Minecraft.class)
-    World (up.class)
-    WorldServerMP (atd.class)
-    WorldServer (aub.class)
     RenderGlobal (avb.class)
         [1] disable default stars
         [1] override moon texture
         [1] override sun texture
         [1] render custom sky
         [1] setup for sky rendering
+    World (up.class)
+    WorldServer (aub.class)
+    WorldServerMP (atd.class)
+
+Better Glass
+    added com/pclewis/mcpatcher/mod/RenderPass$1.class
+    added com/pclewis/mcpatcher/mod/RenderPass$2.class
+    added com/pclewis/mcpatcher/mod/RenderPass.class
+    Block (aig.class)
+    EntityRenderer (auw.class)
+        [1] do extra render pass 2
+        [1] do extra render pass 3
+        [2] set gl shade model
+    Minecraft (net/minecraft/client/Minecraft.class)
+    RenderBlocks (avg.class)
+        [15] override AO block brightness for extra render passes
+    RenderGlobal (avb.class)
+        [1] disable lightmap on render pass 3
+        [1] increase gl render lists per chunk from 3 to 5 (init)
+        [1] increase gl render lists per chunk from 3 to 5 (loop)
+    WorldRenderer (aus.class)
+        [1] increase render passes from 2 to 4 (&&)
+        [1] increase render passes from 2 to 4 (init)
+        [3] increase render passes from 2 to 4 (loop)
+        [2] increase render passes from 2 to 4 (occlusion)
+        [1] pre render pass
+        [1] prevent early loop exit
+        [1] set up extra render pass
 
