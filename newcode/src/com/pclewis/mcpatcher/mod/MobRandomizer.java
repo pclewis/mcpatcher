@@ -38,6 +38,14 @@ public class MobRandomizer {
         return mobEntry.getSkin(info.skin, info.origX, info.origY, info.origZ, info.origBiome);
     }
 
+    public static String randomTexture(Object entity, String texture) {
+        if (entity instanceof EntityLiving) {
+            return randomTexture((EntityLiving) entity, texture);
+        } else {
+            return texture;
+        }
+    }
+
     public static final class ExtraInfo {
         private static final String SKIN_TAG = "randomMobsSkin";
         private static final String ORIG_X_TAG = "origX";
@@ -181,7 +189,7 @@ public class MobRandomizer {
             MCPatcherUtils.debug("found %d variations for %s", skinCount, baseSkin);
 
             String filename = baseSkin.replace(".png", ".properties");
-            String altFilename = filename.replaceFirst("_(eyes|overlay|tame|angry)\\.properties$", ".properties");
+            String altFilename = filename.replaceFirst("_(eyes|overlay|tame|angry|collar|fur|invul)\\.properties$", ".properties");
             Properties properties = TexturePackAPI.getProperties(filename);
             if (properties == null && !filename.equals(altFilename)) {
                 properties = TexturePackAPI.getProperties(altFilename);

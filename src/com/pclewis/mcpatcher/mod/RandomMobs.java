@@ -33,6 +33,8 @@ public class RandomMobs extends Mod {
             classMods.add(new RenderSnowmanMod());
             classMods.add(new RenderMooshroomMod());
         }
+        classMods.add(new MiscSkinMod("RenderSheep", "/mob/sheep_fur.png"));
+        classMods.add(new MiscSkinMod("RenderWolf", "/mob/wolf_collar.png"));
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$1"));
@@ -492,6 +494,52 @@ public class RandomMobs extends Mod {
                     );
                 }
             }.targetMethod(renderEquippedItems));
+        }
+    }
+
+    private class MiscSkinMod extends ClassMod {
+        private final String className;
+
+        MiscSkinMod(String className, final String texture) {
+            final MethodRef randomTexture = new MethodRef(MCPatcherUtils.RANDOM_MOBS_CLASS, "randomTexture", "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;");
+
+            this.className = className;
+            global = true;
+
+            classSignatures.add(new ConstSignature(texture));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "randomize " + texture;
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    if ((getMethodInfo().getAccessFlags() & AccessFlag.STATIC) == 0 &&
+                        getMethodInfo().getDescriptor().startsWith("(L")) {
+                        return buildExpression(
+                            push(texture)
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        ALOAD_1,
+                        getMatch(),
+                        reference(INVOKESTATIC, randomTexture)
+                    );
+                }
+            });
+        }
+
+        @Override
+        public String getDeobfClass() {
+            return className;
         }
     }
 }
