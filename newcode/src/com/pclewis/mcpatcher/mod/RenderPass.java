@@ -2,10 +2,7 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
-import net.minecraft.src.Block;
-import net.minecraft.src.EntityLiving;
-import net.minecraft.src.EntityRenderer;
-import net.minecraft.src.RenderGlobal;
+import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Arrays;
@@ -134,6 +131,14 @@ public class RenderPass {
             return baseRenderPass[block.blockID];
         } else {
             return extraRenderPass[block.blockID];
+        }
+    }
+
+    public static boolean shouldSideBeRendered(Block block, IBlockAccess blockAccess, int i, int j, int k, int face) {
+        if (block.shouldSideBeRendered(blockAccess, i, j, k, face)) {
+            return true;
+        } else {
+            return extraRenderPass[blockAccess.getBlockId(i, j, k)] >= 0 && extraRenderPass[block.blockID] < 0;
         }
     }
 

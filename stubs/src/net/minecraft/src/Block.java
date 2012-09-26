@@ -21,4 +21,8 @@ public class Block {
     public float blockStrength(EntityPlayer thePlayer) {
         return 0;
     }
+
+    public boolean shouldSideBeRendered(IBlockAccess blockAccess, int i, int j, int k, int face) {
+        return true;
+    }
 }

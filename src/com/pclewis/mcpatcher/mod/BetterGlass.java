@@ -29,6 +29,7 @@ public class BetterGlass extends Mod {
 
         classMods.add(new BaseMod.MinecraftMod());
         classMods.add(new BaseMod.BlockMod());
+        classMods.add(new BaseMod.IBlockAccessMod());
         classMods.add(new WorldRendererMod());
         classMods.add(new EntityRendererMod());
         classMods.add(new RenderGlobalMod());
@@ -588,6 +589,9 @@ public class BetterGlass extends Mod {
     private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
         RenderBlocksMod() {
             final MethodRef renderStandardBlockWithAmbientOcclusion = new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z");
+            final FieldRef renderAllFaces = new FieldRef(getDeobfClass(), "renderAllFaces", "Z");
+            final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
+            final MethodRef shouldSideBeRendered = new MethodRef("Block", "shouldSideBeRendered", "(LIBlockAccess;IIII)Z");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -598,6 +602,32 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(renderStandardBlockWithAmbientOcclusion));
 
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        IFNE, BinaryRegex.any(2),
+                        ALOAD_1,
+                        ALOAD_0,
+                        BytecodeMatcher.captureReference(GETFIELD),
+                        ILOAD_2,
+                        ILOAD_3,
+                        push(1),
+                        ISUB,
+                        ILOAD, 4,
+                        push(0),
+                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        IFEQ, BinaryRegex.any(2)
+                    );
+                }
+            }
+                .setMethod(renderStandardBlockWithAmbientOcclusion)
+                .addXref(1, renderAllFaces)
+                .addXref(2, blockAccess)
+                .addXref(3, shouldSideBeRendered)
+            );
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -638,6 +668,27 @@ public class BetterGlass extends Mod {
                     );
                 }
             }.targetMethod(renderStandardBlockWithAmbientOcclusion));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "render all sides of adjacent blocks";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKEVIRTUAL, shouldSideBeRendered)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "shouldSideBeRendered", "(LBlock;LIBlockAccess;IIII)Z"))
+                    );
+                }
+            });
         }
     }
 }
