@@ -21,6 +21,7 @@ public class RenderPass {
 
     private static int srcBlend;
     private static int dstBlend;
+    private static boolean enableLightmap;
 
     private static int renderPass = -1;
     private static int maxRenderPass = 1;
@@ -79,6 +80,7 @@ public class RenderPass {
             protected void onChange() {
                 srcBlend = GL11.GL_SRC_ALPHA;
                 dstBlend = GL11.GL_ONE_MINUS_SRC_ALPHA;
+                enableLightmap = true;
 
                 Properties properties = TexturePackAPI.getProperties(RENDERPASS_PROPERTIES);
                 if (properties != null) {
@@ -89,6 +91,7 @@ public class RenderPass {
                     } else if (method.equals("overlay") || method.equals("color")) {
                         srcBlend = GL11.GL_DST_COLOR;
                         dstBlend = GL11.GL_SRC_COLOR;
+                        enableLightmap = false;
                     } else if (matcher.matches()) {
                         try {
                             srcBlend = Integer.parseInt(matcher.group(1));
@@ -97,6 +100,11 @@ public class RenderPass {
                         }
                     } else {
                         MCPatcherUtils.error("%s: unknown blend method '%s'", RENDERPASS_PROPERTIES, method);
+                    }
+
+                    String value = properties.getProperty("enableLightmap.3", "").trim().toLowerCase();
+                    if (!value.equals("")) {
+                        enableLightmap = Boolean.parseBoolean(value);
                     }
                 }
             }
@@ -174,10 +182,10 @@ public class RenderPass {
     }
 
     public static void enableDisableLightmap(EntityRenderer renderer, double partialTick, int pass) {
-        if (pass == 3) {
-            renderer.disableLightmap(partialTick);
-        } else {
+        if (enableLightmap || pass != 3) {
             renderer.enableLightmap(partialTick);
+        } else {
+            renderer.disableLightmap(partialTick);
         }
     }
 }

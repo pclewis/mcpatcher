@@ -557,7 +557,7 @@ public class BetterGlass extends Mod {
             patches.add(new BytecodePatch() {
                 @Override
                 public String getDescription() {
-                    return "disable lightmap on render pass 3";
+                    return "set up lightmap for extra render passes";
                 }
 
                 @Override
