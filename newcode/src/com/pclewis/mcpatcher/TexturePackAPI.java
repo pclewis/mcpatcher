@@ -119,7 +119,7 @@ public class TexturePackAPI {
                 if (list != null) {
                     for (String s : list) {
                         if (s.endsWith(suffix)) {
-                            resources.add("/" + new File(new File(directory), s).getPath());
+                            resources.add("/" + new File(new File(directory), s).getPath().replace('\\', '/'));
                         }
                     }
                 }
