@@ -235,7 +235,7 @@ public class BetterGrass extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     byte[] snow = reference(GETSTATIC, new FieldRef("Material", "snow", "LMaterial;"));
                     byte[] builtSnow = reference(GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;"));
-                    byte[] getBlockID = reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "a", "(III)I"));
+                    byte[] getBlockID = reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockId", "(III)I"));
                     byte[] matrix = reference(GETSTATIC, new FieldRef("BlockGrass", field_MATRIX, fieldtype_MATRIX));
 
                     return buildCode(
