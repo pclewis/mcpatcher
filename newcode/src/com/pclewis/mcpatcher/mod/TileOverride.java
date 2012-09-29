@@ -253,7 +253,9 @@ abstract class TileOverride {
             tileMap = MCPatcherUtils.parseIntegerList(tileList, 0, 255);
         }
 
-        if (renderPass >= 0 && tileIDs.length > 0) {
+        if (renderPass > 3) {
+            error("renderPass must be 0-3");
+        } else if (renderPass >= 0 && tileIDs.length > 0) {
             error("renderPass=%d must be block-based not tile-based", renderPass);
         }
     }
