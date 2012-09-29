@@ -154,6 +154,7 @@ public class TexturePackAPI {
     public static int unloadTexture(String s) {
         int texture = getTextureIfLoaded(s);
         if (texture >= 0) {
+            MCPatcherUtils.debug("unloading texture %s", s);
             RenderEngine renderEngine = MCPatcherUtils.getMinecraft().renderEngine;
             renderEngine.deleteTexture(texture);
             for (Field field : textureMapFields) {
