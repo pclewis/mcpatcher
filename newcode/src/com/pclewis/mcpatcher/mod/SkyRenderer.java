@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
 
 public class SkyRenderer {
@@ -86,11 +87,13 @@ public class SkyRenderer {
         private final int worldType;
         private final ArrayList<Layer> skies;
         private final HashMap<String, Layer> objects;
+        private final HashSet<String> textures;
 
         WorldEntry(int worldType) {
             this.worldType = worldType;
             skies = new ArrayList<Layer>();
             objects = new HashMap<String, Layer>();
+            textures = new HashSet<String>();
             loadSkies();
             loadCelestialObject("sun", "/terrain/sun.png");
             loadCelestialObject("moon", "/terrain/moon_phases.png");
@@ -107,6 +110,7 @@ public class SkyRenderer {
                 } else if (layer.valid) {
                     MCPatcherUtils.info("loaded %s.properties", prefix);
                     skies.add(layer);
+                    textures.add(layer.texture);
                 }
             }
         }
@@ -121,6 +125,7 @@ public class SkyRenderer {
                 if (layer.valid) {
                     MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
                     objects.put(textureName, layer);
+                    textures.add(layer.texture);
                 }
             }
         }
@@ -130,8 +135,19 @@ public class SkyRenderer {
         }
 
         void renderAll(Tessellator tessellator) {
+            HashSet<String> texturesNeeded = new HashSet<String>();
             for (Layer layer : skies) {
-                layer.prepare();
+                if (layer.prepare()) {
+                    texturesNeeded.add(layer.texture);
+                }
+            }
+            HashSet<String> texturesToUnload = new HashSet<String>();
+            texturesToUnload.addAll(textures);
+            texturesToUnload.removeAll(texturesNeeded);
+            for (String s : texturesToUnload) {
+                if (TexturePackAPI.isTextureLoaded(s)) {
+                    TexturePackAPI.unloadTexture(s);
+                }
             }
             for (Layer layer : skies) {
                 if (layer.brightness > 0.0f) {
@@ -359,7 +375,6 @@ public class SkyRenderer {
             }
 
             if (brightness <= 0.0f) {
-                TexturePackAPI.unloadTexture(texture);
                 return false;
             }
             if (brightness > 1.0f) {
