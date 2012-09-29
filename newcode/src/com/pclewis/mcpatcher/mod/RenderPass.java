@@ -148,7 +148,7 @@ public class RenderPass {
     }
 
     public static float getAOBaseMultiplier(float multiplier) {
-        return renderPass > 2 ? 1.0f : multiplier;
+        return renderPass > 2 && !enableLightmap ? 1.0f : multiplier;
     }
 
     public static void doRenderPass(RenderGlobal renderer, EntityLiving camera, int pass, double partialTick) {
