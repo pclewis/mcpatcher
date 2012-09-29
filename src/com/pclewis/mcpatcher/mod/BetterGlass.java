@@ -304,6 +304,7 @@ public class BetterGlass extends Mod {
     private class EntityRendererMod extends ClassMod {
         EntityRendererMod() {
             final MethodRef renderWorld = new MethodRef(getDeobfClass(), "renderWorld", "(FJ)V");
+            final MethodRef renderRainSnow = new MethodRef(getDeobfClass(), "renderRainSnow", "(F)V");
             final MethodRef sortAndRender = new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I");
             final MethodRef doRenderPass = new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "doRenderPass", "(LRenderGlobal;LEntityLiving;ID)V");
 
@@ -348,6 +349,15 @@ public class BetterGlass extends Mod {
                     );
                 }
             }.setMethod(enableLightmap));
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push("/environment/snow.png")
+                    );
+                }
+            }.setMethod(renderRainSnow));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -398,6 +408,7 @@ public class BetterGlass extends Mod {
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
+                        // RenderPass.doRenderPass(renderGlobal, camera, 2, par1);
                         ALOAD, 5,
                         ALOAD, 4,
                         push(2),
@@ -434,6 +445,12 @@ public class BetterGlass extends Mod {
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     return buildCode(
+                        // renderRainSnow(par1);
+                        ALOAD_0,
+                        FLOAD_1,
+                        reference(INVOKEVIRTUAL, renderRainSnow),
+
+                        // RenderPass.doRenderPass(renderGlobal, camera, 3, par1);
                         ALOAD, 5,
                         ALOAD, 4,
                         push(3),
