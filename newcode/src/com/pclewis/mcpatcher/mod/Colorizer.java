@@ -111,16 +111,21 @@ public class Colorizer {
     private static final boolean[] textCodeColorSet = new boolean[32];
     private static int signTextColor; // text.sign
 
-    private static final float[][] origFleeceColors = EntitySheep.fleeceColorTable.clone(); // sheep.*
     private static final int[] origDyeColors = ItemDye.dyeColors.clone(); // dye.*
+    private static final float[][] origFleeceColors = new float[EntitySheep.fleeceColorTable.length][]; // sheep.*
 
-    public static final float[][] armorColors = EntitySheep.fleeceColorTable.clone(); // armor.*
+    public static final float[][] armorColors = new float[EntitySheep.fleeceColorTable.length][]; // armor.*
     public static int undyedLeatherColor; // armor.default
 
-    public static final float[][] collarColors = EntitySheep.fleeceColorTable.clone(); // collar.*
+    public static final float[][] collarColors = new float[EntitySheep.fleeceColorTable.length][]; // collar.*
 
     static {
         try {
+            for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
+                origFleeceColors[i] = EntitySheep.fleeceColorTable[i].clone();
+                armorColors[i] = EntitySheep.fleeceColorTable[i].clone();
+                collarColors[i] = EntitySheep.fleeceColorTable[i].clone();
+            }
             reset();
         } catch (Throwable e) {
             e.printStackTrace();
@@ -520,10 +525,12 @@ public class Colorizer {
                 mapColor.colorValue = mapColor.origColorValue;
             }
         }
-        System.arraycopy(origFleeceColors, 0, EntitySheep.fleeceColorTable, 0, origFleeceColors.length);
         System.arraycopy(origDyeColors, 0, ItemDye.dyeColors, 0, origDyeColors.length);
-        System.arraycopy(origFleeceColors, 0, armorColors, 0, origFleeceColors.length);
-        System.arraycopy(origFleeceColors, 0, collarColors, 0, origFleeceColors.length);
+        for (int i = 0; i < origFleeceColors.length; i++) {
+            EntitySheep.fleeceColorTable[i] = origFleeceColors[i].clone();
+            armorColors[i] = origFleeceColors[i].clone();
+            collarColors[i] = origFleeceColors[i].clone();
+        }
         undyedLeatherColor = 0xa06540;
         myceliumColors = null;
         xpOrbColors = null;
@@ -677,10 +684,10 @@ public class Colorizer {
             loadIntColor("dye." + getStringKey(ItemDye.dyeColorNames, i), ItemDye.dyeColors, i);
         }
         for (int i = 0; i < EntitySheep.fleeceColorTable.length; i++) {
-            int j = EntitySheep.fleeceColorTable.length - 1 - i;
-            loadFloatColor("sheep." + getStringKey(ItemDye.dyeColorNames, j), EntitySheep.fleeceColorTable[i]);
-            loadFloatColor("armor." + getStringKey(ItemDye.dyeColorNames, j), armorColors[i]);
-            loadFloatColor("collar." + getStringKey(ItemDye.dyeColorNames, j), collarColors[i]);
+            String key = getStringKey(ItemDye.dyeColorNames, EntitySheep.fleeceColorTable.length - 1 - i);
+            loadFloatColor("sheep." + key, EntitySheep.fleeceColorTable[i]);
+            loadFloatColor("armor." + key, armorColors[i]);
+            loadFloatColor("collar." + key, collarColors[i]);
         }
         undyedLeatherColor = loadIntColor("armor.default", undyedLeatherColor);
     }
