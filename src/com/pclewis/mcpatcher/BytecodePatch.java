@@ -19,6 +19,13 @@ abstract public class BytecodePatch extends ClassPatch {
     private MethodRef targetMethod;
     int labelOffset;
 
+    /**
+     * Restricts the patch to a single method.
+     *
+     * @param targetMethod deobfuscated method to be compared against
+     * @return this
+     * @see #getTargetMethod()
+     */
     public BytecodePatch targetMethod(MethodRef targetMethod) {
         this.targetMethod = targetMethod;
         return this;
@@ -52,9 +59,11 @@ abstract public class BytecodePatch extends ClassPatch {
     /**
      * Get a regular expression to look for within the target method's bytecode.  The expression
      * can contain opcodes (IADD, IF_ICMPGE, etc.).  Use the push method to generate bytecode
-     * for loading constants, getting/setting fields, and invoking methods.
+     * for loading constants and the reference method for getting/setting fields and invoking methods.
      *
      * @return string using BinaryRegex methods
+     * @see #push(Object)
+     * @see #reference(int, JavaRef)
      */
     abstract public String getMatchExpression();
 
