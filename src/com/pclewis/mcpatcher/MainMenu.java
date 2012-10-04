@@ -25,6 +25,8 @@ class MainMenu {
     JMenuItem removeMod;
     JMenuItem moveUp;
     JMenuItem moveDown;
+
+    JMenu profile;
     JMenuItem save;
     JMenuItem load;
     JMenuItem delete;
@@ -88,6 +90,10 @@ class MainMenu {
 
         mods.addSeparator();
 
+        profile = new JMenu("Profile");
+        profile.setMnemonic('P');
+        menuBar.add(profile);
+
         save = new JMenuItem("Save profile...");
         save.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -134,13 +140,13 @@ class MainMenu {
                 }
             }
         });
-        mods.add(save);
+        profile.add(save);
 
         load = new JMenu("Select profile");
-        mods.add(load);
+        profile.add(load);
 
         delete = new JMenu("Delete profile");
-        mods.add(delete);
+        profile.add(delete);
 
         game = new JMenu("Game");
         game.setMnemonic('G');
@@ -178,6 +184,7 @@ class MainMenu {
     void updateControls(boolean busy) {
         file.setEnabled(!busy);
         mods.setEnabled(!busy);
+        profile.setEnabled(!busy);
         game.setEnabled(!busy);
 
         origFile.setEnabled(mainForm.origBrowseButton.isEnabled());
