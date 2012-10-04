@@ -23,6 +23,8 @@ class MainMenu {
     JMenu mods;
     JMenuItem addMod;
     JMenuItem removeMod;
+    JMenuItem enableAll;
+    JMenuItem disableAll;
     JMenuItem moveUp;
     JMenuItem moveDown;
 
@@ -77,6 +79,32 @@ class MainMenu {
         removeMod = new JMenuItem("Remove");
         copyActionListener(removeMod, mainForm.removeButton);
         mods.add(removeMod);
+
+        mods.addSeparator();
+
+        enableAll = new JMenuItem("Enable all");
+        mods.add(enableAll);
+        enableAll.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ModList modList = MCPatcher.modList;
+                if (modList != null) {
+                    modList.enableValidMods(true);
+                    mainForm.redrawModListCheckboxes();
+                }
+            }
+        });
+
+        disableAll = new JMenuItem("Disable all");
+        mods.add(disableAll);
+        disableAll.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ModList modList = MCPatcher.modList;
+                if (modList != null) {
+                    modList.disableAll();
+                    mainForm.redrawModListCheckboxes();
+                }
+            }
+        });
 
         mods.addSeparator();
 

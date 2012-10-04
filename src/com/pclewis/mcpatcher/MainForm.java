@@ -3,6 +3,7 @@ package com.pclewis.mcpatcher;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
@@ -752,6 +753,11 @@ class MainForm {
         modTable.getColumnModel().getColumn(1).setCellRenderer(new ModTextRenderer());
         AbstractTableModel model = (AbstractTableModel) modTable.getModel();
         model.fireTableDataChanged();
+    }
+
+    void redrawModListCheckboxes() {
+        AbstractTableModel model = (AbstractTableModel) modTable.getModel();
+        model.fireTableChanged(new TableModelEvent(model, 0, modTable.getRowCount(), 0));
     }
 
     private class ModCheckBoxRenderer extends JCheckBox implements TableCellRenderer {

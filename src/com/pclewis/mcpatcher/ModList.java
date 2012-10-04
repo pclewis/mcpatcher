@@ -179,6 +179,13 @@ class ModList {
         }
     }
 
+    void disableAll() {
+        for (int i = modsByIndex.size() - 1; i >= 0; i--) {
+            Mod mod = modsByIndex.get(i);
+            selectMod(mod, false);
+        }
+    }
+
     boolean isApplied() {
         return applied;
     }
