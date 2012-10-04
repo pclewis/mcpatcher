@@ -48,6 +48,8 @@ public class BetterGlass extends Mod {
             final FieldRef glRenderList = new FieldRef(getDeobfClass(), "glRenderList", "I");
             final FieldRef skipRenderPass = new FieldRef(getDeobfClass(), "skipRenderPass", "[Z");
             final MethodRef startPass = new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "start", "(I)V");
+            final MethodRef canRenderInPass1 = new MethodRef("forge/ForgeHooksClient", "canRenderInPass", "(LBlock;I)Z");
+            final MethodRef canRenderInPass2 = new MethodRef("Block", "canRenderInPass", "(I)Z");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -262,6 +264,30 @@ public class BetterGlass extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "getBlockRenderPass", "(LBlock;)I"))
+                    );
+                }
+            }.targetMethod(updateRenderer));
+
+            patches.add(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "set up extra render pass (forge)";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(BinaryRegex.or(
+                        BinaryRegex.build(reference(INVOKESTATIC, canRenderInPass1)),
+                        BinaryRegex.build(reference(INVOKEVIRTUAL, canRenderInPass2))
+                    ));
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        DUP2,
+                        getMatch(),
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "canRenderInPass", "(LBlock;IZ)Z"))
                     );
                 }
             }.targetMethod(updateRenderer));

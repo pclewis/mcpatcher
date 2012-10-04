@@ -134,6 +134,14 @@ public class RenderPass {
         }
     }
 
+    public static boolean canRenderInPass(Block block, int pass, boolean renderThis) {
+        if (baseRenderPass[block.blockID] < 2 && extraRenderPass[block.blockID] < 2) {
+            return renderThis;
+        } else {
+            return pass == getBlockRenderPass(block);
+        }
+    }
+
     public static boolean shouldSideBeRendered(Block block, IBlockAccess blockAccess, int i, int j, int k, int face) {
         if (block.shouldSideBeRendered(blockAccess, i, j, k, face)) {
             return true;
