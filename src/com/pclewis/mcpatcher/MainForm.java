@@ -78,7 +78,7 @@ class MainForm {
     private boolean busy = true;
     private Thread workerThread = null;
 
-    public MainForm() {
+    MainForm() {
         Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueue() {
             private boolean reenter;
 
@@ -449,12 +449,12 @@ class MainForm {
         }
     }
 
-    public void show() {
+    void show() {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    public File chooseMinecraftDir(File minecraftDir) {
+    File chooseMinecraftDir(File minecraftDir) {
         JOptionPane.showMessageDialog(null,
             "Minecraft not found in\n" +
                 minecraftDir.getPath() + "\n\n" +
@@ -473,7 +473,7 @@ class MainForm {
         return fd.getSelectedFile();
     }
 
-    public void showBetaWarning() {
+    void showBetaWarning() {
         JOptionPane.showMessageDialog(frame,
             "This is a pre-release version of MCPatcher and is not intended\n" +
                 "for general use.\n\n" +
@@ -484,7 +484,7 @@ class MainForm {
         );
     }
 
-    public void showCorruptJarError(File defaultMinecraft) {
+    void showCorruptJarError(File defaultMinecraft) {
         if (defaultMinecraft.exists()) {
             tabbedPane.setSelectedIndex(TAB_LOG);
             JOptionPane.showMessageDialog(frame,
@@ -532,7 +532,7 @@ class MainForm {
         workerThread.start();
     }
 
-    public synchronized void setBusy(boolean busy) {
+    synchronized void setBusy(boolean busy) {
         this.busy = busy;
         if (!busy) {
             setStatusText("");
@@ -541,11 +541,11 @@ class MainForm {
         updateControls();
     }
 
-    public synchronized void setStatusText(String format, Object... params) {
+    synchronized void setStatusText(String format, Object... params) {
         statusText.setText(String.format(format, params));
     }
 
-    public synchronized void updateProgress(int value, int max) {
+    synchronized void updateProgress(int value, int max) {
         if (max > 0) {
             progressBar.setVisible(true);
             progressBar.setMinimum(0);
@@ -559,7 +559,7 @@ class MainForm {
         }
     }
 
-    public void updateControls() {
+    void updateControls() {
         String currentProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
         if (currentProfile == null || currentProfile.equals("")) {
             frame.setTitle("MCPatcher " + MCPatcher.VERSION_STRING);
@@ -680,7 +680,7 @@ class MainForm {
         out.close();
     }
 
-    public void setModList(final ModList modList) {
+    void setModList(final ModList modList) {
         modTable.setModel(new DefaultTableModel() {
             public int getRowCount() {
                 return modList == null ? 0 : modList.getVisible().size();
@@ -717,7 +717,7 @@ class MainForm {
         redrawModList();
     }
 
-    public void updateModList() {
+    void updateModList() {
         setBusy(true);
         setStatusText("Analyzing %s...", MCPatcher.minecraft.getInputFile().getName());
         runWorker(new Runnable() {
@@ -748,7 +748,7 @@ class MainForm {
         });
     }
 
-    public void redrawModList() {
+    void redrawModList() {
         modTable.getColumnModel().getColumn(0).setCellRenderer(new ModCheckBoxRenderer());
         modTable.getColumnModel().getColumn(1).setCellRenderer(new ModTextRenderer());
         AbstractTableModel model = (AbstractTableModel) modTable.getModel();
