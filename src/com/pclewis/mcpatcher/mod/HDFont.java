@@ -7,6 +7,8 @@ import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class HDFont extends Mod {
@@ -71,11 +73,11 @@ public class HDFont extends Mod {
                         if (getMethodInfo().isConstructor()) {
                             return buildExpression(
                                 ALOAD_0,
-                                BinaryRegex.or(
-                                    BinaryRegex.build(push(8)),
-                                    BinaryRegex.build(push(9))
+                                or(
+                                    build(push(8)),
+                                    build(push(9))
                                 ),
-                                BytecodeMatcher.captureReference(PUTFIELD)
+                                captureReference(PUTFIELD)
                             );
                         } else {
                             return null;
@@ -97,7 +99,7 @@ public class HDFont extends Mod {
                             return buildExpression(
                                 ALOAD_0,
                                 ILOAD, 4,
-                                BytecodeMatcher.captureReference(PUTFIELD)
+                                captureReference(PUTFIELD)
                             );
                         } else {
                             return null;
@@ -124,13 +126,13 @@ public class HDFont extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ICONST_0,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
-                        ILOAD, BinaryRegex.backReference(1),
+                        ISTORE, capture(any()),
+                        ILOAD, backReference(1),
                         push(256),
-                        IF_ICMPGE, BinaryRegex.any(2),
-                        BinaryRegex.any(1, 180),
-                        IINC, BinaryRegex.backReference(1), 1,
-                        GOTO, BinaryRegex.any(2)
+                        IF_ICMPGE, any(2),
+                        any(1, 180),
+                        IINC, backReference(1), 1,
+                        GOTO, any(2)
                     );
                 }
 
@@ -162,7 +164,7 @@ public class HDFont extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         reference(GETFIELD, charWidth),
-                        BinaryRegex.capture(BinaryRegex.any(1, 4)),
+                        capture(any(1, 4)),
                         IALOAD,
                         I2F,
                         FRETURN
@@ -280,7 +282,7 @@ public class HDFont extends Mod {
                         ILOAD_2,
                         ALOAD_0,
                         reference(GETFIELD, charWidth),
-                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
+                        capture(anyILOAD),
                         BIPUSH, 32,
                         IADD,
                         IALOAD,
@@ -316,7 +318,7 @@ public class HDFont extends Mod {
                     return buildExpression(
                         ILOAD_2,
                         IRETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
 
@@ -341,7 +343,7 @@ public class HDFont extends Mod {
                     return buildExpression(
                         // k += (k1 - j1) / 2 + 1;
                         ILOAD_2,
-                        BinaryRegex.capture(BinaryRegex.any(0, 20)),
+                        capture(any(0, 20)),
                         IADD,
                         ISTORE_2
                     );
@@ -368,15 +370,15 @@ public class HDFont extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(BinaryRegex.build(
+                        capture(build(
                             ALOAD_0,
                             DUP,
-                            BytecodeMatcher.anyReference(GETFIELD)
+                            anyReference(GETFIELD)
                         )),
                         push(4.0f),
-                        BinaryRegex.capture(BinaryRegex.build(
+                        capture(build(
                             FADD,
-                            BytecodeMatcher.anyReference(PUTFIELD)
+                            anyReference(PUTFIELD)
                         ))
                     );
                 }
@@ -409,9 +411,9 @@ public class HDFont extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
-                        BinaryRegex.any(0, 1000),
-                        BinaryRegex.end()
+                        begin(),
+                        any(0, 1000),
+                        end()
                     );
                 }
 

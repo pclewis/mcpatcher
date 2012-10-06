@@ -8,6 +8,8 @@ import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class BetterGrass extends Mod {
@@ -38,27 +40,27 @@ public class BetterGrass extends Mod {
     private class MaterialMod extends ClassMod {
         MaterialMod() {
             classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
+                begin(),
                 ALOAD_0,
                 ICONST_1,
-                PUTFIELD, BinaryRegex.any(2),
+                PUTFIELD, any(2),
                 ALOAD_0,
                 ARETURN,
-                BinaryRegex.end()
+                end()
             ));
 
             classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
+                begin(),
                 ICONST_0,
                 IRETURN,
-                BinaryRegex.end()
+                end()
             ));
 
             classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
+                begin(),
                 ICONST_1,
                 IRETURN,
-                BinaryRegex.end()
+                end()
             ));
 
             classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
@@ -101,12 +103,12 @@ public class BetterGrass extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        BytecodeMatcher.captureReference(GETSTATIC),
-                        IF_ACMPEQ, BinaryRegex.any(2),
-                        ALOAD, BinaryRegex.backReference(1),
-                        BytecodeMatcher.captureReference(GETSTATIC),
-                        IF_ACMPNE, BinaryRegex.any(2),
+                        ALOAD, capture(any()),
+                        captureReference(GETSTATIC),
+                        IF_ACMPEQ, any(2),
+                        ALOAD, backReference(1),
+                        captureReference(GETSTATIC),
+                        IF_ACMPNE, any(2),
                         BIPUSH, 68,
                         IRETURN,
                         push(halfTextureID),
@@ -126,11 +128,11 @@ public class BetterGrass extends Mod {
 
             classSignatures.add(new FixedBytecodeSignature(
                 BIPUSH, 9,
-                IF_ICMPLT, BinaryRegex.any(2)
+                IF_ICMPLT, any(2)
             ));
 
             classSignatures.add(new FixedBytecodeSignature(
-                BytecodeMatcher.captureReference(INVOKEINTERFACE)
+                captureReference(INVOKEINTERFACE)
             ).addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")));
 
             final FieldRef array = new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX);
@@ -218,12 +220,12 @@ public class BetterGrass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // return material != Material.snow && material != Material.builtSnow ? 3 : 68;
-                        ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        BinaryRegex.capture(BinaryRegex.build(GETSTATIC, BinaryRegex.any(2))),
-                        IF_ACMPEQ, BinaryRegex.any(2),
-                        ALOAD, BinaryRegex.backReference(1),
-                        BinaryRegex.capture(BinaryRegex.build(GETSTATIC, BinaryRegex.any(2))),
-                        IF_ACMPNE, BinaryRegex.any(2),
+                        ALOAD, capture(any()),
+                        capture(build(GETSTATIC, any(2))),
+                        IF_ACMPEQ, any(2),
+                        ALOAD, backReference(1),
+                        capture(build(GETSTATIC, any(2))),
+                        IF_ACMPNE, any(2),
                         BIPUSH, 68,
                         IRETURN,
                         push(halfTextureID),
@@ -358,30 +360,30 @@ public class BetterGrass extends Mod {
                     if (getMethodInfo().getDescriptor().matches("^\\(L[^;]+;IIIFFF\\)Z$")) {
                         return buildExpression(
                             push(0.5f),
-                            FSTORE, BinaryRegex.any(),
+                            FSTORE, any(),
                             push(1.0f),
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                            FSTORE, capture(any()),
                             push(0.8f),
-                            FSTORE, BinaryRegex.any(),
+                            FSTORE, any(),
                             push(0.6f),
-                            FSTORE, BinaryRegex.any(),
+                            FSTORE, any(),
 
-                            BinaryRegex.any(0, 20),
+                            any(0, 20),
 
-                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, backReference(1),
                             FLOAD, 5,
                             FMUL,
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                            FSTORE, capture(any()),
 
-                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, backReference(1),
                             FLOAD, 6,
                             FMUL,
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                            FSTORE, capture(any()),
 
-                            FLOAD, BinaryRegex.backReference(1),
+                            FLOAD, backReference(1),
                             FLOAD, 7,
                             FMUL,
-                            FSTORE, BinaryRegex.capture(BinaryRegex.any())
+                            FSTORE, capture(any())
                         );
                     } else {
                         return null;
@@ -411,32 +413,32 @@ public class BetterGrass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        capture(build(
+                            ALOAD, capture(any()),
+                            anyFLOAD,
+                            FLOAD, capture(any()),
                             FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.backReference(3),
+                            anyFLOAD,
+                            FLOAD, backReference(3),
                             FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.backReference(3),
+                            anyFLOAD,
+                            FLOAD, backReference(3),
                             FMUL,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                            captureReference(INVOKEVIRTUAL)
                         )),
 
                         // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
-                        BinaryRegex.capture(BinaryRegex.build(
+                        capture(build(
                             ALOAD_1,
                             ALOAD_0,
                             reference(GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
                             ILOAD_2,
                             ILOAD_3,
                             ILOAD, 4,
-                            BinaryRegex.any(1, 2),
+                            any(1, 2),
                             reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
                         )),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                        ISTORE, capture(any())
                     );
                 }
 
@@ -479,33 +481,33 @@ public class BetterGrass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // int l = block.getBlockTexture(blockAccess, i, j, k, ?);
-                        BinaryRegex.capture(BinaryRegex.build(
+                        capture(build(
                             ALOAD_1,
                             ALOAD_0,
                             reference(GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;")),
                             ILOAD_2,
                             ILOAD_3,
                             ILOAD, 4,
-                            BinaryRegex.any(1, 2),
+                            any(1, 2),
                             reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
                         )),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        ISTORE, capture(any()),
 
-                        BinaryRegex.capture(BinaryRegex.any(20, 40)),
+                        capture(any(20, 40)),
 
                         // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
-                        BinaryRegex.capture(BinaryRegex.build(
-                            ALOAD, BinaryRegex.capture(BinaryRegex.any()),
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        capture(build(
+                            ALOAD, capture(any()),
+                            anyFLOAD,
+                            FLOAD, capture(any()),
                             FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            anyFLOAD,
+                            FLOAD, capture(any()),
                             FMUL,
-                            BytecodeMatcher.anyFLOAD,
-                            FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                            anyFLOAD,
+                            FLOAD, capture(any()),
                             FMUL,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                            captureReference(INVOKEVIRTUAL)
                         ))
                     );
                 }
@@ -548,31 +550,31 @@ public class BetterGrass extends Mod {
 
             classSignatures.add(new FixedBytecodeSignature(
                 ICONST_0,
-                BinaryRegex.or(
-                    BinaryRegex.build(
+                or(
+                    build(
                         // vanilla minecraft
                         DUP,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // southFace
+                        ISTORE, capture(any()), // southFace
                         DUP,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // northFace
+                        ISTORE, capture(any()), // northFace
                         DUP,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // westFace
+                        ISTORE, capture(any()), // westFace
                         DUP,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any())  // eastFace
+                        ISTORE, capture(any())  // eastFace
                     ),
-                    BinaryRegex.build(
+                    build(
                         // ModLoader
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // southFace
+                        ISTORE, capture(any()), // southFace
                         ICONST_0,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // northFace
+                        ISTORE, capture(any()), // northFace
                         ICONST_0,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // westFace
+                        ISTORE, capture(any()), // westFace
                         ICONST_0,
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()), // eastFace
+                        ISTORE, capture(any()), // eastFace
                         ICONST_0
                     )
                 ),
-                BytecodeMatcher.anyISTORE
+                anyISTORE
             ) {
                 public void afterMatch(ClassFile classFile) {
                     byte[][] m = new byte[][]{
@@ -603,10 +605,10 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return BinaryRegex.capture(BinaryRegex.build(
+                    return capture(build(
                         ICONST_0,
-                        BinaryRegex.or(
-                            BinaryRegex.build(
+                        or(
+                            build(
                                 // vanilla minecraft
                                 DUP,
                                 ISTORE, southFace,
@@ -617,7 +619,7 @@ public class BetterGrass extends Mod {
                                 DUP,
                                 ISTORE, eastFace
                             ),
-                            BinaryRegex.build(
+                            build(
                                 // ModLoader
                                 ISTORE, southFace,
                                 ICONST_0,
@@ -629,7 +631,7 @@ public class BetterGrass extends Mod {
                                 ICONST_0
                             )
                         ),
-                        BytecodeMatcher.anyISTORE
+                        anyISTORE
                     ));
                 }
 

@@ -13,6 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class CustomColors extends Mod {
@@ -333,7 +335,7 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         push(65),
                         reference(INVOKESTATIC, new MethodRef("org/lwjgl/input/Keyboard", "isKeyDown", "(I)Z")),
-                        IFEQ, BinaryRegex.any(2),
+                        IFEQ, any(2),
                         reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/Display", "update", "()V"))
                     );
                 }
@@ -350,7 +352,7 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -376,10 +378,10 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     if (getMethodInfo().getDescriptor().equals(getRenderColor.getType())) {
                         return buildExpression(
-                            BinaryRegex.begin(),
+                            begin(),
                             push(0xffffff),
                             IRETURN,
-                            BinaryRegex.end()
+                            end()
                         );
                     } else {
                         return null;
@@ -463,7 +465,7 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_0,
                             push(0xffffff),
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -478,7 +480,7 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_1,
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -493,10 +495,10 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_0,
                             push(0.5f),
-                            BytecodeMatcher.captureReference(PUTFIELD),
+                            captureReference(PUTFIELD),
                             ALOAD_0,
                             push(0.5f),
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -512,13 +514,13 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     if (getMethodInfo().getDescriptor().startsWith("(Ljava/lang/String;)")) {
                         return buildExpression(
-                            BinaryRegex.begin(),
+                            begin(),
                             ALOAD_0,
                             ALOAD_1,
-                            BytecodeMatcher.captureReference(PUTFIELD),
+                            captureReference(PUTFIELD),
                             ALOAD_0,
                             ARETURN,
-                            BinaryRegex.end()
+                            end()
                         );
                     } else {
                         return null;
@@ -535,28 +537,28 @@ public class CustomColors extends Mod {
                     public String getMatchExpression() {
                         return buildExpression(
                             // d = MathHelper.clampf(getTemperature(), 0.0f, 1.0f);
-                            BinaryRegex.begin(),
+                            begin(),
                             ALOAD_0,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            captureReference(INVOKEVIRTUAL),
                             FCONST_0,
                             FCONST_1,
-                            BytecodeMatcher.anyReference(INVOKESTATIC),
+                            anyReference(INVOKESTATIC),
                             F2D,
                             DSTORE_1,
 
                             // d1 = MathHelper.clampf(getRainfall(), 0.0f, 1.0f);
                             ALOAD_0,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            captureReference(INVOKEVIRTUAL),
                             FCONST_0,
                             FCONST_1,
-                            BytecodeMatcher.anyReference(INVOKESTATIC),
+                            anyReference(INVOKESTATIC),
                             F2D,
                             DSTORE_3,
 
                             // return Colorizerxxx.yyy(d, d1);
                             DLOAD_1,
                             DLOAD_3,
-                            BytecodeMatcher.anyReference(INVOKESTATIC),
+                            anyReference(INVOKESTATIC),
                             IRETURN
                         );
                     }
@@ -577,20 +579,20 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             // d = iblockaccess.getWorldChunkManager().getTemperature(i, j, k);
                             ALOAD_1,
-                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            anyReference(INVOKEINTERFACE),
                             ILOAD_2,
                             ILOAD_3,
                             ILOAD, 4,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            captureReference(INVOKEVIRTUAL),
                             F2D,
                             DSTORE, 5,
 
                             // d1 = iblockaccess.getWorldChunkManager().getRainfall(i, k);
                             ALOAD_1,
-                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            anyReference(INVOKEINTERFACE),
                             ILOAD_2,
                             ILOAD, 4,
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            captureReference(INVOKEVIRTUAL),
                             F2D,
                             DSTORE, 7
                         );
@@ -616,7 +618,7 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         ARETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
 
@@ -725,13 +727,13 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_1,
                             ILOAD_2,
-                            BytecodeMatcher.anyILOAD,
+                            anyILOAD,
                             IADD,
                             ILOAD, 4,
-                            BytecodeMatcher.anyILOAD,
+                            anyILOAD,
                             IADD,
-                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
-                            BytecodeMatcher.captureReference(GETFIELD)
+                            anyReference(INVOKEINTERFACE),
+                            captureReference(GETFIELD)
                         );
                     }
                 }
@@ -766,17 +768,17 @@ public class CustomColors extends Mod {
                     public String getMatchExpression() {
                         return buildExpression(
                             ALOAD_1,
-                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
+                            anyReference(INVOKEINTERFACE),
                             ILOAD_2,
-                            BinaryRegex.any(0, 3),
+                            any(0, 3),
                             ILOAD, 4,
-                            BinaryRegex.any(0, 3),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                            BinaryRegex.optional(BinaryRegex.build(
+                            any(0, 3),
+                            anyReference(INVOKEVIRTUAL),
+                            optional(build(
                                 ASTORE, 5,
                                 ALOAD, 5
                             )),
-                            BytecodeMatcher.anyReference(GETFIELD)
+                            anyReference(GETFIELD)
                         );
                     }
                 }.setMethod(colorMultiplier));
@@ -791,7 +793,7 @@ public class CustomColors extends Mod {
                     public String getMatchExpression() {
                         return buildExpression(
                             reference(INVOKEVIRTUAL, new MethodRef("WorldChunkManager", "getBiomeGenAt", "(II)LBiomeGenBase;")),
-                            BinaryRegex.any(0, 4),
+                            any(0, 4),
                             reference(GETFIELD, waterColorMultiplier)
                         );
                     }
@@ -834,10 +836,10 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         push(0xffffff),
                         IRETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
             }.setMethod(getColorFromDamage));
@@ -859,7 +861,7 @@ public class CustomColors extends Mod {
                             ILOAD_1,
                             push(256),
                             IADD,
-                            BytecodeMatcher.anyReference(PUTFIELD)
+                            anyReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -917,14 +919,14 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         // par2ItemStack.itemID
                         ALOAD_2,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BinaryRegex.or(
-                            BinaryRegex.build(push(256)),
-                            BinaryRegex.build(AALOAD)
+                        captureReference(GETFIELD),
+                        or(
+                            build(push(256)),
+                            build(AALOAD)
                         ),
 
                         // ...
-                        BinaryRegex.any(0, 400),
+                        any(0, 400),
 
                         // GL11.glTranslatef(-0.9375f, -0.0625f, 0.0f);
                         push(-0.9375f),
@@ -985,13 +987,13 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     if (getMethodInfo().getDescriptor().startsWith("(Ljava/lang/String;)")) {
                         return buildExpression(
-                            BinaryRegex.begin(),
+                            begin(),
                             ALOAD_0,
                             ALOAD_1,
-                            BytecodeMatcher.captureReference(PUTFIELD),
+                            captureReference(PUTFIELD),
                             ALOAD_0,
                             ARETURN,
-                            BinaryRegex.end()
+                            end()
                         );
                     } else {
                         return null;
@@ -1009,7 +1011,7 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_1,
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -1024,7 +1026,7 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_3,
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -1053,7 +1055,7 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         ARETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
 
@@ -1085,7 +1087,7 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // int i = 0x385dc6;
-                        BinaryRegex.begin(),
+                        begin(),
                         push(MAGIC),
                         ISTORE_1
                     );
@@ -1122,10 +1124,10 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         push(color),
                         IRETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
 
@@ -1148,29 +1150,29 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         ALOAD_1,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEINTERFACE),
+                        captureReference(INVOKEINTERFACE),
                         ISTORE, 5,
 
                         ILOAD, 5,
-                        BinaryRegex.subset(new byte[]{ICONST_1, ICONST_3}, true), // 1.1 uses (i & 1) == 1, 12w03a uses (i & 3) == 1
+                        subset(new byte[]{ICONST_1, ICONST_3}, true), // 1.1 uses (i & 1) == 1, 12w03a uses (i & 3) == 1
                         IAND,
                         ICONST_1,
-                        IF_ICMPNE, BinaryRegex.any(2),
-                        BytecodeMatcher.captureReference(INVOKESTATIC),
+                        IF_ICMPNE, any(2),
+                        captureReference(INVOKESTATIC),
                         IRETURN,
 
                         ILOAD, 5,
-                        BinaryRegex.subset(new byte[]{ICONST_2, ICONST_3}, true), // 1.1 uses (i & 2) == 2, 12w03a uses (i & 3) == 2
+                        subset(new byte[]{ICONST_2, ICONST_3}, true), // 1.1 uses (i & 2) == 2, 12w03a uses (i & 3) == 2
                         IAND,
                         ICONST_2,
-                        IF_ICMPNE, BinaryRegex.any(2),
+                        IF_ICMPNE, any(2),
 
-                        BytecodeMatcher.captureReference(INVOKESTATIC),
+                        captureReference(INVOKESTATIC),
                         IRETURN
                     );
                 }
@@ -1188,13 +1190,13 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_1,
                             ILOAD_2,
-                            BytecodeMatcher.anyILOAD,
+                            anyILOAD,
                             IADD,
                             ILOAD, 4,
-                            BytecodeMatcher.anyILOAD,
+                            anyILOAD,
                             IADD,
-                            BytecodeMatcher.captureReference(INVOKEINTERFACE),
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                            captureReference(INVOKEINTERFACE),
+                            captureReference(INVOKEVIRTUAL)
                         );
                     }
                 }
@@ -1207,19 +1209,19 @@ public class CustomColors extends Mod {
                     public String getMatchExpression() {
                         return buildExpression(
                             ALOAD_1,
-                            BytecodeMatcher.captureReference(INVOKEINTERFACE),
+                            captureReference(INVOKEINTERFACE),
                             ILOAD_2,
-                            BinaryRegex.any(0, 3),
+                            any(0, 3),
                             ILOAD, 4,
-                            BinaryRegex.any(0, 3),
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                            any(0, 3),
+                            captureReference(INVOKEVIRTUAL),
                             ALOAD_1,
                             ILOAD_2,
-                            BinaryRegex.any(0, 3),
+                            any(0, 3),
                             ILOAD_3,
                             ILOAD, 4,
-                            BinaryRegex.any(0, 3),
-                            BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                            any(0, 3),
+                            captureReference(INVOKEVIRTUAL)
                         );
                     }
                 }
@@ -1272,20 +1274,20 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // f8 = (f4 * 0.3f + f5 * 0.59f + f6 * 0.11f) * 0.6f;
-                        FLOAD, BinaryRegex.any(),
+                        FLOAD, any(),
                         push(0.3f),
                         FMUL,
-                        FLOAD, BinaryRegex.any(),
+                        FLOAD, any(),
                         push(0.59f),
                         FMUL,
                         FADD,
-                        FLOAD, BinaryRegex.any(),
+                        FLOAD, any(),
                         push(0.11f),
                         FMUL,
                         FADD,
                         push(0.6f),
                         FMUL,
-                        FSTORE, BinaryRegex.any()
+                        FSTORE, any()
                     );
                 }
             }.setMethod(getSkyColor));
@@ -1302,7 +1304,7 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // f4 = (float) (k >> 16 & 0xff) / 255.0f;
-                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        ILOAD, capture(any()),
                         push(16),
                         ISHR,
                         push(255),
@@ -1310,10 +1312,10 @@ public class CustomColors extends Mod {
                         I2F,
                         push(255.0f),
                         FDIV,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
                         // f5 = (float) (k >> 8 & 0xff) / 255.0f;
-                        ILOAD, BinaryRegex.backReference(1),
+                        ILOAD, backReference(1),
                         push(8),
                         ISHR,
                         push(255),
@@ -1321,16 +1323,16 @@ public class CustomColors extends Mod {
                         I2F,
                         push(255.0f),
                         FDIV,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
                         // f6 = (float) (k & 0xff) / 255.0f;
-                        ILOAD, BinaryRegex.backReference(1),
+                        ILOAD, backReference(1),
                         push(255),
                         IAND,
                         I2F,
                         push(255.0f),
                         FDIV,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any())
+                        FSTORE, capture(any())
                     );
                 }
 
@@ -1393,14 +1395,14 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, capture(any()),
                         FLOAD_3,
                         push(0.94f),
                         FMUL,
                         push(0.06f),
                         FADD,
                         FMUL,
-                        FSTORE, BinaryRegex.backReference(1)
+                        FSTORE, backReference(1)
                     );
                 }
             }.setMethod(getFogColor));
@@ -1416,15 +1418,15 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         // f3 = 0.7529412f;
                         push(0.7529412f),
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
                         // f4 = 0.84705883f;
                         push(0.84705883f),
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
                         // f5 = 1.0f;
                         push(1.0f),
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any())
+                        FSTORE, capture(any())
                     );
                 }
 
@@ -1538,11 +1540,11 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         F2D,
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         F2D,
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         F2D
                     );
                 }
@@ -1559,11 +1561,11 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         F2D,
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         F2D,
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         F2D
                     );
                 }
@@ -1608,7 +1610,7 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         ILOAD_1,
                         ILOAD_3,
                         ISUB,
@@ -1635,31 +1637,31 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
 
                         // prevPosX = posX = d;
                         ALOAD_0,
                         ALOAD_0,
                         DLOAD_1,
                         DUP2_X1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
 
                         // prevPosY = posY = d1;
                         ALOAD_0,
                         ALOAD_0,
                         DLOAD_3,
                         DUP2_X1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
 
                         // prevPosZ = posZ = d2;
                         ALOAD_0,
                         ALOAD_0,
                         DLOAD, 5,
                         DUP2_X1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        captureReference(PUTFIELD),
+                        captureReference(PUTFIELD)
                     );
                 }
             }
@@ -1689,7 +1691,7 @@ public class CustomColors extends Mod {
                             ALOAD_0,
                             push(0.2f),
                             push(0.2f),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                            anyReference(INVOKEVIRTUAL)
                         );
                     } else {
                         return null;
@@ -1708,10 +1710,10 @@ public class CustomColors extends Mod {
                             ALOAD_0,
                             FCONST_1,
                             DUP_X1,
-                            BytecodeMatcher.captureReference(PUTFIELD),
+                            captureReference(PUTFIELD),
                             DUP_X1,
-                            BytecodeMatcher.captureReference(PUTFIELD),
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD),
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -1861,7 +1863,7 @@ public class CustomColors extends Mod {
                             // 19 + rand.nextInt(4)
                             push(19),
                             ALOAD_0,
-                            BytecodeMatcher.anyReference(GETFIELD),
+                            anyReference(GETFIELD),
                             ICONST_4,
                             reference(INVOKEVIRTUAL, new MethodRef("java/util/Random", "nextInt", "(I)I")),
                             IADD
@@ -1889,25 +1891,25 @@ public class CustomColors extends Mod {
                         // particleRed = 0.2f;
                         ALOAD_0,
                         push(0.2f),
-                        BytecodeMatcher.anyReference(PUTFIELD),
+                        anyReference(PUTFIELD),
 
                         // particleGreen = 0.3f;
                         ALOAD_0,
                         push(0.3f),
-                        BytecodeMatcher.anyReference(PUTFIELD),
+                        anyReference(PUTFIELD),
 
                         // particleBlue = 1.0f;
                         ALOAD_0,
                         push(1.0f),
-                        BytecodeMatcher.anyReference(PUTFIELD),
+                        anyReference(PUTFIELD),
 
                         // ...
-                        BinaryRegex.any(0, 30),
+                        any(0, 30),
 
                         // 40 - age
                         push(40),
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ISUB
                     );
                 }
@@ -1967,13 +1969,13 @@ public class CustomColors extends Mod {
                         // particleGreen = 16.0f / (float)((40 - timer) + 16);
                         ALOAD_0,
                         push(16.0f),
-                        BinaryRegex.any(0, 20),
+                        any(0, 20),
                         reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleGreen", "F")),
 
                         // particleBlue = 4.0f / (float)((40 - timer) + 8);
                         ALOAD_0,
                         push(4.0f),
-                        BinaryRegex.any(0, 20),
+                        any(0, 20),
                         reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                     );
                 }
@@ -2039,10 +2041,10 @@ public class CustomColors extends Mod {
                         return buildExpression(
                             ALOAD_0,
                             ALOAD_0,
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                            anyReference(INVOKEVIRTUAL),
                             ICONST_1,
                             IADD,
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                            anyReference(INVOKEVIRTUAL)
                         );
                     } else {
                         return null;
@@ -2066,13 +2068,13 @@ public class CustomColors extends Mod {
                             // setParticleTextureIndex(32);
                             ALOAD_0,
                             push(32),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                            anyReference(INVOKEVIRTUAL),
 
                             // setSize(0.02F, 0.02F);
                             ALOAD_0,
                             push(0.02f),
                             push(0.02f),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                            anyReference(INVOKEVIRTUAL)
                         );
                     } else {
                         return null;
@@ -2099,7 +2101,7 @@ public class CustomColors extends Mod {
                             ALOAD_0,
                             push(0.01f),
                             push(0.01f),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                            anyReference(INVOKEVIRTUAL)
                         );
                     } else {
                         return null;
@@ -2179,18 +2181,18 @@ public class CustomColors extends Mod {
                             // particleGreen *= 0.3f;
                             ALOAD_0,
                             DUP,
-                            GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
+                            GETFIELD, capture(any(2)),
                             push(0.3f),
                             FMUL,
-                            PUTFIELD, BinaryRegex.backReference(1),
+                            PUTFIELD, backReference(1),
 
                             // particleBlue *= 0.9f;
                             ALOAD_0,
                             DUP,
-                            GETFIELD, BinaryRegex.capture(BinaryRegex.any(2)),
+                            GETFIELD, capture(any(2)),
                             push(0.9f),
                             FMUL,
-                            PUTFIELD, BinaryRegex.backReference(2)
+                            PUTFIELD, backReference(2)
                         );
                     } else {
                         return null;
@@ -2275,7 +2277,7 @@ public class CustomColors extends Mod {
                             ALOAD_0,
                             push(0.02f),
                             push(0.02f),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                            anyReference(INVOKEVIRTUAL)
                         );
                     } else {
                         return null;
@@ -2381,78 +2383,78 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // sun = world.func_35464_b(1.0F) * 0.95F + 0.05F;
-                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
+                        registerLoadStore(ALOAD, 1 + updateLightmapOffset),
                         FCONST_1,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         push(0.95f),
                         FMUL,
                         push(0.05f),
                         FADD,
-                        BytecodeMatcher.registerLoadStore(FSTORE, 3 + updateLightmapOffset),
+                        registerLoadStore(FSTORE, 3 + updateLightmapOffset),
 
                         // lightsun = world.worldProvider.lightBrightnessTable[i / 16] * sun;
-                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.registerLoadStore(ILOAD, 2 + updateLightmapOffset),
+                        registerLoadStore(ALOAD, 1 + updateLightmapOffset),
+                        captureReference(GETFIELD),
+                        captureReference(GETFIELD),
+                        registerLoadStore(ILOAD, 2 + updateLightmapOffset),
                         BIPUSH, 16,
                         IDIV,
                         FALOAD,
-                        BytecodeMatcher.registerLoadStore(FLOAD, 3 + updateLightmapOffset),
+                        registerLoadStore(FLOAD, 3 + updateLightmapOffset),
                         FMUL,
-                        BytecodeMatcher.registerLoadStore(FSTORE, 4 + updateLightmapOffset),
+                        registerLoadStore(FSTORE, 4 + updateLightmapOffset),
 
                         // lighttorch = world.worldProvider.lightBrightnessTable[i % 16] * (torchFlickerX * 0.1F + 1.5F);
-                        BinaryRegex.any(0, 20),
-                        BytecodeMatcher.registerLoadStore(ILOAD, 2 + updateLightmapOffset),
+                        any(0, 20),
+                        registerLoadStore(ILOAD, 2 + updateLightmapOffset),
                         BIPUSH, 16,
                         IREM,
                         FALOAD,
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
 
                         // ...
-                        BinaryRegex.any(0, 200),
+                        any(0, 200),
 
                         // if (world.lightningFlash > 0)
-                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        IFLE, BinaryRegex.any(2),
+                        registerLoadStore(ALOAD, 1 + updateLightmapOffset),
+                        captureReference(GETFIELD),
+                        IFLE, any(2),
 
                         // ...
-                        BinaryRegex.any(0, 300),
+                        any(0, 300),
 
                         // if (world.worldProvider.worldType == 1) {
-                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
-                        BinaryRegex.backReference(2),
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        registerLoadStore(ALOAD, 1 + updateLightmapOffset),
+                        backReference(2),
+                        captureReference(GETFIELD),
                         ICONST_1,
-                        IF_ICMPNE, BinaryRegex.any(2),
+                        IF_ICMPNE, any(2),
 
                         // ...
-                        BinaryRegex.any(0, 200),
+                        any(0, 200),
 
                         // gamma = mc.gameSettings.gammaSetting;
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.registerLoadStore(FSTORE, 15 + updateLightmapOffset),
+                        captureReference(GETFIELD),
+                        captureReference(GETFIELD),
+                        captureReference(GETFIELD),
+                        registerLoadStore(FSTORE, 15 + updateLightmapOffset),
 
                         // ...
-                        BinaryRegex.any(0, 300),
+                        any(0, 300),
 
                         // mc.renderEngine.createTextureFromBytes(lightmapColors, 16, 16, lightmapTexture);
                         ALOAD_0,
-                        BinaryRegex.backReference(7),
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        backReference(7),
+                        captureReference(GETFIELD),
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         BIPUSH, 16,
                         BIPUSH, 16,
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(GETFIELD),
+                        captureReference(INVOKEVIRTUAL),
                         RETURN
                     );
                 }
@@ -2487,17 +2489,17 @@ public class CustomColors extends Mod {
                         // fogColorRed = 0.02f;
                         ALOAD_0,
                         push(0.02f),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
 
                         // fogColorGreen = 0.02f;
                         ALOAD_0,
                         push(0.02f),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
 
                         // fogColorBlue = 0.2f;
                         ALOAD_0,
                         push(0.2f),
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        captureReference(PUTFIELD)
                     );
                 }
             }
@@ -2513,25 +2515,25 @@ public class CustomColors extends Mod {
                     public String getMatchExpression() {
                         return buildExpression(
                             // if (mc.thePlayer.isPotionActive(Potion.nightVision)) {
-                            BinaryRegex.capture(BinaryRegex.build(
+                            capture(build(
                                 ALOAD_0,
-                                BytecodeMatcher.captureReference(GETFIELD),
-                                BytecodeMatcher.captureReference(GETFIELD),
-                                BytecodeMatcher.captureReference(GETSTATIC),
-                                BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                                captureReference(GETFIELD),
+                                captureReference(GETFIELD),
+                                captureReference(GETSTATIC),
+                                captureReference(INVOKEVIRTUAL)
                             )),
-                            IFEQ, BinaryRegex.any(2),
+                            IFEQ, any(2),
 
                             // var16 = getNightVisionStrength1(mc.thePlayer, var1);
-                            BinaryRegex.capture(BinaryRegex.build(
+                            capture(build(
                                 ALOAD_0,
                                 ALOAD_0,
-                                BinaryRegex.backReference(2),
-                                BinaryRegex.backReference(3),
+                                backReference(2),
+                                backReference(3),
                                 FLOAD_1,
-                                BytecodeMatcher.captureReference(INVOKESPECIAL)
+                                captureReference(INVOKESPECIAL)
                             )),
-                            FSTORE, BinaryRegex.any()
+                            FSTORE, any()
                         );
                     }
 
@@ -2578,7 +2580,7 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BytecodeMatcher.registerLoadStore(ASTORE, 1 + updateLightmapOffset)
+                        registerLoadStore(ASTORE, 1 + updateLightmapOffset)
                     );
                 }
 
@@ -2587,7 +2589,7 @@ public class CustomColors extends Mod {
                     return buildCode(
                         // if (Lightmap.computeLightmap(this, world, partialTick)) {
                         ALOAD_0,
-                        BytecodeMatcher.registerLoadStore(ALOAD, 1 + updateLightmapOffset),
+                        registerLoadStore(ALOAD, 1 + updateLightmapOffset),
                         updateLightmapTakesFloat ? buildCode(FLOAD_1) : push(0.0f),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.LIGHTMAP_CLASS, "computeLightmap", "(LEntityRenderer;LWorld;F)Z")),
                         IFEQ, branch("A"),
@@ -2612,21 +2614,21 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         // f1 = 1.0f - Math.pow(f1, 0.25);
                         push(1.0f),
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, capture(any()),
                         F2D,
                         push(0.25),
                         reference(INVOKESTATIC, new MethodRef("java/lang/Math", "pow", "(DD)D")),
                         D2F,
                         FSUB,
-                        FSTORE, BinaryRegex.backReference(1),
+                        FSTORE, backReference(1),
 
                         // ...
-                        BinaryRegex.any(0, 100),
+                        any(0, 100),
 
                         // fogColorBlue = vec3d1.zCoord;
                         ALOAD_0,
-                        BytecodeMatcher.anyALOAD,
-                        BytecodeMatcher.anyReference(GETFIELD),
+                        anyALOAD,
+                        anyReference(GETFIELD),
                         D2F,
                         reference(PUTFIELD, fogColorBlue)
                     );
@@ -2742,19 +2744,19 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // f = (float) l / 15.0f;
-                        BytecodeMatcher.anyILOAD,
+                        anyILOAD,
                         I2F,
                         push(15.0f),
                         FDIV,
-                        BytecodeMatcher.anyFSTORE,
+                        anyFSTORE,
 
                         // f1 = f * 0.6f + 0.4f;
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         push(0.6f),
                         FMUL,
                         push(0.4f),
                         FADD,
-                        BytecodeMatcher.anyFSTORE
+                        anyFSTORE
                     );
                 }
             }.setMethod(method));
@@ -2768,38 +2770,38 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        ILOAD, capture(any()),
                         I2F,
                         push(15.0f),
                         FDIV,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
-                        FLOAD, BinaryRegex.backReference(2),
+                        FLOAD, backReference(2),
                         push(0.6f),
                         FMUL,
                         push(0.4f),
                         FADD,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
-                        BinaryRegex.any(0, 10),
+                        any(0, 10),
 
-                        FLOAD, BinaryRegex.backReference(2),
-                        FLOAD, BinaryRegex.backReference(2),
+                        FLOAD, backReference(2),
+                        FLOAD, backReference(2),
                         FMUL,
                         push(0.7f),
                         FMUL,
                         push(0.5f),
                         FSUB,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
-                        FLOAD, BinaryRegex.backReference(2),
-                        FLOAD, BinaryRegex.backReference(2),
+                        FLOAD, backReference(2),
+                        FLOAD, backReference(2),
                         FMUL,
                         push(0.6f),
                         FMUL,
                         push(0.7f),
                         FSUB,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any())
+                        FSTORE, capture(any())
                     );
                 }
 
@@ -2887,11 +2889,11 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         ALOAD_1,
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         ISTORE, 6
                     );
                 }
@@ -2915,7 +2917,7 @@ public class CustomColors extends Mod {
                         FLOAD, 6,
                         FLOAD, 10,
                         FMUL,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        captureReference(INVOKEVIRTUAL)
                     );
                 }
             }.addXref(1, setColorOpaque_F));
@@ -2924,7 +2926,7 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         push(0.5f),
                         FSTORE, 6 + renderBlockFallingSandOffset,
                         FCONST_1,
@@ -2949,7 +2951,7 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push(205),
-                        ISTORE, BinaryRegex.any()
+                        ISTORE, any()
                     );
                 }
 
@@ -2988,13 +2990,13 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         // tessellator.setColorOpaque_F($1 * f5, $1 * f5, $1 * f5);
                         ALOAD, 10 + renderBlockFallingSandOffset,
-                        BinaryRegex.capture(BytecodeMatcher.anyFLOAD),
+                        capture(anyFLOAD),
                         FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
-                        BinaryRegex.backReference(1),
+                        backReference(1),
                         FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
-                        BinaryRegex.backReference(1),
+                        backReference(1),
                         FLOAD, 12 + renderBlockFallingSandOffset,
                         FMUL,
                         reference(INVOKEVIRTUAL, setColorOpaque_F)
@@ -3056,7 +3058,7 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // f = (float)(l >> 16 & 0xff) / 255F;
-                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
+                        capture(anyILOAD),
                         push(16),
                         ISHR,
                         push(255),
@@ -3064,10 +3066,10 @@ public class CustomColors extends Mod {
                         I2F,
                         push(255.0f),
                         FDIV,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
                         // f1 = (float)(l >> 8 & 0xff) / 255F;
-                        BinaryRegex.backReference(1),
+                        backReference(1),
                         push(8),
                         ISHR,
                         push(255),
@@ -3075,16 +3077,16 @@ public class CustomColors extends Mod {
                         I2F,
                         push(255.0f),
                         FDIV,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        FSTORE, capture(any()),
 
                         // f2 = (float)(l & 0xff) / 255F;
-                        BinaryRegex.backReference(1),
+                        backReference(1),
                         push(255),
                         IAND,
                         I2F,
                         push(255.0f),
                         FDIV,
-                        FSTORE, BinaryRegex.capture(BinaryRegex.any())
+                        FSTORE, capture(any())
                     );
                 }
 
@@ -3109,14 +3111,14 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         // tessellator.setColorOpaque_F(f3 * f7, f3 * f7, f3 * f7);
                         ALOAD, 5,
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, capture(any()),
+                        FLOAD, capture(any()),
                         FMUL,
-                        FLOAD, BinaryRegex.backReference(1),
-                        FLOAD, BinaryRegex.backReference(2),
+                        FLOAD, backReference(1),
+                        FLOAD, backReference(2),
                         FMUL,
-                        FLOAD, BinaryRegex.backReference(1),
-                        FLOAD, BinaryRegex.backReference(2),
+                        FLOAD, backReference(1),
+                        FLOAD, backReference(2),
                         FMUL,
                         reference(INVOKEVIRTUAL, setColorOpaque_F)
                     );
@@ -3163,11 +3165,11 @@ public class CustomColors extends Mod {
                             D2F,
                             push(0.8f),
                             FADD,
-                            BytecodeMatcher.anyFLOAD,
+                            anyFLOAD,
                             FMUL,
-                            BytecodeMatcher.anyFLOAD,
+                            anyFLOAD,
                             FMUL,
-                            BytecodeMatcher.anyReference(PUTFIELD)
+                            anyReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -3231,7 +3233,7 @@ public class CustomColors extends Mod {
 
             classSignatures.add(new FixedBytecodeSignature(
                 // j = i * 32;
-                BinaryRegex.begin(),
+                begin(),
                 ILOAD_1,
                 BIPUSH, 32,
                 IMUL,
@@ -3262,7 +3264,7 @@ public class CustomColors extends Mod {
                 ILOAD, 4,
                 IOR,
                 IRETURN,
-                BinaryRegex.end()
+                end()
             ).setMethod(getRenderColor));
 
             patches.add(new BytecodePatch.InsertBefore() {
@@ -3275,7 +3277,7 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         IRETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
 
@@ -3302,12 +3304,12 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push(32),
-                        BytecodeMatcher.anyISTORE,
+                        anyISTORE,
                         push(256),
-                        BytecodeMatcher.anyILOAD,
+                        anyILOAD,
                         IDIV,
-                        BytecodeMatcher.anyISTORE,
-                        BinaryRegex.any(1, 50),
+                        anyISTORE,
+                        any(1, 50),
                         push("/environment/clouds.png")
                     );
                 }
@@ -3331,15 +3333,15 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.lookBehind(BinaryRegex.any(21), false),
-                        BinaryRegex.capture(BinaryRegex.build(
+                        lookBehind(any(21), false),
+                        capture(build(
                             ALOAD_0,
-                            BytecodeMatcher.anyReference(GETFIELD),
-                            BytecodeMatcher.anyReference(GETFIELD),
-                            BytecodeMatcher.anyReference(GETFIELD)
+                            anyReference(GETFIELD),
+                            anyReference(GETFIELD),
+                            anyReference(GETFIELD)
                         )),
-                        BinaryRegex.capture(BinaryRegex.build(
-                            IFEQ, BinaryRegex.any(2)
+                        capture(build(
+                            IFEQ, any(2)
                         ))
                     );
                 }
@@ -3362,9 +3364,9 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return buildExpression(BinaryRegex.or(
-                        BinaryRegex.build(push(0x181818)), // pre-12w23a
-                        BinaryRegex.build(push(0x282828))  // 12w23a+
+                    return buildExpression(or(
+                        build(push(0x181818)), // pre-12w23a
+                        build(push(0x282828))  // 12w23a+
                     ));
                 }
 
@@ -3384,24 +3386,24 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return buildExpression(BinaryRegex.lookBehind(BinaryRegex.build(
+                    return buildExpression(lookBehind(build(
                         // if (s.equals("townaura")) {
                         ALOAD_1,
                         push("townaura"),
                         reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z")),
-                        IFEQ, BinaryRegex.any(2),
+                        IFEQ, any(2),
 
                         // obj = new EntityAuraFX(worldObj, d, d1, d2, d3, d4, d5);
                         reference(NEW, new ClassRef("EntityAuraFX")),
                         DUP,
                         ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
-                        BytecodeMatcher.anyDLOAD,
-                        BytecodeMatcher.anyDLOAD,
-                        BytecodeMatcher.anyDLOAD,
-                        BytecodeMatcher.anyDLOAD,
-                        BytecodeMatcher.anyDLOAD,
-                        BytecodeMatcher.anyDLOAD,
+                        anyReference(GETFIELD),
+                        anyDLOAD,
+                        anyDLOAD,
+                        anyDLOAD,
+                        anyDLOAD,
+                        anyDLOAD,
+                        anyDLOAD,
                         reference(INVOKESPECIAL, new MethodRef("EntityAuraFX", "<init>", "(LWorld;DDDDDD)V"))
                     ), true));
                 }
@@ -3433,7 +3435,7 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -3469,8 +3471,8 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         // s1 = EntityList.getEntityString(itemStack.getItemDamage());
                         ALOAD_1,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        BytecodeMatcher.captureReference(INVOKESTATIC),
+                        captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKESTATIC),
                         ASTORE_3,
                         ALOAD_3
                     );
@@ -3706,34 +3708,34 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // var7 = (int)((float)var7 * var10 / var11);
-                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        ILOAD, capture(any()),
                         I2F,
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, capture(any()),
                         FMUL,
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        FLOAD, capture(any()),
                         FDIV,
                         F2I,
-                        ISTORE, BinaryRegex.backReference(1),
+                        ISTORE, backReference(1),
 
                         // var8 = (int)((float)var8 * var10 / var11);
-                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        ILOAD, capture(any()),
                         I2F,
-                        FLOAD, BinaryRegex.backReference(2),
+                        FLOAD, backReference(2),
                         FMUL,
-                        FLOAD, BinaryRegex.backReference(3),
+                        FLOAD, backReference(3),
                         FDIV,
                         F2I,
-                        ISTORE, BinaryRegex.backReference(4),
+                        ISTORE, backReference(4),
 
                         // var9 = (int)((float)var9 * var10 / var11);
-                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        ILOAD, capture(any()),
                         I2F,
-                        FLOAD, BinaryRegex.backReference(2),
+                        FLOAD, backReference(2),
                         FMUL,
-                        FLOAD, BinaryRegex.backReference(3),
+                        FLOAD, backReference(3),
                         FDIV,
                         F2I,
-                        ISTORE, BinaryRegex.backReference(5)
+                        ISTORE, backReference(5)
                     );
                 }
             });
@@ -3775,7 +3777,7 @@ public class CustomColors extends Mod {
                             ALOAD_0,
                             push(32),
                             NEWARRAY, T_INT,
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -3788,7 +3790,7 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push(0xff000000),
-                        BinaryRegex.any(0, 100),
+                        any(0, 100),
                         reference(INVOKESTATIC, glColor4f)
                     );
                 }
@@ -3805,7 +3807,7 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         ICONST_0,
-                        BytecodeMatcher.anyReference(PUTFIELD)
+                        anyReference(PUTFIELD)
                     );
                 }
 
@@ -3830,7 +3832,7 @@ public class CustomColors extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         reference(GETFIELD, colorCode),
-                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
+                        capture(anyILOAD),
                         IALOAD
                     );
                 }
@@ -3874,7 +3876,7 @@ public class CustomColors extends Mod {
                         ICONST_0,
                         reference(INVOKESTATIC, glDepthMask),
                         ICONST_0,
-                        BinaryRegex.capture(BytecodeMatcher.anyISTORE)
+                        capture(anyISTORE)
                     );
                 }
 
@@ -3913,22 +3915,22 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.lookBehind(BinaryRegex.build(
+                        lookBehind(build(
                             // MathHelper.sin(f8 + 0.0F)
-                            BinaryRegex.capture(BytecodeMatcher.anyFLOAD),
+                            capture(anyFLOAD),
                             push(0.0f),
                             FADD,
-                            BytecodeMatcher.anyReference(INVOKESTATIC),
+                            anyReference(INVOKESTATIC),
 
                             // ...
-                            BinaryRegex.any(0, 200)
+                            any(0, 200)
                         ), true),
 
                         // tessellator.setColorRGBA_I(i1, 128);
-                        BinaryRegex.capture(BytecodeMatcher.anyILOAD),
-                        BinaryRegex.lookAhead(BinaryRegex.build(
+                        capture(anyILOAD),
+                        lookAhead(build(
                             push(128),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                            anyReference(INVOKEVIRTUAL)
                         ), true)
                     );
                 }

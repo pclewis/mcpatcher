@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 /**
@@ -96,7 +98,7 @@ public final class BaseMod extends Mod {
                 public String getMatchExpression() {
                     if (getMethodInfo().getName().equals("<init>")) {
                         return buildExpression(
-                            BinaryRegex.begin(),
+                            begin(),
                             ALOAD_0,
                             reference(INVOKESPECIAL, new MethodRef("java.lang.Object", "<init>", "()V"))
                         );
@@ -404,7 +406,7 @@ public final class BaseMod extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         push(7),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         RETURN
                     );
                 }
@@ -420,13 +422,13 @@ public final class BaseMod extends Mod {
                         ALOAD_0,
                         DLOAD, 7,
                         DLOAD, 9,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
 
                         ALOAD_0,
                         DLOAD_1,
                         DLOAD_3,
                         DLOAD, 5,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
 
                         RETURN
                     );
@@ -649,14 +651,14 @@ public final class BaseMod extends Mod {
                 public String getMatchExpression() {
                     if (getMethodInfo().isStaticInitializer()) {
                         return buildExpression(
-                            BytecodeMatcher.captureReference(NEW),
+                            captureReference(NEW),
                             DUP,
                             push(blockID),
-                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 60)),
+                            nonGreedy(any(0, 60)),
                             push(blockName),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
-                            BytecodeMatcher.captureReference(PUTSTATIC)
+                            anyReference(INVOKEVIRTUAL),
+                            nonGreedy(any(0, 20)),
+                            captureReference(PUTSTATIC)
                         );
                     } else {
                         return null;
@@ -740,16 +742,16 @@ public final class BaseMod extends Mod {
                 public String getMatchExpression() {
                     if (getMethodInfo().isConstructor()) {
                         return buildExpression(
-                            BinaryRegex.begin(),
+                            begin(),
                             ALOAD_0,
-                            BytecodeMatcher.anyReference(INVOKESPECIAL),
+                            anyReference(INVOKESPECIAL),
                             ALOAD_0,
                             push(256),
                             NEWARRAY, T_INT,
-                            BytecodeMatcher.captureReference(PUTFIELD),
+                            captureReference(PUTFIELD),
                             ALOAD_0,
                             ICONST_0,
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -821,11 +823,11 @@ public final class BaseMod extends Mod {
                         AALOAD,
                         push(option),
                         reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z")),
-                        IFEQ, BinaryRegex.any(2),
+                        IFEQ, any(2),
 
                         // field = ...;
-                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 20)),
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        nonGreedy(any(0, 20)),
+                        captureReference(PUTFIELD)
                     );
                 }
             }.addXref(1, new FieldRef(getDeobfClass(), field, descriptor)));
@@ -849,10 +851,10 @@ public final class BaseMod extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         ALOAD_0,
                         ALOAD_1,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        captureReference(INVOKEVIRTUAL)
                     );
                 }
             }

@@ -5,6 +5,8 @@ import javassist.bytecode.AccessFlag;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class RandomMobs extends Mod {
@@ -71,7 +73,7 @@ public class RandomMobs extends Mod {
                     return buildExpression(
                         FCONST_0,
                         push(-24.0f),
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         FMUL,
                         push(0.0078125f),
                         FSUB,
@@ -90,7 +92,7 @@ public class RandomMobs extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(BytecodeMatcher.anyALOAD),
+                        capture(anyALOAD),
                         reference(INVOKEVIRTUAL, new MethodRef("EntityLiving", "getEntityTexture", "()Ljava/lang/String;"))
                     );
                 }
@@ -156,31 +158,31 @@ public class RandomMobs extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
 
                         // prevPosX = posX = d;
                         ALOAD_0,
                         ALOAD_0,
                         DLOAD_1,
                         DUP2_X1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
 
                         // prevPosY = posY = d1;
                         ALOAD_0,
                         ALOAD_0,
                         DLOAD_3,
                         DUP2_X1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
 
                         // prevPosZ = posZ = d2;
                         ALOAD_0,
                         ALOAD_0,
                         DLOAD, 5,
                         DUP2_X1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        captureReference(PUTFIELD),
+                        captureReference(PUTFIELD)
                     );
                 }
             }
@@ -236,7 +238,7 @@ public class RandomMobs extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -260,7 +262,7 @@ public class RandomMobs extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -306,7 +308,7 @@ public class RandomMobs extends Mod {
                     return buildExpression(
                         // f = 0.625f;
                         push(0.625f),
-                        BytecodeMatcher.anyFSTORE,
+                        anyFSTORE,
 
                         // GL11.glTranslatef(0.0f, -0.34375f, 0.0f);
                         push(0.0f),
@@ -328,12 +330,12 @@ public class RandomMobs extends Mod {
                     return buildExpression(
                         // renderManager.itemRenderer.renderItem(par1EntitySnowman, itemstack, 0);
                         ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
-                        BytecodeMatcher.anyReference(GETFIELD),
+                        anyReference(GETFIELD),
+                        anyReference(GETFIELD),
                         ALOAD_1,
                         ALOAD_3,
                         ICONST_0,
-                        BytecodeMatcher.anyReference(INVOKEVIRTUAL)
+                        anyReference(INVOKEVIRTUAL)
                     );
                 }
 
@@ -387,7 +389,7 @@ public class RandomMobs extends Mod {
                         // loadTexture("/terrain.png");
                         ALOAD_0,
                         push("/terrain.png"),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
 
                         // GL11.glEnable(GL11.GL_CULL_FACE);
                         push(2884),
@@ -397,15 +399,15 @@ public class RandomMobs extends Mod {
                         reference(INVOKESTATIC, glPushMatrix),
 
                         // ...
-                        BinaryRegex.any(0, 100),
+                        any(0, 100),
 
                         // renderBlocks.renderBlockAsItem(Block.mushroomRed, 0, 1.0f);
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(GETSTATIC),
+                        captureReference(GETFIELD),
+                        captureReference(GETSTATIC),
                         push(0),
                         push(1.0f),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL)
+                        captureReference(INVOKEVIRTUAL)
                     );
                 }
             }

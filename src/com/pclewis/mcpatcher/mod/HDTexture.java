@@ -5,6 +5,8 @@ import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class HDTexture extends BaseTexturePackMod {
@@ -94,7 +96,7 @@ public class HDTexture extends BaseTexturePackMod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // var1 = -1;
-                        BinaryRegex.begin(),
+                        begin(),
                         push(-1),
                         ISTORE_1
                     );
@@ -125,10 +127,10 @@ public class HDTexture extends BaseTexturePackMod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push(16),
-                        BinaryRegex.capture(BinaryRegex.subset(new byte[]{IREM, IDIV}, true)),
+                        capture(subset(new byte[]{IREM, IDIV}, true)),
                         push(16),
                         IMUL,
-                        BinaryRegex.capture(BinaryRegex.any(1, 3)),
+                        capture(any(1, 3)),
                         push(16),
                         IMUL
                     );
@@ -209,18 +211,18 @@ public class HDTexture extends BaseTexturePackMod {
                         ALOAD_2,
                         ALOAD_1,
                         reference(getInputStreamOpcode, getInputStream),
-                        BytecodeMatcher.anyASTORE,
-                        BytecodeMatcher.anyALOAD,
-                        IFNONNULL, BinaryRegex.any(2),
+                        anyASTORE,
+                        anyALOAD,
+                        IFNONNULL, any(2),
                         ALOAD_0,
                         ALOAD_0,
-                        GETFIELD, BinaryRegex.any(2),
-                        BytecodeMatcher.anyILOAD,
+                        GETFIELD, any(2),
+                        anyILOAD,
                         reference(INVOKEVIRTUAL, setupTexture),
-                        GOTO, BinaryRegex.any(2),
+                        GOTO, any(2),
                         ALOAD_0,
                         ALOAD_0,
-                        BytecodeMatcher.anyALOAD,
+                        anyALOAD,
                         reference(INVOKESPECIAL, readTextureImage)
                     );
                 }
@@ -253,7 +255,7 @@ public class HDTexture extends BaseTexturePackMod {
                         // imageData.put($1);
                         ALOAD_0,
                         reference(GETFIELD, imageData),
-                        BinaryRegex.capture(BinaryRegex.any(2, 5)),
+                        capture(any(2, 5)),
                         reference(INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "put", "([B)Ljava/nio/ByteBuffer;")),
                         POP,
 
@@ -262,7 +264,7 @@ public class HDTexture extends BaseTexturePackMod {
                         reference(GETFIELD, imageData),
                         ICONST_0,
                         reference(INVOKEVIRTUAL, new MethodRef("java/nio/ByteBuffer", "position", "(I)Ljava/nio/Buffer;")),
-                        BinaryRegex.backReference(1),
+                        backReference(1),
                         ARRAYLENGTH,
                         reference(INVOKEVIRTUAL, new MethodRef("java/nio/Buffer", "limit", "(I)Ljava/nio/Buffer;")),
                         POP
@@ -292,9 +294,9 @@ public class HDTexture extends BaseTexturePackMod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
-                        BinaryRegex.any(0, 50),
-                        BinaryRegex.end()
+                        begin(),
+                        any(0, 50),
+                        end()
                     );
                 }
 
@@ -319,7 +321,7 @@ public class HDTexture extends BaseTexturePackMod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -343,7 +345,7 @@ public class HDTexture extends BaseTexturePackMod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -422,9 +424,9 @@ public class HDTexture extends BaseTexturePackMod {
             ));
 
             classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
+                begin(),
                 RETURN,
-                BinaryRegex.end()
+                end()
             ).setMethodName("onTick"));
 
             memberMappers.add(new FieldMapper(imageData));
@@ -464,7 +466,7 @@ public class HDTexture extends BaseTexturePackMod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -493,7 +495,7 @@ public class HDTexture extends BaseTexturePackMod {
                 ALOAD_0,
                 SIPUSH, 0x01, 0x00, // 256
                 NEWARRAY, T_INT,
-                PUTFIELD, BinaryRegex.any(2),
+                PUTFIELD, any(2),
                 ALOAD_0
             ));
 
@@ -517,11 +519,11 @@ public class HDTexture extends BaseTexturePackMod {
             classSignatures.add(new FixedBytecodeSignature(
                 SIPUSH, 0x01, 0x40, // 320
                 NEWARRAY, T_FLOAT,
-                PUTFIELD, BinaryRegex.any(2),
+                PUTFIELD, any(2),
                 ALOAD_0,
                 SIPUSH, 0x01, 0x40, // 320
                 NEWARRAY, T_FLOAT,
-                PUTFIELD, BinaryRegex.any(2),
+                PUTFIELD, any(2),
                 RETURN
             ));
 
@@ -553,8 +555,8 @@ public class HDTexture extends BaseTexturePackMod {
 
             classSignatures.add(new FixedBytecodeSignature(
                 ALOAD_0,
-                GETSTATIC, BinaryRegex.any(2),
-                GETFIELD, BinaryRegex.any(2),
+                GETSTATIC, any(2),
+                GETFIELD, any(2),
                 (flow ? new byte[]{ICONST_1, IADD} : new byte[0]),
                 INVOKESPECIAL
             ));
@@ -646,9 +648,9 @@ public class HDTexture extends BaseTexturePackMod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        FLOAD, BinaryRegex.any(),
+                        FLOAD, any(),
                         F2D,
-                        FLOAD, BinaryRegex.any(),
+                        FLOAD, any(),
                         F2D,
                         reference(INVOKESTATIC, new MethodRef("java.lang.Math", "atan2", "(DD)D")),
                         D2F
@@ -685,8 +687,8 @@ public class HDTexture extends BaseTexturePackMod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push("/misc/" + name.toLowerCase() + "color.png"),
-                        BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                        BytecodeMatcher.captureReference(INVOKESTATIC)
+                        anyReference(INVOKEVIRTUAL),
+                        captureReference(INVOKESTATIC)
                     );
                 }
             }.addXref(1, new MethodRef("Colorizer" + name, "loadColorBuffer", "([I)V")));

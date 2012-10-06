@@ -10,6 +10,8 @@ import javassist.bytecode.BadBytecode;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class GLSLShader extends Mod {
@@ -66,16 +68,16 @@ public class GLSLShader extends Mod {
                         // if (Keyboard.getEventKey() == 63) {
                         reference(INVOKESTATIC, new MethodRef("org/lwjgl/input/Keyboard", "getEventKey", "()I")),
                         push(63),
-                        IF_ICMPNE, BinaryRegex.any(2),
+                        IF_ICMPNE, any(2),
 
                         // gameSettings.thirdPersonView++;
                         ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
+                        anyReference(GETFIELD),
                         DUP,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ICONST_1,
                         IADD,
-                        BytecodeMatcher.anyReference(PUTFIELD)
+                        anyReference(PUTFIELD)
                     );
                 }
             }.addXref(1, new FieldRef("GameSettings", "thirdPersonView", "I")));
@@ -153,17 +155,17 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         push(0.2f),
                         FMUL,
                         push(0.04f),
                         FADD,
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         push(0.2f),
                         FMUL,
                         push(0.04f),
                         FADD,
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         push(0.6f),
                         FMUL,
                         push(0.1f),
@@ -191,9 +193,9 @@ public class GLSLShader extends Mod {
                         reference(GETFIELD, worldObj),
                         FLOAD_1,
                         reference(INVOKEVIRTUAL, new MethodRef(worldClass, "getStarBrightness", "(F)F")),
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         FMUL,
-                        BytecodeMatcher.anyFSTORE
+                        anyFSTORE
                     );
                 }
 
@@ -296,13 +298,13 @@ public class GLSLShader extends Mod {
                         push(2918), // GL_FOG_COLOR
                         ALOAD_0,
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         push(1.0f),
-                        BytecodeMatcher.anyReference(INVOKESPECIAL),
+                        anyReference(INVOKESPECIAL),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glFog", "(ILjava/nio/FloatBuffer;)V"))
                     );
                 }
@@ -343,8 +345,8 @@ public class GLSLShader extends Mod {
                         // renderHand(f, i);
                         ALOAD_0,
                         FLOAD_1,
-                        BytecodeMatcher.anyILOAD,
-                        BytecodeMatcher.captureReference(INVOKESPECIAL)
+                        anyILOAD,
+                        captureReference(INVOKESPECIAL)
                     );
                 }
             }
@@ -365,7 +367,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -413,7 +415,7 @@ public class GLSLShader extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         FLOAD_1,
-                        BytecodeMatcher.anyILOAD,
+                        anyILOAD,
                         reference(INVOKESPECIAL, setupCameraTransform)
                     );
                 }
@@ -472,12 +474,12 @@ public class GLSLShader extends Mod {
                     return buildExpression(
                         // (vanilla) renderglobal.renderAllRenderLists(1, par1);
                         // (w/ Better Glass) renderglobal.renderAllRenderLists(this.loop, par1);
-                        BytecodeMatcher.anyALOAD,
-                        BinaryRegex.or(
-                            BinaryRegex.build(ICONST_1),
-                            BinaryRegex.build(
+                        anyALOAD,
+                        or(
+                            build(ICONST_1),
+                            build(
                                 ALOAD_0,
-                                BytecodeMatcher.anyReference(GETFIELD)
+                                anyReference(GETFIELD)
                             )
                         ),
                         FLOAD_1,
@@ -534,7 +536,7 @@ public class GLSLShader extends Mod {
                     return buildExpression(
                         ALOAD_0,
                         FLOAD_1,
-                        BytecodeMatcher.anyILOAD,
+                        anyILOAD,
                         reference(INVOKESPECIAL, renderHand)
                     );
                 }
@@ -646,7 +648,7 @@ public class GLSLShader extends Mod {
                         // hasNormals = true;
                         ALOAD_0,
                         ICONST_1,
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(PUTFIELD),
 
                         //  byte0 = (byte) (int) (f * 127.0f);
                         FLOAD_1,
@@ -654,7 +656,7 @@ public class GLSLShader extends Mod {
                         FMUL,
                         F2I,
                         I2B,
-                        BytecodeMatcher.anyISTORE,
+                        anyISTORE,
 
                         // byte1 = (byte) (int) (f1 * 127.0f);
                         FLOAD_2,
@@ -662,7 +664,7 @@ public class GLSLShader extends Mod {
                         FMUL,
                         F2I,
                         I2B,
-                        BytecodeMatcher.anyISTORE,
+                        anyISTORE,
 
                         // byte2 = (byte) (int) (f2 * 127.0f);
                         FLOAD_3,
@@ -670,11 +672,11 @@ public class GLSLShader extends Mod {
                         FMUL,
                         F2I,
                         I2B,
-                        BytecodeMatcher.anyISTORE,
+                        anyISTORE,
 
                         ALOAD_0,
-                        BinaryRegex.any(0, 30),
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        any(0, 30),
+                        captureReference(PUTFIELD)
                     );
                 }
             }
@@ -688,19 +690,19 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // addedVertices++;
-                        BinaryRegex.begin(),
+                        begin(),
                         ALOAD_0,
                         DUP,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ICONST_1,
                         IADD,
-                        BytecodeMatcher.anyReference(PUTFIELD),
+                        anyReference(PUTFIELD),
 
                         // if (drawMode == 7)
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         push(7),
-                        IF_ICMPNE, BinaryRegex.any(2)
+                        IF_ICMPNE, any(2)
                     );
                 }
             }
@@ -714,10 +716,10 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ICONST_0,
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         reference(INVOKEVIRTUAL, new MethodRef("java/nio/IntBuffer", "put", "([III)Ljava/nio/IntBuffer;"))
                     );
                 }
@@ -731,11 +733,11 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
+                        anyReference(GETFIELD),
                         push(7),
-                        IF_ICMPNE, BinaryRegex.any(2),
-                        BytecodeMatcher.captureReference(GETSTATIC),
-                        IFEQ, BinaryRegex.any(2)
+                        IF_ICMPNE, any(2),
+                        captureReference(GETSTATIC),
+                        IFEQ, any(2)
                     );
                 }
             }.addXref(1, convertQuadsToTriangles));
@@ -828,7 +830,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -875,7 +877,7 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -987,9 +989,9 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         reference(GETSTATIC, new FieldRef("Tessellator", "instance", "LTessellator;")),
-                        ASTORE, BinaryRegex.capture(BinaryRegex.any())
+                        ASTORE, capture(any())
                     );
                 }
 
@@ -1080,17 +1082,17 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         FCONST_1,
-                        BytecodeMatcher.anyFLOAD,
+                        anyFLOAD,
                         push((float) Math.PI),
                         FMUL,
                         FCONST_2,
                         FMUL,
-                        BytecodeMatcher.anyReference(INVOKESTATIC),
+                        anyReference(INVOKESTATIC),
                         FCONST_2,
                         FMUL,
-                        BinaryRegex.or(
-                            BinaryRegex.build(push(0.75f)), // pre-12w21a
-                            BinaryRegex.build(push(0.25f))  // 12w21a+
+                        or(
+                            build(push(0.75f)), // pre-12w21a
+                            build(push(0.25f))  // 12w21a+
                         ),
                         FADD,
                         FSUB
@@ -1099,15 +1101,15 @@ public class GLSLShader extends Mod {
             }.setMethod(new MethodRef(getDeobfClass(), "getStarBrightness", "(F)F")));
 
             classSignatures.add(new FixedBytecodeSignature(
-                BinaryRegex.begin(),
+                begin(),
                 ALOAD_0,
                 ILOAD_1,
                 ILOAD_2,
                 ILOAD_3,
                 ICONST_1,
-                BytecodeMatcher.anyReference(INVOKEVIRTUAL),
+                anyReference(INVOKEVIRTUAL),
                 IRETURN,
-                BinaryRegex.end()
+                end()
             ).setMethod(new MethodRef(getDeobfClass(), "getBlockLightValue", "(III)I")));
 
             classSignatures.add(new BytecodeSignature() {
@@ -1117,20 +1119,20 @@ public class GLSLShader extends Mod {
                         // entity.lastTickPosX = entity.posX;
                         ALOAD_1,
                         ALOAD_1,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(GETFIELD),
+                        captureReference(PUTFIELD),
 
                         // entity.lastTickPosY = entity.posY;
                         ALOAD_1,
                         ALOAD_1,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD),
+                        captureReference(GETFIELD),
+                        captureReference(PUTFIELD),
 
                         // entity.lastTickPosZ = entity.posZ;
                         ALOAD_1,
                         ALOAD_1,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        captureReference(GETFIELD),
+                        captureReference(PUTFIELD)
                     );
                 }
             }
@@ -1147,10 +1149,10 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // f1 = getCelestialAngle(f);
-                        BinaryRegex.begin(),
+                        begin(),
                         ALOAD_0,
                         FLOAD_1,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         FSTORE_2,
 
                         // return f1 * 3.141593f * 2.0f;
@@ -1160,7 +1162,7 @@ public class GLSLShader extends Mod {
                         push(2.0f),
                         FMUL,
                         FRETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
             }
@@ -1198,15 +1200,15 @@ public class GLSLShader extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BytecodeMatcher.anyILOAD,
-                        BytecodeMatcher.anyALOAD,
-                        BinaryRegex.capture(BytecodeMatcher.anyALOAD),
-                        BytecodeMatcher.anyILOAD,
-                        BytecodeMatcher.anyILOAD,
-                        BytecodeMatcher.anyILOAD,
+                        anyILOAD,
+                        anyALOAD,
+                        capture(anyALOAD),
+                        anyILOAD,
+                        anyILOAD,
+                        anyILOAD,
                         reference(INVOKEVIRTUAL, new MethodRef("RenderBlocks", "renderBlockByRenderType", "(LBlock;III)Z")),
                         IOR,
-                        BytecodeMatcher.anyISTORE
+                        anyISTORE
                     );
                 }
 
@@ -1232,7 +1234,7 @@ public class GLSLShader extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         RETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
 

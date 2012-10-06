@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class ConnectedTextures extends Mod {
@@ -163,17 +165,17 @@ public class ConnectedTextures extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         ALOAD_0,
                         ILOAD, 5,
                         ALOAD_1,
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEINTERFACE),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEINTERFACE),
+                        captureReference(INVOKEVIRTUAL),
                         IRETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
             }
@@ -204,25 +206,25 @@ public class ConnectedTextures extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         push(4),
                         IREM,
 
-                        BinaryRegex.any(0, 1000),
+                        any(0, 1000),
 
                         ALOAD_0,
                         DUP,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ICONST_1,
                         IADD,
-                        BytecodeMatcher.anyReference(PUTFIELD),
+                        anyReference(PUTFIELD),
 
                         ALOAD_0,
                         DUP,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         push(8),
                         IADD,
-                        BytecodeMatcher.anyReference(PUTFIELD)
+                        anyReference(PUTFIELD)
                     );
                 }
             }
@@ -236,21 +238,21 @@ public class ConnectedTextures extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
 
-                        BinaryRegex.any(0, 50),
+                        any(0, 50),
 
                         push("Already tesselating!"),
-                        BinaryRegex.any(0, 100),
+                        any(0, 100),
 
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(INVOKESPECIAL),
+                        captureReference(INVOKESPECIAL),
 
                         ALOAD_0,
                         ILOAD_1,
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        captureReference(PUTFIELD)
                     );
                 }
             }
@@ -264,12 +266,12 @@ public class ConnectedTextures extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin(),
+                        begin(),
                         ALOAD_0,
                         push(7),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         RETURN,
-                        BinaryRegex.end()
+                        end()
                     );
                 }
             }
@@ -284,7 +286,7 @@ public class ConnectedTextures extends Mod {
                         return buildExpression(
                             ALOAD_0,
                             ILOAD_1,
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -313,10 +315,10 @@ public class ConnectedTextures extends Mod {
                         return buildExpression(
                             reference(NEW, new ClassRef("Tessellator")),
                             DUP,
-                            BinaryRegex.capture(BinaryRegex.optional(BytecodeMatcher.anyLDC)),
-                            BinaryRegex.capture(BinaryRegex.or(
-                                BinaryRegex.build(reference(INVOKESPECIAL, constructor)),
-                                BinaryRegex.build(reference(INVOKESPECIAL, constructor0))
+                            capture(optional(anyLDC)),
+                            capture(or(
+                                build(reference(INVOKESPECIAL, constructor)),
+                                build(reference(INVOKESPECIAL, constructor0))
                             ))
                         );
                     } else {
@@ -372,12 +374,12 @@ public class ConnectedTextures extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.or(
-                            BinaryRegex.build(
+                        or(
+                            build(
                                 ALOAD_0,
-                                BytecodeMatcher.anyReference(GETFIELD)
+                                anyReference(GETFIELD)
                             ),
-                            BytecodeMatcher.anyReference(GETSTATIC)
+                            anyReference(GETSTATIC)
                         ),
                         reference(INVOKEVIRTUAL, new MethodRef("java/nio/IntBuffer", "clear", "()Ljava/nio/Buffer;")),
                         POP
@@ -471,13 +473,13 @@ public class ConnectedTextures extends Mod {
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         POP,
 
                         // overrideBlockTexture = 156;
                         ALOAD_0,
                         push(156),
-                        BytecodeMatcher.captureReference(PUTFIELD)
+                        captureReference(PUTFIELD)
                     );
                 }
             }
@@ -491,15 +493,15 @@ public class ConnectedTextures extends Mod {
                     return buildExpression(
                         ILOAD, 5,
                         push(18),
-                        BytecodeMatcher.IF_ICMPNE_or_IF_ICMPEQ, BinaryRegex.any(2),
+                        IF_ICMPNE_or_IF_ICMPEQ, any(2),
 
                         ALOAD_0,
                         ALOAD_1,
-                        BytecodeMatcher.anyReference(CHECKCAST),
+                        anyReference(CHECKCAST),
                         ILOAD_2,
                         ILOAD_3,
                         ILOAD, 4,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         IRETURN
                     );
                 }
@@ -532,7 +534,7 @@ public class ConnectedTextures extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         reference(GETSTATIC, instance),
-                        ASTORE, BinaryRegex.capture(BinaryRegex.any())
+                        ASTORE, capture(any())
                     );
                 }
 
@@ -569,18 +571,18 @@ public class ConnectedTextures extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // j = (i & 0x0f) << 4;
-                        ILOAD, BinaryRegex.capture(BinaryRegex.any()),
+                        ILOAD, capture(any()),
                         push(0x0f),
                         IAND,
                         push(4),
                         ISHL,
-                        ISTORE, BinaryRegex.any(),
+                        ISTORE, any(),
 
                         // k = (i & 0xf0);
-                        ILOAD, BinaryRegex.backReference(1),
+                        ILOAD, backReference(1),
                         push(0xf0),
                         IAND,
-                        ISTORE, BinaryRegex.any()
+                        ISTORE, any()
                     );
                 }
 
@@ -638,14 +640,14 @@ public class ConnectedTextures extends Mod {
                     return buildExpression(
                         // tessellator = Tessellator.instance;
                         reference(GETSTATIC, instance),
-                        ASTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        ASTORE, capture(any()),
 
                         // i = par1Block.getBlockTextureFromSideAndMetadata(0, par2);
                         ALOAD_1,
                         ICONST_0,
                         ILOAD_2,
-                        BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                        anyReference(INVOKEVIRTUAL),
+                        ISTORE, capture(any())
                     );
                 }
 
@@ -705,14 +707,14 @@ public class ConnectedTextures extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // sideU0 = (sideU + 7) / 256.0f;
-                        BytecodeMatcher.anyILOAD,
+                        anyILOAD,
                         push(7),
                         IADD,
                         I2F,
                         push(256.0f),
                         FDIV,
                         F2D,
-                        DSTORE, BinaryRegex.capture(BinaryRegex.any())
+                        DSTORE, capture(any())
                     );
                 }
 
@@ -748,9 +750,9 @@ public class ConnectedTextures extends Mod {
                             IADD,
                             ILOAD_3,
                             ILOAD, 4,
-                            BytecodeMatcher.anyReference(INVOKEINTERFACE),
-                            BytecodeMatcher.anyReference(INVOKEVIRTUAL),
-                            ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                            anyReference(INVOKEINTERFACE),
+                            anyReference(INVOKEVIRTUAL),
+                            ISTORE, capture(any())
                         );
                     }
                 }
@@ -787,11 +789,11 @@ public class ConnectedTextures extends Mod {
                     if (sideUVRegisters == null) {
                         return null;
                     } else {
-                        return buildExpression(BinaryRegex.repeat(BinaryRegex.build(
-                            ALOAD, BinaryRegex.any(),
-                            BinaryRegex.nonGreedy(BinaryRegex.any(0, 15)),
-                            DLOAD, BinaryRegex.subset(sideUVRegisters, false),
-                            DLOAD, BinaryRegex.subset(sideUVRegisters, false),
+                        return buildExpression(repeat(build(
+                            ALOAD, any(),
+                            nonGreedy(any(0, 15)),
+                            DLOAD, subset(sideUVRegisters, false),
+                            DLOAD, subset(sideUVRegisters, false),
                             reference(INVOKEVIRTUAL, addVertexWithUV)
                         ), 8));
                     }
@@ -826,22 +828,22 @@ public class ConnectedTextures extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.capture(BinaryRegex.build(
+                        capture(build(
                             // tessellator = Tessellator.instance;
                             reference(GETSTATIC, instance),
-                            ASTORE, BinaryRegex.capture(BinaryRegex.any()),
+                            ASTORE, capture(any()),
 
                             // if (overrideBlockTexture >= 0) {
                             ALOAD_0,
                             reference(GETFIELD, overrideBlockTexture)
                         )),
-                        IFLT, BinaryRegex.any(2),
+                        IFLT, any(2),
 
                         // texture = overrideBlockTexture;
-                        BinaryRegex.capture(BinaryRegex.build(
+                        capture(build(
                             ALOAD_0,
                             reference(GETFIELD, overrideBlockTexture),
-                            ISTORE, BinaryRegex.capture(BinaryRegex.any())
+                            ISTORE, capture(any())
                         ))
                     );
                 }
@@ -928,7 +930,7 @@ public class ConnectedTextures extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 

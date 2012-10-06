@@ -4,6 +4,8 @@ import com.pclewis.mcpatcher.*;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class BetterSkies extends Mod {
@@ -85,56 +87,56 @@ public class BetterSkies extends Mod {
                     return buildExpression(
                         // mc.theWorld.worldProvider.worldType == 1
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BinaryRegex.any(3),
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
+                        any(3),
+                        captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ICONST_1,
 
                         // ...
-                        BinaryRegex.any(0, 100),
+                        any(0, 100),
 
                         // renderEngine.bindTexture(renderEngine.getTexture("/misc/tunnel.png"));
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ALOAD_0,
-                        BinaryRegex.backReference(4),
+                        backReference(4),
                         push("/misc/tunnel.png"),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
 
                         // Tessellator tessellator = Tessellator.instance;
-                        BytecodeMatcher.captureReference(GETSTATIC),
-                        BytecodeMatcher.anyASTORE,
+                        captureReference(GETSTATIC),
+                        anyASTORE,
 
                         // ...
-                        BinaryRegex.any(0, 1000),
+                        any(0, 1000),
 
                         // d = 1.0F - worldObj.getRainStrength(par1);
                         push(1.0f),
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         FLOAD_1,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         FSUB,
-                        BinaryRegex.or(
-                            BinaryRegex.build(
-                                BytecodeMatcher.anyFSTORE
+                        or(
+                            build(
+                                anyFSTORE
                             ),
-                            BinaryRegex.build(
+                            build(
                                 F2D,
-                                BytecodeMatcher.anyDSTORE
+                                anyDSTORE
                             )
                         ),
 
                         // ..
-                        BinaryRegex.any(0, 500),
+                        any(0, 500),
 
                         // GL11.glRotatef(worldObj.getCelestialAngle(par1) * 360F, 1.0F, 0.0F, 0.0F);
                         ALOAD_0,
-                        BinaryRegex.backReference(8),
+                        backReference(8),
                         FLOAD_1,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         push(360.0f),
                         FMUL,
                         push(1.0f),
@@ -162,19 +164,19 @@ public class BetterSkies extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         reference(INVOKESTATIC, glCallList),
 
-                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 1000)),
+                        nonGreedy(any(0, 1000)),
 
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         reference(INVOKESTATIC, glCallList),
 
-                        BinaryRegex.nonGreedy(BinaryRegex.any(0, 1000)),
+                        nonGreedy(any(0, 1000)),
 
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         reference(INVOKESTATIC, glCallList)
                     );
                 }
@@ -191,12 +193,12 @@ public class BetterSkies extends Mod {
                     return buildExpression(
                         // tessellator.startDrawingQuads();
                         ALOAD_2,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
 
                         // tessellator.setColorOpaque_I(0x...);
                         ALOAD_2,
-                        BytecodeMatcher.anyLDC,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        anyLDC,
+                        captureReference(INVOKEVIRTUAL),
 
                         // tessellator.addVertexWithUV(-100D, -100D, -100D, 0.0D, 0.0D);
                         ALOAD_2,
@@ -205,7 +207,7 @@ public class BetterSkies extends Mod {
                         push(-100.0),
                         push(0.0),
                         push(0.0),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
 
                         // tessellator.addVertexWithUV(-100D, -100D, 100D, 0.0D, 16D);
                         ALOAD_2,
@@ -214,7 +216,7 @@ public class BetterSkies extends Mod {
                         push(100.0),
                         push(0.0),
                         push(16.0),
-                        BinaryRegex.backReference(3),
+                        backReference(3),
 
                         // tessellator.addVertexWithUV(100D, -100D, 100D, 16D, 16D);
                         ALOAD_2,
@@ -223,7 +225,7 @@ public class BetterSkies extends Mod {
                         push(100.0),
                         push(16.0),
                         push(16.0),
-                        BinaryRegex.backReference(3),
+                        backReference(3),
 
                         // tessellator.addVertexWithUV(100D, -100D, -100D, 16D, 0.0D);
                         ALOAD_2,
@@ -232,11 +234,11 @@ public class BetterSkies extends Mod {
                         push(-100.0),
                         push(16.0),
                         push(0.0),
-                        BinaryRegex.backReference(3),
+                        backReference(3),
 
                         // tessellator.draw();
                         ALOAD_2,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
+                        captureReference(INVOKEVIRTUAL),
                         POP
                     );
                 }
@@ -256,7 +258,7 @@ public class BetterSkies extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BinaryRegex.begin()
+                        begin()
                     );
                 }
 
@@ -317,10 +319,10 @@ public class BetterSkies extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        FLOAD, BinaryRegex.capture(BinaryRegex.any()),
-                        FLOAD, BinaryRegex.backReference(1),
-                        FLOAD, BinaryRegex.backReference(1),
-                        FLOAD, BinaryRegex.backReference(1),
+                        FLOAD, capture(any()),
+                        FLOAD, backReference(1),
+                        FLOAD, backReference(1),
+                        FLOAD, backReference(1),
                         reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glColor4f", "(FFFF)V")),
 
                         ALOAD_0,

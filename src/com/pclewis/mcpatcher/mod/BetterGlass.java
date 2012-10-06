@@ -4,6 +4,8 @@ import com.pclewis.mcpatcher.*;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 public class BetterGlass extends Mod {
@@ -56,21 +58,21 @@ public class BetterGlass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // j3 = block.getRenderBlockPass();
-                        BytecodeMatcher.anyALOAD,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        anyALOAD,
+                        captureReference(INVOKEVIRTUAL),
+                        ISTORE, capture(any()),
 
                         // ...
-                        BinaryRegex.any(0, 30),
+                        any(0, 30),
 
                         // if (j3 != i2)
-                        ILOAD, BinaryRegex.backReference(2),
-                        ILOAD, BinaryRegex.any(),
-                        IF_ICMPEQ, BinaryRegex.any(2),
+                        ILOAD, backReference(2),
+                        ILOAD, any(),
+                        IF_ICMPEQ, any(2),
 
                         // flag = true;
                         push(1),
-                        ISTORE, BinaryRegex.any()
+                        ISTORE, any()
                     );
                 }
             }
@@ -83,7 +85,7 @@ public class BetterGlass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         push(2),
                         IADD,
                         reference(INVOKESTATIC, glCallList)
@@ -118,14 +120,14 @@ public class BetterGlass extends Mod {
                 @Override
                 protected String getPrefix() {
                     return buildExpression(
-                        BytecodeMatcher.anyILOAD
+                        anyILOAD
                     );
                 }
 
                 @Override
                 protected String getSuffix() {
                     return buildExpression(
-                        BytecodeMatcher.IF_ICMPLT_or_IF_ICMPGE, BinaryRegex.any(2)
+                        IF_ICMPLT_or_IF_ICMPGE, any(2)
                     );
                 }
             });
@@ -157,11 +159,11 @@ public class BetterGlass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         push(0),
-                        ISTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        ISTORE, capture(any()),
                         push(0),
-                        ISTORE, BinaryRegex.any(),
+                        ISTORE, any(),
                         push(0),
-                        ISTORE, BinaryRegex.any()
+                        ISTORE, any()
                     );
                 }
 
@@ -187,10 +189,10 @@ public class BetterGlass extends Mod {
                     return buildExpression(
                         // if (!var12) {
                         ILOAD, loopRegister + 1,
-                        IFNE, BinaryRegex.any(2),
+                        IFNE, any(2),
 
                         // break;
-                        GOTO, BinaryRegex.any(2)
+                        GOTO, any(2)
 
                         // }
                     );
@@ -217,17 +219,17 @@ public class BetterGlass extends Mod {
                         reference(GETFIELD, skipRenderPass),
                         push(0),
                         BALOAD,
-                        IFEQ, BinaryRegex.any(2),
+                        IFEQ, any(2),
                         ALOAD_0,
                         reference(GETFIELD, skipRenderPass),
                         push(1),
                         BALOAD,
-                        IFEQ, BinaryRegex.any(2),
+                        IFEQ, any(2),
                         push(1),
-                        BinaryRegex.or(
-                            BinaryRegex.build(IRETURN),
-                            BinaryRegex.build(
-                                GOTO, BinaryRegex.any(2)
+                        or(
+                            build(IRETURN),
+                            build(
+                                GOTO, any(2)
                             )
                         ),
                         push(0),
@@ -276,9 +278,9 @@ public class BetterGlass extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return buildExpression(BinaryRegex.or(
-                        BinaryRegex.build(reference(INVOKESTATIC, canRenderInPass1)),
-                        BinaryRegex.build(reference(INVOKEVIRTUAL, canRenderInPass2))
+                    return buildExpression(or(
+                        build(reference(INVOKESTATIC, canRenderInPass1)),
+                        build(reference(INVOKEVIRTUAL, canRenderInPass2))
                     ));
                 }
 
@@ -308,9 +310,9 @@ public class BetterGlass extends Mod {
             @Override
             public final String getMatchExpression() {
                 return buildExpression(
-                    BinaryRegex.lookBehind(getPrefix(), true),
+                    lookBehind(getPrefix(), true),
                     push(2),
-                    BinaryRegex.lookAhead(getSuffix(), true)
+                    lookAhead(getSuffix(), true)
                 );
             }
 
@@ -347,8 +349,8 @@ public class BetterGlass extends Mod {
                         push(1),
                         FLOAD_1,
                         F2D,
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        ISTORE, BinaryRegex.any()
+                        captureReference(INVOKEVIRTUAL),
+                        ISTORE, any()
                     );
                 }
             }
@@ -395,7 +397,7 @@ public class BetterGlass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // if (...)
-                        IFEQ, BinaryRegex.any(2),
+                        IFEQ, any(2),
 
                         // GL11.glShadeModel(GL11.GL_SMOOTH);
                         push(7425),
@@ -506,8 +508,8 @@ public class BetterGlass extends Mod {
                         return buildExpression(
                             push(3),
                             IMUL,
-                            BytecodeMatcher.captureReference(INVOKESTATIC),
-                            BytecodeMatcher.captureReference(PUTFIELD)
+                            captureReference(INVOKESTATIC),
+                            captureReference(PUTFIELD)
                         );
                     } else {
                         return null;
@@ -522,7 +524,7 @@ public class BetterGlass extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        BytecodeMatcher.anyILOAD,
+                        anyILOAD,
                         push(16),
                         IDIV,
                         push(1),
@@ -537,13 +539,13 @@ public class BetterGlass extends Mod {
                     return buildExpression(
                         // var4 = this.allRenderLists;
                         ALOAD_0,
-                        BytecodeMatcher.anyReference(GETFIELD),
-                        ASTORE, BinaryRegex.capture(BinaryRegex.any()),
+                        anyReference(GETFIELD),
+                        ASTORE, capture(any()),
 
                         // var5 = var4.length;
-                        ALOAD, BinaryRegex.backReference(1),
+                        ALOAD, backReference(1),
                         ARRAYLENGTH,
-                        ISTORE, BinaryRegex.any()
+                        ISTORE, any()
                     );
                 }
             }.setMethod(renderAllRenderLists));
@@ -559,7 +561,7 @@ public class BetterGlass extends Mod {
                     if (getMethodInfo().isConstructor()) {
                         return buildExpression(
                             push(3),
-                            BinaryRegex.lookAhead(BinaryRegex.build(
+                            lookAhead(build(
                                 IMUL,
                                 reference(INVOKESTATIC, generateDisplayLists)
                             ), true)
@@ -586,7 +588,7 @@ public class BetterGlass extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        IINC, BinaryRegex.capture(BinaryRegex.any()), 3
+                        IINC, capture(any()), 3
                     );
                 }
 
@@ -608,10 +610,10 @@ public class BetterGlass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // mc.entityRenderer.enableLightmap(par2);
-                        BinaryRegex.lookBehind(BinaryRegex.build(
+                        lookBehind(build(
                             ALOAD_0,
-                            BytecodeMatcher.anyReference(GETFIELD),
-                            BytecodeMatcher.anyReference(GETFIELD),
+                            anyReference(GETFIELD),
+                            anyReference(GETFIELD),
                             DLOAD_2
                         ), true),
                         reference(INVOKEVIRTUAL, enableLightmap)
@@ -650,19 +652,19 @@ public class BetterGlass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
-                        IFNE, BinaryRegex.any(2),
+                        captureReference(GETFIELD),
+                        IFNE, any(2),
                         ALOAD_1,
                         ALOAD_0,
-                        BytecodeMatcher.captureReference(GETFIELD),
+                        captureReference(GETFIELD),
                         ILOAD_2,
                         ILOAD_3,
                         push(1),
                         ISUB,
                         ILOAD, 4,
                         push(0),
-                        BytecodeMatcher.captureReference(INVOKEVIRTUAL),
-                        IFEQ, BinaryRegex.any(2)
+                        captureReference(INVOKEVIRTUAL),
+                        IFEQ, any(2)
                     );
                 }
             }
@@ -682,14 +684,14 @@ public class BetterGlass extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         // (flag ? f : 1.0f) * ...
-                        IFEQ, BinaryRegex.any(2),
-                        BinaryRegex.capture(BytecodeMatcher.anyFLOAD),
-                        GOTO, BinaryRegex.any(2),
+                        IFEQ, any(2),
+                        capture(anyFLOAD),
+                        GOTO, any(2),
                         push(1.0f),
-                        BinaryRegex.capture(BinaryRegex.or(
-                            BinaryRegex.build(push(0.5f)),
-                            BinaryRegex.build(push(0.6f)),
-                            BinaryRegex.build(push(0.8f))
+                        capture(or(
+                            build(push(0.5f)),
+                            build(push(0.6f)),
+                            build(push(0.8f))
                         )),
                         FMUL
                     );

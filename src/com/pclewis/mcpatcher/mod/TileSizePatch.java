@@ -4,6 +4,8 @@ import com.pclewis.mcpatcher.*;
 
 import java.io.IOException;
 
+import static com.pclewis.mcpatcher.BinaryRegex.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.*;
 import static javassist.bytecode.Opcode.*;
 
 class TileSizePatch extends BytecodePatch {
@@ -42,9 +44,9 @@ class TileSizePatch extends BytecodePatch {
     @Override
     public String getMatchExpression() {
         return buildExpression(
-            BinaryRegex.capture(prefix()),
+            capture(prefix()),
             push(value),
-            BinaryRegex.capture(suffix())
+            capture(suffix())
         );
     }
 
@@ -184,9 +186,9 @@ class TileSizePatch extends BytecodePatch {
             return buildExpression(
                 push(16),
                 push(16),
-                BinaryRegex.capture(buildExpression(
+                capture(buildExpression(
                     ALOAD_0,
-                    GETFIELD, BinaryRegex.any(), BinaryRegex.any(),
+                    GETFIELD, any(), any(),
                     ICONST_0
                 )),
                 push(16)
@@ -215,13 +217,13 @@ class TileSizePatch extends BytecodePatch {
         public String getMatchExpression() {
             return buildExpression(
                 push(16),
-                BinaryRegex.capture(BinaryRegex.subset(new byte[]{IREM, IDIV}, true)),
+                capture(subset(new byte[]{IREM, IDIV}, true)),
                 push(16),
                 IMUL,
                 I2F,
-                BinaryRegex.capture(BinaryRegex.or(
-                    BinaryRegex.build(FCONST_0),
-                    BinaryRegex.build(push(15.99F))
+                capture(or(
+                    build(FCONST_0),
+                    build(push(15.99F))
                 )),
                 FADD,
                 push(256.0F)
@@ -256,15 +258,15 @@ class TileSizePatch extends BytecodePatch {
         @Override
         public String getMatchExpression() {
             return buildExpression(
-                BinaryRegex.capture(BinaryRegex.build(
-                    BytecodeMatcher.anyFLOAD,
-                    BytecodeMatcher.anyFLOAD,
+                capture(build(
+                    anyFLOAD,
+                    anyFLOAD,
                     FMUL
                 )),
                 push(0.0625F),
-                BinaryRegex.capture(BinaryRegex.build(
+                capture(build(
                     FADD,
-                    BytecodeMatcher.anyFSTORE
+                    anyFSTORE
                 ))
             );
         }
