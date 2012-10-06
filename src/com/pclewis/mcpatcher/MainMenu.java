@@ -48,10 +48,12 @@ class MainMenu {
         menuBar.add(file);
 
         origFile = new JMenuItem("Select input file...");
+        origFile.setMnemonic('i');
         copyActionListener(origFile, mainForm.origBrowseButton);
         file.add(origFile);
 
         outputFile = new JMenuItem("Select output file...");
+        outputFile.setMnemonic('o');
         copyActionListener(outputFile, mainForm.outputBrowseButton);
         file.add(outputFile);
 
@@ -73,16 +75,19 @@ class MainMenu {
         menuBar.add(mods);
 
         addMod = new JMenuItem("Add...");
+        addMod.setMnemonic('A');
         copyActionListener(addMod, mainForm.addButton);
         mods.add(addMod);
 
         removeMod = new JMenuItem("Remove");
+        removeMod.setMnemonic('R');
         copyActionListener(removeMod, mainForm.removeButton);
         mods.add(removeMod);
 
         mods.addSeparator();
 
         enableAll = new JMenuItem("Enable all");
+        enableAll.setMnemonic('E');
         mods.add(enableAll);
         enableAll.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -95,6 +100,7 @@ class MainMenu {
         });
 
         disableAll = new JMenuItem("Disable all");
+        disableAll.setMnemonic('D');
         mods.add(disableAll);
         disableAll.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -109,20 +115,23 @@ class MainMenu {
         mods.addSeparator();
 
         moveUp = new JMenuItem("Move up");
+        moveUp.setMnemonic('u');
         copyActionListener(moveUp, mainForm.upButton);
         mods.add(moveUp);
 
         moveDown = new JMenuItem("Move down");
+        moveDown.setMnemonic('d');
         copyActionListener(moveDown, mainForm.downButton);
         mods.add(moveDown);
 
         mods.addSeparator();
 
         profile = new JMenu("Profile");
-        profile.setMnemonic('P');
+        profile.setMnemonic('r');
         menuBar.add(profile);
 
         save = new JMenuItem("Save profile...");
+        save.setMnemonic('S');
         save.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String profileName;
@@ -171,9 +180,11 @@ class MainMenu {
         profile.add(save);
 
         load = new JMenu("Select profile");
+        load.setMnemonic('e');
         profile.add(load);
 
         delete = new JMenu("Delete profile");
+        delete.setMnemonic('D');
         profile.add(delete);
 
         game = new JMenu("Game");
@@ -181,16 +192,19 @@ class MainMenu {
         menuBar.add(game);
 
         patch = new JMenuItem("Patch");
+        patch.setMnemonic('P');
         copyActionListener(patch, mainForm.patchButton);
         game.add(patch);
 
         unpatch = new JMenuItem("Unpatch");
+        unpatch.setMnemonic('U');
         copyActionListener(unpatch, mainForm.undoButton);
         game.add(unpatch);
 
         game.addSeparator();
 
         test = new JMenuItem("Test Minecraft");
+        test.setMnemonic('T');
         copyActionListener(test, mainForm.testButton);
         game.add(test);
 
