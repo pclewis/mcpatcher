@@ -209,6 +209,7 @@ public class HDTexture extends BaseTexturePackMod {
                 public String getMatchExpression() {
                     return buildExpression(
                         ALOAD_2,
+                        any(0, 6), // some mods have two useless CHECKCASTS here
                         ALOAD_1,
                         reference(getInputStreamOpcode, getInputStream),
                         anyASTORE,
