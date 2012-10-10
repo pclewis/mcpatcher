@@ -17,6 +17,7 @@ import static javassist.bytecode.Opcode.*;
 abstract public class BytecodePatch extends ClassPatch {
     BytecodeMatcher matcher;
     private MethodRef targetMethod;
+    private final ArrayList<BytecodeSignature> preMatchSignatures = new ArrayList<BytecodeSignature>();
     int labelOffset;
 
     /**
@@ -28,6 +29,19 @@ abstract public class BytecodePatch extends ClassPatch {
      */
     public BytecodePatch targetMethod(MethodRef targetMethod) {
         this.targetMethod = targetMethod;
+        return this;
+    }
+
+    /**
+     * Add a bytecode signature that must match the current method before the patch is applied.  It is
+     * tested against each method after targetMethod but before getMatchExpression.  This can be used
+     * to capture parts of the method (e.g., register numbers) in different locations from the main
+     * match expression.
+     *
+     * @return this
+     */
+    public BytecodePatch addPreMatchSignature(BytecodeSignature signature) {
+        preMatchSignatures.add(signature);
         return this;
     }
 
@@ -48,12 +62,20 @@ abstract public class BytecodePatch extends ClassPatch {
      */
     public boolean filterMethod(MethodInfo methodInfo) {
         MethodRef targetMethod = getTargetMethod();
-        if (targetMethod == null) {
-            return true;
-        } else {
+        if (targetMethod != null) {
             JavaRef ref = map(targetMethod);
-            return methodInfo.getDescriptor().equals(ref.getType()) && methodInfo.getName().equals(ref.getName());
+            if (!methodInfo.getDescriptor().equals(ref.getType()) || !methodInfo.getName().equals(ref.getName())) {
+                return false;
+            }
         }
+        for (BytecodeSignature signature : preMatchSignatures) {
+            if (signature.match()) {
+                signature.afterMatch(getClassFile(), methodInfo);
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -76,6 +98,14 @@ abstract public class BytecodePatch extends ClassPatch {
      * @throws IOException
      */
     abstract public byte[] getReplacementBytes() throws IOException;
+
+    @Override
+    void setClassMod(ClassMod classMod) {
+        super.setClassMod(classMod);
+        for (BytecodeSignature signature : preMatchSignatures) {
+            signature.classMod = classMod;
+        }
+    }
 
     private boolean apply(MethodInfo mi) throws BadBytecode {
         boolean patched = false;
