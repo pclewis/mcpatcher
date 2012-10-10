@@ -61,6 +61,10 @@ abstract public class BytecodePatch extends ClassPatch {
      * @return true if method should be considered for patching
      */
     public boolean filterMethod(MethodInfo methodInfo) {
+        return true;
+    }
+
+    private boolean filterMethod1(MethodInfo methodInfo) {
         MethodRef targetMethod = getTargetMethod();
         if (targetMethod != null) {
             JavaRef ref = map(targetMethod);
@@ -75,7 +79,7 @@ abstract public class BytecodePatch extends ClassPatch {
                 return false;
             }
         }
-        return true;
+        return filterMethod(methodInfo);
     }
 
     /**
@@ -308,7 +312,7 @@ abstract public class BytecodePatch extends ClassPatch {
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
             classMod.methodInfo = methodInfo;
-            if (filterMethod(methodInfo)) {
+            if (filterMethod1(methodInfo)) {
                 if (apply(methodInfo)) {
                     patched = true;
                 }
