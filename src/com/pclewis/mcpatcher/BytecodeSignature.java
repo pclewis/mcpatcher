@@ -215,4 +215,24 @@ abstract public class BytecodeSignature extends ClassSignature {
      */
     public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
     }
+
+    /**
+     * Get a captured subexpression after a match.  Can only be called in afterMatch.
+     *
+     * @param group number of capture group, starting at 1
+     * @return byte array
+     */
+    final protected byte[] getCaptureGroup(int group) {
+        return matcher.getCaptureGroup(group);
+    }
+
+    /**
+     * Get matching bytecode string after a match.  Can only be called in afterMatch.
+     *
+     * @return byte array
+     */
+    final protected byte[] getMatch() {
+        return matcher.getMatch();
+    }
+
 }
