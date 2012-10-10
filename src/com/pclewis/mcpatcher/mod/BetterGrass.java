@@ -336,70 +336,79 @@ public class BetterGrass extends Mod {
         }
     }
 
-    private class RenderBlocksMod extends ClassMod {
-        private int eastFace;
-        private int westFace;
-        private int northFace;
-        private int southFace;
-
-        private int redMultiplier;
-        private int greenMultiplier;
-        private int blueMultiplier;
-
+    private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
         RenderBlocksMod() {
-            classSignatures.add(new ConstSignature(0.02734375));
-            classSignatures.add(new ConstSignature(0.0234375));
-            classSignatures.add(new ConstSignature(0.03515625));
-            classSignatures.add(new ConstSignature(0.03125));
-
-            MethodRef renderStandardBlockWithColorMultiplier = new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z");
+            final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
+            final MethodRef renderStandardBlockWithColorMultiplier = new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
                         push(0.5f),
-                        FSTORE, any(),
+                        anyFSTORE,
                         push(1.0f),
-                        FSTORE, capture(any()),
+                        anyFSTORE,
                         push(0.8f),
-                        FSTORE, any(),
+                        anyFSTORE,
                         push(0.6f),
-                        FSTORE, any(),
-
-                        any(0, 20),
-
-                        FLOAD, backReference(1),
-                        FLOAD, 5,
-                        FMUL,
-                        FSTORE, capture(any()),
-
-                        FLOAD, backReference(1),
-                        FLOAD, 6,
-                        FMUL,
-                        FSTORE, capture(any()),
-
-                        FLOAD, backReference(1),
-                        FLOAD, 7,
-                        FMUL,
-                        FSTORE, capture(any())
-                    );
-                }
-
-                @Override
-                public void afterMatch(ClassFile classFile) {
-                    redMultiplier = matcher.getCaptureGroup(2)[0] & 0xff;
-                    greenMultiplier = matcher.getCaptureGroup(3)[0] & 0xff;
-                    blueMultiplier = matcher.getCaptureGroup(4)[0] & 0xff;
-                    Logger.log(Logger.LOG_CONST, "non-AO multipliers (R G B) = (%d %d %d)",
-                        redMultiplier, greenMultiplier, blueMultiplier
+                        anyFSTORE
                     );
                 }
             }.setMethod(renderStandardBlockWithColorMultiplier));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;")));
+            memberMappers.add(new FieldMapper(blockAccess));
 
             patches.add(new BytecodePatch() {
+                private int redMultiplier;
+                private int greenMultiplier;
+                private int blueMultiplier;
+
+                {
+                    addPreMatchSignature(new BytecodeSignature() {
+                        @Override
+                        public String getMatchExpression() {
+                            return buildExpression(
+                                push(0.5f),
+                                FSTORE, any(),
+                                push(1.0f),
+                                FSTORE, capture(any()),
+                                push(0.8f),
+                                FSTORE, any(),
+                                push(0.6f),
+                                FSTORE, any(),
+
+                                any(0, 20),
+
+                                FLOAD, backReference(1),
+                                FLOAD, 5,
+                                FMUL,
+                                FSTORE, capture(any()),
+
+                                FLOAD, backReference(1),
+                                FLOAD, 6,
+                                FMUL,
+                                FSTORE, capture(any()),
+
+                                FLOAD, backReference(1),
+                                FLOAD, 7,
+                                FMUL,
+                                FSTORE, capture(any())
+                            );
+                        }
+
+                        @Override
+                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                            redMultiplier = matcher.getCaptureGroup(2)[0] & 0xff;
+                            greenMultiplier = matcher.getCaptureGroup(3)[0] & 0xff;
+                            blueMultiplier = matcher.getCaptureGroup(4)[0] & 0xff;
+                            Logger.log(Logger.LOG_CONST, "non-AO multipliers (R G B) = (%d %d %d)",
+                                redMultiplier, greenMultiplier, blueMultiplier
+                            );
+                        }
+                    });
+                }
+
                 @Override
                 public String getDescription() {
                     return "if (getBlockTexture == 0) useBiomeColor = true (non-AO pre-1.8)";
@@ -539,58 +548,80 @@ public class BetterGrass extends Mod {
         }
 
         private void setupAO() {
-            MethodRef renderStandardBlockWithAmbientOcclusion = new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z");
+            final MethodRef renderStandardBlockWithAmbientOcclusion = new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z");
 
-            classSignatures.add(new FixedBytecodeSignature(
-                ICONST_0,
-                or(
-                    build(
-                        // vanilla minecraft
-                        DUP,
-                        ISTORE, capture(any()), // southFace
-                        DUP,
-                        ISTORE, capture(any()), // northFace
-                        DUP,
-                        ISTORE, capture(any()), // westFace
-                        DUP,
-                        ISTORE, capture(any())  // eastFace
-                    ),
-                    build(
-                        // ModLoader
-                        ISTORE, capture(any()), // southFace
-                        ICONST_0,
-                        ISTORE, capture(any()), // northFace
-                        ICONST_0,
-                        ISTORE, capture(any()), // westFace
-                        ICONST_0,
-                        ISTORE, capture(any()), // eastFace
-                        ICONST_0
-                    )
-                ),
-                anyISTORE
-            ) {
-                public void afterMatch(ClassFile classFile) {
-                    byte[][] m = new byte[][]{
-                        matcher.getCaptureGroup(1),
-                        matcher.getCaptureGroup(2),
-                        matcher.getCaptureGroup(3),
-                        matcher.getCaptureGroup(4),
-                        matcher.getCaptureGroup(5),
-                        matcher.getCaptureGroup(6),
-                        matcher.getCaptureGroup(7),
-                        matcher.getCaptureGroup(8),
-                    };
-                    southFace = m[(m[0] == null ? 4 : 0)][0] & 0xff;
-                    northFace = m[(m[1] == null ? 5 : 1)][0] & 0xff;
-                    westFace = m[(m[2] == null ? 6 : 2)][0] & 0xff;
-                    eastFace = m[(m[3] == null ? 7 : 3)][0] & 0xff;
-                    Logger.log(Logger.LOG_CONST, "AO faces (N S E W) = (%d %d %d %d)",
-                        northFace, southFace, eastFace, westFace
+            final BytecodeSignature matchFaceRegisters = new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0),
+                        or(
+                            build(
+                                // vanilla minecraft
+                                DUP,
+                                ISTORE, capture(any()), // southFace
+                                DUP,
+                                ISTORE, capture(any()), // northFace
+                                DUP,
+                                ISTORE, capture(any()), // westFace
+                                DUP,
+                                ISTORE, capture(any())  // eastFace
+                            ),
+                            build(
+                                // ModLoader
+                                ISTORE, capture(any()), // southFace
+                                push(0),
+                                ISTORE, capture(any()), // northFace
+                                push(0),
+                                ISTORE, capture(any()), // westFace
+                                push(0),
+                                ISTORE, capture(any()), // eastFace
+                                push(0)
+                            )
+                        ),
+                        anyISTORE
                     );
                 }
-            }.setMethod(renderStandardBlockWithAmbientOcclusion));
+            }.setMethod(renderStandardBlockWithAmbientOcclusion);
+
+            classSignatures.add(matchFaceRegisters);
 
             patches.add(new BytecodePatch() {
+                private int eastFace;
+                private int westFace;
+                private int northFace;
+                private int southFace;
+
+                {
+                    addPreMatchSignature(new BytecodeSignature() {
+                        @Override
+                        public String getMatchExpression() {
+                            return matchFaceRegisters.getMatchExpression();
+                        }
+
+                        @Override
+                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                            byte[][] m = new byte[][]{
+                                matcher.getCaptureGroup(1),
+                                matcher.getCaptureGroup(2),
+                                matcher.getCaptureGroup(3),
+                                matcher.getCaptureGroup(4),
+                                matcher.getCaptureGroup(5),
+                                matcher.getCaptureGroup(6),
+                                matcher.getCaptureGroup(7),
+                                matcher.getCaptureGroup(8),
+                            };
+                            southFace = m[(m[0] == null ? 4 : 0)][0] & 0xff;
+                            northFace = m[(m[1] == null ? 5 : 1)][0] & 0xff;
+                            westFace = m[(m[2] == null ? 6 : 2)][0] & 0xff;
+                            eastFace = m[(m[3] == null ? 7 : 3)][0] & 0xff;
+                            Logger.log(Logger.LOG_CONST, "AO faces (N S E W) = (%d %d %d %d)",
+                                northFace, southFace, eastFace, westFace
+                            );
+                        }
+                    });
+                }
+
                 @Override
                 public String getDescription() {
                     return "if (getBlockTexture == 0) useBiomeColor = true (AO)";
@@ -598,7 +629,7 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return capture(build(
+                    return buildExpression(
                         ICONST_0,
                         or(
                             build(
@@ -625,7 +656,7 @@ public class BetterGrass extends Mod {
                             )
                         ),
                         anyISTORE
-                    ));
+                    );
                 }
 
                 @Override
@@ -634,7 +665,7 @@ public class BetterGrass extends Mod {
                     byte[] getBlockTexture = reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"));
 
                     return buildCode(
-                        getCaptureGroup(1),
+                        getMatch(),
 
                         // if (block.getBlockTexture(blockAccess, i, j, k, 2) == 0) eastFace = true;
                         ALOAD_1,

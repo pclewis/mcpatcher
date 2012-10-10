@@ -2,13 +2,13 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import static com.pclewis.mcpatcher.BinaryRegex.*;
 import static com.pclewis.mcpatcher.BytecodeMatcher.*;
@@ -445,10 +445,6 @@ public class ConnectedTextures extends Mod {
         private final FieldRef newTessellator = new FieldRef(MCPatcherUtils.CTM_UTILS_CLASS, "newTessellator", "LTessellator;");
         private final MethodRef skipDefaultRendering = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "skipDefaultRendering", "(LBlock;)Z");
 
-        private ArrayList<MethodInfo> renderMethods = new ArrayList<MethodInfo>();
-        private ArrayList<Integer> tessellatorRegisters = new ArrayList<Integer>();
-        private int[] sideUVRegisters;
-
         RenderBlocksMod() {
             if (getMinecraftVersion().compareTo("12w34a") >= 0) {
                 drawCrossedSquares = new MethodRef(getDeobfClass(), "drawCrossedSquares", "(LBlock;IDDDF)V");
@@ -513,41 +509,26 @@ public class ConnectedTextures extends Mod {
             memberMappers.add(new MethodMapper(faceMethods));
             memberMappers.add(new MethodMapper(drawCrossedSquares));
 
-            patches.add(new BytecodePatch() {
-                private JavaRef ref;
-
-                @Override
-                public String getDescription() {
-                    return "find potential render methods";
-                }
-
-                @Override
-                public boolean filterMethod(MethodInfo methodInfo) {
-                    if (ref == null) {
-                        ref = map(renderBlockPane);
-                    }
-                    return methodInfo.getDescriptor().matches("^\\(L[a-z]+;III.*") &&
-                        (!methodInfo.getDescriptor().equals(ref.getType()) || !methodInfo.getName().equals(ref.getName()));
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        reference(GETSTATIC, instance),
-                        ASTORE, capture(any())
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    renderMethods.add(getMethodInfo());
-                    tessellatorRegisters.add(getCaptureGroup(1)[0] & 0xff);
-                    return null;
-                }
-            });
-
             patches.add(new BytecodePatch.InsertBefore() {
                 private int tessellatorRegister;
+                private JavaRef renderBlockPaneMapped;
+
+                {
+                    addPreMatchSignature(new BytecodeSignature() {
+                        @Override
+                        public String getMatchExpression() {
+                            return buildExpression(
+                                reference(GETSTATIC, instance),
+                                ASTORE, capture(any())
+                            );
+                        }
+
+                        @Override
+                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                            tessellatorRegister = getCaptureGroup(1)[0] & 0xff;
+                        }
+                    });
+                }
 
                 @Override
                 public String getDescription() {
@@ -556,15 +537,12 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public boolean filterMethod(MethodInfo methodInfo) {
-                    for (int i = 0; i < renderMethods.size(); i++) {
-                        MethodInfo m = renderMethods.get(i);
-                        if (methodInfo.getName().equals(m.getName()) &&
-                            methodInfo.getDescriptor().equals(m.getDescriptor())) {
-                            tessellatorRegister = tessellatorRegisters.get(i);
-                            return true;
-                        }
+                    if (renderBlockPaneMapped == null) {
+                        renderBlockPaneMapped = map(renderBlockPane);
                     }
-                    return false;
+                    return methodInfo.getDescriptor().matches("^\\(L[a-z]+;III.*") &&
+                        !(methodInfo.getDescriptor().equals(renderBlockPaneMapped.getType()) &&
+                            methodInfo.getName().equals(renderBlockPaneMapped.getName()));
                 }
 
                 @Override
@@ -588,6 +566,7 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public byte[] getInsertBytes() throws IOException {
+                    Logger.log(Logger.LOG_BYTECODE, "tessellator register %d", tessellatorRegister);
                     return buildCode(
                         // if (overrideBlockTexture < 0
                         ALOAD_0,
@@ -697,38 +676,6 @@ public class ConnectedTextures extends Mod {
                 }
             }.targetMethod(drawCrossedSquares));
 
-            patches.add(new BytecodePatch() {
-                @Override
-                public String getDescription() {
-                    return "determine glass side texture uv registers";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        // sideU0 = (sideU + 7) / 256.0f;
-                        anyILOAD,
-                        push(7),
-                        IADD,
-                        I2F,
-                        push(256.0f),
-                        FDIV,
-                        F2D,
-                        DSTORE, capture(any())
-                    );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    int reg = getCaptureGroup(1)[0] & 0xff;
-                    sideUVRegisters = new int[]{reg, reg + 2, reg + 4, reg + 6, reg + 8};
-                    Logger.log(Logger.LOG_CONST, "glass side texture uv registers (%d %d %d %d %d)",
-                        reg, reg + 2, reg + 4, reg + 6, reg + 8
-                    );
-                    return null;
-                }
-            }.targetMethod(renderBlockPane));
-
             patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
@@ -737,29 +684,28 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (sideUVRegisters == null) {
-                        return null;
-                    } else {
-                        return buildExpression(
-                            // connectEast = par1BlockPane.canThisPaneConnectToThisBlockID(this.blockAccess.getBlockId(i + 1, j, k));
-                            ALOAD_1,
-                            ALOAD_0,
-                            reference(GETFIELD, blockAccess),
-                            ILOAD_2,
-                            push(1),
-                            IADD,
-                            ILOAD_3,
-                            ILOAD, 4,
-                            anyReference(INVOKEINTERFACE),
-                            anyReference(INVOKEVIRTUAL),
-                            ISTORE, capture(any())
-                        );
-                    }
+                    return buildExpression(
+                        // connectEast = par1BlockPane.canThisPaneConnectToThisBlockID(this.blockAccess.getBlockId(i + 1, j, k));
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(GETFIELD, blockAccess),
+                        ILOAD_2,
+                        push(1),
+                        IADD,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        anyReference(INVOKEINTERFACE),
+                        anyReference(INVOKEVIRTUAL),
+                        ISTORE, capture(any())
+                    );
                 }
 
                 @Override
                 public byte[] getInsertBytes() throws IOException {
                     int reg = getCaptureGroup(1)[0] & 0xff;
+                    Logger.log(Logger.LOG_BYTECODE, "glass side connect flags (%d %d %d %d)",
+                        reg - 3, reg - 2, reg - 1, reg
+                    );
                     return buildCode(
                         // GlassPaneRenderer.render(renderBlocks, overrideBlockTexture, blockPane, i, j, k, connectNorth, ...);
                         ALOAD_0,
@@ -779,6 +725,36 @@ public class ConnectedTextures extends Mod {
             }.targetMethod(renderBlockPane));
 
             patches.add(new BytecodePatch() {
+                private int[] sideUVRegisters;
+
+                {
+                    addPreMatchSignature(new BytecodeSignature() {
+                        @Override
+                        public String getMatchExpression() {
+                            return buildExpression(
+                                // sideU0 = (sideU + 7) / 256.0f;
+                                anyILOAD,
+                                push(7),
+                                IADD,
+                                I2F,
+                                push(256.0f),
+                                FDIV,
+                                F2D,
+                                DSTORE, capture(any())
+                            );
+                        }
+
+                        @Override
+                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                            int reg = getCaptureGroup(1)[0] & 0xff;
+                            sideUVRegisters = new int[]{reg, reg + 2, reg + 4, reg + 6, reg + 8};
+                            Logger.log(Logger.LOG_CONST, "glass side texture uv registers (%d %d %d %d %d)",
+                                reg, reg + 2, reg + 4, reg + 6, reg + 8
+                            );
+                        }
+                    });
+                }
+
                 @Override
                 public String getDescription() {
                     return "disable default rendering (glass pane faces)";
@@ -786,17 +762,13 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (sideUVRegisters == null) {
-                        return null;
-                    } else {
-                        return buildExpression(repeat(build(
-                            ALOAD, any(),
-                            nonGreedy(any(0, 15)),
-                            DLOAD, subset(sideUVRegisters, false),
-                            DLOAD, subset(sideUVRegisters, false),
-                            reference(INVOKEVIRTUAL, addVertexWithUV)
-                        ), 8));
-                    }
+                    return buildExpression(repeat(build(
+                        ALOAD, any(),
+                        nonGreedy(any(0, 15)),
+                        DLOAD, subset(sideUVRegisters, false),
+                        DLOAD, subset(sideUVRegisters, false),
+                        reference(INVOKEVIRTUAL, addVertexWithUV)
+                    ), 8));
                 }
 
                 @Override
