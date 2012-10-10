@@ -225,10 +225,10 @@ public class BetterGrass extends Mod {
                         IF_ACMPEQ, any(2),
                         ALOAD, backReference(1),
                         capture(build(GETSTATIC, any(2))),
-                        IF_ACMPNE, any(2),
-                        BIPUSH, 68,
-                        IRETURN,
-                        push(halfTextureID),
+                        IF_ACMPNE_or_IF_ACMPEQ, any(2),
+                        or(build(push(68)), build(push(halfTextureID))),
+                        or(build(IRETURN), build(GOTO, any(2))),
+                        or(build(push(68)), build(push(halfTextureID))),
                         IRETURN
                     );
                 }
@@ -357,37 +357,33 @@ public class BetterGrass extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().getDescriptor().matches("^\\(L[^;]+;IIIFFF\\)Z$")) {
-                        return buildExpression(
-                            push(0.5f),
-                            FSTORE, any(),
-                            push(1.0f),
-                            FSTORE, capture(any()),
-                            push(0.8f),
-                            FSTORE, any(),
-                            push(0.6f),
-                            FSTORE, any(),
+                    return buildExpression(
+                        push(0.5f),
+                        FSTORE, any(),
+                        push(1.0f),
+                        FSTORE, capture(any()),
+                        push(0.8f),
+                        FSTORE, any(),
+                        push(0.6f),
+                        FSTORE, any(),
 
-                            any(0, 20),
+                        any(0, 20),
 
-                            FLOAD, backReference(1),
-                            FLOAD, 5,
-                            FMUL,
-                            FSTORE, capture(any()),
+                        FLOAD, backReference(1),
+                        FLOAD, 5,
+                        FMUL,
+                        FSTORE, capture(any()),
 
-                            FLOAD, backReference(1),
-                            FLOAD, 6,
-                            FMUL,
-                            FSTORE, capture(any()),
+                        FLOAD, backReference(1),
+                        FLOAD, 6,
+                        FMUL,
+                        FSTORE, capture(any()),
 
-                            FLOAD, backReference(1),
-                            FLOAD, 7,
-                            FMUL,
-                            FSTORE, capture(any())
-                        );
-                    } else {
-                        return null;
-                    }
+                        FLOAD, backReference(1),
+                        FLOAD, 7,
+                        FMUL,
+                        FSTORE, capture(any())
+                    );
                 }
 
                 @Override
@@ -489,14 +485,13 @@ public class BetterGrass extends Mod {
                             ILOAD_3,
                             ILOAD, 4,
                             any(1, 2),
-                            reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"))
+                            reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I")),
+                            ISTORE, capture(any())
                         )),
-                        ISTORE, capture(any()),
-
-                        capture(any(20, 40)),
 
                         // Tessellator.setColorOpaque_F(f11 * f22, f14 * f22, f17 * f22);
                         capture(build(
+                            nonGreedy(any(20, 60)),
                             ALOAD, capture(any()),
                             anyFLOAD,
                             FLOAD, capture(any()),
@@ -516,26 +511,24 @@ public class BetterGrass extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         getCaptureGroup(1),
-                        ISTORE, getCaptureGroup(2),
 
                         // Tessellator.setColorOpaque_F(f * f18, f1 * f21, f2 * f24);
                         ILOAD, getCaptureGroup(2),
                         IFNE, branch("A"),
-                        ALOAD, getCaptureGroup(5),
+                        ALOAD, getCaptureGroup(4),
                         FLOAD, 5,
-                        FLOAD, getCaptureGroup(6),
+                        FLOAD, getCaptureGroup(5),
                         FMUL,
                         FLOAD, 6,
-                        FLOAD, getCaptureGroup(7),
+                        FLOAD, getCaptureGroup(6),
                         FMUL,
                         FLOAD, 7,
-                        FLOAD, getCaptureGroup(8),
+                        FLOAD, getCaptureGroup(7),
                         FMUL,
-                        getCaptureGroup(9),
+                        getCaptureGroup(8),
 
                         label("A"),
-                        getCaptureGroup(3),
-                        getCaptureGroup(4)
+                        getCaptureGroup(3)
                     );
                 }
             }.targetMethod(renderStandardBlockWithColorMultiplier));
