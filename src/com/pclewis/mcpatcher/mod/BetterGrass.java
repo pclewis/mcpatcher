@@ -3,7 +3,6 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.ClassFile;
-import javassist.bytecode.FieldInfo;
 import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
@@ -16,18 +15,19 @@ public class BetterGrass extends Mod {
     private static final String field_MATRIX = "grassMatrix";
     private static final String fieldtype_MATRIX = "[[I";
 
-    private boolean haveAO;
+    final MethodRef getBlockTexture = new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I");
+
+    private final boolean haveAO;
 
     public BetterGrass(MinecraftVersion minecraftVersion) {
         name = MCPatcherUtils.BETTER_GRASS;
         author = "MCPatcher";
         description = "Improves the look of the sides of grass blocks. Inspired by MrMessiah's mod.";
-        version = "1.0";
+        version = "1.1";
         defaultEnabled = false;
 
         haveAO = minecraftVersion.compareTo("Beta 1.6") >= 0;
 
-        classMods.add(new MaterialMod());
         classMods.add(new BlockMod());
         classMods.add(new BlockGrassMod("Grass", 2, 3, 0));
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 1") >= 0) {
@@ -37,107 +37,58 @@ public class BetterGrass extends Mod {
         classMods.add(new RenderBlocksMod());
     }
 
-    private class MaterialMod extends ClassMod {
-        MaterialMod() {
-            classSignatures.add(new FixedBytecodeSignature(
-                begin(),
-                ALOAD_0,
-                ICONST_1,
-                PUTFIELD, any(2),
-                ALOAD_0,
-                ARETURN,
-                end()
-            ));
-
-            classSignatures.add(new FixedBytecodeSignature(
-                begin(),
-                ICONST_0,
-                IRETURN,
-                end()
-            ));
-
-            classSignatures.add(new FixedBytecodeSignature(
-                begin(),
-                ICONST_1,
-                IRETURN,
-                end()
-            ));
-
-            classSignatures.add(new ConstSignature("CONFLICT @ ").negate(true));
-
-            classSignatures.add(new ClassSignature() {
-                @Override
-                public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
-                    int count = 0;
-                    int flags = AccessFlag.PUBLIC | AccessFlag.STATIC | AccessFlag.FINAL;
-                    String descriptor = "L" + getClassFile().getName() + ";";
-                    for (Object o : getClassFile().getFields()) {
-                        FieldInfo fieldInfo = (FieldInfo) o;
-                        if ((fieldInfo.getAccessFlags() & flags) == flags &&
-                            fieldInfo.getDescriptor().equals(descriptor)) {
-                            count++;
-                        }
-                    }
-                    return count > 10;
-                }
-            });
-
-            memberMappers.add(new FieldMapper(null, new FieldRef(getDeobfClass(), "ground", "LMaterial;")).accessFlag(AccessFlag.STATIC, true));
-        }
-    }
-
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockTexture", "(LIBlockAccess;IIII)I")));
+            memberMappers.add(new MethodMapper(getBlockTexture));
         }
     }
 
     private class BlockGrassMod extends ClassMod {
-        private byte[] material;
-        private String blockName;
+        private final String blockName;
 
         BlockGrassMod(final String blockName, final int blockID, final int halfTextureID, final int fullTextureID) {
             this.blockName = blockName;
 
-            classSignatures.add(new BytecodeSignature() {
+            final FieldRef snow = new FieldRef("Material", "snow", "LMaterial;");
+            final FieldRef builtSnow = new FieldRef("Material", "builtSnow", "LMaterial;");
+            final FieldRef grassMatrix = new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX);
+            final InterfaceMethodRef getBlockMaterial = new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;");
+            final InterfaceMethodRef getBlockId = new InterfaceMethodRef("IBlockAccess", "getBlockId", "(III)I");
+
+            final BytecodeSignature matchMaterial = new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        ALOAD, capture(any()),
+                        // var6 = par1IBlockAccess.getBlockMaterial(...);
+                        lookBehind(build(
+                            captureReference(INVOKEINTERFACE),
+                            ASTORE, capture(any()),
+                            any(0, 20)
+                        ), true),
+
+                        // return var6 != Material.snow && var6 != Material.builtSnow ? halfTextureID : 68
+                        ALOAD, backReference(2),
                         captureReference(GETSTATIC),
                         IF_ACMPEQ, any(2),
-                        ALOAD, backReference(1),
+                        ALOAD, backReference(2),
                         captureReference(GETSTATIC),
-                        IF_ACMPNE, any(2),
-                        BIPUSH, 68,
-                        IRETURN,
-                        push(halfTextureID),
+                        IF_ACMPNE_or_IF_ACMPEQ, any(2),
+                        or(build(push(68)), build(push(halfTextureID))),
+                        or(build(IRETURN), build(GOTO, any(2))),
+                        or(build(push(68)), build(push(halfTextureID))),
                         IRETURN
                     );
                 }
-
-                @Override
-                public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
-                    material = matcher.getCaptureGroup(1);
-                }
             }
-                .addXref(2, new FieldRef("Material", "snow", "LMaterial;"))
-                .addXref(3, new FieldRef("Material", "builtSnow", "LMaterial;"))
-                .setMethodName("getBlockTexture")
-            );
+                .addXref(1, getBlockMaterial)
+                .addXref(3, snow)
+                .addXref(4, builtSnow)
+                .setMethod(getBlockTexture)
+            ;
 
-            classSignatures.add(new FixedBytecodeSignature(
-                BIPUSH, 9,
-                IF_ICMPLT, any(2)
-            ));
+            classSignatures.add(matchMaterial);
 
-            classSignatures.add(new FixedBytecodeSignature(
-                captureReference(INVOKEINTERFACE)
-            ).addXref(1, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")));
-
-            final FieldRef array = new FieldRef(getDeobfClass(), field_MATRIX, fieldtype_MATRIX);
-
-            patches.add(new AddFieldPatch(array, AccessFlag.PUBLIC | AccessFlag.STATIC));
+            patches.add(new AddFieldPatch(grassMatrix, AccessFlag.PUBLIC | AccessFlag.STATIC));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -158,50 +109,47 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
-                    byte[] getArray = reference(GETSTATIC, array);
-                    byte[] putArray = reference(PUTSTATIC, array);
                     return buildCode(
                         // if (grassMatrix != null)
-                        getArray,
-                        ACONST_NULL,
-                        IF_ACMPNE, branch("A"),
+                        reference(GETSTATIC, grassMatrix),
+                        IFNONNULL, branch("A"),
 
                         // grassMatrix = new int[4][2];
-                        ICONST_4,
-                        ICONST_2,
+                        push(4),
+                        push(2),
                         reference(MULTIANEWARRAY, new ClassRef(fieldtype_MATRIX)), 2,
-                        putArray,
+                        reference(PUTSTATIC, grassMatrix),
 
                         // a[0][1] = -1;
-                        getArray,
-                        ICONST_0,
+                        reference(GETSTATIC, grassMatrix),
+                        push(0),
                         AALOAD,
-                        ICONST_1,
-                        ICONST_M1,
+                        push(1),
+                        push(-1),
                         IASTORE,
 
                         // a[1][1] = 1;
-                        getArray,
-                        ICONST_1,
+                        reference(GETSTATIC, grassMatrix),
+                        push(1),
                         AALOAD,
-                        ICONST_1,
-                        ICONST_1,
+                        push(1),
+                        push(1),
                         IASTORE,
 
                         // a[2][0] = -1;
-                        getArray,
-                        ICONST_2,
+                        reference(GETSTATIC, grassMatrix),
+                        push(2),
                         AALOAD,
-                        ICONST_0,
-                        ICONST_M1,
+                        push(0),
+                        push(-1),
                         IASTORE,
 
                         // a[3][0] = 1;
-                        getArray,
-                        ICONST_3,
+                        reference(GETSTATIC, grassMatrix),
+                        push(3),
                         AALOAD,
-                        ICONST_0,
-                        ICONST_1,
+                        push(0),
+                        push(1),
                         IASTORE,
 
                         label("A"),
@@ -218,62 +166,46 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return buildExpression(
-                        // return material != Material.snow && material != Material.builtSnow ? 3 : 68;
-                        ALOAD, capture(any()),
-                        capture(build(GETSTATIC, any(2))),
-                        IF_ACMPEQ, any(2),
-                        ALOAD, backReference(1),
-                        capture(build(GETSTATIC, any(2))),
-                        IF_ACMPNE_or_IF_ACMPEQ, any(2),
-                        or(build(push(68)), build(push(halfTextureID))),
-                        or(build(IRETURN), build(GOTO, any(2))),
-                        or(build(push(68)), build(push(halfTextureID))),
-                        IRETURN
-                    );
+                    return matchMaterial.getMatchExpression();
                 }
 
                 @Override
                 public byte[] getReplacementBytes() throws IOException {
-                    byte[] snow = reference(GETSTATIC, new FieldRef("Material", "snow", "LMaterial;"));
-                    byte[] builtSnow = reference(GETSTATIC, new FieldRef("Material", "builtSnow", "LMaterial;"));
-                    byte[] getBlockID = reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockId", "(III)I"));
-                    byte[] matrix = reference(GETSTATIC, new FieldRef("BlockGrass", field_MATRIX, fieldtype_MATRIX));
-
+                    int material = getCaptureGroup(2)[0] & 0xff;
                     return buildCode(
                         // l -= 2;
                         IINC, 5, -2,
 
                         // if (material == Material.snow)
                         ALOAD, material,
-                        snow,
+                        reference(GETSTATIC, snow),
                         IF_ACMPEQ, branch("A"),
 
                         // if (material == Material.builtSnow)
                         ALOAD, material,
-                        builtSnow,
+                        reference(GETSTATIC, builtSnow),
                         IF_ACMPEQ, branch("A"),
 
                         // if (iblockaccess.getBlockId(i+a[l][0], j-1, k+a[l][1]) == 2)
                         ALOAD, 1,
                         ILOAD, 2,
-                        matrix,
+                        reference(GETSTATIC, grassMatrix),
                         ILOAD, 5,
                         AALOAD,
-                        ICONST_0,
+                        push(0),
                         IALOAD,
                         IADD,
                         ILOAD, 3,
-                        ICONST_1,
+                        push(1),
                         ISUB,
                         ILOAD, 4,
-                        matrix,
+                        reference(GETSTATIC, grassMatrix),
                         ILOAD, 5,
                         AALOAD,
-                        ICONST_1,
+                        push(1),
                         IALOAD,
                         IADD,
-                        getBlockID,
+                        reference(INVOKEINTERFACE, getBlockId),
                         push(blockID),
                         IF_ICMPEQ, branch("B"),
 
@@ -290,40 +222,40 @@ public class BetterGrass extends Mod {
                         label("A"),
                         ALOAD, 1,
                         ILOAD, 2,
-                        matrix,
+                        reference(GETSTATIC, grassMatrix),
                         ILOAD, 5,
                         AALOAD,
-                        ICONST_0,
+                        push(0),
                         IALOAD,
                         IADD,
                         ILOAD, 3,
                         ILOAD, 4,
-                        matrix,
+                        reference(GETSTATIC, grassMatrix),
                         ILOAD, 5,
                         AALOAD,
-                        ICONST_1,
+                        push(1),
                         IALOAD,
                         IADD,
-                        reference(INVOKEINTERFACE, new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;")),
+                        reference(INVOKEINTERFACE, getBlockMaterial),
                         ASTORE, material,
 
                         // if (material == Material.snow)
                         ALOAD, material,
-                        snow,
+                        reference(GETSTATIC, snow),
                         IF_ACMPEQ, branch("C"),
 
                         // if (material == Material.builtSnow)
                         ALOAD, material,
-                        builtSnow,
+                        reference(GETSTATIC, builtSnow),
                         IF_ACMPEQ, branch("C"),
 
                         // return 68;
-                        BIPUSH, 68,
+                        push(68),
                         IRETURN,
 
                         // return 66;
                         label("C"),
-                        BIPUSH, 66,
+                        push(66),
                         IRETURN
                     );
                 }
@@ -337,10 +269,11 @@ public class BetterGrass extends Mod {
     }
 
     private class RenderBlocksMod extends BaseMod.RenderBlocksMod {
-        RenderBlocksMod() {
-            final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
-            final MethodRef renderStandardBlockWithColorMultiplier = new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z");
+        private final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
+        private final MethodRef renderStandardBlockWithColorMultiplier = new MethodRef(getDeobfClass(), "renderStandardBlockWithColorMultiplier", "(LBlock;IIIFFF)Z");
+        private final MethodRef getBlockTexture = new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I");
 
+        RenderBlocksMod() {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
@@ -550,7 +483,21 @@ public class BetterGrass extends Mod {
         private void setupAO() {
             final MethodRef renderStandardBlockWithAmbientOcclusion = new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z");
 
-            final BytecodeSignature matchFaceRegisters = new BytecodeSignature() {
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(0x0f000f)
+                    );
+                }
+            }.setMethod(renderStandardBlockWithAmbientOcclusion));
+
+            patches.add(new BytecodePatch.InsertAfter() {
+                @Override
+                public String getDescription() {
+                    return "if (getBlockTexture == 0) useBiomeColor = true (AO)";
+                }
+
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -582,147 +529,50 @@ public class BetterGrass extends Mod {
                         anyISTORE
                     );
                 }
-            }.setMethod(renderStandardBlockWithAmbientOcclusion);
-
-            classSignatures.add(matchFaceRegisters);
-
-            patches.add(new BytecodePatch() {
-                private int eastFace;
-                private int westFace;
-                private int northFace;
-                private int southFace;
-
-                {
-                    addPreMatchSignature(new BytecodeSignature() {
-                        @Override
-                        public String getMatchExpression() {
-                            return matchFaceRegisters.getMatchExpression();
-                        }
-
-                        @Override
-                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
-                            byte[][] m = new byte[][]{
-                                matcher.getCaptureGroup(1),
-                                matcher.getCaptureGroup(2),
-                                matcher.getCaptureGroup(3),
-                                matcher.getCaptureGroup(4),
-                                matcher.getCaptureGroup(5),
-                                matcher.getCaptureGroup(6),
-                                matcher.getCaptureGroup(7),
-                                matcher.getCaptureGroup(8),
-                            };
-                            southFace = m[(m[0] == null ? 4 : 0)][0] & 0xff;
-                            northFace = m[(m[1] == null ? 5 : 1)][0] & 0xff;
-                            westFace = m[(m[2] == null ? 6 : 2)][0] & 0xff;
-                            eastFace = m[(m[3] == null ? 7 : 3)][0] & 0xff;
-                            Logger.log(Logger.LOG_CONST, "AO faces (N S E W) = (%d %d %d %d)",
-                                northFace, southFace, eastFace, westFace
-                            );
-                        }
-                    });
-                }
 
                 @Override
-                public String getDescription() {
-                    return "if (getBlockTexture == 0) useBiomeColor = true (AO)";
-                }
-
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        ICONST_0,
-                        or(
-                            build(
-                                // vanilla minecraft
-                                DUP,
-                                ISTORE, southFace,
-                                DUP,
-                                ISTORE, northFace,
-                                DUP,
-                                ISTORE, westFace,
-                                DUP,
-                                ISTORE, eastFace
-                            ),
-                            build(
-                                // ModLoader
-                                ISTORE, southFace,
-                                ICONST_0,
-                                ISTORE, northFace,
-                                ICONST_0,
-                                ISTORE, westFace,
-                                ICONST_0,
-                                ISTORE, eastFace,
-                                ICONST_0
-                            )
-                        ),
-                        anyISTORE
+                public byte[] getInsertBytes() throws IOException {
+                    byte[][] m = new byte[][]{
+                        getCaptureGroup(1),
+                        getCaptureGroup(2),
+                        getCaptureGroup(3),
+                        getCaptureGroup(4),
+                        getCaptureGroup(5),
+                        getCaptureGroup(6),
+                        getCaptureGroup(7),
+                        getCaptureGroup(8),
+                    };
+                    int southFace = m[(m[0] == null ? 4 : 0)][0] & 0xff;
+                    int northFace = m[(m[1] == null ? 5 : 1)][0] & 0xff;
+                    int westFace = m[(m[2] == null ? 6 : 2)][0] & 0xff;
+                    int eastFace = m[(m[3] == null ? 7 : 3)][0] & 0xff;
+                    Logger.log(Logger.LOG_BYTECODE, "AO faces (N S E W) = (%d %d %d %d)",
+                        northFace, southFace, eastFace, westFace
                     );
-                }
-
-                @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    byte[] blockAccess = reference(GETFIELD, new FieldRef("RenderBlocks", "blockAccess", "LIBlockAccess;"));
-                    byte[] getBlockTexture = reference(INVOKEVIRTUAL, new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I"));
-
                     return buildCode(
-                        getMatch(),
-
-                        // if (block.getBlockTexture(blockAccess, i, j, k, 2) == 0) eastFace = true;
-                        ALOAD_1,
-                        ALOAD_0,
-                        blockAccess,
-                        ILOAD_2,
-                        ILOAD_3,
-                        ILOAD, 4,
-                        ICONST_2,
-                        getBlockTexture,
-                        IFNE, branch("east"),
-                        ICONST_1,
-                        ISTORE, eastFace,
-                        label("east"),
-
-                        // if (block.getBlockTexture(blockAccess, i, j, k, 3) == 0) westFace = true;
-                        ALOAD_1,
-                        ALOAD_0,
-                        blockAccess,
-                        ILOAD_2,
-                        ILOAD_3,
-                        ILOAD, 4,
-                        ICONST_3,
-                        getBlockTexture,
-                        IFNE, branch("west"),
-                        ICONST_1,
-                        ISTORE, westFace,
-                        label("west"),
-
-                        // if (block.getBlockTexture(blockAccess, i, j, k, 4) == 0) northFace = true;
-                        ALOAD_1,
-                        ALOAD_0,
-                        blockAccess,
-                        ILOAD_2,
-                        ILOAD_3,
-                        ILOAD, 4,
-                        ICONST_4,
-                        getBlockTexture,
-                        IFNE, branch("north"),
-                        ICONST_1,
-                        ISTORE, northFace,
-                        label("north"),
-
-                        // if (block.getBlockTexture(blockAccess, i, j, k, 5) == 0) southFace = true;
-                        ALOAD_1,
-                        ALOAD_0,
-                        blockAccess,
-                        ILOAD_2,
-                        ILOAD_3,
-                        ILOAD, 4,
-                        ICONST_5,
-                        getBlockTexture,
-                        IFNE, branch("south"),
-                        ICONST_1,
-                        ISTORE, southFace,
-                        label("south")
+                        getCodeForFace(eastFace, 2, "east"),
+                        getCodeForFace(westFace, 3, "west"),
+                        getCodeForFace(northFace, 4, "north"),
+                        getCodeForFace(southFace, 5, "south")
                     );
+                }
+
+                private Object[] getCodeForFace(int register, int face, String label) {
+                    return new Object[]{
+                        // if (block.getBlockTexture(blockAccess, i, j, k, face) == 0) xxxxFace = true;
+                        ALOAD_1,
+                        ALOAD_0,
+                        reference(GETFIELD, blockAccess),
+                        ILOAD_2,
+                        ILOAD_3,
+                        ILOAD, 4,
+                        push(face),
+                        reference(INVOKEVIRTUAL, getBlockTexture),
+                        IFNE, branch(label),
+                        ICONST_1,
+                        registerLoadStore(ISTORE, register),
+                        label(label)
+                    };
                 }
             }.targetMethod(renderStandardBlockWithAmbientOcclusion));
         }
