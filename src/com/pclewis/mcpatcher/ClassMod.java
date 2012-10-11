@@ -103,6 +103,12 @@ abstract public class ClassMod implements PatchComponent {
             }
             sigIndex++;
         }
+        for (ClassSignature cs : classSignatures) {
+            addToConstPool = false;
+            if (!cs.afterMatch()) {
+                return false;
+            }
+        }
 
         targetClasses.add(classFile.getName());
         if (targetClasses.size() == 1 && !global) {

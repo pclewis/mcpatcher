@@ -22,10 +22,8 @@ public class OrSignature extends ClassSignature {
     }
 
     @Override
-    public void afterMatch(ClassFile classFile) {
-        if (matchedSignature != null) {
-            matchedSignature.afterMatch(classFile);
-        }
+    public boolean afterMatch() {
+        return matchedSignature != null && matchedSignature.afterMatch();
     }
 
     @Override

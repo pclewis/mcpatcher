@@ -32,8 +32,22 @@ abstract public class ClassSignature implements PatchComponent {
      * values using getCaptureGroup, for example.
      *
      * @param classFile matched class file
+     * @see #afterMatch()
+     * @deprecated
      */
     protected void afterMatch(ClassFile classFile) {
+    }
+
+    /**
+     * Called immediately after a successful match.  Gives an opportunity to extract bytecode
+     * values using getCaptureGroup, for example.
+     *
+     * @return false if match should be ignored
+     */
+    @SuppressWarnings("deprecation")
+    protected boolean afterMatch() {
+        afterMatch(getClassFile());
+        return true;
     }
 
     void setClassMod(ClassMod classMod) {

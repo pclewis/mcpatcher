@@ -117,6 +117,9 @@ abstract public class BytecodeSignature extends ClassSignature {
             try {
                 match:
                 for (int offset = 0; offset < codeIterator.getCodeLength() && matcher.match(methodInfo, offset); offset = codeIterator.next()) {
+                    if (!afterMatch()) {
+                        continue;
+                    }
                     tempMappings.clear();
                     for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
                         int captureGroup = entry.getKey();
@@ -158,7 +161,6 @@ abstract public class BytecodeSignature extends ClassSignature {
                             }
                         }
                     }
-                    afterMatch(classFile, methodInfo);
                     classMod.methodInfo = null;
                     return true;
                 }
@@ -212,8 +214,22 @@ abstract public class BytecodeSignature extends ClassSignature {
      *
      * @param classFile  matched class file
      * @param methodInfo matched method
+     * @see #afterMatch()
+     * @deprecated
      */
     public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+    }
+
+    /**
+     * Called immediately after a successful match.  Gives an opportunity to extract bytecode
+     * values using getCaptureGroup, for example.
+     *
+     * @return true if match should be ignored
+     */
+    @SuppressWarnings("deprecation")
+    public boolean afterMatch() {
+        afterMatch(getClassFile(), getMethodInfo());
+        return true;
     }
 
     /**
@@ -234,5 +250,4 @@ abstract public class BytecodeSignature extends ClassSignature {
     final protected byte[] getMatch() {
         return matcher.getMatch();
     }
-
 }

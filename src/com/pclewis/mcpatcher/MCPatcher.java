@@ -244,10 +244,6 @@ final public class MCPatcher {
                                         Logger.log(Logger.LOG_METHOD, "%s matches %s %s", e.getKey(), e.getValue().name, e.getValue().type);
                                     }
                                 }
-                                for (ClassSignature cs : classMod.classSignatures) {
-                                    classMod.addToConstPool = false;
-                                    cs.afterMatch(classFile);
-                                }
                             }
                         } catch (InterruptedException e) {
                             throw e;
@@ -335,10 +331,6 @@ final public class MCPatcher {
                             for (Map.Entry<String, ClassMap.MemberEntry> e : mod.classMap.getMethodMap(classMod.getDeobfClass()).entrySet()) {
                                 Logger.log(Logger.LOG_METHOD, "%s matches %s %s", e.getKey(), e.getValue().name, e.getValue().type);
                             }
-                        }
-                        for (ClassSignature cs : classMod.classSignatures) {
-                            classMod.addToConstPool = false;
-                            cs.afterMatch(classFile);
                         }
                         iterator.remove();
                         progress = true;
