@@ -293,6 +293,11 @@ abstract public class ClassMod implements PatchComponent {
 
     final public byte[] buildCode(Object... objects) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        buildCode1(baos, objects);
+        return baos.toByteArray();
+    }
+
+    private void buildCode1(ByteArrayOutputStream baos, Object[] objects) throws IOException {
         for (Object o : objects) {
             if (o instanceof Byte) {
                 baos.write((Byte) o);
@@ -318,11 +323,12 @@ abstract public class ClassMod implements PatchComponent {
                     baos.write(0);
                     baos.write(0);
                 }
+            } else if (o instanceof Object[]) {
+                buildCode1(baos, (Object[]) o);
             } else {
                 throw new AssertionError("invalid type: " + o.getClass().toString());
             }
         }
-        return baos.toByteArray();
     }
 
     final public Object push(Object value) {

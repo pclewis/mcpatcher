@@ -21,9 +21,13 @@ public class BinaryRegex {
      */
     public static String build(Object... objects) {
         StringBuilder sb = new StringBuilder();
+        return build1(sb, objects) ? sb.toString() : null;
+    }
+
+    private static boolean build1(StringBuilder sb, Object[] objects) {
         for (Object o : objects) {
             if (o == null) {
-                return null;
+                return false;
             } else if (o instanceof Byte) {
                 sb.append(literal((Byte) o));
             } else if (o instanceof byte[]) {
@@ -36,11 +40,13 @@ public class BinaryRegex {
                 sb.append((String) o);
             } else if (o instanceof Character) {
                 sb.append(literal((int) (Character) o));
+            } else if (o instanceof Object[]) {
+                return build1(sb, (Object[]) o);
             } else {
                 throw new IllegalArgumentException("unknown binary regex type: " + o.getClass().getSimpleName() + " " + o);
             }
         }
-        return sb.toString();
+        return true;
     }
 
     /**
