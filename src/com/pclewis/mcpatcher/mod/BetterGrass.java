@@ -2,8 +2,6 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
@@ -331,13 +329,14 @@ public class BetterGrass extends Mod {
                         }
 
                         @Override
-                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                        public boolean afterMatch() {
                             redMultiplier = matcher.getCaptureGroup(2)[0] & 0xff;
                             greenMultiplier = matcher.getCaptureGroup(3)[0] & 0xff;
                             blueMultiplier = matcher.getCaptureGroup(4)[0] & 0xff;
                             Logger.log(Logger.LOG_CONST, "non-AO multipliers (R G B) = (%d %d %d)",
                                 redMultiplier, greenMultiplier, blueMultiplier
                             );
+                            return true;
                         }
                     });
                 }

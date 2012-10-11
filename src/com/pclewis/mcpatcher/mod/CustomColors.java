@@ -3,8 +3,6 @@ package com.pclewis.mcpatcher.mod;
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.BadBytecode;
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -2538,9 +2536,10 @@ public class CustomColors extends Mod {
                     }
 
                     @Override
-                    public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                    public boolean afterMatch() {
                         isNightVisionActive = matcher.getCaptureGroup(1);
                         getNightVisionCode = matcher.getCaptureGroup(6);
+                        return true;
                     }
                 }
                     .setMethod(updateLightmap)

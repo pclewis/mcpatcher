@@ -2,7 +2,6 @@ package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
 import javassist.bytecode.AccessFlag;
-import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
@@ -524,8 +523,9 @@ public class ConnectedTextures extends Mod {
                         }
 
                         @Override
-                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                        public boolean afterMatch() {
                             tessellatorRegister = getCaptureGroup(1)[0] & 0xff;
+                            return true;
                         }
                     });
                 }
@@ -745,12 +745,13 @@ public class ConnectedTextures extends Mod {
                         }
 
                         @Override
-                        public void afterMatch(ClassFile classFile, MethodInfo methodInfo) {
+                        public boolean afterMatch() {
                             int reg = getCaptureGroup(1)[0] & 0xff;
                             sideUVRegisters = new int[]{reg, reg + 2, reg + 4, reg + 6, reg + 8};
                             Logger.log(Logger.LOG_CONST, "glass side texture uv registers (%d %d %d %d %d)",
                                 reg, reg + 2, reg + 4, reg + 6, reg + 8
                             );
+                            return true;
                         }
                     });
                 }

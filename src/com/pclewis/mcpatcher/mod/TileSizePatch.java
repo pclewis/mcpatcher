@@ -1,11 +1,14 @@
 package com.pclewis.mcpatcher.mod;
 
-import com.pclewis.mcpatcher.*;
+import com.pclewis.mcpatcher.BytecodePatch;
+import com.pclewis.mcpatcher.FieldRef;
+import com.pclewis.mcpatcher.MCPatcherUtils;
 
 import java.io.IOException;
 
 import static com.pclewis.mcpatcher.BinaryRegex.*;
-import static com.pclewis.mcpatcher.BytecodeMatcher.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.anyFLOAD;
+import static com.pclewis.mcpatcher.BytecodeMatcher.anyFSTORE;
 import static javassist.bytecode.Opcode.*;
 
 class TileSizePatch extends BytecodePatch {
