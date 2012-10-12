@@ -1470,21 +1470,28 @@ public class CustomColors extends Mod {
     }
 
     private class WorldProviderHellMod extends ClassMod {
+        private static final double MAGIC1 = 0.20000000298023224;
+        private static final double MAGIC2 = 0.029999999329447746;
+
         WorldProviderHellMod() {
             parentClass = "WorldProvider";
+
+            final MethodRef getFogColor = new MethodRef(getDeobfClass(), "getFogColor", "(FF)LVec3D;");
+            final FieldRef netherFogColor = new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F");
+
+            classSignatures.add(new ConstSignature(MAGIC1));
+            classSignatures.add(new ConstSignature(MAGIC2));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        push(0.20000000298023224),
-                        push(0.029999999329447746),
-                        push(0.029999999329447746)
+                        push(MAGIC1),
+                        push(MAGIC2),
+                        push(MAGIC2)
                     );
                 }
-            });
-
-            MethodRef getFogColor = new MethodRef(getDeobfClass(), "getFogColor", "(FF)LVec3D;");
+            }.setMethod(getFogColor));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -1495,9 +1502,9 @@ public class CustomColors extends Mod {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
-                        push(0.20000000298023224),
-                        push(0.029999999329447746),
-                        push(0.029999999329447746)
+                        push(MAGIC1),
+                        push(MAGIC2),
+                        push(MAGIC2)
                     );
                 }
 
@@ -1505,17 +1512,17 @@ public class CustomColors extends Mod {
                 public byte[] getReplacementBytes() throws IOException {
                     return buildCode(
                         // Colorizer.setColor[0], Colorizer.setColor[1], Colorizer.setColor[2]
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        reference(GETSTATIC, netherFogColor),
                         ICONST_0,
                         FALOAD,
                         F2D,
 
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        reference(GETSTATIC, netherFogColor),
                         ICONST_1,
                         FALOAD,
                         F2D,
 
-                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.COLORIZER_CLASS, "netherFogColor", "[F")),
+                        reference(GETSTATIC, netherFogColor),
                         ICONST_2,
                         FALOAD,
                         F2D

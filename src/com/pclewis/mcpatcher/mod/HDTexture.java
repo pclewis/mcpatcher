@@ -645,17 +645,23 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class PortalMod extends ClassMod {
         PortalMod() {
+            final MethodRef atan2 = new MethodRef("java.lang.Math", "atan2", "(DD)D");
+
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    return buildExpression(
-                        FLOAD, any(),
-                        F2D,
-                        FLOAD, any(),
-                        F2D,
-                        reference(INVOKESTATIC, new MethodRef("java.lang.Math", "atan2", "(DD)D")),
-                        D2F
-                    );
+                    if (getMethodInfo().isConstructor()) {
+                        return buildExpression(
+                            FLOAD, any(),
+                            F2D,
+                            FLOAD, any(),
+                            F2D,
+                            reference(INVOKESTATIC, atan2),
+                            D2F
+                        );
+                    } else {
+                        return null;
+                    }
                 }
             });
 
