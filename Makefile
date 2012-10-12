@@ -57,7 +57,7 @@ control: $(TEST_LOG)
 	cp -f $(TEST_LOG) $(GOOD_LOG)
 
 profile: $(MCPATCHER) $(JIP)
-	java -Xmx512M -javaagent:$(JIP) -Dprofile.properties=profile.properties -jar $(MCPATCHER)
+	java -Xmx512M -javaagent:$(JIP) -Dprofile.properties=profile.properties -jar $(MCPATCHER) $(TEST_OPTS) > $(TEST_LOG) 2>&1
 
 testclean:
 	rm -f $(TEST_LOG) $(TEST_LOG).1 $(GOOD_LOG).1
