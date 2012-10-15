@@ -88,68 +88,81 @@ abstract public class BytecodeSignature extends ClassSignature {
     }
 
     public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
+        boolean matched = false;
+        String className = ClassMap.filenameToClassName(filename);
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
             classMod.methodInfo = methodInfo;
-            CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
-            if (codeAttribute == null) {
-                continue;
+            if (match(className, methodInfo, tempClassMap)) {
+                matched = true;
+                break;
             }
-            if (getClassMap().hasMap(deobfMethod)) {
-                MethodRef obfTarget = (MethodRef) getClassMap().map(deobfMethod);
-                if (!methodInfo.getName().equals(obfTarget.getName())) {
+        }
+        classMod.methodInfo = null;
+        return matched;
+    }
+
+    boolean match(String className, MethodInfo methodInfo, ClassMap tempClassMap) {
+        CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
+        if (codeAttribute == null) {
+            return false;
+        }
+        if (getClassMap().hasMap(deobfMethod)) {
+            MethodRef obfTarget = (MethodRef) getClassMap().map(deobfMethod);
+            if (!methodInfo.getName().equals(obfTarget.getName())) {
+                return false;
+            }
+        }
+        ArrayList<String> deobfTypes = null;
+        ArrayList<String> obfTypes = null;
+        if (deobfMethod != null && deobfMethod.getType() != null) {
+            deobfTypes = ConstPoolUtils.parseDescriptor(deobfMethod.getType());
+            obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
+            if (!isPotentialTypeMatch(deobfTypes, obfTypes)) {
+                return false;
+            }
+        }
+        ConstPool constPool = methodInfo.getConstPool();
+        CodeIterator codeIterator = codeAttribute.iterator();
+        initMatcher();
+        ArrayList<JavaRef> tempMappings = new ArrayList<JavaRef>();
+        try {
+            match:
+            for (int offset = 0; offset < codeIterator.getCodeLength() && matcher.match(methodInfo, offset); offset = codeIterator.next()) {
+                if (!afterMatch()) {
                     continue;
                 }
-            }
-            ArrayList<String> deobfTypes = null;
-            ArrayList<String> obfTypes = null;
-            if (deobfMethod != null && deobfMethod.getType() != null) {
-                deobfTypes = ConstPoolUtils.parseDescriptor(deobfMethod.getType());
-                obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
-                if (!isPotentialTypeMatch(deobfTypes, obfTypes)) {
-                    continue;
-                }
-            }
-            ConstPool constPool = methodInfo.getConstPool();
-            CodeIterator codeIterator = codeAttribute.iterator();
-            initMatcher();
-            ArrayList<JavaRef> tempMappings = new ArrayList<JavaRef>();
-            try {
-                match:
-                for (int offset = 0; offset < codeIterator.getCodeLength() && matcher.match(methodInfo, offset); offset = codeIterator.next()) {
-                    if (!afterMatch()) {
-                        continue;
-                    }
-                    tempMappings.clear();
-                    for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
-                        int captureGroup = entry.getKey();
-                        JavaRef xref = entry.getValue();
-                        byte[] code = matcher.getCaptureGroup(captureGroup);
-                        int index = Util.demarshal(code, 1, 2);
-                        ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
-                        ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
-                        JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
-                        if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
-                            if (deobfMethod != null) {
-                                Logger.log(Logger.LOG_METHOD, "method %s %s matches %s %s, but",
-                                    methodInfo.getName(), methodInfo.getDescriptor(), deobfMethod.getName(), deobfMethod.getType()
-                                );
-                            }
-                            Logger.log(Logger.LOG_METHOD, "method %s %s failed xref #%d %s %s -> %s %s",
-                                methodInfo.getName(), methodInfo.getDescriptor(), captureGroup,
-                                xref.getName(), xref.getType(), newRef.getName(), newRef.getType()
+                tempMappings.clear();
+                for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
+                    int captureGroup = entry.getKey();
+                    JavaRef xref = entry.getValue();
+                    byte[] code = matcher.getCaptureGroup(captureGroup);
+                    int index = Util.demarshal(code, 1, 2);
+                    ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
+                    ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
+                    JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
+                    if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
+                        if (deobfMethod != null) {
+                            Logger.log(Logger.LOG_METHOD, "method %s %s matches %s %s, but",
+                                methodInfo.getName(), methodInfo.getDescriptor(), deobfMethod.getName(), deobfMethod.getType()
                             );
-                            continue match;
                         }
-                        tempMappings.add(xref);
-                        tempMappings.add(newRef);
+                        Logger.log(Logger.LOG_METHOD, "method %s %s failed xref #%d %s %s -> %s %s",
+                            methodInfo.getName(), methodInfo.getDescriptor(), captureGroup,
+                            xref.getName(), xref.getType(), newRef.getName(), newRef.getType()
+                        );
+                        continue match;
                     }
+                    tempMappings.add(xref);
+                    tempMappings.add(newRef);
+                }
+                if (className != null && tempClassMap != null) {
                     for (int i = 0; i + 1 < tempMappings.size(); i += 2) {
                         tempClassMap.addMap(tempMappings.get(i), tempMappings.get(i + 1));
                     }
                     if (deobfMethod != null) {
                         String deobfName = classMod.getDeobfClass();
-                        tempClassMap.addClassMap(deobfName, ClassMap.filenameToClassName(filename));
+                        tempClassMap.addClassMap(deobfName, className);
                         tempClassMap.addMethodMap(deobfName, deobfMethod.getName(), methodInfo.getName(), methodInfo.getDescriptor());
                         if (deobfTypes != null && obfTypes != null) {
                             for (int i = 0; i < deobfTypes.size(); i++) {
@@ -161,14 +174,12 @@ abstract public class BytecodeSignature extends ClassSignature {
                             }
                         }
                     }
-                    classMod.methodInfo = null;
-                    return true;
                 }
-            } catch (BadBytecode e) {
-                Logger.log(e);
+                return true;
             }
+        } catch (BadBytecode e) {
+            Logger.log(e);
         }
-        classMod.methodInfo = null;
         return false;
     }
 

@@ -73,7 +73,7 @@ abstract public class BytecodePatch extends ClassPatch {
             }
         }
         for (BytecodeSignature signature : preMatchSignatures) {
-            if (!signature.match() || !signature.afterMatch()) {
+            if (!signature.match(null, methodInfo, null)) {
                 return false;
             }
         }
