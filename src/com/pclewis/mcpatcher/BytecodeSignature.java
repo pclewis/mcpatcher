@@ -11,14 +11,16 @@ import java.util.Map;
  */
 abstract public class BytecodeSignature extends ClassSignature {
     MethodRef deobfMethod;
+    ArrayList<String> deobfTypes;
+    ArrayList<String> obfTypes;
+    private final HashMap<Integer, JavaRef> xrefs = new HashMap<Integer, JavaRef>();
+
     /**
      * Matcher object.
      *
      * @see BytecodeMatcher
      */
     protected BytecodeMatcher matcher;
-
-    HashMap<Integer, JavaRef> xrefs = new HashMap<Integer, JavaRef>();
 
     /**
      * Generate a regular expression for the current method.
@@ -44,6 +46,28 @@ abstract public class BytecodeSignature extends ClassSignature {
         if (deobfMethod != null && deobfMethod.getClassName() == null) {
             deobfMethod = new MethodRef(classMod.getDeobfClass(), deobfMethod.getName(), deobfMethod.getType());
         }
+    }
+
+    private boolean filterMethod1() {
+        MethodInfo methodInfo = getMethodInfo();
+        CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
+        if (codeAttribute == null) {
+            return false;
+        }
+        if (getClassMap().hasMap(deobfMethod)) {
+            MethodRef obfTarget = (MethodRef) getClassMap().map(deobfMethod);
+            if (!methodInfo.getName().equals(obfTarget.getName())) {
+                return false;
+            }
+        }
+        if (deobfMethod != null && deobfMethod.getType() != null) {
+            deobfTypes = ConstPoolUtils.parseDescriptor(deobfMethod.getType());
+            obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
+            if (!isPotentialTypeMatch(deobfTypes, obfTypes)) {
+                return false;
+            }
+        }
+        return filterMethod();
     }
 
     private boolean isPotentialTypeMatch(ArrayList<String> deobfTypes, ArrayList<String> obfTypes) {
@@ -93,6 +117,10 @@ abstract public class BytecodeSignature extends ClassSignature {
         for (Object o : classFile.getMethods()) {
             MethodInfo methodInfo = (MethodInfo) o;
             classMod.methodInfo = methodInfo;
+            if (deobfMethod != null && deobfMethod.getType() != null) {
+                deobfTypes = ConstPoolUtils.parseDescriptor(deobfMethod.getType());
+                obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
+            }
             if (match(className, methodInfo, tempClassMap)) {
                 matched = true;
                 break;
@@ -103,84 +131,71 @@ abstract public class BytecodeSignature extends ClassSignature {
     }
 
     boolean match(String className, MethodInfo methodInfo, ClassMap tempClassMap) {
-        CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
-        if (codeAttribute == null) {
+        if (!filterMethod1()) {
             return false;
         }
-        if (getClassMap().hasMap(deobfMethod)) {
-            MethodRef obfTarget = (MethodRef) getClassMap().map(deobfMethod);
-            if (!methodInfo.getName().equals(obfTarget.getName())) {
-                return false;
-            }
-        }
-        ArrayList<String> deobfTypes = null;
-        ArrayList<String> obfTypes = null;
-        if (deobfMethod != null && deobfMethod.getType() != null) {
-            deobfTypes = ConstPoolUtils.parseDescriptor(deobfMethod.getType());
-            obfTypes = ConstPoolUtils.parseDescriptor(methodInfo.getDescriptor());
-            if (!isPotentialTypeMatch(deobfTypes, obfTypes)) {
-                return false;
-            }
-        }
-        ConstPool constPool = methodInfo.getConstPool();
+        CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
         CodeIterator codeIterator = codeAttribute.iterator();
         initMatcher();
-        ArrayList<JavaRef> tempMappings = new ArrayList<JavaRef>();
         try {
-            match:
             for (int offset = 0; offset < codeIterator.getCodeLength() && matcher.match(methodInfo, offset); offset = codeIterator.next()) {
-                if (!afterMatch()) {
-                    continue;
+                if (afterMatch1(className, tempClassMap)) {
+                    return true;
                 }
-                tempMappings.clear();
-                for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
-                    int captureGroup = entry.getKey();
-                    JavaRef xref = entry.getValue();
-                    byte[] code = matcher.getCaptureGroup(captureGroup);
-                    int index = Util.demarshal(code, 1, 2);
-                    ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
-                    ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
-                    JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
-                    if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
-                        if (deobfMethod != null) {
-                            Logger.log(Logger.LOG_METHOD, "method %s %s matches %s %s, but",
-                                methodInfo.getName(), methodInfo.getDescriptor(), deobfMethod.getName(), deobfMethod.getType()
-                            );
-                        }
-                        Logger.log(Logger.LOG_METHOD, "method %s %s failed xref #%d %s %s -> %s %s",
-                            methodInfo.getName(), methodInfo.getDescriptor(), captureGroup,
-                            xref.getName(), xref.getType(), newRef.getName(), newRef.getType()
-                        );
-                        continue match;
-                    }
-                    tempMappings.add(xref);
-                    tempMappings.add(newRef);
-                }
-                if (className != null && tempClassMap != null) {
-                    for (int i = 0; i + 1 < tempMappings.size(); i += 2) {
-                        tempClassMap.addMap(tempMappings.get(i), tempMappings.get(i + 1));
-                    }
-                    if (deobfMethod != null) {
-                        String deobfName = classMod.getDeobfClass();
-                        tempClassMap.addClassMap(deobfName, className);
-                        tempClassMap.addMethodMap(deobfName, deobfMethod.getName(), methodInfo.getName(), methodInfo.getDescriptor());
-                        if (deobfTypes != null && obfTypes != null) {
-                            for (int i = 0; i < deobfTypes.size(); i++) {
-                                String desc = ClassMap.descriptorToClassName(deobfTypes.get(i));
-                                String obf = ClassMap.descriptorToClassName(obfTypes.get(i));
-                                if (!obf.equals(desc)) {
-                                    tempClassMap.addClassMap(desc, obf);
-                                }
-                            }
-                        }
-                    }
-                }
-                return true;
             }
         } catch (BadBytecode e) {
             Logger.log(e);
         }
         return false;
+    }
+
+    private boolean afterMatch1(String className, ClassMap tempClassMap) {
+        MethodInfo methodInfo = getMethodInfo();
+        ConstPool constPool = methodInfo.getConstPool();
+        ArrayList<JavaRef> tempMappings = new ArrayList<JavaRef>();
+        for (Map.Entry<Integer, JavaRef> entry : xrefs.entrySet()) {
+            int captureGroup = entry.getKey();
+            JavaRef xref = entry.getValue();
+            byte[] code = matcher.getCaptureGroup(captureGroup);
+            int index = Util.demarshal(code, 1, 2);
+            ConstPoolUtils.matchOpcodeToRefType(code[0], xref);
+            ConstPoolUtils.matchConstPoolTagToRefType(constPool.getTag(index), xref);
+            JavaRef newRef = ConstPoolUtils.getRefForIndex(constPool, index);
+            if (!isPotentialTypeMatch(xref.getType(), newRef.getType())) {
+                if (deobfMethod != null) {
+                    Logger.log(Logger.LOG_METHOD, "method %s %s matches %s %s, but",
+                        methodInfo.getName(), methodInfo.getDescriptor(), deobfMethod.getName(), deobfMethod.getType()
+                    );
+                }
+                Logger.log(Logger.LOG_METHOD, "method %s %s failed xref #%d %s %s -> %s %s",
+                    methodInfo.getName(), methodInfo.getDescriptor(), captureGroup,
+                    xref.getName(), xref.getType(), newRef.getName(), newRef.getType()
+                );
+                return false;
+            }
+            tempMappings.add(xref);
+            tempMappings.add(newRef);
+        }
+        if (className != null && tempClassMap != null) {
+            for (int i = 0; i + 1 < tempMappings.size(); i += 2) {
+                tempClassMap.addMap(tempMappings.get(i), tempMappings.get(i + 1));
+            }
+            if (deobfMethod != null) {
+                String deobfName = classMod.getDeobfClass();
+                tempClassMap.addClassMap(deobfName, className);
+                tempClassMap.addMethodMap(deobfName, deobfMethod.getName(), methodInfo.getName(), methodInfo.getDescriptor());
+                if (deobfTypes != null && obfTypes != null) {
+                    for (int i = 0; i < deobfTypes.size(); i++) {
+                        String desc = ClassMap.descriptorToClassName(deobfTypes.get(i));
+                        String obf = ClassMap.descriptorToClassName(obfTypes.get(i));
+                        if (!obf.equals(desc)) {
+                            tempClassMap.addClassMap(desc, obf);
+                        }
+                    }
+                }
+            }
+        }
+        return afterMatch();
     }
 
     /**
@@ -220,6 +235,15 @@ abstract public class BytecodeSignature extends ClassSignature {
     }
 
     /**
+     * Called before each method.  Can be overridden to filter out certain methods by signature.
+     *
+     * @return true if method should be matched
+     */
+    public boolean filterMethod() {
+        return true;
+    }
+
+    /**
      * Called immediately after a successful match.  Gives an opportunity to extract bytecode
      * values using getCaptureGroup, for example.
      *
@@ -235,7 +259,7 @@ abstract public class BytecodeSignature extends ClassSignature {
      * Called immediately after a successful match.  Gives an opportunity to extract bytecode
      * values using getCaptureGroup, for example.
      *
-     * @return true if match should be ignored
+     * @return false if match should be ignored
      */
     @SuppressWarnings("deprecation")
     public boolean afterMatch() {
