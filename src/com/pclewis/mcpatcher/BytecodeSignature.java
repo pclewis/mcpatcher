@@ -14,6 +14,8 @@ abstract public class BytecodeSignature extends ClassSignature {
     ArrayList<String> deobfTypes;
     ArrayList<String> obfTypes;
     private final HashMap<Integer, JavaRef> xrefs = new HashMap<Integer, JavaRef>();
+    boolean constructorOnly;
+    boolean staticInitializerOnly;
 
     /**
      * Matcher object.
@@ -45,6 +47,12 @@ abstract public class BytecodeSignature extends ClassSignature {
 
     private boolean filterMethod1() {
         MethodInfo methodInfo = getMethodInfo();
+        if (constructorOnly && !methodInfo.isConstructor()) {
+            return false;
+        }
+        if (staticInitializerOnly && !methodInfo.isStaticInitializer()) {
+            return false;
+        }
         CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
         if (codeAttribute == null) {
             return false;
@@ -226,6 +234,28 @@ abstract public class BytecodeSignature extends ClassSignature {
      */
     public BytecodeSignature addXref(int captureGroup, JavaRef javaRef) {
         xrefs.put(captureGroup, javaRef);
+        return this;
+    }
+
+    /**
+     * Sets whether only constructors should be considered for matching.
+     *
+     * @param only true to enable constructor filter.
+     * @return this
+     */
+    public BytecodeSignature setConstructorOnly(boolean only) {
+        constructorOnly = only;
+        return this;
+    }
+
+    /**
+     * Sets whether only static initializers should be considered for matching.
+     *
+     * @param only true to enable static initializer filter.
+     * @return this
+     */
+    public BytecodeSignature setStaticInitializerOnly(boolean only) {
+        staticInitializerOnly = only;
         return this;
     }
 
