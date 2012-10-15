@@ -31,11 +31,6 @@ abstract public class BytecodeSignature extends ClassSignature {
      */
     abstract public String getMatchExpression();
 
-    boolean match() {
-        matcher = new BytecodeMatcher(getMatchExpression());
-        return matcher.match(getMethodInfo());
-    }
-
     void initMatcher() {
         matcher = new BytecodeMatcher(getMatchExpression());
     }
