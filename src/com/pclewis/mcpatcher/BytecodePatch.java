@@ -17,6 +17,8 @@ import static javassist.bytecode.Opcode.*;
 abstract public class BytecodePatch extends ClassPatch {
     BytecodeMatcher matcher;
     private MethodRef targetMethod;
+    boolean constructorOnly;
+    boolean staticInitializerOnly;
     private final ArrayList<BytecodeSignature> preMatchSignatures = new ArrayList<BytecodeSignature>();
     int labelOffset;
 
@@ -29,6 +31,30 @@ abstract public class BytecodePatch extends ClassPatch {
      */
     public BytecodePatch targetMethod(MethodRef targetMethod) {
         this.targetMethod = targetMethod;
+        return this;
+    }
+
+    /**
+     * Sets whether only constructors should be considered for matching.
+     * Shorthand for a filterMethod that returns getMethodInfo().isConstructor().
+     *
+     * @param only true to enable constructor filter.
+     * @return this
+     */
+    public BytecodePatch matchConstructorOnly(boolean only) {
+        constructorOnly = only;
+        return this;
+    }
+
+    /**
+     * Sets whether only static initializers should be considered for matching.
+     * Shorthand for a filterMethod that returns getMethodInfo().isStaticInitializer().
+     *
+     * @param only true to enable static initializer filter.
+     * @return this
+     */
+    public BytecodePatch matchStaticInitializerOnly(boolean only) {
+        staticInitializerOnly = only;
         return this;
     }
 
@@ -83,6 +109,12 @@ abstract public class BytecodePatch extends ClassPatch {
             if (!methodInfo.getDescriptor().equals(ref.getType()) || !methodInfo.getName().equals(ref.getName())) {
                 return false;
             }
+        }
+        if (constructorOnly && !methodInfo.isConstructor()) {
+            return false;
+        }
+        if (staticInitializerOnly && !methodInfo.isStaticInitializer()) {
+            return false;
         }
         for (BytecodeSignature signature : preMatchSignatures) {
             if (!signature.match(null, methodInfo, null)) {

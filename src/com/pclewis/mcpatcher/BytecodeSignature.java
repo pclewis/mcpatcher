@@ -239,22 +239,24 @@ abstract public class BytecodeSignature extends ClassSignature {
 
     /**
      * Sets whether only constructors should be considered for matching.
+     * Shorthand for a filterMethod that returns getMethodInfo().isConstructor().
      *
      * @param only true to enable constructor filter.
      * @return this
      */
-    public BytecodeSignature setConstructorOnly(boolean only) {
+    public BytecodeSignature matchConstructorOnly(boolean only) {
         constructorOnly = only;
         return this;
     }
 
     /**
      * Sets whether only static initializers should be considered for matching.
+     * Shorthand for a filterMethod that returns getMethodInfo().isStaticInitializer().
      *
      * @param only true to enable static initializer filter.
      * @return this
      */
-    public BytecodeSignature setStaticInitializerOnly(boolean only) {
+    public BytecodeSignature matchStaticInitializerOnly(boolean only) {
         staticInitializerOnly = only;
         return this;
     }
