@@ -459,50 +459,45 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            push(0xffffff),
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            }.addXref(1, new FieldRef(getDeobfClass(), "waterColorMultiplier", "I")));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            ILOAD_1,
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
-                }
-            }.addXref(1, new FieldRef(getDeobfClass(), "biomeID", "I")));
-
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            push(0.5f),
-                            captureReference(PUTFIELD),
-                            ALOAD_0,
-                            push(0.5f),
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        push(0xffffff),
+                        captureReference(PUTFIELD)
+                    );
                 }
             }
+                .matchConstructorOnly(true)
+                .addXref(1, new FieldRef(getDeobfClass(), "waterColorMultiplier", "I"))
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        ILOAD_1,
+                        captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .matchConstructorOnly(true)
+                .addXref(1, new FieldRef(getDeobfClass(), "biomeID", "I"))
+            );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        ALOAD_0,
+                        push(0.5f),
+                        captureReference(PUTFIELD),
+                        ALOAD_0,
+                        push(0.5f),
+                        captureReference(PUTFIELD)
+                    );
+                }
+            }
+                .matchConstructorOnly(true)
                 .addXref(1, new FieldRef(getDeobfClass(), "temperature", "F"))
                 .addXref(2, new FieldRef(getDeobfClass(), "rainfall", "F"))
             );
@@ -853,19 +848,15 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            ILOAD_1,
-                            push(256),
-                            IADD,
-                            anyReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        ILOAD_1,
+                        push(256),
+                        IADD,
+                        anyReference(PUTFIELD)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             memberMappers.add(new FieldMapper(blockID).accessFlag(AccessFlag.PRIVATE, true));
 
@@ -1005,32 +996,30 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            ILOAD_1,
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        ILOAD_1,
+                        captureReference(PUTFIELD)
+                    );
                 }
-            }.addXref(1, new FieldRef(getDeobfClass(), "id", "I")));
+            }
+                .matchConstructorOnly(true)
+                .addXref(1, new FieldRef(getDeobfClass(), "id", "I"))
+            );
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            ILOAD_3,
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        ILOAD_3,
+                        captureReference(PUTFIELD)
+                    );
                 }
-            }.addXref(1, new FieldRef(getDeobfClass(), "color", "I")));
+            }
+                .matchConstructorOnly(true)
+                .addXref(1, new FieldRef(getDeobfClass(), "color", "I"))
+            );
 
             patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "name", "Ljava/lang/String;")));
             patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origColor", "I")));
@@ -1690,41 +1679,34 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            // setSize(0.2f, 0.2f);
-                            ALOAD_0,
-                            push(0.2f),
-                            push(0.2f),
-                            anyReference(INVOKEVIRTUAL)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        // setSize(0.2f, 0.2f);
+                        ALOAD_0,
+                        push(0.2f),
+                        push(0.2f),
+                        anyReference(INVOKEVIRTUAL)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            // particleRed = particleGreen = particleBlue = 1.0f;
-                            ALOAD_0,
-                            ALOAD_0,
-                            ALOAD_0,
-                            FCONST_1,
-                            DUP_X1,
-                            captureReference(PUTFIELD),
-                            DUP_X1,
-                            captureReference(PUTFIELD),
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        // particleRed = particleGreen = particleBlue = 1.0f;
+                        ALOAD_0,
+                        ALOAD_0,
+                        ALOAD_0,
+                        FCONST_1,
+                        DUP_X1,
+                        captureReference(PUTFIELD),
+                        DUP_X1,
+                        captureReference(PUTFIELD),
+                        captureReference(PUTFIELD)
+                    );
                 }
             }
+                .matchConstructorOnly(true)
                 .addXref(1, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                 .addXref(2, new FieldRef(getDeobfClass(), "particleGreen", "F"))
                 .addXref(3, new FieldRef(getDeobfClass(), "particleRed", "F"))
@@ -1746,9 +1728,7 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (!getMethodInfo().isConstructor()) {
-                        return null;
-                    } else if (origColors == null) {
+                    if (origColors == null) {
                         return buildExpression(
                             RETURN
                         );
@@ -1832,7 +1812,7 @@ public class CustomColors extends Mod {
                         (origColors == null ? new byte[]{(byte) RETURN} : new byte[]{})
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
         }
     }
 
@@ -1843,41 +1823,33 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            // 0.2f * (float) Math.random() + 0.1f
-                            reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
-                            D2F,
-                            push(0.2f),
-                            FMUL,
-                            push(0.1f),
-                            FADD,
-                            F2D
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        // 0.2f * (float) Math.random() + 0.1f
+                        reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
+                        D2F,
+                        push(0.2f),
+                        FMUL,
+                        push(0.1f),
+                        FADD,
+                        F2D
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            // 19 + rand.nextInt(4)
-                            push(19),
-                            ALOAD_0,
-                            anyReference(GETFIELD),
-                            ICONST_4,
-                            reference(INVOKEVIRTUAL, new MethodRef("java/util/Random", "nextInt", "(I)I")),
-                            IADD
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        // 19 + rand.nextInt(4)
+                        push(19),
+                        ALOAD_0,
+                        anyReference(GETFIELD),
+                        ICONST_4,
+                        reference(INVOKEVIRTUAL, new MethodRef("java/util/Random", "nextInt", "(I)I")),
+                        IADD
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             addWaterColorPatch("rain drop", new float[]{1.0f, 1.0f, 1.0f}, new float[]{0.2f, 0.3f, 1.0f});
         }
@@ -2042,20 +2014,16 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            ALOAD_0,
-                            anyReference(INVOKEVIRTUAL),
-                            ICONST_1,
-                            IADD,
-                            anyReference(INVOKEVIRTUAL)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        ALOAD_0,
+                        anyReference(INVOKEVIRTUAL),
+                        ICONST_1,
+                        IADD,
+                        anyReference(INVOKEVIRTUAL)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             addWaterColorPatch("splash", null);
         }
@@ -2068,24 +2036,20 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            // setParticleTextureIndex(32);
-                            ALOAD_0,
-                            push(32),
-                            anyReference(INVOKEVIRTUAL),
+                    return buildExpression(
+                        // setParticleTextureIndex(32);
+                        ALOAD_0,
+                        push(32),
+                        anyReference(INVOKEVIRTUAL),
 
-                            // setSize(0.02F, 0.02F);
-                            ALOAD_0,
-                            push(0.02f),
-                            push(0.02f),
-                            anyReference(INVOKEVIRTUAL)
-                        );
-                    } else {
-                        return null;
-                    }
+                        // setSize(0.02F, 0.02F);
+                        ALOAD_0,
+                        push(0.02f),
+                        push(0.02f),
+                        anyReference(INVOKEVIRTUAL)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             addWaterColorPatch("bubble", new float[]{1.0f, 1.0f, 1.0f});
         }
@@ -2101,18 +2065,14 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            push(0.01f),
-                            push(0.01f),
-                            anyReference(INVOKEVIRTUAL)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        push(0.01f),
+                        push(0.01f),
+                        anyReference(INVOKEVIRTUAL)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -2181,29 +2141,25 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            // particleGreen *= 0.3f;
-                            ALOAD_0,
-                            DUP,
-                            GETFIELD, capture(any(2)),
-                            push(0.3f),
-                            FMUL,
-                            PUTFIELD, backReference(1),
+                    return buildExpression(
+                        // particleGreen *= 0.3f;
+                        ALOAD_0,
+                        DUP,
+                        GETFIELD, capture(any(2)),
+                        push(0.3f),
+                        FMUL,
+                        PUTFIELD, backReference(1),
 
-                            // particleBlue *= 0.9f;
-                            ALOAD_0,
-                            DUP,
-                            GETFIELD, capture(any(2)),
-                            push(0.9f),
-                            FMUL,
-                            PUTFIELD, backReference(2)
-                        );
-                    } else {
-                        return null;
-                    }
+                        // particleBlue *= 0.9f;
+                        ALOAD_0,
+                        DUP,
+                        GETFIELD, capture(any(2)),
+                        push(0.9f),
+                        FMUL,
+                        PUTFIELD, backReference(2)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             addPortalPatch(0.9f, 0, "red");
             addPortalPatch(0.3f, 1, "green");
@@ -2216,13 +2172,9 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            RETURN
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN
+                    );
                 }
 
                 @Override
@@ -2235,7 +2187,7 @@ public class CustomColors extends Mod {
                         reference(PUTFIELD, new FieldRef(getDeobfClass(), "particleBlue", "F"))
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
         }
 
         private void addPortalPatch(final float origValue, final int index, final String color) {
@@ -2247,13 +2199,9 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            push(origValue)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        push(origValue)
+                    );
                 }
 
                 @Override
@@ -2264,7 +2212,7 @@ public class CustomColors extends Mod {
                         FALOAD
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
         }
     }
 
@@ -2277,18 +2225,14 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            push(0.02f),
-                            push(0.02f),
-                            anyReference(INVOKEVIRTUAL)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        push(0.02f),
+                        push(0.02f),
+                        anyReference(INVOKEVIRTUAL)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "colorize", "()LEntityAuraFX;")) {
                 @Override
@@ -3162,26 +3106,22 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
-                            push(0.20000000298023224),
-                            DMUL,
-                            D2F,
-                            push(0.8f),
-                            FADD,
-                            anyFLOAD,
-                            FMUL,
-                            anyFLOAD,
-                            FMUL,
-                            anyReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D")),
+                        push(0.20000000298023224),
+                        DMUL,
+                        D2F,
+                        push(0.8f),
+                        FADD,
+                        anyFLOAD,
+                        FMUL,
+                        anyFLOAD,
+                        FMUL,
+                        anyReference(PUTFIELD)
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new BytecodePatch() {
                 @Override
@@ -3191,15 +3131,11 @@ public class CustomColors extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            FCONST_1,
-                            FSTORE, 9,
-                            reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D"))
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        FCONST_1,
+                        FSTORE, 9,
+                        reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D"))
+                    );
                 }
 
                 @Override
@@ -3229,7 +3165,7 @@ public class CustomColors extends Mod {
                         reference(INVOKESTATIC, new MethodRef("java/lang/Math", "random", "()D"))
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
         }
     }
 
@@ -3778,18 +3714,17 @@ public class CustomColors extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            push(32),
-                            NEWARRAY, T_INT,
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        push(32),
+                        NEWARRAY, T_INT,
+                        captureReference(PUTFIELD)
+                    );
                 }
-            }.addXref(1, colorCode));
+            }
+                .matchConstructorOnly(true)
+                .addXref(1, colorCode)
+            );
 
             classSignatures.add(new BytecodeSignature() {
                 @Override

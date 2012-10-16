@@ -123,20 +123,18 @@ public class GLSLShader extends Mod {
 
     private class RenderEngineMod extends ClassMod {
         RenderEngineMod() {
+            final MethodRef refreshTextures = new MethodRef(getDeobfClass(), "refreshTextures", "()V");
+
             classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().getDescriptor().equals("()V") && !getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            push("%clamp%")
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        push("%clamp%")
+                    );
                 }
-            }.setMethodName("refreshTextures"));
+            }.setMethod(refreshTextures));
 
             memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I")));
         }
@@ -756,13 +754,9 @@ public class GLSLShader extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            RETURN
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN
+                    );
                 }
 
                 @Override
@@ -796,7 +790,7 @@ public class GLSLShader extends Mod {
                         reference(PUTFIELD, shadersShortBuffer)
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setEntity", "(I)V")) {
                 @Override

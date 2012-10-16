@@ -70,20 +70,17 @@ public class HDFont extends Mod {
                 classSignatures.add(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
-                        if (getMethodInfo().isConstructor()) {
-                            return buildExpression(
-                                ALOAD_0,
-                                or(
-                                    build(push(8)),
-                                    build(push(9))
-                                ),
-                                captureReference(PUTFIELD)
-                            );
-                        } else {
-                            return null;
-                        }
+                        return buildExpression(
+                            ALOAD_0,
+                            or(
+                                build(push(8)),
+                                build(push(9))
+                            ),
+                            captureReference(PUTFIELD)
+                        );
                     }
                 }
+                    .matchConstructorOnly(true)
                     .setMethod(constructor)
                     .addXref(1, fontHeight)
                 );
@@ -95,17 +92,16 @@ public class HDFont extends Mod {
                 classSignatures.add(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
-                        if (getMethodInfo().isConstructor()) {
-                            return buildExpression(
-                                ALOAD_0,
-                                ILOAD, 4,
-                                captureReference(PUTFIELD)
-                            );
-                        } else {
-                            return null;
-                        }
+                        return buildExpression(
+                            ALOAD_0,
+                            ILOAD, 4,
+                            captureReference(PUTFIELD)
+                        );
                     }
-                }.addXref(1, isUnicode));
+                }
+                    .matchConstructorOnly(true)
+                    .addXref(1, isUnicode)
+                );
 
                 patches.add(new MakeMemberPublicPatch(isUnicode));
             } else {

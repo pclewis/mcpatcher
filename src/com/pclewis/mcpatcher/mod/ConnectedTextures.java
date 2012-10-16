@@ -281,17 +281,16 @@ public class ConnectedTextures extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0,
-                            ILOAD_1,
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0,
+                        ILOAD_1,
+                        captureReference(PUTFIELD)
+                    );
                 }
-            }.addXref(1, bufferSize));
+            }
+                .matchConstructorOnly(true)
+                .addXref(1, bufferSize)
+            );
 
             memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
@@ -310,19 +309,15 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isStaticInitializer()) {
-                        return buildExpression(
-                            reference(NEW, new ClassRef("Tessellator")),
-                            DUP,
-                            capture(optional(anyLDC)),
-                            capture(or(
-                                build(reference(INVOKESPECIAL, constructor)),
-                                build(reference(INVOKESPECIAL, constructor0))
-                            ))
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        reference(NEW, new ClassRef("Tessellator")),
+                        DUP,
+                        capture(optional(anyLDC)),
+                        capture(or(
+                            build(reference(INVOKESPECIAL, constructor)),
+                            build(reference(INVOKESPECIAL, constructor0))
+                        ))
+                    );
                 }
 
                 @Override
@@ -335,7 +330,7 @@ public class ConnectedTextures extends Mod {
                         reference(INVOKESPECIAL, new MethodRef(MCPatcherUtils.SUPER_TESSELLATOR_CLASS, "<init>", isForge ? "()V" : "(I)V"))
                     );
                 }
-            });
+            }.matchStaticInitializerOnly(true));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -345,13 +340,9 @@ public class ConnectedTextures extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            RETURN
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN
+                    );
                 }
 
                 @Override
@@ -362,7 +353,7 @@ public class ConnectedTextures extends Mod {
                         reference(PUTFIELD, texture)
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new BytecodePatch.InsertBefore() {
                 @Override
@@ -536,10 +527,11 @@ public class ConnectedTextures extends Mod {
                 }
 
                 @Override
-                public boolean filterMethod(MethodInfo methodInfo) {
+                public boolean filterMethod() {
                     if (renderBlockPaneMapped == null) {
                         renderBlockPaneMapped = map(renderBlockPane);
                     }
+                    MethodInfo methodInfo = getMethodInfo();
                     return methodInfo.getDescriptor().matches("^\\(L[a-z]+;III.*") &&
                         !(methodInfo.getDescriptor().equals(renderBlockPaneMapped.getType()) &&
                             methodInfo.getName().equals(renderBlockPaneMapped.getName()));

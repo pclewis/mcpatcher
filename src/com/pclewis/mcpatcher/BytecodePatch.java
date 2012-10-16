@@ -85,8 +85,8 @@ abstract public class BytecodePatch extends ClassPatch {
      *
      * @param methodInfo current method
      * @return true if method should be considered for patching
-     * @deprecated
      * @see #filterMethod()
+     * @deprecated
      */
     public boolean filterMethod(MethodInfo methodInfo) {
         return true;

@@ -81,8 +81,7 @@ public class BetterGrass extends Mod {
                 .addXref(1, getBlockMaterial)
                 .addXref(3, snow)
                 .addXref(4, builtSnow)
-                .setMethod(getBlockTexture)
-            ;
+                .setMethod(getBlockTexture);
 
             classSignatures.add(matchMaterial);
 
@@ -96,13 +95,9 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            RETURN
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        RETURN
+                    );
                 }
 
                 @Override
@@ -154,7 +149,7 @@ public class BetterGrass extends Mod {
                         RETURN
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new BytecodePatch() {
                 @Override

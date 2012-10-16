@@ -98,13 +98,9 @@ public class BetterGlass extends Mod {
             patches.add(new RenderPassPatch("init") {
                 @Override
                 protected String getPrefix() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            ALOAD_0
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        ALOAD_0
+                    );
                 }
 
                 @Override
@@ -114,7 +110,7 @@ public class BetterGlass extends Mod {
                         reference(PUTFIELD, skipRenderPass)
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new RenderPassPatch("loop") {
                 @Override
@@ -504,18 +500,15 @@ public class BetterGlass extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            push(3),
-                            IMUL,
-                            captureReference(INVOKESTATIC),
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        push(3),
+                        IMUL,
+                        captureReference(INVOKESTATIC),
+                        captureReference(PUTFIELD)
+                    );
                 }
             }
+                .matchConstructorOnly(true)
                 .addXref(1, generateDisplayLists)
                 .addXref(2, glRenderListBase)
             );
@@ -558,17 +551,13 @@ public class BetterGlass extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            push(3),
-                            lookAhead(build(
-                                IMUL,
-                                reference(INVOKESTATIC, generateDisplayLists)
-                            ), true)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        push(3),
+                        lookAhead(build(
+                            IMUL,
+                            reference(INVOKESTATIC, generateDisplayLists)
+                        ), true)
+                    );
                 }
 
                 @Override
@@ -577,7 +566,7 @@ public class BetterGlass extends Mod {
                         push(3 + EXTRA_PASSES)
                     );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new BytecodePatch() {
                 @Override

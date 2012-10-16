@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.pclewis.mcpatcher.BinaryRegex.*;
-import static com.pclewis.mcpatcher.BytecodeMatcher.*;
+import static com.pclewis.mcpatcher.BytecodeMatcher.anyReference;
+import static com.pclewis.mcpatcher.BytecodeMatcher.captureReference;
 import static javassist.bytecode.Opcode.*;
 
 /**
@@ -649,22 +650,19 @@ public final class BaseMod extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isStaticInitializer()) {
-                        return buildExpression(
-                            captureReference(NEW),
-                            DUP,
-                            push(blockID),
-                            nonGreedy(any(0, 60)),
-                            push(blockName),
-                            anyReference(INVOKEVIRTUAL),
-                            nonGreedy(any(0, 20)),
-                            captureReference(PUTSTATIC)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        captureReference(NEW),
+                        DUP,
+                        push(blockID),
+                        nonGreedy(any(0, 60)),
+                        push(blockName),
+                        anyReference(INVOKEVIRTUAL),
+                        nonGreedy(any(0, 20)),
+                        captureReference(PUTSTATIC)
+                    );
                 }
             }
+                .matchStaticInitializerOnly(true)
                 .addXref(1, new ClassRef(className))
                 .addXref(2, new FieldRef(getDeobfClass(), fieldName, "L" + fieldClass + ";"))
             );
@@ -740,24 +738,21 @@ public final class BaseMod extends Mod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            begin(),
-                            ALOAD_0,
-                            anyReference(INVOKESPECIAL),
-                            ALOAD_0,
-                            push(256),
-                            NEWARRAY, T_INT,
-                            captureReference(PUTFIELD),
-                            ALOAD_0,
-                            ICONST_0,
-                            captureReference(PUTFIELD)
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        begin(),
+                        ALOAD_0,
+                        anyReference(INVOKESPECIAL),
+                        ALOAD_0,
+                        push(256),
+                        NEWARRAY, T_INT,
+                        captureReference(PUTFIELD),
+                        ALOAD_0,
+                        ICONST_0,
+                        captureReference(PUTFIELD)
+                    );
                 }
             }
+                .matchConstructorOnly(true)
                 .addXref(1, new FieldRef(getDeobfClass(), "charWidth", "[I"))
                 .addXref(2, new FieldRef(getDeobfClass(), "fontTextureName", "I"))
             );

@@ -1,7 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
-import javassist.bytecode.MethodInfo;
 
 import java.io.IOException;
 
@@ -539,7 +538,7 @@ public class HDTexture extends BaseTexturePackMod {
 
             patches.add(new TileSizePatch.MultiplyPatch(16, "int_size") {
                 @Override
-                public boolean filterMethod(MethodInfo methodInfo) {
+                public boolean filterMethod() {
                     return !getMethodInfo().isConstructor();
                 }
             });
@@ -636,7 +635,7 @@ public class HDTexture extends BaseTexturePackMod {
 
             patches.add(new TileSizePatch.ModPatch(16, "int_size") {
                 @Override
-                public boolean filterMethod(MethodInfo methodInfo) {
+                public boolean filterMethod() {
                     return !getMethodInfo().isConstructor();
                 }
             });
@@ -650,20 +649,16 @@ public class HDTexture extends BaseTexturePackMod {
             classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
-                    if (getMethodInfo().isConstructor()) {
-                        return buildExpression(
-                            FLOAD, any(),
-                            F2D,
-                            FLOAD, any(),
-                            F2D,
-                            reference(INVOKESTATIC, atan2),
-                            D2F
-                        );
-                    } else {
-                        return null;
-                    }
+                    return buildExpression(
+                        FLOAD, any(),
+                        F2D,
+                        FLOAD, any(),
+                        F2D,
+                        reference(INVOKESTATIC, atan2),
+                        D2F
+                    );
                 }
-            });
+            }.matchConstructorOnly(true));
 
             patches.add(new TileSizePatch(16.0F, "float_size"));
             patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
