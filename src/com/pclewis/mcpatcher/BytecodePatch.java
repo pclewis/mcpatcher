@@ -59,9 +59,21 @@ abstract public class BytecodePatch extends ClassPatch {
      *
      * @param methodInfo current method
      * @return true if method should be considered for patching
+     * @deprecated
+     * @see #filterMethod()
      */
     public boolean filterMethod(MethodInfo methodInfo) {
         return true;
+    }
+
+    /**
+     * Can be overridden to skip certain methods during patching.
+     *
+     * @return true if method should be considered for patching
+     */
+    @SuppressWarnings("deprecation")
+    public boolean filterMethod() {
+        return filterMethod(getMethodInfo());
     }
 
     private boolean filterMethod1(MethodInfo methodInfo) {
@@ -77,7 +89,7 @@ abstract public class BytecodePatch extends ClassPatch {
                 return false;
             }
         }
-        return filterMethod(methodInfo);
+        return filterMethod();
     }
 
     /**
