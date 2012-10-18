@@ -148,6 +148,7 @@ final public class MinecraftVersion {
             addKnownVersion("12w41a", "b6f1227e4bb0a8d9155fc2093319fc26");
             addKnownVersion("12w41b", "a6269139ef11b1815eb597132533cdfb");
             addKnownVersion("12w42a", "5d25fdfe0f202ec380e8d429b2d6a81f");
+            addKnownVersion("12w42b", "c610c644ef5c27d2f91cf512e2e23c28");
 
             for (int i = 0; i < versionOrdering.size(); i++) {
                 MinecraftVersion a = versionOrdering.get(i);
