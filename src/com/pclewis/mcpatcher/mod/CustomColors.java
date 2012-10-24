@@ -1605,6 +1605,7 @@ public class CustomColors extends Mod {
                 public String getMatchExpression() {
                     return buildExpression(
                         begin(),
+                        optional(anyReference(INVOKESTATIC)),
                         ILOAD_1,
                         ILOAD_3,
                         ISUB,
