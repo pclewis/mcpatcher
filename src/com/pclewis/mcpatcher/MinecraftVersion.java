@@ -132,7 +132,6 @@ final public class MinecraftVersion {
             addKnownVersion("1.3", "a6effac1eaccf5d429aae340cf95ed5d");
             addKnownVersion("1.3.1", "266ccbc9798afd2eadf3d6c01b4c562a");
             addKnownVersion("1.3.2", "969699f13e5bbe7f12e40ac4f32b7d9a");
-            addKnownVersion("1.3.9999", null); // ensures that any 1.3.x is considered < the 1.4 snapshots
 
             addKnownVersion("12w32a", "0de5595692a736307e96e3fec050a98e");
             addKnownVersion("12w34a", "562b82c59fa6870c10e79d9474edb356");
@@ -149,6 +148,10 @@ final public class MinecraftVersion {
             addKnownVersion("12w41b", "a6269139ef11b1815eb597132533cdfb");
             addKnownVersion("12w42a", "5d25fdfe0f202ec380e8d429b2d6a81f");
             addKnownVersion("12w42b", "c610c644ef5c27d2f91cf512e2e23c28");
+
+            addKnownVersion("1.4", "32a654388b54d3e4bb29c1a46e7d6a12");
+            addKnownVersion("1.4.1", "542621a5298659dc65f383f35170fc4c");
+            addKnownVersion("1.4.2", "771175c01778ea67395bc6919a5a9dc5");
 
             for (int i = 0; i < versionOrdering.size(); i++) {
                 MinecraftVersion a = versionOrdering.get(i);
