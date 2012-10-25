@@ -2310,9 +2310,6 @@ public class CustomColors extends Mod {
     }
 
     private class EntityRendererMod extends ClassMod {
-        private byte[] isNightVisionActive = new byte[]{(byte) ICONST_0};
-        private byte[] getNightVisionCode = new byte[]{(byte) FCONST_0};
-
         EntityRendererMod() {
             final boolean updateLightmapTakesFloat = getMinecraftVersion().compareTo("12w32a") >= 0;
             final MethodRef updateLightmap;
@@ -2324,6 +2321,16 @@ public class CustomColors extends Mod {
                 updateLightmap = new MethodRef(getDeobfClass(), "updateLightmap", "()V");
                 updateLightmapOffset = 0;
             }
+            final FieldRef mc = new FieldRef(getDeobfClass(), "mc", "LMinecraft;");
+            final MethodRef updateFogColor = new MethodRef(getDeobfClass(), "updateFogColor", "(F)V");
+            final FieldRef fogColorRed = new FieldRef(getDeobfClass(), "fogColorRed", "F");
+            final FieldRef fogColorGreen = new FieldRef(getDeobfClass(), "fogColorGreen", "F");
+            final FieldRef fogColorBlue = new FieldRef(getDeobfClass(), "fogColorBlue", "F");
+            final FieldRef thePlayer = new FieldRef("Minecraft", "thePlayer", "LEntityClientPlayerMP;");
+            final FieldRef nightVision = new FieldRef("Potion", "nightVision", "LPotion;");
+            final MethodRef isPotionActive = new MethodRef("EntityClientPlayerMP", "isPotionActive", "(LPotion;)Z");
+            final MethodRef getNightVisionStrength1 = new MethodRef(getDeobfClass(), "getNightVisionStrength1", "(LEntityPlayer;F)F");
+            final MethodRef getNightVisionStrength = new MethodRef(getDeobfClass(), "getNightVisionStrength", "(F)F");
 
             classSignatures.add(new ConstSignature("ambient.weather.rain"));
             classSignatures.add(new ConstSignature("/terrain.png"));
@@ -2416,7 +2423,7 @@ public class CustomColors extends Mod {
                 .addXref(4, new FieldRef(getDeobfClass(), "torchFlickerX", "F"))
                 .addXref(5, new FieldRef("World", "lightningFlash", "I"))
                 .addXref(6, new FieldRef("WorldProvider", "worldType", "I"))
-                .addXref(7, new FieldRef(getDeobfClass(), "mc", "LMinecraft;"))
+                .addXref(7, mc)
                 .addXref(8, new FieldRef("Minecraft", "gameSettings", "LGameSettings;"))
                 .addXref(9, new FieldRef("GameSettings", "gammaSetting", "F"))
                 .addXref(10, new FieldRef("Minecraft", "renderEngine", "LRenderEngine;"))
@@ -2424,13 +2431,6 @@ public class CustomColors extends Mod {
                 .addXref(12, new FieldRef(getDeobfClass(), "lightmapTexture", "I"))
                 .addXref(13, new MethodRef("RenderEngine", "createTextureFromBytes", "([IIII)V"))
             );
-
-            final MethodRef updateFogColor = new MethodRef(getDeobfClass(), "updateFogColor", "(F)V");
-            final FieldRef fogColorRed = new FieldRef(getDeobfClass(), "fogColorRed", "F");
-            final FieldRef fogColorGreen = new FieldRef(getDeobfClass(), "fogColorGreen", "F");
-            final FieldRef fogColorBlue = new FieldRef(getDeobfClass(), "fogColorBlue", "F");
-            final MethodRef getNightVisionStrength1 = new MethodRef(getDeobfClass(), "getNightVisionStrength1", "(LEntityPlayer;F)F");
-            final MethodRef getNightVisionStrength = new MethodRef(getDeobfClass(), "getNightVisionStrength", "(F)F");
 
             classSignatures.add(new BytecodeSignature() {
                 @Override
@@ -2486,19 +2486,12 @@ public class CustomColors extends Mod {
                             FSTORE, any()
                         );
                     }
-
-                    @Override
-                    public boolean afterMatch() {
-                        isNightVisionActive = matcher.getCaptureGroup(1);
-                        getNightVisionCode = matcher.getCaptureGroup(6);
-                        return true;
-                    }
                 }
                     .setMethod(updateLightmap)
-                    .addXref(2, new FieldRef(getDeobfClass(), "mc", "LMinecraft;"))
-                    .addXref(3, new FieldRef("Minecraft", "thePlayer", "LEntityClientPlayerMP;"))
-                    .addXref(4, new FieldRef("Potion", "nightVision", "LPotion;"))
-                    .addXref(5, new MethodRef("EntityClientPlayerMP", "isPotionActive", "(LPotion;)Z"))
+                    .addXref(2, mc)
+                    .addXref(3, thePlayer)
+                    .addXref(4, nightVision)
+                    .addXref(5, isPotionActive)
                     .addXref(7, getNightVisionStrength1)
                 );
             }
@@ -2506,17 +2499,33 @@ public class CustomColors extends Mod {
             patches.add(new AddMethodPatch(getNightVisionStrength) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
-                    return buildCode(
-                        isNightVisionActive,
-                        IFEQ, branch("A"),
+                    if (haveNightVision) {
+                        return buildCode(
+                            ALOAD_0,
+                            reference(GETFIELD, mc),
+                            reference(GETFIELD, thePlayer),
+                            reference(GETSTATIC, nightVision),
+                            reference(INVOKEVIRTUAL, isPotionActive),
+                            IFEQ, branch("A"),
 
-                        getNightVisionCode,
-                        FRETURN,
+                            ALOAD_0,
+                            ALOAD_0,
+                            reference(GETFIELD, mc),
+                            reference(GETFIELD, thePlayer),
+                            FLOAD_1,
+                            reference(INVOKESPECIAL, getNightVisionStrength1),
+                            FRETURN,
 
-                        label("A"),
-                        push(0.0f),
-                        FRETURN
-                    );
+                            label("A"),
+                            push(0.0f),
+                            FRETURN
+                        );
+                    } else {
+                        return buildCode(
+                            push(0.0f),
+                            FRETURN
+                        );
+                    }
                 }
             });
 
