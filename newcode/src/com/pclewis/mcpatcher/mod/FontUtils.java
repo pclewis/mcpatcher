@@ -19,6 +19,8 @@ public class FontUtils {
     private static final boolean showLines = false;
 
     static {
+        TexturePackAPI.loadFontFromTexturePack = true;
+
         TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.HD_FONT, 2) {
             @Override
             protected void onChange() {

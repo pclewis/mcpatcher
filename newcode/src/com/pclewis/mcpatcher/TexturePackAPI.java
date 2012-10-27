@@ -13,6 +13,7 @@ import java.util.zip.ZipFile;
 
 public class TexturePackAPI {
     public static TexturePackAPI instance = new TexturePackAPI();
+    public static boolean loadFontFromTexturePack;
 
     private static final ArrayList<Field> textureMapFields = new ArrayList<Field>();
 
@@ -171,7 +172,9 @@ public class TexturePackAPI {
     }
 
     protected InputStream getInputStreamImpl(String s) {
-        if (texturePack == null) {
+        if (!loadFontFromTexturePack && s.startsWith("/font/")) {
+            return TexturePackAPI.class.getResourceAsStream(s);
+        } else if (texturePack == null) {
             TexturePackBase currentTexturePack = getCurrentTexturePack();
             if (currentTexturePack == null) {
                 return TexturePackAPI.class.getResourceAsStream(s);
