@@ -41,8 +41,8 @@ public class RandomMobs extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$1"));
         filesToAdd.add(ClassMap.classNameToFilename(EXTRA_INFO_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$MobEntry"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RANDOM_MOBS_CLASS + "$SkinEntry"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_RULE_LIST_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_RULE_LIST_CLASS + "$MobRuleEntry"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.MOB_OVERLAY_CLASS));
     }
 
@@ -212,10 +212,6 @@ public class RandomMobs extends Mod {
             final MethodRef getEntityTexture = new MethodRef(getDeobfClass(), "getEntityTexture", "()Ljava/lang/String;");
             final MethodRef writeToNBT = new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V");
             final MethodRef readFromNBT = new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V");
-            final MethodRef getLong = new MethodRef("NBTTagCompound", "getLong", "(Ljava/lang/String;)J");
-            final MethodRef setLong = new MethodRef("NBTTagCompound", "setLong", "(Ljava/lang/String;J)V");
-            final MethodRef getInteger = new MethodRef("NBTTagCompound", "getInteger", "(Ljava/lang/String;)I");
-            final MethodRef setInteger = new MethodRef("NBTTagCompound", "setInteger", "(Ljava/lang/String;I)V");
 
             parentClass = "Entity";
 
