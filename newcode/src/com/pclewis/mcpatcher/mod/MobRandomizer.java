@@ -63,13 +63,18 @@ public class MobRandomizer {
         public final int origX;
         public final int origY;
         public final int origZ;
-        public final String origBiome;
+        public String origBiome;
 
         static {
             try {
                 Class<?> biomeHelperClass = Class.forName(MCPatcherUtils.BIOME_HELPER_CLASS);
                 getBiomeNameAt = biomeHelperClass.getDeclaredMethod("getBiomeNameAt", Integer.TYPE, Integer.TYPE, Integer.TYPE);
             } catch (Throwable e) {
+            }
+            if (getBiomeNameAt == null) {
+                MCPatcherUtils.warn("%s biome integration failed", MCPatcherUtils.RANDOM_MOBS);
+            } else {
+                MCPatcherUtils.info("%s biome integration active", MCPatcherUtils.RANDOM_MOBS);
             }
         }
 
@@ -78,7 +83,7 @@ public class MobRandomizer {
             origX = (int) entity.posX;
             origY = (int) entity.posY;
             origZ = (int) entity.posZ;
-            origBiome = getBiome(origX, origY, origZ);
+            setBiome();
         }
 
         ExtraInfo(long skin, int origX, int origY, int origZ) {
@@ -86,20 +91,42 @@ public class MobRandomizer {
             this.origX = origX;
             this.origY = origY;
             this.origZ = origZ;
-            origBiome = getBiome(origX, origY, origZ);
+            setBiome();
+        }
+
+        private void setBiome() {
+            if (origBiome == null && getBiomeNameAt != null) {
+                try {
+                    String biome = (String) getBiomeNameAt.invoke(null, origX, origY, origZ);
+                    if (biome != null) {
+                        origBiome = biome.toLowerCase().replace(" ", "");
+                    }
+                } catch (Throwable e) {
+                    getBiomeNameAt = null;
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s{%d, %d, %d, %d, %s}", getClass().getSimpleName(), skin, origX, origY, origZ, origBiome);
         }
 
         static ExtraInfo getInfo(EntityLiving entity) {
+            ExtraInfo info = entity.randomMobsInfo;
             synchronized (allInfo) {
-                if (entity.randomMobsInfo == null) {
-                    entity.randomMobsInfo = allInfo.get(entity.entityId);
-                    if (entity.randomMobsInfo == null) {
-                        entity.randomMobsInfo = new ExtraInfo(entity);
+                if (info == null) {
+                    info = allInfo.get(entity.entityId);
+                    if (info == null) {
+                        info = new ExtraInfo(entity);
                         putInfo(entity);
                     }
+                    entity.randomMobsInfo = info;
                 }
             }
-            return entity.randomMobsInfo;
+            info.setBiome();
+            return info;
         }
 
         static void putInfo(EntityLiving entity) {
@@ -114,11 +141,6 @@ public class MobRandomizer {
             }
         }
 
-        @Override
-        public String toString() {
-            return String.format("%s{%d, %d, %d, %d, %s}", getClass().getName(), skin, origX, origY, origZ, origBiome);
-        }
-
         private static long getSkinId(int entityId) {
             long n = entityId;
             n = n ^ (n << 16) ^ (n << 32) ^ (n << 48);
@@ -128,27 +150,15 @@ public class MobRandomizer {
             return (n >> 32) ^ n;
         }
 
-        private static String getBiome(int x, int y, int z) {
-            if (getBiomeNameAt != null) {
-                try {
-                    String biome = (String) getBiomeNameAt.invoke(null, x, y, z);
-                    if (biome != null) {
-                        return biome.toLowerCase().replace(" ", "");
-                    }
-                } catch (Throwable e) {
-                    getBiomeNameAt = null;
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
         public static void readFromNBT(EntityLiving entity, NBTTagCompound nbt) {
             long skin = nbt.getLong(SKIN_TAG);
             if (skin == 0) {
                 entity.randomMobsInfo = new ExtraInfo(entity);
             } else {
-                entity.randomMobsInfo = new ExtraInfo(skin, nbt.getInteger("origX"), nbt.getInteger("origY"), nbt.getInteger("origZ"));
+                int x = nbt.getInteger(ORIG_X_TAG);
+                int y = nbt.getInteger(ORIG_Y_TAG);
+                int z = nbt.getInteger(ORIG_Z_TAG);
+                entity.randomMobsInfo = new ExtraInfo(skin, x, y, z);
             }
             putInfo(entity);
         }
