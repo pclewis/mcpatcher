@@ -77,7 +77,6 @@ public class MobRandomizer {
             origX = (int) entity.posX;
             origY = (int) entity.posY;
             origZ = (int) entity.posZ;
-            setBiome();
         }
 
         ExtraInfo(long skin, int origX, int origY, int origZ) {
@@ -85,7 +84,6 @@ public class MobRandomizer {
             this.origX = origX;
             this.origY = origY;
             this.origZ = origZ;
-            setBiome();
         }
 
         private void setBiome() {
@@ -146,9 +144,7 @@ public class MobRandomizer {
 
         public static void readFromNBT(EntityLiving entity, NBTTagCompound nbt) {
             long skin = nbt.getLong(SKIN_TAG);
-            if (skin == 0) {
-                entity.randomMobsInfo = new ExtraInfo(entity);
-            } else {
+            if (skin != 0L) {
                 int x = nbt.getInteger(ORIG_X_TAG);
                 int y = nbt.getInteger(ORIG_Y_TAG);
                 int z = nbt.getInteger(ORIG_Z_TAG);
@@ -158,7 +154,7 @@ public class MobRandomizer {
         }
 
         public static void writeToNBT(EntityLiving entity, NBTTagCompound nbt) {
-            ExtraInfo info = getInfo(entity);
+            ExtraInfo info = entity.randomMobsInfo;
             if (info != null) {
                 nbt.setLong(SKIN_TAG, info.skin);
                 nbt.setInteger(ORIG_X_TAG, info.origX);
