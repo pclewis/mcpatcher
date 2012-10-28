@@ -125,7 +125,6 @@ public class SkyRenderer {
                 if (layer.valid) {
                     MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
                     objects.put(textureName, layer);
-                    textures.add(layer.texture);
                 }
             }
         }
@@ -145,9 +144,7 @@ public class SkyRenderer {
             texturesToUnload.addAll(textures);
             texturesToUnload.removeAll(texturesNeeded);
             for (String s : texturesToUnload) {
-                if (TexturePackAPI.isTextureLoaded(s)) {
-                    TexturePackAPI.unloadTexture(s);
-                }
+                TexturePackAPI.unloadTexture(s);
             }
             for (Layer layer : skies) {
                 if (layer.brightness > 0.0f) {
