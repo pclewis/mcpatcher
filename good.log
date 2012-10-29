@@ -1,4 +1,4 @@
-MCPatcher version is 2.4.3_02
+MCPatcher version is 2.4.3_03
 OS: Linux 3.6.2-1.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_37 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
@@ -5942,60 +5942,60 @@ Patching...
    method signature (Lnet/minecraft/src/TexturePackBase;)Lnet/minecraft/src/TexturePackBase; -> (Lbck;)Lbck;
    field signature Lnet/minecraft/src/TexturePackBase; -> Lbck;
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; getTexturePack()Lbck;@0
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@37
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@49
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@58
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@162
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@171
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
-    field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@0
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
-    field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@28
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
+    field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@23
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
+    field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@51
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; access$000()Lbck;@0
-     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x5e
+     GETSTATIC 0x00 0x01       GETSTATIC 0x01 0x64
     field ref com.pclewis.mcpatcher.TexturePackAPI.texturePack Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.texturePack Lbck; access$002(Lbck;)Lbck;@2
-     PUTSTATIC 0x00 0x01       PUTSTATIC 0x01 0x5e
+     PUTSTATIC 0x00 0x01       PUTSTATIC 0x01 0x64
     field ref net.minecraft.client.Minecraft.texturePackList Lnet/minecraft/src/TexturePackList; -> net/minecraft/client/Minecraft.C Lbcp; getCurrentTexturePack()Lbck;@11
-     GETFIELD 0x00 0x04        GETFIELD 0x01 0x62
+     GETFIELD 0x00 0x04        GETFIELD 0x01 0x68
     method ref net.minecraft.src.TexturePackList.getSelectedTexturePack ()Lnet/minecraft/src/TexturePackBase; -> bcp.getSelectedTexturePack ()Lbck; getCurrentTexturePack()Lbck;@22
-     INVOKEVIRTUAL 0x00 0x05   INVOKEVIRTUAL 0x01 0x66
+     INVOKEVIRTUAL 0x00 0x05   INVOKEVIRTUAL 0x01 0x6c
     method ref com.pclewis.mcpatcher.TexturePackAPI.getTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.getTexturePack ()Lbck; isDefaultTexturePack()Z@0
-     INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0x68
+     INVOKESTATIC 0x00 0x06    INVOKESTATIC 0x01 0x6e
     class ref net.minecraft.src.TexturePackDefault -> bcl isDefaultTexturePack()Z@3
-     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x6a
+     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x70
     class ref net.minecraft.src.TexturePackDefault -> bcl listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@40
-     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x6a
+     INSTANCEOF 0x00 0x07      INSTANCEOF 0x01 0x70
     class ref net.minecraft.src.TexturePackCustom -> bcm listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@52
-     INSTANCEOF 0x00 0x1c      INSTANCEOF 0x01 0x6c
+     INSTANCEOF 0x00 0x1c      INSTANCEOF 0x01 0x72
     class ref net.minecraft.src.TexturePackCustom -> bcm listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@61
-     CHECKCAST 0x00 0x1c       CHECKCAST 0x01 0x6c
+     CHECKCAST 0x00 0x1c       CHECKCAST 0x01 0x72
     field ref net.minecraft.src.TexturePackCustom.zipFile Ljava/util/zip/ZipFile; -> bcm.e Ljava/util/zip/ZipFile; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@64
-     GETFIELD 0x00 0x1d        GETFIELD 0x01 0x6e
+     GETFIELD 0x00 0x1d        GETFIELD 0x01 0x74
     class ref net.minecraft.src.TexturePackFolder -> bcn listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@165
-     INSTANCEOF 0x00 0x2a      INSTANCEOF 0x01 0x70
+     INSTANCEOF 0x00 0x2a      INSTANCEOF 0x01 0x76
     class ref net.minecraft.src.TexturePackFolder -> bcn listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@174
-     CHECKCAST 0x00 0x2a       CHECKCAST 0x01 0x70
+     CHECKCAST 0x00 0x2a       CHECKCAST 0x01 0x76
     method ref net.minecraft.src.TexturePackFolder.getFolder ()Ljava/io/File; -> bcn.getFolder ()Ljava/io/File; listResources(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;@177
-     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x01 0x71
+     INVOKEVIRTUAL 0x00 0x2b   INVOKEVIRTUAL 0x01 0x77
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lazc; getTextureIfLoaded(Ljava/lang/String;)I@3
-     GETFIELD 0x00 0x38        GETFIELD 0x01 0x74
+     GETFIELD 0x00 0x38        GETFIELD 0x01 0x7a
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lazc; unloadTexture(Ljava/lang/String;)I@25
-     GETFIELD 0x00 0x38        GETFIELD 0x01 0x74
+     GETFIELD 0x00 0x38        GETFIELD 0x01 0x7a
     method ref net.minecraft.src.RenderEngine.deleteTexture (I)V -> azc.a (I)V unloadTexture(Ljava/lang/String;)I@31
-     INVOKEVIRTUAL 0x00 0x45   INVOKEVIRTUAL 0x01 0x79
-    method ref com.pclewis.mcpatcher.TexturePackAPI.getCurrentTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.getCurrentTexturePack ()Lbck; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@6
-     INVOKESTATIC 0x00 0x47    INVOKESTATIC 0x01 0x7b
-    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> bck.a (Ljava/lang/String;)Ljava/io/InputStream; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@24
-     INVOKEVIRTUAL 0x00 0x4a   INVOKEVIRTUAL 0x01 0x7f
-    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> bck.a (Ljava/lang/String;)Ljava/io/InputStream; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@32
-     INVOKEVIRTUAL 0x00 0x4a   INVOKEVIRTUAL 0x01 0x7f
-   string replace net/minecraft/src/RenderEngine -> azc @4053
+     INVOKEVIRTUAL 0x00 0x45   INVOKEVIRTUAL 0x01 0x7f
+    method ref com.pclewis.mcpatcher.TexturePackAPI.getCurrentTexturePack ()Lnet/minecraft/src/TexturePackBase; -> com.pclewis.mcpatcher.TexturePackAPI.getCurrentTexturePack ()Lbck; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@29
+     INVOKESTATIC 0x00 0x4b    INVOKESTATIC 0x01 0x81
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> bck.a (Ljava/lang/String;)Ljava/io/InputStream; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@47
+     INVOKEVIRTUAL 0x00 0x4c   INVOKEVIRTUAL 0x01 0x85
+    method ref net.minecraft.src.TexturePackBase.getInputStream (Ljava/lang/String;)Ljava/io/InputStream; -> bck.a (Ljava/lang/String;)Ljava/io/InputStream; getInputStreamImpl(Ljava/lang/String;)Ljava/io/InputStream;@55
+     INVOKEVIRTUAL 0x00 0x4c   INVOKEVIRTUAL 0x01 0x85
+   string replace net/minecraft/src/RenderEngine -> azc @4105
    string replace Lnet/minecraft/src/RenderEngine; -> Lazc; @3031
    string replace Lnet/minecraft/src/TexturePackBase; -> Lbck; @3455
    string replace Lnet/minecraft/src/TexturePackList; -> Lbcp; @342
@@ -6224,31 +6224,31 @@ Patching...
    method signature (Lnet/minecraft/src/FontRenderer;Ljava/lang/String;)F -> (Lasb;Ljava/lang/String;)F
    method signature (Lnet/minecraft/client/Minecraft;Lnet/minecraft/src/FontRenderer;Ljava/lang/String;)V -> (Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V
     method ref com.pclewis.mcpatcher.mod.FontUtils.setFontRenderer (Lnet/minecraft/client/Minecraft;Lnet/minecraft/src/FontRenderer;Ljava/lang/String;)V -> com.pclewis.mcpatcher.mod.FontUtils.setFontRenderer (Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V access$000(Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V@3
-     INVOKESTATIC 0x00 0x01    INVOKESTATIC 0x01 0x46
+     INVOKESTATIC 0x00 0x01    INVOKESTATIC 0x01 0x49
     field ref net.minecraft.src.FontRenderer.isUnicode Z -> asb.l Z setFontRenderer(Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V@5
-     GETFIELD 0x00 0x03        GETFIELD 0x01 0x4b
+     GETFIELD 0x00 0x03        GETFIELD 0x01 0x4e
     field ref net.minecraft.src.FontRenderer.isUnicode Z -> asb.l Z setFontRenderer(Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V@24
-     PUTFIELD 0x00 0x03        PUTFIELD 0x01 0x4b
+     PUTFIELD 0x00 0x03        PUTFIELD 0x01 0x4e
     field ref net.minecraft.client.Minecraft.gameSettings Lnet/minecraft/src/GameSettings; -> net/minecraft/client/Minecraft.y Lard; setFontRenderer(Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V@11
-     GETFIELD 0x00 0x04        GETFIELD 0x01 0x4e
+     GETFIELD 0x00 0x04        GETFIELD 0x01 0x51
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lazc; setFontRenderer(Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V@16
-     GETFIELD 0x00 0x05        GETFIELD 0x01 0x52
+     GETFIELD 0x00 0x05        GETFIELD 0x01 0x55
     method ref net.minecraft.src.FontRenderer.initialize (Lnet/minecraft/src/GameSettings;Ljava/lang/String;Lnet/minecraft/src/RenderEngine;)V -> asb.initialize (Lard;Ljava/lang/String;Lazc;)V setFontRenderer(Lnet/minecraft/client/Minecraft;Lasb;Ljava/lang/String;)V@19
-     INVOKEVIRTUAL 0x00 0x06   INVOKEVIRTUAL 0x01 0x55
+     INVOKEVIRTUAL 0x00 0x06   INVOKEVIRTUAL 0x01 0x58
     field ref net.minecraft.src.FontRenderer.FONT_HEIGHT I -> asb.b I computeCharWidths(Lasb;Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F@1
-     GETFIELD 0x00 0x07        GETFIELD 0x01 0x58
+     GETFIELD 0x00 0x07        GETFIELD 0x01 0x5b
     field ref net.minecraft.src.FontRenderer.FONT_HEIGHT I -> asb.b I computeCharWidths(Lasb;Ljava/lang/String;Ljava/awt/image/BufferedImage;[I[I)[F@10
-     PUTFIELD 0x00 0x07        PUTFIELD 0x01 0x58
+     PUTFIELD 0x00 0x07        PUTFIELD 0x01 0x5b
     method ref net.minecraft.src.FontRenderer.getCharWidth (C)I -> asb.a (C)I getCharWidthf(Lasb;C)F@2
-     INVOKEVIRTUAL 0x00 0x1a   INVOKEVIRTUAL 0x01 0x5b
+     INVOKEVIRTUAL 0x00 0x1a   INVOKEVIRTUAL 0x01 0x5e
     field ref net.minecraft.src.FontRenderer.charWidthf [F -> asb.charWidthf [F getCharWidthf(Lasb;C)F@15
-     GETFIELD 0x00 0x1b        GETFIELD 0x01 0x5c
+     GETFIELD 0x00 0x1b        GETFIELD 0x01 0x5f
     field ref net.minecraft.src.FontRenderer.charWidthf [F -> asb.charWidthf [F getCharWidthf(Lasb;C)F@29
-     GETFIELD 0x00 0x1b        GETFIELD 0x01 0x5c
+     GETFIELD 0x00 0x1b        GETFIELD 0x01 0x5f
     method ref com.pclewis.mcpatcher.mod.FontUtils.getCharWidthf (Lnet/minecraft/src/FontRenderer;C)F -> com.pclewis.mcpatcher.mod.FontUtils.getCharWidthf (Lasb;C)F getStringWidthf(Lasb;Ljava/lang/String;)F@31
-     INVOKESTATIC 0x00 0x1e    INVOKESTATIC 0x01 0x5e
+     INVOKESTATIC 0x00 0x1e    INVOKESTATIC 0x01 0x61
     method ref com.pclewis.mcpatcher.mod.FontUtils.getCharWidthf (Lnet/minecraft/src/FontRenderer;C)F -> com.pclewis.mcpatcher.mod.FontUtils.getCharWidthf (Lasb;C)F getStringWidthf(Lasb;Ljava/lang/String;)F@145
-     INVOKESTATIC 0x00 0x1e    INVOKESTATIC 0x01 0x5e
+     INVOKESTATIC 0x00 0x1e    INVOKESTATIC 0x01 0x61
    string replace Lnet/minecraft/src/FontRenderer; -> Lasb; @351
   adding com/pclewis/mcpatcher/mod/FontUtils$1.class for HD Font
     field ref net.minecraft.client.Minecraft.fontRenderer Lnet/minecraft/src/FontRenderer; -> net/minecraft/client/Minecraft.p Lasb; onChange()V@6
@@ -6267,17 +6267,17 @@ Patching...
    method signature (Lnet/minecraft/src/EntityLiving;)Ljava/lang/String; -> (Lln;)Ljava/lang/String;
    method signature (Lnet/minecraft/src/EntityLiving;Ljava/lang/String;)Ljava/lang/String; -> (Lln;Ljava/lang/String;)Ljava/lang/String;
     method ref net.minecraft.src.EntityLiving.getEntityTexture ()Ljava/lang/String; -> ln.O ()Ljava/lang/String; randomTexture(Lln;)Ljava/lang/String;@2
-     INVOKEVIRTUAL 0x00 0x03   INVOKEVIRTUAL 0x00 0x83
+     INVOKEVIRTUAL 0x00 0x02   INVOKEVIRTUAL 0x00 0x6d
     method ref com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Lnet/minecraft/src/EntityLiving;Ljava/lang/String;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Lln;Ljava/lang/String;)Ljava/lang/String; randomTexture(Lln;)Ljava/lang/String;@5
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x00 0x85
+     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x6f
     method ref com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Lnet/minecraft/src/EntityLiving;Ljava/lang/String;)Ljava/lang/String; -> com.pclewis.mcpatcher.mod.MobRandomizer.randomTexture (Lln;Ljava/lang/String;)Ljava/lang/String; randomTexture(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;@12
-     INVOKESTATIC 0x00 0x04    INVOKESTATIC 0x00 0x85
+     INVOKESTATIC 0x00 0x03    INVOKESTATIC 0x00 0x6f
     method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.getInfo (Lnet/minecraft/src/EntityLiving;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.getInfo (Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; randomTexture(Lln;Ljava/lang/String;)Ljava/lang/String;@21
-     INVOKESTATIC 0x00 0x09    INVOKESTATIC 0x00 0x88
+     INVOKESTATIC 0x00 0x08    INVOKESTATIC 0x00 0x72
     class ref net.minecraft.src.EntityLiving -> ln randomTexture(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;@1
-     INSTANCEOF 0x00 0x14      INSTANCEOF 0x00 0x80
+     INSTANCEOF 0x00 0x10      INSTANCEOF 0x00 0x6a
     class ref net.minecraft.src.EntityLiving -> ln randomTexture(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;@8
-     CHECKCAST 0x00 0x14       CHECKCAST 0x00 0x80
+     CHECKCAST 0x00 0x10       CHECKCAST 0x00 0x6a
    string replace Lnet/minecraft/src/EntityLiving; -> Lln; @252
   adding com/pclewis/mcpatcher/mod/MobRandomizer$1.class for Random Mobs
   adding com/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo.class for Random Mobs
@@ -6287,63 +6287,53 @@ Patching...
    method signature (Lnet/minecraft/src/EntityLiving;Lnet/minecraft/src/NBTTagCompound;)V -> (Lln;Lbh;)V
    method signature (Lnet/minecraft/src/EntityLiving;Lnet/minecraft/src/NBTTagCompound;)V -> (Lln;Lbh;)V
     field ref net.minecraft.src.EntityLiving.entityId I -> ln.k I <init>(Lln;)V@6
-     GETFIELD 0x00 0x02        GETFIELD 0x00 0xe8
-    field ref net.minecraft.src.EntityLiving.entityId I -> ln.k I getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@18
-     GETFIELD 0x00 0x02        GETFIELD 0x00 0xe8
+     GETFIELD 0x00 0x02        GETFIELD 0x00 0xf3
+    field ref net.minecraft.src.EntityLiving.entityId I -> ln.k I getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@19
+     GETFIELD 0x00 0x02        GETFIELD 0x00 0xf3
     field ref net.minecraft.src.EntityLiving.entityId I -> ln.k I putInfo(Lln;)V@10
-     GETFIELD 0x00 0x02        GETFIELD 0x00 0xe8
+     GETFIELD 0x00 0x02        GETFIELD 0x00 0xf3
     field ref net.minecraft.src.EntityLiving.posX D -> ln.t D <init>(Lln;)V@17
-     GETFIELD 0x00 0x05        GETFIELD 0x00 0xeb
+     GETFIELD 0x00 0x05        GETFIELD 0x00 0xf6
     field ref net.minecraft.src.EntityLiving.posY D -> ln.u D <init>(Lln;)V@26
-     GETFIELD 0x00 0x07        GETFIELD 0x00 0xee
+     GETFIELD 0x00 0x07        GETFIELD 0x00 0xf9
     field ref net.minecraft.src.EntityLiving.posZ D -> ln.v D <init>(Lln;)V@35
-     GETFIELD 0x00 0x09        GETFIELD 0x00 0xf1
-    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@7
-     GETFIELD 0x00 0x0e        GETFIELD 0x00 0xf2
-    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@30
-     PUTFIELD 0x00 0x0e        PUTFIELD 0x00 0xf2
-    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@34
-     GETFIELD 0x00 0x0e        GETFIELD 0x00 0xf2
-    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@49
-     PUTFIELD 0x00 0x0e        PUTFIELD 0x00 0xf2
-    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@67
-     GETFIELD 0x00 0x0e        GETFIELD 0x00 0xf2
+     GETFIELD 0x00 0x09        GETFIELD 0x00 0xfc
+    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@1
+     GETFIELD 0x00 0x1c        GETFIELD 0x00 0xfd
+    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@51
+     PUTFIELD 0x00 0x1c        PUTFIELD 0x00 0xfd
     field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; putInfo(Lln;)V@17
-     GETFIELD 0x00 0x0e        GETFIELD 0x00 0xf2
-    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; readFromNBT(Lln;Lbh;)V@22
-     PUTFIELD 0x00 0x0e        PUTFIELD 0x00 0xf2
-    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; readFromNBT(Lln;Lbh;)V@55
-     PUTFIELD 0x00 0x0e        PUTFIELD 0x00 0xf2
-    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.<init> (Lnet/minecraft/src/EntityLiving;)V -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.<init> (Lln;)V getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@46
-     INVOKESPECIAL 0x00 0x12   INVOKESPECIAL 0x00 0xf4
-    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.<init> (Lnet/minecraft/src/EntityLiving;)V -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.<init> (Lln;)V readFromNBT(Lln;Lbh;)V@19
-     INVOKESPECIAL 0x00 0x12   INVOKESPECIAL 0x00 0xf4
-    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lnet/minecraft/src/EntityLiving;)V -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lln;)V getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@53
-     INVOKESTATIC 0x00 0x13    INVOKESTATIC 0x00 0xf6
-    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lnet/minecraft/src/EntityLiving;)V -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lln;)V readFromNBT(Lln;Lbh;)V@59
-     INVOKESTATIC 0x00 0x13    INVOKESTATIC 0x00 0xf6
+     GETFIELD 0x00 0x1c        GETFIELD 0x00 0xfd
+    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; readFromNBT(Lln;Lbh;)V@52
+     PUTFIELD 0x00 0x1c        PUTFIELD 0x00 0xfd
+    field ref net.minecraft.src.EntityLiving.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> ln.randomMobsInfo Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; writeToNBT(Lln;Lbh;)V@1
+     GETFIELD 0x00 0x1c        GETFIELD 0x00 0xfd
+    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.<init> (Lnet/minecraft/src/EntityLiving;)V -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.<init> (Lln;)V getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@41
+     INVOKESPECIAL 0x00 0x20   INVOKESPECIAL 0x00 0xff
+    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lnet/minecraft/src/EntityLiving;)V -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lln;)V getInfo(Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo;@46
+     INVOKESTATIC 0x00 0x21    INVOKESTATIC 0x01 0x01
+    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lnet/minecraft/src/EntityLiving;)V -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.putInfo (Lln;)V readFromNBT(Lln;Lbh;)V@56
+     INVOKESTATIC 0x00 0x21    INVOKESTATIC 0x01 0x01
     method ref net.minecraft.src.NBTTagCompound.getLong (Ljava/lang/String;)J -> bh.f (Ljava/lang/String;)J readFromNBT(Lln;Lbh;)V@3
-     INVOKEVIRTUAL 0x00 0x2c   INVOKEVIRTUAL 0x00 0xfb
-    method ref net.minecraft.src.NBTTagCompound.getInteger (Ljava/lang/String;)I -> bh.e (Ljava/lang/String;)I readFromNBT(Lln;Lbh;)V@37
-     INVOKEVIRTUAL 0x00 0x2e   INVOKEVIRTUAL 0x00 0xfd
-    method ref net.minecraft.src.NBTTagCompound.getInteger (Ljava/lang/String;)I -> bh.e (Ljava/lang/String;)I readFromNBT(Lln;Lbh;)V@43
-     INVOKEVIRTUAL 0x00 0x2e   INVOKEVIRTUAL 0x00 0xfd
-    method ref net.minecraft.src.NBTTagCompound.getInteger (Ljava/lang/String;)I -> bh.e (Ljava/lang/String;)I readFromNBT(Lln;Lbh;)V@49
-     INVOKEVIRTUAL 0x00 0x2e   INVOKEVIRTUAL 0x00 0xfd
-    method ref com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.getInfo (Lnet/minecraft/src/EntityLiving;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; -> com.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo.getInfo (Lln;)Lcom/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo; writeToNBT(Lln;Lbh;)V@1
-     INVOKESTATIC 0x00 0x32    INVOKESTATIC 0x00 0xff
+     INVOKEVIRTUAL 0x00 0x2c   INVOKEVIRTUAL 0x01 0x06
+    method ref net.minecraft.src.NBTTagCompound.getInteger (Ljava/lang/String;)I -> bh.e (Ljava/lang/String;)I readFromNBT(Lln;Lbh;)V@16
+     INVOKEVIRTUAL 0x00 0x2e   INVOKEVIRTUAL 0x01 0x08
+    method ref net.minecraft.src.NBTTagCompound.getInteger (Ljava/lang/String;)I -> bh.e (Ljava/lang/String;)I readFromNBT(Lln;Lbh;)V@24
+     INVOKEVIRTUAL 0x00 0x2e   INVOKEVIRTUAL 0x01 0x08
+    method ref net.minecraft.src.NBTTagCompound.getInteger (Ljava/lang/String;)I -> bh.e (Ljava/lang/String;)I readFromNBT(Lln;Lbh;)V@32
+     INVOKEVIRTUAL 0x00 0x2e   INVOKEVIRTUAL 0x01 0x08
     method ref net.minecraft.src.NBTTagCompound.setLong (Ljava/lang/String;J)V -> bh.a (Ljava/lang/String;J)V writeToNBT(Lln;Lbh;)V@16
-     INVOKEVIRTUAL 0x00 0x33   INVOKEVIRTUAL 0x01 0x02
+     INVOKEVIRTUAL 0x00 0x32   INVOKEVIRTUAL 0x01 0x0b
     method ref net.minecraft.src.NBTTagCompound.setInteger (Ljava/lang/String;I)V -> bh.a (Ljava/lang/String;I)V writeToNBT(Lln;Lbh;)V@26
-     INVOKEVIRTUAL 0x00 0x34   INVOKEVIRTUAL 0x01 0x04
+     INVOKEVIRTUAL 0x00 0x33   INVOKEVIRTUAL 0x01 0x0d
     method ref net.minecraft.src.NBTTagCompound.setInteger (Ljava/lang/String;I)V -> bh.a (Ljava/lang/String;I)V writeToNBT(Lln;Lbh;)V@36
-     INVOKEVIRTUAL 0x00 0x34   INVOKEVIRTUAL 0x01 0x04
+     INVOKEVIRTUAL 0x00 0x33   INVOKEVIRTUAL 0x01 0x0d
     method ref net.minecraft.src.NBTTagCompound.setInteger (Ljava/lang/String;I)V -> bh.a (Ljava/lang/String;I)V writeToNBT(Lln;Lbh;)V@46
-     INVOKEVIRTUAL 0x00 0x34   INVOKEVIRTUAL 0x01 0x04
+     INVOKEVIRTUAL 0x00 0x33   INVOKEVIRTUAL 0x01 0x0d
    string replace Lnet/minecraft/src/EntityLiving; -> Lln; @223
-   string replace Lnet/minecraft/src/NBTTagCompound; -> Lbh; @1713
-  adding com/pclewis/mcpatcher/mod/MobRandomizer$MobEntry.class for Random Mobs
-  adding com/pclewis/mcpatcher/mod/MobRandomizer$SkinEntry.class for Random Mobs
+   string replace Lnet/minecraft/src/NBTTagCompound; -> Lbh; @1700
+  adding com/pclewis/mcpatcher/mod/MobRuleList.class for Random Mobs
+  adding com/pclewis/mcpatcher/mod/MobRuleList$MobRuleEntry.class for Random Mobs
   adding com/pclewis/mcpatcher/mod/MobOverlay.class for Random Mobs
    method signature (Lnet/minecraft/src/EntityLiving;Ljava/lang/String;)Ljava/lang/String; -> (Lln;Ljava/lang/String;)Ljava/lang/String;
    method signature (Lnet/minecraft/src/EntityLiving;)Z -> (Lln;)Z
@@ -7187,8 +7177,8 @@ Patching...
    string replace Lnet/minecraft/src/World; -> Lxe; @313
   adding com/pclewis/mcpatcher/mod/SkyRenderer$WorldEntry.class for Better Skies
    method signature (Lnet/minecraft/src/Tessellator;)V -> (Lazb;)V
-    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lnet/minecraft/src/Tessellator;)Z -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lazb;)Z renderAll(Lazb;)V@169
-     INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x00 0xe2
+    method ref com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lnet/minecraft/src/Tessellator;)Z -> com.pclewis.mcpatcher.mod.SkyRenderer$Layer.render (Lazb;)Z renderAll(Lazb;)V@161
+     INVOKEVIRTUAL 0x00 0x3a   INVOKEVIRTUAL 0x00 0xde
    string replace Lnet/minecraft/src/Tessellator; -> Lazb; @1995
   adding com/pclewis/mcpatcher/mod/SkyRenderer$Layer.class for Better Skies
    method signature (Lnet/minecraft/src/Tessellator;)Z -> (Lazb;)Z
@@ -7473,9 +7463,9 @@ Random Mobs
     added com/pclewis/mcpatcher/mod/MobOverlay.class
     added com/pclewis/mcpatcher/mod/MobRandomizer$1.class
     added com/pclewis/mcpatcher/mod/MobRandomizer$ExtraInfo.class
-    added com/pclewis/mcpatcher/mod/MobRandomizer$MobEntry.class
-    added com/pclewis/mcpatcher/mod/MobRandomizer$SkinEntry.class
     added com/pclewis/mcpatcher/mod/MobRandomizer.class
+    added com/pclewis/mcpatcher/mod/MobRuleList$MobRuleEntry.class
+    added com/pclewis/mcpatcher/mod/MobRuleList.class
     Entity (lb.class)
     EntityLiving (ln.class)
         [1] insert field randomMobsInfo Lcom.pclewis.mcpatcher.mod.MobRandomizer$ExtraInfo;
