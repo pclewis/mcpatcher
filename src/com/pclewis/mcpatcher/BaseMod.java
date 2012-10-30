@@ -700,6 +700,8 @@ public final class BaseMod extends Mod {
      */
     public static class WorldMod extends ClassMod {
         public WorldMod() {
+            interfaces = new String[]{"IBlockAccess"};
+
             classSignatures.add(new ConstSignature("ambient.cave.cave"));
             classSignatures.add(new ConstSignature(0x3c6ef35f));
         }
