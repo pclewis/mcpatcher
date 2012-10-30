@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -176,37 +177,12 @@ abstract public class ClassMod implements PatchComponent {
 
         for (MemberMapper mapper : memberMappers) {
             String mapperType = mapper.getMapperType();
-            if (mapper.descriptor != null) {
-                mapper.descriptor = mod.getClassMap().mapTypeString(mapper.descriptor);
-            }
-            if (mapper instanceof FieldMapper) {
-                FieldMapper fm = (FieldMapper) mapper;
-                for (Object o : classFile.getFields()) {
-                    FieldInfo fi = (FieldInfo) o;
-                    if (fm.match(fi)) {
-                        String name = fm.getName();
-                        if (name != null) {
-                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s %s", mapperType, name, fi.getName(), fi.getDescriptor());
-                            mod.getClassMap().addFieldMap(getDeobfClass(), name, fi.getName(), fi.getDescriptor());
-                        }
-                        fm.afterMatch();
-                    }
+            mapper.mapDescriptor(mod.getClassMap());
+            for (Object o : mapper.getMatchingObjects(classFile)) {
+                if (mapper.match(o)) {
+                    mapper.updateClassMap(getClassMap(), classFile, o);
+                    mapper.afterMatch();
                 }
-            } else if (mapper instanceof MethodMapper) {
-                MethodMapper mm = (MethodMapper) mapper;
-                for (Object o : classFile.getMethods()) {
-                    MethodInfo mi = (MethodInfo) o;
-                    if (mm.match(mi)) {
-                        String name = mm.getName();
-                        if (name != null) {
-                            Logger.log(Logger.LOG_METHOD, "%s %s matches %s %s", mapperType, name, mi.getName(), mi.getDescriptor());
-                            mod.getClassMap().addMethodMap(getDeobfClass(), name, mi.getName(), mi.getDescriptor());
-                        }
-                        mm.afterMatch();
-                    }
-                }
-            } else {
-                throw new AssertionError("invalid type");
             }
             if (!mapper.allMatched()) {
                 addError(String.format("no match found for %s %s", mapperType, mapper.getName()));
@@ -363,9 +339,9 @@ abstract public class ClassMod implements PatchComponent {
      */
     public abstract class MemberMapper {
         /**
-         * Deobfuscated member name.
+         * Deobfuscated members.
          */
-        protected String[] names;
+        protected JavaRef[] refs;
         /**
          * Java type descriptor, e.g.,<br>
          * "[B" represents an array of bytes.<br>
@@ -373,23 +349,21 @@ abstract public class ClassMod implements PatchComponent {
          */
         protected String descriptor;
 
+        private int mapSuperclass;
+        int mapInterface = -1;
+
         private int setAccessFlags;
         private int clearAccessFlags;
         private int count;
 
         MemberMapper(JavaRef... refs) {
-            names = new String[refs.length];
-            for (int i = 0; i < refs.length; i++) {
-                if (refs[i] != null) {
-                    names[i] = refs[i].getName();
-                    if (descriptor == null) {
-                        descriptor = refs[i].getType();
-                    }
+            this.refs = refs.clone();
+            for (JavaRef ref : refs) {
+                if (ref != null && ref.getType() != null) {
+                    return;
                 }
             }
-            if (descriptor == null) {
-                throw new RuntimeException("refs list is empty");
-            }
+            throw new RuntimeException("refs list has no descriptor");
         }
 
         /**
@@ -397,8 +371,18 @@ abstract public class ClassMod implements PatchComponent {
          * @param descriptor Java type descriptor
          */
         MemberMapper(String[] names, String descriptor) {
-            this.names = names.clone();
-            this.descriptor = descriptor;
+            refs = new JavaRef[names.length];
+            for (int i = 0; i < names.length; i++) {
+                if (names[i] != null) {
+                    if (this instanceof FieldMapper) {
+                        refs[i] = new FieldRef(null, names[i], descriptor);
+                    } else if (this instanceof MethodMapper) {
+                        refs[i] = new MethodRef(null, names[i], descriptor);
+                    } else {
+                        throw new IllegalArgumentException("invalid type " + getClass().getName());
+                    }
+                }
+            }
         }
 
         /**
@@ -426,14 +410,48 @@ abstract public class ClassMod implements PatchComponent {
             return this;
         }
 
+        public MemberMapper mapToSuperclass(int ancestry) {
+            if (ancestry > 1) {
+                throw new IllegalArgumentException("ancestry " + ancestry + " is not supported");
+            }
+            this.mapSuperclass = ancestry;
+            return this;
+        }
+
+        void mapDescriptor(ClassMap classMap) {
+            count = 0;
+            for (JavaRef ref : refs) {
+                if (ref != null && ref.getType() != null) {
+                    descriptor = classMap.mapTypeString(ref.getType());
+                    return;
+                }
+            }
+        }
+
         boolean matchInfo(String descriptor, int flags) {
             return descriptor.equals(this.descriptor) &&
                 (flags & setAccessFlags) == setAccessFlags &&
                 (flags & clearAccessFlags) == 0;
         }
 
+        JavaRef getRef() {
+            return count < refs.length ? refs[count] : null;
+        }
+
+        String getClassName() {
+            JavaRef ref = getRef();
+            if (ref == null)
+                return null;
+            else if (ref.getClassName() == null || ref.getClassName().equals("")) {
+                return getDeobfClass();
+            } else {
+                return ref.getClassName();
+            }
+        }
+
         String getName() {
-            return count < names.length ? names[count] : null;
+            JavaRef ref = getRef();
+            return ref == null ? null : ref.getName();
         }
 
         void afterMatch() {
@@ -441,10 +459,40 @@ abstract public class ClassMod implements PatchComponent {
         }
 
         boolean allMatched() {
-            return count >= names.length;
+            return count >= refs.length;
         }
 
-        abstract String getMapperType();
+        abstract protected String getMapperType();
+
+        abstract protected List getMatchingObjects(ClassFile classFile);
+
+        abstract protected boolean match(Object o);
+
+        abstract protected JavaRef getObfRef(String className, Object o);
+
+        abstract protected String[] describeMatch(Object o);
+
+        protected void updateClassMap(ClassMap classMap, ClassFile classFile, Object o) {
+            JavaRef ref = getRef();
+            if (ref != null) {
+                String obfClassName;
+                String prefix;
+                if (mapSuperclass == 1) {
+                    obfClassName = classFile.getSuperclass();
+                    prefix = getClassName() + '.';
+                } else if (mapInterface >= 0) {
+                    obfClassName = classFile.getInterfaces()[mapInterface];
+                    prefix = getClassName() + '.';
+                } else {
+                    obfClassName = classFile.getName();
+                    prefix = "";
+                }
+                JavaRef obfRef = getObfRef(obfClassName, o);
+                String[] s = describeMatch(o);
+                Logger.log(Logger.LOG_FIELD, "%s %s matches %s%s %s", getMapperType(), ref.getName(), prefix, s[0], s[1]);
+                classMap.addMap(ref, obfRef);
+            }
+        }
     }
 
     /**
@@ -476,16 +524,36 @@ abstract public class ClassMod implements PatchComponent {
             super(name, descriptor);
         }
 
-        final String getMapperType() {
+        protected final String getMapperType() {
             return "field";
         }
 
-        /**
-         * @param fieldInfo candidate field
-         * @return true if fieldInfo matches the desired field
-         */
-        public boolean match(FieldInfo fieldInfo) {
+        protected boolean match(Object o) {
+            FieldInfo fieldInfo = (FieldInfo) o;
             return matchInfo(fieldInfo.getDescriptor(), fieldInfo.getAccessFlags());
+        }
+
+        protected JavaRef getObfRef(String className, Object o) {
+            FieldInfo fieldInfo = (FieldInfo) o;
+            return new FieldRef(className, fieldInfo.getName(), fieldInfo.getDescriptor());
+        }
+
+        protected String[] describeMatch(Object o) {
+            FieldInfo fieldInfo = (FieldInfo) o;
+            return new String[]{fieldInfo.getName(), fieldInfo.getDescriptor()};
+        }
+
+        protected void updateClassMap11(ClassMap classMap, ClassFile classFile, Object o) {
+            super.updateClassMap(classMap, classFile, o);
+            JavaRef ref = getRef();
+            if (ref != null) {
+                FieldInfo fieldInfo = (FieldInfo) o;
+                Logger.log(Logger.LOG_FIELD, "field %s matches %s %s", ref.getName(), fieldInfo.getName(), fieldInfo.getDescriptor());
+            }
+        }
+
+        protected List getMatchingObjects(ClassFile classFile) {
+            return classFile.getFields();
         }
     }
 
@@ -518,16 +586,41 @@ abstract public class ClassMod implements PatchComponent {
             super(name, descriptor);
         }
 
-        final String getMapperType() {
+        public MethodMapper mapToInterface(int mapInterface) {
+            this.mapInterface = mapInterface;
+            return this;
+        }
+
+        protected final String getMapperType() {
             return "method";
         }
 
-        /**
-         * @param methodInfo candidate field
-         * @return true if fieldInfo matches the desired field
-         */
-        public boolean match(MethodInfo methodInfo) {
+        protected boolean match(Object o) {
+            MethodInfo methodInfo = (MethodInfo) o;
             return matchInfo(methodInfo.getDescriptor(), methodInfo.getAccessFlags());
+        }
+
+        protected JavaRef getObfRef(String className, Object o) {
+            MethodInfo methodInfo = (MethodInfo) o;
+            return new MethodRef(className, methodInfo.getName(), methodInfo.getDescriptor());
+        }
+
+        protected String[] describeMatch(Object o) {
+            MethodInfo methodInfo = (MethodInfo) o;
+            return new String[]{methodInfo.getName(), methodInfo.getDescriptor()};
+        }
+
+        protected void updateClassMap11(ClassMap classMap, ClassFile classFile, Object o) {
+            super.updateClassMap(classMap, classFile, o);
+            JavaRef ref = getRef();
+            if (ref != null) {
+                MethodInfo methodInfo = (MethodInfo) o;
+                Logger.log(Logger.LOG_METHOD, "method %s matches %s %s", ref.getName(), methodInfo.getName(), methodInfo.getDescriptor());
+            }
+        }
+
+        protected List getMatchingObjects(ClassFile classFile) {
+            return classFile.getMethods();
         }
     }
 }
