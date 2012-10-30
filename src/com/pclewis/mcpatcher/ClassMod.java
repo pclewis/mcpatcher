@@ -121,7 +121,7 @@ abstract public class ClassMod implements PatchComponent {
                 String[] obfInterfaces = classFile.getInterfaces();
                 for (int i = 0; i < Math.min(interfaces.length, obfInterfaces.length); i++) {
                     mod.classMap.addClassMap(interfaces[i], obfInterfaces[i]);
-                    mod.classMap.addInheritance(interfaces[i], deobfName);
+                    mod.classMap.addInterface(interfaces[i], deobfName);
                 }
             }
         }

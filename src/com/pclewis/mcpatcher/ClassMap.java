@@ -245,6 +245,21 @@ public class ClassMap {
         }
     }
 
+    public void addInterface(String parent, String child) {
+        ClassMapEntry parentEntry = getEntry(parent);
+        if (parentEntry == null) {
+            parentEntry = new ClassMapEntry(parent);
+            putEntry(parentEntry);
+        }
+        ClassMapEntry childEntry = getEntry(child);
+        if (childEntry == null) {
+            childEntry = new ClassMapEntry(child, child, parentEntry);
+            putEntry(childEntry);
+        } else {
+            childEntry.addInterface(parentEntry);
+        }
+    }
+
     public boolean isEmpty() {
         return classMap.isEmpty();
     }
