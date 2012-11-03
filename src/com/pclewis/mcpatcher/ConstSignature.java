@@ -1,14 +1,13 @@
 package com.pclewis.mcpatcher;
 
 import javassist.bytecode.ClassFile;
-import javassist.bytecode.ConstPool;
 
 /**
  * ClassSignature that matches if the class's constant pool contains the given value or reference.
  */
 public class ConstSignature extends ClassSignature {
-    private Object value;
-    private int tag;
+    private final Object value;
+    private final int tag;
 
     /**
      * Constructor
@@ -22,16 +21,6 @@ public class ConstSignature extends ClassSignature {
 
     @Override
     public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
-        ConstPool cp = classFile.getConstPool();
-        for (int i = 1; i < cp.getSize(); i++) {
-            if (match(cp, i)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean match(ConstPool cp, int index) {
-        return cp.getTag(index) == tag && ConstPoolUtils.checkEqual(cp, index, value);
+        return ConstPoolUtils.find(classFile.getConstPool(), value, tag) >= 0;
     }
 }

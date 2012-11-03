@@ -90,23 +90,22 @@ class ConstPoolUtils {
         throw new IllegalArgumentException("Unhandled type: " + o.getClass().getName());
     }
 
-    private static int find(ConstPool cp, Object value) {
-        int index = -1;
-        int tag = getTag(value);
-        for (int i = 1; i < cp.getSize(); ++i) {
-            if (cp.getTag(i) == tag) {
-                if (checkEqual(cp, i, value)) {
-                    index = i;
-                    break;
-                }
+    static int find(ConstPool cp, Object value) {
+        return find(cp, value, getTag(value));
+    }
+
+    static int find(ConstPool cp, Object value, int tag) {
+        for (int i = 1; i < cp.getSize(); i++) {
+            if (cp.getTag(i) == tag && checkEqual(cp, i, value)) {
+                return i;
             }
         }
-        return index;
+        return -1;
     }
 
     private static int findOrAdd(ConstPool cp, Object value) {
         int index = find(cp, value);
-        if (index == -1) {
+        if (index < 0) {
             index = addToPool(cp, value);
         }
         return index;
@@ -132,8 +131,8 @@ class ConstPoolUtils {
         if (mop == LDC) {
             // obfuscator occasionally uses LDC_W even when LDC would do, so we're forced to generate a regex here
             return BinaryRegex.or(
-                BinaryRegex.build(new byte[]{LDC, Util.b(i, 0)}),
-                BinaryRegex.build(new byte[]{LDC_W, Util.b(i, 1), Util.b(i, 0)})
+                BinaryRegex.build(LDC, Util.b(i, 0)),
+                BinaryRegex.build(LDC_W, Util.b(i, 1), Util.b(i, 0))
             );
         } else {
             return new byte[]{(byte) mop, Util.b(i, 1), Util.b(i, 0)};
