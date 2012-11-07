@@ -90,17 +90,28 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             }.setMethod(refreshTextures));
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        // var1 = -1;
-                        begin(),
-                        push(-1),
-                        ISTORE_1
-                    );
-                }
-            }.setMethod(updateDynamicTextures));
+            if (getMinecraftVersion().compareTo("1.0.0") >= 0) {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            // var1 = -1;
+                            begin(),
+                            push(-1),
+                            ISTORE_1
+                        );
+                    }
+                }.setMethod(updateDynamicTextures));
+            } else {
+                classSignatures.add(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V"))
+                        );
+                    }
+                }.setMethod(updateDynamicTextures));
+            }
 
             memberMappers.add(new FieldMapper(imageData));
             memberMappers.add(new FieldMapper(textureList));
