@@ -526,22 +526,48 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(loadRenderers));
 
-            classSignatures.add(new BytecodeSignature() {
-                @Override
-                public String getMatchExpression() {
-                    return buildExpression(
-                        // var4 = this.allRenderLists;
-                        ALOAD_0,
-                        anyReference(GETFIELD),
-                        ASTORE, capture(any()),
+            classSignatures.add(new OrSignature(
+                // 1.4.3
+                new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            // var4 = this.allRenderLists;
+                            ALOAD_0,
+                            anyReference(GETFIELD),
+                            ASTORE, capture(any()),
 
-                        // var5 = var4.length;
-                        ALOAD, backReference(1),
-                        ARRAYLENGTH,
-                        ISTORE, any()
-                    );
-                }
-            }.setMethod(renderAllRenderLists));
+                            // var5 = var4.length;
+                            ALOAD, backReference(1),
+                            ARRAYLENGTH,
+                            build(ISTORE, any())
+                        );
+                    }
+                }.setMethod(renderAllRenderLists),
+                // 1.4.4+
+                new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            // for (int var4 = 0; var4 < this.allRenderLists.length; var4++)
+                            push(0),
+                            ISTORE, capture(any()),
+                            ILOAD, backReference(1),
+
+                            ALOAD_0,
+                            captureReference(GETFIELD),
+                            ARRAYLENGTH,
+                            IF_ICMPGE_or_IF_ICMPLT, any(2),
+
+                            // this.allRenderLists[var4]...
+                            ALOAD_0,
+                            backReference(2),
+                            ILOAD, backReference(1),
+                            AALOAD
+                        );
+                    }
+                }.setMethod(renderAllRenderLists)
+            ));
 
             patches.add(new BytecodePatch() {
                 @Override
