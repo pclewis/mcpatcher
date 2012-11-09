@@ -30,7 +30,7 @@ final public class MCPatcher {
     /**
      * MCPatcher patch level
      */
-    public static final int PATCH_VERSION = 3;
+    public static final int PATCH_VERSION = 4;
     /**
      * MCPatcher beta version if > 0
      */
