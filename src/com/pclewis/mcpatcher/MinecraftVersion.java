@@ -153,6 +153,7 @@ final public class MinecraftVersion {
             addKnownVersion("1.4.1", "542621a5298659dc65f383f35170fc4c");
             addKnownVersion("1.4.2", "771175c01778ea67395bc6919a5a9dc5");
             addKnownVersion("1.4.3", "9cc3295931edb6339f22989fe1b612a6");
+            addKnownVersion("1.4.4", "7aa46c8058cba2f38e9d2ddddcc77c72");
 
             for (int i = 0; i < versionOrdering.size(); i++) {
                 MinecraftVersion a = versionOrdering.get(i);
