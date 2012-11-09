@@ -156,6 +156,7 @@ public class ConnectedTextures extends Mod {
 
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
+            final FieldRef blockMaterial = new FieldRef(getDeobfClass(), "blockMaterial", "LMaterial;");
             final MethodRef getBlockTexture = new MethodRef(getDeobfClass(), "getBlockTexture", "(LIBlockAccess;IIII)I");
             final InterfaceMethodRef getBlockMetadata = new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I");
             final MethodRef getBlockTextureFromSideAndMetadata = new MethodRef(getDeobfClass(), "getBlockTextureFromSideAndMetadata", "(II)I");
@@ -182,6 +183,20 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, getBlockMetadata)
                 .addXref(2, getBlockTextureFromSideAndMetadata)
             );
+
+            classSignatures.add(new BytecodeSignature() {
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        push(" is already occupied by ")
+                    );
+                }
+            }
+                .matchConstructorOnly(true)
+                .setMethod(new MethodRef(getDeobfClass(), "<init>", "(ILMaterial;)V"))
+            );
+
+            memberMappers.add(new FieldMapper(blockMaterial).accessFlag(AccessFlag.PUBLIC, true));
         }
     }
 

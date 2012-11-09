@@ -5,6 +5,7 @@ public class Block {
     public static int lightValue[];
 
     public int blockID;
+    public Material blockMaterial;
 
     public int getBlockTexture(IBlockAccess blockAccess, int i, int j, int k, int face) {
         return 0;

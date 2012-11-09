@@ -107,6 +107,10 @@ abstract class TileOverride {
         },
     };
 
+    private static final int CONNECT_BY_BLOCK = 0;
+    private static final int CONNECT_BY_TILE = 1;
+    private static final int CONNECT_BY_MATERIAL = 2;
+
     final String filePrefix;
     final String textureName;
     final int texture;
@@ -115,7 +119,7 @@ abstract class TileOverride {
     final int[] tileIDs;
     final int faces;
     final int metadata;
-    final boolean connectByTile;
+    final int connectType;
     final int[] tileMap;
 
     boolean disabled;
@@ -182,7 +186,7 @@ abstract class TileOverride {
         tileIDs = new int[]{tileID};
         faces = -1;
         metadata = -1;
-        connectByTile = true;
+        connectType = CONNECT_BY_MATERIAL;
         tileMap = null;
     }
 
@@ -239,11 +243,18 @@ abstract class TileOverride {
         }
         metadata = meta;
 
-        String connectType = properties.getProperty("connect", "").trim().toLowerCase();
-        if ("".equals(connectType)) {
-            connectByTile = tileIDs.length > 0;
+        String connectType1 = properties.getProperty("connect", "").trim().toLowerCase();
+        if (connectType1.equals("")) {
+            connectType = tileIDs.length > 0 ? CONNECT_BY_TILE : CONNECT_BY_BLOCK;
+        } else if (connectType1.equals("block")) {
+            connectType = CONNECT_BY_BLOCK;
+        } else if (connectType1.equals("tile")) {
+            connectType = CONNECT_BY_TILE;
+        } else if (connectType1.equals("material")) {
+            connectType = CONNECT_BY_MATERIAL;
         } else {
-            connectByTile = connectType.equals("tile");
+            error("invalid connect type %s", connectType1);
+            connectType = CONNECT_BY_BLOCK;
         }
 
         String tileList = properties.getProperty("tiles", "");
@@ -319,10 +330,19 @@ abstract class TileOverride {
             return false;
         } else if (metamask != -1 && (blockAccess.getBlockMetadata(i, j, k) & ~metamask) != (meta & ~metamask)) {
             return false;
-        } else if (connectByTile) {
-            return neighbor.getBlockTexture(blockAccess, i, j, k, face) == tileNum;
-        } else {
-            return neighborID == block.blockID;
+        }
+        switch (connectType) {
+            case CONNECT_BY_BLOCK:
+                return neighborID == block.blockID;
+
+            case CONNECT_BY_TILE:
+                return neighbor.getBlockTexture(blockAccess, i, j, k, face) == tileNum;
+
+            case CONNECT_BY_MATERIAL:
+                return block.blockMaterial == neighbor.blockMaterial;
+
+            default:
+                return false;
         }
     }
 
