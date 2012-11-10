@@ -226,7 +226,7 @@ public class TextureUtils {
                 e.printStackTrace();
             }
         }
-        if (textureFX.imageData.length != TileSize.int_numBytes) {
+        if (textureFX.imageData.length < TileSize.int_numBytes) {
             MCPatcherUtils.debug("resizing %s buffer from %d to %d bytes",
                 textureFXClass.getName(), textureFX.imageData.length, TileSize.int_numBytes
             );
