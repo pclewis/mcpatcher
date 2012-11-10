@@ -53,16 +53,14 @@ public class BetterGrass extends Mod {
             final InterfaceMethodRef getBlockMaterial = new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;");
             final InterfaceMethodRef getBlockId = new InterfaceMethodRef("IBlockAccess", "getBlockId", "(III)I");
 
-            final BytecodeSignature matchMaterial = new BytecodeSignature() {
+            classSignatures.add(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
                         // var6 = par1IBlockAccess.getBlockMaterial(...);
-                        lookBehind(build(
-                            captureReference(INVOKEINTERFACE),
-                            ASTORE, capture(any()),
-                            any(0, 20)
-                        ), true),
+                        captureReference(INVOKEINTERFACE),
+                        ASTORE, capture(any()),
+                        any(0, 20),
 
                         // return var6 != Material.snow && var6 != Material.builtSnow ? halfTextureID : 68
                         ALOAD, backReference(2),
@@ -81,9 +79,8 @@ public class BetterGrass extends Mod {
                 .addXref(1, getBlockMaterial)
                 .addXref(3, snow)
                 .addXref(4, builtSnow)
-                .setMethod(getBlockTexture);
-
-            classSignatures.add(matchMaterial);
+                .setMethod(getBlockTexture)
+            );
 
             patches.add(new AddFieldPatch(grassMatrix, AccessFlag.PUBLIC | AccessFlag.STATIC));
 
@@ -151,7 +148,7 @@ public class BetterGrass extends Mod {
                 }
             }.matchConstructorOnly(true));
 
-            patches.add(new BytecodePatch() {
+            patches.add(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "check surrounding blocks in getBlockTexture";
@@ -159,12 +156,15 @@ public class BetterGrass extends Mod {
 
                 @Override
                 public String getMatchExpression() {
-                    return matchMaterial.getMatchExpression();
+                    return buildExpression(
+                        reference(INVOKEINTERFACE, getBlockMaterial),
+                        ASTORE, capture(any())
+                    );
                 }
 
                 @Override
-                public byte[] getReplacementBytes() throws IOException {
-                    int material = getCaptureGroup(2)[0] & 0xff;
+                public byte[] getInsertBytes() throws IOException {
+                    int material = getCaptureGroup(1)[0] & 0xff;
                     return buildCode(
                         // l -= 2;
                         IINC, 5, -2,
@@ -252,7 +252,7 @@ public class BetterGrass extends Mod {
                         IRETURN
                     );
                 }
-            });
+            }.targetMethod(getBlockTexture));
         }
 
         @Override
