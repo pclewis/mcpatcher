@@ -1,5 +1,5 @@
-MCPatcher version is 2.4.3_03
-OS: Linux 3.6.2-1.fc16.x86_64 amd64
+MCPatcher version is 2.4.3_04
+OS: Linux 3.6.6-1.fc16.x86_64 amd64
 JVM: Sun Microsystems Inc. 1.6.0_37 (64 bit)
 Classpath: out/artifacts/mcpatcher/mcpatcher.jar
 Minecraft version is 1.4.2 (md5 771175c01778ea67395bc6919a5a9dc5)
@@ -218,6 +218,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.2.jar (1887 files)
    colorMultiplier matches b (Lxo;III)I
    getRenderColor matches g_ (I)I
   Block matches alf.class
+   <init> matches <init> (ILafg;)V
    getBlockTextureFromSideAndMetadata matches a (II)I
    getBlockTexture matches d (Lxo;IIII)I
   Block matches alf.class
@@ -428,6 +429,7 @@ Analyzing /home/prupe/.minecraft/bin/minecraft-1.4.2.jar (methods and fields)
   Block (alf.class)
    field blockID matches cm I
    field blocksList matches p [Lalf;
+   field blockMaterial matches cB Lafg;
   Tessellator (azb.class)
    field instance matches a Lazb;
    field instance matches a Lazb;
@@ -489,7 +491,7 @@ __TexturePackBase
         field texturePackList -> C Lbcp;
     class RenderEngine (azc.class)
         method deleteTexture -> a (I)V
-    class TexturePackBase (bck.class) extends ITexturePack
+    class TexturePackBase (bck.class) implements ITexturePack
         method getInputStream -> a (Ljava/lang/String;)Ljava/io/InputStream;
         field file -> a Ljava/io/File;
         field texturePackFileName -> e Ljava/lang/String;
@@ -566,7 +568,7 @@ HD Textures
         field tileImage -> i I
         field tileNumber -> e I
         field tileSize -> h I
-    class TexturePackBase (bck.class) extends ITexturePack
+    class TexturePackBase (bck.class) implements ITexturePack
         method getInputStream -> a (Ljava/lang/String;)Ljava/io/InputStream;
         field file -> a Ljava/io/File;
         field texturePackFileName -> e Ljava/lang/String;
@@ -992,7 +994,7 @@ Custom Colors
     class TileEntitySignRenderer (bbv.class)
         method renderTileSignEntityAt -> a (Lamj;DDDF)V
     class Vec3D (amw.class)
-    class World (xe.class) extends IBlockAccess
+    class World (xe.class) implements IBlockAccess
         method getBiomeGenAt -> a (II)Lxz;
         method getBlockId -> a (III)I
         method getBlockMetadata -> g (III)I
@@ -1078,14 +1080,17 @@ Custom Colors
 
 Connected Textures
     class Block (alf.class)
+        method <init> -> <init> (ILafg;)V
         method getBlockTexture -> d (Lxo;IIII)I
         method getBlockTextureFromSideAndMetadata -> a (II)I
         field blockID -> cm I
+        field blockMaterial -> cB Lafg;
         field blocksList -> p [Lalf;
     class BlockPane (ale.class)
     class IBlockAccess (xo.class)
         method getBlockId -> a (III)I
         method getBlockMetadata -> g (III)I
+    class Material (afg.class)
     class Minecraft (net/minecraft/client/Minecraft.class)
         field renderEngine -> o Lazc;
     class RenderBlocks (azd.class)
@@ -1139,12 +1144,14 @@ Connected Textures
     class net.minecraft.src.Block alias for Block
     class net.minecraft.src.BlockPane alias for BlockPane
     class net.minecraft.src.IBlockAccess alias for IBlockAccess
+    class net.minecraft.src.Material alias for Material
     class net.minecraft.src.RenderBlocks alias for RenderBlocks
     class net.minecraft.src.RenderEngine alias for RenderEngine
     class net.minecraft.src.Tessellator alias for Tessellator
     class net.minecraft.src.WorldRenderer alias for WorldRenderer
 
 Better Skies
+    class IBlockAccess (xo.class)
     class Minecraft (net/minecraft/client/Minecraft.class)
         field worldServer -> i Laxx;
     class RenderEngine (azc.class)
@@ -1164,7 +1171,7 @@ Better Skies
         method setColorOpaque_I -> d (I)V
         method startDrawingQuads -> b ()V
         field instance -> a Lazb;
-    class World (xe.class)
+    class World (xe.class) implements IBlockAccess
         method getRainStrength -> j (F)F
         method getWorldTime -> F ()J
         field worldProvider -> v Lzr;
@@ -1178,6 +1185,7 @@ Better Skies
         method getWorldTime -> F ()J
         field worldProvider -> v Lzr;
     class net.minecraft.client.Minecraft alias for Minecraft
+    class net.minecraft.src.IBlockAccess alias for IBlockAccess
     class net.minecraft.src.RenderEngine alias for RenderEngine
     class net.minecraft.src.RenderGlobal alias for RenderGlobal
     class net.minecraft.src.Tessellator alias for Tessellator
@@ -5648,24 +5656,26 @@ Patching...
                                ICONST_0
                                ICONST_1
                                IASTORE
-    check surrounding blocks in getBlockTexture d(Lxo;IIII)I@29
-     label A -> instruction 89
-     label B -> instruction 87
-     label C -> instruction 141
-     branch offset IF_ACMPEQ A -> +52 @37
-     branch offset IF_ACMPEQ A -> +44 @45
-     branch offset IF_ICMPEQ B -> +5 @82
-     branch offset IF_ACMPEQ C -> +14 @127
-     branch offset IF_ACMPEQ C -> +6 @135
-     ALOAD 0x06                IINC 0x05 0xfe
-     GETSTATIC 0x00 0x0f       ALOAD 0x06
-     IF_ACMPEQ 0x00 0x0b       GETSTATIC 0x00 0x0f
-     ALOAD 0x06                IF_ACMPEQ 0x00 0x34
-     GETSTATIC 0x00 0x10       ALOAD 0x06
-     IF_ACMPNE 0x00 0x06       GETSTATIC 0x00 0x10
-     BIPUSH 0x44               IF_ACMPEQ 0x00 0x2c
-     IRETURN                   ALOAD 0x01
-     ICONST_3                  ILOAD 0x02
+    check surrounding blocks in getBlockTexture d(Lxo;IIII)I@22
+     label A -> instruction 82
+     label B -> instruction 80
+     label C -> instruction 134
+     branch offset IF_ACMPEQ A -> +52 @30
+     branch offset IF_ACMPEQ A -> +44 @38
+     branch offset IF_ICMPEQ B -> +5 @75
+     branch offset IF_ACMPEQ C -> +14 @120
+     branch offset IF_ACMPEQ C -> +6 @128
+     INVOKEINTERFACE 0x00 0x25 0x04 0x00  INVOKEINTERFACE 0x00 0x25 0x04 0x00
+     ASTORE 0x06               ASTORE 0x06
+                               IINC 0x05 0xfe
+                               ALOAD 0x06
+                               GETSTATIC 0x00 0x0f
+                               IF_ACMPEQ 0x00 0x34
+                               ALOAD 0x06
+                               GETSTATIC 0x00 0x10
+                               IF_ACMPEQ 0x00 0x2c
+                               ALOAD 0x01
+                               ILOAD 0x02
                                GETSTATIC 0x00 0x75
                                ILOAD 0x05
                                AALOAD
@@ -5716,6 +5726,7 @@ Patching...
                                BIPUSH 0x44
                                IRETURN
                                BIPUSH 0x42
+                               IRETURN
    increasing stack size from 4 to 6
  applying BlockLeaves patch to aji.class for mod Custom Colors
     override biome pine foliage color b(Lxo;III)I@20
@@ -5776,24 +5787,26 @@ Patching...
                                ICONST_0
                                ICONST_1
                                IASTORE
-    check surrounding blocks in getBlockTexture d(Lxo;IIII)I@30
-     label A -> instruction 93
-     label B -> instruction 90
-     label C -> instruction 145
-     branch offset IF_ACMPEQ A -> +55 @38
-     branch offset IF_ACMPEQ A -> +47 @46
-     branch offset IF_ICMPEQ B -> +6 @84
-     branch offset IF_ACMPEQ C -> +14 @131
-     branch offset IF_ACMPEQ C -> +6 @139
-     ALOAD 0x06                IINC 0x05 0xfe
-     GETSTATIC 0x00 0x0b       ALOAD 0x06
-     IF_ACMPEQ 0x00 0x0b       GETSTATIC 0x00 0x0b
-     ALOAD 0x06                IF_ACMPEQ 0x00 0x37
-     GETSTATIC 0x00 0x0c       ALOAD 0x06
-     IF_ACMPNE 0x00 0x06       GETSTATIC 0x00 0x0c
-     BIPUSH 0x44               IF_ACMPEQ 0x00 0x2f
-     IRETURN                   ALOAD 0x01
-     BIPUSH 0x4d               ILOAD 0x02
+    check surrounding blocks in getBlockTexture d(Lxo;IIII)I@23
+     label A -> instruction 86
+     label B -> instruction 83
+     label C -> instruction 138
+     branch offset IF_ACMPEQ A -> +55 @31
+     branch offset IF_ACMPEQ A -> +47 @39
+     branch offset IF_ICMPEQ B -> +6 @77
+     branch offset IF_ACMPEQ C -> +14 @124
+     branch offset IF_ACMPEQ C -> +6 @132
+     INVOKEINTERFACE 0x00 0x1f 0x04 0x00  INVOKEINTERFACE 0x00 0x1f 0x04 0x00
+     ASTORE 0x06               ASTORE 0x06
+                               IINC 0x05 0xfe
+                               ALOAD 0x06
+                               GETSTATIC 0x00 0x0b
+                               IF_ACMPEQ 0x00 0x37
+                               ALOAD 0x06
+                               GETSTATIC 0x00 0x0c
+                               IF_ACMPEQ 0x00 0x2f
+                               ALOAD 0x01
+                               ILOAD 0x02
                                GETSTATIC 0x00 0x67
                                ILOAD 0x05
                                AALOAD
@@ -5844,6 +5857,7 @@ Patching...
                                BIPUSH 0x44
                                IRETURN
                                BIPUSH 0x42
+                               IRETURN
    increasing stack size from 4 to 6
  applying BlockRedstoneWire patch to akk.class for mod Custom Colors
     override redstone wire particle color a(Lxe;IIILjava/util/Random;)V@70
@@ -6933,40 +6947,44 @@ Patching...
    method signature (Lnet/minecraft/src/RenderBlocks;Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lazd;Lxo;Lalf;IIIII)I
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lxo;Lalf;IIIII)I
     field ref net.minecraft.client.Minecraft.renderEngine Lnet/minecraft/src/RenderEngine; -> net/minecraft/client/Minecraft.o Lazc; <init>(Ljava/awt/image/BufferedImage;I)V@18
-     GETFIELD 0x00 0x3a        GETFIELD 0x01 0xf0
+     GETFIELD 0x00 0x3a        GETFIELD 0x01 0xfb
     method ref net.minecraft.src.RenderEngine.allocateAndSetupTexture (Ljava/awt/image/BufferedImage;)I -> azc.a (Ljava/awt/image/BufferedImage;)I <init>(Ljava/awt/image/BufferedImage;I)V@22
-     INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x01 0xf4
+     INVOKEVIRTUAL 0x00 0x3b   INVOKEVIRTUAL 0x01 0xff
     field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> alf.p [Lalf; <init>(Ljava/lang/String;Ljava/util/Properties;)V@121
-     GETSTATIC 0x00 0x4e       GETSTATIC 0x01 0xfa
+     GETSTATIC 0x00 0x4e       GETSTATIC 0x02 0x05
     field ref net.minecraft.src.Block.blocksList [Lnet/minecraft/src/Block; -> alf.p [Lalf; shouldConnect(Lxo;Lalf;IIIII[I)Z@55
-     GETSTATIC 0x00 0x4e       GETSTATIC 0x01 0xfa
+     GETSTATIC 0x00 0x4e       GETSTATIC 0x02 0x05
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> xo.g (III)I shouldConnect(Lxo;Lalf;IIIII[I)Z@7
-     INVOKEINTERFACE 0x00 0x75 0x04 0x00  INVOKEINTERFACE 0x01 0xff 0x04 0x00
+     INVOKEINTERFACE 0x00 0x77 0x04 0x00  INVOKEINTERFACE 0x02 0x0a 0x04 0x00
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> xo.g (III)I shouldConnect(Lxo;Lalf;IIIII[I)Z@99
-     INVOKEINTERFACE 0x00 0x75 0x04 0x00  INVOKEINTERFACE 0x01 0xff 0x04 0x00
+     INVOKEINTERFACE 0x00 0x77 0x04 0x00  INVOKEINTERFACE 0x02 0x0a 0x04 0x00
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> xo.g (III)I exclude(Lxo;Lalf;IIIII)Z@55
-     INVOKEINTERFACE 0x00 0x75 0x04 0x00  INVOKEINTERFACE 0x01 0xff 0x04 0x00
+     INVOKEINTERFACE 0x00 0x77 0x04 0x00  INVOKEINTERFACE 0x02 0x0a 0x04 0x00
     interface method ref net.minecraft.src.IBlockAccess.getBlockMetadata (III)I -> xo.g (III)I getTile(Lazd;Lxo;Lalf;IIIII)I@68
-     INVOKEINTERFACE 0x00 0x75 0x04 0x00  INVOKEINTERFACE 0x01 0xff 0x04 0x00
+     INVOKEINTERFACE 0x00 0x77 0x04 0x00  INVOKEINTERFACE 0x02 0x0a 0x04 0x00
     interface method ref net.minecraft.src.IBlockAccess.getBlockId (III)I -> xo.a (III)I shouldConnect(Lxo;Lalf;IIIII[I)Z@48
-     INVOKEINTERFACE 0x00 0x76 0x04 0x00  INVOKEINTERFACE 0x02 0x01 0x04 0x00
+     INVOKEINTERFACE 0x00 0x78 0x04 0x00  INVOKEINTERFACE 0x02 0x0c 0x04 0x00
     method ref com.pclewis.mcpatcher.mod.TileOverride.exclude (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.TileOverride.exclude (Lxo;Lalf;IIIII)Z shouldConnect(Lxo;Lalf;IIIII[I)Z@76
-     INVOKEVIRTUAL 0x00 0x77   INVOKEVIRTUAL 0x02 0x03
+     INVOKEVIRTUAL 0x00 0x79   INVOKEVIRTUAL 0x02 0x0e
     method ref com.pclewis.mcpatcher.mod.TileOverride.exclude (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)Z -> com.pclewis.mcpatcher.mod.TileOverride.exclude (Lxo;Lalf;IIIII)Z getTile(Lazd;Lxo;Lalf;IIIII)I@155
-     INVOKEVIRTUAL 0x00 0x77   INVOKEVIRTUAL 0x02 0x03
-    method ref net.minecraft.src.Block.getBlockTexture (Lnet/minecraft/src/IBlockAccess;IIII)I -> alf.d (Lxo;IIII)I shouldConnect(Lxo;Lalf;IIIII[I)Z@143
-     INVOKEVIRTUAL 0x00 0x79   INVOKEVIRTUAL 0x02 0x07
+     INVOKEVIRTUAL 0x00 0x79   INVOKEVIRTUAL 0x02 0x0e
     field ref net.minecraft.src.Block.blockID I -> alf.cm I shouldConnect(Lxo;Lalf;IIIII[I)Z@159
-     GETFIELD 0x00 0x7a        GETFIELD 0x02 0x0a
+     GETFIELD 0x00 0x7b        GETFIELD 0x02 0x11
     field ref net.minecraft.src.Block.blockID I -> alf.cm I getTile(Lazd;Lxo;Lalf;IIIII)I@47
-     GETFIELD 0x00 0x7a        GETFIELD 0x02 0x0a
+     GETFIELD 0x00 0x7b        GETFIELD 0x02 0x11
+    method ref net.minecraft.src.Block.getBlockTexture (Lnet/minecraft/src/IBlockAccess;IIII)I -> alf.d (Lxo;IIII)I shouldConnect(Lxo;Lalf;IIIII[I)Z@182
+     INVOKEVIRTUAL 0x00 0x7c   INVOKEVIRTUAL 0x02 0x15
+    field ref net.minecraft.src.Block.blockMaterial Lnet/minecraft/src/Material; -> alf.cB Lafg; shouldConnect(Lxo;Lalf;IIIII[I)Z@196
+     GETFIELD 0x00 0x7d        GETFIELD 0x02 0x19
+    field ref net.minecraft.src.Block.blockMaterial Lnet/minecraft/src/Material; -> alf.cB Lafg; shouldConnect(Lxo;Lalf;IIIII[I)Z@201
+     GETFIELD 0x00 0x7d        GETFIELD 0x02 0x19
     method ref com.pclewis.mcpatcher.mod.RenderPassAPI.skipThisRenderPass (Lnet/minecraft/src/Block;I)Z -> com.pclewis.mcpatcher.mod.RenderPassAPI.skipThisRenderPass (Lalf;I)Z exclude(Lxo;Lalf;IIIII)Z@14
-     INVOKEVIRTUAL 0x00 0x7d   INVOKEVIRTUAL 0x02 0x0d
+     INVOKEVIRTUAL 0x00 0x80   INVOKEVIRTUAL 0x02 0x1c
     method ref com.pclewis.mcpatcher.mod.TileOverride.getTileImpl (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> com.pclewis.mcpatcher.mod.TileOverride.getTileImpl (Lxo;Lalf;IIIII)I getTile(Lazd;Lxo;Lalf;IIIII)I@176
-     INVOKEVIRTUAL 0x00 0x83   INVOKEVIRTUAL 0x02 0x0f
-   string replace Lnet/minecraft/src/Block; -> Lalf; @4177
-   string replace Lnet/minecraft/src/RenderBlocks; -> Lazd; @4657
-   string replace Lnet/minecraft/src/IBlockAccess; -> Lxo; @4142
+     INVOKEVIRTUAL 0x00 0x86   INVOKEVIRTUAL 0x02 0x1e
+   string replace Lnet/minecraft/src/Block; -> Lalf; @4219
+   string replace Lnet/minecraft/src/RenderBlocks; -> Lazd; @4722
+   string replace Lnet/minecraft/src/IBlockAccess; -> Lxo; @4184
   adding com/pclewis/mcpatcher/mod/TileOverride$CTM.class for Connected Textures
    method signature (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII)I -> (Lxo;Lalf;IIIII)I
     method ref com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Lnet/minecraft/src/IBlockAccess;Lnet/minecraft/src/Block;IIIII[I)Z -> com.pclewis.mcpatcher.mod.TileOverride$CTM.shouldConnect (Lxo;Lalf;IIIII[I)Z getTileImpl(Lxo;Lalf;IIIII)I@38
