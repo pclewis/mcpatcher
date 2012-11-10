@@ -774,11 +774,16 @@ public class GLSLShader extends Mod {
 
                         // shadersBuffer = GLAllocation.createDirectByteBuffer(i / 8 * 4);
                         ALOAD_0,
-                        ILOAD_1,
-                        push(8),
-                        IDIV,
-                        ICONST_4,
-                        IMUL,
+                        getMethodInfo().getDescriptor().startsWith("(I") ?
+                            buildCode(
+                                ILOAD_1,
+                                push(8),
+                                IDIV,
+                                ICONST_4,
+                                IMUL) :
+                            buildCode(
+                                push(1048576)
+                            ),
                         reference(INVOKESTATIC, new MethodRef("GLAllocation", "createDirectByteBuffer", "(I)Ljava/nio/ByteBuffer;")),
                         reference(PUTFIELD, shadersBuffer),
 
