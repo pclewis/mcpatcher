@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.WeightedIndex;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.Block;
@@ -660,8 +661,7 @@ abstract class TileOverride {
         private static final long ADDEND = 0xbL;
 
         private final int symmetry;
-        private final int[] weight;
-        private final int sum;
+        private final WeightedIndex chooser;
 
         private Random1(String filePrefix, Properties properties) {
             super(filePrefix, properties);
@@ -675,29 +675,9 @@ abstract class TileOverride {
                 symmetry = 1;
             }
 
-            boolean useWeight = false;
-            int sum1 = 0;
-            int[] wt = null;
-            if (tileMap != null) {
-                wt = new int[tileMap.length];
-                String[] list = properties.getProperty("weights", "").split("\\s+");
-                for (int i = 0; i < tileMap.length; i++) {
-                    if (i < list.length && list[i].matches("^\\d+$")) {
-                        wt[i] = Math.max(Integer.parseInt(list[i]), 0);
-                    } else {
-                        wt[i] = 1;
-                    }
-                    if (i > 0 && wt[i] != wt[0]) {
-                        useWeight = true;
-                    }
-                    sum1 += wt[i];
-                }
-            }
-            sum = sum1;
-            if (useWeight && sum > 0) {
-                weight = wt;
-            } else {
-                weight = null;
+            chooser = WeightedIndex.create(tileMap.length, properties.getProperty("weights", ""));
+            if (chooser == null) {
+                error("invalid weights");
             }
         }
 
@@ -717,16 +697,7 @@ abstract class TileOverride {
             face = reorient(face) / symmetry;
             long n = P1 * i * (i + ADDEND) + P2 * j * (j + ADDEND) + P3 * k * (k + ADDEND) + P4 * face * (face + ADDEND);
             n = MULTIPLIER * (n + i + j + k + face) + ADDEND;
-            int index = (int) ((n >> 32) ^ n) & 0x7fffffff;
-
-            if (weight == null) {
-                index %= tileMap.length;
-            } else {
-                int m = index % sum;
-                for (index = 0; index < weight.length - 1 && m >= weight[index]; index++) {
-                    m -= weight[index];
-                }
-            }
+            int index = chooser.choose(n);
             return tileMap[index];
         }
     }
