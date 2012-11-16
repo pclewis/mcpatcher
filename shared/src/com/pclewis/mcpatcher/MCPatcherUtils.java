@@ -40,6 +40,7 @@ public class MCPatcherUtils {
     public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
     public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
     public static final String TEXTURE_PACK_API_CLASS = "com.pclewis.mcpatcher.TexturePackAPI";
+    public static final String WEIGHTED_INDEX_CLASS = "com.pclewis.mcpatcher.WeightedIndex";
     public static final String GL11_CLASS = "org.lwjgl.opengl.GL11";
 
     public static final String TILE_SIZE_CLASS = "com.pclewis.mcpatcher.mod.TileSize";

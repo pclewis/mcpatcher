@@ -42,6 +42,9 @@ public class BaseTexturePackMod extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_PACK_API_CLASS));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_PACK_API_CLASS + "$ChangeHandler"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_PACK_API_CLASS + "$ChangeHandler$1"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.WEIGHTED_INDEX_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.WEIGHTED_INDEX_CLASS + "$1"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.WEIGHTED_INDEX_CLASS + "$2"));
     }
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
