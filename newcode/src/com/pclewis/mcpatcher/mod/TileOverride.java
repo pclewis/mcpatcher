@@ -127,6 +127,7 @@ abstract class TileOverride {
     int[] reorient;
     int metamask;
     int rotateUV;
+    boolean rotateTop;
 
     static TileOverride create(String filePrefix, Properties properties) {
         if (filePrefix == null) {
@@ -381,12 +382,14 @@ abstract class TileOverride {
         reorient = null;
         metamask = -1;
         rotateUV = 0;
+        rotateTop = false;
         if (block.blockID == CTMUtils.BLOCK_ID_LOG) {
             metamask = ~0xc;
             int orientation = blockAccess.getBlockMetadata(i, j, k) & 0xc;
             if (orientation == 4) { // east/west cut
                 reorient = ROTATE_UV_MAP[0];
                 rotateUV = ROTATE_UV_MAP[0][face + 6];
+                rotateTop = true;
             } else if (orientation == 8) { // north/south cut
                 reorient = ROTATE_UV_MAP[1];
                 rotateUV = ROTATE_UV_MAP[1][face + 6];
@@ -750,14 +753,19 @@ abstract class TileOverride {
             if (face < 0) {
                 face = 0;
             }
-            face = reorient(face) & symmetry;
+            face &= symmetry;
             int x;
             int y;
             switch (face) {
                 case TOP_FACE:
                 case BOTTOM_FACE:
-                    x = i;
-                    y = k;
+                    if (rotateTop) {
+                        x = k;
+                        y = i;
+                    } else {
+                        x = i;
+                        y = k;
+                    }
                     break;
 
                 case NORTH_FACE:
