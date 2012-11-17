@@ -644,12 +644,16 @@ public class HDTexture extends BaseTexturePackMod {
             patches.add(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
             patches.add(new TileSizePatch.DivPatch(16, "int_size"));
 
-            patches.add(new TileSizePatch.ModPatch(16, "int_size") {
-                @Override
-                public boolean filterMethod() {
-                    return !getMethodInfo().isConstructor();
-                }
-            });
+            patches.add(new TileSizePatch.ModPatch(16, "int_size")
+                .addPreMatchSignature(new BytecodeSignature() {
+                    @Override
+                    public String getMatchExpression() {
+                        return buildExpression(
+                            push(Math.PI)
+                        );
+                    }
+                })
+            );
         }
     }
 
