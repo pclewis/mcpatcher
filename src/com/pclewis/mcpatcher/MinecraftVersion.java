@@ -154,7 +154,10 @@ final public class MinecraftVersion {
             addKnownVersion("1.4.2", "771175c01778ea67395bc6919a5a9dc5");
             addKnownVersion("1.4.3", "9cc3295931edb6339f22989fe1b612a6");
             addKnownVersion("1.4.4", "7aa46c8058cba2f38e9d2ddddcc77c72");
-            addKnownVersion("1.4.5", "469c9743ba88b7aa498769db75e31b1c");
+            // First pre-release of 1.4.5 still had the particle bug MC-2497.
+            // Mojang reused the version number when they issued a fix.
+            addKnownVersion("1.4.5pre1", "469c9743ba88b7aa498769db75e31b1c");
+            addKnownVersion("1.4.5", "b15e2b2b6b4629f0d99a95b6b44412a0");
 
             for (int i = 0; i < versionOrdering.size(); i++) {
                 MinecraftVersion a = versionOrdering.get(i);

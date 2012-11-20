@@ -402,6 +402,8 @@ class MinecraftJar {
                                 version = MinecraftVersion.parseVersion("Minecraft RC2 Prerelease 1");
                             } else if (version.getVersionString().equals("11w49a") && md5.equals("8763eb2747d57e2958295bbd06e764b1")) {
                                 version = MinecraftVersion.parseVersion("Minecraft 11w50a");
+                            } else if (version.getVersionString().equals("1.4.5") && md5.equals("469c9743ba88b7aa498769db75e31b1c")) {
+                                version = MinecraftVersion.parseVersion("Minecraft 1.4.5 Prerelease 1");
                             }
                             break;
                         }
