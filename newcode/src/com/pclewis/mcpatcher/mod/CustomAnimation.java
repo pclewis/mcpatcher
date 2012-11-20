@@ -74,7 +74,8 @@ public class CustomAnimation {
             try {
                 BufferedImage srcImage = TexturePackAPI.getImage(srcName);
                 if (srcImage != null) {
-                    add(newStrip(textureName, tileCount, srcName, srcImage, (tileNumber % 16) * TileSize.int_size, (tileNumber / 16) * TileSize.int_size, TileSize.int_size, TileSize.int_size, null));
+                    int tileSize = getTileSize(textureName);
+                    add(newStrip(textureName, tileCount, srcName, srcImage, (tileNumber % 16) * tileSize, (tileNumber / 16) * tileSize, tileSize, tileSize, null));
                     return true;
                 }
             } catch (IOException e) {
@@ -133,11 +134,12 @@ public class CustomAnimation {
     }
 
     private static CustomAnimation newTile(String textureName, int tileCount, int tileNumber, int minScrollDelay, int maxScrollDelay) {
-        int x = (tileNumber % 16) * TileSize.int_size;
-        int y = (tileNumber / 16) * TileSize.int_size;
-        int w = TileSize.int_size;
-        int h = TileSize.int_size;
-        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + tileCount * w > 16 * TileSize.int_size || y + tileCount * h > 16 * TileSize.int_size) {
+        int tileSize = getTileSize(textureName);
+        int x = (tileNumber % 16) * tileSize;
+        int y = (tileNumber / 16) * tileSize;
+        int w = tileSize;
+        int h = tileSize;
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + tileCount * w > 16 * tileSize || y + tileCount * h > 16 * tileSize) {
             MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, textureName, x, y, w, h);
             return null;
         }
@@ -203,6 +205,11 @@ public class CustomAnimation {
             dest[(i * 4) + 1] = (byte) ((v >> 8) & 0xff);
             dest[(i * 4) + 2] = (byte) ((v >> 0) & 0xff);
         }
+    }
+
+    static int getTileSize(String textureName) {
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, MCPatcherUtils.getMinecraft().renderEngine.getTexture(textureName));
+        return GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH) / 16;
     }
 
     private interface Delegate {
