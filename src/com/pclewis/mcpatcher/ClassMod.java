@@ -4,10 +4,7 @@ import javassist.bytecode.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a set of patches to be applied to a class.
@@ -66,7 +63,7 @@ abstract public class ClassMod implements PatchComponent {
      */
     protected String[] interfaces;
 
-    ArrayList<String> targetClasses = new ArrayList<String>();
+    Collection<String> targetClasses = new HashSet<String>();
     ArrayList<String> errors = new ArrayList<String>();
     boolean addToConstPool = false;
     ClassFile classFile;
@@ -75,6 +72,7 @@ abstract public class ClassMod implements PatchComponent {
     String bestMatch;
     private ArrayList<Label> labels = new ArrayList<Label>();
     private HashMap<String, Integer> labelPositions = new HashMap<String, Integer>();
+    boolean matchAddedFiles;
 
     boolean matchClassFile(String filename, ClassFile classFile) {
         addToConstPool = false;
@@ -148,6 +146,13 @@ abstract public class ClassMod implements PatchComponent {
         errors.add(error);
     }
 
+    List<String> getTargetClasses() {
+        ArrayList<String> sortedList = new ArrayList<String>(targetClasses.size());
+        sortedList.addAll(targetClasses);
+        Collections.sort(sortedList);
+        return sortedList;
+    }
+
     /**
      * Used to quickly rule out candidate class files based on filename alone.  The default implementation
      * allows only default minecraft classes in the default package or in net.minecraft.client.
@@ -214,6 +219,15 @@ abstract public class ClassMod implements PatchComponent {
      * @throws Exception
      */
     public void postPatch(String filename, ClassFile classFile) throws Exception {
+    }
+
+    final protected void setMatchAddedFiles(boolean match) {
+        if (match) {
+            matchAddedFiles = true;
+            global = true;
+        } else {
+            matchAddedFiles = false;
+        }
     }
 
     final public static class Label {

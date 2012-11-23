@@ -1,6 +1,5 @@
 package com.pclewis.mcpatcher;
 
-import javassist.bytecode.BadBytecode;
 import javassist.bytecode.ClassFile;
 
 import java.io.*;
@@ -392,7 +391,7 @@ final public class MCPatcher {
                 checkInterrupt();
                 try {
                     if (!classMod.global && classMod.okToApply()) {
-                        String name = ClassMap.classNameToFilename(classMod.targetClasses.get(0));
+                        String name = ClassMap.classNameToFilename(classMod.getTargetClasses().get(0));
                         Logger.log(Logger.LOG_CLASS, "%s (%s)", classMod.getDeobfClass(), name);
                         ClassFile classFile = new ClassFile(new DataInputStream(origJar.getInputStream(new ZipEntry(name))));
                         classMod.addToConstPool = false;
@@ -518,7 +517,7 @@ final public class MCPatcher {
                     }
                 });
                 for (ClassMod classMod : classMods) {
-                    ArrayList<String> tc = classMod.targetClasses;
+                    List<String> tc = classMod.getTargetClasses();
                     out.printf("    %s", classMod.getDeobfClass());
                     if (tc.size() == 0) {
                     } else if (tc.size() == 1) {
@@ -737,7 +736,7 @@ final public class MCPatcher {
         }
     }
 
-    private static boolean addFile(Mod mod, String filename, JarOutputStream outputJar) throws IOException, BadBytecode {
+    private static boolean addFile(Mod mod, String filename, JarOutputStream outputJar) throws Exception {
         String resource = "/" + filename;
         InputStream inputStream = mod.openFile(resource);
         if (inputStream == null) {
@@ -748,12 +747,38 @@ final public class MCPatcher {
         try {
             outputJar.putNextEntry(new ZipEntry(filename));
             ClassMap classMap = mod.classMap;
-            if (MinecraftJar.isClassFile(filename) && !classMap.isEmpty()) {
+            boolean directCopy = true;
+            if (MinecraftJar.isClassFile(filename)) {
                 ClassFile classFile = new ClassFile(new DataInputStream(inputStream));
-                classMap.apply(classFile);
-                classFile.compact();
-                classMap.stringReplace(classFile, outputJar);
-            } else {
+                for (Mod mod1 : modList.getSelected()) {
+                    for (ClassMod classMod : mod1.getClassMods()) {
+                        if (classMod.matchAddedFiles && classMod.matchClassFile(filename, classFile)) {
+                            classMod.targetClasses.add(classFile.getName());
+                            ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
+                            classMods.add(classMod);
+                            if (applyPatches(filename, classFile, classMods)) {
+                                directCopy = false;
+                            }
+                        }
+                    }
+                }
+                if (!classMap.isEmpty()) {
+                    directCopy = false;
+                    classMap.apply(classFile);
+                }
+                if (directCopy) {
+                    MCPatcherUtils.close(inputStream);
+                    inputStream = mod.openFile(resource);
+                    if (inputStream == null) {
+                        directCopy = false;
+                    }
+                }
+                if (!directCopy) {
+                    classFile.compact();
+                    classMap.stringReplace(classFile, outputJar);
+                }
+            }
+            if (directCopy) {
                 Util.copyStream(inputStream, outputJar);
             }
             outputJar.closeEntry();
