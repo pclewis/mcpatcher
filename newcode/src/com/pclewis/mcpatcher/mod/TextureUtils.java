@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TextureUtils {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.HD_TEXTURES);
+
     private static final boolean animatedFire = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedFire", true);
     private static final boolean animatedLava = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedLava", true);
     private static final boolean animatedWater = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "animatedWater", true);
@@ -56,6 +59,9 @@ public class TextureUtils {
         expectedColumns.put("/terrain.png", 16);
         expectedColumns.put("/gui/items.png", 16);
         expectedColumns.put("/misc/dial.png", 1);
+
+        logger.fine("/mob/zombie.png aspect ratio is %d:1", zombieAspectRatio);
+        logger.fine("/mob/pigzombie.png aspect ratio is %d:1", pigZombieAspectRatio);
 
         TexturePackAPI.instance = new TexturePackAPI() {
             @Override
@@ -110,7 +116,7 @@ public class TextureUtils {
                         }
                     }
                     if (p > 0) {
-                        MCPatcherUtils.debug("  fixed %d transparent pixels", p, s);
+                        logger.finest("  fixed %d transparent pixels", p, s);
                     }
                 }
 
@@ -128,13 +134,13 @@ public class TextureUtils {
                     int width = image.getWidth();
                     int height = image.getHeight();
                     if (aspectRatio == 1 && width == 2 * height) {
-                        MCPatcherUtils.info("  resizing %s to %dx%d", texture, width, 2 * height);
+                        logger.fine("resizing %s to %dx%d", texture, width, 2 * height);
                         BufferedImage newImage = new BufferedImage(width, 2 * height, BufferedImage.TYPE_INT_ARGB);
                         Graphics2D graphics2D = newImage.createGraphics();
                         graphics2D.drawImage(image, 0, 0, width, height, 0, 0, width, height, null);
                         image = newImage;
                     } else if (aspectRatio == 2 && width == height) {
-                        MCPatcherUtils.info("  resizing %s to %dx%d", texture, width, height / 2);
+                        logger.fine("resizing %s to %dx%d", texture, width, height / 2);
                         BufferedImage newImage = new BufferedImage(width, height / 2, BufferedImage.TYPE_INT_ARGB);
                         Graphics2D graphics2D = newImage.createGraphics();
                         graphics2D.drawImage(image, 0, 0, width, height / 2, 0, 0, width, height / 2, null);
@@ -181,7 +187,7 @@ public class TextureUtils {
     public static void registerTextureFX(java.util.List<TextureFX> textureList, TextureFX textureFX) {
         TextureFX fx = refreshTextureFX(textureFX);
         if (fx != null) {
-            MCPatcherUtils.debug("registering new TextureFX class %s", textureFX.getClass().getName());
+            logger.finer("registering new TextureFX class %s", textureFX.getClass().getName());
             textureList.add(fx);
             fx.onTick();
         }
@@ -198,7 +204,7 @@ public class TextureUtils {
             textureFX instanceof Portal) {
             return null;
         }
-        MCPatcherUtils.info("attempting to refresh unknown animation %s", textureFX.getClass().getName());
+        logger.info("attempting to refresh unknown animation %s", textureFX.getClass().getName());
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         Class<? extends TextureFX> textureFXClass = textureFX.getClass();
         for (int i = 0; i < 3; i++) {
@@ -227,7 +233,7 @@ public class TextureUtils {
             }
         }
         if (textureFX.imageData.length < TileSize.int_numBytes) {
-            MCPatcherUtils.debug("resizing %s buffer from %d to %d bytes",
+            logger.finer("resizing %s buffer from %d to %d bytes",
                 textureFXClass.getName(), textureFX.imageData.length, TileSize.int_numBytes
             );
             textureFX.imageData = new byte[TileSize.int_numBytes];
@@ -317,7 +323,7 @@ public class TextureUtils {
         final int have = buffer.capacity();
         final int needed = data.length;
         if (needed > have || (reclaimGLMemory && have >= 4 * needed)) {
-            //MCPatcherUtils.log("resizing gl buffer from 0x%x to 0x%x", have, needed);
+            logger.finest("resizing gl buffer from 0x%x to 0x%x", have, needed);
             buffer = GLAllocation.createDirectByteBuffer(needed);
         }
         buffer.put(data);
@@ -345,10 +351,10 @@ public class TextureUtils {
     private static boolean setTileSize() {
         int size = getTileSize();
         if (size == TileSize.int_size) {
-            MCPatcherUtils.debug("tile size %d unchanged", size);
+            logger.fine("tile size %d unchanged", size);
             return false;
         } else {
-            MCPatcherUtils.debug("setting tile size to %d (was %d)", size, TileSize.int_size);
+            logger.fine("setting tile size to %d (was %d)", size, TileSize.int_size);
             TileSize.setTileSize(size);
             return true;
         }
@@ -361,7 +367,7 @@ public class TextureUtils {
             BufferedImage image = TexturePackAPI.getImage(entry.getKey());
             if (image != null) {
                 int newSize = image.getWidth() / entry.getValue();
-                MCPatcherUtils.debug("  %s tile size is %d", entry.getKey(), newSize);
+                logger.fine("%s tile size is %d", entry.getKey(), newSize);
                 size = Math.max(size, newSize);
             }
         }
@@ -371,7 +377,7 @@ public class TextureUtils {
 
     static BufferedImage resizeImage(BufferedImage image, int width) {
         int height = image.getHeight() * width / image.getWidth();
-        MCPatcherUtils.debug("  resizing to %dx%d", width, height);
+        logger.fine("resizing to %dx%d", width, height);
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = newImage.createGraphics();
         graphics2D.drawImage(image, 0, 0, width, height, null);
@@ -380,6 +386,7 @@ public class TextureUtils {
 
     private static void refreshColorizer(int[] colorBuffer, String resource) {
         BufferedImage image = TexturePackAPI.getImage(resource);
+        logger.fine("reloading %s", resource);
         if (image != null) {
             image.getRGB(0, 0, 256, 256, colorBuffer, 0, 256);
         }
@@ -387,7 +394,7 @@ public class TextureUtils {
 
     public static boolean bindImageBegin() {
         if (bindImageReentry) {
-            MCPatcherUtils.warn("caught TextureFX.bindImage recursion");
+            logger.warning("caught TextureFX.bindImage recursion");
             return false;
         }
         bindImageReentry = true;

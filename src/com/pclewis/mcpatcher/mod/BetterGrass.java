@@ -35,6 +35,11 @@ public class BetterGrass extends Mod {
         classMods.add(new RenderBlocksMod());
     }
 
+    @Override
+    public String[] getLoggingCategories() {
+        return null;
+    }
+
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
             memberMappers.add(new MethodMapper(getBlockTexture));

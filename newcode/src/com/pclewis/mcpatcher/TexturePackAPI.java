@@ -12,6 +12,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class TexturePackAPI {
+    private static final MCLogger logger = MCLogger.getLogger("Texture Pack");
+
     public static TexturePackAPI instance = new TexturePackAPI();
     public static boolean loadFontFromTexturePack;
 
@@ -155,7 +157,7 @@ public class TexturePackAPI {
     public static int unloadTexture(String s) {
         int texture = getTextureIfLoaded(s);
         if (texture >= 0) {
-            MCPatcherUtils.debug("unloading texture %s", s);
+            logger.finest("unloading texture %s", s);
             RenderEngine renderEngine = MCPatcherUtils.getMinecraft().renderEngine;
             renderEngine.deleteTexture(texture);
             for (Field field : textureMapFields) {
@@ -193,7 +195,7 @@ public class TexturePackAPI {
             try {
                 image = ImageIO.read(input);
             } catch (IOException e) {
-                MCPatcherUtils.error("could not read %s", s);
+                logger.severe("could not read %s", s);
                 e.printStackTrace();
             } finally {
                 MCPatcherUtils.close(input);
@@ -211,7 +213,7 @@ public class TexturePackAPI {
                     return true;
                 }
             } catch (IOException e) {
-                MCPatcherUtils.error("could not read %s");
+                logger.severe("could not read %s");
                 e.printStackTrace();
             } finally {
                 MCPatcherUtils.close(input);
@@ -241,15 +243,15 @@ public class TexturePackAPI {
             if (handler != null) {
                 if (texturePack != null) {
                     try {
-                        MCPatcherUtils.info("initializing %s...", handler.name);
+                        logger.info("initializing %s...", handler.name);
                         handler.onChange();
                     } catch (Throwable e) {
                         e.printStackTrace();
-                        MCPatcherUtils.error("%s initialization failed", handler.name);
+                        logger.severe("%s initialization failed", handler.name);
                     }
                 }
                 handlers.add(handler);
-                MCPatcherUtils.debug("registered texture pack handler %s, priority %d", handler.name, handler.order);
+                logger.fine("registered texture pack handler %s, priority %d", handler.name, handler.order);
                 Collections.sort(handlers, new Comparator<ChangeHandler>() {
                     public int compare(ChangeHandler o1, ChangeHandler o2) {
                         return o1.order - o2.order;
@@ -283,28 +285,28 @@ public class TexturePackAPI {
                 long memDiff = -(runtime.totalMemory() - runtime.freeMemory());
 
                 if (texturePack == null) {
-                    MCPatcherUtils.info("\nsetting texture pack to %s", newPack.texturePackFileName);
+                    logger.info("\nsetting texture pack to %s", newPack.texturePackFileName);
                 } else if (texturePack == newPack) {
-                    MCPatcherUtils.info("\nreloading texture pack %s", newPack.texturePackFileName);
+                    logger.info("\nreloading texture pack %s", newPack.texturePackFileName);
                 } else {
-                    MCPatcherUtils.info("\nchanging texture pack from %s to %s", texturePack.texturePackFileName, newPack.texturePackFileName);
+                    logger.info("\nchanging texture pack from %s to %s", texturePack.texturePackFileName, newPack.texturePackFileName);
                 }
 
                 texturePack = newPack;
                 for (ChangeHandler handler : handlers) {
                     try {
-                        MCPatcherUtils.info("refreshing %s...", handler.name);
+                        logger.info("refreshing %s...", handler.name);
                         handler.onChange();
                     } catch (Throwable e) {
                         e.printStackTrace();
-                        MCPatcherUtils.error("%s refresh failed", handler.name);
+                        logger.severe("%s refresh failed", handler.name);
                     }
                 }
 
                 System.gc();
                 timeDiff += System.currentTimeMillis();
                 memDiff += runtime.totalMemory() - runtime.freeMemory();
-                MCPatcherUtils.info("done (%.3fs elapsed, mem usage %+.1fMB)\n", timeDiff / 1000.0, memDiff / 1048576.0);
+                logger.info("done (%.3fs elapsed, mem usage %+.1fMB)\n", timeDiff / 1000.0, memDiff / 1048576.0);
                 changing = false;
             }
         }
@@ -340,7 +342,7 @@ public class TexturePackAPI {
                 pack.origZip = pack.zipFile;
                 pack.zipFile = newZipFile;
                 newZipFile = null;
-                MCPatcherUtils.debug("copied %s to %s, lastModified = %d", pack.file.getPath(), pack.tmpFile.getPath(), pack.lastModified);
+                logger.fine("copied %s to %s, lastModified = %d", pack.file.getPath(), pack.tmpFile.getPath(), pack.lastModified);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -358,7 +360,7 @@ public class TexturePackAPI {
                 pack.zipFile = pack.origZip;
                 pack.origZip = null;
                 pack.tmpFile.delete();
-                MCPatcherUtils.debug("deleted %s", pack.tmpFile.getPath());
+                logger.fine("deleted %s", pack.tmpFile.getPath());
                 pack.tmpFile = null;
             }
         }
@@ -376,7 +378,7 @@ public class TexturePackAPI {
             if (lastModified == pack.lastModified || lastModified == 0 || pack.lastModified == 0) {
                 return false;
             }
-            MCPatcherUtils.info("%s lastModified changed from %d to %d", pack.file.getName(), pack.lastModified, lastModified);
+            logger.finer("%s lastModified changed from %d to %d", pack.file.getName(), pack.lastModified, lastModified);
             ZipFile tmpZip = null;
             try {
                 tmpZip = new ZipFile(pack.file);

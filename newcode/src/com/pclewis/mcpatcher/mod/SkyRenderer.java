@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.RenderEngine;
@@ -13,6 +14,8 @@ import java.util.HashSet;
 import java.util.Properties;
 
 public class SkyRenderer {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.BETTER_SKIES);
+
     private static RenderEngine renderEngine;
     private static double worldTime;
     private static float celestialAngle;
@@ -108,7 +111,7 @@ public class SkyRenderer {
                         break;
                     }
                 } else if (layer.valid) {
-                    MCPatcherUtils.info("loaded %s.properties", prefix);
+                    logger.fine("loaded %s.properties", prefix);
                     skies.add(layer);
                     textures.add(layer.texture);
                 }
@@ -123,7 +126,7 @@ public class SkyRenderer {
                 properties.setProperty("rotate", "true");
                 Layer layer = new Layer(prefix, properties);
                 if (layer.valid) {
-                    MCPatcherUtils.info("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
+                    logger.fine("using %s.properties (%s) for the %s", prefix, layer.texture, objName);
                     objects.put(textureName, layer);
                 }
             }
@@ -317,16 +320,16 @@ public class SkyRenderer {
             b = (Math.cos(s0) - Math.cos(e1)) / det;
             c = (Math.cos(e1) * Math.sin(s0) - Math.cos(s0) * Math.sin(e1)) / det;
 
-            MCPatcherUtils.debug("%s.properties: y = %f cos x + %f sin x + %f", prefix, a, b, c);
-            MCPatcherUtils.debug("  at %f: %f", s0, f(s0));
-            MCPatcherUtils.debug("  at %f: %f", s1, f(s1));
-            MCPatcherUtils.debug("  at %f: %f", e0, f(e0));
-            MCPatcherUtils.debug("  at %f: %f", e1, f(e1));
+            logger.finer("%s.properties: y = %f cos x + %f sin x + %f", prefix, a, b, c);
+            logger.finer("  at %f: %f", s0, f(s0));
+            logger.finer("  at %f: %f", s1, f(s1));
+            logger.finer("  at %f: %f", e0, f(e0));
+            logger.finer("  at %f: %f", e1, f(e1));
             return true;
         }
 
         private boolean addError(String format, Object... params) {
-            MCPatcherUtils.error(prefix + ".properties: " + format, params);
+            logger.severe(prefix + ".properties: " + format, params);
             valid = false;
             return false;
         }

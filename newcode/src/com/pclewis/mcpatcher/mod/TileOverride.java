@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.WeightedIndex;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
@@ -13,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 abstract class TileOverride {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.CONNECTED_TEXTURES, "CTM");
+
     static final int BOTTOM_FACE = 0; // 0, -1, 0
     static final int TOP_FACE = 1; // 0, 1, 0
     static final int NORTH_FACE = 2; // 0, 0, -1
@@ -158,7 +161,7 @@ abstract class TileOverride {
         } else if (method.equals("repeat") || method.equals("pattern")) {
             override = new Repeat(filePrefix, properties);
         } else {
-            MCPatcherUtils.error("%s.properties: unknown method \"%s\"", filePrefix, method);
+            logger.severe("%s.properties: unknown method \"%s\"", filePrefix, method);
         }
 
         if (override == null || override.disabled) {
@@ -312,11 +315,14 @@ abstract class TileOverride {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s[%s]", getMethod(), textureName);
+    }
+
     final void error(String format, Object... params) {
-        if (filePrefix == null || filePrefix.equals("/ctm")) {
-            //MCPatcherUtils.error(format, params);
-        } else {
-            MCPatcherUtils.error(filePrefix + ".properties: " + format, params);
+        if (filePrefix != null && !filePrefix.equals("/ctm")) {
+            logger.severe(filePrefix + ".properties: " + format, params);
         }
         disabled = true;
     }

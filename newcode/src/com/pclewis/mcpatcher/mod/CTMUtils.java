@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.Block;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 import java.util.Properties;
 
 public class CTMUtils {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.CONNECTED_TEXTURES, "CTM");
+
     private static final boolean enableGlass = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "glass", true);
     private static final boolean enableGlassPane = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "glassPane", true);
     private static final boolean enableBookshelf = MCPatcherUtils.getBoolean(MCPatcherUtils.CONNECTED_TEXTURES, "bookshelf", true);
@@ -211,12 +214,12 @@ public class CTMUtils {
 
     private static void registerOverride(TileOverride override) {
         if (override != null) {
-            registerOverride(override, override.blockIDs, blockOverrides);
-            registerOverride(override, override.tileIDs, tileOverrides);
+            registerOverride(override, override.blockIDs, blockOverrides, "block");
+            registerOverride(override, override.tileIDs, tileOverrides, "tile");
         }
     }
 
-    private static void registerOverride(TileOverride override, int[] ids, TileOverride[][] allOverrides) {
+    private static void registerOverride(TileOverride override, int[] ids, TileOverride[][] allOverrides, String type) {
         if (override == null || ids == null || allOverrides == null) {
             return;
         }
@@ -230,6 +233,7 @@ public class CTMUtils {
                 newList[oldList.length] = override;
                 allOverrides[index] = newList;
             }
+            logger.fine("using %s for %s %d", override.toString(), type, index);
         }
     }
 

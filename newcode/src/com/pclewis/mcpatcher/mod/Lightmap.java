@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.EntityRenderer;
@@ -9,6 +10,8 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 public final class Lightmap {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.CUSTOM_COLORS);
+
     private static final String LIGHTMAP_FORMAT = "/environment/lightmap%d.png";
     private static final int LIGHTMAP_SIZE = 16;
     private static final int HEIGHT_WITHOUT_NIGHTVISION = 2 * LIGHTMAP_SIZE;
@@ -64,7 +67,7 @@ public final class Lightmap {
         image.getRGB(0, 0, width, height, origMap, 0, width);
         valid = (height == HEIGHT_WITHOUT_NIGHTVISION || height == HEIGHT_WITH_NIGHTVISION);
         if (!valid) {
-            MCPatcherUtils.error("%s must be exactly %d or %d pixels high", name, HEIGHT_WITHOUT_NIGHTVISION, HEIGHT_WITH_NIGHTVISION);
+            logger.severe("%s must be exactly %d or %d pixels high", name, HEIGHT_WITHOUT_NIGHTVISION, HEIGHT_WITH_NIGHTVISION);
         }
     }
 

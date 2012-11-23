@@ -72,6 +72,11 @@ class ExternalMod extends Mod {
     }
 
     @Override
+    public String[] getLoggingCategories() {
+        return null;
+    }
+
+    @Override
     public InputStream openFile(String filename) throws IOException {
         String path = fileMap.get(filename.replaceFirst("^/", ""));
         if (path == null) {

@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.*;
@@ -11,6 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RenderPass {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.BETTER_GLASS);
+
     private static final String RENDERPASS_PROPERTIES = "/renderpass.properties";
 
     private static final int[] baseRenderPass = new int[Block.blocksList.length];
@@ -96,7 +99,7 @@ public class RenderPass {
                         } catch (NumberFormatException e) {
                         }
                     } else {
-                        MCPatcherUtils.error("%s: unknown blend method '%s'", RENDERPASS_PROPERTIES, method);
+                        logger.severe("%s: unknown blend method '%s'", RENDERPASS_PROPERTIES, method);
                     }
 
                     String value = properties.getProperty("enableLightmap.3", "").trim().toLowerCase();

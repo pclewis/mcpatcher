@@ -1,10 +1,13 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 
 import java.lang.reflect.Field;
 
 final public class TileSize {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.HD_TEXTURES);
+
     public static int int_size;
     public static int int_sizeMinus1;
     public static int int_sizeHalf;
@@ -71,15 +74,17 @@ final public class TileSize {
         double_sizeMinus1 = double_size - 1.0;
         double_compassCenterMin = double_size / 2.0 - 0.5;
         double_compassCenterMax = double_size / 2.0 + 0.5;
+
+        dump();
     }
 
     private static void dump() {
         for (Field f : TileSize.class.getDeclaredFields()) {
             if (f.getName().contains("_")) {
                 try {
-                    MCPatcherUtils.debug("%s = %s", f.getName(), f.get(null));
+                    logger.finer("%s = %s", f.getName(), f.get(null));
                 } catch (Exception e) {
-                    MCPatcherUtils.debug("%s: %s", f.getName(), e.toString());
+                    logger.finer("%s: %s", f.getName(), e.toString());
                 }
             }
         }

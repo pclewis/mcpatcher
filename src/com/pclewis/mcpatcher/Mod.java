@@ -118,6 +118,10 @@ public abstract class Mod {
         return description;
     }
 
+    public String[] getLoggingCategories() {
+        return new String[]{getName()};
+    }
+
     /**
      * Hook for doing any cleanup (closing files, etc.) when a Mod is deleted.
      */

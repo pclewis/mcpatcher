@@ -47,6 +47,15 @@ public class BaseTexturePackMod extends Mod {
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.WEIGHTED_INDEX_CLASS + "$2"));
     }
 
+    @Override
+    public String[] getLoggingCategories() {
+        if (name.equals(NAME)) {
+            return new String[]{"Texture Pack"};
+        } else {
+            return super.getLoggingCategories();
+        }
+    }
+
     private class MinecraftMod extends BaseMod.MinecraftMod {
         MinecraftMod() {
             final FieldRef texturePackList = new FieldRef(getDeobfClass(), "texturePackList", "LTexturePackList;");

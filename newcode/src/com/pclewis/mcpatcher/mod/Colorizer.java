@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.*;
@@ -8,6 +9,8 @@ import org.lwjgl.opengl.GL11;
 import java.util.*;
 
 public class Colorizer {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.CUSTOM_COLORS);
+
     private static final String COLOR_PROPERTIES = "/color.properties";
     private static final String REDSTONE_COLORS = "/misc/redstonecolor.png";
     private static final String STEM_COLORS = "/misc/stemcolor.png";
@@ -383,7 +386,7 @@ public class Colorizer {
             for (BiomeGenBase biome : biomes) {
                 int x = ColorMap.getX(biome.temperature, biome.rainfall);
                 int y = ColorMap.getY(biome.temperature, biome.rainfall);
-                MCPatcherUtils.debug("setupBiome #%d \"%s\" %06x (%d,%d)", biome.biomeID, biome.biomeName, biome.waterColorMultiplier, x, y);
+                logger.finer("setupBiome #%d \"%s\" %06x (%d,%d)", biome.biomeID, biome.biomeName, biome.waterColorMultiplier, x, y);
             }
         }
     }
@@ -459,16 +462,13 @@ public class Colorizer {
     }
 
     public static void setupPotion(Potion potion) {
-        //System.out.printf("potion.%s=%06x\n", potion.name, potion.color);
-        MCPatcherUtils.debug("setupPotion #%d \"%s\" %06x", potion.id, potion.name, potion.color);
         potion.origColor = potion.color;
         potions.add(potion);
     }
 
     public static void setupSpawnerEgg(String entityName, int entityID, int defaultShellColor, int defaultSpotColor) {
-        //System.out.printf("egg.shell.%s=%06x\n", entityName, defaultShellColor);
-        //System.out.printf("egg.spots.%s=%06x\n", entityName, defaultSpotColor);
-        MCPatcherUtils.debug("setupSpawnerEgg #%d \"%s\" %06x %06x", entityID, entityName, defaultShellColor, defaultSpotColor);
+        logger.config("egg.shell.%s=%06x", entityName, defaultShellColor);
+        logger.config("egg.spots.%s=%06x", entityName, defaultSpotColor);
         entityNamesByID.put(entityID, entityName);
     }
 
@@ -543,7 +543,7 @@ public class Colorizer {
 
     private static void reloadColorProperties() {
         if (TexturePackAPI.getProperties(COLOR_PROPERTIES, properties)) {
-            MCPatcherUtils.debug("reloading %s", COLOR_PROPERTIES);
+            logger.finer("reloading %s", COLOR_PROPERTIES);
         }
     }
 
@@ -622,7 +622,7 @@ public class Colorizer {
                     default:
                         continue;
                 }
-                MCPatcherUtils.debug("using %s for block %s, default color %06x", key, idString, colorMap.colorize());
+                logger.finer("using %s for block %s, default color %06x", key, idString, colorMap.colorize());
             }
         }
     }
@@ -741,7 +741,7 @@ public class Colorizer {
     }
 
     private static void loadIntColor(String key, Potion potion) {
-        //System.out.printf("%s=%06x\n", key, potion.color);
+        logger.config("%s=%06x", key, potion.color);
         String value = properties.getProperty(key, "");
         if (!value.equals("")) {
             try {
@@ -752,7 +752,7 @@ public class Colorizer {
     }
 
     private static boolean loadIntColor(String key, int[] color, int index) {
-        //System.out.printf("%s=%06x\n", key, color[index]);
+        logger.config("%s=%06x", key, color[index]);
         String value = properties.getProperty(key, "");
         if (!value.equals("")) {
             try {
@@ -765,7 +765,7 @@ public class Colorizer {
     }
 
     private static int loadIntColor(String key, int color) {
-        //System.out.printf("%s=%06x\n", key, color);
+        logger.config("%s=%06x", key, color);
         String value = properties.getProperty(key, "");
         if (!value.equals("")) {
             try {
@@ -777,7 +777,7 @@ public class Colorizer {
     }
 
     private static void loadFloatColor(String key, float[] color) {
-        //System.out.printf("%s=%06x\n", key, float3ToInt(color));
+        logger.config("%s=%06x", key, float3ToInt(color));
         String value = properties.getProperty(key, "");
         if (!value.equals("")) {
             try {

@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.client.Minecraft;
@@ -10,6 +11,8 @@ import java.util.Map;
 import java.util.Properties;
 
 public class FontUtils {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.HD_FONT);
+
     private static final int ROWS = 16;
     private static final int COLS = 16;
 
@@ -61,7 +64,7 @@ public class FontUtils {
                     int pixel = rgb[x + y * width];
                     if (isOpaque(pixel)) {
                         if (printThis(ch)) {
-                            MCPatcherUtils.debug("'%c' pixel (%d, %d) = %08x, colIdx = %d", (char) ch, x, y, pixel, colIdx);
+                            logger.finer("'%c' pixel (%d, %d) = %08x, colIdx = %d", (char) ch, x, y, pixel, colIdx);
                         }
                         charWidthf[ch] = (128.0f * (float) (colIdx + 1)) / (float) width + 1.0f;
                         if (showLines) {
@@ -97,7 +100,7 @@ public class FontUtils {
         for (int ch = 0; ch < charWidth.length; ch++) {
             charWidth[ch] = Math.round(charWidthf[ch]);
             if (printThis(ch)) {
-                MCPatcherUtils.debug("charWidth['%c'] = %f", (char) ch, charWidthf[ch]);
+                logger.finer("charWidth['%c'] = %f", (char) ch, charWidthf[ch]);
             }
         }
         return charWidthf;
@@ -176,7 +179,7 @@ public class FontUtils {
         if (props == null) {
             return;
         }
-        MCPatcherUtils.debug("reading character widths from %s", textFile);
+        logger.fine("reading character widths from %s", textFile);
         for (Map.Entry entry : props.entrySet()) {
             String key = entry.getKey().toString().trim();
             String value = entry.getValue().toString().trim();
@@ -185,7 +188,7 @@ public class FontUtils {
                     int ch = Integer.parseInt(key.substring(6));
                     float width = Float.parseFloat(value);
                     if (ch >= 0 && ch < charWidthf.length) {
-                        MCPatcherUtils.debug("    setting charWidthf[%d] to %f", ch, width);
+                        logger.finer("setting charWidthf[%d] to %f", ch, width);
                         charWidthf[ch] = width;
                         isOverride[ch] = true;
                     }

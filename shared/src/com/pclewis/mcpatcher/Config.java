@@ -17,6 +17,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.logging.Level;
 
 class Config {
     private File xmlFile = null;
@@ -61,9 +62,12 @@ class Config {
     static final String TAG_JAVA_HEAP_SIZE = "javaHeapSize";
     static final String TAG_LAST_VERSION = "lastVersion";
     static final String TAG_BETA_WARNING_SHOWN = "betaWarningShown";
+    static final String TAG_LOGGING = "logging";
+    static final String TAG_LEVEL = "level";
     static final String TAG_MODS = "mods";
     static final String ATTR_PROFILE = "profile";
     static final String TAG_MOD = "mod";
+    static final String TAG_CATEGORY = "category";
     static final String TAG_NAME = "name";
     static final String TAG_TYPE = "type";
     static final String TAG_PATH = "path";
@@ -434,6 +438,39 @@ class Config {
             }
             element.appendChild(xml.createTextNode(value));
         }
+    }
+
+    private Element getLogLevelElement(String category) {
+        Element config = getConfig();
+        NodeList list = config.getElementsByTagName(TAG_LOGGING);
+        for (int i = 0; i < list.getLength(); i++) {
+            Element element = (Element) list.item(i);
+            if (category.equals(element.getAttribute(TAG_CATEGORY))) {
+                return element;
+            }
+        }
+        Element element = xml.createElement(TAG_LOGGING);
+        config.appendChild(element);
+        element.setAttribute(TAG_CATEGORY, category);
+        return element;
+    }
+
+    void setLogLevel(String category, Level level) {
+        getLogLevelElement(category).setAttribute(TAG_LEVEL, level.toString());
+    }
+
+    Level getLogLevel(String category) {
+        Level level = Level.INFO;
+        Element element = getLogLevelElement(category);
+        try {
+            String attribute = element.getAttribute(TAG_LEVEL);
+            if (attribute != null) {
+                level = Level.parse(attribute.trim().toUpperCase());
+            }
+        } catch (Throwable e) {
+        }
+        element.setAttribute(TAG_LEVEL, level.toString());
+        return level;
     }
 
     private void buildNewProperties() {

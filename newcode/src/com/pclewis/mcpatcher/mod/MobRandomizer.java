@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.EntityLiving;
@@ -13,6 +14,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class MobRandomizer {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.RANDOM_MOBS);
+
     static {
         TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.RANDOM_MOBS, 2) {
             @Override
@@ -74,9 +77,9 @@ public class MobRandomizer {
             } catch (Throwable e) {
             }
             if (getBiomeNameAt == null) {
-                MCPatcherUtils.warn("%s biome integration failed", MCPatcherUtils.RANDOM_MOBS);
+                logger.warning("%s biome integration failed", MCPatcherUtils.RANDOM_MOBS);
             } else {
-                MCPatcherUtils.info("%s biome integration active", MCPatcherUtils.RANDOM_MOBS);
+                logger.info("%s biome integration active", MCPatcherUtils.RANDOM_MOBS);
             }
         }
 

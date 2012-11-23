@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.zip.ZipFile;
 
 /**
@@ -38,6 +39,7 @@ public class MCPatcherUtils {
     public static final String GLSL_SHADERS = "GLSL Shaders";
 
     public static final String UTILS_CLASS = "com.pclewis.mcpatcher.MCPatcherUtils";
+    public static final String LOGGER_CLASS = "com.pclewis.mcpatcher.MCLogger";
     public static final String CONFIG_CLASS = "com.pclewis.mcpatcher.Config";
     public static final String TEXTURE_PACK_API_CLASS = "com.pclewis.mcpatcher.TexturePackAPI";
     public static final String WEIGHTED_INDEX_CLASS = "com.pclewis.mcpatcher.WeightedIndex";
@@ -363,6 +365,14 @@ public class MCPatcherUtils {
         if (config != null) {
             config.remove(config.getConfig(tag));
         }
+    }
+
+    static void setLogLevel(String category, Level level) {
+        config.setLogLevel(category, level);
+    }
+
+    static Level getLogLevel(String category) {
+        return config.getLogLevel(category);
     }
 
     /**

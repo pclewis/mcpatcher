@@ -6,11 +6,13 @@ import javassist.bytecode.ClassFile;
 import javassist.bytecode.MethodInfo;
 
 import javax.swing.*;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Level;
 
 import static com.pclewis.mcpatcher.BinaryRegex.*;
 import static com.pclewis.mcpatcher.BytecodeMatcher.anyReference;
@@ -38,27 +40,109 @@ public final class BaseMod extends Mod {
         classMods.add(new XMinecraftMod());
 
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.UTILS_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.LOGGER_CLASS));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.LOGGER_CLASS + "$1"));
+        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.LOGGER_CLASS + "$1$1"));
         filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CONFIG_CLASS));
+    }
+
+    @Override
+    public String[] getLoggingCategories() {
+        return null;
     }
 
     class ConfigPanel extends ModConfigPanel {
         private JPanel panel;
         private JTextField heapSizeText;
-        private JCheckBox debugCheckBox;
         private JCheckBox autoRefreshTexturesCheckBox;
+        private JTable logTable;
 
         ConfigPanel() {
-            debugCheckBox.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    MCPatcherUtils.set(com.pclewis.mcpatcher.Config.TAG_DEBUG, debugCheckBox.isSelected());
-                }
-            });
-
             autoRefreshTexturesCheckBox.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     MCPatcherUtils.set("autoRefreshTextures", autoRefreshTexturesCheckBox.isSelected());
                 }
             });
+
+            logTable.setModel(new TableModel() {
+                private Vector<String> getCategories() {
+                    Vector<String> allCategories = new Vector<String>();
+                    for (Mod mod : MCPatcher.modList.getAll()) {
+                        String[] categories = mod.getLoggingCategories();
+                        if (categories != null) {
+                            for (String category : categories) {
+                                if (category != null) {
+                                    allCategories.add(category);
+                                }
+                            }
+                        }
+                    }
+                    return allCategories;
+                }
+
+                private String getCategory(int rowIndex) {
+                    Vector<String> categories = getCategories();
+                    return rowIndex >= 0 && rowIndex < categories.size() ? categories.elementAt(rowIndex) : null;
+                }
+
+                public int getRowCount() {
+                    return getCategories().size();
+                }
+
+                public int getColumnCount() {
+                    return 2;
+                }
+
+                public String getColumnName(int columnIndex) {
+                    return null;
+                }
+
+                public Class<?> getColumnClass(int columnIndex) {
+                    return String.class;
+                }
+
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return columnIndex == 1;
+                }
+
+                public Object getValueAt(int rowIndex, int columnIndex) {
+                    String category = getCategory(rowIndex);
+                    if (category == null) {
+                        return null;
+                    }
+                    return columnIndex == 0 ? category : MCPatcherUtils.getLogLevel(category);
+                }
+
+                public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                    String category = getCategory(rowIndex);
+                    if (columnIndex != 1 || category == null) {
+                        return;
+                    }
+                    try {
+                        MCPatcherUtils.setLogLevel(category, Level.parse(aValue.toString()));
+                    } catch (IllegalArgumentException e) {
+                    }
+                }
+
+                public void addTableModelListener(TableModelListener l) {
+                }
+
+                public void removeTableModelListener(TableModelListener l) {
+                }
+            });
+
+            JComboBox combo = new JComboBox();
+            combo.addItem(Level.OFF);
+            combo.addItem(Level.SEVERE);
+            combo.addItem(Level.WARNING);
+            combo.addItem(Level.INFO);
+            combo.addItem(Level.CONFIG);
+            combo.addItem(Level.FINE);
+            combo.addItem(Level.FINER);
+            combo.addItem(Level.FINEST);
+            combo.addItem(Level.ALL);
+
+            logTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(combo));
         }
 
         @Override
@@ -73,15 +157,14 @@ public final class BaseMod extends Mod {
 
         @Override
         public void load() {
-            heapSizeText.setText("" + MCPatcherUtils.getInt(com.pclewis.mcpatcher.Config.TAG_JAVA_HEAP_SIZE, 1024));
-            debugCheckBox.setSelected(MCPatcherUtils.getBoolean(com.pclewis.mcpatcher.Config.TAG_DEBUG, false));
+            heapSizeText.setText("" + MCPatcherUtils.getInt(Config.TAG_JAVA_HEAP_SIZE, 1024));
             autoRefreshTexturesCheckBox.setSelected(MCPatcherUtils.getBoolean("autoRefreshTextures", false));
         }
 
         @Override
         public void save() {
             try {
-                MCPatcherUtils.set(com.pclewis.mcpatcher.Config.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
+                MCPatcherUtils.set(Config.TAG_JAVA_HEAP_SIZE, Integer.parseInt(heapSizeText.getText()));
             } catch (Exception e) {
             }
         }

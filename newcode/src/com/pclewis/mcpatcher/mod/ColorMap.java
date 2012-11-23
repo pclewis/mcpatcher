@@ -1,9 +1,12 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 
 final class ColorMap {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.CUSTOM_COLORS);
+
     private static final int COLORMAP_SIZE = 256;
     private static final float COLORMAP_SCALE = COLORMAP_SIZE - 1;
 
@@ -35,12 +38,12 @@ final class ColorMap {
             return;
         }
         if (map.length != COLORMAP_SIZE * COLORMAP_SIZE) {
-            MCPatcherUtils.error("%s must be %dx%d", filename, COLORMAP_SIZE, COLORMAP_SIZE);
+            logger.severe("%s must be %dx%d", filename, COLORMAP_SIZE, COLORMAP_SIZE);
             map = null;
             return;
         }
         mapDefault = colorize(0xffffff, 0.5, 1.0);
-        MCPatcherUtils.debug("using %s, default color %06x", filename, mapDefault);
+        logger.fine("using %s, default color %06x", filename, mapDefault);
     }
 
     boolean isCustom() {

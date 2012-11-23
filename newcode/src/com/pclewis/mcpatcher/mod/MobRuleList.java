@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.WeightedIndex;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
@@ -7,6 +8,8 @@ import com.pclewis.mcpatcher.TexturePackAPI;
 import java.util.*;
 
 class MobRuleList {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.RANDOM_MOBS);
+
     public static final String ALTERNATIVES_REGEX = "_(eyes|overlay|tame|angry|collar|fur|invul)\\.properties$";
 
     private static final HashMap<String, MobRuleList> allRules = new HashMap<String, MobRuleList>();
@@ -32,7 +35,7 @@ class MobRuleList {
             entries = null;
             return;
         }
-        MCPatcherUtils.debug("found %d variations for %s", skinCount, baseSkin);
+        logger.fine("found %d variations for %s", skinCount, baseSkin);
 
         String filename = baseSkin.replace(".png", ".properties");
         String altFilename = filename.replaceFirst(ALTERNATIVES_REGEX, ".properties");
@@ -40,7 +43,7 @@ class MobRuleList {
         if (properties == null && !filename.equals(altFilename)) {
             properties = TexturePackAPI.getProperties(altFilename);
             if (properties != null) {
-                MCPatcherUtils.debug("using %s for %s", altFilename, baseSkin);
+                logger.fine("using %s for %s", altFilename, baseSkin);
             }
         }
         ArrayList<MobRuleEntry> tmpEntries = new ArrayList<MobRuleEntry>();
@@ -52,7 +55,7 @@ class MobRuleList {
                         break;
                     }
                 } else {
-                    MCPatcherUtils.debug("  %s", entry.toString());
+                    logger.finer("  %s", entry.toString());
                     tmpEntries.add(entry);
                 }
             }

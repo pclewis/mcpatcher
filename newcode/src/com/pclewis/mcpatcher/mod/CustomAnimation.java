@@ -1,5 +1,6 @@
 package com.pclewis.mcpatcher.mod;
 
+import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import org.lwjgl.opengl.GL11;
@@ -12,6 +13,8 @@ import java.util.Properties;
 import java.util.Random;
 
 public class CustomAnimation {
+    private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.HD_TEXTURES);
+
     private static final String CLASS_NAME = CustomAnimation.class.getSimpleName();
 
     private static Random rand = new Random();
@@ -88,29 +91,29 @@ public class CustomAnimation {
     private static void add(CustomAnimation animation) {
         if (animation != null) {
             animations.add(animation);
-            MCPatcherUtils.debug("new %s %s %dx%d -> %s @ %d,%d (%d frames)", CLASS_NAME, animation.srcName, animation.w, animation.h, animation.textureName, animation.x, animation.y, animation.numFrames);
+            logger.fine("new %s %s %dx%d -> %s @ %d,%d (%d frames)", CLASS_NAME, animation.srcName, animation.w, animation.h, animation.textureName, animation.x, animation.y, animation.numFrames);
         }
     }
 
     private static CustomAnimation newStrip(String textureName, int tileCount, String srcName, BufferedImage srcImage, int x, int y, int w, int h, Properties properties) throws IOException {
         if (srcImage == null) {
-            MCPatcherUtils.error("%s: image %s not found in texture pack", CLASS_NAME, srcName);
+            logger.severe("%s: image %s not found in texture pack", CLASS_NAME, srcName);
             return null;
         }
         if (x < 0 || y < 0 || w <= 0 || h <= 0 || tileCount <= 0) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
+            logger.severe("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;
         }
         int textureID = MCPatcherUtils.getMinecraft().renderEngine.getTexture(textureName);
         if (textureID <= 0) {
-            MCPatcherUtils.error("%s: invalid id %d for texture %s", CLASS_NAME, textureID, textureName);
+            logger.severe("%s: invalid id %d for texture %s", CLASS_NAME, textureID, textureName);
             return null;
         }
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         int destWidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
         int destHeight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
         if (x + tileCount * w > destWidth || y + tileCount * h > destHeight) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
+            logger.severe("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d,count=%d", CLASS_NAME, srcName, x, y, w, h, tileCount);
             return null;
         }
         int width = srcImage.getWidth();
@@ -121,7 +124,7 @@ public class CustomAnimation {
             height = srcImage.getHeight();
         }
         if (width != w || height < h) {
-            MCPatcherUtils.error("%s: %s dimensions %dx%d do not match %dx%d", CLASS_NAME, srcName, width, height, w, h);
+            logger.severe("%s: %s dimensions %dx%d do not match %dx%d", CLASS_NAME, srcName, width, height, w, h);
             return null;
         }
         ByteBuffer imageData = ByteBuffer.allocateDirect(4 * width * height);
@@ -140,7 +143,7 @@ public class CustomAnimation {
         int w = tileSize;
         int h = tileSize;
         if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + tileCount * w > 16 * tileSize || y + tileCount * h > 16 * tileSize) {
-            MCPatcherUtils.error("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, textureName, x, y, w, h);
+            logger.severe("%s: %s invalid dimensions x=%d,y=%d,w=%d,h=%d", CLASS_NAME, textureName, x, y, w, h);
             return null;
         }
         try {
