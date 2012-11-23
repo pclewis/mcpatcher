@@ -33,7 +33,7 @@ public class MobRandomizer {
         if (texture == null) {
             texture = randomTexture(entity, entity.getEntityTexture());
             cache.put(entity.entityId, texture);
-            logger.finer("entity %d using %s", entity.entityId, texture);
+            logger.finer("entity %s using %s", entity, texture);
         }
         return texture;
     }
