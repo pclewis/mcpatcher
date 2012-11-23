@@ -29,8 +29,8 @@ public class TextureUtils {
     private static final boolean customPortal = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customPortal", true);
     private static final boolean customOther = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customOther", true);
 
-    private static final boolean useTextureCache = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "useTextureCache", false);
-    private static final boolean reclaimGLMemory = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "reclaimGLMemory", false);
+    private static final boolean useTextureCache = false;
+    private static final boolean reclaimGLMemory = false;
     private static final boolean useZombieHack = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true);
     private static final int zombieAspectRatio = getAspectRatio("/mob/zombie.png");
     private static final int pigZombieAspectRatio = getAspectRatio("/mob/pigzombie.png");
