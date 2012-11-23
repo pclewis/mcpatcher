@@ -15,11 +15,13 @@ import java.util.HashSet;
 
 public class MobRandomizer {
     private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.RANDOM_MOBS);
+    private static final HashMap<Integer, String> cache = new HashMap<Integer, String>();
 
     static {
         TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.RANDOM_MOBS, 2) {
             @Override
             protected void onChange() {
+                cache.clear();
                 MobRuleList.clear();
                 MobOverlay.reset();
             }
@@ -27,7 +29,13 @@ public class MobRandomizer {
     }
 
     public static String randomTexture(EntityLiving entity) {
-        return randomTexture(entity, entity.getEntityTexture());
+        String texture = cache.get(entity.entityId);
+        if (texture == null) {
+            texture = randomTexture(entity, entity.getEntityTexture());
+            cache.put(entity.entityId, texture);
+            logger.finer("entity %d using %s", entity.entityId, texture);
+        }
+        return texture;
     }
 
     public static String randomTexture(EntityLiving entity, String texture) {
@@ -123,7 +131,7 @@ public class MobRandomizer {
                     if (info != null) {
                         info.references.remove(ref);
                         if (info.references.isEmpty()) {
-                            MCPatcherUtils.info("removing unused ref %d", info.entityId);
+                            logger.finest("removing unused ref %d", info.entityId);
                             allInfo.remove(info.entityId);
                         }
                     }
@@ -152,7 +160,7 @@ public class MobRandomizer {
                     WeakReference<EntityLiving> reference = new WeakReference<EntityLiving>(entity, refQueue);
                     info.references.add(reference);
                     allRefs.put(reference, info);
-                    MCPatcherUtils.info("added ref #%d for %d (%d entities)", info.references.size(), entity.entityId, allInfo.size());
+                    logger.finest("added ref #%d for %d (%d entities)", info.references.size(), entity.entityId, allInfo.size());
                 }
                 info.setBiome();
             }
