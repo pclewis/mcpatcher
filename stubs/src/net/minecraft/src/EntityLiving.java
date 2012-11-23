@@ -5,9 +5,6 @@ import com.pclewis.mcpatcher.mod.MobRandomizer;
 public class EntityLiving extends Entity {
     protected int health;
 
-    // added by Random Mobs
-    public MobRandomizer.ExtraInfo randomMobsInfo;
-
     public EntityLiving(World worldObj) {
         super(worldObj);
     }

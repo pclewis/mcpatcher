@@ -5,8 +5,12 @@ import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.NBTTagCompound;
 
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class MobRandomizer {
     static {
@@ -52,12 +56,16 @@ public class MobRandomizer {
 
         private static Method getBiomeNameAt;
         private static final HashMap<Integer, ExtraInfo> allInfo = new HashMap<Integer, ExtraInfo>();
+        private static final HashMap<WeakReference<EntityLiving>, ExtraInfo> allRefs = new HashMap<WeakReference<EntityLiving>, ExtraInfo>();
+        private static final ReferenceQueue<EntityLiving> refQueue = new ReferenceQueue<EntityLiving>();
 
-        public final long skin;
-        public final int origX;
-        public final int origY;
-        public final int origZ;
-        public String origBiome;
+        private final int entityId;
+        private final HashSet<WeakReference<EntityLiving>> references;
+        private final long skin;
+        private final int origX;
+        private final int origY;
+        private final int origZ;
+        private String origBiome;
 
         static {
             try {
@@ -73,13 +81,12 @@ public class MobRandomizer {
         }
 
         ExtraInfo(EntityLiving entity) {
-            skin = getSkinId(entity.entityId);
-            origX = (int) entity.posX;
-            origY = (int) entity.posY;
-            origZ = (int) entity.posZ;
+            this(entity, getSkinId(entity.entityId), (int) entity.posX, (int) entity.posY, (int) entity.posZ);
         }
 
-        ExtraInfo(long skin, int origX, int origY, int origZ) {
+        ExtraInfo(EntityLiving entity, long skin, int origX, int origY, int origZ) {
+            entityId = entity.entityId;
+            references = new HashSet<WeakReference<EntityLiving>>();
             this.skin = skin;
             this.origX = origX;
             this.origY = origY;
@@ -102,28 +109,56 @@ public class MobRandomizer {
 
         @Override
         public String toString() {
-            return String.format("%s{%d, %d, %d, %d, %s}", getClass().getSimpleName(), skin, origX, origY, origZ, origBiome);
+            return String.format("%s{%d, %d, %d, %d, %d, %s}", getClass().getSimpleName(), entityId, skin, origX, origY, origZ, origBiome);
+        }
+
+        private static void clearUnusedReferences() {
+            synchronized (allInfo) {
+                Reference<? extends EntityLiving> ref;
+                while ((ref = refQueue.poll()) != null) {
+                    ExtraInfo info = allRefs.get(ref);
+                    if (info != null) {
+                        info.references.remove(ref);
+                        if (info.references.isEmpty()) {
+                            MCPatcherUtils.info("removing unused ref %d", info.entityId);
+                            allInfo.remove(info.entityId);
+                        }
+                    }
+                    allRefs.remove(ref);
+                }
+            }
         }
 
         static ExtraInfo getInfo(EntityLiving entity) {
-            ExtraInfo info = entity.randomMobsInfo;
+            ExtraInfo info;
             synchronized (allInfo) {
+                clearUnusedReferences();
+                info = allInfo.get(entity.entityId);
                 if (info == null) {
-                    info = allInfo.get(entity.entityId);
-                    if (info == null) {
-                        info = new ExtraInfo(entity);
-                        putInfo(entity);
-                    }
-                    entity.randomMobsInfo = info;
+                    info = new ExtraInfo(entity);
+                    putInfo(entity, info);
                 }
+                boolean found = false;
+                for (WeakReference<EntityLiving> ref : info.references) {
+                    if (ref.get() == entity) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    WeakReference<EntityLiving> reference = new WeakReference<EntityLiving>(entity, refQueue);
+                    info.references.add(reference);
+                    allRefs.put(reference, info);
+                    MCPatcherUtils.info("added ref #%d for %d (%d entities)", info.references.size(), entity.entityId, allInfo.size());
+                }
+                info.setBiome();
             }
-            info.setBiome();
             return info;
         }
 
-        static void putInfo(EntityLiving entity) {
+        static void putInfo(EntityLiving entity, ExtraInfo info) {
             synchronized (allInfo) {
-                allInfo.put(entity.entityId, entity.randomMobsInfo);
+                allInfo.put(entity.entityId, info);
             }
         }
 
@@ -148,18 +183,19 @@ public class MobRandomizer {
                 int x = nbt.getInteger(ORIG_X_TAG);
                 int y = nbt.getInteger(ORIG_Y_TAG);
                 int z = nbt.getInteger(ORIG_Z_TAG);
-                entity.randomMobsInfo = new ExtraInfo(skin, x, y, z);
+                putInfo(entity, new ExtraInfo(entity, skin, x, y, z));
             }
-            putInfo(entity);
         }
 
         public static void writeToNBT(EntityLiving entity, NBTTagCompound nbt) {
-            ExtraInfo info = entity.randomMobsInfo;
-            if (info != null) {
-                nbt.setLong(SKIN_TAG, info.skin);
-                nbt.setInteger(ORIG_X_TAG, info.origX);
-                nbt.setInteger(ORIG_Y_TAG, info.origY);
-                nbt.setInteger(ORIG_Z_TAG, info.origZ);
+            synchronized (allInfo) {
+                ExtraInfo info = allInfo.get(entity.entityId);
+                if (info != null) {
+                    nbt.setLong(SKIN_TAG, info.skin);
+                    nbt.setInteger(ORIG_X_TAG, info.origX);
+                    nbt.setInteger(ORIG_Y_TAG, info.origY);
+                    nbt.setInteger(ORIG_Z_TAG, info.origZ);
+                }
             }
         }
     }

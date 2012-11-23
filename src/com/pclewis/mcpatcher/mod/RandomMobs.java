@@ -208,7 +208,6 @@ public class RandomMobs extends Mod {
 
     private class EntityLivingMod extends ClassMod {
         EntityLivingMod() {
-            final FieldRef info = new FieldRef(getDeobfClass(), "randomMobsInfo", "L" + EXTRA_INFO_CLASS + ";");
             final MethodRef getEntityTexture = new MethodRef(getDeobfClass(), "getEntityTexture", "()Ljava/lang/String;");
             final MethodRef writeToNBT = new MethodRef(getDeobfClass(), "writeToNBT", "(LNBTTagCompound;)V");
             final MethodRef readFromNBT = new MethodRef(getDeobfClass(), "readFromNBT", "(LNBTTagCompound;)V");
@@ -222,8 +221,6 @@ public class RandomMobs extends Mod {
             memberMappers.add(new MethodMapper(writeToNBT, readFromNBT)
                 .accessFlag(AccessFlag.PUBLIC, true)
             );
-
-            patches.add(new AddFieldPatch(info));
 
             patches.add(new BytecodePatch() {
                 @Override
