@@ -54,6 +54,21 @@ public class TexturePackAPI {
         return getTexturePack() instanceof TexturePackDefault;
     }
 
+    public static String[] parseTextureName(String s) {
+        String[] result = new String[]{null, s};
+        if (s.startsWith("##")) {
+            result[0] = "##";
+            result[1] = s.substring(2);
+        } else if (s.startsWith("%")) {
+            int index = s.indexOf('%', 1);
+            if (index > 0) {
+                result[0] = s.substring(0, index + 1);
+                result[1] = s.substring(index + 1);
+            }
+        }
+        return result;
+    }
+
     public static InputStream getInputStream(String s) {
         return instance.getInputStreamImpl(s);
     }
@@ -75,7 +90,7 @@ public class TexturePackAPI {
     }
 
     public static BufferedImage getImage(Object o, String s) {
-        return instance.getImageImpl(s);
+        return getImage(s);
     }
 
     public static Properties getProperties(String s) {
@@ -174,6 +189,7 @@ public class TexturePackAPI {
     }
 
     protected InputStream getInputStreamImpl(String s) {
+        s = parseTextureName(s)[1];
         if (!loadFontFromTexturePack && s.startsWith("/font/")) {
             return TexturePackAPI.class.getResourceAsStream(s);
         } else if (texturePack == null) {
