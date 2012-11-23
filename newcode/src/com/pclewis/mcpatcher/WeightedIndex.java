@@ -13,6 +13,11 @@ abstract public class WeightedIndex {
             public int choose(long key) {
                 return mod(key, size);
             }
+
+            @Override
+            public String toString() {
+                return "unweighted";
+            }
         };
     }
 
@@ -50,6 +55,20 @@ abstract public class WeightedIndex {
                     m -= weights[index];
                 }
                 return index;
+            }
+
+            @Override
+            public String toString() {
+                StringBuilder sb = new StringBuilder();
+                sb.append("%(");
+                for (int i = 0; i < weights.length; i++) {
+                    if (i > 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(String.format("%.1f", 100.0 * weights[i] / sum));
+                }
+                sb.append(")");
+                return sb.toString();
             }
         };
     }

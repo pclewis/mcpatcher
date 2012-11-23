@@ -15,7 +15,7 @@ import java.util.HashSet;
 
 public class MobRandomizer {
     private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.RANDOM_MOBS);
-    private static final HashMap<Integer, String> cache = new HashMap<Integer, String>();
+    private static final HashMap<EntityLiving, String> cache = new HashMap<EntityLiving, String>();
 
     static {
         TexturePackAPI.ChangeHandler.register(new TexturePackAPI.ChangeHandler(MCPatcherUtils.RANDOM_MOBS, 2) {
@@ -29,10 +29,10 @@ public class MobRandomizer {
     }
 
     public static String randomTexture(EntityLiving entity) {
-        String texture = cache.get(entity.entityId);
+        String texture = cache.get(entity);
         if (texture == null) {
             texture = randomTexture(entity, entity.getEntityTexture());
-            cache.put(entity.entityId, texture);
+            cache.put(entity, texture);
             logger.finer("entity %s using %s", entity, texture);
         }
         return texture;
@@ -85,9 +85,9 @@ public class MobRandomizer {
             } catch (Throwable e) {
             }
             if (getBiomeNameAt == null) {
-                logger.warning("%s biome integration failed", MCPatcherUtils.RANDOM_MOBS);
+                logger.warning("biome integration failed");
             } else {
-                logger.info("%s biome integration active", MCPatcherUtils.RANDOM_MOBS);
+                logger.fine("biome integration active");
             }
         }
 

@@ -55,7 +55,7 @@ class MobRuleList {
                         break;
                     }
                 } else {
-                    logger.finer("  %s", entry.toString());
+                    logger.fine("  %s", entry.toString());
                     tmpEntries.add(entry);
                 }
             }
@@ -73,7 +73,7 @@ class MobRuleList {
         } else {
             for (MobRuleEntry entry : entries) {
                 if (entry.match(i, j, k, biome)) {
-                    int index = entry.chooser.choose(key);
+                    int index = entry.weightedIndex.choose(key);
                     return allSkins.get(entry.skins[index]);
                 }
             }
@@ -96,7 +96,7 @@ class MobRuleList {
 
     private static class MobRuleEntry {
         final int[] skins;
-        final WeightedIndex chooser;
+        final WeightedIndex weightedIndex;
         private final HashSet<String> biomes;
         private final int minHeight;
         private final int maxHeight;
@@ -148,9 +148,9 @@ class MobRuleList {
             return new MobRuleEntry(skins, chooser, biomes, minHeight, maxHeight);
         }
 
-        MobRuleEntry(int[] skins, WeightedIndex chooser, HashSet<String> biomes, int minHeight, int maxHeight) {
+        MobRuleEntry(int[] skins, WeightedIndex weightedIndex, HashSet<String> biomes, int minHeight, int maxHeight) {
             this.skins = skins;
-            this.chooser = chooser;
+            this.weightedIndex = weightedIndex;
             this.biomes = biomes;
             this.minHeight = minHeight;
             this.maxHeight = maxHeight;
@@ -186,6 +186,7 @@ class MobRuleList {
             if (minHeight >= 0) {
                 sb.append(", height: ").append(minHeight).append('-').append(maxHeight);
             }
+            sb.append(", weights: ").append(weightedIndex.toString());
             return sb.toString();
         }
     }
