@@ -24,21 +24,21 @@ public class BetterSkies extends Mod {
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
         haveNewWorldTime = minecraftVersion.compareTo("12w32a") >= 0;
 
-        classMods.add(new BaseMod.MinecraftMod().addWorldGetter(minecraftVersion));
-        classMods.add(new WorldMod());
+        addClassMod(new BaseMod.MinecraftMod().addWorldGetter(minecraftVersion));
+        addClassMod(new WorldMod());
         if (haveNewWorld) {
-            classMods.add(new BaseMod.WorldServerMPMod(minecraftVersion));
-            classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
+            addClassMod(new BaseMod.WorldServerMPMod(minecraftVersion));
+            addClassMod(new BaseMod.WorldServerMod(minecraftVersion));
             worldObjClass = "WorldServerMP";
         } else {
             worldObjClass = "World";
         }
-        classMods.add(new RenderGlobalMod());
+        addClassMod(new RenderGlobalMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$WorldEntry"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SKY_RENDERER_CLASS + "$Layer"));
+        addClassFile(MCPatcherUtils.SKY_RENDERER_CLASS);
+        addClassFile(MCPatcherUtils.SKY_RENDERER_CLASS + "$1");
+        addClassFile(MCPatcherUtils.SKY_RENDERER_CLASS + "$WorldEntry");
+        addClassFile(MCPatcherUtils.SKY_RENDERER_CLASS + "$Layer");
     }
 
     private class WorldMod extends BaseMod.WorldMod {
@@ -46,9 +46,9 @@ public class BetterSkies extends Mod {
             final MethodRef getWorldTime = new MethodRef(getDeobfClass(), "getWorldTime", "()J");
 
             if (haveNewWorldTime) {
-                memberMappers.add(new MethodMapper(null, null, getWorldTime));
+                addMemberMapper(new MethodMapper(null, null, getWorldTime));
             } else {
-                memberMappers.add(new MethodMapper(null, getWorldTime));
+                addMemberMapper(new MethodMapper(null, getWorldTime));
             }
         }
     }
@@ -78,10 +78,10 @@ public class BetterSkies extends Mod {
             final FieldRef glStarList = new FieldRef(getDeobfClass(), "glStarList", "I");
             final FieldRef active = new FieldRef(MCPatcherUtils.SKY_RENDERER_CLASS, "active", "Z");
 
-            classSignatures.add(new ConstSignature("smoke"));
-            classSignatures.add(new ConstSignature("/environment/clouds.png"));
+            addClassSignature(new ConstSignature("smoke"));
+            addClassSignature(new ConstSignature("/environment/clouds.png"));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -159,7 +159,7 @@ public class BetterSkies extends Mod {
                 .addXref(10, getCelestialAngle)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -187,7 +187,7 @@ public class BetterSkies extends Mod {
                 .addXref(3, glSkyList2)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -249,7 +249,7 @@ public class BetterSkies extends Mod {
                 .addXref(4, draw)
             );
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "setup for sky rendering";
@@ -279,7 +279,7 @@ public class BetterSkies extends Mod {
                 }
             }.targetMethod(renderSky));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "render custom sky";
@@ -310,7 +310,7 @@ public class BetterSkies extends Mod {
                 }
             }.targetMethod(renderSky));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "disable default stars";
@@ -347,7 +347,7 @@ public class BetterSkies extends Mod {
         }
 
         private void addCelestialObjectPatch(final String objName, final String textureName) {
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "override " + objName + " texture";

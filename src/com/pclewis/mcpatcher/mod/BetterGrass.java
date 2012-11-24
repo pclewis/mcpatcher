@@ -26,13 +26,13 @@ public class BetterGrass extends Mod {
 
         haveAO = minecraftVersion.compareTo("Beta 1.6") >= 0;
 
-        classMods.add(new BlockMod());
-        classMods.add(new BlockGrassMod("Grass", 2, 3, 0));
+        addClassMod(new BlockMod());
+        addClassMod(new BlockGrassMod("Grass", 2, 3, 0));
         if (minecraftVersion.compareTo("Beta 1.9 Prerelease 1") >= 0) {
-            classMods.add(new BlockGrassMod("Mycelium", 110, 77, 78));
+            addClassMod(new BlockGrassMod("Mycelium", 110, 77, 78));
         }
-        classMods.add(new BaseMod.IBlockAccessMod().mapMaterial());
-        classMods.add(new RenderBlocksMod());
+        addClassMod(new BaseMod.IBlockAccessMod().mapMaterial());
+        addClassMod(new RenderBlocksMod());
     }
 
     @Override
@@ -42,7 +42,7 @@ public class BetterGrass extends Mod {
 
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
-            memberMappers.add(new MethodMapper(getBlockTexture));
+            addMemberMapper(new MethodMapper(getBlockTexture));
         }
     }
 
@@ -58,7 +58,7 @@ public class BetterGrass extends Mod {
             final InterfaceMethodRef getBlockMaterial = new InterfaceMethodRef("IBlockAccess", "getBlockMaterial", "(III)LMaterial;");
             final InterfaceMethodRef getBlockId = new InterfaceMethodRef("IBlockAccess", "getBlockId", "(III)I");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -87,9 +87,9 @@ public class BetterGrass extends Mod {
                 .setMethod(getBlockTexture)
             );
 
-            patches.add(new AddFieldPatch(grassMatrix, AccessFlag.PUBLIC | AccessFlag.STATIC));
+            addPatch(new AddFieldPatch(grassMatrix, AccessFlag.PUBLIC | AccessFlag.STATIC));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "initialize " + field_MATRIX;
@@ -153,7 +153,7 @@ public class BetterGrass extends Mod {
                 }
             }.matchConstructorOnly(true));
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "check surrounding blocks in getBlockTexture";
@@ -272,7 +272,7 @@ public class BetterGrass extends Mod {
         private final MethodRef getBlockTexture = new MethodRef("Block", "getBlockTexture", "(LIBlockAccess;IIII)I");
 
         RenderBlocksMod() {
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -288,9 +288,9 @@ public class BetterGrass extends Mod {
                 }
             }.setMethod(renderStandardBlockWithColorMultiplier));
 
-            memberMappers.add(new FieldMapper(blockAccess));
+            addMemberMapper(new FieldMapper(blockAccess));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 private int redMultiplier;
                 private int greenMultiplier;
                 private int blueMultiplier;
@@ -408,7 +408,7 @@ public class BetterGrass extends Mod {
                 }
             }.targetMethod(renderStandardBlockWithColorMultiplier));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "if (getBlockTexture == 0) useBiomeColor = true (non-AO post-1.8)";
@@ -482,7 +482,7 @@ public class BetterGrass extends Mod {
         private void setupAO() {
             final MethodRef renderStandardBlockWithAmbientOcclusion = new MethodRef(getDeobfClass(), "renderStandardBlockWithAmbientOcclusion", "(LBlock;IIIFFF)Z");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -491,7 +491,7 @@ public class BetterGrass extends Mod {
                 }
             }.setMethod(renderStandardBlockWithAmbientOcclusion));
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "if (getBlockTexture == 0) useBiomeColor = true (AO)";

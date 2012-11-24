@@ -29,17 +29,17 @@ public class BetterGlass extends Mod {
         addDependency(BaseTexturePackMod.NAME);
         addDependency(MCPatcherUtils.CONNECTED_TEXTURES);
 
-        classMods.add(new BaseMod.MinecraftMod());
-        classMods.add(new BaseMod.BlockMod());
-        classMods.add(new BaseMod.IBlockAccessMod());
-        classMods.add(new WorldRendererMod());
-        classMods.add(new EntityRendererMod());
-        classMods.add(new RenderGlobalMod());
-        classMods.add(new RenderBlocksMod());
+        addClassMod(new BaseMod.MinecraftMod());
+        addClassMod(new BaseMod.BlockMod());
+        addClassMod(new BaseMod.IBlockAccessMod());
+        addClassMod(new WorldRendererMod());
+        addClassMod(new EntityRendererMod());
+        addClassMod(new RenderGlobalMod());
+        addClassMod(new RenderBlocksMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_CLASS + "$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_CLASS + "$2"));
+        addClassFile(MCPatcherUtils.RENDER_PASS_CLASS);
+        addClassFile(MCPatcherUtils.RENDER_PASS_CLASS + "$1");
+        addClassFile(MCPatcherUtils.RENDER_PASS_CLASS + "$2");
     }
 
     private class WorldRendererMod extends ClassMod {
@@ -53,7 +53,7 @@ public class BetterGlass extends Mod {
             final MethodRef canRenderInPass1 = new MethodRef("forge/ForgeHooksClient", "canRenderInPass", "(LBlock;I)Z");
             final MethodRef canRenderInPass2 = new MethodRef("Block", "canRenderInPass", "(I)Z");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -80,7 +80,7 @@ public class BetterGlass extends Mod {
                 .addXref(1, getRenderBlockPass)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -93,9 +93,9 @@ public class BetterGlass extends Mod {
                 }
             }.addXref(1, glRenderList));
 
-            memberMappers.add(new FieldMapper(skipRenderPass));
+            addMemberMapper(new FieldMapper(skipRenderPass));
 
-            patches.add(new RenderPassPatch("init") {
+            addPatch(new RenderPassPatch("init") {
                 @Override
                 protected String getPrefix() {
                     return buildExpression(
@@ -112,7 +112,7 @@ public class BetterGlass extends Mod {
                 }
             }.matchConstructorOnly(true));
 
-            patches.add(new RenderPassPatch("loop") {
+            addPatch(new RenderPassPatch("loop") {
                 @Override
                 protected String getPrefix() {
                     return buildExpression(
@@ -128,7 +128,7 @@ public class BetterGlass extends Mod {
                 }
             });
 
-            patches.add(new RenderPassPatch("occlusion") {
+            addPatch(new RenderPassPatch("occlusion") {
                 @Override
                 protected String getPrefix() {
                     return buildExpression(
@@ -145,7 +145,7 @@ public class BetterGlass extends Mod {
                 }
             });
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "pre render pass";
@@ -174,7 +174,7 @@ public class BetterGlass extends Mod {
                 }
             }.targetMethod(updateRenderer));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "prevent early loop exit";
@@ -201,7 +201,7 @@ public class BetterGlass extends Mod {
                 }
             }.targetMethod(updateRenderer));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "increase render passes from 2 to " + (2 + EXTRA_PASSES) + " (&&)";
@@ -245,7 +245,7 @@ public class BetterGlass extends Mod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "set up extra render pass";
@@ -266,7 +266,7 @@ public class BetterGlass extends Mod {
                 }
             }.targetMethod(updateRenderer));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "set up extra render pass (forge)";
@@ -332,11 +332,11 @@ public class BetterGlass extends Mod {
             final MethodRef sortAndRender = new MethodRef("RenderGlobal", "sortAndRender", "(LEntityLiving;ID)I");
             final MethodRef doRenderPass = new MethodRef(MCPatcherUtils.RENDER_PASS_CLASS, "doRenderPass", "(LRenderGlobal;LEntityLiving;ID)V");
 
-            classSignatures.add(new ConstSignature("/terrain.png"));
-            classSignatures.add(new ConstSignature("/environment/snow.png"));
-            classSignatures.add(new ConstSignature("ambient.weather.rain"));
+            addClassSignature(new ConstSignature("/terrain.png"));
+            addClassSignature(new ConstSignature("/environment/snow.png"));
+            addClassSignature(new ConstSignature("ambient.weather.rain"));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -354,7 +354,7 @@ public class BetterGlass extends Mod {
                 .addXref(1, sortAndRender)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -364,7 +364,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(disableLightmap));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -374,7 +374,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(enableLightmap));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -383,7 +383,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(renderRainSnow));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "set gl shade model";
@@ -410,7 +410,7 @@ public class BetterGlass extends Mod {
                 }
             });
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "do extra render pass 2";
@@ -443,7 +443,7 @@ public class BetterGlass extends Mod {
                 }
             });
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "do extra render pass 3";
@@ -494,10 +494,10 @@ public class BetterGlass extends Mod {
             final MethodRef renderAllRenderLists = new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V");
             final MethodRef generateDisplayLists = new MethodRef("GLAllocation", "generateDisplayLists", "(I)I");
 
-            classSignatures.add(new ConstSignature("smoke"));
-            classSignatures.add(new ConstSignature("/environment/clouds.png"));
+            addClassSignature(new ConstSignature("smoke"));
+            addClassSignature(new ConstSignature("/environment/clouds.png"));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -513,7 +513,7 @@ public class BetterGlass extends Mod {
                 .addXref(2, glRenderListBase)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -526,7 +526,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(loadRenderers));
 
-            classSignatures.add(new OrSignature(
+            addClassSignature(new OrSignature(
                 // 1.4.3
                 new BytecodeSignature() {
                     @Override
@@ -569,7 +569,7 @@ public class BetterGlass extends Mod {
                 }.setMethod(renderAllRenderLists)
             ));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "increase gl render lists per chunk from 3 to " + (3 + EXTRA_PASSES) + " (init)";
@@ -594,7 +594,7 @@ public class BetterGlass extends Mod {
                 }
             }.matchConstructorOnly(true));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "increase gl render lists per chunk from 3 to " + (3 + EXTRA_PASSES) + " (loop)";
@@ -615,7 +615,7 @@ public class BetterGlass extends Mod {
                 }
             }.targetMethod(loadRenderers));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "set up lightmap for extra render passes";
@@ -653,7 +653,7 @@ public class BetterGlass extends Mod {
             final FieldRef blockAccess = new FieldRef(getDeobfClass(), "blockAccess", "LIBlockAccess;");
             final MethodRef shouldSideBeRendered = new MethodRef("Block", "shouldSideBeRendered", "(LIBlockAccess;IIII)Z");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -662,7 +662,7 @@ public class BetterGlass extends Mod {
                 }
             }.setMethod(renderStandardBlockWithAmbientOcclusion));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -689,7 +689,7 @@ public class BetterGlass extends Mod {
                 .addXref(3, shouldSideBeRendered)
             );
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "override AO block brightness for extra render passes";
@@ -729,7 +729,7 @@ public class BetterGlass extends Mod {
                 }
             }.targetMethod(renderStandardBlockWithAmbientOcclusion));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "render all sides of adjacent blocks";

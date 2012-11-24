@@ -24,27 +24,27 @@ public class ConnectedTextures extends Mod {
 
         configPanel = new ConfigPanel();
 
-        classMods.add(new MinecraftMod());
-        classMods.add(new RenderEngineMod());
-        classMods.add(new BaseMod.IBlockAccessMod());
-        classMods.add(new BlockMod());
-        classMods.add(new TessellatorMod(minecraftVersion));
-        classMods.add(new RenderBlocksMod());
-        classMods.add(new WorldRendererMod());
+        addClassMod(new MinecraftMod());
+        addClassMod(new RenderEngineMod());
+        addClassMod(new BaseMod.IBlockAccessMod());
+        addClassMod(new BlockMod());
+        addClassMod(new TessellatorMod(minecraftVersion));
+        addClassMod(new RenderBlocksMod());
+        addClassMod(new WorldRendererMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CTM_UTILS_CLASS + "$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SUPER_TESSELLATOR_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$CTM"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Random1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Fixed"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Horizontal"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Vertical"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Top"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Repeat"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.GLASS_PANE_RENDERER_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.RENDER_PASS_API_CLASS));
+        addClassFile(MCPatcherUtils.CTM_UTILS_CLASS);
+        addClassFile(MCPatcherUtils.CTM_UTILS_CLASS + "$1");
+        addClassFile(MCPatcherUtils.SUPER_TESSELLATOR_CLASS);
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS);
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$CTM");
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Random1");
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Fixed");
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Horizontal");
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Vertical");
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Top");
+        addClassFile(MCPatcherUtils.TILE_OVERRIDE_CLASS + "$Repeat");
+        addClassFile(MCPatcherUtils.GLASS_PANE_RENDERER_CLASS);
+        addClassFile(MCPatcherUtils.RENDER_PASS_API_CLASS);
 
         getClassMap().addInheritance("Tessellator", MCPatcherUtils.SUPER_TESSELLATOR_CLASS);
     }
@@ -128,7 +128,7 @@ public class ConnectedTextures extends Mod {
         MinecraftMod() {
             final FieldRef renderEngine = new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;");
 
-            memberMappers.add(new FieldMapper(renderEngine));
+            addMemberMapper(new FieldMapper(renderEngine));
         }
     }
 
@@ -138,16 +138,16 @@ public class ConnectedTextures extends Mod {
             final MethodRef allocateAndSetupTexture = new MethodRef(getDeobfClass(), "allocateAndSetupTexture", "(Ljava/awt/image/BufferedImage;)I");
             final MethodRef getTexture = new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I");
 
-            classSignatures.add(new ConstSignature("%clamp%"));
-            classSignatures.add(new ConstSignature("%blur%"));
-            classSignatures.add(new ConstSignature(glTexSubImage2D));
+            addClassSignature(new ConstSignature("%clamp%"));
+            addClassSignature(new ConstSignature("%blur%"));
+            addClassSignature(new ConstSignature(glTexSubImage2D));
 
-            memberMappers.add(new MethodMapper(getTexture)
+            addMemberMapper(new MethodMapper(getTexture)
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
 
-            memberMappers.add(new MethodMapper(allocateAndSetupTexture)
+            addMemberMapper(new MethodMapper(allocateAndSetupTexture)
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
             );
@@ -161,7 +161,7 @@ public class ConnectedTextures extends Mod {
             final InterfaceMethodRef getBlockMetadata = new InterfaceMethodRef("IBlockAccess", "getBlockMetadata", "(III)I");
             final MethodRef getBlockTextureFromSideAndMetadata = new MethodRef(getDeobfClass(), "getBlockTextureFromSideAndMetadata", "(II)I");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -184,7 +184,7 @@ public class ConnectedTextures extends Mod {
                 .addXref(2, getBlockTextureFromSideAndMetadata)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -196,7 +196,7 @@ public class ConnectedTextures extends Mod {
                 .setMethod(new MethodRef(getDeobfClass(), "<init>", "(ILMaterial;)V"))
             );
 
-            memberMappers.add(new FieldMapper(blockMaterial).accessFlag(AccessFlag.PUBLIC, true));
+            addMemberMapper(new FieldMapper(blockMaterial).accessFlag(AccessFlag.PUBLIC, true));
         }
     }
 
@@ -215,7 +215,7 @@ public class ConnectedTextures extends Mod {
             final FieldRef vertexCount = new FieldRef(getDeobfClass(), "vertexCount", "I");
             final FieldRef rawBufferIndex = new FieldRef(getDeobfClass(), "rawBufferIndex", "I");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -248,7 +248,7 @@ public class ConnectedTextures extends Mod {
                 .addXref(3, rawBufferIndex)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -276,7 +276,7 @@ public class ConnectedTextures extends Mod {
                 .addXref(3, drawMode)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -293,7 +293,7 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, startDrawing)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -307,16 +307,16 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, bufferSize)
             );
 
-            memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
+            addMemberMapper(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
 
             for (JavaRef ref : new JavaRef[]{constructor, startDrawing, isDrawing, drawMode, draw, reset, bufferSize,
                 addedVertices, vertexCount, rawBufferIndex}) {
-                patches.add(new MakeMemberPublicPatch(ref));
+                addPatch(new MakeMemberPublicPatch(ref));
             }
 
-            patches.add(new AddFieldPatch(texture));
+            addPatch(new AddFieldPatch(texture));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "replace tessellator instance";
@@ -347,7 +347,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.matchStaticInitializerOnly(true));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "initialize texture field to -1";
@@ -370,7 +370,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.matchConstructorOnly(true));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "bind texture before drawing";
@@ -411,7 +411,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.targetMethod(draw));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "fix references to reset method";
@@ -464,7 +464,7 @@ public class ConnectedTextures extends Mod {
             setupBlockFace(4, "West");
             setupBlockFace(5, "East");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -488,7 +488,7 @@ public class ConnectedTextures extends Mod {
                 .addXref(2, overrideBlockTexture)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -510,11 +510,11 @@ public class ConnectedTextures extends Mod {
                 .addXref(1, renderBlockPane)
             );
 
-            memberMappers.add(new FieldMapper(blockAccess));
-            memberMappers.add(new MethodMapper(faceMethods));
-            memberMappers.add(new MethodMapper(drawCrossedSquares));
+            addMemberMapper(new FieldMapper(blockAccess));
+            addMemberMapper(new MethodMapper(faceMethods));
+            addMemberMapper(new MethodMapper(drawCrossedSquares));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 private int tessellatorRegister;
                 private JavaRef renderBlockPaneMapped;
 
@@ -615,7 +615,7 @@ public class ConnectedTextures extends Mod {
                 }
             });
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "override texture (crossed squares)";
@@ -683,7 +683,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.targetMethod(drawCrossedSquares));
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "override texture (glass pane)";
@@ -731,7 +731,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.targetMethod(renderBlockPane));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 private int[] sideUVRegisters;
 
                 {
@@ -799,7 +799,7 @@ public class ConnectedTextures extends Mod {
         private void setupBlockFace(final int face, final String direction) {
             faceMethods[face] = new MethodRef(getDeobfClass(), "render" + direction + "Face", "(LBlock;DDDI)V");
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "override texture (" + direction.toLowerCase() + " face)";
@@ -890,9 +890,9 @@ public class ConnectedTextures extends Mod {
             final MethodRef start = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "start", "()V");
             final MethodRef finish = new MethodRef(MCPatcherUtils.CTM_UTILS_CLASS, "finish", "()V");
 
-            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
+            addClassSignature(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -901,7 +901,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.setMethod(updateRenderer));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "pre render world";
@@ -922,7 +922,7 @@ public class ConnectedTextures extends Mod {
                 }
             }.targetMethod(updateRenderer));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "post render world";

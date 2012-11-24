@@ -27,32 +27,32 @@ public class GLSLShader extends Mod {
 
         haveNewWorld = minecraftVersion.compareTo("12w18a") >= 0;
 
-        classMods.add(new MinecraftMod(minecraftVersion));
-        classMods.add(new BaseMod.GLAllocationMod());
-        classMods.add(new RenderEngineMod());
-        classMods.add(new RenderGlobalMod());
-        classMods.add(new RenderLivingMod());
-        classMods.add(new EntityRendererMod());
-        classMods.add(new EntityLivingMod());
-        classMods.add(new BlockMod());
-        classMods.add(new GameSettingsMod());
-        classMods.add(new TessellatorMod());
-        classMods.add(new RenderBlocksMod());
-        classMods.add(new EntityPlayerMod());
-        classMods.add(new EntityPlayerSPMod());
+        addClassMod(new MinecraftMod(minecraftVersion));
+        addClassMod(new BaseMod.GLAllocationMod());
+        addClassMod(new RenderEngineMod());
+        addClassMod(new RenderGlobalMod());
+        addClassMod(new RenderLivingMod());
+        addClassMod(new EntityRendererMod());
+        addClassMod(new EntityLivingMod());
+        addClassMod(new BlockMod());
+        addClassMod(new GameSettingsMod());
+        addClassMod(new TessellatorMod());
+        addClassMod(new RenderBlocksMod());
+        addClassMod(new EntityPlayerMod());
+        addClassMod(new EntityPlayerSPMod());
         if (haveNewWorld) {
-            classMods.add(new EntityPlayerSPSubMod());
+            addClassMod(new EntityPlayerSPSubMod());
         }
-        classMods.add(new InventoryPlayerMod(minecraftVersion));
-        classMods.add(new ItemStackMod());
-        classMods.add(new WorldMod());
+        addClassMod(new InventoryPlayerMod(minecraftVersion));
+        addClassMod(new ItemStackMod());
+        addClassMod(new WorldMod());
         if (haveNewWorld) {
-            classMods.add(new BaseMod.WorldServerMod(minecraftVersion));
-            classMods.add(new BaseMod.WorldServerMPMod(minecraftVersion));
+            addClassMod(new BaseMod.WorldServerMod(minecraftVersion));
+            addClassMod(new BaseMod.WorldServerMPMod(minecraftVersion));
         }
-        classMods.add(new WorldRendererMod());
+        addClassMod(new WorldRendererMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.SHADERS_CLASS));
+        addClassFile(MCPatcherUtils.SHADERS_CLASS);
     }
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
@@ -61,7 +61,7 @@ public class GLSLShader extends Mod {
             final FieldRef playerSub = new FieldRef(getDeobfClass(), "playerSub", "LEntityPlayerSPSub;");
             final MethodRef getPlayer = new MethodRef(getDeobfClass(), "getPlayer", "()LEntityPlayerSP;");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -84,17 +84,17 @@ public class GLSLShader extends Mod {
 
             addWorldGetter(minecraftVersion);
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "renderEngine", "LRenderEngine;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;")));
             if (haveNewWorld) {
-                memberMappers.add(new FieldMapper(playerSub));
+                addMemberMapper(new FieldMapper(playerSub));
             } else {
-                memberMappers.add(new FieldMapper(thePlayer));
+                addMemberMapper(new FieldMapper(thePlayer));
             }
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "entityRenderer", "LEntityRenderer;")));
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "renderViewEntity", "LEntityLiving;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "entityRenderer", "LEntityRenderer;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "renderViewEntity", "LEntityLiving;")));
 
-            memberMappers.add(new FieldMapper(
+            addMemberMapper(new FieldMapper(
                 new FieldRef(getDeobfClass(), "displayWidth", "I"),
                 new FieldRef(getDeobfClass(), "displayHeight", "I")
             )
@@ -103,12 +103,12 @@ public class GLSLShader extends Mod {
                 .accessFlag(AccessFlag.FINAL, false)
             );
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getAppDir", "(Ljava/lang/String;)Ljava/io/File;"))
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getAppDir", "(Ljava/lang/String;)Ljava/io/File;"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
             );
 
-            patches.add(new AddMethodPatch(getPlayer) {
+            addPatch(new AddMethodPatch(getPlayer) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -125,9 +125,9 @@ public class GLSLShader extends Mod {
         RenderEngineMod() {
             final MethodRef refreshTextures = new MethodRef(getDeobfClass(), "refreshTextures", "()V");
 
-            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
+            addClassSignature(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V")));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -136,7 +136,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(refreshTextures));
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I")));
         }
     }
 
@@ -146,10 +146,10 @@ public class GLSLShader extends Mod {
             final String worldClass = haveNewWorld ? "WorldServerMP" : "World";
             final FieldRef worldObj = new FieldRef(getDeobfClass(), "worldObj", "L" + worldClass + ";");
 
-            classSignatures.add(new ConstSignature("smoke"));
-            classSignatures.add(new ConstSignature("/environment/clouds.png"));
+            addClassSignature(new ConstSignature("smoke"));
+            addClassSignature(new ConstSignature("/environment/clouds.png"));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -173,11 +173,11 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(renderSky));
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "sortAndRender", "(LEntityLiving;ID)I")));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V")));
-            memberMappers.add(new FieldMapper(worldObj));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "sortAndRender", "(LEntityLiving;ID)I")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "renderAllRenderLists", "(ID)V")));
+            addMemberMapper(new FieldMapper(worldObj));
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "call setCelestialPosition";
@@ -210,7 +210,7 @@ public class GLSLShader extends Mod {
         }
 
         private void addGLWrapper(final String name) {
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "wrap " + name;
@@ -235,9 +235,9 @@ public class GLSLShader extends Mod {
 
     private class RenderLivingMod extends ClassMod {
         RenderLivingMod() {
-            classSignatures.add(new ConstSignature("deadmau5"));
+            addClassSignature(new ConstSignature("deadmau5"));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -252,7 +252,7 @@ public class GLSLShader extends Mod {
         }
 
         private void addGLWrapper(final String name) {
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "wrap " + name;
@@ -277,9 +277,9 @@ public class GLSLShader extends Mod {
 
     private class EntityRendererMod extends ClassMod {
         EntityRendererMod() {
-            classSignatures.add(new ConstSignature("/terrain.png"));
-            classSignatures.add(new ConstSignature("/environment/snow.png"));
-            classSignatures.add(new ConstSignature("ambient.weather.rain"));
+            addClassSignature(new ConstSignature("/terrain.png"));
+            addClassSignature(new ConstSignature("/environment/snow.png"));
+            addClassSignature(new ConstSignature("ambient.weather.rain"));
 
             final MethodRef setupCameraTransform = new MethodRef(getDeobfClass(), "setupCameraTransform", "(FI)V");
             final MethodRef renderWorld = new MethodRef(getDeobfClass(), "renderWorld", "(FJ)V");
@@ -289,7 +289,7 @@ public class GLSLShader extends Mod {
             final FieldRef fogColorGreen = new FieldRef(getDeobfClass(), "fogColorGreen", "F");
             final FieldRef fogColorBlue = new FieldRef(getDeobfClass(), "fogColorBlue", "F");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -312,7 +312,7 @@ public class GLSLShader extends Mod {
                 .addXref(3, fogColorBlue)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -323,7 +323,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(setupCameraTransform));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -332,7 +332,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(renderRainSnow));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -352,11 +352,11 @@ public class GLSLShader extends Mod {
                 .addXref(1, renderHand)
             );
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "mc", "LMinecraft;")));
-            memberMappers.add(new MethodMapper(renderWorld));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "disableLightmap", "(D)V"), new MethodRef(getDeobfClass(), "enableLightmap", "(D)V")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "mc", "LMinecraft;")));
+            addMemberMapper(new MethodMapper(renderWorld));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "disableLightmap", "(D)V"), new MethodRef(getDeobfClass(), "enableLightmap", "(D)V")));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "call beginRender";
@@ -381,7 +381,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(renderWorld));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "call endRender";
@@ -402,7 +402,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(renderWorld));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "call setClearColor / setCamera";
@@ -440,7 +440,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(renderWorld));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "wrap terrain and water rendering";
@@ -461,7 +461,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(renderWorld));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "wrap water rendering";
@@ -497,7 +497,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(renderWorld));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "wrap weather rendering";
@@ -523,7 +523,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(renderWorld));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "wrap hand rendering";
@@ -555,7 +555,7 @@ public class GLSLShader extends Mod {
         }
 
         private void addLightmapPatch(final String name) {
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "wrap " + name;
@@ -580,16 +580,16 @@ public class GLSLShader extends Mod {
 
     private class EntityLivingMod extends ClassMod {
         EntityLivingMod() {
-            parentClass = "Entity";
+            setParentClass("Entity");
 
-            classSignatures.add(new ConstSignature("/mob/char.png"));
-            classSignatures.add(new ConstSignature("bubble"));
+            addClassSignature(new ConstSignature("/mob/char.png"));
+            addClassSignature(new ConstSignature("bubble"));
         }
     }
 
     private class BlockMod extends BaseMod.BlockMod {
         BlockMod() {
-            memberMappers.add(new FieldMapper(
+            addMemberMapper(new FieldMapper(
                 new FieldRef(getDeobfClass(), "lightOpacity", "[I"),
                 new FieldRef(getDeobfClass(), "lightValue", "[I")
             )
@@ -621,7 +621,7 @@ public class GLSLShader extends Mod {
             final FieldRef shadersShortBuffer = new FieldRef(getDeobfClass(), "shadersShortBuffer", "Ljava/nio/ShortBuffer;");
             final FieldRef shadersData = new FieldRef(getDeobfClass(), "shadersData", "[S");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -630,7 +630,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(draw));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -639,7 +639,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(reset));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -683,7 +683,7 @@ public class GLSLShader extends Mod {
                 .addXref(2, new FieldRef(getDeobfClass(), "normal", "I"))
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -709,7 +709,7 @@ public class GLSLShader extends Mod {
                 .addXref(2, drawMode)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -726,7 +726,7 @@ public class GLSLShader extends Mod {
                 .addXref(2, rawBufferIndex)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -740,13 +740,13 @@ public class GLSLShader extends Mod {
                 }
             }.addXref(1, convertQuadsToTriangles));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "instance", "LTessellator;")).accessFlag(AccessFlag.STATIC, true));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "instance", "LTessellator;")).accessFlag(AccessFlag.STATIC, true));
 
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersBuffer", "Ljava.nio.ByteBuffer;")));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersShortBuffer", "Ljava.nio.ShortBuffer;")));
-            patches.add(new AddFieldPatch(shadersData));
+            addPatch(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersBuffer", "Ljava.nio.ByteBuffer;")));
+            addPatch(new AddFieldPatch(new FieldRef(getDeobfClass(), "shadersShortBuffer", "Ljava.nio.ShortBuffer;")));
+            addPatch(new AddFieldPatch(shadersData));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "initialize shadersData";
@@ -797,7 +797,7 @@ public class GLSLShader extends Mod {
                 }
             }.matchConstructorOnly(true));
 
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "setEntity", "(I)V")) {
+            addPatch(new AddMethodPatch(new MethodRef(getDeobfClass(), "setEntity", "(I)V")) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -820,7 +820,7 @@ public class GLSLShader extends Mod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "clear shadersBuffer";
@@ -844,7 +844,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(reset));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "wrap glDrawArrays";
@@ -867,7 +867,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(draw));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "call Shaders.addVertex";
@@ -972,14 +972,14 @@ public class GLSLShader extends Mod {
             setupBlockFace(4, "West", -1, 0, 0);
             setupBlockFace(5, "East", 1, 0, 0);
 
-            memberMappers.add(new MethodMapper(faceMethods));
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "renderBlockByRenderType", "(LBlock;III)Z")));
+            addMemberMapper(new MethodMapper(faceMethods));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "renderBlockByRenderType", "(LBlock;III)Z")));
         }
 
         private void setupBlockFace(int face, final String direction, final int x, final int y, final int z) {
             faceMethods[face] = new MethodRef(getDeobfClass(), "render" + direction + "Face", "(LBlock;DDDI)V");
 
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "set normal when rendering block " + direction.toLowerCase() + " face";
@@ -1010,30 +1010,30 @@ public class GLSLShader extends Mod {
 
     private class EntityPlayerMod extends ClassMod {
         EntityPlayerMod() {
-            classSignatures.add(new ConstSignature("humanoid"));
-            classSignatures.add(new ConstSignature("/mob/char.png"));
+            addClassSignature(new ConstSignature("humanoid"));
+            addClassSignature(new ConstSignature("/mob/char.png"));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "inventory", "LInventoryPlayer;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "inventory", "LInventoryPlayer;")));
         }
     }
 
     private class EntityPlayerSPMod extends ClassMod {
         EntityPlayerSPMod() {
-            parentClass = "EntityPlayer";
+            setParentClass("EntityPlayer");
 
-            classSignatures.add(new OrSignature(
+            addClassSignature(new OrSignature(
                 new ConstSignature("http://s3.amazonaws.com/MinecraftSkins/"), // 1.2
                 new ConstSignature("http://skins.minecraft.net/MinecraftSkins/") // 1.3
             ));
-            classSignatures.add(new ConstSignature("portal.trigger"));
+            addClassSignature(new ConstSignature("portal.trigger"));
         }
     }
 
     private class EntityPlayerSPSubMod extends ClassMod {
         EntityPlayerSPSubMod() {
-            parentClass = "EntityPlayerSP";
+            setParentClass("EntityPlayerSP");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -1048,23 +1048,23 @@ public class GLSLShader extends Mod {
     private class InventoryPlayerMod extends ClassMod {
         InventoryPlayerMod(MinecraftVersion minecraftVersion) {
             if (minecraftVersion.compareTo("12w04a") >= 0) {
-                classSignatures.add(new ConstSignature("container.inventory"));
+                addClassSignature(new ConstSignature("container.inventory"));
             } else {
-                classSignatures.add(new ConstSignature("Inventory"));
+                addClassSignature(new ConstSignature("Inventory"));
             }
-            classSignatures.add(new ConstSignature("Slot"));
+            addClassSignature(new ConstSignature("Slot"));
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getCurrentItem", "()LItemStack;")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getCurrentItem", "()LItemStack;")));
         }
     }
 
     private class ItemStackMod extends ClassMod {
         ItemStackMod() {
-            classSignatures.add(new ConstSignature("id"));
-            classSignatures.add(new ConstSignature("Count"));
-            classSignatures.add(new ConstSignature("Damage"));
+            addClassSignature(new ConstSignature("id"));
+            addClassSignature(new ConstSignature("Count"));
+            addClassSignature(new ConstSignature("Damage"));
 
-            memberMappers.add(new FieldMapper(
+            addMemberMapper(new FieldMapper(
                 new FieldRef(getDeobfClass(), "stackSize", "I"),
                 new FieldRef(getDeobfClass(), "animationsToGo", "I"),
                 new FieldRef(getDeobfClass(), "itemID", "I")
@@ -1076,7 +1076,7 @@ public class GLSLShader extends Mod {
 
     private class WorldMod extends BaseMod.WorldMod {
         WorldMod() {
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -1099,7 +1099,7 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(new MethodRef(getDeobfClass(), "getStarBrightness", "(F)F")));
 
-            classSignatures.add(new FixedBytecodeSignature(
+            addClassSignature(new FixedBytecodeSignature(
                 begin(),
                 ALOAD_0,
                 ILOAD_1,
@@ -1111,7 +1111,7 @@ public class GLSLShader extends Mod {
                 end()
             ).setMethod(new MethodRef(getDeobfClass(), "getBlockLightValue", "(III)I")));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -1143,7 +1143,7 @@ public class GLSLShader extends Mod {
                 .addXref(6, new FieldRef("Entity", "lastTickPosZ", "D"))
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -1169,7 +1169,7 @@ public class GLSLShader extends Mod {
                 .addXref(1, new MethodRef(getDeobfClass(), "getCelestialAngle", "(F)F"))
             );
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getSeed", "()J"), new MethodRef(getDeobfClass(), "getWorldTime", "()J")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getSeed", "()J"), new MethodRef(getDeobfClass(), "getWorldTime", "()J")));
         }
     }
 
@@ -1177,9 +1177,9 @@ public class GLSLShader extends Mod {
         WorldRendererMod() {
             final MethodRef updateRenderer = new MethodRef(getDeobfClass(), "updateRenderer", "()V");
 
-            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
+            addClassSignature(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glNewList", "(II)V")));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -1188,9 +1188,9 @@ public class GLSLShader extends Mod {
                 }
             }.setMethod(updateRenderer));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "worldObj", "LWorld;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "worldObj", "LWorld;")));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "call Tessellator.setEntity";
@@ -1223,7 +1223,7 @@ public class GLSLShader extends Mod {
                 }
             }.targetMethod(updateRenderer));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "clear Tessellator.setEntity";

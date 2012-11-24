@@ -36,30 +36,37 @@ abstract public class ClassMod implements PatchComponent {
     protected Mod mod;
     /**
      * List of classes that must be resolved via their ClassMods first.
+     * @see #addPrerequisiteClass(String)
      */
     protected ArrayList<String> prerequisiteClasses = new ArrayList<String>();
     /**
      * List of signatures that identifies the class file(s) to which the ClassMod should be applied.
+     * @see #addClassSignature(ClassSignature)
      */
     protected ArrayList<ClassSignature> classSignatures = new ArrayList<ClassSignature>();
     /**
      * List of patches to be applied to all matching class files.
+     * @see #addPatch(ClassPatch)
      */
     protected ArrayList<ClassPatch> patches = new ArrayList<ClassPatch>();
     /**
      * List of class members to deobfuscate in the target class - not used if global == true.
+     * @see #addMemberMapper(com.pclewis.mcpatcher.ClassMod.MemberMapper)
      */
     protected ArrayList<MemberMapper> memberMappers = new ArrayList<MemberMapper>();
     /**
      * By default, a ClassMod should only match a single class. Set this field to true to allow any number of matches.
+     * @see #setMultipleMatchesAllowed(boolean)
      */
     protected boolean global = false;
     /**
      * Descriptive name of parent class if any.
+     * @see #setParentClass(String)
      */
     protected String parentClass;
     /**
      * Descriptive names of interfaces implemented by the class.
+     * @see #setInterfaces(String[])
      */
     protected String[] interfaces;
 
@@ -221,13 +228,43 @@ abstract public class ClassMod implements PatchComponent {
     public void postPatch(String filename, ClassFile classFile) throws Exception {
     }
 
-    final protected void setMatchAddedFiles(boolean match) {
+    protected void addPrerequisiteClass(String className) {
+        prerequisiteClasses.add(className);
+    }
+
+    protected void addClassSignature(ClassSignature classSignature) {
+        classSignature.classMod = this;
+        classSignatures.add(classSignature);
+    }
+
+    protected void addPatch(ClassPatch classPatch) {
+        classPatch.classMod = this;
+        patches.add(classPatch);
+    }
+
+    protected void addMemberMapper(MemberMapper memberMapper) {
+        memberMappers.add(memberMapper);
+    }
+
+    protected void setMultipleMatchesAllowed(boolean match) {
+        global = match;
+    }
+
+    protected void setMatchAddedFiles(boolean match) {
         if (match) {
             matchAddedFiles = true;
-            global = true;
+            setMultipleMatchesAllowed(true);
         } else {
             matchAddedFiles = false;
         }
+    }
+
+    protected void setParentClass(String className) {
+        parentClass = className;
+    }
+
+    protected void setInterfaces(String... interfaces) {
+        this.interfaces = interfaces.clone();
     }
 
     final public static class Label {

@@ -37,13 +37,13 @@ public final class BaseMod extends Mod {
         configPanel = new ConfigPanel();
         dependencies.clear();
 
-        classMods.add(new XMinecraftMod());
+        addClassMod(new XMinecraftMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.UTILS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.LOGGER_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.LOGGER_CLASS + "$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.LOGGER_CLASS + "$1$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CONFIG_CLASS));
+        addClassFile(MCPatcherUtils.UTILS_CLASS);
+        addClassFile(MCPatcherUtils.LOGGER_CLASS);
+        addClassFile(MCPatcherUtils.LOGGER_CLASS + "$1");
+        addClassFile(MCPatcherUtils.LOGGER_CLASS + "$1$1");
+        addClassFile(MCPatcherUtils.CONFIG_CLASS);
     }
 
     @Override
@@ -172,7 +172,7 @@ public final class BaseMod extends Mod {
 
     private class XMinecraftMod extends MinecraftMod {
         XMinecraftMod() {
-            patches.add(new BytecodePatch.InsertAfter() {
+            addPatch(new BytecodePatch.InsertAfter() {
                 @Override
                 public String getDescription() {
                     return "MCPatcherUtils.setMinecraft(this)";
@@ -215,9 +215,9 @@ public final class BaseMod extends Mod {
      * <p/>
      * Including
      * <pre>
-     *     classMods.add(new BaseMod.MinecraftMod().mapTexturePackList();
-     *     classMods.add(new BaseMod.TexturePackListMod());
-     *     classMods.add(new BaseMod.TexturePackBaseMod());
+     *     addClassMod(new BaseMod.MinecraftMod().mapTexturePackList();
+     *     addClassMod(new BaseMod.TexturePackListMod());
+     *     addClassMod(new BaseMod.TexturePackBaseMod());
      * </pre>
      * will allow you to detect when a different texture pack has been selected:
      * <pre>
@@ -236,11 +236,11 @@ public final class BaseMod extends Mod {
      */
     public static class MinecraftMod extends ClassMod {
         public MinecraftMod() {
-            classSignatures.add(new FilenameSignature("net/minecraft/client/Minecraft.class"));
+            addClassSignature(new FilenameSignature("net/minecraft/client/Minecraft.class"));
         }
 
         public MinecraftMod mapTexturePackList() {
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackList", "LTexturePackList;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackList", "LTexturePackList;")));
             return this;
         }
 
@@ -251,9 +251,9 @@ public final class BaseMod extends Mod {
                 final FieldRef worldServer = new FieldRef(getDeobfClass(), "worldServer", "LWorldServer;");
                 final FieldRef world = new FieldRef("WorldServer", "world", "LWorld;");
 
-                memberMappers.add(new FieldMapper(worldServer));
+                addMemberMapper(new FieldMapper(worldServer));
 
-                patches.add(new AddMethodPatch(getWorld) {
+                addPatch(new AddMethodPatch(getWorld) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -267,9 +267,9 @@ public final class BaseMod extends Mod {
             } else {
                 final FieldRef theWorld = new FieldRef(getDeobfClass(), "theWorld", "LWorld;");
 
-                memberMappers.add(new FieldMapper(theWorld));
+                addMemberMapper(new FieldMapper(theWorld));
 
-                patches.add(new AddMethodPatch(getWorld) {
+                addPatch(new AddMethodPatch(getWorld) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -296,8 +296,8 @@ public final class BaseMod extends Mod {
         protected final MethodRef getSelectedTexturePack = new MethodRef(getDeobfClass(), "getSelectedTexturePack", "()LTexturePackBase;");
 
         public TexturePackListMod(MinecraftVersion minecraftVersion) {
-            classSignatures.add(new ConstSignature(".zip"));
-            classSignatures.add(new ConstSignature("texturepacks"));
+            addClassSignature(new ConstSignature(".zip"));
+            addClassSignature(new ConstSignature("texturepacks"));
 
             if (minecraftVersion.compareTo("12w15a") >= 0) {
                 useITexturePack = true;
@@ -306,18 +306,18 @@ public final class BaseMod extends Mod {
                 selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", texturePackType);
                 defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", texturePackType);
 
-                memberMappers.add(new FieldMapper(selectedTexturePack)
+                addMemberMapper(new FieldMapper(selectedTexturePack)
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
                 );
-                memberMappers.add(new FieldMapper(defaultTexturePack)
+                addMemberMapper(new FieldMapper(defaultTexturePack)
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, true)
                     .accessFlag(AccessFlag.FINAL, true)
                 );
 
-                patches.add(new AddMethodPatch(getDefaultTexturePack) {
+                addPatch(new AddMethodPatch(getDefaultTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -328,7 +328,7 @@ public final class BaseMod extends Mod {
                     }
                 });
 
-                patches.add(new AddMethodPatch(getSelectedTexturePack) {
+                addPatch(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -346,10 +346,10 @@ public final class BaseMod extends Mod {
                 selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", texturePackType);
                 defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", texturePackType);
 
-                memberMappers.add(new FieldMapper(selectedTexturePack).accessFlag(AccessFlag.PUBLIC, true));
-                memberMappers.add(new FieldMapper(defaultTexturePack).accessFlag(AccessFlag.PRIVATE, true));
+                addMemberMapper(new FieldMapper(selectedTexturePack).accessFlag(AccessFlag.PUBLIC, true));
+                addMemberMapper(new FieldMapper(defaultTexturePack).accessFlag(AccessFlag.PRIVATE, true));
 
-                patches.add(new AddMethodPatch(getDefaultTexturePack) {
+                addPatch(new AddMethodPatch(getDefaultTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -360,7 +360,7 @@ public final class BaseMod extends Mod {
                     }
                 });
 
-                patches.add(new AddMethodPatch(getSelectedTexturePack) {
+                addPatch(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -383,17 +383,17 @@ public final class BaseMod extends Mod {
         public TexturePackBaseMod(MinecraftVersion minecraftVersion) {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
 
-            classSignatures.add(new ConstSignature(getResourceAsStream));
+            addClassSignature(new ConstSignature(getResourceAsStream));
             if (minecraftVersion.compareTo("12w15a") >= 0) {
                 useITexturePack = true;
-                classSignatures.add(new ConstSignature("/pack.txt"));
+                addClassSignature(new ConstSignature("/pack.txt"));
                 interfaces = new String[]{"ITexturePack"};
             } else {
                 useITexturePack = false;
-                classSignatures.add(new ConstSignature("pack.txt").negate(true));
+                addClassSignature(new ConstSignature("pack.txt").negate(true));
             }
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -404,9 +404,9 @@ public final class BaseMod extends Mod {
                 }
             }.setMethodName("getInputStream"));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackFileName", "Ljava/lang/String;")));
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "texturePackFileName", "Ljava/lang/String;")));
 
-            patches.add(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "texturePackFileName", "Ljava/lang/String;")));
+            addPatch(new MakeMemberPublicPatch(new FieldRef(getDeobfClass(), "texturePackFileName", "Ljava/lang/String;")));
         }
     }
 
@@ -417,7 +417,7 @@ public final class BaseMod extends Mod {
         public TexturePackDefaultMod() {
             parentClass = "TexturePackBase";
 
-            classSignatures.add(new ConstSignature("The default look of Minecraft"));
+            addClassSignature(new ConstSignature("The default look of Minecraft"));
         }
     }
 
@@ -426,9 +426,9 @@ public final class BaseMod extends Mod {
      */
     public static class GLAllocationMod extends ClassMod {
         public GLAllocationMod() {
-            classSignatures.add(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glDeleteLists", "(II)V")));
+            addClassSignature(new ConstSignature(new MethodRef(MCPatcherUtils.GL11_CLASS, "glDeleteLists", "(II)V")));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     if (getMethodInfo().getDescriptor().equals("(I)Ljava/nio/ByteBuffer;")) {
@@ -462,7 +462,7 @@ public final class BaseMod extends Mod {
             } else {
                 draw1 = new MethodRef(getDeobfClass(), "draw1", "()V");
 
-                patches.add(new AddMethodPatch(draw) {
+                addPatch(new AddMethodPatch(draw) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -475,7 +475,7 @@ public final class BaseMod extends Mod {
                 });
             }
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -484,7 +484,7 @@ public final class BaseMod extends Mod {
                 }
             }.setMethod(draw1));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -499,7 +499,7 @@ public final class BaseMod extends Mod {
                 .addXref(1, startDrawing)
             );
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -523,7 +523,7 @@ public final class BaseMod extends Mod {
                 .addXref(2, addVertex)
             );
 
-            memberMappers.add(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
+            addMemberMapper(new FieldMapper(instance).accessFlag(AccessFlag.STATIC, true));
         }
     }
 
@@ -532,14 +532,14 @@ public final class BaseMod extends Mod {
      */
     public static class IBlockAccessMod extends ClassMod {
         public IBlockAccessMod() {
-            classSignatures.add(new ClassSignature() {
+            addClassSignature(new ClassSignature() {
                 @Override
                 public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
                     return classFile.isAbstract();
                 }
             });
 
-            classSignatures.add(new ClassSignature() {
+            addClassSignature(new ClassSignature() {
                 @Override
                 public boolean match(String filename, ClassFile classFile, ClassMap tempClassMap) {
                     List list = getClassFile().getMethods();
@@ -547,11 +547,11 @@ public final class BaseMod extends Mod {
                 }
             });
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockId", "(III)I"), new MethodRef(getDeobfClass(), "getBlockMetadata", "(III)I")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockId", "(III)I"), new MethodRef(getDeobfClass(), "getBlockMetadata", "(III)I")));
         }
 
         public IBlockAccessMod mapMaterial() {
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockMaterial", "(III)LMaterial;")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getBlockMaterial", "(III)LMaterial;")));
             return this;
         }
     }
@@ -713,15 +713,15 @@ public final class BaseMod extends Mod {
         };
 
         public BlockMod() {
-            classSignatures.add(new ConstSignature(" is already occupied by "));
+            addClassSignature(new ConstSignature(" is already occupied by "));
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blockID", "I"))
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "blockID", "I"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, false)
                 .accessFlag(AccessFlag.FINAL, true)
             );
 
-            memberMappers.add(new FieldMapper(new FieldRef(getDeobfClass(), "blocksList", "[LBlock;"))
+            addMemberMapper(new FieldMapper(new FieldRef(getDeobfClass(), "blocksList", "[LBlock;"))
                 .accessFlag(AccessFlag.PUBLIC, true)
                 .accessFlag(AccessFlag.STATIC, true)
                 .accessFlag(AccessFlag.FINAL, true)
@@ -755,7 +755,7 @@ public final class BaseMod extends Mod {
         }
 
         protected void addBlockSignature(final int blockID, final String fieldClass, final String fieldName, final String className, final String blockName) {
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -800,8 +800,8 @@ public final class BaseMod extends Mod {
      */
     public static class ItemMod extends ClassMod {
         public ItemMod() {
-            classSignatures.add(new ConstSignature("CONFLICT @ "));
-            classSignatures.add(new ConstSignature("coal"));
+            addClassSignature(new ConstSignature("CONFLICT @ "));
+            addClassSignature(new ConstSignature("coal"));
         }
     }
 
@@ -812,8 +812,8 @@ public final class BaseMod extends Mod {
         public WorldMod() {
             interfaces = new String[]{"IBlockAccess"};
 
-            classSignatures.add(new ConstSignature("ambient.cave.cave"));
-            classSignatures.add(new ConstSignature(0x3c6ef35f));
+            addClassSignature(new ConstSignature("ambient.cave.cave"));
+            addClassSignature(new ConstSignature(0x3c6ef35f));
         }
     }
 
@@ -824,13 +824,13 @@ public final class BaseMod extends Mod {
         public WorldServerMod(MinecraftVersion minecraftVersion) {
             final FieldRef world = new FieldRef(getDeobfClass(), "world", "LWorld;");
 
-            classSignatures.add(new ConstSignature("/particles.png"));
-            classSignatures.add(new ConstSignature("/terrain.png"));
-            classSignatures.add(new ConstSignature("/gui/items.png"));
+            addClassSignature(new ConstSignature("/particles.png"));
+            addClassSignature(new ConstSignature("/terrain.png"));
+            addClassSignature(new ConstSignature("/gui/items.png"));
 
-            memberMappers.add(new FieldMapper(world));
+            addMemberMapper(new FieldMapper(world));
 
-            patches.add(new MakeMemberPublicPatch(world));
+            addPatch(new MakeMemberPublicPatch(world));
         }
     }
 
@@ -838,7 +838,7 @@ public final class BaseMod extends Mod {
         public WorldServerMPMod(MinecraftVersion minecraftVersion) {
             parentClass = "World";
 
-            classSignatures.add(new ConstSignature("MpServer"));
+            addClassSignature(new ConstSignature("MpServer"));
         }
     }
 
@@ -847,7 +847,7 @@ public final class BaseMod extends Mod {
      */
     public static class FontRendererMod extends ClassMod {
         public FontRendererMod() {
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -869,7 +869,7 @@ public final class BaseMod extends Mod {
                 .addXref(2, new FieldRef(getDeobfClass(), "fontTextureName", "I"))
             );
 
-            classSignatures.add(new OrSignature(
+            addClassSignature(new OrSignature(
                 new ConstSignature("0123456789abcdef"),
                 new ConstSignature("0123456789abcdefk"),
                 new ConstSignature("/font/glyph_sizes.bin")
@@ -882,8 +882,8 @@ public final class BaseMod extends Mod {
      */
     public static class RenderBlocksMod extends ClassMod {
         public RenderBlocksMod() {
-            classSignatures.add(new ConstSignature(0.1875));
-            classSignatures.add(new ConstSignature(0.01));
+            addClassSignature(new ConstSignature(0.1875));
+            addClassSignature(new ConstSignature(0.01));
         }
     }
 
@@ -894,9 +894,9 @@ public final class BaseMod extends Mod {
         protected final MethodRef glTexSubImage2D = new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V");
 
         public RenderEngineMod() {
-            classSignatures.add(new ConstSignature("%clamp%"));
-            classSignatures.add(new ConstSignature("%blur%"));
-            classSignatures.add(new ConstSignature(glTexSubImage2D));
+            addClassSignature(new ConstSignature("%clamp%"));
+            addClassSignature(new ConstSignature("%blur%"));
+            addClassSignature(new ConstSignature(glTexSubImage2D));
         }
     }
 
@@ -905,8 +905,8 @@ public final class BaseMod extends Mod {
      */
     public static class GameSettingsMod extends ClassMod {
         public GameSettingsMod() {
-            classSignatures.add(new ConstSignature("options.txt"));
-            classSignatures.add(new OrSignature(
+            addClassSignature(new ConstSignature("options.txt"));
+            addClassSignature(new OrSignature(
                 new ConstSignature("key.forward"),
                 new ConstSignature("Forward")
             ));
@@ -920,7 +920,7 @@ public final class BaseMod extends Mod {
          * @param descriptor type descriptor
          */
         protected void mapOption(final String option, final String field, final String descriptor) {
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -946,14 +946,14 @@ public final class BaseMod extends Mod {
      */
     public static class ProfilerMod extends ClassMod {
         public ProfilerMod() {
-            classSignatures.add(new ConstSignature("[UNKNOWN]"));
-            classSignatures.add(new ConstSignature(100.0));
+            addClassSignature(new ConstSignature("[UNKNOWN]"));
+            addClassSignature(new ConstSignature(100.0));
 
             final MethodRef startSection = new MethodRef(getDeobfClass(), "startSection", "(Ljava/lang/String;)V");
             final MethodRef endSection = new MethodRef(getDeobfClass(), "endSection", "()V");
             final MethodRef endStartSection = new MethodRef(getDeobfClass(), "endStartSection", "(Ljava/lang/String;)V");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(

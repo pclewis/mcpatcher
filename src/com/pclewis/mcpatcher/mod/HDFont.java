@@ -30,13 +30,13 @@ public class HDFont extends Mod {
         haveUnicode = minecraftVersion.compareTo("11w49a") >= 0 || minecraftVersion.compareTo("1.0.1") >= 0;
         haveGetCharWidth = minecraftVersion.compareTo("1.2.4") >= 0;
 
-        classMods.add(new MinecraftMod());
-        classMods.add(new FontRendererMod());
-        classMods.add(new BaseMod.RenderEngineMod());
-        classMods.add(new BaseMod.GameSettingsMod());
+        addClassMod(new MinecraftMod());
+        addClassMod(new FontRendererMod());
+        addClassMod(new BaseMod.RenderEngineMod());
+        addClassMod(new BaseMod.GameSettingsMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.FONT_UTILS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.FONT_UTILS_CLASS + "$1"));
+        addClassFile(MCPatcherUtils.FONT_UTILS_CLASS);
+        addClassFile(MCPatcherUtils.FONT_UTILS_CLASS + "$1");
     }
 
     private class MinecraftMod extends BaseMod.MinecraftMod {
@@ -47,13 +47,13 @@ public class HDFont extends Mod {
             final FieldRef gameSettings = new FieldRef(getDeobfClass(), "gameSettings", "LGameSettings;");
 
             if (haveAlternateFont) {
-                memberMappers.add(new FieldMapper(fontRenderer, alternateFontRenderer));
+                addMemberMapper(new FieldMapper(fontRenderer, alternateFontRenderer));
             } else {
-                memberMappers.add(new FieldMapper(fontRenderer));
-                memberMappers.add(new FieldMapper(alternateFontRenderer));
+                addMemberMapper(new FieldMapper(fontRenderer));
+                addMemberMapper(new FieldMapper(alternateFontRenderer));
             }
-            memberMappers.add(new FieldMapper(renderEngine));
-            memberMappers.add(new FieldMapper(gameSettings));
+            addMemberMapper(new FieldMapper(renderEngine));
+            addMemberMapper(new FieldMapper(gameSettings));
         }
     }
 
@@ -67,7 +67,7 @@ public class HDFont extends Mod {
 
         FontRendererMod() {
             if (haveFontHeight) {
-                classSignatures.add(new BytecodeSignature() {
+                addClassSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
@@ -85,11 +85,11 @@ public class HDFont extends Mod {
                     .addXref(1, fontHeight)
                 );
             } else {
-                patches.add(new AddFieldPatch(fontHeight));
+                addPatch(new AddFieldPatch(fontHeight));
             }
 
             if (haveUnicode) {
-                classSignatures.add(new BytecodeSignature() {
+                addClassSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
@@ -103,16 +103,16 @@ public class HDFont extends Mod {
                     .addXref(1, isUnicode)
                 );
 
-                patches.add(new MakeMemberPublicPatch(isUnicode));
+                addPatch(new MakeMemberPublicPatch(isUnicode));
             } else {
-                patches.add(new AddFieldPatch(isUnicode));
+                addPatch(new AddFieldPatch(isUnicode));
             }
 
-            memberMappers.add(new MethodMapper(getStringWidth));
+            addMemberMapper(new MethodMapper(getStringWidth));
 
-            patches.add(new AddFieldPatch(charWidthf));
+            addPatch(new AddFieldPatch(charWidthf));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "FontUtils.computeCharWidths on init";
@@ -149,7 +149,7 @@ public class HDFont extends Mod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "use charWidthf intead of charWidth";
@@ -185,7 +185,7 @@ public class HDFont extends Mod {
                 }
             });
 
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "initialize", "()V")) {
+            addPatch(new AddMethodPatch(new MethodRef(getDeobfClass(), "initialize", "()V")) {
                 MethodInfo constructor;
 
                 @Override
@@ -243,7 +243,7 @@ public class HDFont extends Mod {
         }
 
         private void addStringWidthPatchesV1() {
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "use charWidthf in getStringWidth (init)";
@@ -266,7 +266,7 @@ public class HDFont extends Mod {
                 }
             }.targetMethod(getStringWidth));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "use charWidthf in getStringWidth (loop)";
@@ -303,7 +303,7 @@ public class HDFont extends Mod {
                 }
             }.targetMethod(getStringWidth));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "use charWidthf in getStringWidth (return value)";
@@ -328,7 +328,7 @@ public class HDFont extends Mod {
                 }
             }.targetMethod(getStringWidth));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "getStringWidth int -> float";
@@ -357,7 +357,7 @@ public class HDFont extends Mod {
                 }
             }.targetMethod(getStringWidth));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "4.0f -> charWidthf[32]";
@@ -396,9 +396,9 @@ public class HDFont extends Mod {
         private void addStringWidthPatchesV2() {
             final MethodRef getStringWidthf = new MethodRef(MCPatcherUtils.FONT_UTILS_CLASS, "getStringWidthf", "(LFontRenderer;Ljava/lang/String;)F");
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getCharWidth", "(C)I")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getCharWidth", "(C)I")));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "replace getStringWidth";
@@ -425,7 +425,7 @@ public class HDFont extends Mod {
                 }
             }.targetMethod(getStringWidth));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "4.0f -> charWidthf[32]";

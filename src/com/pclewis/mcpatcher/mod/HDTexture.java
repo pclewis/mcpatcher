@@ -27,35 +27,35 @@ public class HDTexture extends BaseTexturePackMod {
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
         haveGetImageRGB = minecraftVersion.compareTo("Beta 1.6") >= 0;
 
-        classMods.add(new RenderEngineMod());
-        classMods.add(new TextureFXMod());
-        classMods.add(new CompassMod());
-        classMods.add(new FireMod());
-        classMods.add(new FluidMod("StillLava"));
-        classMods.add(new FluidMod("FlowLava"));
-        classMods.add(new FluidMod("StillWater"));
-        classMods.add(new FluidMod("FlowWater"));
-        classMods.add(new ItemRendererMod());
-        classMods.add(new WatchMod());
-        classMods.add(new PortalMod());
-        classMods.add(new MinecraftMod());
-        classMods.add(new BaseMod.GLAllocationMod());
-        classMods.add(new ColorizerMod("ColorizerWater", haveColorizerWater ? "/misc/watercolor.png" : "/misc/foliagecolor.png"));
-        classMods.add(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
-        classMods.add(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
+        addClassMod(new RenderEngineMod());
+        addClassMod(new TextureFXMod());
+        addClassMod(new CompassMod());
+        addClassMod(new FireMod());
+        addClassMod(new FluidMod("StillLava"));
+        addClassMod(new FluidMod("FlowLava"));
+        addClassMod(new FluidMod("StillWater"));
+        addClassMod(new FluidMod("FlowWater"));
+        addClassMod(new ItemRendererMod());
+        addClassMod(new WatchMod());
+        addClassMod(new PortalMod());
+        addClassMod(new MinecraftMod());
+        addClassMod(new BaseMod.GLAllocationMod());
+        addClassMod(new ColorizerMod("ColorizerWater", haveColorizerWater ? "/misc/watercolor.png" : "/misc/foliagecolor.png"));
+        addClassMod(new ColorizerMod("ColorizerGrass", "/misc/grasscolor.png"));
+        addClassMod(new ColorizerMod("ColorizerFoliage", "/misc/foliagecolor.png"));
 
         if (minecraftVersion.compareTo("12w22a") < 0) {
-            classMods.add(new GuiContainerCreativeMod());
+            addClassMod(new GuiContainerCreativeMod());
         }
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TILE_SIZE_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$2"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Delegate"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Tile"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Strip"));
+        addClassFile(MCPatcherUtils.TILE_SIZE_CLASS);
+        addClassFile(MCPatcherUtils.TEXTURE_UTILS_CLASS);
+        addClassFile(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$1");
+        addClassFile(MCPatcherUtils.TEXTURE_UTILS_CLASS + "$2");
+        addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS);
+        addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Delegate");
+        addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Tile");
+        addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Strip");
     }
 
     private class RenderEngineMod extends BaseMod.RenderEngineMod {
@@ -81,7 +81,7 @@ public class HDTexture extends BaseTexturePackMod {
                 getInputStream = new MethodRef("TexturePackBase", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
             }
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -91,7 +91,7 @@ public class HDTexture extends BaseTexturePackMod {
             }.setMethod(refreshTextures));
 
             if (getMinecraftVersion().compareTo("1.0.0") >= 0) {
-                classSignatures.add(new BytecodeSignature() {
+                addClassSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
@@ -103,7 +103,7 @@ public class HDTexture extends BaseTexturePackMod {
                     }
                 }.setMethod(updateDynamicTextures));
             } else {
-                classSignatures.add(new BytecodeSignature() {
+                addClassSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
@@ -113,20 +113,20 @@ public class HDTexture extends BaseTexturePackMod {
                 }.setMethod(updateDynamicTextures));
             }
 
-            memberMappers.add(new FieldMapper(imageData));
-            memberMappers.add(new FieldMapper(textureList));
-            memberMappers.add(new MethodMapper(registerTextureFX));
-            memberMappers.add(new MethodMapper(readTextureImage));
-            memberMappers.add(new MethodMapper(setupTexture));
-            memberMappers.add(new MethodMapper(getTexture));
+            addMemberMapper(new FieldMapper(imageData));
+            addMemberMapper(new FieldMapper(textureList));
+            addMemberMapper(new MethodMapper(registerTextureFX));
+            addMemberMapper(new MethodMapper(readTextureImage));
+            addMemberMapper(new MethodMapper(setupTexture));
+            addMemberMapper(new MethodMapper(getTexture));
             if (haveGetImageRGB) {
-                memberMappers.add(new MethodMapper(getImageRGB));
+                addMemberMapper(new MethodMapper(getImageRGB));
             }
             if (haveColorizerWater) {
-                memberMappers.add(new MethodMapper(readTextureImageData));
+                addMemberMapper(new MethodMapper(readTextureImageData));
             }
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     String op = (getCaptureGroup(1)[0] == IREM ? "%" : "/");
@@ -160,7 +160,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "glTexSubImage2D(...,16,16) -> glTexSubImage2D(...,int_size,int_size)";
@@ -187,7 +187,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "readTextureImage(getInputStream(...)) -> getImage(...)";
@@ -209,7 +209,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "getInputStream(...), readTextureImage -> getImage(...)";
@@ -248,7 +248,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "imageData.clear(), .put(), .limit() -> imageData = TextureUtils.getByteBuffer()";
@@ -296,7 +296,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             });
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "call TextureUtils.registerTextureFX";
@@ -323,7 +323,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             }.targetMethod(registerTextureFX));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "null check in setupTexture";
@@ -347,7 +347,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             }.targetMethod(setupTexture));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "null check in getImageRGB";
@@ -372,9 +372,9 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             }.targetMethod(getImageRGB));
 
-            patches.add(new TileSizePatch(1048576, "int_glBufferSize"));
+            addPatch(new TileSizePatch(1048576, "int_glBufferSize"));
 
-            patches.add(new AddMethodPatch(new MethodRef(getDeobfClass(), "reloadTextures", "(Lnet/minecraft/client/Minecraft;)V")) {
+            addPatch(new AddMethodPatch(new MethodRef(getDeobfClass(), "reloadTextures", "(Lnet/minecraft/client/Minecraft;)V")) {
                 @Override
                 public byte[] generateMethod() throws IOException {
                     return buildCode(
@@ -398,7 +398,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             });
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "update custom animations";
@@ -429,25 +429,25 @@ public class HDTexture extends BaseTexturePackMod {
             final FieldRef tileImage = new FieldRef(getDeobfClass(), "tileImage", "I");
             final MethodRef bindImage = new MethodRef(getDeobfClass(), "bindImage", "(LRenderEngine;)V");
 
-            classSignatures.add(new FixedBytecodeSignature(
+            addClassSignature(new FixedBytecodeSignature(
                 SIPUSH, 0x04, 0x00, // 1024
                 NEWARRAY, T_BYTE
             ));
 
-            classSignatures.add(new FixedBytecodeSignature(
+            addClassSignature(new FixedBytecodeSignature(
                 begin(),
                 RETURN,
                 end()
             ).setMethodName("onTick"));
 
-            memberMappers.add(new FieldMapper(imageData));
-            memberMappers.add(new FieldMapper(tileNumber, null, tileSize, tileImage));
+            addMemberMapper(new FieldMapper(imageData));
+            addMemberMapper(new FieldMapper(tileNumber, null, tileSize, tileImage));
 
-            memberMappers.add(new MethodMapper(bindImage));
+            addMemberMapper(new MethodMapper(bindImage));
 
-            patches.add(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
+            addPatch(new TileSizePatch.ArraySizePatch(1024, "int_numBytes"));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "check for bindImage recursion (end)";
@@ -468,7 +468,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             }.targetMethod(bindImage));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "check for bindImage recursion (start)";
@@ -498,11 +498,11 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class CompassMod extends ClassMod {
         CompassMod() {
-            classSignatures.add(new ConstSignature("/gui/items.png"));
-            classSignatures.add(new ConstSignature("/misc/dial.png").negate(true));
-            classSignatures.add(new ConstSignature(new MethodRef("java.lang.Math", "sin", "(D)D")));
+            addClassSignature(new ConstSignature("/gui/items.png"));
+            addClassSignature(new ConstSignature("/misc/dial.png").negate(true));
+            addClassSignature(new ConstSignature(new MethodRef("java.lang.Math", "sin", "(D)D")));
 
-            classSignatures.add(new FixedBytecodeSignature(
+            addClassSignature(new FixedBytecodeSignature(
                 ALOAD_0,
                 SIPUSH, 0x01, 0x00, // 256
                 NEWARRAY, T_INT,
@@ -510,24 +510,24 @@ public class HDTexture extends BaseTexturePackMod {
                 ALOAD_0
             ));
 
-            patches.add(new TileSizePatch(7.5, "double_compassCenterMin"));
-            patches.add(new TileSizePatch(8.5, "double_compassCenterMax"));
-            patches.add(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
-            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch(-4, "int_compassCrossMin"));
-            patches.add(new TileSizePatch.IfGreaterPatch(4, "int_compassCrossMax"));
-            patches.add(new TileSizePatch(-8, "int_compassNeedleMin"));
-            patches.add(new TileSizePatch.IfGreaterPatch(16, "int_compassNeedleMax"));
-            patches.add(new TileSizePatch.GetRGBPatch());
+            addPatch(new TileSizePatch(7.5, "double_compassCenterMin"));
+            addPatch(new TileSizePatch(8.5, "double_compassCenterMax"));
+            addPatch(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch.MultiplyPatch(16, "int_size"));
+            addPatch(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch(-4, "int_compassCrossMin"));
+            addPatch(new TileSizePatch.IfGreaterPatch(4, "int_compassCrossMax"));
+            addPatch(new TileSizePatch(-8, "int_compassNeedleMin"));
+            addPatch(new TileSizePatch.IfGreaterPatch(16, "int_compassNeedleMax"));
+            addPatch(new TileSizePatch.GetRGBPatch());
         }
     }
 
     private class FireMod extends ClassMod {
         FireMod() {
-            classSignatures.add(new ConstSignature(new MethodRef("java.lang.Math", "random", "()D")));
+            addClassSignature(new ConstSignature(new MethodRef("java.lang.Math", "random", "()D")));
 
-            classSignatures.add(new FixedBytecodeSignature(
+            addClassSignature(new FixedBytecodeSignature(
                 SIPUSH, 0x01, 0x40, // 320
                 NEWARRAY, T_FLOAT,
                 PUTFIELD, any(2),
@@ -538,16 +538,16 @@ public class HDTexture extends BaseTexturePackMod {
                 RETURN
             ));
 
-            patches.add(new TileSizePatch(1.06f, "float_flameNudge"));
-            patches.add(new TileSizePatch(1.0600001f, "float_flameNudge"));
-            patches.add(new TileSizePatch.ArraySizePatch(320, "int_flameArraySize"));
-            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch.WhilePatch(20, "int_flameHeight"));
-            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
-            patches.add(new TileSizePatch.ModPatch(20, "int_flameHeight"));
-            patches.add(new TileSizePatch.IfLessPatch(19, "int_flameHeightMinus1"));
+            addPatch(new TileSizePatch(1.06f, "float_flameNudge"));
+            addPatch(new TileSizePatch(1.0600001f, "float_flameNudge"));
+            addPatch(new TileSizePatch.ArraySizePatch(320, "int_flameArraySize"));
+            addPatch(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch.WhilePatch(20, "int_flameHeight"));
+            addPatch(new TileSizePatch.WhilePatch(16, "int_size"));
+            addPatch(new TileSizePatch.ModPatch(20, "int_flameHeight"));
+            addPatch(new TileSizePatch.IfLessPatch(19, "int_flameHeightMinus1"));
 
-            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size") {
+            addPatch(new TileSizePatch.MultiplyPatch(16, "int_size") {
                 @Override
                 public boolean filterMethod() {
                     return !getMethodInfo().isConstructor();
@@ -564,7 +564,7 @@ public class HDTexture extends BaseTexturePackMod {
             boolean lava = name.contains("Lava");
             boolean flow = name.contains("Flow");
 
-            classSignatures.add(new FixedBytecodeSignature(
+            addClassSignature(new FixedBytecodeSignature(
                 ALOAD_0,
                 GETSTATIC, any(2),
                 GETFIELD, any(2),
@@ -574,7 +574,7 @@ public class HDTexture extends BaseTexturePackMod {
 
             final double rand = (lava ? 0.005 : flow ? 0.2 : 0.05);
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -587,7 +587,7 @@ public class HDTexture extends BaseTexturePackMod {
             });
 
             if (lava) {
-                classSignatures.add(new BytecodeSignature() {
+                addClassSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
@@ -603,12 +603,12 @@ public class HDTexture extends BaseTexturePackMod {
                 });
             }
 
-            patches.add(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
-            patches.add(new TileSizePatch.BitMaskPatch(255, "int_numPixelsMinus1"));
-            patches.add(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
-            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
+            addPatch(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch.WhilePatch(16, "int_size"));
+            addPatch(new TileSizePatch.BitMaskPatch(255, "int_numPixelsMinus1"));
+            addPatch(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
+            addPatch(new TileSizePatch.MultiplyPatch(16, "int_size"));
         }
 
         @Override
@@ -619,32 +619,32 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class ItemRendererMod extends ClassMod {
         ItemRendererMod() {
-            classSignatures.add(new ConstSignature(-0.9375F));
-            classSignatures.add(new ConstSignature(0.0625F));
-            classSignatures.add(new ConstSignature(0.001953125F));
+            addClassSignature(new ConstSignature(-0.9375F));
+            addClassSignature(new ConstSignature(0.0625F));
+            addClassSignature(new ConstSignature(0.001953125F));
 
-            patches.add(new TileSizePatch.ToolPixelTopPatch());
-            patches.add(new TileSizePatch(16.0F, "float_size"));
-            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
-            patches.add(new TileSizePatch.ToolTexPatch());
-            patches.add(new TileSizePatch(0.001953125F, "float_texNudge"));
+            addPatch(new TileSizePatch.ToolPixelTopPatch());
+            addPatch(new TileSizePatch(16.0F, "float_size"));
+            addPatch(new TileSizePatch.WhilePatch(16, "int_size"));
+            addPatch(new TileSizePatch.ToolTexPatch());
+            addPatch(new TileSizePatch(0.001953125F, "float_texNudge"));
         }
     }
 
     private class WatchMod extends ClassMod {
         public WatchMod() {
-            classSignatures.add(new ConstSignature("/misc/dial.png"));
+            addClassSignature(new ConstSignature("/misc/dial.png"));
 
-            patches.add(new TileSizePatch(16.0D, "double_size"));
-            patches.add(new TileSizePatch(15.0D, "double_sizeMinus1"));
-            patches.add(new TileSizePatch.GetRGBPatch());
-            patches.add(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
-            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
-            patches.add(new TileSizePatch.DivPatch(16, "int_size"));
+            addPatch(new TileSizePatch(16.0D, "double_size"));
+            addPatch(new TileSizePatch(15.0D, "double_sizeMinus1"));
+            addPatch(new TileSizePatch.GetRGBPatch());
+            addPatch(new TileSizePatch.ArraySizePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch.MultiplyPatch(16, "int_size"));
+            addPatch(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch.BitMaskPatch(15, "int_sizeMinus1"));
+            addPatch(new TileSizePatch.DivPatch(16, "int_size"));
 
-            patches.add(new TileSizePatch.ModPatch(16, "int_size")
+            addPatch(new TileSizePatch.ModPatch(16, "int_size")
                 .addPreMatchSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
@@ -661,7 +661,7 @@ public class HDTexture extends BaseTexturePackMod {
         PortalMod() {
             final MethodRef atan2 = new MethodRef("java.lang.Math", "atan2", "(DD)D");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -675,13 +675,13 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             }.matchConstructorOnly(true));
 
-            patches.add(new TileSizePatch(16.0F, "float_size"));
-            patches.add(new TileSizePatch.WhilePatch(16, "int_size"));
-            patches.add(new TileSizePatch.ArraySize2DPatch(1024, "int_numBytes", 32));
-            patches.add(new TileSizePatch.MultiplyPatch(16, "int_size"));
-            patches.add(new TileSizePatch.MultiplyPatch(8, "int_sizeHalf"));
-            patches.add(new TileSizePatch.WhilePatch(256, "int_numPixels"));
-            patches.add(new TileSizePatch.IfLessPatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch(16.0F, "float_size"));
+            addPatch(new TileSizePatch.WhilePatch(16, "int_size"));
+            addPatch(new TileSizePatch.ArraySize2DPatch(1024, "int_numBytes", 32));
+            addPatch(new TileSizePatch.MultiplyPatch(16, "int_size"));
+            addPatch(new TileSizePatch.MultiplyPatch(8, "int_sizeHalf"));
+            addPatch(new TileSizePatch.WhilePatch(256, "int_numPixels"));
+            addPatch(new TileSizePatch.IfLessPatch(256, "int_numPixels"));
         }
     }
 
@@ -695,11 +695,11 @@ public class HDTexture extends BaseTexturePackMod {
                 addColorizerSignature("Foliage");
             }
 
-            memberMappers.add(new FieldMapper(renderEngine));
+            addMemberMapper(new FieldMapper(renderEngine));
         }
 
         private void addColorizerSignature(final String name) {
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -720,14 +720,14 @@ public class HDTexture extends BaseTexturePackMod {
 
             final FieldRef colorBuffer = new FieldRef(getDeobfClass(), "colorBuffer", "[I");
 
-            memberMappers.add(new FieldMapper(colorBuffer));
+            addMemberMapper(new FieldMapper(colorBuffer));
 
-            patches.add(new MakeMemberPublicPatch(colorBuffer));
+            addPatch(new MakeMemberPublicPatch(colorBuffer));
 
             if (haveColorizerWater) {
-                prerequisiteClasses.add("Minecraft");
+                addPrerequisiteClass("Minecraft");
             } else {
-                classSignatures.add(new ConstSignature(resource));
+                addClassSignature(new ConstSignature(resource));
             }
         }
 
@@ -739,11 +739,11 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class GuiContainerCreativeMod extends ClassMod {
         GuiContainerCreativeMod() {
-            global = true;
+            setMultipleMatchesAllowed(true);
 
-            classSignatures.add(new ConstSignature("/gui/allitems.png"));
+            addClassSignature(new ConstSignature("/gui/allitems.png"));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "use allitemsx.png for creative mode inventory background";

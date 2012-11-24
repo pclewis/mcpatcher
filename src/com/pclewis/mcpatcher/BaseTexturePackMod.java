@@ -25,26 +25,26 @@ public class BaseTexturePackMod extends Mod {
         haveITexturePack = minecraftVersion.compareTo("12w15a") >= 0;
         texturePackType = haveITexturePack ? "LITexturePack;" : "LTexturePackBase;";
 
-        classMods.add(new MinecraftMod());
-        classMods.add(new RenderEngineMod());
-        classMods.add(new TexturePackListMod());
+        addClassMod(new MinecraftMod());
+        addClassMod(new RenderEngineMod());
+        addClassMod(new TexturePackListMod());
         if (haveITexturePack) {
-            classMods.add(new ITexturePackMod());
+            addClassMod(new ITexturePackMod());
         }
-        classMods.add(new TexturePackBaseMod());
-        classMods.add(new TexturePackDefaultMod());
-        classMods.add(new TexturePackCustomMod());
+        addClassMod(new TexturePackBaseMod());
+        addClassMod(new TexturePackDefaultMod());
+        addClassMod(new TexturePackCustomMod());
         if (haveFolderTexturePacks) {
-            classMods.add(new TexturePackFolderMod());
+            addClassMod(new TexturePackFolderMod());
         }
-        classMods.add(new GetResourceMod());
+        addClassMod(new GetResourceMod());
 
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_PACK_API_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_PACK_API_CLASS + "$ChangeHandler"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.TEXTURE_PACK_API_CLASS + "$ChangeHandler$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.WEIGHTED_INDEX_CLASS));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.WEIGHTED_INDEX_CLASS + "$1"));
-        filesToAdd.add(ClassMap.classNameToFilename(MCPatcherUtils.WEIGHTED_INDEX_CLASS + "$2"));
+        addClassFile(MCPatcherUtils.TEXTURE_PACK_API_CLASS);
+        addClassFile(MCPatcherUtils.TEXTURE_PACK_API_CLASS + "$ChangeHandler");
+        addClassFile(MCPatcherUtils.TEXTURE_PACK_API_CLASS + "$ChangeHandler$1");
+        addClassFile(MCPatcherUtils.WEIGHTED_INDEX_CLASS);
+        addClassFile(MCPatcherUtils.WEIGHTED_INDEX_CLASS + "$1");
+        addClassFile(MCPatcherUtils.WEIGHTED_INDEX_CLASS + "$2");
     }
 
     @Override
@@ -63,7 +63,7 @@ public class BaseTexturePackMod extends Mod {
             final MethodRef startGame = new MethodRef(getDeobfClass(), "startGame", "()V");
             final MethodRef runGameLoop = new MethodRef(getDeobfClass(), "runGameLoop", "()V");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -72,7 +72,7 @@ public class BaseTexturePackMod extends Mod {
                 }
             }.setMethod(startGame));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -81,10 +81,10 @@ public class BaseTexturePackMod extends Mod {
                 }
             }.setMethod(runGameLoop));
 
-            memberMappers.add(new FieldMapper(texturePackList));
-            memberMappers.add(new FieldMapper(renderEngine));
+            addMemberMapper(new FieldMapper(texturePackList));
+            addMemberMapper(new FieldMapper(renderEngine));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "init texture pack handlers on startup";
@@ -105,7 +105,7 @@ public class BaseTexturePackMod extends Mod {
                 }
             }.targetMethod(startGame));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "check for texture pack change";
@@ -132,7 +132,7 @@ public class BaseTexturePackMod extends Mod {
         RenderEngineMod() {
             final MethodRef deleteTexture = new MethodRef(getDeobfClass(), "deleteTexture", "(I)V");
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -153,10 +153,10 @@ public class BaseTexturePackMod extends Mod {
             final MethodRef updateAvailableTexturePacks = new MethodRef(getDeobfClass(), "updateAvailableTexturePacks", "()V");
             final ClassRef texturePackClass = new ClassRef("TexturePackBase");
 
-            classSignatures.add(new ConstSignature(".zip"));
-            classSignatures.add(new ConstSignature("texturepacks"));
+            addClassSignature(new ConstSignature(".zip"));
+            addClassSignature(new ConstSignature("texturepacks"));
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -169,24 +169,24 @@ public class BaseTexturePackMod extends Mod {
                 }
             }.setMethod(updateAvailableTexturePacks));
 
-            memberMappers.add(new MethodMapper(setTexturePack));
+            addMemberMapper(new MethodMapper(setTexturePack));
 
             if (haveITexturePack) {
                 selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LITexturePack;");
                 defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LITexturePack;");
 
-                memberMappers.add(new FieldMapper(selectedTexturePack)
+                addMemberMapper(new FieldMapper(selectedTexturePack)
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, false)
                     .accessFlag(AccessFlag.FINAL, false)
                 );
-                memberMappers.add(new FieldMapper(defaultTexturePack)
+                addMemberMapper(new FieldMapper(defaultTexturePack)
                     .accessFlag(AccessFlag.PRIVATE, true)
                     .accessFlag(AccessFlag.STATIC, true)
                     .accessFlag(AccessFlag.FINAL, true)
                 );
 
-                patches.add(new AddMethodPatch(getDefaultTexturePack) {
+                addPatch(new AddMethodPatch(getDefaultTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -197,7 +197,7 @@ public class BaseTexturePackMod extends Mod {
                     }
                 });
 
-                patches.add(new AddMethodPatch(getSelectedTexturePack) {
+                addPatch(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -212,10 +212,10 @@ public class BaseTexturePackMod extends Mod {
                 selectedTexturePack = new FieldRef(getDeobfClass(), "selectedTexturePack", "LTexturePackBase;");
                 defaultTexturePack = new FieldRef(getDeobfClass(), "defaultTexturePack", "LTexturePackBase;");
 
-                memberMappers.add(new FieldMapper(selectedTexturePack).accessFlag(AccessFlag.PUBLIC, true));
-                memberMappers.add(new FieldMapper(defaultTexturePack).accessFlag(AccessFlag.PRIVATE, true));
+                addMemberMapper(new FieldMapper(selectedTexturePack).accessFlag(AccessFlag.PUBLIC, true));
+                addMemberMapper(new FieldMapper(defaultTexturePack).accessFlag(AccessFlag.PRIVATE, true));
 
-                patches.add(new AddMethodPatch(getDefaultTexturePack) {
+                addPatch(new AddMethodPatch(getDefaultTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -226,7 +226,7 @@ public class BaseTexturePackMod extends Mod {
                     }
                 });
 
-                patches.add(new AddMethodPatch(getSelectedTexturePack) {
+                addPatch(new AddMethodPatch(getSelectedTexturePack) {
                     @Override
                     public byte[] generateMethod() throws BadBytecode, IOException {
                         return buildCode(
@@ -238,7 +238,7 @@ public class BaseTexturePackMod extends Mod {
                 });
             }
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "handle texture pack change";
@@ -260,7 +260,7 @@ public class BaseTexturePackMod extends Mod {
                 }
             }.targetMethod(setTexturePack));
 
-            patches.add(new BytecodePatch.InsertBefore() {
+            addPatch(new BytecodePatch.InsertBefore() {
                 @Override
                 public String getDescription() {
                     return "handle texture pack list change";
@@ -287,7 +287,7 @@ public class BaseTexturePackMod extends Mod {
         ITexturePackMod() {
             prerequisiteClasses.add("TexturePackBase");
 
-            memberMappers.add(new MethodMapper(new MethodRef(getDeobfClass(), "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
+            addMemberMapper(new MethodMapper(new MethodRef(getDeobfClass(), "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;")));
         }
     }
 
@@ -298,21 +298,21 @@ public class BaseTexturePackMod extends Mod {
             final MethodRef getInputStream = new MethodRef(getDeobfClass(), "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
 
-            classSignatures.add(new ConstSignature(getResourceAsStream));
+            addClassSignature(new ConstSignature(getResourceAsStream));
 
             if (haveITexturePack) {
                 interfaces = new String[]{"ITexturePack"};
 
-                classSignatures.add(new ConstSignature("/pack.txt"));
+                addClassSignature(new ConstSignature("/pack.txt"));
 
-                memberMappers.add(new FieldMapper(file));
+                addMemberMapper(new FieldMapper(file));
 
-                patches.add(new MakeMemberPublicPatch(file));
+                addPatch(new MakeMemberPublicPatch(file));
             } else {
-                classSignatures.add(new ConstSignature("pack.txt").negate(true));
+                addClassSignature(new ConstSignature("pack.txt").negate(true));
             }
 
-            classSignatures.add(new BytecodeSignature() {
+            addClassSignature(new BytecodeSignature() {
                 @Override
                 public String getMatchExpression() {
                     return buildExpression(
@@ -323,9 +323,9 @@ public class BaseTexturePackMod extends Mod {
                 }
             }.setMethod(getInputStream));
 
-            memberMappers.add(new FieldMapper(texturePackFileName));
+            addMemberMapper(new FieldMapper(texturePackFileName));
 
-            patches.add(new MakeMemberPublicPatch(texturePackFileName));
+            addPatch(new MakeMemberPublicPatch(texturePackFileName));
         }
     }
 
@@ -333,7 +333,7 @@ public class BaseTexturePackMod extends Mod {
         TexturePackDefaultMod() {
             parentClass = "TexturePackBase";
 
-            classSignatures.add(new ConstSignature("The default look of Minecraft"));
+            addClassSignature(new ConstSignature("The default look of Minecraft"));
         }
     }
 
@@ -344,24 +344,24 @@ public class BaseTexturePackMod extends Mod {
             final FieldRef file = new FieldRef(getDeobfClass(), "file", "Ljava/io/File;");
             final FieldRef zipFile = new FieldRef(getDeobfClass(), "zipFile", "Ljava/util/zip/ZipFile;");
 
-            classSignatures.add(new ConstSignature(new MethodRef("java/util/zip/ZipFile", "getEntry", "(Ljava/lang/String;)Ljava/util/zip/ZipEntry;")));
-            classSignatures.add(new ConstSignature(new MethodRef("java/util/zip/ZipFile", "close", "()V")));
+            addClassSignature(new ConstSignature(new MethodRef("java/util/zip/ZipFile", "getEntry", "(Ljava/lang/String;)Ljava/util/zip/ZipEntry;")));
+            addClassSignature(new ConstSignature(new MethodRef("java/util/zip/ZipFile", "close", "()V")));
 
             if (!haveITexturePack) {
-                classSignatures.add(new ConstSignature("pack.txt"));
-                classSignatures.add(new ConstSignature("pack.png"));
+                addClassSignature(new ConstSignature("pack.txt"));
+                addClassSignature(new ConstSignature("pack.png"));
 
-                memberMappers.add(new FieldMapper(file));
+                addMemberMapper(new FieldMapper(file));
 
-                patches.add(new MakeMemberPublicPatch(file));
+                addPatch(new MakeMemberPublicPatch(file));
             }
 
-            memberMappers.add(new FieldMapper(zipFile));
+            addMemberMapper(new FieldMapper(zipFile));
 
-            patches.add(new MakeMemberPublicPatch(zipFile));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "origZip", "Ljava/util/zip/ZipFile;")));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "tmpFile", "Ljava/io/File;")));
-            patches.add(new AddFieldPatch(new FieldRef(getDeobfClass(), "lastModified", "J")));
+            addPatch(new MakeMemberPublicPatch(zipFile));
+            addPatch(new AddFieldPatch(new FieldRef(getDeobfClass(), "origZip", "Ljava/util/zip/ZipFile;")));
+            addPatch(new AddFieldPatch(new FieldRef(getDeobfClass(), "tmpFile", "Ljava/io/File;")));
+            addPatch(new AddFieldPatch(new FieldRef(getDeobfClass(), "lastModified", "J")));
         }
     }
 
@@ -374,10 +374,10 @@ public class BaseTexturePackMod extends Mod {
             final MethodRef getFolder = new MethodRef(getDeobfClass(), "getFolder", "()Ljava/io/File;");
             final MethodRef substring = new MethodRef("java/lang/String", "substring", "(I)Ljava/lang/String;");
 
-            classSignatures.add(new ConstSignature(new ClassRef("java.io.FileInputStream")));
+            addClassSignature(new ConstSignature(new ClassRef("java.io.FileInputStream")));
 
             if (haveITexturePack) {
-                classSignatures.add(new BytecodeSignature() {
+                addClassSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
                         return buildExpression(
@@ -388,13 +388,13 @@ public class BaseTexturePackMod extends Mod {
                     }
                 });
             } else {
-                classSignatures.add(new ConstSignature("pack.txt"));
-                classSignatures.add(new ConstSignature("pack.png"));
+                addClassSignature(new ConstSignature("pack.txt"));
+                addClassSignature(new ConstSignature("pack.png"));
 
-                memberMappers.add(new FieldMapper(file));
+                addMemberMapper(new FieldMapper(file));
             }
 
-            patches.add(new AddMethodPatch(getFolder) {
+            addPatch(new AddMethodPatch(getFolder) {
                 @Override
                 public byte[] generateMethod() throws BadBytecode, IOException {
                     return buildCode(
@@ -416,16 +416,16 @@ public class BaseTexturePackMod extends Mod {
             final MethodRef getResourceAsStream = new MethodRef("java.lang.Class", "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
             final MethodRef readStream = new MethodRef("javax.imageio.ImageIO", "read", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
 
-            classSignatures.add(new OrSignature(
+            addClassSignature(new OrSignature(
                 new ConstSignature(getResource),
                 new ConstSignature(getResourceAsStream)
             ));
-            classSignatures.add(new OrSignature(
+            addClassSignature(new OrSignature(
                 new ConstSignature(readURL),
                 new ConstSignature(readStream)
             ));
 
-            patches.add(new BytecodePatch() {
+            addPatch(new BytecodePatch() {
                 @Override
                 public String getDescription() {
                     return "ImageIO.read(getResource(...)) -> getImage(...)";

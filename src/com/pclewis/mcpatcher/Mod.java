@@ -39,10 +39,13 @@ public abstract class Mod {
     protected ModConfigPanel configPanel = null;
     /**
      * List of ClassMod objects for the mod
+     * @see #addClassMod(ClassMod)
      */
     protected ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
     /**
      * List of files to add or replace in the output minecraft.jar
+     * @see #addFile(String)
+     * @see #addClassFile(String)
      */
     protected ArrayList<String> filesToAdd = new ArrayList<String>();
 
@@ -195,6 +198,19 @@ public abstract class Mod {
         }
         filesToAdd.clear();
         return this;
+    }
+
+    protected void addClassMod(ClassMod classMod) {
+        classMod.mod = this;
+        classMods.add(classMod);
+    }
+
+    protected void addFile(String filename) {
+        filesToAdd.add(filename);
+    }
+
+    protected void addClassFile(String className) {
+        addFile(ClassMap.classNameToFilename(className));
     }
 
     ArrayList<String> getErrors() {
