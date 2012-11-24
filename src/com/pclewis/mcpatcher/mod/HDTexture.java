@@ -498,6 +498,8 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class CompassMod extends ClassMod {
         CompassMod() {
+            setParentClass("TextureFX");
+
             addClassSignature(new ConstSignature("/gui/items.png"));
             addClassSignature(new ConstSignature("/misc/dial.png").negate(true));
             addClassSignature(new ConstSignature(new MethodRef("java.lang.Math", "sin", "(D)D")));
@@ -525,6 +527,8 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class FireMod extends ClassMod {
         FireMod() {
+            setParentClass("TextureFX");
+
             addClassSignature(new ConstSignature(new MethodRef("java.lang.Math", "random", "()D")));
 
             addClassSignature(new FixedBytecodeSignature(
@@ -560,6 +564,8 @@ public class HDTexture extends BaseTexturePackMod {
         private String name;
 
         FluidMod(String name) {
+            setParentClass("TextureFX");
+
             this.name = name;
             boolean lava = name.contains("Lava");
             boolean flow = name.contains("Flow");
@@ -633,6 +639,8 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class WatchMod extends ClassMod {
         public WatchMod() {
+            setParentClass("TextureFX");
+
             addClassSignature(new ConstSignature("/misc/dial.png"));
 
             addPatch(new TileSizePatch(16.0D, "double_size"));
@@ -659,6 +667,8 @@ public class HDTexture extends BaseTexturePackMod {
 
     private class PortalMod extends ClassMod {
         PortalMod() {
+            setParentClass("TextureFX");
+
             final MethodRef atan2 = new MethodRef("java.lang.Math", "atan2", "(DD)D");
 
             addClassSignature(new BytecodeSignature() {
