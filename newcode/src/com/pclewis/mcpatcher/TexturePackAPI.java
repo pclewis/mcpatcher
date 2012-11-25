@@ -188,6 +188,27 @@ public class TexturePackAPI {
         return texture;
     }
 
+    public static String getTextureName(int texture) {
+        if (texture >= 0) {
+            RenderEngine renderEngine = MCPatcherUtils.getMinecraft().renderEngine;
+            for (Field field : textureMapFields) {
+                try {
+                    HashMap map = (HashMap) field.get(renderEngine);
+                    for (Object o : map.entrySet()) {
+                        Map.Entry entry = (Map.Entry) o;
+                        Object value = entry.getValue();
+                        Object key = entry.getKey();
+                        if (value instanceof Integer && key instanceof String && (Integer) value == texture) {
+                            return (String) key;
+                        }
+                    }
+                } catch (IllegalAccessException e) {
+                }
+            }
+        }
+        return null;
+    }
+
     protected InputStream getInputStreamImpl(String s) {
         s = parseTextureName(s)[1];
         if (!loadFontFromTexturePack && s.startsWith("/font/")) {
