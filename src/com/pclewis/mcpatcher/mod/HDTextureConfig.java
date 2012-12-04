@@ -71,19 +71,6 @@ public class HDTextureConfig extends ModConfigPanel {
             listener.load();
         }
         otherCombo.setSelectedIndex(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customOther", true) ? 1 : 0);
-        boolean is64bit = false;
-        try {
-            String datamodel = System.getProperty("sun.arch.data.model"); // sun-specific, but gets the arch of the jvm
-            String arch = System.getProperty("os.arch"); // generic, but gets the arch of the os, not the jvm (may be a 32-bit jvm on a 64-bit os)
-            if (datamodel != null) {
-                is64bit = (Integer.parseInt(datamodel) >= 64);
-            } else if (arch != null) {
-                is64bit = arch.contains("64");
-            } else {
-                is64bit = false;
-            }
-        } catch (Throwable e) {
-        }
         zombieHackCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true));
     }
 
