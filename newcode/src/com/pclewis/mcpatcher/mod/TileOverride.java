@@ -1,9 +1,9 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.MCLogger;
-import com.pclewis.mcpatcher.WeightedIndex;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
+import com.pclewis.mcpatcher.WeightedIndex;
 import net.minecraft.src.Block;
 import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.RenderBlocks;

@@ -39,11 +39,13 @@ public abstract class Mod {
     protected ModConfigPanel configPanel = null;
     /**
      * List of ClassMod objects for the mod
+     *
      * @see #addClassMod(ClassMod)
      */
     protected ArrayList<ClassMod> classMods = new ArrayList<ClassMod>();
     /**
      * List of files to add or replace in the output minecraft.jar
+     *
      * @see #addFile(String)
      * @see #addClassFile(String)
      */

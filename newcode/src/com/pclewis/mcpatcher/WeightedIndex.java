@@ -72,7 +72,7 @@ abstract public class WeightedIndex {
             }
         };
     }
-    
+
     protected WeightedIndex(int size) {
         this.size = size;
     }

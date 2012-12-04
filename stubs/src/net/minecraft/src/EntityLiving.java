@@ -1,7 +1,5 @@
 package net.minecraft.src;
 
-import com.pclewis.mcpatcher.mod.MobRandomizer;
-
 public class EntityLiving extends Entity {
     protected int health;
 
