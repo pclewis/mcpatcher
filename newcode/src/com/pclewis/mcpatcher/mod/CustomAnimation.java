@@ -36,6 +36,7 @@ public class CustomAnimation {
     private Delegate delegate;
 
     public static void updateAll() {
+        FancyCompass.update();
         for (CustomAnimation animation : animations) {
             animation.update();
         }

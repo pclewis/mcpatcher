@@ -17,6 +17,7 @@ public class HDTextureConfig extends ModConfigPanel {
     private JComboBox portalCombo;
     private JComboBox otherCombo;
     private JCheckBox zombieHackCheckBox;
+    private JCheckBox fancyCompassCheckBox;
 
     private AnimationComboListener[] comboListeners;
 
@@ -58,6 +59,12 @@ public class HDTextureConfig extends ModConfigPanel {
                 MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "zombieHack", zombieHackCheckBox.isSelected());
             }
         });
+
+        fancyCompassCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "fancyCompass", fancyCompassCheckBox.isSelected());
+            }
+        });
     }
 
     @Override
@@ -72,6 +79,7 @@ public class HDTextureConfig extends ModConfigPanel {
         }
         otherCombo.setSelectedIndex(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customOther", true) ? 1 : 0);
         zombieHackCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true));
+        fancyCompassCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "fancyCompass", true));
     }
 
     @Override

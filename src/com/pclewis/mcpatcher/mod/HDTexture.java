@@ -1,6 +1,7 @@
 package com.pclewis.mcpatcher.mod;
 
 import com.pclewis.mcpatcher.*;
+import javassist.bytecode.AccessFlag;
 
 import java.io.IOException;
 
@@ -56,6 +57,7 @@ public class HDTexture extends BaseTexturePackMod {
         addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Delegate");
         addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Tile");
         addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Strip");
+        addClassFile(MCPatcherUtils.FANCY_COMPASS_CLASS);
     }
 
     private class RenderEngineMod extends BaseMod.RenderEngineMod {
@@ -65,11 +67,14 @@ public class HDTexture extends BaseTexturePackMod {
             final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
             final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
             final MethodRef refreshTextures = new MethodRef(getDeobfClass(), "refreshTextures", "()V");
+            final FieldRef clampTexture = new FieldRef(getDeobfClass(), "clampTexture", "Z");
+            final FieldRef blurTexture = new FieldRef(getDeobfClass(), "blurTexture", "Z");
             final FieldRef imageData = new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;");
             final FieldRef textureList = new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;");
             final MethodRef getTexture = new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I");
             final MethodRef getImageRGB = new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I");
             final MethodRef readTextureImageData = new MethodRef(getDeobfClass(), "readTextureImageData", "(Ljava/lang/String;)[I");
+            final MethodRef allocateAndSetupTexture = new MethodRef(getDeobfClass(), "allocateAndSetupTexture", "(Ljava/awt/image/BufferedImage;)I");
 
             final int getInputStreamOpcode;
             final JavaRef getInputStream;
@@ -115,6 +120,10 @@ public class HDTexture extends BaseTexturePackMod {
 
             addMemberMapper(new FieldMapper(imageData));
             addMemberMapper(new FieldMapper(textureList));
+            addMemberMapper(new FieldMapper(clampTexture, blurTexture)
+                .accessFlag(AccessFlag.PUBLIC, true)
+                .accessFlag(AccessFlag.STATIC, false)
+            );
             addMemberMapper(new MethodMapper(registerTextureFX));
             addMemberMapper(new MethodMapper(readTextureImage));
             addMemberMapper(new MethodMapper(setupTexture));
@@ -125,6 +134,7 @@ public class HDTexture extends BaseTexturePackMod {
             if (haveColorizerWater) {
                 addMemberMapper(new MethodMapper(readTextureImageData));
             }
+            memberMappers.add(new MethodMapper(allocateAndSetupTexture));
 
             addPatch(new BytecodePatch() {
                 @Override
@@ -500,6 +510,9 @@ public class HDTexture extends BaseTexturePackMod {
         CompassMod() {
             setParentClass("TextureFX");
 
+            final FieldRef currentAngle = new FieldRef(getDeobfClass(), "currentAngle", "D");
+            final FieldRef targetAngle = new FieldRef(getDeobfClass(), "targetAngle", "D");
+
             addClassSignature(new ConstSignature("/gui/items.png"));
             addClassSignature(new ConstSignature("/misc/dial.png").negate(true));
             addClassSignature(new ConstSignature(new MethodRef("java.lang.Math", "sin", "(D)D")));
@@ -511,6 +524,8 @@ public class HDTexture extends BaseTexturePackMod {
                 PUTFIELD, any(2),
                 ALOAD_0
             ));
+
+            addMemberMapper(new FieldMapper(currentAngle, targetAngle));
 
             addPatch(new TileSizePatch(7.5, "double_compassCenterMin"));
             addPatch(new TileSizePatch(8.5, "double_compassCenterMax"));
