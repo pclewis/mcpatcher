@@ -15,12 +15,18 @@ import static javassist.bytecode.Opcode.*;
  * @see BinaryRegex
  */
 abstract public class BytecodePatch extends ClassPatch {
-    BytecodeMatcher matcher;
     private MethodRef targetMethod;
     boolean constructorOnly;
     boolean staticInitializerOnly;
     private final ArrayList<BytecodeSignature> preMatchSignatures = new ArrayList<BytecodeSignature>();
     int labelOffset;
+
+    /**
+     * Matcher object.
+     *
+     * @see BytecodeMatcher
+     */
+    protected BytecodeMatcher matcher;
 
     /**
      * Restricts the patch to a single method.
