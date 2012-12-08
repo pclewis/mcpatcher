@@ -192,6 +192,7 @@ public class BytecodeMatcher extends BinaryMatcher {
      * @return bytecode
      */
     public static byte[] registerLoadStore(int opcode, int register) {
+        opcode &= 0xff;
         switch (opcode) {
             case ALOAD:
                 return registerLoadStore(ALOAD_OPCODES, ALOAD, register);
@@ -224,8 +225,232 @@ public class BytecodeMatcher extends BinaryMatcher {
                 return registerLoadStore(DSTORE_OPCODES, DSTORE, register);
 
             default:
-                throw new IllegalArgumentException("invalid opcode " + opcode);
+                throw new IllegalArgumentException("invalid opcode " + Mnemonic.OPCODE[opcode]);
         }
+    }
+
+    /**
+     * "Flips" a register load/store operation to its opposite: e.g., ALOAD_1 -> ASTORE_1; ISTORE, 5 -> ILOAD, 5.
+     *
+     * @param code load/store operation
+     * @return matching store/load operation of the same register and type
+     */
+    public static byte[] flipLoadStore(byte[] code) {
+        if (code == null) {
+            return null;
+        }
+        byte[] newcode = code.clone();
+        int offset = 0;
+        if (newcode[offset] == WIDE) {
+            offset++;
+        }
+        int opcode = newcode[offset] & 0xff;
+        switch (opcode) {
+            case ALOAD:
+                opcode = ASTORE;
+                break;
+
+            case ALOAD_0:
+                opcode = ASTORE_0;
+                break;
+
+            case ALOAD_1:
+                opcode = ASTORE_1;
+                break;
+
+            case ALOAD_2:
+                opcode = ASTORE_2;
+                break;
+
+            case ALOAD_3:
+                opcode = ASTORE_3;
+                break;
+
+            case ASTORE:
+                opcode = ALOAD;
+                break;
+
+            case ASTORE_0:
+                opcode = ALOAD_0;
+                break;
+
+            case ASTORE_1:
+                opcode = ALOAD_1;
+                break;
+
+            case ASTORE_2:
+                opcode = ALOAD_2;
+                break;
+
+            case ASTORE_3:
+                opcode = ALOAD_3;
+                break;
+
+            case ILOAD:
+                opcode = ISTORE;
+                break;
+
+            case ILOAD_0:
+                opcode = ISTORE_0;
+                break;
+
+            case ILOAD_1:
+                opcode = ISTORE_1;
+                break;
+
+            case ILOAD_2:
+                opcode = ISTORE_2;
+                break;
+
+            case ILOAD_3:
+                opcode = ISTORE_3;
+                break;
+
+            case ISTORE:
+                opcode = ILOAD;
+                break;
+
+            case ISTORE_0:
+                opcode = ILOAD_0;
+                break;
+
+            case ISTORE_1:
+                opcode = ILOAD_1;
+                break;
+
+            case ISTORE_2:
+                opcode = ILOAD_2;
+                break;
+
+            case ISTORE_3:
+                opcode = ILOAD_3;
+                break;
+
+            case LLOAD:
+                opcode = LSTORE;
+                break;
+
+            case LLOAD_0:
+                opcode = LSTORE_0;
+                break;
+
+            case LLOAD_1:
+                opcode = LSTORE_1;
+                break;
+
+            case LLOAD_2:
+                opcode = LSTORE_2;
+                break;
+
+            case LLOAD_3:
+                opcode = LSTORE_3;
+                break;
+
+            case LSTORE:
+                opcode = LLOAD;
+                break;
+
+            case LSTORE_0:
+                opcode = LLOAD_0;
+                break;
+
+            case LSTORE_1:
+                opcode = LLOAD_1;
+                break;
+
+            case LSTORE_2:
+                opcode = LLOAD_2;
+                break;
+
+            case LSTORE_3:
+                opcode = LLOAD_3;
+                break;
+
+            case FLOAD:
+                opcode = FSTORE;
+                break;
+
+            case FLOAD_0:
+                opcode = FSTORE_0;
+                break;
+
+            case FLOAD_1:
+                opcode = FSTORE_1;
+                break;
+
+            case FLOAD_2:
+                opcode = FSTORE_2;
+                break;
+
+            case FLOAD_3:
+                opcode = FSTORE_3;
+                break;
+
+            case FSTORE:
+                opcode = FLOAD;
+                break;
+
+            case FSTORE_0:
+                opcode = FLOAD_0;
+                break;
+
+            case FSTORE_1:
+                opcode = FLOAD_1;
+                break;
+
+            case FSTORE_2:
+                opcode = FLOAD_2;
+                break;
+
+            case FSTORE_3:
+                opcode = FLOAD_3;
+                break;
+
+            case DLOAD:
+                opcode = DSTORE;
+                break;
+
+            case DLOAD_0:
+                opcode = DSTORE_0;
+                break;
+
+            case DLOAD_1:
+                opcode = DSTORE_1;
+                break;
+
+            case DLOAD_2:
+                opcode = DSTORE_2;
+                break;
+
+            case DLOAD_3:
+                opcode = DSTORE_3;
+                break;
+
+            case DSTORE:
+                opcode = DLOAD;
+                break;
+
+            case DSTORE_0:
+                opcode = DLOAD_0;
+                break;
+
+            case DSTORE_1:
+                opcode = DLOAD_1;
+                break;
+
+            case DSTORE_2:
+                opcode = DLOAD_2;
+                break;
+
+            case DSTORE_3:
+                opcode = DLOAD_3;
+                break;
+
+            default:
+                throw new IllegalArgumentException("invalid opcode " + Mnemonic.OPCODE[opcode]);
+        }
+        newcode[offset] = (byte) opcode;
+        return newcode;
     }
 
     /**
