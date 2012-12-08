@@ -30,6 +30,9 @@ public class RenderEngine {
         return -1;
     }
 
+    public void setupTexture(BufferedImage image, int texture) {
+    }
+
     public void reloadTextures(Minecraft minecraft) {
     }
 }

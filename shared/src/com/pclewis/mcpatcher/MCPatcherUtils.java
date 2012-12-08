@@ -49,6 +49,7 @@ public class MCPatcherUtils {
     public static final String TEXTURE_UTILS_CLASS = "com.pclewis.mcpatcher.mod.TextureUtils";
     public static final String CUSTOM_ANIMATION_CLASS = "com.pclewis.mcpatcher.mod.CustomAnimation";
     public static final String FANCY_COMPASS_CLASS = "com.pclewis.mcpatcher.mod.FancyCompass";
+    public static final String MIPMAP_HELPER_CLASS = "com.pclewis.mcpatcher.mod.MipmapHelper";
     public static final String FONT_UTILS_CLASS = "com.pclewis.mcpatcher.mod.FontUtils";
     public static final String RANDOM_MOBS_CLASS = "com.pclewis.mcpatcher.mod.MobRandomizer";
     public static final String MOB_RULE_LIST_CLASS = "com.pclewis.mcpatcher.mod.MobRuleList";

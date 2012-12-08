@@ -334,6 +334,7 @@ public class CustomAnimation {
         public void update(int texture, int dx, int dy) {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
             GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x + dx, y + dy, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * h * tileOrder[currentFrame]));
+            MipmapHelper.update(textureName, x + dx, y + dy, w, h, imageData.slice());
         }
 
         public int getDelay() {

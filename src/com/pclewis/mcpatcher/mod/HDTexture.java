@@ -12,6 +12,7 @@ import static javassist.bytecode.Opcode.*;
 public class HDTexture extends BaseTexturePackMod {
     private final boolean haveColorizerWater;
     private final boolean haveGetImageRGB;
+    private final int updateDynamicTextureVersion;
 
     public HDTexture(MinecraftVersion minecraftVersion) {
         super(minecraftVersion);
@@ -20,13 +21,20 @@ public class HDTexture extends BaseTexturePackMod {
         name = MCPatcherUtils.HD_TEXTURES;
         author = "MCPatcher";
         description = "Provides support for high-resolution texture packs and custom animations.";
-        version = "1.4";
+        version = "1.5";
         configPanel = new HDTextureConfig();
 
         addDependency(BaseTexturePackMod.NAME);
 
         haveColorizerWater = minecraftVersion.compareTo("Beta 1.6") >= 0;
         haveGetImageRGB = minecraftVersion.compareTo("Beta 1.6") >= 0;
+        if (minecraftVersion.compareTo("1.0.0") < 0) {
+            updateDynamicTextureVersion = 0;
+        } else if (minecraftVersion.compareTo("12w34a") < 0) {
+            updateDynamicTextureVersion = 1;
+        } else {
+            updateDynamicTextureVersion = 2;
+        }
 
         addClassMod(new RenderEngineMod());
         addClassMod(new TextureFXMod());
@@ -58,26 +66,36 @@ public class HDTexture extends BaseTexturePackMod {
         addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Tile");
         addClassFile(MCPatcherUtils.CUSTOM_ANIMATION_CLASS + "$Strip");
         addClassFile(MCPatcherUtils.FANCY_COMPASS_CLASS);
+        addClassFile(MCPatcherUtils.MIPMAP_HELPER_CLASS);
+    }
+
+    @Override
+    public String[] getLoggingCategories() {
+        return new String[]{
+            name,
+            "Mipmap"
+        };
     }
 
     private class RenderEngineMod extends BaseMod.RenderEngineMod {
-        RenderEngineMod() {
-            final MethodRef updateDynamicTextures = new MethodRef(getDeobfClass(), "updateDynamicTextures", "()V");
-            final MethodRef readTextureImage = new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
-            final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
-            final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
-            final MethodRef refreshTextures = new MethodRef(getDeobfClass(), "refreshTextures", "()V");
-            final FieldRef clampTexture = new FieldRef(getDeobfClass(), "clampTexture", "Z");
-            final FieldRef blurTexture = new FieldRef(getDeobfClass(), "blurTexture", "Z");
-            final FieldRef imageData = new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;");
-            final FieldRef textureList = new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;");
-            final MethodRef getTexture = new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I");
-            final MethodRef getImageRGB = new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I");
-            final MethodRef readTextureImageData = new MethodRef(getDeobfClass(), "readTextureImageData", "(Ljava/lang/String;)[I");
-            final MethodRef allocateAndSetupTexture = new MethodRef(getDeobfClass(), "allocateAndSetupTexture", "(Ljava/awt/image/BufferedImage;)I");
+        private final MethodRef updateDynamicTextures = new MethodRef(getDeobfClass(), "updateDynamicTextures", "()V");
+        private final MethodRef readTextureImage = new MethodRef(getDeobfClass(), "readTextureImage", "(Ljava/io/InputStream;)Ljava/awt/image/BufferedImage;");
+        private final MethodRef setupTexture = new MethodRef(getDeobfClass(), "setupTexture", "(Ljava/awt/image/BufferedImage;I)V");
+        private final MethodRef registerTextureFX = new MethodRef(getDeobfClass(), "registerTextureFX", "(LTextureFX;)V");
+        private final MethodRef refreshTextures = new MethodRef(getDeobfClass(), "refreshTextures", "()V");
+        private final FieldRef clampTexture = new FieldRef(getDeobfClass(), "clampTexture", "Z");
+        private final FieldRef blurTexture = new FieldRef(getDeobfClass(), "blurTexture", "Z");
+        private final FieldRef imageData = new FieldRef(getDeobfClass(), "imageData", "Ljava/nio/ByteBuffer;");
+        private final FieldRef textureList = new FieldRef(getDeobfClass(), "textureList", "Ljava/util/List;");
+        private final MethodRef getTexture = new MethodRef(getDeobfClass(), "getTexture", "(Ljava/lang/String;)I");
+        private final MethodRef getImageRGB = new MethodRef(getDeobfClass(), "getImageRGB", "(Ljava/awt/image/BufferedImage;[I)[I");
+        private final MethodRef readTextureImageData = new MethodRef(getDeobfClass(), "readTextureImageData", "(Ljava/lang/String;)[I");
+        private final MethodRef allocateAndSetupTexture = new MethodRef(getDeobfClass(), "allocateAndSetupTexture", "(Ljava/awt/image/BufferedImage;)I");
 
-            final int getInputStreamOpcode;
-            final JavaRef getInputStream;
+        private final int getInputStreamOpcode;
+        private final JavaRef getInputStream;
+
+        RenderEngineMod() {
             if (haveITexturePack) {
                 getInputStreamOpcode = INVOKEINTERFACE;
                 getInputStream = new InterfaceMethodRef("ITexturePack", "getInputStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
@@ -95,7 +113,7 @@ public class HDTexture extends BaseTexturePackMod {
                 }
             }.setMethod(refreshTextures));
 
-            if (getMinecraftVersion().compareTo("1.0.0") >= 0) {
+            if (updateDynamicTextureVersion >= 1) {
                 addClassSignature(new BytecodeSignature() {
                     @Override
                     public String getMatchExpression() {
@@ -428,6 +446,184 @@ public class HDTexture extends BaseTexturePackMod {
                     );
                 }
             }.targetMethod(updateDynamicTextures));
+
+            addMipmappingPatches();
+        }
+
+        private void addMipmappingPatches() {
+            final MethodRef updateDynamicTexture;
+
+            if (updateDynamicTextureVersion <= 0) {
+                return;
+            } else if (updateDynamicTextureVersion == 1) {
+                updateDynamicTexture = updateDynamicTextures;
+            } else {
+                updateDynamicTexture = new MethodRef(getDeobfClass(), "updateDynamicTexture", "(LTextureFX;I)I");
+            }
+
+            addMemberMapper(new MethodMapper(updateDynamicTexture));
+
+            addPatch(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "override mipmap level in setupTexture";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        // GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, var3, var4, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, this.imageData);
+                        lookBehind(build(
+                            push(3553)
+                        ), true),
+                        push(0),
+                        lookAhead(build(
+                            push(6408),
+                            anyILOAD,
+                            anyILOAD,
+                            push(0),
+                            push(6408),
+                            push(5121),
+                            ALOAD_0,
+                            reference(GETFIELD, imageData),
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V"))
+                        ), true)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        // GL11.glTexImage2D(..., Mipmap.currentLevel, ...);
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.MIPMAP_HELPER_CLASS, "currentLevel", "I"))
+                    );
+                }
+            }.targetMethod(setupTexture));
+
+            addPatch(new BytecodePatch() {
+                @Override
+                public String getDescription() {
+                    return "preserve texture parameters during mipmap creation";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        begin(),
+                        capture(nonGreedy(any(0, 300))),
+                        capture(build(
+                            ALOAD_1,
+                            reference(INVOKEVIRTUAL, new MethodRef("java/awt/image/BufferedImage", "getWidth", "()I"))
+                        ))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        reference(GETSTATIC, new FieldRef(MCPatcherUtils.MIPMAP_HELPER_CLASS, "currentLevel", "I")),
+                        IFNE, branch("A"),
+                        getCaptureGroup(1),
+                        label("A"),
+                        getCaptureGroup(2)
+                    );
+                }
+            }.targetMethod(setupTexture));
+
+            addPatch(new BytecodePatch() {
+                private byte[] pushTextureName;
+                private int position;
+
+                {
+                    addPreMatchSignature(new BytecodeSignature() {
+                        @Override
+                        public String getMatchExpression() {
+                            return buildExpression(
+                                capture(anyALOAD),
+                                push("##"),
+                                reference(INVOKEVIRTUAL, new MethodRef("java/lang/String", "startsWith", "(Ljava/lang/String;)Z"))
+                            );
+                        }
+
+                        @Override
+                        public boolean afterMatch() {
+                            pushTextureName = getCaptureGroup(1);
+                            position = matcher.getStart();
+                            return true;
+                        }
+                    });
+                }
+
+                @Override
+                public String getDescription() {
+                    return "generate mipmaps during texture setup";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKEVIRTUAL, setupTexture)
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    if (matcher.getStart() < position) {
+                        return null;
+                    } else {
+                        return buildCode(
+                            pushTextureName,
+                            reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MIPMAP_HELPER_CLASS, "setupTexture", "(LRenderEngine;Ljava/awt/image/BufferedImage;ILjava/lang/String;)V"))
+                        );
+                    }
+                }
+            });
+
+            addPatch(new BytecodePatch() {
+                private byte[] loadTextureFX = new byte[]{ALOAD_1};
+
+                {
+                    if (updateDynamicTextureVersion < 2) {
+                        addPreMatchSignature(new BytecodeSignature() {
+                            @Override
+                            public String getMatchExpression() {
+                                return buildExpression(
+                                    anyALOAD,
+                                    reference(INVOKEINTERFACE, new InterfaceMethodRef("java/util/Iterator", "next", "()Ljava/lang/Object;")),
+                                    reference(CHECKCAST, new ClassRef("TextureFX")),
+                                    capture(anyASTORE)
+                                );
+                            }
+
+                            @Override
+                            public boolean afterMatch() {
+                                loadTextureFX = flipLoadStore(getCaptureGroup(1));
+                                return true;
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public String getDescription() {
+                    return "update mipmaps for animations";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.GL11_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getReplacementBytes() throws IOException {
+                    return buildCode(
+                        loadTextureFX,
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.MIPMAP_HELPER_CLASS, "glTexSubImage2D", "(IIIIIIIILjava/nio/ByteBuffer;LTextureFX;)V"))
+                    );
+                }
+            }.targetMethod(updateDynamicTexture));
         }
     }
 
@@ -721,6 +917,29 @@ public class HDTexture extends BaseTexturePackMod {
             }
 
             addMemberMapper(new FieldMapper(renderEngine));
+
+            /*
+            addPatch(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "enable anti-aliasing";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        reference(INVOKESTATIC, new MethodRef("org/lwjgl/opengl/Display", "create", "(Lorg/lwjgl/opengl/PixelFormat;)V"))
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        reference(INVOKESTATIC, new MethodRef(MCPatcherUtils.TEXTURE_UTILS_CLASS, "getAAPixelFormat", "(Lorg/lwjgl/opengl/PixelFormat;)Lorg/lwjgl/opengl/PixelFormat;"))
+                    );
+                }
+            });
+            */
         }
 
         private void addColorizerSignature(final String name) {

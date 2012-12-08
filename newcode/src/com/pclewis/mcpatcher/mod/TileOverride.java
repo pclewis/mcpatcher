@@ -9,6 +9,7 @@ import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.RenderBlocks;
 
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -115,6 +116,8 @@ abstract class TileOverride {
     private static final int CONNECT_BY_TILE = 1;
     private static final int CONNECT_BY_MATERIAL = 2;
 
+    private static final Method forceMipmapType;
+
     final String filePrefix;
     final String textureName;
     final int texture;
@@ -131,6 +134,17 @@ abstract class TileOverride {
     int metamask;
     int rotateUV;
     boolean rotateTop;
+
+    static {
+        Method method = null;
+        try {
+            Class<?> cl = Class.forName(MCPatcherUtils.MIPMAP_HELPER_CLASS);
+            method = cl.getDeclaredMethod("forceMipmapType", String.class, Integer.TYPE);
+        } catch (ClassNotFoundException e) {
+        } catch (NoSuchMethodException e) {
+        }
+        forceMipmapType = method;
+    }
 
     static TileOverride create(String filePrefix, Properties properties) {
         if (filePrefix == null) {
@@ -198,6 +212,21 @@ abstract class TileOverride {
     private TileOverride(String filePrefix, Properties properties) {
         this.filePrefix = filePrefix;
         textureName = properties.getProperty("source", filePrefix + ".png");
+
+        int pass = 0;
+        try {
+            pass = Integer.parseInt(properties.getProperty("renderPass", "-1"));
+        } catch (NumberFormatException e) {
+        }
+        renderPass = pass;
+        if (forceMipmapType != null) {
+            try {
+                forceMipmapType.invoke(null, textureName, renderPass > 2 ? 2 : 1);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+
         texture = CTMUtils.getTexture(textureName);
         if (texture < 0) {
             if (properties.contains("source")) {
@@ -206,13 +235,6 @@ abstract class TileOverride {
                 disabled = true;
             }
         }
-
-        int pass = 0;
-        try {
-            pass = Integer.parseInt(properties.getProperty("renderPass", "-1"));
-        } catch (NumberFormatException e) {
-        }
-        renderPass = pass;
 
         blockIDs = getIDList(properties, "blockIDs", "block", Block.blocksList.length - 1);
         tileIDs = getIDList(properties, "tileIDs", "terrain", CTMUtils.NUM_TILES - 1);

@@ -5,6 +5,7 @@ import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
+import org.lwjgl.opengl.PixelFormat;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -35,6 +36,8 @@ public class TextureUtils {
     private static final boolean useZombieHack = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true);
     private static final int zombieAspectRatio = getAspectRatio("/mob/zombie.png");
     private static final int pigZombieAspectRatio = getAspectRatio("/mob/pigzombie.png");
+
+    private static final int aaSamples = MCPatcherUtils.getInt(MCPatcherUtils.HD_TEXTURES, "antiAliasing", 0);
 
     private static final int LAVA_STILL_TEXTURE_INDEX = 14 * 16 + 13;  // Block.lavaStill.blockIndexInTexture
     private static final int LAVA_FLOWING_TEXTURE_INDEX = LAVA_STILL_TEXTURE_INDEX + 1; // Block.lavaMoving.blockIndexInTexture
@@ -97,6 +100,7 @@ public class TextureUtils {
                 }
                 int width = image.getWidth();
                 int height = image.getHeight();
+                logger.finer("opened %s %dx%d", s, width, height);
 
                 if (enableResizing) {
                     Integer i = expectedColumns.get(s);
@@ -156,6 +160,7 @@ public class TextureUtils {
             @Override
             protected void onChange() {
                 imageCache.clear();
+                MipmapHelper.reset();
                 setTileSize();
                 Minecraft minecraft = MCPatcherUtils.getMinecraft();
                 minecraft.renderEngine.reloadTextures(minecraft);
@@ -379,10 +384,14 @@ public class TextureUtils {
     }
 
     static BufferedImage resizeImage(BufferedImage image, int width) {
+        if (width == image.getWidth()) {
+            return image;
+        }
         int height = image.getHeight() * width / image.getWidth();
-        logger.fine("resizing to %dx%d", width, height);
+        logger.finer("resizing to %dx%d", width, height);
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = newImage.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics2D.drawImage(image, 0, 0, width, height, null);
         return newImage;
     }
@@ -406,5 +415,9 @@ public class TextureUtils {
 
     public static void bindImageEnd() {
         bindImageReentry = false;
+    }
+
+    public static PixelFormat getAAPixelFormat(PixelFormat format) {
+        return aaSamples > 0 ? format.withSamples(aaSamples) : format;
     }
 }
