@@ -198,6 +198,9 @@ public class MipmapHelper {
     }
 
     static void forceMipmapType(String texture, int type) {
+        if (!useMipmap) {
+            return;
+        }
         boolean reload = false;
         if (mipmapType.containsKey(texture)) {
             reload = mipmapType.get(texture) != type;
@@ -227,7 +230,7 @@ public class MipmapHelper {
     }
 
     private static int getMinSize(String texture) {
-        return texture.equals("/terrain.png") || texture.startsWith("/ctm/") ? 16 : 1;
+        return texture.equals("/terrain.png") || texture.startsWith("/ctm/") ? 32 : 2;
     }
 
     private static void resetOnOffTransparency(BufferedImage image) {
