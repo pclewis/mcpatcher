@@ -168,6 +168,9 @@ final public class MCPatcher {
             String defaultProfile = Config.getDefaultProfileName(minecraft.getVersion().getProfileString());
             MCPatcherUtils.config.setDefaultProfileName(defaultProfile);
             String selectedProfile = MCPatcherUtils.config.getConfigValue(Config.TAG_SELECTED_PROFILE);
+            if (MCPatcherUtils.config.selectedProfile == null) {
+                MCPatcherUtils.config.selectProfile(selectedProfile);
+            }
             if (Config.isDefaultProfile(selectedProfile)) {
                 MCPatcherUtils.config.selectProfile(defaultProfile);
             } else {
