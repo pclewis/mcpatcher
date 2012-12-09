@@ -13,9 +13,13 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class MipmapHelper {
     private static final MCLogger logger = MCLogger.getLogger("Mipmap");
+
+    private static final String MIPMAP_PROPERTIES = "/mipmap.properties";
 
     private static final boolean mipmapSupported;
     private static final boolean mipmapEnabled = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "mipmap", true);
@@ -174,6 +178,26 @@ public class MipmapHelper {
     static void reset() {
         mipmapType.clear();
         forceMipmapType("/terrain.png", MIPMAP_BASIC);
+        Properties properties = TexturePackAPI.getProperties(MIPMAP_PROPERTIES);
+        if (properties != null) {
+            for (Map.Entry entry : properties.entrySet()) {
+                if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
+                    String key = ((String) entry.getKey()).trim();
+                    String value = ((String) entry.getValue()).trim().toLowerCase();
+                    if (key.startsWith("/")) {
+                        if (value.equals("none")) {
+                            mipmapType.put(key, MIPMAP_NONE);
+                        } else if (value.equals("basic") || value.equals("opaque")) {
+                            mipmapType.put(key, MIPMAP_BASIC);
+                        } else if (value.equals("alpha")) {
+                            mipmapType.put(key, MIPMAP_ALPHA);
+                        } else {
+                            logger.warning("%s: unknown value '%s' for %s", MIPMAP_PROPERTIES, value, key);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static ArrayList<BufferedImage> getCustomMipmaps(String texture, int baseWidth, int baseHeight) {
