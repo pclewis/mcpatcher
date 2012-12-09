@@ -11,6 +11,7 @@ import org.lwjgl.util.glu.GLU;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MipmapHelper {
@@ -66,17 +67,28 @@ public class MipmapHelper {
                 return;
             }
             int mipmap = 0;
+            int type;
+            boolean useCustom;
             BufferedImage origImage = image;
-            int type = getMipmapType(currentTexture, image);
-            if (type >= MIPMAP_BASIC) {
-                mipmap = getMipmapLevel(currentTexture, image);
-                if (mipmap > 0) {
-                    logger.fine("generating %d mipmaps for %s, alpha=%s", mipmap, currentTexture, type >= MIPMAP_ALPHA);
-                } else {
-                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmap);
-                    type = MIPMAP_NONE;
-                    if (currentTexture != null) {
-                        mipmapType.put(currentTexture, type);
+            ArrayList<BufferedImage> customMipmaps = getCustomMipmaps(currentTexture, image.getWidth(), image.getHeight());
+            if (customMipmaps.size() > 0) {
+                useCustom = true;
+                mipmap = customMipmaps.size();
+                logger.fine("using %d custom mipmaps for %s", mipmap, currentTexture);
+                type = MIPMAP_BASIC;
+            } else {
+                useCustom = false;
+                type = getMipmapType(currentTexture, image);
+                if (type >= MIPMAP_BASIC) {
+                    mipmap = getMipmapLevel(currentTexture, image);
+                    if (mipmap > 0) {
+                        logger.fine("generating %d mipmaps for %s, alpha=%s", mipmap, currentTexture, type >= MIPMAP_ALPHA);
+                    } else {
+                        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmap);
+                        type = MIPMAP_NONE;
+                        if (currentTexture != null) {
+                            mipmapType.put(currentTexture, type);
+                        }
                     }
                 }
             }
@@ -97,12 +109,16 @@ public class MipmapHelper {
                 if (++currentLevel > mipmap) {
                     break;
                 }
-                origImage = scaleHalf(origImage);
-                if (type >= MIPMAP_ALPHA) {
-                    image = origImage;
+                if (useCustom) {
+                    image = customMipmaps.get(currentLevel - 1);
                 } else {
-                    image = new BufferedImage(origImage.getColorModel(), origImage.copyData(null), origImage.getColorModel().isAlphaPremultiplied(), null);
-                    resetOnOffTransparency(image);
+                    origImage = scaleHalf(origImage);
+                    if (type >= MIPMAP_ALPHA) {
+                        image = origImage;
+                    } else {
+                        image = new BufferedImage(origImage.getColorModel(), origImage.copyData(null), origImage.getColorModel().isAlphaPremultiplied(), null);
+                        resetOnOffTransparency(image);
+                    }
                 }
                 logger.finest("%s mipmap level %d (%dx%d)", currentTexture, currentLevel, image.getWidth(), image.getHeight());
             }
@@ -158,6 +174,30 @@ public class MipmapHelper {
     static void reset() {
         mipmapType.clear();
         forceMipmapType("/terrain.png", MIPMAP_BASIC);
+    }
+
+    private static ArrayList<BufferedImage> getCustomMipmaps(String texture, int baseWidth, int baseHeight) {
+        ArrayList<BufferedImage> mipmaps = new ArrayList<BufferedImage>();
+        if (useMipmap && texture != null) {
+            for (int i = 1; baseWidth > 0 && baseHeight > 0 && i <= maxMipmapLevel; i++) {
+                baseWidth >>>= 1;
+                baseHeight >>>= 1;
+                String name = texture.replace(".png", "-mipmap" + i + ".png");
+                BufferedImage image = TexturePackAPI.getImage(name);
+                if (image == null) {
+                    break;
+                }
+                int width = image.getWidth();
+                int height = image.getHeight();
+                if (width == baseWidth && height == baseHeight) {
+                    mipmaps.add(image);
+                } else {
+                    logger.warning("%s has wrong size %dx%d (expecting %dx%d)", name, width, height, baseWidth, baseHeight);
+                    break;
+                }
+            }
+        }
+        return mipmaps;
     }
 
     private static int getMipmapType(String texture, BufferedImage image) {
