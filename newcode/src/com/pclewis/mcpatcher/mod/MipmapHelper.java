@@ -348,22 +348,57 @@ public class MipmapHelper {
         int a01 = pixel01 & 0xff;
         int a10 = pixel10 & 0xff;
         int a11 = pixel11 & 0xff;
-        int a = a00 + a01 + a10 + a11;
-        if (a == 0 || a == 0x3fc) {
-            return average2RGBA(average2RGBA(pixel00, pixel11), average2RGBA(pixel01, pixel10)) | (a >>> 2);
-        } else {
-            int pixel = a >> 2;
-            for (int i = 8; i < 32; i += 8) {
-                int average = (a00 * ((pixel00 >> i) & 0xff) + a01 * ((pixel01 >> i) & 0xff) +
-                    a10 * ((pixel10 >> i) & 0xff) + a11 * ((pixel11 >> i) & 0xff)) / a;
-                pixel |= (average << i);
-            }
-            return pixel;
+        switch ((a00 << 24) | (a01 << 16) | (a10 << 8) | a11) {
+            case 0x00000000:
+                return 0x00000000;
+
+            case 0xff000000:
+                return pixel00;
+
+            case 0x00ff0000:
+                return pixel01;
+
+            case 0x0000ff00:
+                return pixel10;
+
+            case 0x000000ff:
+                return pixel11;
+
+            case 0xffff0000:
+                return average2RGBA(pixel00, pixel01);
+
+            case 0xff00ff00:
+                return average2RGBA(pixel00, pixel10);
+
+            case 0xff0000ff:
+                return average2RGBA(pixel00, pixel11);
+
+            case 0x00ffff00:
+                return average2RGBA(pixel01, pixel10);
+
+            case 0x00ff00ff:
+                return average2RGBA(pixel01, pixel11);
+
+            case 0x0000ffff:
+                return average2RGBA(pixel10, pixel11);
+
+            case 0xffffffff:
+                return average2RGBA(average2RGBA(pixel00, pixel11), average2RGBA(pixel01, pixel10));
+
+            default:
+                int a = a00 + a01 + a10 + a11;
+                int pixel = a >> 2;
+                for (int i = 8; i < 32; i += 8) {
+                    int average = (a00 * ((pixel00 >> i) & 0xff) + a01 * ((pixel01 >> i) & 0xff) +
+                        a10 * ((pixel10 >> i) & 0xff) + a11 * ((pixel11 >> i) & 0xff)) / a;
+                    pixel |= (average << i);
+                }
+                return pixel;
         }
     }
 
     private static int average2RGBA(int a, int b) {
-        return ((a & 0xfefefefe) >>> 1) + ((b & 0xfefefefe) >>> 1);
+        return (((a & 0xfefefefe) >>> 1) + ((b & 0xfefefefe) >>> 1)) | (a & b & 0x01010101);
     }
 
     private static void checkGLError(String format, Object... params) {
