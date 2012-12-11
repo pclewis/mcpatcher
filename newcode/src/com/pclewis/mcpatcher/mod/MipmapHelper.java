@@ -8,7 +8,9 @@ import net.minecraft.src.TextureFX;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.glu.GLU;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -70,25 +72,28 @@ public class MipmapHelper {
             if (texture < 0 || image == null) {
                 return;
             }
-            int mipmap = 0;
+            int mipmaps = 0;
             int type;
             boolean useCustom;
             BufferedImage origImage = image;
             ArrayList<BufferedImage> customMipmaps = getCustomMipmaps(currentTexture, image.getWidth(), image.getHeight());
             if (customMipmaps.size() > 0) {
                 useCustom = true;
-                mipmap = customMipmaps.size();
-                logger.fine("using %d custom mipmaps for %s", mipmap, currentTexture);
+                mipmaps = customMipmaps.size();
+                logger.fine("using %d custom mipmaps for %s", mipmaps, currentTexture);
                 type = MIPMAP_BASIC;
             } else {
                 useCustom = false;
                 type = getMipmapType(currentTexture, image);
                 if (type >= MIPMAP_BASIC) {
-                    mipmap = getMipmapLevel(currentTexture, image);
-                    if (mipmap > 0) {
-                        logger.fine("generating %d mipmaps for %s, alpha=%s", mipmap, currentTexture, type >= MIPMAP_ALPHA);
+                    mipmaps = getMipmapLevel(currentTexture, image);
+                    if (mipmaps > 0) {
+                        logger.fine("generating %d mipmaps for %s, alpha=%s", mipmaps, currentTexture, type >= MIPMAP_ALPHA);
+                        if (type == MIPMAP_BASIC) {
+                            setBackgroundColor(origImage, mipmaps);
+                        }
                     } else {
-                        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmap);
+                        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmaps);
                         type = MIPMAP_NONE;
                         if (currentTexture != null) {
                             mipmapType.put(currentTexture, type);
@@ -100,8 +105,8 @@ public class MipmapHelper {
                 if (currentLevel == 1) {
                     GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
                     GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmap);
-                    checkGLError("set GL_TEXTURE_MAX_LEVEL = %d", mipmap);
+                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmaps);
+                    checkGLError("set GL_TEXTURE_MAX_LEVEL = %d", mipmaps);
                     if (anisoSupported && anisoLevel > 1) {
                         GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoLevel);
                         checkGLError("set GL_TEXTURE_MAX_ANISOTROPY_EXT = %f", anisoLevel);
@@ -110,7 +115,7 @@ public class MipmapHelper {
                 }
                 renderEngine.setupTexture(image, texture);
                 checkGLError("setupTexture %d", currentLevel);
-                if (++currentLevel > mipmap) {
+                if (++currentLevel > mipmaps) {
                     break;
                 }
                 if (useCustom) {
@@ -285,16 +290,42 @@ public class MipmapHelper {
     }
 
     private static int getMipmapLevel(String texture, BufferedImage image) {
-        int size = Math.min(image.getWidth(), image.getHeight());
+        int size = BigInteger.valueOf(image.getWidth()).gcd(BigInteger.valueOf(image.getHeight())).intValue();
         int minSize = getMinSize(texture);
         int mipmap;
-        for (mipmap = 0; size >= minSize && mipmap < maxMipmapLevel; size >>= 1, mipmap++) {
+        for (mipmap = 0; size >= minSize && ((size & 1) == 0) && mipmap < maxMipmapLevel; size >>= 1, mipmap++) {
         }
         return mipmap;
     }
 
     private static int getMinSize(String texture) {
         return texture.equals("/terrain.png") || texture.startsWith("/ctm/") ? 32 : 2;
+    }
+
+    private static void setBackgroundColor(BufferedImage image, int mipmaps) {
+        if (image == null || mipmaps <= 0) {
+            return;
+        }
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int scale = 1 << mipmaps;
+        BufferedImage scaledImage = null;
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int pixel = image.getRGB(i, j);
+                if ((pixel & 0xff000000) == 0) {
+                    if (scaledImage == null) {
+                        scaledImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D graphics2D = scaledImage.createGraphics();
+                        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        graphics2D.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+                        graphics2D.drawImage(image, 0, 0, width, height, null);
+                    }
+                    pixel = scaledImage.getRGB(i / scale, j / scale);
+                    image.setRGB(i, j, pixel & 0x00ffffff);
+                }
+            }
+        }
     }
 
     private static void resetOnOffTransparency(BufferedImage image) {
@@ -349,9 +380,6 @@ public class MipmapHelper {
         int a10 = pixel10 & 0xff;
         int a11 = pixel11 & 0xff;
         switch ((a00 << 24) | (a01 << 16) | (a10 << 8) | a11) {
-            case 0x00000000:
-                return 0x00000000;
-
             case 0xff000000:
                 return pixel00;
 
@@ -382,6 +410,7 @@ public class MipmapHelper {
             case 0x0000ffff:
                 return average2RGBA(pixel10, pixel11);
 
+            case 0x00000000:
             case 0xffffffff:
                 return average2RGBA(average2RGBA(pixel00, pixel11), average2RGBA(pixel01, pixel10));
 
