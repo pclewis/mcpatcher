@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,7 +142,10 @@ public class MipmapHelper {
     public static void glTexSubImage2D(int target, int level, int xoffset, int yoffset, int width, int height, int format, int type, ByteBuffer pixels, TextureFX textureFX) {
         GL11.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
         if (textureFX.tileImage == 0) {
+            ByteOrder saveOrder = pixels.order();
+            pixels.order(ByteOrder.BIG_ENDIAN);
             update("/terrain.png", xoffset, yoffset, width, height, pixels);
+            pixels.order(saveOrder);
         }
     }
 
