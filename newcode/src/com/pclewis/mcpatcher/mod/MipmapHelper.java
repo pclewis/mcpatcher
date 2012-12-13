@@ -149,12 +149,16 @@ public class MipmapHelper {
         }
     }
 
-    static void update(String texture, int x, int y, int w, int h, ByteBuffer imageData) {
+    static int getMipmapLevels() {
         int filter = GL11.glGetTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER);
         if (filter != GL11.GL_NEAREST_MIPMAP_LINEAR && filter != GL11.GL_NEAREST_MIPMAP_NEAREST) {
-            return;
+            return 0;
         }
-        int mipmaps = GL11.glGetTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL);
+        return GL11.glGetTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL);
+    }
+
+    static void update(String texture, int x, int y, int w, int h, ByteBuffer imageData) {
+        int mipmaps = getMipmapLevels();
         for (int i = 1; i <= mipmaps && ((x | y | w | h) & mipmapAlignment) == 0; i++) {
             ByteBuffer newImage = ByteBuffer.allocateDirect(w * h);
             scaleHalf(imageData.asIntBuffer(), w, h, newImage.asIntBuffer());
@@ -294,7 +298,11 @@ public class MipmapHelper {
     }
 
     private static int getMipmapLevel(String texture, BufferedImage image) {
-        int size = BigInteger.valueOf(image.getWidth()).gcd(BigInteger.valueOf(image.getHeight())).intValue();
+        return getMipmapLevel(texture, image.getWidth(), image.getHeight());
+    }
+
+    static int getMipmapLevel(String texture, int width, int height) {
+        int size = BigInteger.valueOf(width).gcd(BigInteger.valueOf(height)).intValue();
         int minSize = getMinSize(texture);
         int mipmap;
         for (mipmap = 0; size >= minSize && ((size & 1) == 0) && mipmap < maxMipmapLevel; size >>= 1, mipmap++) {
@@ -349,7 +357,7 @@ public class MipmapHelper {
         }
     }
 
-    private static void scaleHalf(IntBuffer in, int w, int h, IntBuffer out) {
+    static void scaleHalf(IntBuffer in, int w, int h, IntBuffer out) {
         for (int i = 0; i < w / 2; i++) {
             for (int j = 0; j < h / 2; j++) {
                 int k = w * 2 * j + 2 * i;
