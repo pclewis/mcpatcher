@@ -144,7 +144,7 @@ class FancyCompass {
             logger.info("offsetY = %f", offsetY + plusOY);
         }
 
-        GL11.glPushAttrib(GL11.GL_VIEWPORT_BIT | GL11.GL_SCISSOR_BIT | GL11.GL_DEPTH_BITS);
+        GL11.glPushAttrib(GL11.GL_VIEWPORT_BIT | GL11.GL_SCISSOR_BIT | GL11.GL_DEPTH_BITS | GL11.GL_LIGHTING_BIT);
         GL11.glViewport(compassX, compassY, tileSize, tileSize);
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(compassX, compassY, tileSize, tileSize);
@@ -156,6 +156,8 @@ class FancyCompass {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GL11.glDisable(GL11.GL_LIGHTING);
 
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
