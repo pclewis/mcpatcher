@@ -4,6 +4,7 @@ import com.pclewis.mcpatcher.MCLogger;
 import com.pclewis.mcpatcher.MCPatcherUtils;
 import com.pclewis.mcpatcher.TexturePackAPI;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class CustomAnimation {
     private int currentFrame;
     private int currentDelay;
     private int numFrames;
+    private boolean error;
 
     private Delegate delegate;
 
@@ -87,7 +89,7 @@ public class CustomAnimation {
         if (animation != null) {
             animations.add(animation);
             if (animation.mipmapLevel == 0) {
-                logger.fine("new %s %s %dx%d -> %s @ %d,%d (%d frames)", CLASS_NAME, animation.srcName, animation.w, animation.h, animation.dstName, animation.x, animation.y, animation.numFrames);
+                logger.fine("new %s", animation);
             }
         }
     }
@@ -196,6 +198,9 @@ public class CustomAnimation {
     }
 
     void update() {
+        if (error) {
+            return;
+        }
         int texture = TexturePackAPI.getTextureIfLoaded(dstName);
         if (texture < 0) {
             return;
@@ -209,9 +214,22 @@ public class CustomAnimation {
         for (int i = 0; i < tileCount; i++) {
             for (int j = 0; j < tileCount; j++) {
                 delegate.update(texture, i * w, j * h);
+                int glError = GL11.glGetError();
+                if (glError != 0) {
+                    logger.severe("%s: %s", this, GLU.gluErrorString(glError));
+                    error = true;
+                    return;
+                }
             }
         }
         currentDelay = delegate.getDelay();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %dx%d -> %s%s @ %d,%d (%d frames)",
+            CLASS_NAME, srcName, w, h, dstName, (mipmapLevel > 0 ? "#" + mipmapLevel : ""), x, y, numFrames
+        );
     }
 
     static void ARGBtoRGBA(int[] src, byte[] dest) {
