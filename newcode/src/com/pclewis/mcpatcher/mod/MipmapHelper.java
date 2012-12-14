@@ -339,7 +339,7 @@ public class MipmapHelper {
             for (int j = 0; j < height; j++) {
                 int pixel = image.getRGB(i, j);
                 int alpha = pixel >>> 24;
-                if (alpha <= 0x7f) {
+                if (alpha < 0x7f) {
                     pixel &= 0x00ffffff;
                 } else {
                     pixel |= 0xff000000;
