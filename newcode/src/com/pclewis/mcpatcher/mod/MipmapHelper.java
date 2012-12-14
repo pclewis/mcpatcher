@@ -83,7 +83,7 @@ public class MipmapHelper {
                 logger.fine("using %d custom mipmaps for %s", mipmaps, textureName);
                 mipmaps = mipmapImages.size() - 1;
             } else {
-                mipmaps = getMipmapLevel(textureName, image);
+                mipmaps = getMipmapLevels(textureName, image);
                 if (mipmaps > 0) {
                     BufferedImage origImage = image;
                     BufferedImage scaledImage = null;
@@ -155,15 +155,7 @@ public class MipmapHelper {
         }
     }
 
-    static int getMipmapLevels() {
-        int filter = GL11.glGetTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER);
-        if (filter != GL11.GL_NEAREST_MIPMAP_LINEAR && filter != GL11.GL_NEAREST_MIPMAP_NEAREST) {
-            return 0;
-        }
-        return GL11.glGetTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL);
-    }
-
-    static void update(String texture, int x, int y, int w, int h, ByteBuffer imageData) {
+    private static void update(String texture, int x, int y, int w, int h, ByteBuffer imageData) {
         int mipmaps = getMipmapLevels();
         for (int i = 1; i <= mipmaps && ((x | y | w | h) & mipmapAlignment) == 0; i++) {
             ByteBuffer newImage = ByteBuffer.allocateDirect(w * h);
@@ -293,11 +285,19 @@ public class MipmapHelper {
         }
     }
 
-    private static int getMipmapLevel(String texture, BufferedImage image) {
-        return getMipmapLevel(texture, image.getWidth(), image.getHeight());
+    static int getMipmapLevels() {
+        int filter = GL11.glGetTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER);
+        if (filter != GL11.GL_NEAREST_MIPMAP_LINEAR && filter != GL11.GL_NEAREST_MIPMAP_NEAREST) {
+            return 0;
+        }
+        return GL11.glGetTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL);
     }
 
-    static int getMipmapLevel(String texture, int width, int height) {
+    private static int getMipmapLevels(String texture, BufferedImage image) {
+        return getMipmapLevels(texture, image.getWidth(), image.getHeight());
+    }
+
+    private static int getMipmapLevels(String texture, int width, int height) {
         int size = BigInteger.valueOf(width).gcd(BigInteger.valueOf(height)).intValue();
         int minSize = getMinSize(texture);
         int mipmap;
