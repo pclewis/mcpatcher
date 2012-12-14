@@ -21,6 +21,8 @@ public class CustomAnimation {
     private static final Random rand = new Random();
     private static final ArrayList<CustomAnimation> animations = new ArrayList<CustomAnimation>();
 
+    private static int boundTexture = -1;
+
     private final String dstName;
     private final String srcName;
     private final int mipmapLevel;
@@ -39,6 +41,7 @@ public class CustomAnimation {
     private Delegate delegate;
 
     public static void updateAll() {
+        boundTexture = -1;
         FancyCompass.update();
         for (CustomAnimation animation : animations) {
             animation.update();
@@ -132,10 +135,10 @@ public class CustomAnimation {
         byte[] rgba = new byte[4 * width * height];
         srcImage.getRGB(0, 0, width, height, argb, 0, width);
         ARGBtoRGBA(argb, rgba);
-        imageData.put(rgba).position(0);
+        imageData.put(rgba).flip();
         for (int mipmapLevel = 0; mipmapLevel <= levels; mipmapLevel++) {
             add(new CustomAnimation(srcName, dstName, mipmapLevel, tileCount, x, y, w, h, imageData, height / h, properties));
-            if (((x | y | w | h) & 0x1) != 0) {
+            if (((x | y | w | h) & 0x1) != 0 || w <= 0 || h <= 0) {
                 break;
             }
             ByteBuffer newImage = ByteBuffer.allocateDirect(width * height);
@@ -211,6 +214,10 @@ public class CustomAnimation {
         if (++currentFrame >= numFrames) {
             currentFrame = 0;
         }
+        if (texture != boundTexture) {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
+            boundTexture = texture;
+        }
         for (int i = 0; i < tileCount; i++) {
             for (int j = 0; j < tileCount; j++) {
                 delegate.update(texture, i * w, j * h);
@@ -232,7 +239,7 @@ public class CustomAnimation {
         );
     }
 
-    static void ARGBtoRGBA(int[] src, byte[] dest) {
+    private static void ARGBtoRGBA(int[] src, byte[] dest) {
         for (int i = 0; i < src.length; i++) {
             int v = src[i];
             dest[(i * 4) + 3] = (byte) ((v >> 24) & 0xff);
@@ -242,7 +249,7 @@ public class CustomAnimation {
         }
     }
 
-    static int getTileSize(String textureName) {
+    private static int getTileSize(String textureName) {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, MCPatcherUtils.getMinecraft().renderEngine.getTexture(textureName));
         return GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH) / 16;
     }
@@ -256,12 +263,11 @@ public class CustomAnimation {
     private class Tile implements Delegate {
         private final int minScrollDelay;
         private final int maxScrollDelay;
-        private final boolean isScrolling;
 
         Tile(int minScrollDelay, int maxScrollDelay) throws IOException {
             this.minScrollDelay = minScrollDelay;
             this.maxScrollDelay = maxScrollDelay;
-            isScrolling = (this.minScrollDelay >= 0);
+            error = this.minScrollDelay < 0;
             BufferedImage tiles = TexturePackAPI.getImage(dstName);
             int rgbInt[] = new int[w * h];
             byte rgbByte[] = new byte[4 * w * h];
@@ -271,12 +277,9 @@ public class CustomAnimation {
         }
 
         public void update(int texture, int dx, int dy) {
-            if (isScrolling) {
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
-                int rowOffset = h - currentFrame;
-                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, mipmapLevel, x + dx, y + dy + h - rowOffset, w, rowOffset, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(0));
-                GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, mipmapLevel, x + dx, y + dy, w, h - rowOffset, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * rowOffset));
-            }
+            int rowOffset = h - currentFrame;
+            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, mipmapLevel, x + dx, y + dy + h - rowOffset, w, rowOffset, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(0));
+            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, mipmapLevel, x + dx, y + dy, w, h - rowOffset, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * rowOffset));
         }
 
         public int getDelay() {
@@ -363,7 +366,6 @@ public class CustomAnimation {
         }
 
         public void update(int texture, int dx, int dy) {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
             GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, mipmapLevel, x + dx, y + dy, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) imageData.position(4 * w * h * tileOrder[currentFrame]));
         }
 
