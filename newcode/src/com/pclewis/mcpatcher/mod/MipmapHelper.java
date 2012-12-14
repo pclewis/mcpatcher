@@ -8,6 +8,7 @@ import net.minecraft.src.TextureFX;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.glu.GLU;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -82,9 +83,10 @@ public class MipmapHelper {
                 logger.fine("using %d custom mipmaps for %s", mipmaps, textureName);
                 mipmaps = mipmapImages.size() - 1;
             } else {
-                BufferedImage origImage = image;
                 mipmaps = getMipmapLevel(textureName, image);
                 if (mipmaps > 0) {
+                    BufferedImage origImage = image;
+                    BufferedImage scaledImage = null;
                     logger.fine("generating %d mipmaps for %s, alpha=%s", mipmaps, textureName, type >= MIPMAP_ALPHA);
                     for (int i = 0; i < mipmaps; i++) {
                         origImage = scaleHalf(origImage);
@@ -94,12 +96,17 @@ public class MipmapHelper {
                             image = new BufferedImage(origImage.getColorModel(), origImage.copyData(null), origImage.getColorModel().isAlphaPremultiplied(), null);
                             resetOnOffTransparency(image);
                         }
-                        mipmapImages.add(image);
-                    }
-                    if (type == MIPMAP_BASIC) {
-                        for (int i = 0; i < mipmaps - 1; i++) {
-                            setBackgroundColor(mipmapImages.get(i), mipmapImages.get(mipmaps - 1));
+                        if (type == MIPMAP_BASIC) {
+                            if (scaledImage == null) {
+                                scaledImage = new BufferedImage(image.getWidth() >> mipmaps, image.getHeight() >> mipmaps, BufferedImage.TYPE_INT_ARGB);
+                                Graphics2D graphics2D = scaledImage.createGraphics();
+                                graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                                graphics2D.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+                                graphics2D.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+                            }
+                            setBackgroundColor(image, scaledImage);
                         }
+                        mipmapImages.add(image);
                     }
                 } else {
                     GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmaps);
