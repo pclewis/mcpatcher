@@ -68,55 +68,62 @@ public class MipmapHelper {
     }
 
     public static void setupTexture(RenderEngine renderEngine, BufferedImage image, int texture, String textureName) {
-        try {
-            currentLevel = 0;
-            if (texture < 0 || image == null) {
-                return;
-            }
-            int mipmaps = 0;
-            int type = getMipmapType(textureName, image);
-            ArrayList<BufferedImage> mipmapImages = new ArrayList<BufferedImage>();
-            mipmapImages.add(image);
-            if (type < MIPMAP_BASIC) {
-                // nothing
-            } else if (getCustomMipmaps(mipmapImages, textureName, image.getWidth(), image.getHeight())) {
-                logger.fine("using %d custom mipmaps for %s", mipmaps, textureName);
-                mipmaps = mipmapImages.size() - 1;
+        if (texture < 0 || image == null) {
+            return;
+        }
+        ArrayList<BufferedImage> mipmapImages = getMipmapsForTexture(image, textureName);
+        setupTextureMipmaps(renderEngine, mipmapImages, texture, textureName);
+    }
+
+    private static ArrayList<BufferedImage> getMipmapsForTexture(BufferedImage image, String textureName) {
+        int type = getMipmapType(textureName, image);
+        ArrayList<BufferedImage> mipmapImages = new ArrayList<BufferedImage>();
+        mipmapImages.add(image);
+        if (type < MIPMAP_BASIC) {
+            // nothing
+        } else if (getCustomMipmaps(mipmapImages, textureName, image.getWidth(), image.getHeight())) {
+            logger.fine("using %d custom mipmaps for %s", mipmapImages.size() - 1, textureName);
+        } else {
+            int mipmaps = getMipmapLevels(textureName, image);
+            if (mipmaps > 0) {
+                BufferedImage origImage = image;
+                BufferedImage scaledImage = null;
+                logger.fine("generating %d mipmaps for %s, alpha=%s", mipmaps, textureName, type >= MIPMAP_ALPHA);
+                for (int i = 0; i < mipmaps; i++) {
+                    origImage = scaleHalf(origImage);
+                    if (type >= MIPMAP_ALPHA) {
+                        image = origImage;
+                    } else {
+                        image = new BufferedImage(origImage.getColorModel(), origImage.copyData(null), origImage.getColorModel().isAlphaPremultiplied(), null);
+                        resetOnOffTransparency(image);
+                    }
+                    if (type == MIPMAP_BASIC) {
+                        if (scaledImage == null) {
+                            scaledImage = new BufferedImage(image.getWidth() >> mipmaps, image.getHeight() >> mipmaps, BufferedImage.TYPE_INT_ARGB);
+                            Graphics2D graphics2D = scaledImage.createGraphics();
+                            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                            graphics2D.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+                            graphics2D.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+                        }
+                        setBackgroundColor(image, scaledImage);
+                    }
+                    mipmapImages.add(image);
+                }
             } else {
-                mipmaps = getMipmapLevels(textureName, image);
-                if (mipmaps > 0) {
-                    BufferedImage origImage = image;
-                    BufferedImage scaledImage = null;
-                    logger.fine("generating %d mipmaps for %s, alpha=%s", mipmaps, textureName, type >= MIPMAP_ALPHA);
-                    for (int i = 0; i < mipmaps; i++) {
-                        origImage = scaleHalf(origImage);
-                        if (type >= MIPMAP_ALPHA) {
-                            image = origImage;
-                        } else {
-                            image = new BufferedImage(origImage.getColorModel(), origImage.copyData(null), origImage.getColorModel().isAlphaPremultiplied(), null);
-                            resetOnOffTransparency(image);
-                        }
-                        if (type == MIPMAP_BASIC) {
-                            if (scaledImage == null) {
-                                scaledImage = new BufferedImage(image.getWidth() >> mipmaps, image.getHeight() >> mipmaps, BufferedImage.TYPE_INT_ARGB);
-                                Graphics2D graphics2D = scaledImage.createGraphics();
-                                graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                                graphics2D.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-                                graphics2D.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-                            }
-                            setBackgroundColor(image, scaledImage);
-                        }
-                        mipmapImages.add(image);
-                    }
-                } else {
-                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmaps);
-                    type = MIPMAP_NONE;
-                    if (textureName != null) {
-                        mipmapType.put(textureName, type);
-                    }
+                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmaps);
+                type = MIPMAP_NONE;
+                if (textureName != null) {
+                    mipmapType.put(textureName, type);
                 }
             }
-            for (currentLevel = 0; currentLevel < mipmapImages.size(); currentLevel++) {
+        }
+        return mipmapImages;
+    }
+
+    private static void setupTextureMipmaps(RenderEngine renderEngine, ArrayList<BufferedImage> mipmapImages, int texture, String textureName) {
+        try {
+            int mipmaps = mipmapImages.size() - 1;
+            for (currentLevel = 0; currentLevel <= mipmaps; currentLevel++) {
                 if (currentLevel == 1) {
                     GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
                     GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
@@ -131,7 +138,7 @@ public class MipmapHelper {
                         checkGLError("set GL_TEXTURE_LOD_BIAS_EXT = %d", lodBias);
                     }
                 }
-                image = mipmapImages.get(currentLevel);
+                BufferedImage image = mipmapImages.get(currentLevel);
                 renderEngine.setupTexture(image, texture);
                 checkGLError("setupTexture %s#%d", textureName, currentLevel);
                 if (currentLevel > 0) {
