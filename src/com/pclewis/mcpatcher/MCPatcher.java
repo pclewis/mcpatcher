@@ -29,7 +29,7 @@ final public class MCPatcher {
     /**
      * MCPatcher patch level
      */
-    public static final int PATCH_VERSION = 0;
+    public static final int PATCH_VERSION = 1;
     /**
      * MCPatcher beta version if > 0
      */
@@ -123,6 +123,7 @@ final public class MCPatcher {
             MCPatcherUtils.set(Config.TAG_LAST_VERSION, VERSION_STRING);
             MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, false);
             MCPatcherUtils.set(Config.TAG_DEBUG, BETA_VERSION > 0);
+            MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "mipmap", false);
             MinecraftJar.fixJarNames();
         }
         if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean(Config.TAG_BETA_WARNING_SHOWN, false)) {
