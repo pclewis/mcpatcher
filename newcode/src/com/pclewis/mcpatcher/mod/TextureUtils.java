@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -210,24 +211,28 @@ public class TextureUtils {
             textureFX instanceof Portal) {
             return null;
         }
-        logger.info("attempting to refresh unknown animation %s", textureFX.getClass().getName());
-        Minecraft minecraft = MCPatcherUtils.getMinecraft();
         Class<? extends TextureFX> textureFXClass = textureFX.getClass();
+        logger.info("attempting to refresh unknown animation %s", textureFXClass.getName());
+        Minecraft minecraft = MCPatcherUtils.getMinecraft();
+        loop:
         for (int i = 0; i < 3; i++) {
             Constructor<? extends TextureFX> constructor;
             try {
                 switch (i) {
                     case 0:
                         constructor = textureFXClass.getConstructor(Minecraft.class, Integer.TYPE);
-                        return constructor.newInstance(minecraft, TileSize.int_size);
+                        textureFX = constructor.newInstance(minecraft, TileSize.int_size);
+                        break loop;
 
                     case 1:
                         constructor = textureFXClass.getConstructor(Minecraft.class);
-                        return constructor.newInstance(minecraft);
+                        textureFX = constructor.newInstance(minecraft);
+                        break loop;
 
                     case 2:
                         constructor = textureFXClass.getConstructor();
-                        return constructor.newInstance();
+                        textureFX = constructor.newInstance();
+                        break loop;
 
                     default:
                         break;
@@ -243,6 +248,15 @@ public class TextureUtils {
                 textureFXClass.getName(), textureFX.imageData.length, TileSize.int_numBytes
             );
             textureFX.imageData = new byte[TileSize.int_numBytes];
+        }
+        try {
+            Method setup = textureFXClass.getDeclaredMethod("setup");
+            setup.setAccessible(true);
+            logger.info("calling %s", setup);
+            setup.invoke(textureFX);
+        } catch (NoSuchMethodException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return textureFX;
     }
