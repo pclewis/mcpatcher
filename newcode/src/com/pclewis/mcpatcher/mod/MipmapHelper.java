@@ -26,7 +26,7 @@ public class MipmapHelper {
 
     private static final boolean mipmapSupported;
     private static final boolean mipmapEnabled = MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "mipmap", true);
-    private static final int maxMipmapLevel = MCPatcherUtils.getInt(MCPatcherUtils.HD_TEXTURES, "maxMipmapLevel", 4);
+    private static final int maxMipmapLevel = MCPatcherUtils.getInt(MCPatcherUtils.HD_TEXTURES, "maxMipmapLevel", 3);
     private static final boolean useMipmap;
     private static final int mipmapAlignment = (1 << MCPatcherUtils.getInt(MCPatcherUtils.HD_TEXTURES, "mipmapAlignment", 3)) - 1;
 

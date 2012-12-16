@@ -124,6 +124,7 @@ final public class MCPatcher {
             MCPatcherUtils.set(Config.TAG_BETA_WARNING_SHOWN, false);
             MCPatcherUtils.set(Config.TAG_DEBUG, BETA_VERSION > 0);
             MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "mipmap", false);
+            MCPatcherUtils.set(MCPatcherUtils.HD_TEXTURES, "maxMipmapLevel", 3);
             MinecraftJar.fixJarNames();
         }
         if (BETA_VERSION > 0 && !MCPatcherUtils.getBoolean(Config.TAG_BETA_WARNING_SHOWN, false)) {
