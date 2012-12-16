@@ -37,6 +37,8 @@ public class MipmapHelper {
     private static final boolean lodSupported;
     private static int lodBias;
 
+    private static int bgColorFix;
+
     public static int currentLevel;
 
     private static final HashMap<String, Integer> mipmapType = new HashMap<String, Integer>();
@@ -81,39 +83,43 @@ public class MipmapHelper {
         mipmapImages.add(image);
         if (type < MIPMAP_BASIC) {
             // nothing
-        } else if (getCustomMipmaps(mipmapImages, textureName, image.getWidth(), image.getHeight())) {
-            logger.fine("using %d custom mipmaps for %s", mipmapImages.size() - 1, textureName);
         } else {
-            int mipmaps = getMipmapLevels(textureName, image);
-            if (mipmaps > 0) {
-                BufferedImage origImage = image;
-                BufferedImage scaledImage = null;
-                logger.fine("generating %d mipmaps for %s, alpha=%s", mipmaps, textureName, type >= MIPMAP_ALPHA);
-                for (int i = 0; i < mipmaps; i++) {
-                    origImage = scaleHalf(origImage);
-                    if (type >= MIPMAP_ALPHA) {
-                        image = origImage;
-                    } else {
-                        image = new BufferedImage(origImage.getColorModel(), origImage.copyData(null), origImage.getColorModel().isAlphaPremultiplied(), null);
-                        resetOnOffTransparency(image);
-                    }
-                    if (type == MIPMAP_BASIC) {
-                        if (scaledImage == null) {
-                            scaledImage = new BufferedImage(image.getWidth() >> mipmaps, image.getHeight() >> mipmaps, BufferedImage.TYPE_INT_ARGB);
-                            Graphics2D graphics2D = scaledImage.createGraphics();
-                            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                            graphics2D.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-                            graphics2D.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+            int width = image.getWidth();
+            int height = image.getHeight();
+            if (getCustomMipmaps(mipmapImages, textureName, width, height)) {
+                logger.fine("using %d custom mipmaps for %s", mipmapImages.size() - 1, textureName);
+            } else {
+                int mipmaps = getMipmapLevels(textureName, image);
+                if (mipmaps > 0) {
+                    logger.fine("generating %d mipmaps for %s, alpha=%s", mipmaps, textureName, type >= MIPMAP_ALPHA);
+                    BufferedImage origImage = image;
+                    if (bgColorFix > 0 && type == MIPMAP_BASIC) {
+                        int fix;
+                        for (fix = 0; fix < bgColorFix && (width >> fix) > 1 && (height >> fix) > 1; fix++) {
                         }
+                        BufferedImage scaledImage = new BufferedImage(width >> fix, height >> fix, BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D graphics2D = scaledImage.createGraphics();
+                        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        graphics2D.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+                        graphics2D.drawImage(image, 0, 0, width, height, null);
                         setBackgroundColor(image, scaledImage);
                     }
-                    mipmapImages.add(image);
-                }
-            } else {
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmaps);
-                type = MIPMAP_NONE;
-                if (textureName != null) {
-                    mipmapType.put(textureName, type);
+                    for (int i = 0; i < mipmaps; i++) {
+                        origImage = scaleHalf(origImage);
+                        if (type >= MIPMAP_ALPHA) {
+                            image = origImage;
+                        } else {
+                            image = new BufferedImage(origImage.getColorModel(), origImage.copyData(null), origImage.getColorModel().isAlphaPremultiplied(), null);
+                            resetOnOffTransparency(image);
+                        }
+                        mipmapImages.add(image);
+                    }
+                } else {
+                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, mipmaps);
+                    type = MIPMAP_NONE;
+                    if (textureName != null) {
+                        mipmapType.put(textureName, type);
+                    }
                 }
             }
         }
@@ -183,10 +189,15 @@ public class MipmapHelper {
     }
 
     static void reset() {
+        bgColorFix = 4;
         mipmapType.clear();
         forceMipmapType("/terrain.png", MIPMAP_BASIC);
         Properties properties = TexturePackAPI.getProperties(MIPMAP_PROPERTIES);
         if (properties != null) {
+            try {
+                bgColorFix = Integer.parseInt(properties.getProperty("bgColorFix", "4"));
+            } catch (NumberFormatException e) {
+            }
             for (Map.Entry entry : properties.entrySet()) {
                 if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
                     String key = ((String) entry.getKey()).trim();
