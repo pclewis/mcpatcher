@@ -171,7 +171,7 @@ public class HDTextureConfig extends ModConfigPanel {
         otherCombo.setSelectedIndex(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "customOther", true) ? 1 : 0);
         zombieHackCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "zombieHack", true));
         fancyCompassCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "fancyCompass", true));
-        mipmapCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "mipmap", true));
+        mipmapCheckBox.setSelected(MCPatcherUtils.getBoolean(MCPatcherUtils.HD_TEXTURES, "mipmap", false));
         mipmapLevelSpinner.setValue(MCPatcherUtils.getInt(MCPatcherUtils.HD_TEXTURES, "maxMipmapLevel", 3));
         lodBiasSpinner.setValue(MCPatcherUtils.getInt(MCPatcherUtils.HD_TEXTURES, "lodBias", 0));
         anisoSpinner.setValue(MCPatcherUtils.getInt(MCPatcherUtils.HD_TEXTURES, "anisotropicFiltering", 1));
