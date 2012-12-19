@@ -273,8 +273,10 @@ public class TextureUtils {
         CustomAnimation.clear();
 
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
-        if (!fancyCompass || !FancyCompass.refresh()) {
-            textureList.add(new Compass(minecraft));
+        Compass compass = new Compass(minecraft);
+        textureList.add(compass);
+        if (fancyCompass && FancyCompass.refresh()) {
+            compass.tileSize = 0;
         }
         textureList.add(new Watch(minecraft));
 

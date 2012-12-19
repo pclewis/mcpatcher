@@ -19,7 +19,7 @@ import static org.lwjgl.opengl.EXTFramebufferObject.*;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 
-class FancyCompass {
+public class FancyCompass {
     private static final MCLogger logger = MCLogger.getLogger(MCPatcherUtils.HD_TEXTURES);
 
     private static final String ITEMS_PNG = "/gui/items.png";
@@ -36,7 +36,6 @@ class FancyCompass {
 
     private static FancyCompass instance;
 
-    private final Compass compass;
     private final float scaleX;
     private final float scaleY;
     private final float offsetX;
@@ -62,7 +61,6 @@ class FancyCompass {
     private FancyCompass() {
         Minecraft minecraft = MCPatcherUtils.getMinecraft();
         RenderEngine renderEngine = minecraft.renderEngine;
-        compass = new Compass(minecraft);
 
         int targetTexture = renderEngine.getTexture(ITEMS_PNG);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, targetTexture);
@@ -109,9 +107,7 @@ class FancyCompass {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     }
 
-    private void onTick() {
-        compass.onTick();
-
+    private void onTick(Compass compass) {
         boolean f = false;
         if (!debug) {
             f = true;
@@ -143,6 +139,12 @@ class FancyCompass {
             logger.info("offsetX = %f", offsetX + plusOX);
             logger.info("offsetY = %f", offsetY + plusOY);
         }
+
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glPushMatrix();
+
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPushMatrix();
 
         GL11.glPushAttrib(GL11.GL_VIEWPORT_BIT | GL11.GL_SCISSOR_BIT | GL11.GL_DEPTH_BITS | GL11.GL_LIGHTING_BIT);
         GL11.glViewport(compassX, compassY, tileSize, tileSize);
@@ -188,6 +190,12 @@ class FancyCompass {
 
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         GL11.glPopAttrib();
+
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glPopMatrix();
+
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPopMatrix();
     }
 
     private void drawBox() {
@@ -258,9 +266,9 @@ class FancyCompass {
         return instance != null;
     }
 
-    static void update() {
+    public static void update(Compass compass) {
         if (instance != null) {
-            instance.onTick();
+            instance.onTick(compass);
         }
     }
 }

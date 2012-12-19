@@ -42,7 +42,6 @@ public class CustomAnimation {
 
     public static void updateAll() {
         boundTexture = -1;
-        FancyCompass.update();
         for (CustomAnimation animation : animations) {
             animation.update();
         }

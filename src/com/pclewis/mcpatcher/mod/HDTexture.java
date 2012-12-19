@@ -12,6 +12,7 @@ import static javassist.bytecode.Opcode.*;
 public class HDTexture extends BaseTexturePackMod {
     private final boolean haveColorizerWater;
     private final boolean haveGetImageRGB;
+    private final boolean haveItemFrames;
     private final int updateDynamicTextureVersion;
 
     public HDTexture(MinecraftVersion minecraftVersion) {
@@ -35,6 +36,7 @@ public class HDTexture extends BaseTexturePackMod {
         } else {
             updateDynamicTextureVersion = 2;
         }
+        haveItemFrames = updateDynamicTextureVersion >= 1;
 
         addClassMod(new RenderEngineMod());
         addClassMod(new TextureFXMod());
@@ -708,6 +710,10 @@ public class HDTexture extends BaseTexturePackMod {
 
             final FieldRef currentAngle = new FieldRef(getDeobfClass(), "currentAngle", "D");
             final FieldRef targetAngle = new FieldRef(getDeobfClass(), "targetAngle", "D");
+            final FieldRef instance = new FieldRef(getDeobfClass(), "instance", "LCompass;");
+            final MethodRef onTick = new MethodRef(getDeobfClass(), "onTick", "()V");
+            final MethodRef updateNeedle = new MethodRef(getDeobfClass(), "updateNeedle", "(DDDZZ)V");
+            final MethodRef updateFancyCompass = new MethodRef(MCPatcherUtils.FANCY_COMPASS_CLASS, "update", "(LCompass;)V");
 
             addClassSignature(new ConstSignature("/gui/items.png"));
             addClassSignature(new ConstSignature("/misc/dial.png").negate(true));
@@ -722,6 +728,14 @@ public class HDTexture extends BaseTexturePackMod {
             ));
 
             addMemberMapper(new FieldMapper(currentAngle, targetAngle));
+            if (haveItemFrames) {
+                addMemberMapper(new FieldMapper(instance));
+                addMemberMapper(new MethodMapper(updateNeedle).accessFlag(AccessFlag.STATIC, true));
+            } else {
+                addMemberMapper(new MethodMapper(onTick));
+
+                addPatch(new MakeMemberPublicPatch(currentAngle));
+            }
 
             addPatch(new TileSizePatch(7.5, "double_compassCenterMin"));
             addPatch(new TileSizePatch(8.5, "double_compassCenterMax"));
@@ -733,6 +747,29 @@ public class HDTexture extends BaseTexturePackMod {
             addPatch(new TileSizePatch(-8, "int_compassNeedleMin"));
             addPatch(new TileSizePatch.IfGreaterPatch(16, "int_compassNeedleMax"));
             addPatch(new TileSizePatch.GetRGBPatch());
+
+
+            addPatch(new BytecodePatch.InsertBefore() {
+                @Override
+                public String getDescription() {
+                    return "update custom compass";
+                }
+
+                @Override
+                public String getMatchExpression() {
+                    return buildExpression(
+                        RETURN
+                    );
+                }
+
+                @Override
+                public byte[] getInsertBytes() throws IOException {
+                    return buildCode(
+                        haveItemFrames ? reference(GETSTATIC, instance) : buildCode(ALOAD_0),
+                        reference(INVOKESTATIC, updateFancyCompass)
+                    );
+                }
+            }.targetMethod(haveItemFrames ? updateNeedle : onTick));
         }
     }
 
