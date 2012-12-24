@@ -1,3 +1,7 @@
+NOTE: Project has moved to
+https://bitbucket.org/prupe/mcpatcher
+
+
 MCPatcher is a bytecode-level patcher for Minecraft. The main use right now
 is changing the hard-coded texture sizes, but it is eventually intended to
 apply arbitrary patches.
